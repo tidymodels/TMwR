@@ -5,8 +5,8 @@ rmd_files: [
   "introduction.Rmd",
   "tidyverse.Rmd",
   "a-tale-of-two-models.Rmd",
-  "how-good-is-our-model.Rmd",
   "data-spending.Rmd",
+  "how-good-is-our-model.Rmd",
   "feature-engineering.Rmd",
   "the-model-workflow.Rmd",
   "resampling.Rmd"

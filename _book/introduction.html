@@ -70,12 +70,14 @@
 <li class="divider"></li>
 <li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Hello World</a></li>
 <li class="chapter" data-level="1" data-path="introduction.html"><a href="introduction.html"><i class="fa fa-check"></i><b>1</b> Introduction</a><ul>
-<li class="chapter" data-level="1.1" data-path="introduction.html"><a href="introduction.html#types-of-models"><i class="fa fa-check"></i><b>1.1</b> Types of Models</a></li>
-<li class="chapter" data-level="1.2" data-path="introduction.html"><a href="introduction.html#some-terminology"><i class="fa fa-check"></i><b>1.2</b> Some terminology</a></li>
-<li class="chapter" data-level="1.3" data-path="introduction.html"><a href="introduction.html#where-does-modeling-fit-into-the-scientific-process"><i class="fa fa-check"></i><b>1.3</b> Where does modeling fit into the scientific process?</a></li>
-<li class="chapter" data-level="1.4" data-path="introduction.html"><a href="introduction.html#modeling-is-a-process-not-a-single-activity"><i class="fa fa-check"></i><b>1.4</b> Modeling is a <em>process</em>, not a single activity</a></li>
-<li class="chapter" data-level="1.5" data-path="introduction.html"><a href="introduction.html#what-does-it-mean-to-be-tidy"><i class="fa fa-check"></i><b>1.5</b> What does it mean to be “tidy”</a></li>
-<li class="chapter" data-level="1.6" data-path="introduction.html"><a href="introduction.html#outline-of-future-chapters"><i class="fa fa-check"></i><b>1.6</b> Outline of future chapters</a></li>
+<li class="chapter" data-level="1.1" data-path="introduction.html"><a href="introduction.html#lets-talk-about-models"><i class="fa fa-check"></i><b>1.1</b> Let’s talk about models</a><ul>
+<li class="chapter" data-level="1.1.1" data-path="introduction.html"><a href="introduction.html#types-of-models"><i class="fa fa-check"></i><b>1.1.1</b> Types of Models</a></li>
+<li class="chapter" data-level="1.1.2" data-path="introduction.html"><a href="introduction.html#some-terminology"><i class="fa fa-check"></i><b>1.1.2</b> Some terminology</a></li>
+<li class="chapter" data-level="1.1.3" data-path="introduction.html"><a href="introduction.html#where-does-modeling-fit-into-the-scientific-process"><i class="fa fa-check"></i><b>1.1.3</b> Where does modeling fit into the scientific process?</a></li>
+<li class="chapter" data-level="1.1.4" data-path="introduction.html"><a href="introduction.html#modeling-is-a-process-not-a-single-activity"><i class="fa fa-check"></i><b>1.1.4</b> Modeling is a <em>process</em>, not a single activity</a></li>
+</ul></li>
+<li class="chapter" data-level="1.2" data-path="introduction.html"><a href="introduction.html#what-does-it-mean-to-be-tidy"><i class="fa fa-check"></i><b>1.2</b> What does it mean to be “tidy”</a></li>
+<li class="chapter" data-level="1.3" data-path="introduction.html"><a href="introduction.html#outline-of-future-chapters"><i class="fa fa-check"></i><b>1.3</b> Outline of future chapters</a></li>
 </ul></li>
 <li class="chapter" data-level="2" data-path="a-tidyverse-primer.html"><a href="a-tidyverse-primer.html"><i class="fa fa-check"></i><b>2</b> A tidyverse primer</a><ul>
 <li class="chapter" data-level="2.1" data-path="a-tidyverse-primer.html"><a href="a-tidyverse-primer.html#principles"><i class="fa fa-check"></i><b>2.1</b> Principles</a></li>
@@ -84,8 +86,8 @@
 <li class="chapter" data-level="2.4" data-path="a-tidyverse-primer.html"><a href="a-tidyverse-primer.html#some-additional-tidy-principals-for-modeling."><i class="fa fa-check"></i><b>2.4</b> Some additional tidy principals for modeling.</a></li>
 </ul></li>
 <li class="chapter" data-level="3" data-path="a-tale-of-two-models.html"><a href="a-tale-of-two-models.html"><i class="fa fa-check"></i><b>3</b> A tale of two models</a></li>
-<li class="chapter" data-level="4" data-path="how-good-is-our-model.html"><a href="how-good-is-our-model.html"><i class="fa fa-check"></i><b>4</b> How good is our model?</a></li>
-<li class="chapter" data-level="5" data-path="spending-our-data.html"><a href="spending-our-data.html"><i class="fa fa-check"></i><b>5</b> Spending our data</a></li>
+<li class="chapter" data-level="4" data-path="spending-our-data.html"><a href="spending-our-data.html"><i class="fa fa-check"></i><b>4</b> Spending our data</a></li>
+<li class="chapter" data-level="5" data-path="how-good-is-our-model.html"><a href="how-good-is-our-model.html"><i class="fa fa-check"></i><b>5</b> How good is our model?</a></li>
 <li class="chapter" data-level="6" data-path="feature-engineering.html"><a href="feature-engineering.html"><i class="fa fa-check"></i><b>6</b> Feature engineering</a></li>
 <li class="chapter" data-level="7" data-path="a-model-workflow.html"><a href="a-model-workflow.html"><i class="fa fa-check"></i><b>7</b> A model workflow</a></li>
 <li class="chapter" data-level="8" data-path="resampling-for-evaluating-performance.html"><a href="resampling-for-evaluating-performance.html"><i class="fa fa-check"></i><b>8</b> Resampling for evaluating performance</a></li>
@@ -108,19 +110,32 @@
             <section class="normal" id="section-">
 <div id="introduction" class="section level1">
 <h1><span class="header-section-number">1</span> Introduction</h1>
-<p>a bit about the importance of models, AI, assistive,</p>
-<div id="types-of-models" class="section level2">
-<h2><span class="header-section-number">1.1</span> Types of Models</h2>
+<p>Models are mathematical tools that create equations that are intended to mimic the data given to them. These equations can be used for various purposes, such as: predicting future events, determining if there is a different between two groups, as an aid to a map-based visualization, discovering novel patterns in the data that could be further investigated, and so on. Their utility hinges on their ability to be reductive; the primary influences in the data can be captured mathematically in a way that is useful.</p>
+<p>In the last 20 years, mathematical models have become ubiquitous in our daily lives, in both obvious and subtle ways. A typical day for many people might involve checking the weather to see when a good time would be to walk the dog, ordering a product from a website, typing (and autocorrecting) a text message to a friend, and checking email. In each of these instances, there is a good chance that some type of model was used in an assistive way. In some cases, the contribution of the model might be easily perceived (“You might also be interested in purchasing product <em>X</em>”) while in other cases the impact was the absence of something (e.g., spam email). Models are used to choose clothing that a customer might like, a molecule that should be evaluated as a drug candidate, and might even be the mechanism that a nefarious company uses avoid the discovery of cars that over-pollute. For better or worse, models are here to stay.</p>
+<p>Two reasons that models permeate our lives are that software exists that facilitates their creation and that data has become more easily captured and accessible. In regard to software, it is obviously critical that software produces the <em>correct</em> equations that represent the data. For the most part, determining mathematical correctness is possible. However, the creation of models hinges on a few non-technical aspects.</p>
+<p>First, it is important that it is easy to operate the software in a <em>proper way</em>. For example, the user interface should not be so arcane that the user would not know that they have inappropriately specified the wrong information. As an analogy, one might have a high quality kitchen measuring cup capable of great precision but if the chef adds a cup of salt instead of a cup of sugar, the results would be unpalatable. As a specific example of this issue, <span class="citation">Baggerly and Coombes (<a href="#ref-baggerly2009">2009</a>)</span> report myriad problems in the data analysis in a high profile computational biology publication. One of the issues was related to how the users were required to add the names of the model inputs. The user-interface of the software was poor enough that it was easy to <em>offset</em> the column names of the data from the actual data columns. In the analysis of the data, this resulted in the wrong genes being identified as important for treating cancer patients. This, and many other issues, led to the stoppage of numerous clinical trials <span class="citation">(Carlson <a href="#ref-Carlson2012">2012</a>)</span>. If we are to expect high quality models, it is important that the software facilitate proper usage. <strong>TODO add a quote about the <em>pit of success</em> (is Brad Abrams blog the original reference for this term?)</strong></p>
+<p>The second important non-technical aspect of model building is related to <em>scientific methodology</em>. For models that are used to make complex predictions, it can be easy to unknowingly commit errors related to logical fallacies or inappropriate assumptions. Many machine learning models are so adept at finding patterns, they can effortlessly find empirical patterns in the data that fail to reproduce later. Some of these types of methodological errors are insidious in that the issue might be undetectable until a later time when new data that contain the true result are obtained. In short, as our models become more powerful and complex it has also become easier to commit latent errors. This relates to software. Whenever possible, the software should be able to protect users from committing such mistakes. Here, software should make it easy for users to do the right thing.</p>
+<p>These two aspects of model creation are crucial. Since tools for creating models are easily obtained and models can have such a profound impact, many more people are creating them. In terms of technical expertice and training, their backgrounds will vary. It is important that their tools be <em>robust</em> to the experience of the user. On one had, they tools should be powerful enough to create high-performance models but, one the other hand, should be easy to use in an appropriate way. This book desribes a suite of software that can can create different types of models. The software has been designed with these non-technical asepcts in mind.</p>
+<p>The software is based on the R programming language <span class="citation">(R Core Team <a href="#ref-baseR">2014</a>)</span>. R has been designed especially for data analysis and modeling. It is based on the <em>S language</em> which was created in the 1970’s to</p>
+<blockquote>
+<p>“to turn ideas into software<strong>, </strong>quickly and faithfully” <span class="citation">(Chambers <a href="#ref-Chambers:1998">1998</a>)</span></p>
+</blockquote>
+<p>R has a vast ecosystem of <em>packages</em>; these are mostly user-contributed modules that focus on a specific theme, such as modeling, visualization, and so on.</p>
+<p>One collection of packages is called the <strong><em>tidyverse</em></strong> <span class="citation">(Wickham et al. <a href="#ref-tidyverse">2019</a>)</span>. The tidyverse is an opinionated collection of R packages designed for data science. All packages share an underlying design philosophy, grammar, and data structures. Several of these design philosophies are directly related to the aspects of software described above. Within the tidyverse, there is a set of pacakges specifically focused on modeling and these are usually refered to as the <strong><em>tidymodels</em></strong> packages.</p>
+<div id="lets-talk-about-models" class="section level2">
+<h2><span class="header-section-number">1.1</span> Let’s talk about models</h2>
+<div id="types-of-models" class="section level3">
+<h3><span class="header-section-number">1.1.1</span> Types of Models</h3>
 <p>descriptive, predictive, inferential</p>
 <p>regression, classification</p>
 </div>
-<div id="some-terminology" class="section level2">
-<h2><span class="header-section-number">1.2</span> Some terminology</h2>
+<div id="some-terminology" class="section level3">
+<h3><span class="header-section-number">1.1.2</span> Some terminology</h3>
 <p>supervise, unsupervised</p>
 <p>types of predictors</p>
 </div>
-<div id="where-does-modeling-fit-into-the-scientific-process" class="section level2">
-<h2><span class="header-section-number">1.3</span> Where does modeling fit into the scientific process?</h2>
+<div id="where-does-modeling-fit-into-the-scientific-process" class="section level3">
+<h3><span class="header-section-number">1.1.3</span> Where does modeling fit into the scientific process?</h3>
 <div class="figure" style="text-align: center"><span id="fig:data-science-model"></span>
 <img src="figures-premade/data-science-model.svg" alt="The data science process (from _R for Data Science_)." width="80%" />
 <p class="caption">
@@ -128,8 +143,8 @@ Figure 1.1: The data science process (from <em>R for Data Science</em>).
 </p>
 </div>
 </div>
-<div id="modeling-is-a-process-not-a-single-activity" class="section level2">
-<h2><span class="header-section-number">1.4</span> Modeling is a <em>process</em>, not a single activity</h2>
+<div id="modeling-is-a-process-not-a-single-activity" class="section level3">
+<h3><span class="header-section-number">1.1.4</span> Modeling is a <em>process</em>, not a single activity</h3>
 <div class="figure" style="text-align: center"><span id="fig:modeling-process"></span>
 <img src="figures/introduction-modeling-process-1.svg" alt="A schematic for the typical modeling process." width="100%" />
 <p class="caption">
@@ -137,12 +152,31 @@ Figure 1.2: A schematic for the typical modeling process.
 </p>
 </div>
 </div>
+</div>
 <div id="what-does-it-mean-to-be-tidy" class="section level2">
-<h2><span class="header-section-number">1.5</span> What does it mean to be “tidy”</h2>
+<h2><span class="header-section-number">1.2</span> What does it mean to be “tidy”</h2>
 </div>
 <div id="outline-of-future-chapters" class="section level2">
-<h2><span class="header-section-number">1.6</span> Outline of future chapters</h2>
+<h2><span class="header-section-number">1.3</span> Outline of future chapters</h2>
 
+</div>
+</div>
+<h3>References</h3>
+<div id="refs" class="references">
+<div id="ref-baggerly2009">
+<p>Baggerly, K, and K Coombes. 2009. “Deriving Chemosensitivity from Cell Lines: Forensic Bioinformatics and Reproducible Research in High-Throughput Biology.” <em>The Annals of Applied Statistics</em> 3 (4): 1309–34.</p>
+</div>
+<div id="ref-Carlson2012">
+<p>Carlson, B. 2012. “Putting Oncology Patients at Risk.” <em>Biotechnology Healthcare</em> 9 (3): 17–21.</p>
+</div>
+<div id="ref-Chambers:1998">
+<p>Chambers, J. 1998. <em>Programming with Data: A Guide to the S Language</em>. Berlin, Heidelberg: Springer-Verlag.</p>
+</div>
+<div id="ref-baseR">
+<p>R Core Team. 2014. <em>R: A Language and Environment for Statistical Computing</em>. Vienna, Austria: R Foundation for Statistical Computing. <a href="http://www.R-project.org/">http://www.R-project.org/</a>.</p>
+</div>
+<div id="ref-tidyverse">
+<p>Wickham, H, M Averick, J Bryan, W Chang, L McGowan, R François, G Grolemund, et al. 2019. “Welcome to the Tidyverse.” <em>Journal of Open Source Software</em> 4 (43).</p>
 </div>
 </div>
             </section>
