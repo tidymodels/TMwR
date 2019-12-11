@@ -1,0 +1,99 @@
+```{r introduction-setup, include = FALSE}
+knitr::opts_chunk$set(fig.path = "figures/introduction-")
+library(ggplot2)
+
+transparent_theme()
+```
+
+# Introduction
+
+a bit about the importance of models, AI, assistive, 
+
+## Types of Models
+
+descriptive, predictive, inferential
+
+regression, classification
+
+## Some terminology
+
+supervise, unsupervised
+
+types of predictors
+
+
+## Where does modeling fit into the scientific process? 
+
+```{r data-science-model, echo = FALSE, out.width = '80%', fig.cap = "The data science process (from _R for Data Science_)."}
+knitr::include_graphics("figures-premade/data-science-model.svg")
+```
+
+
+## Modeling is a _process_, not a single activity
+
+
+```{r modeling-process, echo = FALSE, out.width = '100%', fig.width=8, fig.height=3, dev = "svg", fig.cap = "A schematic for the typical modeling process.", warning = FALSE}
+widths <- c(8, 4, 10, 2, 6, 6, 
+            rep(1, 19), 2,
+            rep(1, 19), 2,
+            rep(1, 19), 2,
+            rep(1, 19), 2,
+            4, 8, 15,
+            rep(1, 29), 6,
+            rep(1, 29), 4,
+            1)
+srt <- c(1, cumsum(widths))
+stp <- srt[-1]
+srt <- srt[-length(srt)]
+
+diag_cols <- c(EDA = "#377EB8", "Quantitative Analysis" = "#A6CEE3", 
+               "Feature Engineering" = "#4DAF4A", "Model Fit" = "#E41A1C", 
+               "Model Tuning" = "lightgrey")
+
+bar_loc <- data.frame(srt = srt,
+                  stp = stp,
+                  g = c("EDA", "Quantitative Analysis", "EDA", "Quantitative Analysis", "EDA", "Feature Engineering", 
+                        rep(c("Model Fit", "Model Tuning"), 40),
+                        "Quantitative Analysis", "EDA", "Feature Engineering",
+                        rep(c("Model Fit", "Model Tuning"), 14), "Model Fit", "Feature Engineering",
+                        rep(c("Model Fit", "Model Tuning"), 14), "Model Fit", "Quantitative Analysis",
+                        "Model Fit"))
+bar_loc$ytop <- 1.9
+bar_loc$ybot <- 1
+bar_loc$g <- factor(as.character(bar_loc$g), 
+                levels = c("EDA", "Quantitative Analysis", "Feature Engineering",
+                           "Model Fit", "Model Tuning"))
+text_loc <- data.frame(x = c(1, 8, 30, 36, 120, 124, 132, 147, 211, 215)+1,
+                       y = 2.1)
+text_loc$label <- letters[1:nrow(text_loc)]
+
+mod_loc <- data.frame(x = c(45, 66, 87, 107, 162, 195)+1,
+                      y = .75, 
+                      label = c("Model\n#1", "Model\n#2", "Model\n#3", "Model\n#4",
+                                "Model\n#2", "Model\n#4"))
+
+ggplot(bar_loc) + 
+  geom_rect(aes(fill = g, xmin = srt, xmax = stp,
+                ymin = ybot, ymax = ytop), alpha = .7)  + 
+  theme(legend.position = "bottom",
+        axis.line=element_blank(),axis.text.x=element_blank(),
+        axis.text.y=element_blank(),axis.ticks=element_blank(),
+        axis.title.x=element_text(hjust = .05),
+        axis.title.y=element_blank(),
+        panel.background=element_blank(),
+        panel.border=element_blank(),panel.grid.major=element_blank(),
+        panel.grid.minor=element_blank(),plot.background=element_blank()) +
+  scale_fill_manual(values = diag_cols, name = "") +
+  geom_text(data = text_loc, aes(x = x, y = y, label = label)) + 
+  geom_text(data = mod_loc, aes(x = x, y = y, label = label), size = 3) +   
+  xlab("Time") + 
+  ylim(c(.5, 2.25))
+```
+
+
+
+## What does it mean to be "tidy"
+
+
+## Outline of future chapters
+

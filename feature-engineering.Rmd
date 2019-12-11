@@ -1,0 +1,14 @@
+```{r engineering-setup, include = FALSE}
+knitr::opts_chunk$set(fig.path = "figures/engineering-")
+```
+
+# Feature engineering
+
+Purpose(s) of these activites. 
+
+Why do we do this?
+
+Different representations of same data
+
+Imputation; transformations; (unsup) removal; projection; encodings;
+

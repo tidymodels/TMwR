@@ -1,0 +1,14 @@
+bookdown::gitbook:
+  config:
+    toc:
+      collapse: section
+      before: |
+        <li><strong><a href="./">Tidy Modeling with R</a></strong></li>
+    edit:
+      link: https://github.com/topepo/TMwR-temp/edit/master/%s
+      text: "Edit"
+    sharing: no
+
+bookdown::pdf_book:
+  latex_engine: pdflatex
+  citation_package: natbib

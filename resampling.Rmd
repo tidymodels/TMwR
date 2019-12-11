@@ -1,0 +1,8 @@
+```{r resampling-setup, include = FALSE}
+knitr::opts_chunk$set(fig.path = "figures/resampling-")
+```
+
+# Resampling for evaluating performance
+
+
+Maybe inlcude some simple examples of comparing models using resampling (perhaps go full `tidyposterior`?)
