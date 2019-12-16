@@ -3,7 +3,7 @@
 knit: "bookdown::render_book"
 title: "Tidy Modeling with R"
 author: ["Max Kuhn"]
-date: "2019-12-12"
+date: "2019-12-16"
 description: "Modeling of data is integral to science, business, politics, and many other aspects of our lives. The goals of this book are to: introduce neophytes to models and the tidyverse, demonstrate the `tidymodels` packages, and to outline good practices for the phases of the modeling process."
 github-repo: topepo/TMwR
 twitter-handle: topepos
@@ -44,7 +44,7 @@ In terms of software lifecycle, the tidymodels packages are fairly young. We wil
 #>  collate  en_US.UTF-8                 
 #>  ctype    en_US.UTF-8                 
 #>  tz       America/New_York            
-#>  date     2019-12-12                  
+#>  date     2019-12-16                  
 #> 
 #> ─ Packages ───────────────────────────────────────────────────────────────────
 #>  package     * version      date       lib source                           
@@ -52,18 +52,15 @@ In terms of software lifecycle, the tidymodels packages are fairly young. We wil
 #>  bookdown    * 0.14         2019-10-01 [1] CRAN (R 3.6.0)                   
 #>  broom       * 0.5.2        2019-04-07 [1] CRAN (R 3.6.0)                   
 #>  dials       * 0.0.4        2019-12-02 [1] CRAN (R 3.6.1)                   
-#>  discrim     * 0.0.1        2019-10-10 [1] local                            
 #>  dplyr       * 0.8.3        2019-07-04 [1] CRAN (R 3.6.0)                   
 #>  ggplot2     * 3.2.1.9000   2019-12-06 [1] local                            
 #>  infer       * 0.5.1        2019-11-19 [1] CRAN (R 3.6.0)                   
-#>  parsnip     * 0.0.4.9000   2019-12-04 [1] local                            
+#>  parsnip     * 0.0.4.9000   2019-12-14 [1] local                            
 #>  purrr       * 0.3.3        2019-10-18 [1] CRAN (R 3.6.0)                   
-#>  recipes     * 0.1.7.9002   2019-12-10 [1] local                            
-#>  rlang         0.4.2.9000   2019-12-01 [1] Github (r-lib/rlang@1be25e7)     
+#>  recipes     * 0.1.7        2019-09-15 [1] CRAN (R 3.6.0)                   
+#>  rlang         0.4.2.9000   2019-12-14 [1] Github (r-lib/rlang@ec7c1ed)     
 #>  rsample     * 0.0.5        2019-07-12 [1] CRAN (R 3.6.0)                   
 #>  tibble      * 2.99.99.9010 2019-12-06 [1] Github (tidyverse/tibble@f4365f7)
-#>  tune        * 0.0.0.9004   2019-12-09 [1] local                            
-#>  workflows   * 0.0.0.9002   2019-11-29 [1] local                            
 #>  yardstick   * 0.0.4        2019-08-26 [1] CRAN (R 3.6.0)                   
 #> 
 #> [1] /Library/Frameworks/R.framework/Versions/3.6/Resources/library
