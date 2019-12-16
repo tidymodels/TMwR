@@ -5,6 +5,9 @@
 
 ## Principles
 
+What does it mean to be "tidy" (distinguish tidy data vs tidy interfaces etc. )
+
+
 ## Code
 
 Things that I think that we'll need summaries of:

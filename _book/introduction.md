@@ -5,7 +5,7 @@
 
 Models are mathematical tools that create equations that are intended to mimic the data given to them. These equations can be used for various purposes, such as: predicting future events, determining if there is a different between two groups, as an aid to a map-based visualization, discovering novel patterns in the data that could be further investigated, and so on. Their utility hinges on their ability to be reductive; the primary influences in the data can be captured mathematically in a way that is useful. 
 
-In the last 20 years, mathematical models have become ubiquitous in our daily lives, in both obvious and subtle ways. A typical day for many people might involve checking the weather to see when a good time would be to walk the dog, ordering a product from a website, typing (and autocorrecting) a text message to a friend, and checking email. In each of these instances, there is a good chance that some type of model was used in an assistive way. In some cases, the contribution of the model might be easily perceived ("You might also be interested in purchasing product _X_") while in other cases the impact was the absence of something (e.g., spam email). Models are used to choose clothing that a customer might like, a molecule that should be evaluated as a drug candidate, and might even be the mechanism that a nefarious company uses avoid the discovery of cars that over-pollute.  For better or worse, models are here to stay.
+Since the start of the 21st century, mathematical models have become ubiquitous in our daily lives, in both obvious and subtle ways. A typical day for many people might involve checking the weather to see when a good time would be to walk the dog, ordering a product from a website, typing (and autocorrecting) a text message to a friend, and checking email. In each of these instances, there is a good chance that some type of model was used in an assistive way. In some cases, the contribution of the model might be easily perceived ("You might also be interested in purchasing product _X_") while in other cases the impact was the absence of something (e.g., spam email). Models are used to choose clothing that a customer might like, a molecule that should be evaluated as a drug candidate, and might even be the mechanism that a nefarious company uses avoid the discovery of cars that over-pollute.  For better or worse, models are here to stay.
 
 Two reasons that models permeate our lives are that software exists that facilitates their creation and that data has become more easily captured and accessible. In regard to software, it is obviously critical that software produces the _correct_ equations that represent the data. For the most part, determining mathematical correctness is possible. However, the creation of an appropriate model hinges on a few other aspects. 
 
@@ -25,20 +25,23 @@ The software is based on the R programming language [@baseR]. R has been designe
 
 R is open-source and is provided free of charge. It is a powerful programming language that can be used for many different purposes but specializes in data analysis, modeling, and machine learning. R is easily _extensible_; it has a vast ecosystem of *packages*; these are mostly user-contributed modules that focus on a specific theme, such as modeling, visualization, and so on.
 
-One collection of packages is called the **_tidyverse_** [@tidyverse]. The tidyverse is an opinionated collection of R packages designed for data science. All packages share an underlying design philosophy, grammar, and data structures. Several of these design philosophies are directly related to the aspects of software described above. Within the tidyverse, there is a set of packages specifically focused on modeling and these are usually referred to as the ***tidymodels*** packages. 
-This book is an extended software manual for conducting modeling using the tidyverse. It shows how to use a set of packages, each with its own specific purpose, together to create high-quality models.  
+One collection of packages is called the **_tidyverse_** [@tidyverse]. The tidyverse is an opinionated collection of R packages designed for data science. All packages share an underlying design philosophy, grammar, and data structures. Several of these design philosophies are directly related to the aspects of software described above. Within the tidyverse, there is a set of packages specifically focused on modeling and these are usually referred to as the ***tidymodels*** packages. This book is an extended software manual for conducting modeling using the tidyverse. It shows how to use a set of packages, each with its own specific purpose, together to create high-quality models.  
 
-## Let's talk about models
+## Types of models
 
 Before proceeding, lets describe a taxa for types of models, grouped by _purpose_. While not exhaustive,  most models fail into _at least_ one of these categories: 
 
 **Descriptive Models**: The purpose here would be to model the data so that it can be used to describe or illustrate characteristics of some data.  The analysis might have no other purpose than to visually illustrate some trend or artifact in the data. 
 
-For example, large scale measurements of RNA have been possible for some time using _microarrays_. Early laboratory methods placed a biological sample on a small microchip. Very small locations on the chip would be able to assess a measure of signal based on the abundance of a specific RNA sequence. The chip would contain thousands (or more) outcomes, each a quantification of the RNA related to some biological process. However, there could be quality issued on the chip that might lead to poor results. A fingerprint accidentally left on a portion of the chip might cause inaccurate measurements. An early methods for evaluating such issues where _probe-level models_, or PLM's (REF). A statistical model would be created that accounted for the _known_ differences for the data from the chip, such as the RNA sequence, the type of sequence and so on. If there were other, unwanted factors in the data, these would be contained in the model residuals. When the residuals were plotted by their location on the chip, a good quality chip would show no patterns. When an issue did occur, some sort of spatial pattern would be discernible. Often the type of pattern would suggest the underlying issue (e.g. a fingerprint) and a possible solution (wipe the chip off and rescan). 
+For example, large scale measurements of RNA have been possible for some time using _microarrays_. Early laboratory methods placed a biological sample on a small microchip. Very small locations on the chip would be able to assess a measure of signal based on the abundance of a specific RNA sequence. The chip would contain thousands (or more) outcomes, each a quantification of the RNA related to some biological process. However, there could be quality issued on the chip that might lead to poor results. A fingerprint accidentally left on a portion of the chip might cause inaccurate measurements. An early methods for evaluating such issues where _probe-level models_, or PLM's [@bolstad2004]. A statistical model would be created that accounted for the _known_ differences for the data from the chip, such as the RNA sequence, the type of sequence and so on. If there were other, unwanted factors in the data, these would be contained in the model residuals. When the residuals were plotted by their location on the chip, a good quality chip would show no patterns. When an issue did occur, some sort of spatial pattern would be discernible. Often the type of pattern would suggest the underlying issue (e.g. a fingerprint) and a possible solution (wipe the chip off and rescan). Figure \@ref(fig:descr-examples)(a) shows an application of this method for two microarrays taken from @Gentleman2005. The images show two different colors; red is where the signal intensity was larger than the model expects while the blue color shows lower than expected values. The left-hand panel demonstrates a fairly random pattern while the right-hand panel shows some type of unwanted artifact. 
 
-Another more general, and simpler example of a descriptive model is the locally estimated scatterplot smoothing model, more commonly known as LOESS (REF). Here, a smooth and flexible regression model is fit to a data set, usually with a single independent variable, and the fitted regression line is used to elucidate some trend in the data. These types of _smoothers_ are used to discover potential ways to represent a variable in a model. 
+<div class="figure" style="text-align: center">
+<img src="figures/introduction-descr-examples-1.png" alt="Two examples of how descriptive models can be used to illustrate specific patterns." width="80%" />
+<p class="caption">(\#fig:descr-examples)Two examples of how descriptive models can be used to illustrate specific patterns.</p>
+</div>
 
-**show some examples in a figure** 
+Another more general, and simpler example of a descriptive model is the locally estimated scatterplot smoothing model, more commonly known as LOESS [@cleveland1979]. Here, a smooth and flexible regression model is fit to a data set, usually with a single independent variable, and the fitted regression line is used to elucidate some trend in the data. These types of _smoothers_ are used to discover potential ways to represent a variable in a model. This is demonstrated in Figure \@ref(fig:descr-examples)(b) where a nonlinear trend is illuminated by the flexible smoother. 
+
 
 **Inferential Models**: In these situations, the goal is to produce a decision for a research question or to test a specific hypothesis. The goal is to make some statement of truth regarding some predefined conjecture or idea. In many (but not all) cases, some qualitative statement is produced.
 
@@ -60,7 +63,7 @@ For example, in some cases, a _mechanistic model_ can be developed based on firs
 
 _Empirically driven models_ are those that have more vague assumptions that are used to create their model equations. These models tend to fall more into the machine learning category. A good example is the simple _K_-nearest neighbor (KNN) model. Given a set of reference data, a new sample is predicted by using the values of the most similar data in the reference set. For example, if a book buyer needs a prediction for a new book, previous data from existing books may be available. If a 5-nearest neighbor model were used, the buyer might estimate the amount of the new book to purchase based on the sales numbers of the five books that are most similar to the new one (for some definition of "similar"). For this model, it is only defined by the structure of the prediction (the average of five similar books). No theoretical or probabilistic assumptions are made about the sales numbers or the variables that are used to define similarity. In fact, the primary method of evaluating the appropriateness of the model is to assess its accuracy using existing data. If the structure of this type of model is no consistent with the mechanism that generated the data, the predictions would not be close to the actual values. 
 
-Note that we have defined the type of model by how it is used rather than its mathematical qualities. An ordinary linear regression model might fall into all three classes of models, depending on how it is used: 
+Broader discussions of these distinctions can be found in @breiman2001 and @shmueli2010. Note that we have defined the type of model by how it is used rather than its mathematical qualities. An ordinary linear regression model might fall into all three classes of models, depending on how it is used: 
 
 * A descriptive LOESS model uses linear regression to estimate the trend in the data. 
 
@@ -74,7 +77,7 @@ There is an additional connection between the types of models. While the primary
 
 A potential problem with this approach is that it can be dangerous when statistical significance is used as the _only_ measure of model quality.  It is certainly possible that this statistically optimized model has poor model accuracy (or some other measure of predictive capacity). While the model might not be used for prediction, how much should the inferences be trusted from a model that has all significant p-values but an accuracy of 35%? Predictive performance tends to be related to how close the model's fitted values are to the observed data. If the model has limited fidelity to the data, the inferences generated by the model should be highly suspect. In other words, statistical significance may not imply that the model is good. 
 
-### Some terminology
+## Some terminology
 
 supervise, unsupervised
 
@@ -82,13 +85,10 @@ types of variables
 
 types of predictors
 
-
-### The mode of the model
-
-regression, classification
+The mode of the model: regression, classification
 
 
-### Where does modeling fit into the scientific process? 
+## Where does modeling fit into the data analysis/scientific process? 
 
 (probably need to get explicit permission to use this)
 
@@ -98,7 +98,7 @@ regression, classification
 </div>
 
 
-### Modeling is a _process_, not a single activity
+## Modeling is a _process_, not a single activity
 
 
 (probably need to get explicit permission to use this too)
@@ -108,11 +108,6 @@ regression, classification
 <img src="figures/introduction-modeling-process-1.svg" alt="A schematic for the typical modeling process." width="100%" />
 <p class="caption">(\#fig:modeling-process)A schematic for the typical modeling process.</p>
 </div>
-
-
-
-## What does it mean to be "tidy"
-
 
 ## Outline of future chapters
 

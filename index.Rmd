@@ -30,7 +30,7 @@ This openness also allows users to contribute if they wish. Most often, this com
 In terms of software lifecycle, the tidymodels packages are fairly young. We will do our best to maintain backwards compatibility and, at the completion of this work, will archive the specific versions of software that were used to produce it. The primary packages, and their versions, used to create this website are:
 
 ```{r tidymodels-attach, include = FALSE}
-library(tidymodels)
+library(tidyverse)
 library(AmesHousing)
 library(bookdown)
 library(rmarkdown)
