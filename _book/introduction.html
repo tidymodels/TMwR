@@ -159,30 +159,45 @@ Figure 1.1: Two examples of how descriptive models can be used to illustrate spe
 </div>
 <div id="some-terminology" class="section level2">
 <h2><span class="header-section-number">1.2</span> Some terminology</h2>
-<p>supervise, unsupervised</p>
-<p>types of variables</p>
-<p>types of predictors</p>
-<p>The mode of the model: regression, classification</p>
+<p>Before proceeding, some additional terminology related to modeling, data, and other quantities should be outlined. These descriptions are not exhaustive; they capture the majority of the usage in data analysis.</p>
+<p>First, many models can also be categorized as being <em>supervised</em> or <em>unsupervised</em>. Unsupervised models are those that seek patterns, clusters, or other characteristics of the data but lack an outcome variable (i.e., a dependent variable). For example, principal component analysis (PCA), clustering, and autoencoders are used to understand relationships between variables or sets of variables without the goal of making explicit predictions of an outcome. Supervised models are those that have an outcome variable. Linear regression, neural networks, and numerous other methodologies fall into this category. Within supervised models, the two main sub-categories are:</p>
+<ul>
+<li><p><em>Regression</em>, where a numerical outcome is being predicted.</p></li>
+<li><p><em>Classification</em>, where the outcome is an ordered or unordered set of qualitative values.</p></li>
+</ul>
+<p>These are impact definitions and do not account for all possible types of models. In coming chapters, we refer to these types of supervised techniques are the <em>model mode</em>.</p>
+<p>In terms of data, the main species are quantitative and qualitative. Examples of the former are real numbers and integers. Qualitative values, also known as nominal data, are those that represent some sort of discrete state.</p>
+<p>Different variables can have different <em>roles</em> in an analysis. Outcomes (otherwise known as the labels, endpoints, or dependent variables) are the value being predicted in supervised models. The independent variables, which are the substrate for making predictions of the outcome, also referred to as predictors, features, or covariates (depending on the context). Here, the terms <em>outcomes</em> and <em>predictors</em> are used the most.</p>
 </div>
 <div id="where-does-modeling-fit-into-the-data-analysisscientific-process" class="section level2">
 <h2><span class="header-section-number">1.3</span> Where does modeling fit into the data analysis/scientific process?</h2>
-<p>(probably need to get explicit permission to use this)</p>
+<p>In what circumstances are model created? Are there steps that precede such an undertaking? Is it the first step in data analysis?</p>
+<p>There are always a few critical phases of data analysis that come before modeling. First, there is the chronically underestimated process of <strong>cleaning the data</strong>. No matter the circumstances, the data should be investigated to make sure that it is well understood, applicable to the project goals, accurate, and appropriate. These steps can easily take more time than the rest of the data analysis process (depending on the circumstances).</p>
+<p>It can also overlap with the second phase of <strong>understanding the data</strong>, often referred to as exploratory data analysis (EDA). There should be knowledge of how the different variables related to one another, their distributions, typical ranges, and other attributes. A good question to ask at this phase is “how did I come by these data?” This can help understand how the data at-hand have been sampled or filtered and if these operations were appropriate. For example, when merging data base tables, a join may go awry that could eliminate one or more sub-populations of samples. Another good idea would be to ask if the data are <em>relavant</em>. For example, to predict whether patients have Alzheimer’s disease, it would be unwise to have a data set with subject with the disease and a sample from the general population of those who do not. Given the nature of the disease, the model my simply predict who the are the <em>oldest patients</em>.</p>
+<p>Finally, before starting the data analysis process, there should be clear expectations of the goal of the model and how performance (and success) will be judged. At least one <em>performance metric</em> should be identified with realistic goals of what can be achieved. Common statistical metrics are classification accuracy, true and false positive rates, root mean squared error, and so on. The relative benefits and issues with these metrics should be weighted. It is also important that the metric be germane; alignment with the broader data analysis goals is critical.</p>
 <div class="figure" style="text-align: center"><span id="fig:data-science-model"></span>
 <img src="figures-premade/data-science-model.svg" alt="The data science process (from _R for Data Science_)." width="80%" />
 <p class="caption">
 Figure 1.2: The data science process (from <em>R for Data Science</em>).
 </p>
 </div>
+<p>The process of investigating the data may not be simple. <span class="citation">Wickham and Grolemund (<a href="#ref-wickham2016">2016</a>)</span> contains an excellent illustration of the general data analysis process, reproduced with Figure <a href="introduction.html#fig:data-science-model">1.2</a>. Data ingestion and cleaning are shown as the initial steps. When the analytical steps commence, they are a heuristic process; we cannot pre-determine how long they may take. The cycle of analysis, modeling, and visualization are often cyclical.</p>
+<div class="figure" style="text-align: center"><span id="fig:modeling-process"></span>
+<img src="figures/introduction-modeling-process-1.svg" alt="A schematic for the typical modeling process (from _Feature Engineering and Selection_)." width="100%" />
+<p class="caption">
+Figure 1.3: A schematic for the typical modeling process (from <em>Feature Engineering and Selection</em>).
+</p>
+</div>
+<p>This iterative process is especially true for modeling. Figure <a href="introduction.html#fig:modeling-process">1.3</a> originates from <span class="citation">Kuhn and Johnson (<a href="#ref-kuhn20202">2020</a>)</span> and is meant to emulate the typical path to proceeding a model. The general phases are:</p>
+<ul>
+<li>Exploratory data analysis (EDA) and Quantitative Analysis (blue bars). Initially there is a back and forth between numerical analysis and visualization of the data (represented in Figure <a href="introduction.html#fig:data-science-model">1.2</a> where different discoveries lead to more questions and data analysis “side-quests” to gain more understanding.</li>
+<li><p>Feature engineering (green bars). This understanding translated to the creation of specific model terms that make it easier to accurately model the observed data. This can include complex methodologies (e.g., PCA) or simpler features (using the ratio of two predictors).</p></li>
+<li><p>Model tuning and selection (red and gray bars). A variety of models are generated and their performance is compared. Some models require <em>parameter tuning</em> where some structure parameters are chosen by the modeler.</p></li>
+</ul>
+<p>After an initial sequence of these tasks, more understanding is gained regarding which types of models are superior as well as which sub-populations of the data are not being effectively estimated. This leads to additional EDA and feature engineering and another round of modeling, and so on. Once the data analysis goals are achieved, the last steps are typically to finalize and document the model. For predictive models, it is common to validate the model on an additional set of data reserved for this specific purpose.</p>
 </div>
 <div id="modeling-is-a-process-not-a-single-activity" class="section level2">
 <h2><span class="header-section-number">1.4</span> Modeling is a <em>process</em>, not a single activity</h2>
-<p>(probably need to get explicit permission to use this too)</p>
-<div class="figure" style="text-align: center"><span id="fig:modeling-process"></span>
-<img src="figures/introduction-modeling-process-1.svg" alt="A schematic for the typical modeling process." width="100%" />
-<p class="caption">
-Figure 1.3: A schematic for the typical modeling process.
-</p>
-</div>
 </div>
 <div id="outline-of-future-chapters" class="section level2">
 <h2><span class="header-section-number">1.5</span> Outline of future chapters</h2>
@@ -218,6 +233,9 @@ Figure 1.3: A schematic for the typical modeling process.
 <div id="ref-Gentleman2005">
 <p>Gentleman, R, V Carey, W Huber, R Irizarry, and S Dudoit. 2005. <em>Bioinformatics and Computational Biology Solutions Using R and Bioconductor</em>. Berlin, Heidelberg: Springer-Verlag.</p>
 </div>
+<div id="ref-kuhn20202">
+<p>Kuhn, M, and K Johnson. 2020. <em>Feature Engineering and Selection: A Practical Approach for Predictive Models</em>. CRC Press.</p>
+</div>
 <div id="ref-baseR">
 <p>R Core Team. 2014. <em>R: A Language and Environment for Statistical Computing</em>. Vienna, Austria: R Foundation for Statistical Computing. <a href="http://www.R-project.org/">http://www.R-project.org/</a>.</p>
 </div>
@@ -226,6 +244,9 @@ Figure 1.3: A schematic for the typical modeling process.
 </div>
 <div id="ref-tidyverse">
 <p>Wickham, H, M Averick, J Bryan, W Chang, L McGowan, R François, G Grolemund, et al. 2019. “Welcome to the Tidyverse.” <em>Journal of Open Source Software</em> 4 (43).</p>
+</div>
+<div id="ref-wickham2016">
+<p>Wickham, H, and G Grolemund. 2016. <em><span class="sans-serif">R</span> for Data Science: Import, Tidy, Transform, Visualize, and Model Data</em>. O’Reilly Media, Inc.</p>
 </div>
 </div>
             </section>

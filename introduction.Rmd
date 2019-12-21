@@ -123,31 +123,38 @@ A potential problem with this approach is that it can be dangerous when statisti
 
 ## Some terminology
 
-supervise, unsupervised
+Before proceeding, some additional terminology related to modeling, data, and other quantities should be outlined. These descriptions are not exhaustive; they capture the majority of the usage in data analysis. 
 
-types of variables
+First, many models can also be categorized as being _supervised_ or _unsupervised_. Unsupervised models are those that seek patterns, clusters, or other characteristics of the data but lack an outcome variable (i.e., a dependent variable). For example, principal component analysis (PCA), clustering, and autoencoders are used to understand relationships between variables or sets of variables without the goal of making explicit predictions of an outcome. Supervised models are those that have an outcome variable. Linear regression, neural networks, and numerous other methodologies fall into this category. Within supervised models, the two main sub-categories are: 
 
-types of predictors
+ * _Regression_, where a numerical outcome is being predicted.
 
-The mode of the model: regression, classification
+ * _Classification_, where the outcome is an ordered or unordered set of qualitative values.  
 
+These are impact definitions and do not account for all possible types of models. In coming chapters, we refer to these types of supervised techniques are the _model mode_. 
+
+In terms of data, the main species are quantitative and qualitative. Examples of the former are real numbers and integers. Qualitative values, also known as nominal data, are those that represent some sort of discrete state. 
+
+Different variables can have different _roles_ in an analysis. Outcomes (otherwise known as the labels, endpoints, or dependent variables) are the value being predicted in supervised models. The independent variables, which are the substrate for making predictions of the outcome, also referred to as predictors, features, or covariates (depending on the context). Here, the terms _outcomes_ and _predictors_ are used the most. 
 
 ## Where does modeling fit into the data analysis/scientific process? 
 
-(probably need to get explicit permission to use this)
+In what circumstances are model created? Are there steps that precede such an undertaking? Is it the first step in data analysis? 
+
+There are always a few critical phases of data analysis that come before modeling. First, there is the chronically underestimated process of **cleaning the data**. No matter the circumstances, the data should be investigated to make sure that it is well understood, applicable to the project goals, accurate, and appropriate. These steps can easily take more time than the rest of the data analysis process (depending on the circumstances). 
+
+It can also overlap with the second phase of **understanding the data**, often referred to as exploratory data analysis (EDA). There should be knowledge of how the different variables related to one another, their distributions, typical ranges, and other attributes. A good question to ask at this phase is "how did I come by these data?" This can help understand how the data at-hand have been sampled or filtered and if these operations were appropriate. For example, when merging data base tables, a join may go awry that could eliminate one or more sub-populations of samples. Another good idea would be to ask if the data are _relavant_. For example, to predict whether patients have Alzheimer's disease, it would be unwise to have a data set with subject with the disease and a sample from the general population of those who do not. Given the nature of the disease, the model my simply predict who the are the _oldest patients_. 
+
+Finally, before starting the data analysis process, there should be clear expectations of the goal of the model and how performance (and success) will be judged. At least one _performance metric_ should be identified with realistic goals of what can be achieved. Common statistical metrics are classification accuracy, true and false positive rates, root mean squared error, and so on. The relative benefits and issues with these metrics should be weighted. It is also important that the metric be germane; alignment with the broader data analysis goals is critical. 
 
 ```{r data-science-model, echo = FALSE, out.width = '80%', fig.cap = "The data science process (from _R for Data Science_)."}
 knitr::include_graphics("figures-premade/data-science-model.svg")
 ```
 
-
-## Modeling is a _process_, not a single activity
-
-
-(probably need to get explicit permission to use this too)
+The process of investigating the data may not be simple. @wickham2016 contains an excellent illustration of the general data analysis process, reproduced with Figure \@ref(fig:data-science-model). Data ingestion and cleaning are shown as the initial steps. When the analytical steps commence, they are a heuristic process; we cannot pre-determine how long they may take. The cycle of analysis, modeling, and visualization are often cyclical. 
 
 
-```{r modeling-process, echo = FALSE, out.width = '100%', fig.width=8, fig.height=3, dev = "svg", fig.cap = "A schematic for the typical modeling process.", warning = FALSE}
+```{r modeling-process, echo = FALSE, out.width = '100%', fig.width=8, fig.height=3, dev = "svg", fig.cap = "A schematic for the typical modeling process (from _Feature Engineering and Selection_).", warning = FALSE}
 widths <- c(8, 4, 10, 2, 6, 6, 
             rep(1, 19), 2,
             rep(1, 19), 2,
@@ -178,11 +185,11 @@ bar_loc$ybot <- 1
 bar_loc$g <- factor(as.character(bar_loc$g), 
                 levels = c("EDA", "Quantitative Analysis", "Feature Engineering",
                            "Model Fit", "Model Tuning"))
-text_loc <- data.frame(x = c(1, 8, 30, 36, 120, 124, 132, 147, 211, 215)+1,
+text_loc <- data.frame(x = c(1, 8, 30, 36, 120, 124, 132, 147, 211, 215) + 1,
                        y = 2.1)
 text_loc$label <- letters[1:nrow(text_loc)]
 
-mod_loc <- data.frame(x = c(45, 66, 87, 107, 162, 195)+1,
+mod_loc <- data.frame(x = c(45, 66, 87, 107, 162, 195) + 1,
                       y = .75, 
                       label = c("Model\n#1", "Model\n#2", "Model\n#3", "Model\n#4",
                                 "Model\n#2", "Model\n#4"))
@@ -204,6 +211,20 @@ ggplot(bar_loc) +
   xlab("Time") + 
   ylim(c(.5, 2.25))
 ```
+
+This iterative process is especially true for modeling. Figure \@ref(fig:modeling-process) originates from @kuhn20202 and is meant to emulate the typical path to proceeding a model. The general phases are:
+
+ * Exploratory data analysis (EDA) and Quantitative Analysis (blue bars). Initially there is a back and forth between numerical analysis and visualization of the data (represented in Figure \@ref(fig:data-science-model) where different discoveries lead to more questions and data analysis "side-quests" to gain more understanding. 
+ * Feature engineering (green bars). This understanding translated to the creation of specific model terms that make it easier to accurately model the observed data. This can include complex methodologies (e.g., PCA) or simpler features (using the ratio of two predictors). 
+
+ * Model tuning and selection (red and gray bars). A variety of models are generated and their performance is compared. Some models require _parameter tuning_ where some structure parameters are chosen by the modeler. 
+
+After an initial sequence of these tasks, more understanding is gained regarding which types of models are superior as well as which sub-populations of the data are not being effectively estimated. This leads to additional EDA and feature engineering and another round of modeling, and so on. Once the data analysis goals are achieved, the last steps are typically to finalize and document the model. For predictive models, it is common to validate the model on an additional set of data reserved for this specific purpose. 
+
+
+## Modeling is a _process_, not a single activity
+
+
 
 ## Outline of future chapters
 
