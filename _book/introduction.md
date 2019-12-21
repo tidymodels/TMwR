@@ -153,3 +153,7 @@ This will come into play when topics such as resampling (Chapter \@ref(resamplin
 
 ## Outline of future chapters
 
+The first order of business is to introduce (or review) the ideas and syntax of the tidyverse in Chapter \@ref(tidyverse-primer). In this chapter, we also summarize the unmet needs for modeling when using R. This provides good motivation for why model-specific tidyverse techniques are needed. This chapter also outlines some additional principles related to this challenges. 
+
+Chapter \@ref(two-models) shows two different data analyses for the same data where one is focused on prediction and the other is for inference. This should illustrates the challenges for each approach and what issues are most relavant for each. 
+
