@@ -72,15 +72,16 @@
 <li class="chapter" data-level="1" data-path="introduction.html"><a href="introduction.html"><i class="fa fa-check"></i><b>1</b> Introduction</a><ul>
 <li class="chapter" data-level="1.1" data-path="introduction.html"><a href="introduction.html#types-of-models"><i class="fa fa-check"></i><b>1.1</b> Types of models</a></li>
 <li class="chapter" data-level="1.2" data-path="introduction.html"><a href="introduction.html#some-terminology"><i class="fa fa-check"></i><b>1.2</b> Some terminology</a></li>
-<li class="chapter" data-level="1.3" data-path="introduction.html"><a href="introduction.html#model-phases"><i class="fa fa-check"></i><b>1.3</b> Where does modeling fit into the data analysis/scientific process?</a></li>
+<li class="chapter" data-level="1.3" data-path="introduction.html"><a href="introduction.html#model-phases"><i class="fa fa-check"></i><b>1.3</b> How does modeling fit into the data analysis/scientific process?</a></li>
 <li class="chapter" data-level="1.4" data-path="introduction.html"><a href="introduction.html#begin-model-end"><i class="fa fa-check"></i><b>1.4</b> Where does the model begin and end?</a></li>
 <li class="chapter" data-level="1.5" data-path="introduction.html"><a href="introduction.html#outline-of-future-chapters"><i class="fa fa-check"></i><b>1.5</b> Outline of future chapters</a></li>
 </ul></li>
 <li class="chapter" data-level="2" data-path="tidyverse-primer.html"><a href="tidyverse-primer.html"><i class="fa fa-check"></i><b>2</b> A tidyverse primer</a><ul>
 <li class="chapter" data-level="2.1" data-path="tidyverse-primer.html"><a href="tidyverse-primer.html#principles"><i class="fa fa-check"></i><b>2.1</b> Principles</a></li>
 <li class="chapter" data-level="2.2" data-path="tidyverse-primer.html"><a href="tidyverse-primer.html#code"><i class="fa fa-check"></i><b>2.2</b> Code</a></li>
-<li class="chapter" data-level="2.3" data-path="tidyverse-primer.html"><a href="tidyverse-primer.html#why-tidiness-is-important-for-modeling"><i class="fa fa-check"></i><b>2.3</b> Why tidiness is important for modeling</a></li>
-<li class="chapter" data-level="2.4" data-path="tidyverse-primer.html"><a href="tidyverse-primer.html#some-additional-tidy-principals-for-modeling."><i class="fa fa-check"></i><b>2.4</b> Some additional tidy principals for modeling.</a></li>
+<li class="chapter" data-level="2.3" data-path="tidyverse-primer.html"><a href="tidyverse-primer.html#modeling-via-base-r"><i class="fa fa-check"></i><b>2.3</b> Modeling via base R</a></li>
+<li class="chapter" data-level="2.4" data-path="tidyverse-primer.html"><a href="tidyverse-primer.html#why-tidiness-is-important-for-modeling"><i class="fa fa-check"></i><b>2.4</b> Why tidiness is important for modeling</a></li>
+<li class="chapter" data-level="2.5" data-path="tidyverse-primer.html"><a href="tidyverse-primer.html#some-additional-tidy-principals-for-modeling."><i class="fa fa-check"></i><b>2.5</b> Some additional tidy principals for modeling.</a></li>
 </ul></li>
 <li class="chapter" data-level="3" data-path="two-models.html"><a href="two-models.html"><i class="fa fa-check"></i><b>3</b> A tale of two models</a></li>
 <li class="chapter" data-level="4" data-path="data-spending.html"><a href="data-spending.html"><i class="fa fa-check"></i><b>4</b> Spending our data</a></li>
@@ -170,7 +171,7 @@ Figure 1.1: Two examples of how descriptive models can be used to illustrate spe
 <p>Different variables can have different <em>roles</em> in an analysis. Outcomes (otherwise known as the labels, endpoints, or dependent variables) are the value being predicted in supervised models. The independent variables, which are the substrate for making predictions of the outcome, also referred to as predictors, features, or covariates (depending on the context). Here, the terms <em>outcomes</em> and <em>predictors</em> are used the most.</p>
 </div>
 <div id="model-phases" class="section level2">
-<h2><span class="header-section-number">1.3</span> Where does modeling fit into the data analysis/scientific process?</h2>
+<h2><span class="header-section-number">1.3</span> How does modeling fit into the data analysis/scientific process?</h2>
 <p>In what circumstances are model created? Are there steps that precede such an undertaking? Is it the first step in data analysis?</p>
 <p>There are always a few critical phases of data analysis that come before modeling. First, there is the chronically underestimated process of <strong>cleaning the data</strong>. No matter the circumstances, the data should be investigated to make sure that it is well understood, applicable to the project goals, accurate, and appropriate. These steps can easily take more time than the rest of the data analysis process (depending on the circumstances).</p>
 <p>It can also overlap with the second phase of <strong>understanding the data</strong>, often referred to as exploratory data analysis (EDA). There should be knowledge of how the different variables related to one another, their distributions, typical ranges, and other attributes. A good question to ask at this phase is “how did I come by these data?” This can help understand how the data at-hand have been sampled or filtered and if these operations were appropriate. For example, when merging data base tables, a join may go awry that could eliminate one or more sub-populations of samples. Another good idea would be to ask if the data are <em>relavant</em>. For example, to predict whether patients have Alzheimer’s disease, it would be unwise to have a data set with subject with the disease and a sample from the general population of those who do not. Given the nature of the disease, the model my simply predict who the are the <em>oldest patients</em>.</p>
@@ -199,7 +200,7 @@ Figure 1.3: A schematic for the typical modeling process (from <em>Feature Engin
 <div id="begin-model-end" class="section level2">
 <h2><span class="header-section-number">1.4</span> Where does the model begin and end?</h2>
 <p>So far, we have defined the model to be a structural equation that relates some inputs predictors to one or more outcomes. Let’s consider ordinary linear regression as a simple and well known example. The outcome data are denoted as <span class="math inline">\(y_i\)</span>, where there are <span class="math inline">\(i = 1 \ldots n\)</span> samples in the data set. Suppose that there are <span class="math inline">\(p\)</span> predictors <span class="math inline">\(x_{i1}, \ldots, x_{ip}\)</span> that are used to predict the outcome. Linear regression produces a model equation of</p>
-<p><span class="math display">\[ \hat{y}_i = \beta_0 + \beta_1x_{i1} + \ldots + \beta_px_{ip} \]</span></p>
+<p><span class="math display">\[ \hat{y}_i = \hat{\beta}_0 + \hat{\beta}_1x_{i1} + \ldots + \hat{\beta}_px_{ip} \]</span></p>
 <p>While this is a <em>linear</em> model, it is only linear in the parameters. The predictors could be nonlinear terms (such as the logarithm of the raw predictor value).</p>
 <p>The conventional way of thinking is that the modeling <em>process</em> is encapsulated by the model. For many data sets that are straight-forward in nature, this is the case. However, there are a variety of <em>choices</em> and additional steps that often occur before the data are ready to be added to the model. Some examples:</p>
 <ul>

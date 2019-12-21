@@ -97,7 +97,7 @@ In terms of data, the main species are quantitative and qualitative. Examples of
 
 Different variables can have different _roles_ in an analysis. Outcomes (otherwise known as the labels, endpoints, or dependent variables) are the value being predicted in supervised models. The independent variables, which are the substrate for making predictions of the outcome, also referred to as predictors, features, or covariates (depending on the context). Here, the terms _outcomes_ and _predictors_ are used the most. 
 
-## Where does modeling fit into the data analysis/scientific process? {#model-phases}
+## How does modeling fit into the data analysis/scientific process? {#model-phases}
 
 In what circumstances are model created? Are there steps that precede such an undertaking? Is it the first step in data analysis? 
 
@@ -133,7 +133,7 @@ After an initial sequence of these tasks, more understanding is gained regarding
 
 So far, we have defined the model to be a structural equation that relates some inputs predictors to one or more outcomes. Let's consider ordinary linear regression as a simple and well known example. The outcome data are denoted as $y_i$, where there are $i = 1 \ldots n$ samples in the data set. Suppose that there are $p$ predictors $x_{i1}, \ldots, x_{ip}$ that are used to predict the outcome. Linear regression produces a model equation of 
 
-$$ \hat{y}_i = \beta_0 + \beta_1x_{i1} + \ldots + \beta_px_{ip} $$
+$$ \hat{y}_i = \hat{\beta}_0 + \hat{\beta}_1x_{i1} + \ldots + \hat{\beta}_px_{ip} $$
 
 While this is a _linear_ model, it is only linear in the parameters. The predictors could be nonlinear terms (such as the logarithm of the raw predictor value). 
 

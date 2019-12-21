@@ -46,15 +46,15 @@ In terms of software lifecycle, the tidymodels packages are fairly young. We wil
 #>  date     2019-12-21                  
 #> 
 #> ─ Packages ───────────────────────────────────────────────────────────────────
-#>  package     * version    date       lib source        
-#>  AmesHousing * 0.0.3      2017-12-17 [1] CRAN (R 3.6.0)
-#>  bookdown    * 0.14       2019-10-01 [1] CRAN (R 3.6.0)
-#>  broom         0.5.2      2019-04-07 [1] CRAN (R 3.6.0)
-#>  dplyr       * 0.8.3      2019-07-04 [1] CRAN (R 3.6.0)
-#>  ggplot2     * 3.2.1.9000 2019-12-06 [1] local         
-#>  purrr       * 0.3.3      2019-10-18 [1] CRAN (R 3.6.0)
-#>  rlang         0.4.2      2019-11-23 [1] CRAN (R 3.6.0)
-#>  tibble      * 2.1.3      2019-06-06 [1] CRAN (R 3.6.0)
+#>  package     * version date       lib source        
+#>  AmesHousing * 0.0.3   2017-12-17 [1] CRAN (R 3.6.0)
+#>  bookdown    * 0.14    2019-10-01 [1] CRAN (R 3.6.0)
+#>  broom         0.5.2   2019-04-07 [1] CRAN (R 3.6.0)
+#>  dplyr       * 0.8.3   2019-07-04 [1] CRAN (R 3.6.0)
+#>  ggplot2     * 3.2.1   2019-08-10 [1] CRAN (R 3.6.0)
+#>  purrr       * 0.3.3   2019-10-18 [1] CRAN (R 3.6.0)
+#>  rlang         0.4.2   2019-11-23 [1] CRAN (R 3.6.0)
+#>  tibble      * 2.1.3   2019-06-06 [1] CRAN (R 3.6.0)
 #> 
 #> [1] /Library/Frameworks/R.framework/Versions/3.6/Resources/library
 ```
