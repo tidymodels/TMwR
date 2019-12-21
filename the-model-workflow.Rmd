@@ -2,7 +2,7 @@
 knitr::opts_chunk$set(fig.path = "figures/workflow-")
 ```
 
-# A model workflow
+# A model workflow {#workflows}
 
 aka modeling process or model pipeline
 

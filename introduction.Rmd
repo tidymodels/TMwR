@@ -137,7 +137,7 @@ In terms of data, the main species are quantitative and qualitative. Examples of
 
 Different variables can have different _roles_ in an analysis. Outcomes (otherwise known as the labels, endpoints, or dependent variables) are the value being predicted in supervised models. The independent variables, which are the substrate for making predictions of the outcome, also referred to as predictors, features, or covariates (depending on the context). Here, the terms _outcomes_ and _predictors_ are used the most. 
 
-## Where does modeling fit into the data analysis/scientific process? 
+## Where does modeling fit into the data analysis/scientific process? {#model-phases}
 
 In what circumstances are model created? Are there steps that precede such an undertaking? Is it the first step in data analysis? 
 
@@ -222,8 +222,7 @@ This iterative process is especially true for modeling. Figure \@ref(fig:modelin
 After an initial sequence of these tasks, more understanding is gained regarding which types of models are superior as well as which sub-populations of the data are not being effectively estimated. This leads to additional EDA and feature engineering and another round of modeling, and so on. Once the data analysis goals are achieved, the last steps are typically to finalize and document the model. For predictive models, it is common to validate the model on an additional set of data reserved for this specific purpose. 
 
 
-## Modeling is a _process_, not a single activity
-
+## Where does the model begin and end? {#begin-model-end}
 
 
 ## Outline of future chapters

@@ -2,7 +2,7 @@
 knitr::opts_chunk$set(fig.path = "figures/tidyverse-")
 ```
 
-# A tidyverse primer
+# A tidyverse primer {#tidyverse-primer}
 
 ## Principles
 
