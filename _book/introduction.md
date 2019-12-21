@@ -97,7 +97,7 @@ In terms of data, the main species are quantitative and qualitative. Examples of
 
 Different variables can have different _roles_ in an analysis. Outcomes (otherwise known as the labels, endpoints, or dependent variables) are the value being predicted in supervised models. The independent variables, which are the substrate for making predictions of the outcome, also referred to as predictors, features, or covariates (depending on the context). Here, the terms _outcomes_ and _predictors_ are used the most. 
 
-## Where does modeling fit into the data analysis/scientific process? 
+## Where does modeling fit into the data analysis/scientific process? {#model-phases}
 
 In what circumstances are model created? Are there steps that precede such an undertaking? Is it the first step in data analysis? 
 
@@ -114,7 +114,6 @@ Finally, before starting the data analysis process, there should be clear expect
 
 The process of investigating the data may not be simple. @wickham2016 contains an excellent illustration of the general data analysis process, reproduced with Figure \@ref(fig:data-science-model). Data ingestion and cleaning are shown as the initial steps. When the analytical steps commence, they are a heuristic process; we cannot pre-determine how long they may take. The cycle of analysis, modeling, and visualization are often cyclical. 
 
-
 <div class="figure" style="text-align: center">
 <img src="figures/introduction-modeling-process-1.svg" alt="A schematic for the typical modeling process (from _Feature Engineering and Selection_)." width="100%" />
 <p class="caption">(\#fig:modeling-process)A schematic for the typical modeling process (from _Feature Engineering and Selection_).</p>
@@ -130,9 +129,27 @@ This iterative process is especially true for modeling. Figure \@ref(fig:modelin
 After an initial sequence of these tasks, more understanding is gained regarding which types of models are superior as well as which sub-populations of the data are not being effectively estimated. This leads to additional EDA and feature engineering and another round of modeling, and so on. Once the data analysis goals are achieved, the last steps are typically to finalize and document the model. For predictive models, it is common to validate the model on an additional set of data reserved for this specific purpose. 
 
 
-## Modeling is a _process_, not a single activity
+## Where does the model begin and end? {#begin-model-end}
 
+So far, we have defined the model to be a structural equation that relates some inputs predictors to one or more outcomes. Let's consider ordinary linear regression as a simple and well known example. The outcome data are denoted as $y_i$, where there are $i = 1 \ldots n$ samples in the data set. Suppose that there are $p$ predictors $x_{i1}, \ldots, x_{ip}$ that are used to predict the outcome. Linear regression produces a model equation of 
 
+$$ \hat{y}_i = \beta_0 + \beta_1x_{i1} + \ldots + \beta_px_{ip} $$
+
+While this is a _linear_ model, it is only linear in the parameters. The predictors could be nonlinear terms (such as the logarithm of the raw predictor value). 
+
+The conventional way of thinking is that the modeling _process_ is encapsulated by the model. For many data sets that are straight-forward in nature, this is the case. However, there are a variety of _choices_ and additional steps that often occur before the data are ready to be added to the model. Some examples:
+
+* While our model has $p$ predictors, it is common to start with more than this number of candidate predictors. Through exploratory data analysis or previous experience, some of the predictors may be excluded from the analysis. In other cases, some feature selection routine may have been used to determine a data-driven choice for the minimum predictors set to be out into the model fitting procedure. 
+* There are times when the value of an important predictor is know known. Rather than eliminating this value from the data set, it could be _imputed_ using other values in the data. For example, if $x_1$ were missing but was correlated with predictors $x_2$ and $x_3$, an imputation method could estimate the missing $x_1$ from these other two predictors. 
+* As previously mentioned, it may be beneficial to transform the scale of a predictor. If there is **not** _a priori_ information on what the new scale should be, it might be estimated using a transformation technique. Here, the existing data would be used to statistically _estimate_ the proper scale that optimizes some criterion. Other transformations, such as the previously mentioned PCA, take groups of predictors and transforms them into new features that can be used in the model (instead of the original set).
+
+While the examples above are related to steps that occur before the model, there may also be operations that occur after the model is created. For example, when a classification model is created where the outcome is binary (e.g., `event` and `non-event`), it is common to use a 50% probability cutoff to create a discrete class prediction (also known as a "hard prediction"). For example, a classification model might estimate that the probability of an event was 62%. Using the typical default, the hard prediction would be `event`. However, the model may need to be more focused on reducing false positive results where true non-events are classified as events. One way to do this is to _raise_ the cutoff from 50% to some greater value. This increases the level of evidence required to call a new samples as an event. While this reduces the true positive rate (which is bad), it may have a more profound effect on reducing false positives. The choice of the cutoff value should be optimized using data. This is an example of a post-processing step that has a significant effect on how well the model works even though it is not contained in the model fitting step. 
+
+These examples have a common characteristic of requiring data to derive statistics that are used to alter the raw data values (even if that alteration is to eliminate a predictor) or the predictions generated by the model. 
+
+It is very important to focus on the broader _model fitting procedure_ instead of the specific model being used. This would include any pre-processing steps, the model fit itself, as well as potential post-processing activities. In this text, this will be referred to as the **model workflow** and would include any data-drive activities that are used to produce a final model equation. 
+
+This will come into play when topics such as resampling (Chapter \@ref(resampling)) and  model tuning are discussed. Chapter \@ref(workflows) describes software for creating a model workflow. 
 
 ## Outline of future chapters
 

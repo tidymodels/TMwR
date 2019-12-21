@@ -1,7 +1,7 @@
 
 
 
-# How good is our model?
+# How good is our model? {#model-metrics}
 
 (or how well does our model work? Superman does good; a model can work well)
 

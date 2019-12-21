@@ -1,7 +1,7 @@
 
 
 
-# A tidyverse primer
+# A tidyverse primer {#tidyverse-primer}
 
 ## Principles
 

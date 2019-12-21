@@ -1,7 +1,7 @@
 
 
 
-# A tale of two models
+# A tale of two models  {#two-models}
 
 (tentative title)
 

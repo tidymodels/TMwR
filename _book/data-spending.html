@@ -4,11 +4,11 @@
 
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title>Tidy Modeling with R</title>
+  <title>4 Spending our data | Tidy Modeling with R</title>
   <meta name="description" content="Modeling of data is integral to science, business, politics, and many other aspects of our lives. The goals of this book are to: introduce neophytes to models and the tidyverse, demonstrate the tidymodels packages, and to outline good practices for the phases of the modeling process." />
   <meta name="generator" content="bookdown 0.14 and GitBook 2.6.7" />
 
-  <meta property="og:title" content="Tidy Modeling with R" />
+  <meta property="og:title" content="4 Spending our data | Tidy Modeling with R" />
   <meta property="og:type" content="book" />
   
   
@@ -16,7 +16,7 @@
   <meta name="github-repo" content="topepo/TMwR" />
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="Tidy Modeling with R" />
+  <meta name="twitter:title" content="4 Spending our data | Tidy Modeling with R" />
   <meta name="twitter:site" content="@topepos" />
   <meta name="twitter:description" content="Modeling of data is integral to science, business, politics, and many other aspects of our lives. The goals of this book are to: introduce neophytes to models and the tidyverse, demonstrate the tidymodels packages, and to outline good practices for the phases of the modeling process." />
   
@@ -31,8 +31,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   
   
-
-<link rel="next" href="introduction.html"/>
+<link rel="prev" href="two-models.html"/>
+<link rel="next" href="model-metrics.html"/>
 <script src="libs/jquery-2.2.3/jquery.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
@@ -105,68 +105,22 @@
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="header">
-<h1 class="title">Tidy Modeling with R</h1>
-<p class="author"><em>Max Kuhn</em></p>
-<p class="date"><em>2019-12-21</em></p>
-</div>
-<div id="hello-world" class="section level1 unnumbered">
-<h1>Hello World</h1>
-<p>This is the website for <em>Tidy Modeling with R</em>. Its purpose is to be a guide to using a new collection of software in the R programming language that enable model building. There are few goals, depending on your background. First, if you are new to modeling and R, we hope to provide an introduction on how to use our software to create models. The focus will be on a dialect of R called <em>the tidyverse</em> that is designed to be a better interface for common tasks using R. If you’ve never heard of the tidyverse, there is a chapter that provides a solid introduction. The second (and primary) goal is to demonstrate how the tidyverse can be used to produce high quality models. The tools used to do this are referred to as the <em>tidymodels packages</em>. The third goal is to use the tidymodels packages to encourage good methodology and statistical practice. Many models, especially complex predictive or machine learning models, can work very well on the data at hand but may also fail when exposed to new data. Often, this issue is due to poor choices that were made during the development and/or selection of the models. Whenever possible, our software attempts to prevent these and other pitfalls.</p>
-<p>This book is not intended to be a reference on different types of these techniques We suggest other resources to learn the nuances of models. A general source for information about the most common type of model, the <em>linear model</em>, we suggest <span class="citation">Fox (<a href="#ref-fox08">2008</a>)</span>. Another excellent resource for investigating and analyzing data is <span class="citation">Wickham and Grolemund (<a href="#ref-wickham2016">2016</a>)</span>. For predictive models, <span class="citation">Kuhn and Johnson (<a href="#ref-apm">2013</a>)</span> is a good resource. For pure machine learning methods, <span class="citation">Goodfellow, Bengio, and Courville (<a href="#ref-Goodfellow">2016</a>)</span> is an excellent (but formal) source of information. In some cases, we describe some models that are used in this text but in a way that is less mathematical (and hopefully more intuitive).</p>
-<p>We do not assume that readers will have had extensive experience in model building and statistics. Some statistical knowledge is required, such as: random sampling, variance, correlation, basic linear regression, and other topics that are usually found in a basic undergraduate statistics or data analysis course.</p>
-<p><em>Tidy Modeling with R</em> is currently a work in progress. As we create it, this website is updated. Be aware that, until it is finalized, the content and/or structure of the book may change.</p>
-<p>This openness also allows users to contribute if they wish. Most often, this comes in the form of correcting typos, grammar, and other aspects of our work that could use improvement. Instructions for making contributions can be found in the <a href="https://github.com/topepo/TMwR/blob/master/contributing.md"><code>contributing.md</code></a> file. Also, be aware that this effort has a code of conduct, which can be found at <a href="https://github.com/topepo/TMwR/blob/master/code_of_conduct.md"><code>code_of_conduct.md</code></a>.</p>
-<p>In terms of software lifecycle, the tidymodels packages are fairly young. We will do our best to maintain backwards compatibility and, at the completion of this work, will archive the specific versions of software that were used to produce it. The primary packages, and their versions, used to create this website are:</p>
-<pre><code>#&gt; ─ Session info ───────────────────────────────────────────────────────────────
-#&gt;  setting  value                       
-#&gt;  version  R version 3.6.1 (2019-07-05)
-#&gt;  os       macOS Mojave 10.14.6        
-#&gt;  system   x86_64, darwin15.6.0        
-#&gt;  ui       X11                         
-#&gt;  language (EN)                        
-#&gt;  collate  en_US.UTF-8                 
-#&gt;  ctype    en_US.UTF-8                 
-#&gt;  tz       America/New_York            
-#&gt;  date     2019-12-21                  
-#&gt; 
-#&gt; ─ Packages ───────────────────────────────────────────────────────────────────
-#&gt;  package     * version    date       lib source        
-#&gt;  AmesHousing * 0.0.3      2017-12-17 [1] CRAN (R 3.6.0)
-#&gt;  bookdown    * 0.14       2019-10-01 [1] CRAN (R 3.6.0)
-#&gt;  broom         0.5.2      2019-04-07 [1] CRAN (R 3.6.0)
-#&gt;  dplyr       * 0.8.3      2019-07-04 [1] CRAN (R 3.6.0)
-#&gt;  ggplot2     * 3.2.1.9000 2019-12-06 [1] local         
-#&gt;  purrr       * 0.3.3      2019-10-18 [1] CRAN (R 3.6.0)
-#&gt;  rlang         0.4.2      2019-11-23 [1] CRAN (R 3.6.0)
-#&gt;  tibble      * 2.1.3      2019-06-06 [1] CRAN (R 3.6.0)
-#&gt; 
-#&gt; [1] /Library/Frameworks/R.framework/Versions/3.6/Resources/library</code></pre>
-<p><a href="https://pandoc.org/"><code>pandoc</code></a> is also instrumental in creating this work. The version used here is 2.3.1.</p>
+<div id="data-spending" class="section level1">
+<h1><span class="header-section-number">4</span> Spending our data</h1>
+<p>General data splitting</p>
+<p>Re-emphasize roles or different data sets and good/bad ways of doing things.</p>
+<p>Validation sets.</p>
+<p>What we do differently with a lot of data.</p>
+<p>Allude to resampling.</p>
 
-</div>
-<h3>References</h3>
-<div id="refs" class="references">
-<div id="ref-fox08">
-<p>Fox, J. 2008. <em>Applied Regression Analysis and Generalized Linear Models</em>. Second. Thousand Oaks, CA: Sage.</p>
-</div>
-<div id="ref-Goodfellow">
-<p>Goodfellow, I, Y Bengio, and A Courville. 2016. <em>Deep Learning</em>. MIT Press.</p>
-</div>
-<div id="ref-apm">
-<p>Kuhn, M, and K Johnson. 2013. <em>Applied Predictive Modeling</em>. Springer.</p>
-</div>
-<div id="ref-wickham2016">
-<p>Wickham, H, and G Grolemund. 2016. <em><span class="sans-serif">R</span> for Data Science: Import, Tidy, Transform, Visualize, and Model Data</em>. O’Reilly Media, Inc.</p>
-</div>
 </div>
             </section>
 
           </div>
         </div>
       </div>
-
-<a href="introduction.html" class="navigation navigation-next navigation-unique" aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+<a href="two-models.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="model-metrics.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>
@@ -188,7 +142,7 @@ gitbook.start({
 "size": 2
 },
 "edit": {
-"link": "https://github.com/topepo/TMwR-temp/edit/master/index.Rmd",
+"link": "https://github.com/topepo/TMwR-temp/edit/master/data-spending.Rmd",
 "text": "Edit"
 },
 "history": {
