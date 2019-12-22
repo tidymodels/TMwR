@@ -4,11 +4,11 @@
 
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title>6 Feature engineering | Tidy Modeling with R</title>
+  <title>2 A tidyverse primer | Tidy Modeling with R</title>
   <meta name="description" content="Modeling of data is integral to science, business, politics, and many other aspects of our lives. The goals of this book are to: introduce neophytes to models and the tidyverse, demonstrate the tidymodels packages, and to outline good practices for the phases of the modeling process." />
   <meta name="generator" content="bookdown 0.14 and GitBook 2.6.7" />
 
-  <meta property="og:title" content="6 Feature engineering | Tidy Modeling with R" />
+  <meta property="og:title" content="2 A tidyverse primer | Tidy Modeling with R" />
   <meta property="og:type" content="book" />
   
   
@@ -16,7 +16,7 @@
   <meta name="github-repo" content="topepo/TMwR" />
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="6 Feature engineering | Tidy Modeling with R" />
+  <meta name="twitter:title" content="2 A tidyverse primer | Tidy Modeling with R" />
   <meta name="twitter:site" content="@topepos" />
   <meta name="twitter:description" content="Modeling of data is integral to science, business, politics, and many other aspects of our lives. The goals of this book are to: introduce neophytes to models and the tidyverse, demonstrate the tidymodels packages, and to outline good practices for the phases of the modeling process." />
   
@@ -31,8 +31,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   
   
-<link rel="prev" href="model-metrics.html"/>
-<link rel="next" href="workflows.html"/>
+<link rel="prev" href="introduction.html"/>
+<link rel="next" href="two-models.html"/>
 <script src="libs/jquery-2.2.3/jquery.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
@@ -106,21 +106,40 @@
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="feature-engineering" class="section level1">
-<h1><span class="header-section-number">6</span> Feature engineering</h1>
-<p>Purpose(s) of these activites.</p>
-<p>Why do we do this?</p>
-<p>Different representations of same data</p>
-<p>Imputation; transformations; (unsup) removal; projection; encodings;</p>
+<div id="tidyverse-primer" class="section level1">
+<h1><span class="header-section-number">2</span> A tidyverse primer</h1>
+<div id="principles" class="section level2">
+<h2><span class="header-section-number">2.1</span> Principles</h2>
+<p>What does it mean to be “tidy” (distinguish tidy data vs tidy interfaces etc. )</p>
+</div>
+<div id="code" class="section level2">
+<h2><span class="header-section-number">2.2</span> Code</h2>
+<p>Things that I think that we’ll need summaries of:</p>
+<ul>
+<li><p>strategies: variable specification, pipes (with data or other first arguments), conflicts and using namespaces, splicing, non-standard evaluation,</p></li>
+<li><p>tactics: <code>select</code>, <code>bind_cols</code>, <code>tidyselect</code>, <code>slice</code>, <code>!!</code> and <code>!!!</code>, <code>...</code> for passing arguments, tibbles, joins, <code>nest</code>/<code>unnest</code>, <code>group_by</code></p></li>
+</ul>
+</div>
+<div id="modeling-via-base-r" class="section level2">
+<h2><span class="header-section-number">2.3</span> Modeling via base R</h2>
+<p>white book turning point</p>
+<p>base R conventions, basic usage, etc.</p>
+</div>
+<div id="why-tidiness-is-important-for-modeling" class="section level2">
+<h2><span class="header-section-number">2.4</span> Why tidiness is important for modeling</h2>
+</div>
+<div id="some-additional-tidy-principals-for-modeling." class="section level2">
+<h2><span class="header-section-number">2.5</span> Some additional tidy principals for modeling.</h2>
 
+</div>
 </div>
             </section>
 
           </div>
         </div>
       </div>
-<a href="model-metrics.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
-<a href="workflows.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+<a href="introduction.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="two-models.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>
@@ -142,7 +161,7 @@ gitbook.start({
 "size": 2
 },
 "edit": {
-"link": "https://github.com/topepo/TMwR-temp/edit/master/feature-engineering.Rmd",
+"link": "https://github.com/topepo/TMwR-temp/edit/master/tidyverse.Rmd",
 "text": "Edit"
 },
 "history": {

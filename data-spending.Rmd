@@ -2,7 +2,7 @@
 knitr::opts_chunk$set(fig.path = "figures/spending-")
 ```
 
-# Spending our data
+# Spending our data {#data-spending}
 
 General data splitting
 

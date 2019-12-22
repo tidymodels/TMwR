@@ -1,7 +1,7 @@
 
 
 
-# A tidyverse primer
+# A tidyverse primer {#tidyverse-primer}
 
 ## Principles
 
@@ -16,7 +16,16 @@ Things that I think that we'll need summaries of:
 
  * tactics: `select`, `bind_cols`, `tidyselect`, `slice`,  `!!` and `!!!`, `...` for passing arguments, tibbles, joins, `nest`/`unnest`, `group_by`
 
+
+## Modeling via base R
+
+white book turning point
+
+base R conventions, basic usage, etc.  
+
 ## Why tidiness is important for modeling
+
+
 
 ## Some additional tidy principals for modeling. 
 

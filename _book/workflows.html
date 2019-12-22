@@ -4,11 +4,11 @@
 
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title>3 A tale of two models | Tidy Modeling with R</title>
+  <title>7 A model workflow | Tidy Modeling with R</title>
   <meta name="description" content="Modeling of data is integral to science, business, politics, and many other aspects of our lives. The goals of this book are to: introduce neophytes to models and the tidyverse, demonstrate the tidymodels packages, and to outline good practices for the phases of the modeling process." />
   <meta name="generator" content="bookdown 0.14 and GitBook 2.6.7" />
 
-  <meta property="og:title" content="3 A tale of two models | Tidy Modeling with R" />
+  <meta property="og:title" content="7 A model workflow | Tidy Modeling with R" />
   <meta property="og:type" content="book" />
   
   
@@ -16,7 +16,7 @@
   <meta name="github-repo" content="topepo/TMwR" />
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="3 A tale of two models | Tidy Modeling with R" />
+  <meta name="twitter:title" content="7 A model workflow | Tidy Modeling with R" />
   <meta name="twitter:site" content="@topepos" />
   <meta name="twitter:description" content="Modeling of data is integral to science, business, politics, and many other aspects of our lives. The goals of this book are to: introduce neophytes to models and the tidyverse, demonstrate the tidymodels packages, and to outline good practices for the phases of the modeling process." />
   
@@ -24,15 +24,15 @@
 <meta name="author" content="Max Kuhn" />
 
 
-<meta name="date" content="2019-12-20" />
+<meta name="date" content="2019-12-21" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   
   
-<link rel="prev" href="a-tidyverse-primer.html"/>
-<link rel="next" href="spending-our-data.html"/>
+<link rel="prev" href="feature-engineering.html"/>
+<link rel="next" href="resampling.html"/>
 <script src="libs/jquery-2.2.3/jquery.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
@@ -72,22 +72,23 @@
 <li class="chapter" data-level="1" data-path="introduction.html"><a href="introduction.html"><i class="fa fa-check"></i><b>1</b> Introduction</a><ul>
 <li class="chapter" data-level="1.1" data-path="introduction.html"><a href="introduction.html#types-of-models"><i class="fa fa-check"></i><b>1.1</b> Types of models</a></li>
 <li class="chapter" data-level="1.2" data-path="introduction.html"><a href="introduction.html#some-terminology"><i class="fa fa-check"></i><b>1.2</b> Some terminology</a></li>
-<li class="chapter" data-level="1.3" data-path="introduction.html"><a href="introduction.html#where-does-modeling-fit-into-the-data-analysisscientific-process"><i class="fa fa-check"></i><b>1.3</b> Where does modeling fit into the data analysis/scientific process?</a></li>
-<li class="chapter" data-level="1.4" data-path="introduction.html"><a href="introduction.html#modeling-is-a-process-not-a-single-activity"><i class="fa fa-check"></i><b>1.4</b> Modeling is a <em>process</em>, not a single activity</a></li>
+<li class="chapter" data-level="1.3" data-path="introduction.html"><a href="introduction.html#model-phases"><i class="fa fa-check"></i><b>1.3</b> How does modeling fit into the data analysis/scientific process?</a></li>
+<li class="chapter" data-level="1.4" data-path="introduction.html"><a href="introduction.html#begin-model-end"><i class="fa fa-check"></i><b>1.4</b> Where does the model begin and end?</a></li>
 <li class="chapter" data-level="1.5" data-path="introduction.html"><a href="introduction.html#outline-of-future-chapters"><i class="fa fa-check"></i><b>1.5</b> Outline of future chapters</a></li>
 </ul></li>
-<li class="chapter" data-level="2" data-path="a-tidyverse-primer.html"><a href="a-tidyverse-primer.html"><i class="fa fa-check"></i><b>2</b> A tidyverse primer</a><ul>
-<li class="chapter" data-level="2.1" data-path="a-tidyverse-primer.html"><a href="a-tidyverse-primer.html#principles"><i class="fa fa-check"></i><b>2.1</b> Principles</a></li>
-<li class="chapter" data-level="2.2" data-path="a-tidyverse-primer.html"><a href="a-tidyverse-primer.html#code"><i class="fa fa-check"></i><b>2.2</b> Code</a></li>
-<li class="chapter" data-level="2.3" data-path="a-tidyverse-primer.html"><a href="a-tidyverse-primer.html#why-tidiness-is-important-for-modeling"><i class="fa fa-check"></i><b>2.3</b> Why tidiness is important for modeling</a></li>
-<li class="chapter" data-level="2.4" data-path="a-tidyverse-primer.html"><a href="a-tidyverse-primer.html#some-additional-tidy-principals-for-modeling."><i class="fa fa-check"></i><b>2.4</b> Some additional tidy principals for modeling.</a></li>
+<li class="chapter" data-level="2" data-path="tidyverse-primer.html"><a href="tidyverse-primer.html"><i class="fa fa-check"></i><b>2</b> A tidyverse primer</a><ul>
+<li class="chapter" data-level="2.1" data-path="tidyverse-primer.html"><a href="tidyverse-primer.html#principles"><i class="fa fa-check"></i><b>2.1</b> Principles</a></li>
+<li class="chapter" data-level="2.2" data-path="tidyverse-primer.html"><a href="tidyverse-primer.html#code"><i class="fa fa-check"></i><b>2.2</b> Code</a></li>
+<li class="chapter" data-level="2.3" data-path="tidyverse-primer.html"><a href="tidyverse-primer.html#modeling-via-base-r"><i class="fa fa-check"></i><b>2.3</b> Modeling via base R</a></li>
+<li class="chapter" data-level="2.4" data-path="tidyverse-primer.html"><a href="tidyverse-primer.html#why-tidiness-is-important-for-modeling"><i class="fa fa-check"></i><b>2.4</b> Why tidiness is important for modeling</a></li>
+<li class="chapter" data-level="2.5" data-path="tidyverse-primer.html"><a href="tidyverse-primer.html#some-additional-tidy-principals-for-modeling."><i class="fa fa-check"></i><b>2.5</b> Some additional tidy principals for modeling.</a></li>
 </ul></li>
-<li class="chapter" data-level="3" data-path="a-tale-of-two-models.html"><a href="a-tale-of-two-models.html"><i class="fa fa-check"></i><b>3</b> A tale of two models</a></li>
-<li class="chapter" data-level="4" data-path="spending-our-data.html"><a href="spending-our-data.html"><i class="fa fa-check"></i><b>4</b> Spending our data</a></li>
-<li class="chapter" data-level="5" data-path="how-good-is-our-model.html"><a href="how-good-is-our-model.html"><i class="fa fa-check"></i><b>5</b> How good is our model?</a></li>
+<li class="chapter" data-level="3" data-path="two-models.html"><a href="two-models.html"><i class="fa fa-check"></i><b>3</b> A tale of two models</a></li>
+<li class="chapter" data-level="4" data-path="data-spending.html"><a href="data-spending.html"><i class="fa fa-check"></i><b>4</b> Spending our data</a></li>
+<li class="chapter" data-level="5" data-path="model-metrics.html"><a href="model-metrics.html"><i class="fa fa-check"></i><b>5</b> How good is our model?</a></li>
 <li class="chapter" data-level="6" data-path="feature-engineering.html"><a href="feature-engineering.html"><i class="fa fa-check"></i><b>6</b> Feature engineering</a></li>
-<li class="chapter" data-level="7" data-path="a-model-workflow.html"><a href="a-model-workflow.html"><i class="fa fa-check"></i><b>7</b> A model workflow</a></li>
-<li class="chapter" data-level="8" data-path="resampling-for-evaluating-performance.html"><a href="resampling-for-evaluating-performance.html"><i class="fa fa-check"></i><b>8</b> Resampling for evaluating performance</a></li>
+<li class="chapter" data-level="7" data-path="workflows.html"><a href="workflows.html"><i class="fa fa-check"></i><b>7</b> A model workflow</a></li>
+<li class="chapter" data-level="8" data-path="resampling.html"><a href="resampling.html"><i class="fa fa-check"></i><b>8</b> Resampling for evaluating performance</a></li>
 </ul>
 
       </nav>
@@ -105,11 +106,11 @@
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="a-tale-of-two-models" class="section level1">
-<h1><span class="header-section-number">3</span> A tale of two models</h1>
-<p>(tentative title)</p>
-<p>Perhaps show an example of a predictive model and contrast it with another that is inferential.</p>
-<p>Chicago data from FES: one predictive model and one to test if there is a difference in ridership with the Bears are at home. what do we care about for each? how accurate is the inferential model? Perhaps look at the <a href="https://www.jstatsoft.org/article/view/v082i05"><code>tscount</code></a> package to deal with the autoregressive potential.</p>
+<div id="workflows" class="section level1">
+<h1><span class="header-section-number">7</span> A model workflow</h1>
+<p>aka modeling process or model pipeline</p>
+<p>How to encapsulate the pre-processing and model objects/activities</p>
+<p>Treat them as a single unit for good methodology and convenience.</p>
 
 </div>
             </section>
@@ -117,8 +118,8 @@
           </div>
         </div>
       </div>
-<a href="a-tidyverse-primer.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
-<a href="spending-our-data.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+<a href="feature-engineering.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="resampling.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>
@@ -140,7 +141,7 @@ gitbook.start({
 "size": 2
 },
 "edit": {
-"link": "https://github.com/topepo/TMwR-temp/edit/master/a-tale-of-two-models.Rmd",
+"link": "https://github.com/topepo/TMwR-temp/edit/master/the-model-workflow.Rmd",
 "text": "Edit"
 },
 "history": {
@@ -155,6 +156,20 @@ gitbook.start({
 });
 </script>
 
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    var src = "true";
+    if (src === "" || src === "true") src = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:")
+      if (/^https?:/.test(src))
+        src = src.replace(/^https?:/, '');
+    script.src = src;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
 </body>
 
 </html>
