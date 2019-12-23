@@ -3,7 +3,7 @@
 knit: "bookdown::render_book"
 title: "Tidy Modeling with R"
 author: ["Max Kuhn"]
-date: "2019-12-21"
+date: "2019-12-22"
 description: "Modeling of data is integral to science, business, politics, and many other aspects of our lives. The goals of this book are to: introduce neophytes to models and the tidyverse, demonstrate the `tidymodels` packages, and to outline good practices for the phases of the modeling process."
 github-repo: topepo/TMwR
 twitter-handle: topepos
@@ -21,7 +21,6 @@ This is the website for _Tidy Modeling with R_. Its purpose is to be a guide to 
 This book is not intended to be a reference on different types of these techniques We suggest other resources to learn the nuances of models. A general source for information about the most common type of model, the _linear model_, we suggest @fox08. Another excellent resource for investigating and analyzing data is @wickham2016. For predictive models, @apm is a good resource. For pure machine learning methods, @Goodfellow is an excellent (but formal) source of information.  In some cases, we describe some models that are used in this text but in a way that is less mathematical (and hopefully more intuitive). 
 
 We do not assume that readers will have had extensive experience in model building and statistics. Some statistical knowledge is required, such as: random sampling, variance, correlation, basic linear regression, and other topics that are usually found in a basic undergraduate statistics or data analysis course. 
-
 
 _Tidy Modeling with R_ is currently a work in progress. As we create it, this website is updated. Be aware that, until it is finalized, the content and/or structure of the book may change. 
 
@@ -43,7 +42,7 @@ In terms of software lifecycle, the tidymodels packages are fairly young. We wil
 #>  collate  en_US.UTF-8                 
 #>  ctype    en_US.UTF-8                 
 #>  tz       America/New_York            
-#>  date     2019-12-21                  
+#>  date     2019-12-22                  
 #> 
 #> ─ Packages ───────────────────────────────────────────────────────────────────
 #>  package     * version date       lib source        
