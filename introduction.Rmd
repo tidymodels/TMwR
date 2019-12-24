@@ -357,7 +357,7 @@ rate ~ (temp + species)^2
 
 In addition to the convenience of automatically creating indicator variables, the formula offers a few other niceties: 
 
-* _In-line_ functions can be used in the formula. For example, if the natural log of the temperate were used, the formula `rate ~ log(temp)` could be used. Since the formula is _symbolic_, actual math can be done to the predictors using the identity function `I()`. For example, to use Fahrenheit units, the formula could be `rate ~ I( (temp * 9/5) + 32 )` to make the conversion.
+* _In-line_ functions can be used in the formula. For example, if the natural log of the temperate were used, the formula `rate ~ log(temp)` could be used. Since the formula is symbolic by default, literal math can be done to the predictors using the identity function `I()`. For example, to use Fahrenheit units, the formula could be `rate ~ I( (temp * 9/5) + 32 )` to make the conversion.
 
 * R has many functions that are useful inside of formulas. For example, `poly(x, 3)` would create linear, quadratic, and cubic terms for `x` to the model as main effects. Also, the `splines` package has several functions to create nonlinear spline terms in the formula. 
 
