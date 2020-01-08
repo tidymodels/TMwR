@@ -3,7 +3,7 @@
 knit: "bookdown::render_book"
 title: "Tidy Modeling with R"
 author: ["Max Kuhn"]
-date: "2019-12-22"
+date: "2020-01-08"
 description: "Modeling of data is integral to science, business, politics, and many other aspects of our lives. The goals of this book are to: introduce neophytes to models and the tidyverse, demonstrate the `tidymodels` packages, and to outline good practices for the phases of the modeling process."
 github-repo: topepo/TMwR
 twitter-handle: topepos
@@ -35,25 +35,25 @@ In terms of software lifecycle, the tidymodels packages are fairly young. We wil
 #> ─ Session info ───────────────────────────────────────────────────────────────
 #>  setting  value                       
 #>  version  R version 3.6.1 (2019-07-05)
-#>  os       macOS Mojave 10.14.6        
+#>  os       macOS Catalina 10.15.1      
 #>  system   x86_64, darwin15.6.0        
 #>  ui       X11                         
 #>  language (EN)                        
 #>  collate  en_US.UTF-8                 
 #>  ctype    en_US.UTF-8                 
 #>  tz       America/New_York            
-#>  date     2019-12-22                  
+#>  date     2020-01-08                  
 #> 
 #> ─ Packages ───────────────────────────────────────────────────────────────────
-#>  package     * version date       lib source        
-#>  AmesHousing * 0.0.3   2017-12-17 [1] CRAN (R 3.6.0)
-#>  bookdown    * 0.14    2019-10-01 [1] CRAN (R 3.6.0)
-#>  broom         0.5.2   2019-04-07 [1] CRAN (R 3.6.0)
-#>  dplyr       * 0.8.3   2019-07-04 [1] CRAN (R 3.6.0)
-#>  ggplot2     * 3.2.1   2019-08-10 [1] CRAN (R 3.6.0)
-#>  purrr       * 0.3.3   2019-10-18 [1] CRAN (R 3.6.0)
-#>  rlang         0.4.2   2019-11-23 [1] CRAN (R 3.6.0)
-#>  tibble      * 2.1.3   2019-06-06 [1] CRAN (R 3.6.0)
+#>  package     * version    date       lib source                      
+#>  AmesHousing * 0.0.3      2017-12-17 [1] CRAN (R 3.6.0)              
+#>  bookdown    * 0.16       2019-11-22 [1] CRAN (R 3.6.0)              
+#>  broom         0.5.3      2019-12-14 [1] CRAN (R 3.6.0)              
+#>  dplyr       * 0.8.3      2019-07-04 [1] CRAN (R 3.6.0)              
+#>  ggplot2     * 3.2.1      2019-08-10 [1] CRAN (R 3.6.0)              
+#>  purrr       * 0.3.3      2019-10-18 [1] CRAN (R 3.6.0)              
+#>  rlang         0.4.2.9000 2019-12-26 [1] Github (r-lib/rlang@ce4f717)
+#>  tibble      * 2.1.3      2019-06-06 [1] CRAN (R 3.6.0)              
 #> 
 #> [1] /Library/Frameworks/R.framework/Versions/3.6/Resources/library
 ```
