@@ -6,7 +6,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <title>2 A tidyverse primer | Tidy Modeling with R</title>
   <meta name="description" content="Modeling of data is integral to science, business, politics, and many other aspects of our lives. The goals of this book are to: introduce neophytes to models and the tidyverse, demonstrate the tidymodels packages, and to outline good practices for the phases of the modeling process." />
-  <meta name="generator" content="bookdown 0.14 and GitBook 2.6.7" />
+  <meta name="generator" content="bookdown 0.16 and GitBook 2.6.7" />
 
   <meta property="og:title" content="2 A tidyverse primer | Tidy Modeling with R" />
   <meta property="og:type" content="book" />
@@ -24,7 +24,7 @@
 <meta name="author" content="Max Kuhn" />
 
 
-<meta name="date" content="2019-12-22" />
+<meta name="date" content="2020-01-08" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -136,13 +136,12 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="1.2" data-path="introduction.html"><a href="introduction.html#some-terminology"><i class="fa fa-check"></i><b>1.2</b> Some terminology</a></li>
 <li class="chapter" data-level="1.3" data-path="introduction.html"><a href="introduction.html#model-phases"><i class="fa fa-check"></i><b>1.3</b> How does modeling fit into the data analysis/scientific process?</a></li>
 <li class="chapter" data-level="1.4" data-path="introduction.html"><a href="introduction.html#begin-model-end"><i class="fa fa-check"></i><b>1.4</b> Where does the model begin and end?</a></li>
-<li class="chapter" data-level="1.5" data-path="introduction.html"><a href="introduction.html#r-review"><i class="fa fa-check"></i><b>1.5</b> A review of base R modeling syntax</a></li>
-<li class="chapter" data-level="1.6" data-path="introduction.html"><a href="introduction.html#outline-of-future-chapters"><i class="fa fa-check"></i><b>1.6</b> Outline of future chapters</a></li>
+<li class="chapter" data-level="1.5" data-path="introduction.html"><a href="introduction.html#outline-of-future-chapters"><i class="fa fa-check"></i><b>1.5</b> Outline of future chapters</a></li>
 </ul></li>
 <li class="chapter" data-level="2" data-path="tidyverse-primer.html"><a href="tidyverse-primer.html"><i class="fa fa-check"></i><b>2</b> A tidyverse primer</a><ul>
 <li class="chapter" data-level="2.1" data-path="tidyverse-primer.html"><a href="tidyverse-primer.html#principles"><i class="fa fa-check"></i><b>2.1</b> Principles</a></li>
 <li class="chapter" data-level="2.2" data-path="tidyverse-primer.html"><a href="tidyverse-primer.html#code"><i class="fa fa-check"></i><b>2.2</b> Code</a></li>
-<li class="chapter" data-level="2.3" data-path="tidyverse-primer.html"><a href="tidyverse-primer.html#modeling-via-base-r"><i class="fa fa-check"></i><b>2.3</b> Modeling via base R</a></li>
+<li class="chapter" data-level="2.3" data-path="tidyverse-primer.html"><a href="tidyverse-primer.html#r-review"><i class="fa fa-check"></i><b>2.3</b> A review of base R modeling syntax</a></li>
 <li class="chapter" data-level="2.4" data-path="tidyverse-primer.html"><a href="tidyverse-primer.html#why-tidiness-is-important-for-modeling"><i class="fa fa-check"></i><b>2.4</b> Why tidiness is important for modeling</a></li>
 <li class="chapter" data-level="2.5" data-path="tidyverse-primer.html"><a href="tidyverse-primer.html#some-additional-tidy-principals-for-modeling."><i class="fa fa-check"></i><b>2.5</b> Some additional tidy principals for modeling.</a></li>
 </ul></li>
@@ -183,10 +182,135 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li><p>tactics: <code>select</code>, <code>bind_cols</code>, <code>tidyselect</code>, <code>slice</code>, <code>!!</code> and <code>!!!</code>, <code>...</code> for passing arguments, tibbles, joins, <code>nest</code>/<code>unnest</code>, <code>group_by</code></p></li>
 </ul>
 </div>
-<div id="modeling-via-base-r" class="section level2">
-<h2><span class="header-section-number">2.3</span> Modeling via base R</h2>
-<p>white book turning point</p>
-<p>base R conventions, basic usage, etc.</p>
+<div id="r-review" class="section level2">
+<h2><span class="header-section-number">2.3</span> A review of base R modeling syntax</h2>
+<p>This book is about software, specifically R syntax for creating models. Before descrbing how tidy principles can be used in data analysis, it makes sense to show how models are created and utilized using traditional base R code. This section is a brief illustration of the those conventions. It is not exhaustive but provides readers uninitiated to R ideas about the basic motifs that are commonly used.</p>
+<p>The S language, on which R is based, has had a rich data analysis environment since the publication of <span class="citation">Chambers and Hastie (<a href="#ref-WhiteBook">1992</a>)</span> (commonly known as The White Book). This version of S introduced standard infrastructure components, such as symbolic model formulae, model matrices, data frames, as well as the standard object-oriented programming methods for data analysis. Much of these implementations have not substantively changes since then.</p>
+<p>To demonstrate the fundamentals, experimental data from <span class="citation">McDonald (<a href="#ref-mcdonald2009">2009</a>)</span> (by way of <span class="citation">Mangiafico (<a href="#ref-mangiafico2015">2015</a>)</span>) are used. These data relate how the ambient temperature related to the rate of cricket chirps per minute. Data were collected for two species: <em>O. exclamationis</em> and <em>O. niveus</em>. The data are contained in a data frame called <code>crickets</code> that contains a total of 31 data points. These data are shown via a <code>ggplot</code> graph.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" data-line-number="1"><span class="kw">library</span>(ggplot2)</a>
+<a class="sourceLine" id="cb2-2" data-line-number="2"></a>
+<a class="sourceLine" id="cb2-3" data-line-number="3"><span class="kw">names</span>(crickets)</a>
+<a class="sourceLine" id="cb2-4" data-line-number="4"><span class="co">#&gt; [1] &quot;species&quot; &quot;temp&quot;    &quot;rate&quot;</span></a>
+<a class="sourceLine" id="cb2-5" data-line-number="5"></a>
+<a class="sourceLine" id="cb2-6" data-line-number="6"><span class="co"># Plot the temperature on the x-axis, the chirp rate on the y-axis. The plot</span></a>
+<a class="sourceLine" id="cb2-7" data-line-number="7"><span class="co"># elements will be colored differently for each species:</span></a>
+<a class="sourceLine" id="cb2-8" data-line-number="8"><span class="kw">ggplot</span>(crickets, <span class="kw">aes</span>(<span class="dt">x =</span> temp, <span class="dt">y =</span> rate, <span class="dt">col =</span> species)) <span class="op">+</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb2-9" data-line-number="9"><span class="st">  </span><span class="co"># Plot points for each data point and color by species</span></a>
+<a class="sourceLine" id="cb2-10" data-line-number="10"><span class="st">  </span><span class="kw">geom_point</span>() <span class="op">+</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb2-11" data-line-number="11"><span class="st">  </span><span class="co"># Show a simple linear model fit created separately for each species:</span></a>
+<a class="sourceLine" id="cb2-12" data-line-number="12"><span class="st">  </span><span class="kw">geom_smooth</span>(<span class="dt">method =</span> lm, <span class="dt">se =</span> <span class="ot">FALSE</span>) <span class="op">+</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb2-13" data-line-number="13"><span class="st">  </span><span class="kw">labs</span>(<span class="dt">x =</span> <span class="st">&quot;Temperature (C)&quot;</span>, <span class="dt">y =</span> <span class="st">&quot;Chirp Rate (per minute)&quot;</span>)</a></code></pre></div>
+<p><img src="figures/tidyverse-cricket-plot-1.svg" width="100%" style="display: block; margin: auto;" /></p>
+<p>The data show fairly linear trends for each species. For a given temperature, <em>O. exclamationis</em> appears to have more chirps than the other species. For an inferential model, the researchers might have specified the following null hypotheses prior to seeing the data:</p>
+<ul>
+<li><p>Temperature has no affect on the chirp rate (denoted as hypothesis #1)</p></li>
+<li><p>There are no differences between the species in terms of chirp rate.</p></li>
+</ul>
+<p>There may be some scientific rationale for being able to predict the chirp rate but the focus here will be on inference.</p>
+<p>To fit an ordinary linear model, the <code>lm()</code> function is commonly used. The important arguments to this function are a model formula and a data frame that contains the data The formula is <em>symbolic</em>. For example, the simple formula:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" data-line-number="1">rate <span class="op">~</span><span class="st"> </span>temp</a></code></pre></div>
+<p>states that the chirp rate is the outcome (since it is on the left-hand side of the tidle <code>~</code>) and that the temperature values are the predictor<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>. Suppose the data contained the time of day in which the measurements were obtained in a column called <code>time</code>. The formula</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" data-line-number="1">rate <span class="op">~</span><span class="st"> </span>temp <span class="op">+</span><span class="st"> </span>time</a></code></pre></div>
+<p>would not add the time and temperature values together. This formula would symbolically represent that temperature and time should be added as a separate <em>main effects</em> to the model. Main effects are model terms that contain a single predictor variable.</p>
+<p>There are no time measurements in these data but the species can be added to the model in the same way:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" data-line-number="1">rate <span class="op">~</span><span class="st"> </span>temp <span class="op">+</span><span class="st"> </span>species</a></code></pre></div>
+<p>Species is not a quantitative variable; in the data frame, it is represented as a factor column with levels <code>&quot;O. exclamationis&quot;</code> and <code>&quot;O. niveus&quot;</code>. The vast majority of model functions cannot operate on non-numeric data. For species, the model needs to <em>encode</em> the species data into a numeric format. The most common approach is to use indicator variables (also known as “dummy variables”) in place of the original qualitative values. In this instance, since species has two possible values, the model formula will automatically encode this column as numeric by adding a new column that has a value of zero when the species is <code>&quot;O. exclamationis&quot;</code> and a value of one when the data correspond to <code>&quot;O. niveus&quot;</code>. The underlying formula machinery will automatically convert these data for the data used to create the model as well as for any new data points (for example, when the model is used for prediction).</p>
+<p>Suppose there were five species. The model formula would automatically add <em>four</em> additional binary columns that are binary indicators for four of the species. The <em>reference level</em> of the factor (i.e., the first level) is always left out of the predictor set. The idea is that, if you know the values of the four indicator variables, the value of the species can be determined.</p>
+<p>The model formula shown above creates a model where there are different y-intercepts for each species. It is a reasonable supposition that the slopes of the regression lines could be different for each species. To accommodate this structure, an <em>interaction</em> term can be added to the model. This can be specified in a few different ways, the most basic uses the colon:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" data-line-number="1">rate <span class="op">~</span><span class="st"> </span>temp <span class="op">+</span><span class="st"> </span>species <span class="op">+</span><span class="st"> </span>temp<span class="op">:</span>species</a>
+<a class="sourceLine" id="cb6-2" data-line-number="2"></a>
+<a class="sourceLine" id="cb6-3" data-line-number="3"><span class="co"># A shortcut can be used to expand all interactions containing</span></a>
+<a class="sourceLine" id="cb6-4" data-line-number="4"><span class="co"># interactions with two variables:</span></a>
+<a class="sourceLine" id="cb6-5" data-line-number="5">rate <span class="op">~</span><span class="st"> </span>(temp <span class="op">+</span><span class="st"> </span>species)<span class="op">^</span><span class="dv">2</span></a></code></pre></div>
+<p>In addition to the convenience of automatically creating indicator variables, the formula offers a few other niceties:</p>
+<ul>
+<li><p><em>In-line</em> functions can be used in the formula. For example, if the natural log of the temperate were used, the formula <code>rate ~ log(temp)</code> could be used. Since the formula is symbolic by default, literal math can be done to the predictors using the identity function <code>I()</code>. For example, to use Fahrenheit units, the formula could be <code>rate ~ I( (temp * 9/5) + 32 )</code> to make the conversion.</p></li>
+<li><p>R has many functions that are useful inside of formulas. For example, <code>poly(x, 3)</code> would create linear, quadratic, and cubic terms for <code>x</code> to the model as main effects. Also, the <code>splines</code> package has several functions to create nonlinear spline terms in the formula.</p></li>
+<li><p>For data sets where there are many predictors, the period shortcut is available. The period represents main effects for all of the columns that are not on the left-hand side of the tilde. For example, using <code>~ (.)^3</code> would create main effects as well as all two- and three-variable interactions to the model.</p></li>
+</ul>
+<p>For the initial data analysis, the two-factor interaction model is used. In this book, the suffix <code>_fit</code> is used for R objects for fitted models.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" data-line-number="1">interaction_fit &lt;-<span class="st">  </span><span class="kw">lm</span>(rate <span class="op">~</span><span class="st"> </span>(temp <span class="op">+</span><span class="st"> </span>species)<span class="op">^</span><span class="dv">2</span>, <span class="dt">data =</span> crickets) </a>
+<a class="sourceLine" id="cb7-2" data-line-number="2"></a>
+<a class="sourceLine" id="cb7-3" data-line-number="3"><span class="co"># To print a short summary of the model:</span></a>
+<a class="sourceLine" id="cb7-4" data-line-number="4">interaction_fit</a>
+<a class="sourceLine" id="cb7-5" data-line-number="5"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb7-6" data-line-number="6"><span class="co">#&gt; Call:</span></a>
+<a class="sourceLine" id="cb7-7" data-line-number="7"><span class="co">#&gt; lm(formula = rate ~ (temp + species)^2, data = crickets)</span></a>
+<a class="sourceLine" id="cb7-8" data-line-number="8"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb7-9" data-line-number="9"><span class="co">#&gt; Coefficients:</span></a>
+<a class="sourceLine" id="cb7-10" data-line-number="10"><span class="co">#&gt;           (Intercept)                   temp  </span></a>
+<a class="sourceLine" id="cb7-11" data-line-number="11"><span class="co">#&gt;               -11.041                  3.751  </span></a>
+<a class="sourceLine" id="cb7-12" data-line-number="12"><span class="co">#&gt;      speciesO. niveus  temp:speciesO. niveus  </span></a>
+<a class="sourceLine" id="cb7-13" data-line-number="13"><span class="co">#&gt;                -4.348                 -0.234</span></a></code></pre></div>
+<p>This output is a little hard to read. For the species indicator variables, R mashes the variable name (<code>species</code>) together with the factor level (<code>O. niveus</code>) with no delimiter.</p>
+<p>Before going into any results for this model, the fit should be assessed using diagnostic plots. The <code>plot()</code> method for <code>lm</code> objects can be used. It produces a set of four plots for the object, each showing different aspects of the fit. Two plots are shown here:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb8-1" data-line-number="1"><span class="co"># Place two plots next to one another:</span></a>
+<a class="sourceLine" id="cb8-2" data-line-number="2"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))</a>
+<a class="sourceLine" id="cb8-3" data-line-number="3"></a>
+<a class="sourceLine" id="cb8-4" data-line-number="4"><span class="co"># Show residuals vs predicted values:</span></a>
+<a class="sourceLine" id="cb8-5" data-line-number="5"><span class="kw">plot</span>(interaction_fit, <span class="dt">which =</span> <span class="dv">1</span>)</a>
+<a class="sourceLine" id="cb8-6" data-line-number="6"></a>
+<a class="sourceLine" id="cb8-7" data-line-number="7"><span class="co"># A normal quantile plot on the residuals:</span></a>
+<a class="sourceLine" id="cb8-8" data-line-number="8"><span class="kw">plot</span>(interaction_fit, <span class="dt">which =</span> <span class="dv">2</span>)</a></code></pre></div>
+<p><img src="figures/tidyverse-interaction-plots-1.svg" width="100%" style="display: block; margin: auto;" /></p>
+<p>These appear reasonable enough to conduct inferential analysis.</p>
+<p>From a technical standpoint, R is <em>lazy</em>. Model fitting functions typically compute the minimum possible quantities. For example, there may be interest in the coefficient table for each model term. This is not automatically computed but is instead computed via the <code>summary()</code> method.</p>
+<p>Our second order of business is to assess if the inclusion of the interaction term is necessary. The most appropriate approach for this model is to re-compute the model without the interaction term and use the <code>anova()</code> method.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" data-line-number="1"><span class="co"># Fit a reduced model:</span></a>
+<a class="sourceLine" id="cb9-2" data-line-number="2">main_effect_fit &lt;-<span class="st">  </span><span class="kw">lm</span>(rate <span class="op">~</span><span class="st"> </span>temp <span class="op">+</span><span class="st"> </span>species, <span class="dt">data =</span> crickets) </a>
+<a class="sourceLine" id="cb9-3" data-line-number="3"></a>
+<a class="sourceLine" id="cb9-4" data-line-number="4"><span class="co"># Compare the two:</span></a>
+<a class="sourceLine" id="cb9-5" data-line-number="5"><span class="kw">anova</span>(main_effect_fit, interaction_fit)</a>
+<a class="sourceLine" id="cb9-6" data-line-number="6"><span class="co">#&gt; Analysis of Variance Table</span></a>
+<a class="sourceLine" id="cb9-7" data-line-number="7"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb9-8" data-line-number="8"><span class="co">#&gt; Model 1: rate ~ temp + species</span></a>
+<a class="sourceLine" id="cb9-9" data-line-number="9"><span class="co">#&gt; Model 2: rate ~ (temp + species)^2</span></a>
+<a class="sourceLine" id="cb9-10" data-line-number="10"><span class="co">#&gt;   Res.Df  RSS Df Sum of Sq    F Pr(&gt;F)</span></a>
+<a class="sourceLine" id="cb9-11" data-line-number="11"><span class="co">#&gt; 1     28 89.3                         </span></a>
+<a class="sourceLine" id="cb9-12" data-line-number="12"><span class="co">#&gt; 2     27 85.1  1      4.28 1.36   0.25</span></a></code></pre></div>
+<p>The results of the statistical test generates a p-value of 0.3. This value implies that there is a lack of evidence for the alternative hypothesis that the the interaction term is needed by the model. For this reason, further analysis will be conducted on the model without the interaction.</p>
+<p>Residual plots should be re-assessed to make sure that our theoretical assumptions are valid enough to trust the p-values produced by the model (not shown but spoiler alert: they are).</p>
+<p>The <code>summary()</code> method is used to inspect the coefficients, standard errors, and p-values of each model term:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb10-1" data-line-number="1"><span class="kw">summary</span>(main_effect_fit)</a>
+<a class="sourceLine" id="cb10-2" data-line-number="2"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb10-3" data-line-number="3"><span class="co">#&gt; Call:</span></a>
+<a class="sourceLine" id="cb10-4" data-line-number="4"><span class="co">#&gt; lm(formula = rate ~ temp + species, data = crickets)</span></a>
+<a class="sourceLine" id="cb10-5" data-line-number="5"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb10-6" data-line-number="6"><span class="co">#&gt; Residuals:</span></a>
+<a class="sourceLine" id="cb10-7" data-line-number="7"><span class="co">#&gt;    Min     1Q Median     3Q    Max </span></a>
+<a class="sourceLine" id="cb10-8" data-line-number="8"><span class="co">#&gt; -3.013 -1.130 -0.391  0.965  3.780 </span></a>
+<a class="sourceLine" id="cb10-9" data-line-number="9"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb10-10" data-line-number="10"><span class="co">#&gt; Coefficients:</span></a>
+<a class="sourceLine" id="cb10-11" data-line-number="11"><span class="co">#&gt;                  Estimate Std. Error t value Pr(&gt;|t|)</span></a>
+<a class="sourceLine" id="cb10-12" data-line-number="12"><span class="co">#&gt; (Intercept)       -7.2109     2.5509   -2.83   0.0086</span></a>
+<a class="sourceLine" id="cb10-13" data-line-number="13"><span class="co">#&gt; temp               3.6028     0.0973   37.03  &lt; 2e-16</span></a>
+<a class="sourceLine" id="cb10-14" data-line-number="14"><span class="co">#&gt; speciesO. niveus -10.0653     0.7353  -13.69  6.3e-14</span></a>
+<a class="sourceLine" id="cb10-15" data-line-number="15"><span class="co">#&gt;                     </span></a>
+<a class="sourceLine" id="cb10-16" data-line-number="16"><span class="co">#&gt; (Intercept)      ** </span></a>
+<a class="sourceLine" id="cb10-17" data-line-number="17"><span class="co">#&gt; temp             ***</span></a>
+<a class="sourceLine" id="cb10-18" data-line-number="18"><span class="co">#&gt; speciesO. niveus ***</span></a>
+<a class="sourceLine" id="cb10-19" data-line-number="19"><span class="co">#&gt; ---</span></a>
+<a class="sourceLine" id="cb10-20" data-line-number="20"><span class="co">#&gt; Signif. codes:  </span></a>
+<a class="sourceLine" id="cb10-21" data-line-number="21"><span class="co">#&gt; 0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</span></a>
+<a class="sourceLine" id="cb10-22" data-line-number="22"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb10-23" data-line-number="23"><span class="co">#&gt; Residual standard error: 1.79 on 28 degrees of freedom</span></a>
+<a class="sourceLine" id="cb10-24" data-line-number="24"><span class="co">#&gt; Multiple R-squared:  0.99,   Adjusted R-squared:  0.989 </span></a>
+<a class="sourceLine" id="cb10-25" data-line-number="25"><span class="co">#&gt; F-statistic: 1.33e+03 on 2 and 28 DF,  p-value: &lt;2e-16</span></a></code></pre></div>
+<p>From these values, the chirp rate for each species increases by 3.6 chirps as the temperature increases by a single degree. This term shows strong statistical significance as evidenced by the p-value. The species term has a value of -10.07. This indicates that, across all temperature values, <em>O. niveus</em> is a chirp rate that is about 10 fewer chirps per minute. Similar to the temperature term, the species effect is associated with a very small p-value.</p>
+<p>The only issue in this analysis is the intercept value. It indicates that at 0 C, there are -7.21 chirps per minute. While this is unreasonable, the data only go as low as 17.2 C and interpreting the model at 0 C would be an <em>extrapolation</em>. This would be a bad idea. That said, the model fit is good within the <em>applicable range</em> of the temperature values and the conclusions should be limited to the observed temperature range.</p>
+<p>If there were a need to estimate the chirp rate at a temperature that was not observed in the experiment, the <code>predict()</code> method would be used. It takes the model object and a data frame of new values for prediction. For example, the model estimates the chirp rate for <em>O. exclamationis</em> for temperatures between 15 C and 20 C can be computed via:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb11-1" data-line-number="1">new_values &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">species =</span> <span class="st">&quot;O. exclamationis&quot;</span>, <span class="dt">temp =</span> <span class="dv">15</span><span class="op">:</span><span class="dv">20</span>)</a>
+<a class="sourceLine" id="cb11-2" data-line-number="2"><span class="kw">predict</span>(main_effect_fit, new_values)</a>
+<a class="sourceLine" id="cb11-3" data-line-number="3"><span class="co">#&gt;    1    2    3    4    5    6 </span></a>
+<a class="sourceLine" id="cb11-4" data-line-number="4"><span class="co">#&gt; 46.8 50.4 54.0 57.6 61.2 64.8</span></a></code></pre></div>
+<p>Note that the non-numeric value of <code>species</code> is given to the predict method (as opposed to the binary indicator variable).</p>
+<p>While this analysis has obviously not been an exhaustive demonstration of R’s modeling capabilities, it does highlight some of the major features:</p>
+<ul>
+<li><p>The language has an expressive syntax for specifying model terms for simple and fairly complex models.</p></li>
+<li><p>For formula method has many conveniences for modeling that are also applied to new data when predictions are generated.</p></li>
+<li><p>There are numerous helper functions (e.g., <code>anova()</code>, <code>summary()</code> and <code>predict()</code>) that are used to conduct specific calculations after the fitted model is created.</p></li>
+</ul>
+<p>Finally, as previously mentioned, this framework was devised in 1992. Most of the ideas and methods above were developed in that period and have remained remarkably relavant to this day. It highlights that the S language and, by extension R, has been designed as a language for data analysis since its inception.</p>
 </div>
 <div id="why-tidiness-is-important-for-modeling" class="section level2">
 <h2><span class="header-section-number">2.4</span> Why tidiness is important for modeling</h2>
@@ -195,6 +319,24 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <h2><span class="header-section-number">2.5</span> Some additional tidy principals for modeling.</h2>
 
 </div>
+</div>
+<h3>References</h3>
+<div id="refs" class="references">
+<div id="ref-WhiteBook">
+<p>Chambers, J, and T Hastie, eds. 1992. <em>Statistical Models in S</em>. Boca Raton, FL: CRC Press, Inc.</p>
+</div>
+<div id="ref-mangiafico2015">
+<p>Mangiafico, S. 2015. “An R Companion for the Handbook of Biological Statistics.” <a href="https://rcompanion.org/handbook/">https://rcompanion.org/handbook/</a>.</p>
+</div>
+<div id="ref-mcdonald2009">
+<p>McDonald, J. 2009. <em>Handbook of Biological Statistics</em>. Sparky House Publishing.</p>
+</div>
+</div>
+<div class="footnotes">
+<hr />
+<ol start="1">
+<li id="fn1"><p>Most model functions implicitly add an intercept column.<a href="tidyverse-primer.html#fnref1" class="footnote-back">↩</a></p></li>
+</ol>
 </div>
             </section>
 
@@ -228,6 +370,10 @@ gitbook.start({
 "text": "Edit"
 },
 "history": {
+"link": null,
+"text": null
+},
+"view": {
 "link": null,
 "text": null
 },
