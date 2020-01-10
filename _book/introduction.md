@@ -39,14 +39,10 @@ For example, large scale measurements of RNA have been possible for some time us
 
 An early methods for evaluating such issues where _probe-level models_, or PLM's [@bolstad2004]. A statistical model would be created that accounted for the _known_ differences for the data from the chip, such as the RNA sequence, the type of sequence and so on. If there were other, unwanted factors in the data, these would be contained in the model residuals. When the residuals were plotted by their location on the chip, a good quality chip would show no patterns. When an issue did occur, some sort of spatial pattern would be discernible. Often the type of pattern would suggest the underlying issue (e.g. a fingerprint) and a possible solution (wipe the chip off and rescan). Figure \@ref(fig:descr-examples)(a) shows an application of this method for two microarrays taken from @Gentleman2005. The images show two different colors; red is where the signal intensity was larger than the model expects while the blue color shows lower than expected values. The left-hand panel demonstrates a fairly random pattern while the right-hand panel shows some type of unwanted artifact. 
 
-\begin{figure}
-
-{\centering \includegraphics[width=0.8\linewidth]{figures/introduction-descr-examples-1} 
-
-}
-
-\caption{Two examples of how descriptive models can be used to illustrate specific patterns.}(\#fig:descr-examples)
-\end{figure}
+<div class="figure" style="text-align: center">
+<img src="figures/introduction-descr-examples-1.png" alt="Two examples of how descriptive models can be used to illustrate specific patterns." width="80%" />
+<p class="caption">(\#fig:descr-examples)Two examples of how descriptive models can be used to illustrate specific patterns.</p>
+</div>
 
 Another example of a descriptive model is the _locally estimated scatterplot smoothing_ model, more commonly known as LOESS [@cleveland1979]. Here, a smooth and flexible regression model is fit to a data set, usually with a single independent variable, and the fitted regression line is used to elucidate some trend in the data. These types of _smoothers_ are used to discover potential ways to represent a variable in a model. This is demonstrated in Figure \@ref(fig:descr-examples)(b) where a nonlinear trend is illuminated by the flexible smoother. 
 
@@ -111,25 +107,17 @@ Data cleaning can also overlap with the second phase of **understanding the data
 
 Finally, before starting a data analysis process, there should be clear expectations of the goal of the model and how performance (and success) will be judged. At least one _performance metric_ should be identified with realistic goals of what can be achieved. Common statistical metrics are classification accuracy, true and false positive rates, root mean squared error, and so on. The relative benefits and drawbacks of these metrics should be weighted. It is also important that the metric be germane (i.e., alignment with the broader data analysis goals is critical). 
 
-\begin{figure}
-
-{\centering \includegraphics[width=0.8\linewidth]{figures-premade/data-science-model} 
-
-}
-
-\caption{The data science process (from R for Data Science).}(\#fig:data-science-model)
-\end{figure}
+<div class="figure" style="text-align: center">
+<img src="figures-premade/data-science-model.svg" alt="The data science process (from R for Data Science)." width="80%" />
+<p class="caption">(\#fig:data-science-model)The data science process (from R for Data Science).</p>
+</div>
 
 The process of investigating the data may not be simple. @wickham2016 contains an excellent illustration of the general data analysis process, reproduced with Figure \@ref(fig:data-science-model). Data ingestion and cleaning are shown as the initial steps. When the analytical steps commence, they are a heuristic process; we cannot pre-determine how long they may take. The cycle of analysis, modeling, and visualization often require multiple iterations. 
 
-\begin{figure}
-
-{\centering \includegraphics[width=1\linewidth]{figures/introduction-modeling-process-1} 
-
-}
-
-\caption{A schematic for the typical modeling process (from Feature Engineering and Selection).}(\#fig:modeling-process)
-\end{figure}
+<div class="figure" style="text-align: center">
+<img src="figures/introduction-modeling-process-1.svg" alt="A schematic for the typical modeling process (from Feature Engineering and Selection)." width="100%" />
+<p class="caption">(\#fig:modeling-process)A schematic for the typical modeling process (from Feature Engineering and Selection).</p>
+</div>
 
 This iterative process is especially true for modeling. Figure \@ref(fig:modeling-process) originates from @kuhn20202 and is meant to emulate the typical path to determining an appropriate model. The general phases are:
 

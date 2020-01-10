@@ -33,7 +33,7 @@ In terms of software lifecycle, the tidymodels packages are fairly young. We wil
 
 
 ```
-#> - Session info ---------------------------------------------------------------
+#> ─ Session info ───────────────────────────────────────────────────────────────
 #>  setting  value                       
 #>  version  R version 3.6.1 (2019-07-05)
 #>  os       macOS Catalina 10.15.1      
@@ -45,7 +45,7 @@ In terms of software lifecycle, the tidymodels packages are fairly young. We wil
 #>  tz       America/New_York            
 #>  date     2020-01-09                  
 #> 
-#> - Packages -------------------------------------------------------------------
+#> ─ Packages ───────────────────────────────────────────────────────────────────
 #>  package     * version    date       lib source                      
 #>  AmesHousing * 0.0.3      2017-12-17 [1] CRAN (R 3.6.0)              
 #>  bookdown    * 0.16       2019-11-22 [1] CRAN (R 3.6.0)              
