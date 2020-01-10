@@ -45,7 +45,9 @@ ggplot(crickets, aes(x = temp, y = rate, col = species)) +
   labs(x = "Temperature (C)", y = "Chirp Rate (per minute)")
 ```
 
-<img src="figures/tidyverse-cricket-plot-1.svg" width="100%" style="display: block; margin: auto;" />
+
+
+\begin{center}\includegraphics[width=1\linewidth]{figures/tidyverse-cricket-plot-1} \end{center}
  
 The data show fairly linear trends for each species. For a given temperature, _O. exclamationis_ appears to have more chirps than the other species. For an inferential model, the researchers might have specified the following null hypotheses prior to seeing the data:
 
@@ -131,7 +133,9 @@ plot(interaction_fit, which = 1)
 plot(interaction_fit, which = 2)
 ```
 
-<img src="figures/tidyverse-interaction-plots-1.svg" width="100%" style="display: block; margin: auto;" />
+
+
+\begin{center}\includegraphics[width=1\linewidth]{figures/tidyverse-interaction-plots-1} \end{center}
 
 These appear reasonable enough to conduct inferential analysis. 
 
