@@ -3,6 +3,7 @@
 library(tidyverse)
 
 options(digits = 3, width = 55)
+options(dplyr.print_min = 6, dplyr.print_max = 6)
 
 knitr::opts_chunk$set(
   comment = "#>",
@@ -11,8 +12,9 @@ knitr::opts_chunk$set(
   tidy = FALSE,
   fig.path = "figures/tidyverse-"
 )
-
-options(dplyr.print_min = 6, dplyr.print_max = 6)
+if (knitr::is_latex_output()) {
+  knitr::knit_theme$set("bclear")
+}
 
 transparent_theme <- function() {
   library(ggplot2)
@@ -95,7 +97,7 @@ The S language, on which R is based, has had a rich data analysis environment si
 
 To demonstrate the fundamentals, experimental data from @mcdonald2009 (by way of @mangiafico2015) are used. These data relate how the ambient temperature related to the rate of cricket chirps per minute. Data were collected for two species: _O. exclamationis_ and _O. niveus_. The data are contained in a data frame called `crickets` that contains a total of `r nrow(crickets)` data points. These data are shown via a `ggplot` graph. 
 
-```{r cricket-plot, out.width = '100%', fig.width=8, fig.height=6, dev = "svg", warning = FALSE}
+```{r cricket-plot, out.width = '100%', fig.width=8, fig.height=6, warning = FALSE}
 library(ggplot2)
 
 names(crickets)
@@ -172,7 +174,7 @@ This output is a little hard to read. For the species indicator variables, R mas
 
 Before going into any results for this model, the fit should be assessed using diagnostic plots. The `plot()` method for `lm` objects can be used. It produces a set of four plots for the object, each showing different aspects of the fit. Two plots are shown here:
 
-```{r interaction-plots, out.width = '100%', fig.width=8, fig.height=4.5, dev = "svg", warning = FALSE}
+```{r interaction-plots, out.width = '100%', fig.width=8, fig.height=4.5, warning = FALSE}
 # Place two plots next to one another:
 par(mfrow = c(1, 2))
 

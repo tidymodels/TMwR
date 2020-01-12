@@ -1,0 +1,28 @@
+% Begin preamble.tex -----------------------------------------------------------
+
+% ------------------------------------------------------------------------------
+% size based on "Statistical Rethinking" style files
+
+\usepackage[paperwidth=7.67in,paperheight=10.67in,layoutwidth=7in,layoutheight=10in,text={5.5in,8.5in},left=0.65in,top=0.75in,headheight=0.25in,headsep=0.4in,footskip=0.4in,showcrop, layouthoffset=0.33in, layoutvoffset=0.33in]{geometry}
+
+% ------------------------------------------------------------------------------
+% headers
+
+\usepackage{fancyhdr}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[CO]{\nouppercase{\emph{\rightmark}}}
+\fancyhead[CE]{\nouppercase{\emph{\leftmark}}}
+\fancyhead[RO]{\thepage}
+\fancyhead[LE]{\thepage}
+% no line in header or footer
+\renewcommand{\headrulewidth}{0pt}
+
+% Code chunk mods -------------------------------------------------------------
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\},fontsize=\small}
+\renewcommand{\CommentTok}[1]{\textcolor[rgb]{0.41,0.41,0.41}{\texttt{#1}}}
+
+
+
+% End preamble.tex -------------------------------------------------------------

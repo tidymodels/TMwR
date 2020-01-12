@@ -21,10 +21,10 @@
   <meta name="twitter:description" content="Modeling of data is integral to science, business, politics, and many other aspects of our lives. The goals of this book are to: introduce neophytes to models and the tidyverse, demonstrate the tidymodels packages, and to outline good practices for the phases of the modeling process." />
   
 
-<meta name="author" content="Max Kuhn" />
+<meta name="author" content="Max Kuhn and Davis Vaughan" />
 
 
-<meta name="date" content="2020-01-08" />
+<meta name="date" content="2020-01-09" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -239,16 +239,16 @@ Figure 1.1: Two examples of how descriptive models can be used to illustrate spe
 <p>Data cleaning can also overlap with the second phase of <strong>understanding the data</strong>, often referred to as exploratory data analysis (EDA). There should be knowledge of how the different variables related to one another, their distributions, typical ranges, and other attributes. A good question to ask at this phase is “how did I come by <em>these</em> data?” This question can help understand how the data at-hand have been sampled or filtered and if these operations were appropriate. For example, when merging data base tables, a join may go awry that could accidentally eliminate one or more sub-populations of samples. Another good idea would be to ask if the data are <em>relavant</em>. For example, to predict whether patients have Alzheimer’s disease or not, it would be unwise to have a data set containing subject with the disease and a random sample of healthy adults from the general population. Given the progressive nature of the disease, the model my simply predict who the are the <em>oldest patients</em>.</p>
 <p>Finally, before starting a data analysis process, there should be clear expectations of the goal of the model and how performance (and success) will be judged. At least one <em>performance metric</em> should be identified with realistic goals of what can be achieved. Common statistical metrics are classification accuracy, true and false positive rates, root mean squared error, and so on. The relative benefits and drawbacks of these metrics should be weighted. It is also important that the metric be germane (i.e., alignment with the broader data analysis goals is critical).</p>
 <div class="figure" style="text-align: center"><span id="fig:data-science-model"></span>
-<img src="figures-premade/data-science-model.svg" alt="The data science process (from _R for Data Science_)." width="80%" />
+<img src="figures-premade/data-science-model.svg" alt="The data science process (from R for Data Science)." width="80%" />
 <p class="caption">
-Figure 1.2: The data science process (from <em>R for Data Science</em>).
+Figure 1.2: The data science process (from R for Data Science).
 </p>
 </div>
 <p>The process of investigating the data may not be simple. <span class="citation">Wickham and Grolemund (<a href="#ref-wickham2016">2016</a>)</span> contains an excellent illustration of the general data analysis process, reproduced with Figure <a href="introduction.html#fig:data-science-model">1.2</a>. Data ingestion and cleaning are shown as the initial steps. When the analytical steps commence, they are a heuristic process; we cannot pre-determine how long they may take. The cycle of analysis, modeling, and visualization often require multiple iterations.</p>
 <div class="figure" style="text-align: center"><span id="fig:modeling-process"></span>
-<img src="figures/introduction-modeling-process-1.svg" alt="A schematic for the typical modeling process (from _Feature Engineering and Selection_)." width="100%" />
+<img src="figures/introduction-modeling-process-1.svg" alt="A schematic for the typical modeling process (from Feature Engineering and Selection)." width="100%" />
 <p class="caption">
-Figure 1.3: A schematic for the typical modeling process (from <em>Feature Engineering and Selection</em>).
+Figure 1.3: A schematic for the typical modeling process (from Feature Engineering and Selection).
 </p>
 </div>
 <p>This iterative process is especially true for modeling. Figure <a href="introduction.html#fig:modeling-process">1.3</a> originates from <span class="citation">Kuhn and Johnson (<a href="#ref-kuhn20202">2020</a>)</span> and is meant to emulate the typical path to determining an appropriate model. The general phases are:</p>
@@ -366,7 +366,7 @@ gitbook.start({
 "link": null,
 "text": null
 },
-"download": null,
+"download": ["_main.pdf"],
 "toc": {
 "collapse": "section"
 }
