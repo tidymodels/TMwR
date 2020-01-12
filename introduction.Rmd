@@ -51,7 +51,7 @@ For example, large scale measurements of RNA have been possible for some time us
 
 An early method for evaluating such issues were _probe-level models_, or PLM's [@bolstad2004]. A statistical model would be created that accounted for the _known_ differences for the data from the chip, such as the RNA sequence, the type of sequence, and so on. If there were other, unwanted factors in the data, these would be contained in the model residuals. When the residuals were plotted by their location on the chip, a good quality chip would show no patterns. When an issue did occur, some sort of spatial pattern would be discernible. Often the type of pattern would suggest the underlying issue (e.g. a fingerprint) and a possible solution (wipe the chip off and rescan, repeat the sample, etc.). Figure \@ref(fig:descr-examples)(a) shows an application of this method for two microarrays taken from @Gentleman2005. The images show two different colors; red is where the signal intensity was larger than the model expects while the blue color shows lower than expected values. The left-hand panel demonstrates a fairly random pattern while the right-hand panel shows some type of unwanted artifact in the middle of the chip. 
 
-```{r descr-examples, echo = FALSE, fig.cap = "Two examples of how descriptive models can be used to illustrate specific patterns.", out.width = '80%', fig.height = 8, warning = FALSE, message = FALSE}
+```{r descr-examples, echo = FALSE, fig.cap = "Two examples of how descriptive models can be used to illustrate specific patterns.", out.width = '80%', dev = "png", fig.height = 8, warning = FALSE, message = FALSE}
 load("RData/plm_resids.RData")
 
 resid_cols <- RColorBrewer::brewer.pal(8, "Set1")[1:2]
@@ -152,13 +152,18 @@ Data cleaning can also overlap with the second phase of **understanding the data
 
 Finally, before starting a data analysis process, there should be clear expectations of the goal of the model and how performance (and success) will be judged. At least one _performance metric_ should be identified with realistic goals of what can be achieved. Common statistical metrics are classification accuracy, true and false positive rates, root mean squared error, and so on. The relative benefits and drawbacks of these metrics should be weighted. It is also important that the metric be germane (i.e., alignment with the broader data analysis goals is critical). 
 
-```{r data-science-model, echo = FALSE, out.width = '80%', fig.cap = "The data science process (from _R for Data Science_)."}
-knitr::include_graphics("figures-premade/data-science-model.svg")
+```{r data-science-model, echo = FALSE, out.width = '80%', fig.cap = "The data science process (from R for Data Science)."}
+
+if (knitr:::is_html_output()) {
+  knitr::include_graphics("figures-premade/data-science-model.svg")
+} else {
+   knitr::include_graphics("figures-premade/data-science-model.pdf")
+}
 ```
 
 The process of investigating the data may not be simple. @wickham2016 contains an excellent illustration of the general data analysis process, reproduced with Figure \@ref(fig:data-science-model). Data ingestion and cleaning are shown as the initial steps. When the analytical steps commence, they are a heuristic process; we cannot pre-determine how long they may take. The cycle of analysis, modeling, and visualization often require multiple iterations. 
 
-```{r modeling-process, echo = FALSE, out.width = '100%', fig.width=8, fig.height=3, dev = "svg", fig.cap = "A schematic for the typical modeling process (from _Feature Engineering and Selection_).", warning = FALSE}
+```{r modeling-process, echo = FALSE, out.width = '100%', fig.width=8, fig.height=3, fig.cap = "A schematic for the typical modeling process (from Feature Engineering and Selection).", warning = FALSE}
 widths <- c(8, 4, 10, 2, 6, 6, 
             rep(1, 19), 2,
             rep(1, 19), 2,

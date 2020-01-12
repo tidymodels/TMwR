@@ -1,4 +1,5 @@
 bookdown::gitbook:
+  dev: svg
   config:
     toc:
       collapse: section
@@ -12,3 +13,8 @@ bookdown::gitbook:
 bookdown::pdf_book:
   latex_engine: pdflatex
   citation_package: natbib
+  includes:
+    in_header: latex_extras/preamble.tex
+  keep_tex: yes
+  highlight: tango
+

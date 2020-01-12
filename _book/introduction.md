@@ -108,15 +108,15 @@ Data cleaning can also overlap with the second phase of **understanding the data
 Finally, before starting a data analysis process, there should be clear expectations of the goal of the model and how performance (and success) will be judged. At least one _performance metric_ should be identified with realistic goals of what can be achieved. Common statistical metrics are classification accuracy, true and false positive rates, root mean squared error, and so on. The relative benefits and drawbacks of these metrics should be weighted. It is also important that the metric be germane (i.e., alignment with the broader data analysis goals is critical). 
 
 <div class="figure" style="text-align: center">
-<img src="figures-premade/data-science-model.svg" alt="The data science process (from _R for Data Science_)." width="80%" />
-<p class="caption">(\#fig:data-science-model)The data science process (from _R for Data Science_).</p>
+<img src="figures-premade/data-science-model.svg" alt="The data science process (from R for Data Science)." width="80%" />
+<p class="caption">(\#fig:data-science-model)The data science process (from R for Data Science).</p>
 </div>
 
 The process of investigating the data may not be simple. @wickham2016 contains an excellent illustration of the general data analysis process, reproduced with Figure \@ref(fig:data-science-model). Data ingestion and cleaning are shown as the initial steps. When the analytical steps commence, they are a heuristic process; we cannot pre-determine how long they may take. The cycle of analysis, modeling, and visualization often require multiple iterations. 
 
 <div class="figure" style="text-align: center">
-<img src="figures/introduction-modeling-process-1.svg" alt="A schematic for the typical modeling process (from _Feature Engineering and Selection_)." width="100%" />
-<p class="caption">(\#fig:modeling-process)A schematic for the typical modeling process (from _Feature Engineering and Selection_).</p>
+<img src="figures/introduction-modeling-process-1.svg" alt="A schematic for the typical modeling process (from Feature Engineering and Selection)." width="100%" />
+<p class="caption">(\#fig:modeling-process)A schematic for the typical modeling process (from Feature Engineering and Selection).</p>
 </div>
 
 This iterative process is especially true for modeling. Figure \@ref(fig:modeling-process) originates from @kuhn20202 and is meant to emulate the typical path to determining an appropriate model. The general phases are:
