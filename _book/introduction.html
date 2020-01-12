@@ -24,7 +24,7 @@
 <meta name="author" content="Max Kuhn and Davis Vaughan" />
 
 
-<meta name="date" content="2020-01-09" />
+<meta name="date" content="2020-01-12" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -34,6 +34,7 @@
 <link rel="prev" href="index.html"/>
 <link rel="next" href="tidyverse-primer.html"/>
 <script src="libs/jquery-2.2.3/jquery.min.js"></script>
+<script src="libs/elevate-section-attrs-2.0/elevate-section-attrs.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
@@ -50,28 +51,30 @@
 
 
 
+<script src="libs/kePrint-0.0.1/kePrint.js"></script>
 
 
 <style type="text/css">
-a.sourceLine { display: inline-block; line-height: 1.25; }
-a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
-a.sourceLine:empty { height: 1.2em; }
-.sourceCode { overflow: visible; }
-code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
 pre.sourceCode { margin: 0; }
 @media screen {
 div.sourceCode { overflow: auto; }
 }
 @media print {
-code.sourceCode { white-space: pre-wrap; }
-a.sourceLine { text-indent: -1em; padding-left: 1em; }
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
 }
-pre.numberSource a.sourceLine
-  { position: relative; left: -4em; }
-pre.numberSource a.sourceLine::before
-  { content: attr(data-line-number);
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
     position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; pointer-events: all; display: inline-block;
+    border: none; display: inline-block;
     -webkit-touch-callout: none; -webkit-user-select: none;
     -khtml-user-select: none; -moz-user-select: none;
     -ms-user-select: none; user-select: none;
@@ -80,9 +83,9 @@ pre.numberSource a.sourceLine::before
   }
 pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
 div.sourceCode
-  {  }
+  {   }
 @media screen {
-a.sourceLine::before { text-decoration: underline; }
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 code span.al { color: #ff0000; font-weight: bold; } /* Alert */
 code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
@@ -131,14 +134,16 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 <li class="divider"></li>
 <li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Hello World</a></li>
-<li class="chapter" data-level="1" data-path="introduction.html"><a href="introduction.html"><i class="fa fa-check"></i><b>1</b> Introduction</a><ul>
+<li class="chapter" data-level="1" data-path="introduction.html"><a href="introduction.html"><i class="fa fa-check"></i><b>1</b> Introduction</a>
+<ul>
 <li class="chapter" data-level="1.1" data-path="introduction.html"><a href="introduction.html#types-of-models"><i class="fa fa-check"></i><b>1.1</b> Types of models</a></li>
 <li class="chapter" data-level="1.2" data-path="introduction.html"><a href="introduction.html#some-terminology"><i class="fa fa-check"></i><b>1.2</b> Some terminology</a></li>
 <li class="chapter" data-level="1.3" data-path="introduction.html"><a href="introduction.html#model-phases"><i class="fa fa-check"></i><b>1.3</b> How does modeling fit into the data analysis/scientific process?</a></li>
 <li class="chapter" data-level="1.4" data-path="introduction.html"><a href="introduction.html#begin-model-end"><i class="fa fa-check"></i><b>1.4</b> Where does the model begin and end?</a></li>
 <li class="chapter" data-level="1.5" data-path="introduction.html"><a href="introduction.html#outline-of-future-chapters"><i class="fa fa-check"></i><b>1.5</b> Outline of future chapters</a></li>
 </ul></li>
-<li class="chapter" data-level="2" data-path="tidyverse-primer.html"><a href="tidyverse-primer.html"><i class="fa fa-check"></i><b>2</b> A tidyverse primer</a><ul>
+<li class="chapter" data-level="2" data-path="tidyverse-primer.html"><a href="tidyverse-primer.html"><i class="fa fa-check"></i><b>2</b> A tidyverse primer</a>
+<ul>
 <li class="chapter" data-level="2.1" data-path="tidyverse-primer.html"><a href="tidyverse-primer.html#principles"><i class="fa fa-check"></i><b>2.1</b> Principles</a></li>
 <li class="chapter" data-level="2.2" data-path="tidyverse-primer.html"><a href="tidyverse-primer.html#code"><i class="fa fa-check"></i><b>2.2</b> Code</a></li>
 <li class="chapter" data-level="2.3" data-path="tidyverse-primer.html"><a href="tidyverse-primer.html#r-review"><i class="fa fa-check"></i><b>2.3</b> A review of base R modeling syntax</a></li>
@@ -168,75 +173,75 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="introduction" class="section level1">
-<h1><span class="header-section-number">1</span> Introduction</h1>
+<div id="introduction" class="section level1" number="1">
+<h1 number="1"><span class="header-section-number">1</span> Introduction</h1>
 <p>Models are mathematical tools that create equations that are intended to mimic the data given to them. These equations can be used for various purposes, such as: predicting future events, determining if there is a difference between several groups, as an aid to a map-based visualization, discovering novel patterns in the data that could be further investigated, and so on. Their utility hinges on their ability to be reductive; the primary influences in the data can be captured mathematically in a way that is useful.</p>
 <p>Since the start of the 21st century, mathematical models have become ubiquitous in our daily lives, in both obvious and subtle ways. A typical day for many people might involve checking the weather to see when a good time would be to walk the dog, ordering a product from a website, typing (and autocorrecting) a text message to a friend, and checking email. In each of these instances, there is a good chance that some type of model was used in an assistive way. In some cases, the contribution of the model might be easily perceived (“You might also be interested in purchasing product <em>X</em>”) while in other cases the impact was the absence of something (e.g., spam email). Models are used to choose clothing that a customer might like, a molecule that should be evaluated as a drug candidate, and might even be the mechanism that a nefarious company uses avoid the discovery of cars that over-pollute. For better or worse, models are here to stay.</p>
-<p>Two reasons that models permeate our lives are that software exists that facilitates their creation and that data has become more easily captured and accessible. In regard to software, it is obviously critical that software produces the <em>correct</em> equations that represent the data. For the most part, determining mathematical correctness is possible. However, the creation of an appropriate model hinges on a few other aspects.</p>
-<p>First, it is important that it is easy to operate the software in a <em>proper way</em>. For example, the user interface should not be so arcane that the user would not know that they have inappropriately specified the wrong information. As an analogy, one might have a high quality kitchen measuring cup capable of great precision but if the chef adds a cup of salt instead of a cup of sugar, the results would be unpalatable. As a specific example of this issue, <span class="citation">Baggerly and Coombes (<a href="#ref-baggerly2009">2009</a>)</span> report myriad problems in the data analysis in a high profile computational biology publication. One of the issues was related to how the users were required to add the names of the model inputs. The user-interface of the software was poor enough that it was easy to <em>offset</em> the column names of the data from the actual data columns. In the analysis of the data, this resulted in the wrong genes being identified as important for treating cancer patients. This, and many other issues, led to the stoppage of numerous clinical trials <span class="citation">(Carlson <a href="#ref-Carlson2012">2012</a>)</span>.</p>
-<p>If we are to expect high quality models, it is important that the software facilitate proper usage. <span class="citation">Abrams (<a href="#ref-abrams2003">2003</a>)</span> describes an interesting principle to live by:</p>
+<p>There are two reasons that models permeate our lives: an abundance of <em>software</em> exists to create models and <em>data</em> has become more easily captured and accessible. In regard to software, it is obviously critical that software produces the <em>correct</em> equations that represent the data. For the most part, determining mathematical correctness is possible. However, the creation of an appropriate model hinges on a few other aspects.</p>
+<p>First, it is important that it is easy to operate the software in a <em>proper way</em>. For example, the user interface should not be so arcane that the user would not know that they used it inappropriately. As an analogy, one might have a high quality kitchen measuring cup capable of great precision but if the chef adds a cup of salt instead of a cup of sugar, the results would be unpalatable. As a specific example of this issue, <span class="citation">Baggerly and Coombes (<a href="resampling.html#ref-baggerly2009" role="doc-biblioref">2009</a>)</span> report myriad problems in the data analysis in a high profile computational biology publication. One of the issues was related to how the users were required to add the names of the model inputs. The user-interface of the software was poor enough that it was easy to <em>offset</em> the column names of the data from the actual data columns. In the analysis of the data, this resulted in the wrong genes being identified as important for treating cancer patients. This, and many other issues, led to the stoppage of numerous clinical trials <span class="citation">(Carlson <a href="resampling.html#ref-Carlson2012" role="doc-biblioref">2012</a>)</span>.</p>
+<p>If we are to expect high quality models, it is important that the software facilitate proper usage. <span class="citation">Abrams (<a href="resampling.html#ref-abrams2003" role="doc-biblioref">2003</a>)</span> describes an interesting principle to live by:</p>
 <blockquote>
 <p>The Pit of Success: in stark contrast to a summit, a peak, or a journey across a desert to find victory through many trials and surprises, we want our customers to simply fall into winning practices by using our platform and frameworks.</p>
 </blockquote>
 <p>Data analysis software should also espouse this idea.</p>
-<p>The second important aspect of model building is related to <em>scientific methodology</em>. For models that are used to make complex predictions, it can be easy to unknowingly commit errors related to logical fallacies or inappropriate assumptions. Many machine learning models are so adept at finding patterns, they can effortlessly find empirical patterns in the data that fail to reproduce later. Some of these types of methodological errors are insidious in that the issue might be undetectable until a later time when new data that contain the true result are obtained. In short, as our models become more powerful and complex it has also become easier to commit latent errors. This also relates to programming. Whenever possible, the software should be able to protect users from committing such mistakes. Software should make it easy for users to do the right thing.</p>
-<p>These two aspects of model creation are crucial. Since tools for creating models are easily obtained and models can have such a profound impact, many more people are creating them. In terms of technical expertise and training, their backgrounds will vary. It is important that their tools be <em>robust</em> to the experience of the user. On one had, they tools should be powerful enough to create high-performance models but, on the other hand, should be easy to use in an appropriate way. This book describes a suite of software that can can create different types of models. The software has been designed with these additional characteristics in mind.</p>
-<p>The software is based on the R programming language <span class="citation">(R Core Team <a href="#ref-baseR">2014</a>)</span>. R has been designed especially for data analysis and modeling. It is based on the <em>S language</em> which was created in the 1970’s to</p>
+<p>The second important aspect of model building is related to <em>scientific methodology</em>. For models that are used to make complex predictions, it can be easy to unknowingly commit errors related to logical fallacies or inappropriate assumptions. Many machine learning models are so adept at finding patterns, they can effortlessly find empirical patterns in the data that fail to reproduce later. Some of these types of methodological errors are insidious in that the issue might be undetectable until a later time when new data that contain the true result are obtained. In short, as our models become more powerful and complex it has also become easier to commit latent errors. This also relates to programming. Whenever possible, the software should be able to protect users from committing such mistakes. Software should make it easy for users to <strong>do the right thing</strong>.</p>
+<p>These two aspects of model creation are crucial. Since tools for creating models are easily obtained and models can have such a profound impact, many more people are creating them. In terms of technical expertise and training, their backgrounds will vary. It is important that their tools be <em>robust</em> to the experience of the user. On one hand, they tools should be powerful enough to create high-performance models but, on the other hand, should be easy to use in an appropriate way. This book describes a suite of software that can can create different types of models that has been designed with these additional characteristics in mind.</p>
+<p>The software is based on the R programming language <span class="citation">(R Core Team <a href="resampling.html#ref-baseR" role="doc-biblioref">2014</a>)</span>. R has been designed especially for data analysis and modeling. It is based on the <em>S language</em> which was created in the 1970’s to</p>
 <blockquote>
-<p>“turn ideas into software, quickly and faithfully” <span class="citation">(Chambers <a href="#ref-Chambers:1998">1998</a>)</span></p>
+<p>“turn ideas into software, quickly and faithfully” <span class="citation">(Chambers <a href="resampling.html#ref-Chambers:1998" role="doc-biblioref">1998</a>)</span></p>
 </blockquote>
-<p>R is open-source and is provided free of charge. It is a powerful programming language that can be used for many different purposes but specializes in data analysis, modeling, and machine learning. R is easily <em>extensible</em>; it has a vast ecosystem of <em>packages</em>; these are mostly user-contributed modules that focus on a specific theme, such as modeling, visualization, and so on.</p>
-<p>One collection of packages is called the <strong><em>tidyverse</em></strong> <span class="citation">(Wickham et al. <a href="#ref-tidyverse">2019</a>)</span>. The tidyverse is an opinionated collection of R packages designed for data science. All packages share an underlying design philosophy, grammar, and data structures. Several of these design philosophies are directly related to the aspects of software described above. If you’ve never used the tidy verse packages, Chapter <a href="tidyverse-primer.html#tidyverse-primer">2</a> contains a review. Within the tidyverse, there is a set of packages specifically focused on modeling and these are usually referred to as the <strong><em>tidymodels</em></strong> packages. This book is an extended software manual for conducting modeling using the tidyverse. It shows how to use a set of packages, each with its own specific purpose, together to create high-quality models.</p>
-<div id="types-of-models" class="section level2">
-<h2><span class="header-section-number">1.1</span> Types of models</h2>
+<p>R is open-source and free of charge. It is a powerful programming language that can be used for many different purposes but specializes in data analysis, modeling, and machine learning. R is easily <em>extensible</em>; it has a vast ecosystem of <em>packages</em>; these are mostly user-contributed modules that focus on a specific theme, such as modeling, visualization, and so on.</p>
+<p>One collection of packages is called the <strong><em>tidyverse</em></strong> <span class="citation">(Wickham et al. <a href="resampling.html#ref-tidyverse" role="doc-biblioref">2019</a>)</span>. The tidyverse is an opinionated collection of R packages designed for data science. All packages share an underlying design philosophy, grammar, and data structures. Several of these design philosophies are directly related to the aspects of software described above. If you’ve never used the tidyverse packages, Chapter <a href="tidyverse-primer.html#tidyverse-primer"><strong>??</strong></a> contains a review. Within the tidyverse, the subset of packages specifically focused on modeling are referred to as the <strong><em>tidymodels</em></strong> packages. This book is an extended software manual for conducting modeling using the tidyverse. It shows how to use a set of packages, each with its own specific purpose, together to create high-quality models.</p>
+<div id="types-of-models" class="section level2" number="1.1">
+<h2 number="1.1"><span class="header-section-number">1.1</span> Types of models</h2>
 <p>Before proceeding, lets describe a taxa for types of models, grouped by <em>purpose</em>. While not exhaustive, most models fail into <em>at least</em> one of these categories:</p>
 <p><strong>Descriptive Models</strong>: The purpose here would be to model the data so that it can be used to describe or illustrate characteristics of some data. The analysis might have no other purpose than to visually emphasize some trend or artifact in the data.</p>
-<p>For example, large scale measurements of RNA have been possible for some time using <em>microarrays</em>. Early laboratory methods placed a biological sample on a small microchip. Very small locations on the chip would be able to assess a measure of signal based on the abundance of a specific RNA sequence. The chip would contain thousands (or more) outcomes, each a quantification of the RNA related to some biological process. However, there could be quality issued on the chip that might lead to poor results. A fingerprint accidentally left on a portion of the chip might cause inaccurate measurements when scanned.</p>
-<p>An early methods for evaluating such issues where <em>probe-level models</em>, or PLM’s <span class="citation">(Bolstad <a href="#ref-bolstad2004">2004</a>)</span>. A statistical model would be created that accounted for the <em>known</em> differences for the data from the chip, such as the RNA sequence, the type of sequence and so on. If there were other, unwanted factors in the data, these would be contained in the model residuals. When the residuals were plotted by their location on the chip, a good quality chip would show no patterns. When an issue did occur, some sort of spatial pattern would be discernible. Often the type of pattern would suggest the underlying issue (e.g. a fingerprint) and a possible solution (wipe the chip off and rescan). Figure <a href="introduction.html#fig:descr-examples">1.1</a>(a) shows an application of this method for two microarrays taken from <span class="citation">Gentleman et al. (<a href="#ref-Gentleman2005">2005</a>)</span>. The images show two different colors; red is where the signal intensity was larger than the model expects while the blue color shows lower than expected values. The left-hand panel demonstrates a fairly random pattern while the right-hand panel shows some type of unwanted artifact.</p>
+<p>For example, large scale measurements of RNA have been possible for some time using <em>microarrays</em>. Early laboratory methods place a biological sample on a small microchip. Very small locations on the chip would be able to assess a measure of signal based on the abundance of a specific RNA sequence. The chip would contain thousands (or more) outcomes, each a quantification of the RNA related to some biological process. However, there could be quality issued on the chip that might lead to poor results. A fingerprint accidentally left on a portion of the chip might cause inaccurate measurements when scanned.</p>
+<p>An early method for evaluating such issues were <em>probe-level models</em>, or PLM’s <span class="citation">(Bolstad <a href="resampling.html#ref-bolstad2004" role="doc-biblioref">2004</a>)</span>. A statistical model would be created that accounted for the <em>known</em> differences for the data from the chip, such as the RNA sequence, the type of sequence, and so on. If there were other, unwanted factors in the data, these would be contained in the model residuals. When the residuals were plotted by their location on the chip, a good quality chip would show no patterns. When an issue did occur, some sort of spatial pattern would be discernible. Often the type of pattern would suggest the underlying issue (e.g. a fingerprint) and a possible solution (wipe the chip off and rescan, repeat the sample, etc.). Figure <a href="introduction.html#fig:descr-examples">1</a>(a) shows an application of this method for two microarrays taken from <span class="citation">Gentleman et al. (<a href="resampling.html#ref-Gentleman2005" role="doc-biblioref">2005</a>)</span>. The images show two different colors; red is where the signal intensity was larger than the model expects while the blue color shows lower than expected values. The left-hand panel demonstrates a fairly random pattern while the right-hand panel shows some type of unwanted artifact in the middle of the chip.</p>
 <div class="figure" style="text-align: center"><span id="fig:descr-examples"></span>
 <img src="figures/introduction-descr-examples-1.png" alt="Two examples of how descriptive models can be used to illustrate specific patterns." width="80%" />
 <p class="caption">
-Figure 1.1: Two examples of how descriptive models can be used to illustrate specific patterns.
+Figure 1: Two examples of how descriptive models can be used to illustrate specific patterns.
 </p>
 </div>
-<p>Another example of a descriptive model is the <em>locally estimated scatterplot smoothing</em> model, more commonly known as LOESS <span class="citation">(Cleveland <a href="#ref-cleveland1979">1979</a>)</span>. Here, a smooth and flexible regression model is fit to a data set, usually with a single independent variable, and the fitted regression line is used to elucidate some trend in the data. These types of <em>smoothers</em> are used to discover potential ways to represent a variable in a model. This is demonstrated in Figure <a href="introduction.html#fig:descr-examples">1.1</a>(b) where a nonlinear trend is illuminated by the flexible smoother.</p>
+<p>Another example of a descriptive model is the <em>locally estimated scatterplot smoothing</em> model, more commonly known as LOESS <span class="citation">(Cleveland <a href="resampling.html#ref-cleveland1979" role="doc-biblioref">1979</a>)</span>. Here, a smooth and flexible regression model is fit to a data set, usually with a single independent variable, and the fitted regression line is used to elucidate some trend in the data. These types of <em>smoothers</em> are used to discover potential ways to represent a variable in a model. This is demonstrated in Figure <a href="introduction.html#fig:descr-examples">1</a>(b) where a nonlinear trend is illuminated by the flexible smoother. From this plot, it is clear that there is a hhighly nonlinear relationship between the sale price of a house and its latitude.</p>
 <p><strong>Inferential Models</strong>: In these situations, the goal is to produce a decision for a research question or to test a specific hypothesis. The goal is to make some statement of truth regarding some predefined conjecture or idea. In many (but not all) cases, some qualitative statement is produced.</p>
-<p>For example, in a clinical trial, the goal might be to provide confirmation that a new therapy does a better job in prolonging life than an alternative (e.g., an existing therapy or no treatment). If the clinical endpoint was related to survival or a patient, the <em>null hypothesis</em> might be that the two therapeutic groups have equal median survival times with the alternative hypothesis being that the new therapy has higher median survival. If this trial were evaluated using the traditional <em>null hypothesis significance testing</em> (NHST), a p-value would be produced using some pre-defined methodology based on a set of assumptions for the data. Small values of the p-value indicate that there is evidence that the new therapy does help patients live longer. If not, the conclusion is that there is a failure to show such an difference (which could be due to a number of reasons).</p>
+<p>For example, in a clinical trial, the goal might be to provide confirmation that a new therapy does a better job in prolonging life than an alternative (e.g., an existing therapy or no treatment). If the clinical endpoint was related to survival of a patient, the <em>null hypothesis</em> might be that the two therapeutic groups have equal median survival times with the alternative hypothesis being that the new therapy has higher median survival. If this trial were evaluated using the traditional <em>null hypothesis significance testing</em> (NHST), a p-value would be produced using some pre-defined methodology based on a set of assumptions for the data. Small values of the p-value indicate that there is evidence that the new therapy does help patients live longer. If not, the conclusion is that there is a failure to show such an difference (which could be due to a number of reasons).</p>
 <p>What are the important aspects of this type of analysis? Inferential techniques typically produce some type of probabilistic output, such as a p-value, confidence interval, or posterior probability. Generally, to compute such a quantity, formal assumptions must be made about the data and the underlying processes that generated the data. The quality of the statistical results are highly dependent on these pre-defined assumptions as well as how much the observed data appear to agree with them. The most critical factors here are theoretical in nature: if my data were independent and follow distribution <em>X</em>, then test statistic <em>Y</em> can be used to produce a p-value. Otherwise, the resulting p-value might be inaccurate.</p>
 <p>One aspect of inferential analyses is that there <em>tends</em> to be a longer feedback loop that could help understand how well the data fit the assumptions. In our clinical trial example, if statistical (and clinical) significance indicated that the new therapy should be available for patients to use, it may be years before it is used in the field and enough data were generated to have an independent assessment of whether the original statistical analysis led to the appropriate decision.</p>
 <p><strong>Predictive Models</strong>: There are occasions where data are modeled in an effort to produce the most accurate prediction possible for new data. Here, the primary goal is that the predicted values have the highest possible fidelity to the true value of the new data.</p>
 <p>A simple example would be for a book buyer to predict how many copies of a particular book should be shipped to his/her store for the next month. An over-prediction wastes space and money due to excess books. If the prediction is smaller than it should be, there is opportunity loss and less profit.</p>
-<p>For this type of model, the problem type is one of <em>estimation</em> rather than inference. For example, the buyer is usually not concerned with a question such as “Will I sell more than 100 copies of book <em>X</em> next month?” but rather “How many copies of <em>X</em> will customers purchase next month?” Also, depending on the context, there may not be any interest in <em>why</em> the predicted value is <em>X</em>. In other words, is more interest in the value itself than evaluating a formal hypothesis related to the data. That said, the prediction can also include measures of uncertainty. In the case of the book buyer, some sort of forecasting error might be valuable to help them decide on how many to purchase or could serve as a metric to gauge how well the prediction method worked.</p>
+<p>For this type of model, the problem type is one of <em>estimation</em> rather than inference. For example, the buyer is usually not concerned with a question such as “Will I sell more than 100 copies of book <em>X</em> next month?” but rather “How many copies of <em>X</em> will customers purchase next month?” Also, depending on the context, there may not be any interest in <em>why</em> the predicted value is <em>X</em>. In other words, there is more interest in the value itself than evaluating a formal hypothesis related to the data. That said, the prediction can also include measures of uncertainty. In the case of the book buyer, some sort of forecasting error might be valuable to help them decide on how many to purchase or could serve as a metric to gauge how well the prediction method worked.</p>
 <p>What are the most important factors affecting predictive models? There are many different ways that a predictive model could be created. The important factors depend on how the model was developed.</p>
-<p>For example, a <em>mechanistic model</em> could be developed based on first principles to produce a model equation that is dependent on assumptions. For example, when predicting the amount of a drug that is in a person’s body at a certain time, some formal assumptions are made on how the drug is administered, absorbed, metabolized, and eliminated. Based on this, a set of differential equations can be used to derive a specific model equation. Data are used to estimate the known parameters of this equation and predictions are made after parameter estimation. Like inferential models, mechanistic predictive models greatly depend on the assumptions that define their model equations. However, unlike inferential models, it is easy to make data-driven statements about how well the model performs based on how well it predicts the existing data. Here the feedback loop for the modeler is much faster than it would be for a hypothesis test.</p>
-<p><em>Empirically driven models</em> are those that have more vague assumptions that are used to create their model equations. These models tend to fall more into the machine learning category. A good example is the simple <em>K</em>-nearest neighbor (KNN) model. Given a set of reference data, a new sample is predicted by using the values of the most similar data in the reference set. For example, if a book buyer needs a prediction for a new book, historical data from existing books may be available. A 5-nearest neighbor model would estimate the amount of the new book to purchase based on the sales numbers of the five books that are most similar to the new one (for some definition of “similar”). This model is only defined by the structure of the prediction (the average of five similar books). No theoretical or probabilistic assumptions are made about the sales numbers or the variables that are used to define similarity. In fact, the primary method of evaluating the appropriateness of the model is to assess its accuracy using existing data. If the structure of this type of model was a good choice, the predictions would not be close to the actual values.</p>
-<p>Broader discussions of these distinctions can be found in <span class="citation">Breiman (<a href="#ref-breiman2001">2001</a>)</span> and <span class="citation">Shmueli (<a href="#ref-shmueli2010">2010</a>)</span>. Note that we have defined the type of model by how it is used rather than its mathematical qualities. An ordinary linear regression model might fall into all three classes of models, depending on how it is used:</p>
+<p>For example, a <em>mechanistic model</em> could be derived using first principles to produce a model equation that is dependent on assumptions. For example, when predicting the amount of a drug that is in a person’s body at a certain time, some formal assumptions are made on how the drug is administered, absorbed, metabolized, and eliminated. Based on this, a set of differential equations can be used to derive a specific model equation. Data are used to estimate the unknown parameters of this equation so that predictions can be generated. Like inferential models, mechanistic predictive models greatly depend on the assumptions that define their model equations. However, unlike inferential models, it is easy to make data-driven statements about how well the model performs based on how well it predicts the existing data. Here the feedback loop for the modeler is much faster than it would be for a hypothesis test.</p>
+<p><em>Empirically driven models</em> are those that have more vague assumptions that are used to create their model equations. These models tend to fall more into the machine learning category. A good example is the simple <em>K</em>-nearest neighbor (KNN) model. Given a set of reference data, a new sample is predicted by using the values of the <em>K</em> most similar data in the reference set. For example, if a book buyer needs a prediction for a new book, historical data from existing books may be available. A 5-nearest neighbor model would estimate the amount of the new book to purchase based on the sales numbers of the five books that are most similar to the new one (for some definition of “similar”). This model is only defined by the structure of the prediction (the average of five similar books). No theoretical or probabilistic assumptions are made about the sales numbers or the variables that are used to define similarity. In fact, the primary method of evaluating the appropriateness of the model is to assess its accuracy using existing data. If the structure of this type of model was a good choice, the predictions would be close to the actual values.</p>
+<p>Broader discussions of these distinctions can be found in <span class="citation">Breiman (<a href="resampling.html#ref-breiman2001" role="doc-biblioref">2001</a>)</span> and <span class="citation">Shmueli (<a href="resampling.html#ref-shmueli2010" role="doc-biblioref">2010</a>)</span>. Note that we have defined the type of model by how it is used rather than its mathematical qualities. An ordinary linear regression model might fall into all three classes of models, depending on how it is used:</p>
 <ul>
-<li><p>Descriptive smoother, similar to LOESS, called <em>restricted smoothing splines</em> <span class="citation">(Durrleman and Simon <a href="#ref-Durrleman1989">1989</a>)</span> can be used to describe trends in data using ordinary linear regression with specialized terms.</p></li>
+<li><p>Descriptive smoother, similar to LOESS, called <em>restricted smoothing splines</em> <span class="citation">(Durrleman and Simon <a href="resampling.html#ref-Durrleman1989" role="doc-biblioref">1989</a>)</span> can be used to describe trends in data using ordinary linear regression with specialized terms.</p></li>
 <li><p>An <em>analysis of variance</em> (ANOVA) model is a popular method for producing the p-values used for inference. ANOVA models are a special case of linear regression.</p></li>
 <li><p>If a simple linear regression model produces highly accurate predictions, it can be used as a predictive model.</p></li>
 </ul>
 <p>However, there are many more examples of predictive models that cannot (or at least should not) be used for inference. Even if probabilistic assumptions were made for the data, the nature of the KNN model makes the math required for inference intractable.</p>
-<p>There is an additional connection between the types of models. While the primary purpose of descriptive and inferential models might not be related to prediction, the predictive capacity of the model should not be ignored. For example, logistic regression is a popular model for data where the outcome is qualitative with two possible values. It can model how variables related to the probability of the outcomes. When used in an inferential manner, there is usually an abundance of attention paid to the <em>statistical qualities</em> of the model. For example, analysts tend to strongly focus on the selection of which independent variables are contained in the model. Many iterations of model building are usually used to determine a minimal subset of independent variables that have a “statistically significant” relationship to the outcome variable. This is usually achieved when all of the p-values for the independent variables are below some value (e.g. 0.05). From here, the analyst typically focuses on making qualitative statements about the relative influence that the variables have on the outcome.</p>
-<p>A potential problem with this approach is that it can be dangerous when statistical significance is used as the <em>only</em> measure of model quality. It is certainly possible that this statistically optimized model has poor model accuracy (or some other measure of predictive capacity). While the model might not be used for prediction, how much should the inferences be trusted from a model that has all significant p-values but a dismal accuracy? Predictive performance tends to be related to how close the model’s fitted values are to the observed data. If the model has limited fidelity to the data, the inferences generated by the model should be highly suspect. In other words, statistical significance may not imply that the model should be used. This may seem intuitively obvious, but is often ignored in real-world data analysis.</p>
+<p>There is an additional connection between the types of models. While the primary purpose of descriptive and inferential models might not be related to prediction, the predictive capacity of the model should not be ignored. For example, logistic regression is a popular model for data where the outcome is qualitative with two possible values. It can model how variables related to the probability of the outcomes. When used in an inferential manner, there is usually an abundance of attention paid to the <em>statistical qualities</em> of the model. For example, analysts tend to strongly focus on the selection of which independent variables are contained in the model. Many iterations of model building are usually used to determine a minimal subset of independent variables that have a “statistically significant” relationship to the outcome variable. This is usually achieved when all of the p-values for the independent variables are below some value (e.g. 0.05). From here, the analyst typically focuses on making qualitative statements about the relative influence that the variables have on the outcome (e.g., “There is a statistically signficant relationship between age and the odds of heart disease.”).</p>
+<p>A potential problem with this approach is that it can be dangerous when statistical significance is used as the <em>only</em> measure of model quality. It is certainly possible that this statistically optimized model has poor model accuracy (or some other measure of predictive capacity). While the model might not be used for prediction, how much should the inferences be trusted from a model that has all significant p-values but a dismal accuracy? Predictive performance tends to be related to how close the model’s fitted values are to the observed data. If the model has limited fidelity to the data, the inferences generated by the model should be highly suspect. In other words, statistical significance may not be sufficient proof that that the model is appropriate. This may seem intuitively obvious, but is often ignored in real-world data analysis.</p>
 </div>
-<div id="some-terminology" class="section level2">
-<h2><span class="header-section-number">1.2</span> Some terminology</h2>
+<div id="some-terminology" class="section level2" number="1.2">
+<h2 number="1.2"><span class="header-section-number">1.2</span> Some terminology</h2>
 <p>Before proceeding, some additional terminology related to modeling, data, and other quantities should be outlined. These descriptions are not exhaustive.</p>
 <p>First, many models can be categorized as being <em>supervised</em> or <em>unsupervised</em>. Unsupervised models are those that seek patterns, clusters, or other characteristics of the data but lack an outcome variable (i.e., a dependent variable). For example, principal component analysis (PCA), clustering, and autoencoders are used to understand relationships between variables or sets of variables without an explicit relationship between variables and an outcome. Supervised models are those that have an outcome variable. Linear regression, neural networks, and numerous other methodologies fall into this category. Within supervised models, the two main sub-categories are:</p>
 <ul>
 <li><p><em>Regression</em>, where a numerical outcome is being predicted.</p></li>
 <li><p><em>Classification</em>, where the outcome is an ordered or unordered set of <em>qualitative</em> values.</p></li>
 </ul>
-<p>These are imperfect definitions and do not account for all possible types of models. In coming chapters, we refer to these types of supervised techniques as the <em>model mode</em>.</p>
-<p>In terms of data, the main species are quantitative and qualitative. Examples of the former are real numbers and integers. Qualitative values, also known as nominal data, are those that represent some sort of discrete state that cannot be placed on a numeric scale.</p>
+<p>These are imperfect definitions and do not account for all possible types of models. In coming chapters, we refer to this characteristic of supervised techniques as the <em>model mode</em>.</p>
+<p>In terms of data, the main species are quantitative and qualitative. Examples of the former are real numbers and integers. Qualitative values, also known as nominal data, are those that represent some sort of discrete state that cannot be naturally placed on a numeric scale.</p>
 <p>Different variables can have different <em>roles</em> in an analysis. Outcomes (otherwise known as the labels, endpoints, or dependent variables) are the value being predicted in supervised models. The independent variables, which are the substrate for making predictions of the outcome, also referred to as predictors, features, or covariates (depending on the context). Here, the terms <em>outcomes</em> and <em>predictors</em> are used most frequently here.</p>
 </div>
-<div id="model-phases" class="section level2">
-<h2><span class="header-section-number">1.3</span> How does modeling fit into the data analysis/scientific process?</h2>
+<div id="model-phases" class="section level2" number="1.3">
+<h2 number="1.3"><span class="header-section-number">1.3</span> How does modeling fit into the data analysis/scientific process?</h2>
 <p>In what circumstances are model created? Are there steps that precede such an undertaking? Is it the first step in data analysis?</p>
-<p>There are always a few critical phases of data analysis that come before modeling. First, there is the chronically underestimated process of <strong>cleaning the data</strong>. No matter the circumstances, the data should be investigated to make sure that it is well understood, applicable to the project goals, accurate, and appropriate. These steps can easily take more time than the rest of the data analysis process (depending on the circumstances).</p>
-<p>Data cleaning can also overlap with the second phase of <strong>understanding the data</strong>, often referred to as exploratory data analysis (EDA). There should be knowledge of how the different variables related to one another, their distributions, typical ranges, and other attributes. A good question to ask at this phase is “how did I come by <em>these</em> data?” This question can help understand how the data at-hand have been sampled or filtered and if these operations were appropriate. For example, when merging data base tables, a join may go awry that could accidentally eliminate one or more sub-populations of samples. Another good idea would be to ask if the data are <em>relavant</em>. For example, to predict whether patients have Alzheimer’s disease or not, it would be unwise to have a data set containing subject with the disease and a random sample of healthy adults from the general population. Given the progressive nature of the disease, the model my simply predict who the are the <em>oldest patients</em>.</p>
+<p>There are always a few critical phases of data analysis that come before modeling. First, there is the chronically underestimated process of <strong>cleaning the data</strong>. No matter the circumstances, the data should be investigated to make sure that they are applicable to the project goals, accurate, and appropriate. These steps can easily take more time than the rest of the data analysis process (depending on the circumstances).</p>
+<p>Data cleaning can also overlap with the second phase of <strong>understanding the data</strong>, often referred to as exploratory data analysis (EDA). There should be knowledge of how the different variables related to one another, their distributions, typical ranges, and other attributes. A good question to ask at this phase is “How did I come by <em>these</em> data?” This question can help understand how the data at-hand have been sampled or filtered and if these operations were appropriate. For example, when merging data base tables, a join may go awry that could accidentally eliminate one or more sub-populations of samples. Another good idea would be to ask if the data are <em>relavant</em>. For example, to predict whether patients have Alzheimer’s disease or not, it would be unwise to have a data set containing subject with the disease and a random sample of healthy adults from the general population. Given the progressive nature of the disease, the model my simply predict who the are the <em>oldest patients</em>.</p>
 <p>Finally, before starting a data analysis process, there should be clear expectations of the goal of the model and how performance (and success) will be judged. At least one <em>performance metric</em> should be identified with realistic goals of what can be achieved. Common statistical metrics are classification accuracy, true and false positive rates, root mean squared error, and so on. The relative benefits and drawbacks of these metrics should be weighted. It is also important that the metric be germane (i.e., alignment with the broader data analysis goals is critical).</p>
 <div class="figure" style="text-align: center"><span id="fig:data-science-model"></span>
 <img src="figures-premade/data-science-model.svg" alt="The data science process (from R for Data Science)." width="80%" />
@@ -244,87 +249,194 @@ Figure 1.1: Two examples of how descriptive models can be used to illustrate spe
 Figure 1.2: The data science process (from R for Data Science).
 </p>
 </div>
-<p>The process of investigating the data may not be simple. <span class="citation">Wickham and Grolemund (<a href="#ref-wickham2016">2016</a>)</span> contains an excellent illustration of the general data analysis process, reproduced with Figure <a href="introduction.html#fig:data-science-model">1.2</a>. Data ingestion and cleaning are shown as the initial steps. When the analytical steps commence, they are a heuristic process; we cannot pre-determine how long they may take. The cycle of analysis, modeling, and visualization often require multiple iterations.</p>
+<p>The process of investigating the data may not be simple. <span class="citation">Wickham and Grolemund (<a href="resampling.html#ref-wickham2016" role="doc-biblioref">2016</a>)</span> contains an excellent illustration of the general data analysis process, reproduced with Figure <a href="introduction.html#fig:data-science-model">2</a>. Data ingestion and cleaning are shown as the initial steps. When the analytical steps commence, they are a heuristic process; we cannot pre-determine how long they may take. The cycle of analysis, modeling, and visualization often require multiple iterations.</p>
 <div class="figure" style="text-align: center"><span id="fig:modeling-process"></span>
 <img src="figures/introduction-modeling-process-1.svg" alt="A schematic for the typical modeling process (from Feature Engineering and Selection)." width="100%" />
 <p class="caption">
 Figure 1.3: A schematic for the typical modeling process (from Feature Engineering and Selection).
 </p>
 </div>
-<p>This iterative process is especially true for modeling. Figure <a href="introduction.html#fig:modeling-process">1.3</a> originates from <span class="citation">Kuhn and Johnson (<a href="#ref-kuhn20202">2020</a>)</span> and is meant to emulate the typical path to determining an appropriate model. The general phases are:</p>
+<p>This iterative process is especially true for modeling. Figure <a href="introduction.html#fig:modeling-process">3</a> originates from <span class="citation">Kuhn and Johnson (<a href="resampling.html#ref-kuhn20202" role="doc-biblioref">2020</a>)</span> and is meant to emulate the typical path to determining an appropriate model. The general phases are:</p>
 <ul>
-<li>Exploratory data analysis (EDA) and Quantitative Analysis (blue bars). Initially there is a back and forth between numerical analysis and visualization of the data (represented in Figure <a href="introduction.html#fig:data-science-model">1.2</a>) where different discoveries lead to more questions and data analysis “side-quests” to gain more understanding.</li>
-<li><p>Feature engineering (green bars). This understanding translated to the creation of specific model terms that make it easier to accurately model the observed data. This can include complex methodologies (e.g., PCA) or simpler features (using the ratio of two predictors).</p></li>
+<li><p>Exploratory data analysis (EDA) and Quantitative Analysis (blue bars). Initially there is a back and forth between numerical analysis and visualization of the data (represented in Figure <a href="introduction.html#fig:data-science-model">2</a>) where different discoveries lead to more questions and data analysis “side-quests” to gain more understanding.</p></li>
+<li><p>Feature engineering (green bars). Understanding results in the creation of specific model terms that make it easier to accurately model the observed data. This can include complex methodologies (e.g., PCA) or simpler features (using the ratio of two predictors).</p></li>
 <li><p>Model tuning and selection (red and gray bars). A variety of models are generated and their performance is compared. Some models require <em>parameter tuning</em> where some structural parameters are required to be specified or optimized.</p></li>
 </ul>
 <p>After an initial sequence of these tasks, more understanding is gained regarding which types of models are superior as well as which sub-populations of the data are not being effectively estimated. This leads to additional EDA and feature engineering, another round of modeling, and so on. Once the data analysis goals are achieved, the last steps are typically to finalize and document the model. For predictive models, it is common at the end to validate the model on an additional set of data reserved for this specific purpose.</p>
+<p>As an example, <span class="citation">Kuhn and Johnson (<a href="resampling.html#ref-kuhn20202" role="doc-biblioref">2020</a>)</span> use data to model the daily ridership of Chicago’s public train system using predictors such as the date, the 2-week old ridership results, the weather, and other factors. An approximation of their “inner monolog” when analyzing these data is, in order:</p>
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Thoughts
+</th>
+<th style="text-align:left;">
+Activity
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;width: 75%; font-style: italic;">
+The daily ridership values between stations are extremely correlated.
+</td>
+<td style="text-align:left;width: 25%; ">
+EDA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 75%; font-style: italic;">
+Weekday and weekend ridership look very different.
+</td>
+<td style="text-align:left;width: 25%; ">
+EDA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 75%; font-style: italic;">
+One day in the summer of 2010 has an abnormally large number of riders.
+</td>
+<td style="text-align:left;width: 25%; ">
+EDA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 75%; font-style: italic;">
+Which stations had the lowest daily ridership values?
+</td>
+<td style="text-align:left;width: 25%; ">
+Quantitative Analysis
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 75%; font-style: italic;">
+Date should be at least be encoded as day-of-the-week, and year.
+</td>
+<td style="text-align:left;width: 25%; ">
+Feature Engineering
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 75%; font-style: italic;">
+Maybe PCA could be used on the correlated predictors to make it easier for the models to use them.
+</td>
+<td style="text-align:left;width: 25%; ">
+Feature Engineering
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 75%; font-style: italic;">
+Daily weather records should probably be summarized into daily measurements.
+</td>
+<td style="text-align:left;width: 25%; ">
+Feature Engineering
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 75%; font-style: italic;">
+Let’s start with simple linear regression, K-nearest neighbors, and a boosted decision tree.
+</td>
+<td style="text-align:left;width: 25%; ">
+Model Fitting
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 75%; font-style: italic;">
+How many neighbors should be use?
+</td>
+<td style="text-align:left;width: 25%; ">
+Model Tuning
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 75%; font-style: italic;">
+Should we run a lot of boosting iterations or just a few?
+</td>
+<td style="text-align:left;width: 25%; ">
+Model Tuning
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 75%; font-style: italic;">
+Which models has the lowest root mean squared errors?
+</td>
+<td style="text-align:left;width: 25%; ">
+Quantitative Analysis
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 75%; font-style: italic;">
+How many neighbors seemed to be optimal for these data?
+</td>
+<td style="text-align:left;width: 25%; ">
+Quantitative Analysis
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 75%; font-style: italic;">
+Which days were poorly predicted?
+</td>
+<td style="text-align:left;width: 25%; ">
+EDA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 75%; font-style: italic;">
+Variable importance scores indicate that the weather information is not predictive. We’ll drop them from the next set of models.
+</td>
+<td style="text-align:left;width: 25%; ">
+Quantitative Analysis
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 75%; font-style: italic;">
+It seems like we should focus on a lot boosting iterations for that model.
+</td>
+<td style="text-align:left;width: 25%; ">
+Quantitative Analysis
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 75%; font-style: italic;">
+We need to encode holiday features to improve predictions on (and around) those dates.
+</td>
+<td style="text-align:left;width: 25%; ">
+Feature Engineering
+</td>
+</tr>
+<tr>
+<td style="text-align:left;width: 75%; font-style: italic;">
+Let’s drop K-NN from the model list.
+</td>
+<td style="text-align:left;width: 25%; ">
+Model Fitting
+</td>
+</tr>
+</tbody>
+</table>
+<p>and so on. Eventually, a model is selected that is able to achieve sufficient performance.</p>
 </div>
-<div id="begin-model-end" class="section level2">
-<h2><span class="header-section-number">1.4</span> Where does the model begin and end?</h2>
+<div id="begin-model-end" class="section level2" number="1.4">
+<h2 number="1.4"><span class="header-section-number">1.4</span> Where does the model begin and end?</h2>
 <p>So far, we have defined the model to be a structural equation that relates some predictors to one or more outcomes. Let’s consider ordinary linear regression as a simple and well known example. The outcome data are denoted as <span class="math inline">\(y_i\)</span>, where there are <span class="math inline">\(i = 1 \ldots n\)</span> samples in the data set. Suppose that there are <span class="math inline">\(p\)</span> predictors <span class="math inline">\(x_{i1}, \ldots, x_{ip}\)</span> that are used to predict the outcome. Linear regression produces a model equation of</p>
 <p><span class="math display">\[ \hat{y}_i = \hat{\beta}_0 + \hat{\beta}_1x_{i1} + \ldots + \hat{\beta}_px_{ip} \]</span></p>
 <p>While this is a <em>linear</em> model, it is only linear in the parameters. The predictors could be nonlinear terms (such as the <span class="math inline">\(log(x_i)\)</span>).</p>
-<p>The conventional way of thinking is that the modeling <em>process</em> is encapsulated by the model. For many data sets that are straight-forward in nature, this is the case. However, there are a variety of <em>choices</em> and additional steps that often occur before the data are ready to be added to the model. Some examples:</p>
+<p>The conventional way of thinking is that the modeling <em>process</em> only includes the model fit. For many data sets that are straight-forward in nature, this is the case. However, there are a variety of <em>choices</em> and additional steps that often occur before the data are ready to be added to the model. Some examples:</p>
 <ul>
 <li>While our model has <span class="math inline">\(p\)</span> predictors, it is common to start with more than this number of candidate predictors. Through exploratory data analysis or previous experience, some of the predictors may be excluded from the analysis. In other cases, some feature selection algorithm may have been used to make a data-driven choice for the minimum predictors set to be used in the model.</li>
-<li>There are times when the value of an important predictor is know known. Rather than eliminating this value from the data set, it could be <em>imputed</em> using other values in the data. For example, if <span class="math inline">\(x_1\)</span> were missing but was correlated with predictors <span class="math inline">\(x_2\)</span> and <span class="math inline">\(x_3\)</span>, an imputation method could estimate the missing <span class="math inline">\(x_1\)</span> observation from the values of <span class="math inline">\(x_2\)</span> and <span class="math inline">\(x_3\)</span>.</li>
+<li>There are times when the value of an important predictor is not known. Rather than eliminating this sample from the data set, the missing value could be <em>imputed</em> using other values in the data. For example, if <span class="math inline">\(x_1\)</span> were missing but was correlated with predictors <span class="math inline">\(x_2\)</span> and <span class="math inline">\(x_3\)</span>, an imputation method could estimate the missing <span class="math inline">\(x_1\)</span> observation from the values of <span class="math inline">\(x_2\)</span> and <span class="math inline">\(x_3\)</span>.</li>
 <li>As previously mentioned, it may be beneficial to transform the scale of a predictor. If there is <strong>not</strong> <em>a priori</em> information on what the new scale should be, it might be estimated using a transformation technique. Here, the existing data would be used to statistically <em>estimate</em> the proper scale that optimizes some criterion. Other transformations, such as the previously mentioned PCA, take groups of predictors and transform them into new features that are used as the predictors.</li>
 </ul>
-<p>While the examples above are related to steps that occur before the model, there may also be operations that occur after the model is created. For example, when a classification model is created where the outcome is binary (e.g., <code>event</code> and <code>non-event</code>), it is customary to use a 50% probability cutoff to create a discrete class prediction (also known as a “hard prediction”). For example, a classification model might estimate that the probability of an event was 62%. Using the typical default, the hard prediction would be <code>event</code>. However, the model may need to be more focused on reducing false positive results (i.e., where true non-events are classified as events). One way to do this is to <em>raise</em> the cutoff from 50% to some greater value. This increases the level of evidence required to call a new sample as an event. While this reduces the true positive rate (which is bad), it may have a more profound effect on reducing false positives. The choice of the cutoff value should be optimized using data. This is an example of a post-processing step that has a significant effect on how well the model works even though it is not contained in the model fitting step.</p>
+<p>While the examples above are related to steps that occur before the model fit, there may also be operations that occur after the model is created. For example, when a classification model is created where the outcome is binary (e.g., <code>event</code> and <code>non-event</code>), it is customary to use a 50% probability cutoff to create a discrete class prediction (also known as a “hard prediction”). For example, a classification model might estimate that the probability of an event was 62%. Using the typical default, the hard prediction would be <code>event</code>. However, the model may need to be more focused on reducing false positive results (i.e., where true non-events are classified as events). One way to do this is to <em>raise</em> the cutoff from 50% to some greater value. This increases the level of evidence required to call a new sample as an event. While this reduces the true positive rate (which is bad), it may have a more profound effect on reducing false positives. The choice of the cutoff value should be optimized using data. This is an example of a <em>post-processing</em> step that has a significant effect on how well the model works even though it is not contained in the model fitting step.</p>
 <p>These examples have a common characteristic of requiring data for derivations that alter the raw data values or the predictions generated by the model.</p>
 <p>It is very important to focus on the broader <em>model fitting process</em> instead of the specific model being used to estimate parameters. This would include any pre-processing steps, the model fit itself, as well as potential post-processing activities. In this text, this will be referred to as the <strong>model workflow</strong> and would include any data-driven activities that are used to produce a final model equation.</p>
-<p>This will come into play when topics such as resampling (Chapter <a href="resampling.html#resampling">8</a>) and model tuning are discussed. Chapter <a href="workflows.html#workflows">7</a> describes software for creating a model workflow.</p>
+<p>This will come into play when topics such as resampling (Chapter <a href="resampling.html#resampling"><strong>??</strong></a>) and model tuning are discussed. Chapter <a href="workflows.html#workflows"><strong>??</strong></a> describes software for creating a model workflow.</p>
 </div>
-<div id="outline-of-future-chapters" class="section level2">
-<h2><span class="header-section-number">1.5</span> Outline of future chapters</h2>
-<p>The first order of business is to introduce (or review) the ideas and syntax of the tidyverse in Chapter <a href="tidyverse-primer.html#tidyverse-primer">2</a>. In this chapter, we also summarize the unmet needs for modeling when using R. This provides good motivation for why model-specific tidyverse techniques are needed. This chapter also outlines some additional principles related to this challenges.</p>
-<p>Chapter <a href="two-models.html#two-models">3</a> shows two different data analyses for the same data where one is focused on prediction and the other is for inference. This should illustrates the challenges for each approach and what issues are most relavant for each.</p>
+<div id="outline-of-future-chapters" class="section level2" number="1.5">
+<h2 number="1.5"><span class="header-section-number">1.5</span> Outline of future chapters</h2>
+<p>The first order of business is to introduce (or review) the ideas and syntax of the tidyverse in Chapter <a href="tidyverse-primer.html#tidyverse-primer"><strong>??</strong></a>. In this chapter, we also summarize the unmet needs for modeling when using R. This provides good motivation for why model-specific tidyverse techniques are needed. This chapter also outlines some additional principles related to this challenges.</p>
+<p>Chapter <a href="two-models.html#two-models"><strong>??</strong></a> shows two different data analyses for the same data where one is focused on prediction and the other is for inference. This should illustrates the challenges for each approach and what issues are most relavant for each.</p>
 
-</div>
-</div>
-<h3>References</h3>
-<div id="refs" class="references">
-<div id="ref-abrams2003">
-<p>Abrams, B. 2003. “The Pit of Success.” <a href="https://blogs.msdn.microsoft.com/brada/2003/10/02/the-pit-of-success/">https://blogs.msdn.microsoft.com/brada/2003/10/02/the-pit-of-success/</a>.</p>
-</div>
-<div id="ref-baggerly2009">
-<p>Baggerly, K, and K Coombes. 2009. “Deriving Chemosensitivity from Cell Lines: Forensic Bioinformatics and Reproducible Research in High-Throughput Biology.” <em>The Annals of Applied Statistics</em> 3 (4): 1309–34.</p>
-</div>
-<div id="ref-bolstad2004">
-<p>Bolstad, B. 2004. <em>Low-Level Analysis of High-Density Oligonucleotide Array Data: Background, Normalization and Summarization</em>. University of California, Berkeley.</p>
-</div>
-<div id="ref-breiman2001">
-<p>Breiman, L. 2001. “Statistical Modeling: The Two Cultures.” <em>Statistical Science</em> 16 (3): 199–231.</p>
-</div>
-<div id="ref-Carlson2012">
-<p>Carlson, B. 2012. “Putting Oncology Patients at Risk.” <em>Biotechnology Healthcare</em> 9 (3): 17–21.</p>
-</div>
-<div id="ref-Chambers:1998">
-<p>Chambers, J. 1998. <em>Programming with Data: A Guide to the S Language</em>. Berlin, Heidelberg: Springer-Verlag.</p>
-</div>
-<div id="ref-cleveland1979">
-<p>Cleveland, W. 1979. “Robust Locally Weighted Regression and Smoothing Scatterplots.” <em>Journal of the American Statistical Association</em> 74 (368): 829–36.</p>
-</div>
-<div id="ref-Durrleman1989">
-<p>Durrleman, S, and R Simon. 1989. “Flexible Regression Models with Cubic Splines.” <em>Statistics in Medicine</em> 8 (5): 551–61.</p>
-</div>
-<div id="ref-Gentleman2005">
-<p>Gentleman, R, V Carey, W Huber, R Irizarry, and S Dudoit. 2005. <em>Bioinformatics and Computational Biology Solutions Using R and Bioconductor</em>. Berlin, Heidelberg: Springer-Verlag.</p>
-</div>
-<div id="ref-kuhn20202">
-<p>Kuhn, M, and K Johnson. 2020. <em>Feature Engineering and Selection: A Practical Approach for Predictive Models</em>. CRC Press.</p>
-</div>
-<div id="ref-baseR">
-<p>R Core Team. 2014. <em>R: A Language and Environment for Statistical Computing</em>. Vienna, Austria: R Foundation for Statistical Computing. <a href="http://www.R-project.org/">http://www.R-project.org/</a>.</p>
-</div>
-<div id="ref-shmueli2010">
-<p>Shmueli, G. 2010. “To Explain or to Predict?” <em>Statistical Science</em> 25 (3). Institute of Mathematical Statistics: 289–310.</p>
-</div>
-<div id="ref-tidyverse">
-<p>Wickham, H, M Averick, J Bryan, W Chang, L McGowan, R François, G Grolemund, et al. 2019. “Welcome to the Tidyverse.” <em>Journal of Open Source Software</em> 4 (43).</p>
-</div>
-<div id="ref-wickham2016">
-<p>Wickham, H, and G Grolemund. 2016. <em><span class="sans-serif">R</span> for Data Science: Import, Tidy, Transform, Visualize, and Model Data</em>. O’Reilly Media, Inc.</p>
 </div>
 </div>
             </section>

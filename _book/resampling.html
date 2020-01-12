@@ -24,7 +24,7 @@
 <meta name="author" content="Max Kuhn and Davis Vaughan" />
 
 
-<meta name="date" content="2020-01-09" />
+<meta name="date" content="2020-01-12" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -34,6 +34,7 @@
 <link rel="prev" href="workflows.html"/>
 
 <script src="libs/jquery-2.2.3/jquery.min.js"></script>
+<script src="libs/elevate-section-attrs-2.0/elevate-section-attrs.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
@@ -50,28 +51,30 @@
 
 
 
+<script src="libs/kePrint-0.0.1/kePrint.js"></script>
 
 
 <style type="text/css">
-a.sourceLine { display: inline-block; line-height: 1.25; }
-a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
-a.sourceLine:empty { height: 1.2em; }
-.sourceCode { overflow: visible; }
-code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
 pre.sourceCode { margin: 0; }
 @media screen {
 div.sourceCode { overflow: auto; }
 }
 @media print {
-code.sourceCode { white-space: pre-wrap; }
-a.sourceLine { text-indent: -1em; padding-left: 1em; }
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
 }
-pre.numberSource a.sourceLine
-  { position: relative; left: -4em; }
-pre.numberSource a.sourceLine::before
-  { content: attr(data-line-number);
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
     position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; pointer-events: all; display: inline-block;
+    border: none; display: inline-block;
     -webkit-touch-callout: none; -webkit-user-select: none;
     -khtml-user-select: none; -moz-user-select: none;
     -ms-user-select: none; user-select: none;
@@ -80,9 +83,9 @@ pre.numberSource a.sourceLine::before
   }
 pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
 div.sourceCode
-  {  }
+  {   }
 @media screen {
-a.sourceLine::before { text-decoration: underline; }
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 code span.al { color: #ff0000; font-weight: bold; } /* Alert */
 code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
@@ -131,14 +134,16 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 <li class="divider"></li>
 <li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Hello World</a></li>
-<li class="chapter" data-level="1" data-path="introduction.html"><a href="introduction.html"><i class="fa fa-check"></i><b>1</b> Introduction</a><ul>
+<li class="chapter" data-level="1" data-path="introduction.html"><a href="introduction.html"><i class="fa fa-check"></i><b>1</b> Introduction</a>
+<ul>
 <li class="chapter" data-level="1.1" data-path="introduction.html"><a href="introduction.html#types-of-models"><i class="fa fa-check"></i><b>1.1</b> Types of models</a></li>
 <li class="chapter" data-level="1.2" data-path="introduction.html"><a href="introduction.html#some-terminology"><i class="fa fa-check"></i><b>1.2</b> Some terminology</a></li>
 <li class="chapter" data-level="1.3" data-path="introduction.html"><a href="introduction.html#model-phases"><i class="fa fa-check"></i><b>1.3</b> How does modeling fit into the data analysis/scientific process?</a></li>
 <li class="chapter" data-level="1.4" data-path="introduction.html"><a href="introduction.html#begin-model-end"><i class="fa fa-check"></i><b>1.4</b> Where does the model begin and end?</a></li>
 <li class="chapter" data-level="1.5" data-path="introduction.html"><a href="introduction.html#outline-of-future-chapters"><i class="fa fa-check"></i><b>1.5</b> Outline of future chapters</a></li>
 </ul></li>
-<li class="chapter" data-level="2" data-path="tidyverse-primer.html"><a href="tidyverse-primer.html"><i class="fa fa-check"></i><b>2</b> A tidyverse primer</a><ul>
+<li class="chapter" data-level="2" data-path="tidyverse-primer.html"><a href="tidyverse-primer.html"><i class="fa fa-check"></i><b>2</b> A tidyverse primer</a>
+<ul>
 <li class="chapter" data-level="2.1" data-path="tidyverse-primer.html"><a href="tidyverse-primer.html#principles"><i class="fa fa-check"></i><b>2.1</b> Principles</a></li>
 <li class="chapter" data-level="2.2" data-path="tidyverse-primer.html"><a href="tidyverse-primer.html#code"><i class="fa fa-check"></i><b>2.2</b> Code</a></li>
 <li class="chapter" data-level="2.3" data-path="tidyverse-primer.html"><a href="tidyverse-primer.html#r-review"><i class="fa fa-check"></i><b>2.3</b> A review of base R modeling syntax</a></li>
@@ -168,69 +173,69 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="resampling" class="section level1">
-<h1><span class="header-section-number">8</span> Resampling for evaluating performance</h1>
+<div id="resampling" class="section level1" number="8">
+<h1 number="8"><span class="header-section-number">8</span> Resampling for evaluating performance</h1>
 <p>Maybe inlcude some simple examples of comparing models using resampling (perhaps go full <code>tidyposterior</code>?)</p>
 
-<div id="refs" class="references">
-<div>
+<div id="refs" class="references hanging-indent">
+<div id="ref-abrams2003">
 <p>Abrams, B. 2003. “The Pit of Success.” <a href="https://blogs.msdn.microsoft.com/brada/2003/10/02/the-pit-of-success/">https://blogs.msdn.microsoft.com/brada/2003/10/02/the-pit-of-success/</a>.</p>
 </div>
-<div>
+<div id="ref-baggerly2009">
 <p>Baggerly, K, and K Coombes. 2009. “Deriving Chemosensitivity from Cell Lines: Forensic Bioinformatics and Reproducible Research in High-Throughput Biology.” <em>The Annals of Applied Statistics</em> 3 (4): 1309–34.</p>
 </div>
-<div>
+<div id="ref-bolstad2004">
 <p>Bolstad, B. 2004. <em>Low-Level Analysis of High-Density Oligonucleotide Array Data: Background, Normalization and Summarization</em>. University of California, Berkeley.</p>
 </div>
-<div>
+<div id="ref-breiman2001">
 <p>Breiman, L. 2001. “Statistical Modeling: The Two Cultures.” <em>Statistical Science</em> 16 (3): 199–231.</p>
 </div>
-<div>
+<div id="ref-Carlson2012">
 <p>Carlson, B. 2012. “Putting Oncology Patients at Risk.” <em>Biotechnology Healthcare</em> 9 (3): 17–21.</p>
 </div>
-<div>
+<div id="ref-Chambers:1998">
 <p>Chambers, J. 1998. <em>Programming with Data: A Guide to the S Language</em>. Berlin, Heidelberg: Springer-Verlag.</p>
 </div>
-<div>
+<div id="ref-WhiteBook">
 <p>Chambers, J, and T Hastie, eds. 1992. <em>Statistical Models in S</em>. Boca Raton, FL: CRC Press, Inc.</p>
 </div>
-<div>
+<div id="ref-cleveland1979">
 <p>Cleveland, W. 1979. “Robust Locally Weighted Regression and Smoothing Scatterplots.” <em>Journal of the American Statistical Association</em> 74 (368): 829–36.</p>
 </div>
-<div>
+<div id="ref-Durrleman1989">
 <p>Durrleman, S, and R Simon. 1989. “Flexible Regression Models with Cubic Splines.” <em>Statistics in Medicine</em> 8 (5): 551–61.</p>
 </div>
-<div>
+<div id="ref-fox08">
 <p>Fox, J. 2008. <em>Applied Regression Analysis and Generalized Linear Models</em>. Second. Thousand Oaks, CA: Sage.</p>
 </div>
-<div>
+<div id="ref-Gentleman2005">
 <p>Gentleman, R, V Carey, W Huber, R Irizarry, and S Dudoit. 2005. <em>Bioinformatics and Computational Biology Solutions Using R and Bioconductor</em>. Berlin, Heidelberg: Springer-Verlag.</p>
 </div>
-<div>
+<div id="ref-Goodfellow">
 <p>Goodfellow, I, Y Bengio, and A Courville. 2016. <em>Deep Learning</em>. MIT Press.</p>
 </div>
-<div>
+<div id="ref-apm">
 <p>Kuhn, M, and K Johnson. 2013. <em>Applied Predictive Modeling</em>. Springer.</p>
 </div>
-<div>
+<div id="ref-kuhn20202">
 <p>———. 2020. <em>Feature Engineering and Selection: A Practical Approach for Predictive Models</em>. CRC Press.</p>
 </div>
-<div>
+<div id="ref-mangiafico2015">
 <p>Mangiafico, S. 2015. “An R Companion for the Handbook of Biological Statistics.” <a href="https://rcompanion.org/handbook/">https://rcompanion.org/handbook/</a>.</p>
 </div>
-<div>
+<div id="ref-mcdonald2009">
 <p>McDonald, J. 2009. <em>Handbook of Biological Statistics</em>. Sparky House Publishing.</p>
 </div>
-<div>
+<div id="ref-baseR">
 <p>R Core Team. 2014. <em>R: A Language and Environment for Statistical Computing</em>. Vienna, Austria: R Foundation for Statistical Computing. <a href="http://www.R-project.org/">http://www.R-project.org/</a>.</p>
 </div>
-<div>
-<p>Shmueli, G. 2010. “To Explain or to Predict?” <em>Statistical Science</em> 25 (3). Institute of Mathematical Statistics: 289–310.</p>
+<div id="ref-shmueli2010">
+<p>Shmueli, G. 2010. “To Explain or to Predict?” <em>Statistical Science</em> 25 (3): 289–310.</p>
 </div>
-<div>
+<div id="ref-tidyverse">
 <p>Wickham, H, M Averick, J Bryan, W Chang, L McGowan, R François, G Grolemund, et al. 2019. “Welcome to the Tidyverse.” <em>Journal of Open Source Software</em> 4 (43).</p>
 </div>
-<div>
+<div id="ref-wickham2016">
 <p>Wickham, H, and G Grolemund. 2016. <em><span class="sans-serif">R</span> for Data Science: Import, Tidy, Transform, Visualize, and Model Data</em>. O’Reilly Media, Inc.</p>
 </div>
 </div>
