@@ -371,6 +371,17 @@ Protect users from making objectively poor choices. Examples:
 - Down-sampling the test set
 
 
-
 ### Separate the user-interface from computational-interface
+
+While there are some publications that outline what the informal conventions are for modeling packages (e.g. the White Book), there is very little published that would guide users beyond a brief and somewhat terse webpage on the subject by a member of R Core in 2003^[[`https://developer.r-project.org/model-fitting-functions.html`](https://developer.r-project.org/model-fitting-functions.html)]. From this standpoint, it shouldn't be surprising that there is inconsistency between packages. 
+
+It is critical that people developing R packages differentiate their code into _user-interface code_ and _computational code_. The former requires knowledge of R conventions as well as some well reasons ideas of what a good user interface should be.  The latter is focused on all of the needs of the code to produce the results (e.g., efficiency, data encodings, etc.). These two classes of code are very different and many people who create R packages only know about the computational aspects of their problem. 
+
+However, we shouldn't require all developers to be expert software engineers or user interface experts. Because of this, there are R tools that can be used to enable developers to create good modeling packages that have good user- and computational-interfaces. For example, the `usethis` package is an excellent resource for creating R packages via code. There are functions that can create the basic package infrastructure along with easy access to good development tools for documentation, testing, source control, etc. Similarly, tidymodels contains the `hardhat` package. This builds off of `usethis` to create package skeletons for _modeling packages_. For example, `hardhat` will create the user-facing functions the enable the formula and other interface points. In this way, the package developer can focus on the computational aspects of their work (which is where their expertise resides) and "plug" their computational tools into `hardhat`'s predefined user-interface methods. Like the tidyverse, `hardhat` is _opinionated_ in that some subjective choices are made regarding the interface and how packages should be written. These choices reflect our model implementation guidelines. found at `https://tidymodels.github.io/model-implementation-principles`. 
+
+`hardhat` is discussed more in Chapter TBD. 
+
+
+
+
 
