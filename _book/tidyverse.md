@@ -1,6 +1,7 @@
 
 
 
+
 # A tidyverse primer {#tidyverse-primer}
 
 ## Principles
@@ -60,7 +61,7 @@ To fit an ordinary linear model, the `lm()` function is commonly used. The impor
 ```r
 rate ~ temp
 ```
-states that the chirp rate is the outcome (since it is on the left-hand side of the tidle `~`) and that the temperature values are the predictor^[Most model functions implicitly add an intercept column.]. Suppose the data contained the time of day in which the measurements were obtained in a column called `time`. The formula
+states that the chirp rate is the outcome (since it is on the left-hand side of the tilde `~`) and that the temperature values are the predictor^[Most model functions implicitly add an intercept column.]. Suppose the data contained the time of day in which the measurements were obtained in a column called `time`. The formula
 
 ```r
 rate ~ temp + time
@@ -109,10 +110,10 @@ interaction_fit
 #> lm(formula = rate ~ (temp + species)^2, data = crickets)
 #> 
 #> Coefficients:
-#>           (Intercept)                   temp  
-#>               -11.041                  3.751  
-#>      speciesO. niveus  temp:speciesO. niveus  
-#>                -4.348                 -0.234
+#>           (Intercept)                   temp       speciesO. niveus  
+#>               -11.041                  3.751                 -4.348  
+#> temp:speciesO. niveus  
+#>                -0.234
 ```
 
 This output is a little hard to read. For the species indicator variables, R mashes the variable name (`species`) together with the factor level (`O. niveus`) with no delimiter. 
@@ -172,17 +173,12 @@ summary(main_effect_fit)
 #> -3.013 -1.130 -0.391  0.965  3.780 
 #> 
 #> Coefficients:
-#>                  Estimate Std. Error t value Pr(>|t|)
-#> (Intercept)       -7.2109     2.5509   -2.83   0.0086
-#> temp               3.6028     0.0973   37.03  < 2e-16
-#> speciesO. niveus -10.0653     0.7353  -13.69  6.3e-14
-#>                     
-#> (Intercept)      ** 
-#> temp             ***
-#> speciesO. niveus ***
+#>                  Estimate Std. Error t value Pr(>|t|)    
+#> (Intercept)       -7.2109     2.5509   -2.83   0.0086 ** 
+#> temp               3.6028     0.0973   37.03  < 2e-16 ***
+#> speciesO. niveus -10.0653     0.7353  -13.69  6.3e-14 ***
 #> ---
-#> Signif. codes:  
-#> 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+#> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 #> 
 #> Residual standard error: 1.79 on 28 degrees of freedom
 #> Multiple R-squared:  0.99,	Adjusted R-squared:  0.989 
@@ -220,8 +216,142 @@ Finally, as previously mentioned, this framework was devised in 1992. Most of th
 
 ## Why tidiness is important for modeling
 
+One of the strengths of R is that it encourages developers to create a user-interface that fits their needs.  As an example, here are three common methods for creating a scatter plot of two numeric variables residing in a data frame called `plot_data`:
+
+
+```r
+plot(plot_data$x, plot_data$y)
+
+library(lattice)
+xyplot(y ~ x, data = plot_data)
+
+library(ggplot2)
+ggplot(plot_data, aes(x = y, y = y)) + geom_point()
+```
+
+In this case, separate groups of developers devised distinct interfaces for the same task. Each has advantages and disadvantages. 
+
+In comparison, the _Python Developer's Guide_ espouses the notion that, when approaching a problem:
+
+> "There should be one-- and preferably only one --obvious way to do it."
+
+The advantage of R's diversity of interfaces is that it it can evolve over time and fit different types of needs for different users. 
+
+Unfortunately, some of the syntactical diversity is due to a focus on the developer's needs instead of the needs of the end-user. For example, one issue with some existing methods in base R is that the manner in which some data are stored may not be the most useful. For example, in Section \@ref(r-review) the results of linear model were saved: 
+
+
+```r
+main_effect_fit
+#> 
+#> Call:
+#> lm(formula = rate ~ temp + species, data = crickets)
+#> 
+#> Coefficients:
+#>      (Intercept)              temp  speciesO. niveus  
+#>            -7.21              3.60            -10.07
+```
+
+The `summary()` method was used to print the results of the model fit, including a table with parameter values, their uncertainty estimates, and p-values. These particular results can also be saved:
+
+
+```r
+model_res <- summary(main_effect_fit)
+# The model coefficient table is accessible via the `coef`
+# method.
+param_est <- coef(model_res)
+class(param_est)
+#> [1] "matrix"
+param_est
+#>                  Estimate Std. Error t value Pr(>|t|)
+#> (Intercept)         -7.21     2.5509   -2.83 8.58e-03
+#> temp                 3.60     0.0973   37.03 2.49e-25
+#> speciesO. niveus   -10.07     0.7353  -13.69 6.27e-14
+```
+
+There are a few things to notice about this result. First, the object is a numeric matrix. This data structure was mostly likely chosen since all of the calculated results are numeric and a matrix object is stored more efficiently than a data frame. This choice was probably made in the late 1970's when the level of computational efficiency was critical. Second, the non-numeric data (the labels for the coefficients) are contained in the row names. Keeping the parameter labels as row names is very consistent with the conventions in the original S language. 
+
+A reasonable course of action would be to create a visualization of the parameters values (perhaps using one of the plotting methods shown above). To do this, it would be sensible to convert the parameter matrix to a data frame. In doing so, a new column could be created with the variable names so that they can be used in the plot. However, note that several of the matrix column names would not be valid R object names (e.g. `"Pr(>|t|)"`.  Another complication is the consistency of the column names. For `lm` objects, the column for the test statistic is `"Pr(>|t|)"`. However, for other models, a different test might be used and, as a result, the column name is different (e.g., `"Pr(>|z|)"`) and the type of test is _encoded in the column name_.  
+ 
+While these additional data formatting steps are not problematic they are a bit of an inconvenience, especially since they might be different for different types of models. The matrix is not a highly reusable data structure mostly because it must constrains the data to be of a single type (e.g. numeric). Additionally, keeping some data in the dimension names is also problematic since those data must be extracted to be of general use. For these reasons, the tidyverse places a large degree of importance on data frames and _tibbles_. Tibbles are data frames with a few extra features and, while they can use them, row names are eschewed. 
+
+As a solution, the `broom` package has methods to convert many types of objects to a tidy structure. For example, using the `tidy()` method on the linear model produces:
+
+
+
+
+```r
+library(tidymodels)  # includes the broom package
+tidy(main_effect_fit)
+#> # A tibble: 3 x 5
+#>   term             estimate std.error statistic  p.value
+#>   <chr>               <dbl>     <dbl>     <dbl>    <dbl>
+#> 1 (Intercept)         -7.21    2.55       -2.83 8.58e- 3
+#> 2 temp                 3.60    0.0973     37.0  2.49e-25
+#> 3 speciesO. niveus   -10.1     0.735     -13.7  6.27e-14
+```
+ 
+The column names are standardized across models and do not contain any additional data (such as the type of statistical test). The data previously contained in the row names are now in a column called `terms` and so on. One additional principle in the tidymodels ecosystem is that a functions return values should be **predictable, consistent, and unsurprising**. 
+ 
+As another example of _unpredictability_, another convention in base R is related to missing data. The general rule is that missing data propagate more missing data; the average of a set of values with a missing data point is itself missing and so on. When models make predictions, the vast majority require all of the predictors to have complete values. There are several options based in to R at this point in the form of `na.action`.  This sets the policy for how a function should behave if there are missing values. The two most common policies are `na.fail` and `na.omit`. For former produces an error of missing data are involved while the latter removes the missing data prior to the calculations. From out previous example:
+
+
+```r
+# Add a missing value to the prediction set
+new_values$temp[1] <- NA
+
+# The predict method for `lm` defaults to `na.pass`:
+predict(main_effect_fit, new_values)
+#>    1    2    3    4    5    6 
+#>   NA 50.4 54.0 57.6 61.2 64.8
+
+# Alternatively 
+predict(main_effect_fit, new_values, na.action = na.fail)
+#> Error in na.fail.default(structure(list(temp = c(NA, 16L, 17L, 18L, 19L, : missing values in object
+
+predict(main_effect_fit, new_values, na.action = na.omit)
+#>    2    3    4    5    6 
+#> 50.4 54.0 57.6 61.2 64.8
+```
+
+From a user's point of view, `na.omit()` can be problematic. In our example, `new_values` has 6 rows but only 5 would be returned. To compensate for this, the user would have to determine which row had the missing value and interleave a missing values in the appropriate place if the predictions were merged into `new_values`^[A base R policy called `na.exclude()` does exactly this.]. While it is rare that a prediction function uses `na.omit()` as its missing data policy, this does occur. Users who have determined this as the cause of an error in their code find it _quite memorable_. 
+
+Finally, one other potential stumbling block can be inconsistencies between packages. Suppose a modeling project had an outcome with two classes. There are a variety of statistical and machine learning models that can be used. In order to produce class probability estimate for each sample, it is common for a model function to have a corresponding `predict()`method. However, there is significant heterogeneity in the argument values used by those methods to make class probability predictions. A sampling of these argument values for different models is: 
+
+| Function     | Package      | Code                                       |
+| :----------- | :----------- | :----------------------------------------- |
+| `lda`        | `MASS`       | `predict(obj)`                             |
+| `glm`        | `stats`      | `predict(obj, type = "response")`          |
+| `gbm`        | `gbm`        | `predict(obj, type = "response", n.trees)` |
+| `mda`        | `mda`        | `predict(obj, type = "posterior")`         |
+| `rpart`      | `rpart`      | `predict(obj, type = "prob")`              |
+| various      | `RWeka`      | `predict(obj, type = "probability")`       |
+| `logitboost` | `LogitBoost` | `predict(obj, type = "raw", nIter)`        |
+| `pamr.train` | `pamr`       | `pamr.predict(obj, type = "posterior")`    |
+
+Note that the last example has a custom _function_ to make predictions instead of using the model common `predict()` interface.  
+
+There are a few R packages that provide a unified interface to harmonize these modeling APIs, such as `caret` and `mlr`. tidymodels takes a similar approach to unification of the function interface as well as enforcing consistency in the function names and return values (e.g., `broom::tidy()`)^[If you've never seen `::` in R code before, it is a method to be explicit about what function you are calling. The value of the right-hand side is the _namespace_ where the function lives (usually a package name). The left-hand side is the function name. In cases where two packages use the same function name, this syntax will ensure that the correct function is invoked.].  
+
+To resolve these usage issues, the tidymodels package have a few additional design goals that complement those of the tidyverse.
 
 
 ## Some additional tidy principals for modeling. 
 
+### Be predictable, consistent, and unsurprising
+
+Smooth out diverse interfaces etc. 
+
+### Encourage empirical validation and good methodology.
+
+Enable a wider variety of methodologies
+
+Protect users from making objectively poor choices. Examples:
+
+- *Information leakage* of training set data into evaluation sets.
+- Analyzing integers as categories
+- Down-sampling the test set
+
+
+
+### Separate the user-interface from computational-interface
 

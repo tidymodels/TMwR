@@ -3,7 +3,7 @@
 knit: "bookdown::render_book"
 title: "Tidy Modeling with R"
 author: ["Max Kuhn and Davis Vaughan"]
-date: "2020-01-09"
+date: "2020-01-13"
 description: "Modeling of data is integral to science, business, politics, and many other aspects of our lives. The goals of this book are to: introduce neophytes to models and the tidyverse, demonstrate the `tidymodels` packages, and to outline good practices for the phases of the modeling process."
 github-repo: topepo/TMwR
 twitter-handle: topepos
@@ -43,7 +43,7 @@ In terms of software lifecycle, the tidymodels packages are fairly young. We wil
 #>  collate  en_US.UTF-8                 
 #>  ctype    en_US.UTF-8                 
 #>  tz       America/New_York            
-#>  date     2020-01-12   
+#>  date     2020-01-13                  
 #> 
 #> ─ Packages ───────────────────────────────────────────────────────────────────
 #>  package     * version date       lib source        

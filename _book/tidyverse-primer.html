@@ -24,7 +24,7 @@
 <meta name="author" content="Max Kuhn and Davis Vaughan" />
 
 
-<meta name="date" content="2020-01-12" />
+<meta name="date" content="2020-01-13" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -148,7 +148,12 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="2.2" data-path="tidyverse-primer.html"><a href="tidyverse-primer.html#code"><i class="fa fa-check"></i><b>2.2</b> Code</a></li>
 <li class="chapter" data-level="2.3" data-path="tidyverse-primer.html"><a href="tidyverse-primer.html#r-review"><i class="fa fa-check"></i><b>2.3</b> A review of base R modeling syntax</a></li>
 <li class="chapter" data-level="2.4" data-path="tidyverse-primer.html"><a href="tidyverse-primer.html#why-tidiness-is-important-for-modeling"><i class="fa fa-check"></i><b>2.4</b> Why tidiness is important for modeling</a></li>
-<li class="chapter" data-level="2.5" data-path="tidyverse-primer.html"><a href="tidyverse-primer.html#some-additional-tidy-principals-for-modeling."><i class="fa fa-check"></i><b>2.5</b> Some additional tidy principals for modeling.</a></li>
+<li class="chapter" data-level="2.5" data-path="tidyverse-primer.html"><a href="tidyverse-primer.html#some-additional-tidy-principals-for-modeling."><i class="fa fa-check"></i><b>2.5</b> Some additional tidy principals for modeling.</a>
+<ul>
+<li class="chapter" data-level="2.5.1" data-path="tidyverse-primer.html"><a href="tidyverse-primer.html#be-predictable-consistent-and-unsurprising"><i class="fa fa-check"></i><b>2.5.1</b> Be predictable, consistent, and unsurprising</a></li>
+<li class="chapter" data-level="2.5.2" data-path="tidyverse-primer.html"><a href="tidyverse-primer.html#encourage-empirical-validation-and-good-methodology."><i class="fa fa-check"></i><b>2.5.2</b> Encourage empirical validation and good methodology.</a></li>
+<li class="chapter" data-level="2.5.3" data-path="tidyverse-primer.html"><a href="tidyverse-primer.html#separate-the-user-interface-from-computational-interface"><i class="fa fa-check"></i><b>2.5.3</b> Separate the user-interface from computational-interface</a></li>
+</ul></li>
 </ul></li>
 <li class="chapter" data-level="3" data-path="two-models.html"><a href="two-models.html"><i class="fa fa-check"></i><b>3</b> A tale of two models</a></li>
 <li class="chapter" data-level="4" data-path="data-spending.html"><a href="data-spending.html"><i class="fa fa-check"></i><b>4</b> Spending our data</a></li>
@@ -214,7 +219,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p>There may be some scientific rationale for being able to predict the chirp rate but the focus here will be on inference.</p>
 <p>To fit an ordinary linear model, the <code>lm()</code> function is commonly used. The important arguments to this function are a model formula and a data frame that contains the data The formula is <em>symbolic</em>. For example, the simple formula:</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="tidyverse-primer.html#cb3-1"></a>rate <span class="op">~</span><span class="st"> </span>temp</span></code></pre></div>
-<p>states that the chirp rate is the outcome (since it is on the left-hand side of the tidle <code>~</code>) and that the temperature values are the predictor<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>. Suppose the data contained the time of day in which the measurements were obtained in a column called <code>time</code>. The formula</p>
+<p>states that the chirp rate is the outcome (since it is on the left-hand side of the tilde <code>~</code>) and that the temperature values are the predictor<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>. Suppose the data contained the time of day in which the measurements were obtained in a column called <code>time</code>. The formula</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="tidyverse-primer.html#cb4-1"></a>rate <span class="op">~</span><span class="st"> </span>temp <span class="op">+</span><span class="st"> </span>time</span></code></pre></div>
 <p>would not add the time and temperature values together. This formula would symbolically represent that temperature and time should be added as a separate <em>main effects</em> to the model. Main effects are model terms that contain a single predictor variable.</p>
 <p>There are no time measurements in these data but the species can be added to the model in the same way:</p>
@@ -243,10 +248,10 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb7-7"><a href="tidyverse-primer.html#cb7-7"></a><span class="co">#&gt; lm(formula = rate ~ (temp + species)^2, data = crickets)</span></span>
 <span id="cb7-8"><a href="tidyverse-primer.html#cb7-8"></a><span class="co">#&gt; </span></span>
 <span id="cb7-9"><a href="tidyverse-primer.html#cb7-9"></a><span class="co">#&gt; Coefficients:</span></span>
-<span id="cb7-10"><a href="tidyverse-primer.html#cb7-10"></a><span class="co">#&gt;           (Intercept)                   temp  </span></span>
-<span id="cb7-11"><a href="tidyverse-primer.html#cb7-11"></a><span class="co">#&gt;               -11.041                  3.751  </span></span>
-<span id="cb7-12"><a href="tidyverse-primer.html#cb7-12"></a><span class="co">#&gt;      speciesO. niveus  temp:speciesO. niveus  </span></span>
-<span id="cb7-13"><a href="tidyverse-primer.html#cb7-13"></a><span class="co">#&gt;                -4.348                 -0.234</span></span></code></pre></div>
+<span id="cb7-10"><a href="tidyverse-primer.html#cb7-10"></a><span class="co">#&gt;           (Intercept)                   temp       speciesO. niveus  </span></span>
+<span id="cb7-11"><a href="tidyverse-primer.html#cb7-11"></a><span class="co">#&gt;               -11.041                  3.751                 -4.348  </span></span>
+<span id="cb7-12"><a href="tidyverse-primer.html#cb7-12"></a><span class="co">#&gt; temp:speciesO. niveus  </span></span>
+<span id="cb7-13"><a href="tidyverse-primer.html#cb7-13"></a><span class="co">#&gt;                -0.234</span></span></code></pre></div>
 <p>This output is a little hard to read. For the species indicator variables, R mashes the variable name (<code>species</code>) together with the factor level (<code>O. niveus</code>) with no delimiter.</p>
 <p>Before going into any results for this model, the fit should be assessed using diagnostic plots. The <code>plot()</code> method for <code>lm</code> objects can be used. It produces a set of four plots for the object, each showing different aspects of the fit. Two plots are shown here:</p>
 <div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="tidyverse-primer.html#cb8-1"></a><span class="co"># Place two plots next to one another:</span></span>
@@ -286,21 +291,16 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb10-8"><a href="tidyverse-primer.html#cb10-8"></a><span class="co">#&gt; -3.013 -1.130 -0.391  0.965  3.780 </span></span>
 <span id="cb10-9"><a href="tidyverse-primer.html#cb10-9"></a><span class="co">#&gt; </span></span>
 <span id="cb10-10"><a href="tidyverse-primer.html#cb10-10"></a><span class="co">#&gt; Coefficients:</span></span>
-<span id="cb10-11"><a href="tidyverse-primer.html#cb10-11"></a><span class="co">#&gt;                  Estimate Std. Error t value Pr(&gt;|t|)</span></span>
-<span id="cb10-12"><a href="tidyverse-primer.html#cb10-12"></a><span class="co">#&gt; (Intercept)       -7.2109     2.5509   -2.83   0.0086</span></span>
-<span id="cb10-13"><a href="tidyverse-primer.html#cb10-13"></a><span class="co">#&gt; temp               3.6028     0.0973   37.03  &lt; 2e-16</span></span>
-<span id="cb10-14"><a href="tidyverse-primer.html#cb10-14"></a><span class="co">#&gt; speciesO. niveus -10.0653     0.7353  -13.69  6.3e-14</span></span>
-<span id="cb10-15"><a href="tidyverse-primer.html#cb10-15"></a><span class="co">#&gt;                     </span></span>
-<span id="cb10-16"><a href="tidyverse-primer.html#cb10-16"></a><span class="co">#&gt; (Intercept)      ** </span></span>
-<span id="cb10-17"><a href="tidyverse-primer.html#cb10-17"></a><span class="co">#&gt; temp             ***</span></span>
-<span id="cb10-18"><a href="tidyverse-primer.html#cb10-18"></a><span class="co">#&gt; speciesO. niveus ***</span></span>
-<span id="cb10-19"><a href="tidyverse-primer.html#cb10-19"></a><span class="co">#&gt; ---</span></span>
-<span id="cb10-20"><a href="tidyverse-primer.html#cb10-20"></a><span class="co">#&gt; Signif. codes:  </span></span>
-<span id="cb10-21"><a href="tidyverse-primer.html#cb10-21"></a><span class="co">#&gt; 0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</span></span>
-<span id="cb10-22"><a href="tidyverse-primer.html#cb10-22"></a><span class="co">#&gt; </span></span>
-<span id="cb10-23"><a href="tidyverse-primer.html#cb10-23"></a><span class="co">#&gt; Residual standard error: 1.79 on 28 degrees of freedom</span></span>
-<span id="cb10-24"><a href="tidyverse-primer.html#cb10-24"></a><span class="co">#&gt; Multiple R-squared:  0.99,   Adjusted R-squared:  0.989 </span></span>
-<span id="cb10-25"><a href="tidyverse-primer.html#cb10-25"></a><span class="co">#&gt; F-statistic: 1.33e+03 on 2 and 28 DF,  p-value: &lt;2e-16</span></span></code></pre></div>
+<span id="cb10-11"><a href="tidyverse-primer.html#cb10-11"></a><span class="co">#&gt;                  Estimate Std. Error t value Pr(&gt;|t|)    </span></span>
+<span id="cb10-12"><a href="tidyverse-primer.html#cb10-12"></a><span class="co">#&gt; (Intercept)       -7.2109     2.5509   -2.83   0.0086 ** </span></span>
+<span id="cb10-13"><a href="tidyverse-primer.html#cb10-13"></a><span class="co">#&gt; temp               3.6028     0.0973   37.03  &lt; 2e-16 ***</span></span>
+<span id="cb10-14"><a href="tidyverse-primer.html#cb10-14"></a><span class="co">#&gt; speciesO. niveus -10.0653     0.7353  -13.69  6.3e-14 ***</span></span>
+<span id="cb10-15"><a href="tidyverse-primer.html#cb10-15"></a><span class="co">#&gt; ---</span></span>
+<span id="cb10-16"><a href="tidyverse-primer.html#cb10-16"></a><span class="co">#&gt; Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</span></span>
+<span id="cb10-17"><a href="tidyverse-primer.html#cb10-17"></a><span class="co">#&gt; </span></span>
+<span id="cb10-18"><a href="tidyverse-primer.html#cb10-18"></a><span class="co">#&gt; Residual standard error: 1.79 on 28 degrees of freedom</span></span>
+<span id="cb10-19"><a href="tidyverse-primer.html#cb10-19"></a><span class="co">#&gt; Multiple R-squared:  0.99,   Adjusted R-squared:  0.989 </span></span>
+<span id="cb10-20"><a href="tidyverse-primer.html#cb10-20"></a><span class="co">#&gt; F-statistic: 1.33e+03 on 2 and 28 DF,  p-value: &lt;2e-16</span></span></code></pre></div>
 <p>From these values, the chirp rate for each species increases by 3.6 chirps as the temperature increases by a single degree. This term shows strong statistical significance as evidenced by the p-value. The species term has a value of -10.07. This indicates that, across all temperature values, <em>O. niveus</em> is a chirp rate that is about 10 fewer chirps per minute. Similar to the temperature term, the species effect is associated with a very small p-value.</p>
 <p>The only issue in this analysis is the intercept value. It indicates that at 0 C, there are -7.21 chirps per minute. While this is unreasonable, the data only go as low as 17.2 C and interpreting the model at 0 C would be an <em>extrapolation</em>. This would be a bad idea. That said, the model fit is good within the <em>applicable range</em> of the temperature values and the conclusions should be limited to the observed temperature range.</p>
 <p>If there were a need to estimate the chirp rate at a temperature that was not observed in the experiment, the <code>predict()</code> method would be used. It takes the model object and a data frame of new values for prediction. For example, the model estimates the chirp rate for <em>O. exclamationis</em> for temperatures between 15 C and 20 C can be computed via:</p>
@@ -319,16 +319,155 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </div>
 <div id="why-tidiness-is-important-for-modeling" class="section level2" number="2.4">
 <h2 number="2.4"><span class="header-section-number">2.4</span> Why tidiness is important for modeling</h2>
+<p>One of the strengths of R is that it encourages developers to create a user-interface that fits their needs. As an example, here are three common methods for creating a scatter plot of two numeric variables residing in a data frame called <code>plot_data</code>:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="tidyverse-primer.html#cb12-1"></a><span class="kw">plot</span>(plot_data<span class="op">$</span>x, plot_data<span class="op">$</span>y)</span>
+<span id="cb12-2"><a href="tidyverse-primer.html#cb12-2"></a></span>
+<span id="cb12-3"><a href="tidyverse-primer.html#cb12-3"></a><span class="kw">library</span>(lattice)</span>
+<span id="cb12-4"><a href="tidyverse-primer.html#cb12-4"></a><span class="kw">xyplot</span>(y <span class="op">~</span><span class="st"> </span>x, <span class="dt">data =</span> plot_data)</span>
+<span id="cb12-5"><a href="tidyverse-primer.html#cb12-5"></a></span>
+<span id="cb12-6"><a href="tidyverse-primer.html#cb12-6"></a><span class="kw">library</span>(ggplot2)</span>
+<span id="cb12-7"><a href="tidyverse-primer.html#cb12-7"></a><span class="kw">ggplot</span>(plot_data, <span class="kw">aes</span>(<span class="dt">x =</span> y, <span class="dt">y =</span> y)) <span class="op">+</span><span class="st"> </span><span class="kw">geom_point</span>()</span></code></pre></div>
+<p>In this case, separate groups of developers devised distinct interfaces for the same task. Each has advantages and disadvantages.</p>
+<p>In comparison, the <em>Python Developer’s Guide</em> espouses the notion that, when approaching a problem:</p>
+<blockquote>
+<p>“There should be one– and preferably only one –obvious way to do it.”</p>
+</blockquote>
+<p>The advantage of R’s diversity of interfaces is that it it can evolve over time and fit different types of needs for different users.</p>
+<p>Unfortunately, some of the syntactical diversity is due to a focus on the developer’s needs instead of the needs of the end-user. For example, one issue with some existing methods in base R is that the manner in which some data are stored may not be the most useful. For example, in Section <a href="tidyverse-primer.html#r-review"><strong>??</strong></a> the results of linear model were saved:</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="tidyverse-primer.html#cb13-1"></a>main_effect_fit</span>
+<span id="cb13-2"><a href="tidyverse-primer.html#cb13-2"></a><span class="co">#&gt; </span></span>
+<span id="cb13-3"><a href="tidyverse-primer.html#cb13-3"></a><span class="co">#&gt; Call:</span></span>
+<span id="cb13-4"><a href="tidyverse-primer.html#cb13-4"></a><span class="co">#&gt; lm(formula = rate ~ temp + species, data = crickets)</span></span>
+<span id="cb13-5"><a href="tidyverse-primer.html#cb13-5"></a><span class="co">#&gt; </span></span>
+<span id="cb13-6"><a href="tidyverse-primer.html#cb13-6"></a><span class="co">#&gt; Coefficients:</span></span>
+<span id="cb13-7"><a href="tidyverse-primer.html#cb13-7"></a><span class="co">#&gt;      (Intercept)              temp  speciesO. niveus  </span></span>
+<span id="cb13-8"><a href="tidyverse-primer.html#cb13-8"></a><span class="co">#&gt;            -7.21              3.60            -10.07</span></span></code></pre></div>
+<p>The <code>summary()</code> method was used to print the results of the model fit, including a table with parameter values, their uncertainty estimates, and p-values. These particular results can also be saved:</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="tidyverse-primer.html#cb14-1"></a>model_res &lt;-<span class="st"> </span><span class="kw">summary</span>(main_effect_fit)</span>
+<span id="cb14-2"><a href="tidyverse-primer.html#cb14-2"></a><span class="co"># The model coefficient table is accessible via the `coef`</span></span>
+<span id="cb14-3"><a href="tidyverse-primer.html#cb14-3"></a><span class="co"># method.</span></span>
+<span id="cb14-4"><a href="tidyverse-primer.html#cb14-4"></a>param_est &lt;-<span class="st"> </span><span class="kw">coef</span>(model_res)</span>
+<span id="cb14-5"><a href="tidyverse-primer.html#cb14-5"></a><span class="kw">class</span>(param_est)</span>
+<span id="cb14-6"><a href="tidyverse-primer.html#cb14-6"></a><span class="co">#&gt; [1] &quot;matrix&quot;</span></span>
+<span id="cb14-7"><a href="tidyverse-primer.html#cb14-7"></a>param_est</span>
+<span id="cb14-8"><a href="tidyverse-primer.html#cb14-8"></a><span class="co">#&gt;                  Estimate Std. Error t value Pr(&gt;|t|)</span></span>
+<span id="cb14-9"><a href="tidyverse-primer.html#cb14-9"></a><span class="co">#&gt; (Intercept)         -7.21     2.5509   -2.83 8.58e-03</span></span>
+<span id="cb14-10"><a href="tidyverse-primer.html#cb14-10"></a><span class="co">#&gt; temp                 3.60     0.0973   37.03 2.49e-25</span></span>
+<span id="cb14-11"><a href="tidyverse-primer.html#cb14-11"></a><span class="co">#&gt; speciesO. niveus   -10.07     0.7353  -13.69 6.27e-14</span></span></code></pre></div>
+<p>There are a few things to notice about this result. First, the object is a numeric matrix. This data structure was mostly likely chosen since all of the calculated results are numeric and a matrix object is stored more efficiently than a data frame. This choice was probably made in the late 1970’s when the level of computational efficiency was critical. Second, the non-numeric data (the labels for the coefficients) are contained in the row names. Keeping the parameter labels as row names is very consistent with the conventions in the original S language.</p>
+<p>A reasonable course of action would be to create a visualization of the parameters values (perhaps using one of the plotting methods shown above). To do this, it would be sensible to convert the parameter matrix to a data frame. In doing so, a new column could be created with the variable names so that they can be used in the plot. However, note that several of the matrix column names would not be valid R object names (e.g. <code>"Pr(&gt;|t|)"</code>. Another complication is the consistency of the column names. For <code>lm</code> objects, the column for the test statistic is <code>"Pr(&gt;|t|)"</code>. However, for other models, a different test might be used and, as a result, the column name is different (e.g., <code>"Pr(&gt;|z|)"</code>) and the type of test is <em>encoded in the column name</em>.</p>
+<p>While these additional data formatting steps are not problematic they are a bit of an inconvenience, especially since they might be different for different types of models. The matrix is not a highly reusable data structure mostly because it must constrains the data to be of a single type (e.g. numeric). Additionally, keeping some data in the dimension names is also problematic since those data must be extracted to be of general use. For these reasons, the tidyverse places a large degree of importance on data frames and <em>tibbles</em>. Tibbles are data frames with a few extra features and, while they can use them, row names are eschewed.</p>
+<p>As a solution, the <code>broom</code> package has methods to convert many types of objects to a tidy structure. For example, using the <code>tidy()</code> method on the linear model produces:</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="tidyverse-primer.html#cb15-1"></a><span class="kw">library</span>(tidymodels)  <span class="co"># includes the broom package</span></span>
+<span id="cb15-2"><a href="tidyverse-primer.html#cb15-2"></a><span class="kw">tidy</span>(main_effect_fit)</span>
+<span id="cb15-3"><a href="tidyverse-primer.html#cb15-3"></a><span class="co">#&gt; # A tibble: 3 x 5</span></span>
+<span id="cb15-4"><a href="tidyverse-primer.html#cb15-4"></a><span class="co">#&gt;   term             estimate std.error statistic  p.value</span></span>
+<span id="cb15-5"><a href="tidyverse-primer.html#cb15-5"></a><span class="co">#&gt;   &lt;chr&gt;               &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;</span></span>
+<span id="cb15-6"><a href="tidyverse-primer.html#cb15-6"></a><span class="co">#&gt; 1 (Intercept)         -7.21    2.55       -2.83 8.58e- 3</span></span>
+<span id="cb15-7"><a href="tidyverse-primer.html#cb15-7"></a><span class="co">#&gt; 2 temp                 3.60    0.0973     37.0  2.49e-25</span></span>
+<span id="cb15-8"><a href="tidyverse-primer.html#cb15-8"></a><span class="co">#&gt; 3 speciesO. niveus   -10.1     0.735     -13.7  6.27e-14</span></span></code></pre></div>
+<p>The column names are standardized across models and do not contain any additional data (such as the type of statistical test). The data previously contained in the row names are now in a column called <code>terms</code> and so on. One additional principle in the tidymodels ecosystem is that a functions return values should be <strong>predictable, consistent, and unsurprising</strong>.</p>
+<p>As another example of <em>unpredictability</em>, another convention in base R is related to missing data. The general rule is that missing data propagate more missing data; the average of a set of values with a missing data point is itself missing and so on. When models make predictions, the vast majority require all of the predictors to have complete values. There are several options based in to R at this point in the form of <code>na.action</code>. This sets the policy for how a function should behave if there are missing values. The two most common policies are <code>na.fail</code> and <code>na.omit</code>. For former produces an error of missing data are involved while the latter removes the missing data prior to the calculations. From out previous example:</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="tidyverse-primer.html#cb16-1"></a><span class="co"># Add a missing value to the prediction set</span></span>
+<span id="cb16-2"><a href="tidyverse-primer.html#cb16-2"></a>new_values<span class="op">$</span>temp[<span class="dv">1</span>] &lt;-<span class="st"> </span><span class="ot">NA</span></span>
+<span id="cb16-3"><a href="tidyverse-primer.html#cb16-3"></a></span>
+<span id="cb16-4"><a href="tidyverse-primer.html#cb16-4"></a><span class="co"># The predict method for `lm` defaults to `na.pass`:</span></span>
+<span id="cb16-5"><a href="tidyverse-primer.html#cb16-5"></a><span class="kw">predict</span>(main_effect_fit, new_values)</span>
+<span id="cb16-6"><a href="tidyverse-primer.html#cb16-6"></a><span class="co">#&gt;    1    2    3    4    5    6 </span></span>
+<span id="cb16-7"><a href="tidyverse-primer.html#cb16-7"></a><span class="co">#&gt;   NA 50.4 54.0 57.6 61.2 64.8</span></span>
+<span id="cb16-8"><a href="tidyverse-primer.html#cb16-8"></a></span>
+<span id="cb16-9"><a href="tidyverse-primer.html#cb16-9"></a><span class="co"># Alternatively </span></span>
+<span id="cb16-10"><a href="tidyverse-primer.html#cb16-10"></a><span class="kw">predict</span>(main_effect_fit, new_values, <span class="dt">na.action =</span> na.fail)</span>
+<span id="cb16-11"><a href="tidyverse-primer.html#cb16-11"></a><span class="co">#&gt; Error in na.fail.default(structure(list(temp = c(NA, 16L, 17L, 18L, 19L, : missing values in object</span></span>
+<span id="cb16-12"><a href="tidyverse-primer.html#cb16-12"></a></span>
+<span id="cb16-13"><a href="tidyverse-primer.html#cb16-13"></a><span class="kw">predict</span>(main_effect_fit, new_values, <span class="dt">na.action =</span> na.omit)</span>
+<span id="cb16-14"><a href="tidyverse-primer.html#cb16-14"></a><span class="co">#&gt;    2    3    4    5    6 </span></span>
+<span id="cb16-15"><a href="tidyverse-primer.html#cb16-15"></a><span class="co">#&gt; 50.4 54.0 57.6 61.2 64.8</span></span></code></pre></div>
+<p>From a user’s point of view, <code>na.omit()</code> can be problematic. In our example, <code>new_values</code> has 6 rows but only 5 would be returned. To compensate for this, the user would have to determine which row had the missing value and interleave a missing values in the appropriate place if the predictions were merged into <code>new_values</code><a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a>. While it is rare that a prediction function uses <code>na.omit()</code> as its missing data policy, this does occur. Users who have determined this as the cause of an error in their code find it <em>quite memorable</em>.</p>
+<p>Finally, one other potential stumbling block can be inconsistencies between packages. Suppose a modeling project had an outcome with two classes. There are a variety of statistical and machine learning models that can be used. In order to produce class probability estimate for each sample, it is common for a model function to have a corresponding <code>predict()</code>method. However, there is significant heterogeneity in the argument values used by those methods to make class probability predictions. A sampling of these argument values for different models is:</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Function</th>
+<th align="left">Package</th>
+<th align="left">Code</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left"><code>lda</code></td>
+<td align="left"><code>MASS</code></td>
+<td align="left"><code>predict(obj)</code></td>
+</tr>
+<tr class="even">
+<td align="left"><code>glm</code></td>
+<td align="left"><code>stats</code></td>
+<td align="left"><code>predict(obj, type = "response")</code></td>
+</tr>
+<tr class="odd">
+<td align="left"><code>gbm</code></td>
+<td align="left"><code>gbm</code></td>
+<td align="left"><code>predict(obj, type = "response", n.trees)</code></td>
+</tr>
+<tr class="even">
+<td align="left"><code>mda</code></td>
+<td align="left"><code>mda</code></td>
+<td align="left"><code>predict(obj, type = "posterior")</code></td>
+</tr>
+<tr class="odd">
+<td align="left"><code>rpart</code></td>
+<td align="left"><code>rpart</code></td>
+<td align="left"><code>predict(obj, type = "prob")</code></td>
+</tr>
+<tr class="even">
+<td align="left">various</td>
+<td align="left"><code>RWeka</code></td>
+<td align="left"><code>predict(obj, type = "probability")</code></td>
+</tr>
+<tr class="odd">
+<td align="left"><code>logitboost</code></td>
+<td align="left"><code>LogitBoost</code></td>
+<td align="left"><code>predict(obj, type = "raw", nIter)</code></td>
+</tr>
+<tr class="even">
+<td align="left"><code>pamr.train</code></td>
+<td align="left"><code>pamr</code></td>
+<td align="left"><code>pamr.predict(obj, type = "posterior")</code></td>
+</tr>
+</tbody>
+</table>
+<p>Note that the last example has a custom <em>function</em> to make predictions instead of using the model common <code>predict()</code> interface.</p>
+<p>There are a few R packages that provide a unified interface to harmonize these modeling APIs, such as <code>caret</code> and <code>mlr</code>. tidymodels takes a similar approach to unification of the function interface as well as enforcing consistency in the function names and return values (e.g., <code>broom::tidy()</code>)<a href="#fn3" class="footnote-ref" id="fnref3"><sup>3</sup></a>.</p>
+<p>To resolve these usage issues, the tidymodels package have a few additional design goals that complement those of the tidyverse.</p>
 </div>
 <div id="some-additional-tidy-principals-for-modeling." class="section level2" number="2.5">
 <h2 number="2.5"><span class="header-section-number">2.5</span> Some additional tidy principals for modeling.</h2>
+<div id="be-predictable-consistent-and-unsurprising" class="section level3" number="2.5.1">
+<h3 number="2.5.1"><span class="header-section-number">2.5.1</span> Be predictable, consistent, and unsurprising</h3>
+<p>Smooth out diverse interfaces etc.</p>
+</div>
+<div id="encourage-empirical-validation-and-good-methodology." class="section level3" number="2.5.2">
+<h3 number="2.5.2"><span class="header-section-number">2.5.2</span> Encourage empirical validation and good methodology.</h3>
+<p>Enable a wider variety of methodologies</p>
+<p>Protect users from making objectively poor choices. Examples:</p>
+<ul>
+<li><em>Information leakage</em> of training set data into evaluation sets.</li>
+<li>Analyzing integers as categories</li>
+<li>Down-sampling the test set</li>
+</ul>
+</div>
+<div id="separate-the-user-interface-from-computational-interface" class="section level3" number="2.5.3">
+<h3 number="2.5.3"><span class="header-section-number">2.5.3</span> Separate the user-interface from computational-interface</h3>
 
+</div>
 </div>
 </div>
 <div class="footnotes">
 <hr />
 <ol start="1">
 <li id="fn1"><p>Most model functions implicitly add an intercept column.<a href="tidyverse-primer.html#fnref1" class="footnote-back">↩︎</a></p></li>
+<li id="fn2"><p>A base R policy called <code>na.exclude()</code> does exactly this.<a href="tidyverse-primer.html#fnref2" class="footnote-back">↩︎</a></p></li>
+<li id="fn3"><p>If you’ve never seen <code>::</code> in R code before, it is a method to be explicit about what function you are calling. The value of the right-hand side is the <em>namespace</em> where the function lives (usually a package name). The left-hand side is the function name. In cases where two packages use the same function name, this syntax will ensure that the correct function is invoked.<a href="tidyverse-primer.html#fnref3" class="footnote-back">↩︎</a></p></li>
 </ol>
 </div>
             </section>
