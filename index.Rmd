@@ -2,7 +2,7 @@
 knit: "bookdown::render_book"
 title: "Tidy Modeling with R"
 author: ["Max Kuhn and Davis Vaughan"]
-date: "`r Sys.Date()`"
+date: "`r version()`"
 description: "Modeling of data is integral to science, business, politics, and many other aspects of our lives. The goals of this book are to: introduce neophytes to models and the tidyverse, demonstrate the `tidymodels` packages, and to outline good practices for the phases of the modeling process."
 github-repo: topepo/TMwR
 twitter-handle: topepos

@@ -22,3 +22,10 @@ transparent_theme <- function() {
     )
   theme_set(thm)
 }
+
+version <- function() {
+  dt <- Sys.Date()
+  ver <- read.dcf("DESCRIPTION")[1, "Version"]
+  paste0("Version ", ver, " (", dt, ")")
+}
+
