@@ -1,3 +1,5 @@
+# Introduction
+
 ```{r introduction-setup, include = FALSE}
 knitr::opts_chunk$set(fig.path = "figures/introduction-")
 library(tidyverse)
@@ -7,13 +9,8 @@ library(tibble)
 library(kableExtra)
 
 ames <- make_ames()
-
-transparent_theme()
-
-options(digits = 4, width = 80)
 ```
 
-# Introduction
 
 Models are mathematical tools that create equations that are intended to mimic the data given to them. These equations can be used for various purposes, such as: predicting future events, determining if there is a difference between several groups, as an aid to a map-based visualization, discovering novel patterns in the data that could be further investigated, and so on. Their utility hinges on their ability to be reductive; the primary influences in the data can be captured mathematically in a way that is useful. 
 
