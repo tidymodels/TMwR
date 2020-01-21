@@ -1,0 +1,11 @@
+```{r ames-setup, include = FALSE}
+knitr::opts_chunk$set(fig.path = "figures/ames-")
+```
+
+# Introducing the Ames housing data 
+
+basics
+
+
+
+
