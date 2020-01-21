@@ -4,10 +4,10 @@ rmd_files: [
   "index.Rmd",
   "introduction.Rmd",
   "tidyverse.Rmd",
-  "a-tale-of-two-models.Rmd",
   "data-spending.Rmd",
   "how-good-is-our-model.Rmd",
   "feature-engineering.Rmd",
+  "fitting-models.Rmd",
   "the-model-workflow.Rmd",
   "resampling.Rmd"
 ]
