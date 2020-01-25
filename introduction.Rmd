@@ -233,7 +233,7 @@ This iterative process is especially true for modeling. Figure \@ref(fig:modelin
 
 After an initial sequence of these tasks, more understanding is gained regarding which types of models are superior as well as which sub-populations of the data are not being effectively estimated. This leads to additional EDA and feature engineering, another round of modeling, and so on. Once the data analysis goals are achieved, the last steps are typically to finalize and document the model. For predictive models, it is common at the end to validate the model on an additional set of data reserved for this specific purpose. 
 
-As an example, @kuhn20202 use data to model the daily ridership of Chicago's public train system using predictors such as the date, the 2-week old ridership results, the weather, and other factors. An approximation of their "inner monolog" when analyzing these data is, in order:
+As an example, @fes use data to model the daily ridership of Chicago's public train system using predictors such as the date, the 2-week old ridership results, the weather, and other factors. An approximation of their "inner monolog" when analyzing these data is, in order:
 
 ```{r monolog, echo = FALSE, results = 'as-is'}
 monolog <- 
