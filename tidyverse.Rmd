@@ -5,10 +5,31 @@ library(tidyverse)
 knitr::opts_chunk$set(fig.path = "figures/tidyverse-")
 ```
 
+The tidyverse is a collection of R packages for data analysis that are developed with common ideas and norms. From @tidyverse: 
+
+> "At a high level, the tidyverse is a language for solving data science challenges with R code. Its primary goal is to facilitate a conversation between a human and a computer about data. Less abstractly, the tidyverse is a collection of R packages that share a high-level design philosophy and low-level grammar and data structures, so that learning one package makes it easier to learn the next."
+
+In this chapter, these principles are briefly discussed before diving into specific examples of syntax. After illustrating the details of the tidyverse code, some additional principles related to modeling are described that should help the reader understand the tactics used by the tidymodels packages. 
 
 ## Principles
 
-What does it mean to be "tidy" (distinguish tidy data vs tidy interfaces etc. )
+### Design for humans
+
+The tidyverse focuses on designing R packages and functions that can be easily understood and used by people. Historically, a substantial percentage of R users are people who not programmers or people who are more focused on the end results of their analyses (rather than the software complexities of their tools). As such, there should not be the expectation that users have computer science backgrounds or would be capable or writing their own R packages.
+
+For this reason, it is critical that R code be easy to work with to accomplish your goals. Documentation, training, accessibility, and other factors play an important part in achieving this. However, if the syntax itself is difficult for people to effectively use, no amount of documentation can solve this problem. The software itself must be intuitive.
+
+As an example, the naming of things is crucial. If you were new to R and were writing data analysis code utilizing linear algebra, you might be stymied that there is no matrix inverse function. Using `apropos("inv")` yields no candidates. It turns out that the function to use is `solve()` for solving systems of linear equations. For a matrix `X`, you would use `solve(X)` (with no vector for the right-hand side of the equation). This is only documented in the description in one of the arguments in the help file. In essence, you would need to know the name of the solution to be able to find the solution. 
+
+The tidyverse approach is use function that are explicit and descriptive over short and implicit. There is a focus on verbs (e.g. `fit`, `arrange`, etc.) as general methods. Verb-noun pairs are particularly effective; consider `invert_matrix()` as a function name. As noted below, in the context of modeling, it is also important to avoid highly technical jargon in names (e.g. Greek letters, etc). Names should be as self-documenting as possible. 
+
+Also, when there are similar functions in a package, the function names are designed to be optimized for tab-complete. For example, the `glue` package has a collection of functions starting with a common prefix (`glue_`) that enables users to quickly find the function that they are looking for. 
+
+
+## Reuse existing data structures
+
+## Design for the pipe and functional programming
+
 
 
 ## Code
