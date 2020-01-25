@@ -13,13 +13,30 @@ In this chapter, these principles are briefly discussed before diving into speci
 
 ## Principles
 
+The full set of strategies and tactics for writing R code in the tidyverse style can be found at the websites [`https://design.tidyverse.org`](https://design.tidyverse.org/) and [`https://principles.tidyverse.org`](https://principles.tidyverse.org/). These sections describe a few ideas and their motivation. 
+
 ### Design for humans
 
 The tidyverse focuses on designing R packages and functions that can be easily understood and used by people. Historically, a substantial percentage of R users are people who not programmers or people who are more focused on the end results of their analyses (rather than the software complexities of their tools). As such, there should not be the expectation that users have computer science backgrounds or would be capable or writing their own R packages.
 
 For this reason, it is critical that R code be easy to work with to accomplish your goals. Documentation, training, accessibility, and other factors play an important part in achieving this. However, if the syntax itself is difficult for people to easily comprehend, no amount of documentation can solve this problem. The software itself must be intuitive.
 
-As an example, the naming of things is crucial. If you were new to R and were writing data analysis code utilizing linear algebra, you might be stymied that there appears to be no matrix inverse function. Using `apropos("inv")` yields no candidates. It turns out that the function to use is `solve()` for solving systems of linear equations. For a matrix `X`, you would use `solve(X)` (with no vector for the right-hand side of the equation). This is only documented in the description in one of the arguments in the help file. In essence, you would need to know the name of the solution to be able to find the solution. 
+To contrast the tidyverse approach with more traditional R semantics, consider sorting a data frame. Using only the core language, sorting a data frame using one or more columns is achieved by reordering the columns via R's subscripting rules via `order()` (as opposed to `sort()`). To sort the iris data by two of its columns, the call might look like:
+
+```{r base-sort, eval = FALSE}
+iris[order(iris$Species, iris$Sepal.Length),]
+```
+
+While very computationally efficient, it would be difficult to argue that this is an intuitive user-interface. In `dplyr`, the arrange function takes a set of variable names as input arguments directly:
+
+```{r dplyr-sort, eval = FALSE}
+library(dplyr)
+arrange(data = iris, Species, Sepal.Length)
+```
+
+Note that the variable names are unquoted; where many traditional R functions require a character string to specify variables, tidyverse functions take unquoted names or _selector functions_. The selectors allow for one or more  readable rules that are applied to the column names. For example, `starts_with("Sepal")` would select the first two columns of the `iris` data frame.
+
+Additionally, the naming of things is crucial. If you were new to R and were writing data analysis code utilizing linear algebra, you might be stymied that there appears to be no matrix inverse function. Using `apropos("inv")` yields no candidates. It turns out that the function to use is `solve()` for solving systems of linear equations. For a matrix `X`, you would use `solve(X)` (with no vector for the right-hand side of the equation). This is only documented in the description in one of the arguments in the help file. In essence, you would need to know the name of the solution to be able to find the solution. 
 
 The tidyverse approach is use function names that are explicit and descriptive instead of those that are short and implicit. There is a focus on verbs (e.g. `fit`, `arrange`, etc.) as general methods. Verb-noun pairs are particularly effective; consider `invert_matrix()` as a function name. As noted below, in the context of modeling, it is also important to avoid highly technical jargon in names (e.g. Greek letters, etc). Names should be as self-documenting as possible. 
 
@@ -52,6 +69,38 @@ These are advantageous tools when the problem is _small in scope_ and the potent
 
 
 ## Design for the pipe and functional programming
+
+The `magrittr` pipe operator (`%>%`) is a tool for chaining together a sequence of R commands. To demonstrate, these commands can be used to sort a data frame then retain the first 10 rows:
+
+```{r no-pipe, eval = FALSE}
+small_iris <- arrange(small_iris, Species)
+small_iris <- slice(iris, 1:10)
+
+# or more compactly: 
+small_iris <- slice(arrange(iris, Species), 1:10)
+```
+
+The pipe operator substitutes the value of the left-hand side of the operator as the first argument to the right-hand side: 
+
+```{r pipe, eval = FALSE}
+small_iris <- 
+  iris %>% 
+  arrange(Species) %>% 
+  slice(1:10)
+```
+
+The piped version of this sequence is more readable and the readability increases as more operations are added to the sequence. This approach to programing works in this example because all of the functions that are used return a data structure (a data frame) that is the first argument to the next function. This is by design. When possible, create functions that can be incorporated into a pipeline of operations. 
+
+If you have used `ggplot2`, this is not unlike the layering of plot aspects into a `ggplot` object with the `+` operator. To make a scatterplot with a regression line, the initial `ggplot()` call is augmented with two additional operations:
+
+```{r ggplot-chain, eval = FALSE}
+library(ggplot2)
+ggplot(mtcars, aes(x = wt, y = mpg)) +
+  geom_point() + 
+  geom_smooth(method = lm)
+```
+
+While similar to the `dplyr` pipeline, note that the first argument to this pipeline is a data set (`mtcars`) and that each function call returns a `ggplot` object. Not all pipelines need to keep the returned values (plot objects) the same as the initial value (a data frame). Also, using the the pipe operator with `dplyr` operations has acclimated users to expecting to return a data frame when pipelines are used; as shown with `ggplot`, this does not need to be the case. 
 
 
 
@@ -113,8 +162,6 @@ The S language, on which R is based, has had a rich data analysis environment si
 To demonstrate the fundamentals, experimental data from @mcdonald2009 (by way of @mangiafico2015) are used. These data relate how the ambient temperature related to the rate of cricket chirps per minute. Data were collected for two species: _O. exclamationis_ and _O. niveus_. The data are contained in a data frame called `crickets` that contains a total of `r nrow(crickets)` data points. These data are shown via a `ggplot` graph. 
 
 ```{r cricket-plot, out.width = '100%', fig.width=8, fig.height=6, warning = FALSE}
-library(ggplot2)
-
 names(crickets)
 
 # Plot the temperature on the x-axis, the chirp rate on the y-axis. The plot
