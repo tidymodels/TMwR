@@ -2,6 +2,7 @@
 
 ```{r tidyverse-setup, include = FALSE}
 library(tidyverse)
+library(lubridate)
 knitr::opts_chunk$set(fig.path = "figures/tidyverse-")
 ```
 
@@ -104,13 +105,174 @@ While similar to the `dplyr` pipeline, note that the first argument to this pipe
 
 
 
-## Code
+## Examples of tidyverse syntax
 
-Things that I think that we'll need summaries of:
+Before diving into examples, it is important to discuss how the tidyverse relies on a type of data frames called a "tibble". Tibbles have slightly different rules than basic data frames. For example, tibbles natural with  column names that are not syntactically valid variable names:
 
- * strategies: variable specification, pipes (with data or other first arguments), conflicts and using namespaces, splicing, non-standard evaluation, 
+```{r tidyverse-names}
+# Wants valid names:
+data.frame(`variable 1` = 1:2)
+# But can be coerced to use them with an extra option:
+df <- data.frame(`variable 1` = 1:2, two = 3:4, check.names = FALSE)
+df
 
- * tactics: `select`, `bind_cols`, `tidyselect`, `slice`,  `!!` and `!!!`, `...` for passing arguments, tibbles, joins, `nest`/`unnest`, `group_by`
+# But tibbles just work:
+tbbl <- tibble(`variable 1` = 1:2, two = 3:4)
+tbbl
+```
+
+Standard data frames enable _partial matching_ of arguments so that code that a portion of the column names still work. Tibbles prevent this from happening since it can lead to accidental errors. 
+
+```{r tidyverse-partial, error = TRUE}
+df$tw
+
+tbbl$tw
+```
+
+Tibbles also prevent one of the most common R errors: dropping of dimensions. If a standard data frame subsets the columns down to a single column, the object is converted to a vector. Tibbles _never_ do this:
+
+```{r tidyverse-drop}
+df[, "two"]
+
+tbbl[, "two"]
+```
+
+There are various other advantages to using tibbles instead of data frames, such as better printing and so on.  
+
+
+```{r tidyverse-import-raw, include = FALSE}
+url <- "chi.csv"
+train_cols <- 
+  cols(
+    station_id = col_double(),
+    stationname = col_character(),
+    date = col_character(),
+    daytype = col_character(),
+    rides = col_double()
+  )
+num_combos <- 
+  read_delim(url, delim = ",", col_types = train_cols) %>% 
+  distinct(date, stationname) %>% 
+  nrow()
+```
+
+To demonstrate some syntax, the tidyverse will be used to read in data that could be used in modeling. The data set comes from the city of Chicago's data portal and contains daily ridership data for the city's elevated train stations. The data set has columns for: the station identifier (numeric), the station name (character), the date (character in `mm/dd/yyyy` format), the day of the week (character), and the number of riders (numeric).
+
+The data are already in a tidy format. An _untidy format_ would have had the stations in columns with a single row for each day. **MORE HERE**
+
+The initial tidyverse pipeline will conduct the following tasks, in order: 
+
+1. The tidyverse package `readr` will be used to read the data and convert them into a tibble. To do this, the `read_delim()` function can determine the type of data by reading and initial number of rows. Alternatively, if the column names and types known, a column specification can be created in R and passed to `read_delim()`. 
+
+1. The data are filtered to eliminate a few columns that are not needed (such as the station ID) and the column `stationname` is changed to `station`. The function `select()` is used. When filtering, the names of the column names can be used or a `dplyr()` selector function. When selecting names, the new variable can be declared using the argument format `new_name = old_name`.
+
+1. The date field is converted to the R date format using the `mdy()` function from the `lubridate` package. The ridership numbers are also converted to thousands. Both of these computations are executed using the `dplyr` `mutate()` function. This 
+
+1. There are a small number of days that have replicate ridership numbers at certain stations. To mitigate this issue, the maximum number of rides will be used for each station and day combination. To do this, the data will be _grouped_ by station and day then the ridership data within each of the `r num_combos` unique combinations will be _summarized_ with the maximum statistic. 
+
+The tidyverse code for these steps is:
+
+```{r tidyverse-import}
+library(tidyverse)
+library(lubridate)
+
+url <- "chi.csv"
+
+# Pre-define the data types for the different columns that
+# are imported from the URL. The `col_()` functions tell `read_delim()` what
+# type of data to expect.
+train_cols <- 
+  cols(
+    station_id  = col_double(),
+    stationname = col_character(),
+    date        = col_character(),
+    daytype     = col_character(),
+    rides       = col_double()
+  )
+
+all_stations <- 
+  # Step 1: Read in the data.
+  read_delim(url, delim = ",", col_types = train_cols) %>% 
+  # Step 2: filter columns and rename stationname
+  dplyr::select(station = stationname, date, rides) %>% 
+  # Step 3: Convert the character date field to a date encoding.
+  # Also, put the data in units of 1K rides
+  mutate(date = mdy(date), rides = rides/1000) %>% 
+  # Step 4: Summarize the multiple records using the maximum.
+  group_by(date, station) %>% 
+  summarize(rides = max(rides)) %>% 
+  ungroup()
+```
+
+
+A common data operation is to convert the data back and forth from a _long format_ to a _wide format_. The current data set has the daily ride data stacked on each other so that there are multiple rows for each day and single columns for the number of rides and the station. The wide format would have a single row for day multiple columns for each station name that contain the ridership values. The `tidyr` package can be used to do this. For illustration, a small reproducible example is created by filtering down the data: 
+
+```{r tidyverse-small}
+long_format <- 
+  all_stations %>% 
+  dplyr::filter(
+    station %in% c("Roosevelt", "O'Hare Airport", "Polk") & 
+      date <= ymd("2001-01-03")
+  )
+long_format
+```
+
+To convert to wide format, the function `pivot_wider()` is used to specify the columns that define the unique rows, the columns that are used to name the new columns, and the columns that contain the values to transpose.  In this example, the single ID column is `date`, and the naming and value columns are `station` and `rides`, respectively. 
+
+```{r tidyverse-long-to-wide}
+wide_stations <-
+  long_format %>% 
+  pivot_wider(id_cols = date, names_from = station, values_from = rides)
+wide_stations
+```
+
+Note that one station has spaces and a quotation character. This is typically not a great idea for a data frame column name but can be used. In order to use this column, it should be surrounded with back-ticks, as shown below. 
+
+To convert back, a similar call to `pivot_longer()` will get there:
+
+```{r tidyverse-wide-to-long, results = 'hide'}
+wide_stations %>% 
+  pivot_longer(cols = c(`O'Hare Airport`, Polk, Roosevelt), 
+               names_to = "station", values_to = "rides")
+
+# Or, select everything but 'date'
+wide_stations %>% 
+  pivot_longer(cols = c(-date), 
+               names_to = "station", values_to = "rides")
+```
+
+Another data format that will be used extensively is _nested format_. Columns in data frames have to be the same data type (e.g., all numeric, all dates, etc). Data frames can also contain _list columns_. As long as the number of elements in the list is the same as the number of rows in the data frame, the list can contain any type of data, such as model objects or more data frames. 
+
+To create an example, the `tidy` `nest()` function will be used to create a tibble with one row per station and a list column containing data frames with the station dates and ridership values. 
+
+```{r tidyverse-nest-stations}
+nested_by_date <-
+  long_format %>% 
+  nest(station_data= c(date, rides))
+
+nested_by_date
+
+# The data for the first day:
+nested_by_date$station_data[[1]]
+```
+
+As another example, suppose there was interest in fitting a different linear model for each station where ridership was modeled as a simple function of date. This could be done with the current nested version of the data: **TODO this uses map**
+
+```{r tidyverse-nest-by-lm}
+nested_by_date %>% 
+  mutate(models = map(station_data, ~ lm(rides ~ date, data = .x)))
+```
+
+The `models` column now contains objects that have class "`lm`" class. 
+
+Alternatively, the original long format data can be grouped by station then `do()` will evaluate a function for each group:
+
+```{r tidyverse-group-by-lm}
+long_format %>% 
+  group_by(station) %>% 
+  do(models = lm(rides ~ date, data = .))
+```
+
 
 
 ## A review of base R modeling syntax {#r-review}
