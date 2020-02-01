@@ -11,7 +11,7 @@ rmd_files: [
   "fitting-models.Rmd",
   "the-model-workflow.Rmd",
   "resampling.Rmd",
-  "overfitting.Rmd",
+  "over-fitting.Rmd",
   "model-tuning.Rmd"
 ]
 
