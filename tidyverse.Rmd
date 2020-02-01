@@ -1,6 +1,6 @@
 # A tidyverse primer {#tidyverse-primer}
 
-```{r introduction-setup, include = FALSE}
+```{r tidyverse-setup, include = FALSE}
 library(tidyverse)
 knitr::opts_chunk$set(fig.path = "figures/tidyverse-")
 ```
@@ -13,7 +13,7 @@ In this chapter, these principles are briefly discussed before diving into speci
 
 ## Principles
 
-The full set of strategies and tactics for writing R code in the tidyverse style can be found at the websites [`https://design.tidyverse.org`](https://design.tidyverse.org/) and [`https://principles.tidyverse.org`](https://principles.tidyverse.org/). These sections describe a few ideas and their motivation. 
+The full set of strategies and tactics for writing R code in the tidyverse style can be found at the website [`https://design.tidyverse.org`](https://design.tidyverse.org/). The following sections describe a few ideas and their motivation. 
 
 ### Design for humans
 
@@ -21,15 +21,15 @@ The tidyverse focuses on designing R packages and functions that can be easily u
 
 For this reason, it is critical that R code be easy to work with to accomplish your goals. Documentation, training, accessibility, and other factors play an important part in achieving this. However, if the syntax itself is difficult for people to easily comprehend, no amount of documentation can solve this problem. The software itself must be intuitive.
 
-To contrast the tidyverse approach with more traditional R semantics, consider sorting a data frame. Using only the core language, sorting a data frame using one or more columns is achieved by reordering the columns via R's subscripting rules via `order()` (as opposed to `sort()`). To sort the iris data by two of its columns, the call might look like:
+To contrast the tidyverse approach with more traditional R semantics, consider sorting a data frame. Using only the core language, sorting a data frame using one or more columns is achieved by reordering the columns via R's subscripting rules in conjunction with `order()` (as opposed to `sort()`). To sort the iris data by two of its columns, the call might look like:
 
-```{r base-sort, eval = FALSE}
-iris[order(iris$Species, iris$Sepal.Length),]
+```{r tidyverse-base-sort, eval = FALSE}
+iris[order(iris$Species, iris$Sepal.Length), ]
 ```
 
 While very computationally efficient, it would be difficult to argue that this is an intuitive user-interface. In `dplyr`, the arrange function takes a set of variable names as input arguments directly:
 
-```{r dplyr-sort, eval = FALSE}
+```{r tidyverse-dplyr-sort, eval = FALSE}
 library(dplyr)
 arrange(data = iris, Species, Sepal.Length)
 ```
@@ -61,7 +61,7 @@ In doing so, a variety of vector-based functions can be used with these columns,
 
 One downside to replying on common data structures is the potential loss of computational performance. In some situations, data can be represented in specialized formats that are more efficient representations of the data. For example: 
 
- * In computational chemistry, the structural descriptor format (SDF) is a tool to take chemical structures and encode them in a format that is computational efficient to work with. 
+ * In computational chemistry, the structure-data file format (SDF) is a tool to take chemical structures and encode them in a format that is computational efficient to work with. 
 
  * Data that have a large number of values that are the same (such as zeros for binary data) can be stored in a _sparse matrix format_. This format can reduce the size of the data as well as enable more efficient computational techniques. 
 
@@ -72,7 +72,7 @@ These are advantageous tools when the problem is _small in scope_ and the potent
 
 The `magrittr` pipe operator (`%>%`) is a tool for chaining together a sequence of R commands. To demonstrate, these commands can be used to sort a data frame then retain the first 10 rows:
 
-```{r no-pipe, eval = FALSE}
+```{r tidyverse-no-pipe, eval = FALSE}
 small_iris <- arrange(small_iris, Species)
 small_iris <- slice(iris, 1:10)
 
@@ -82,7 +82,7 @@ small_iris <- slice(arrange(iris, Species), 1:10)
 
 The pipe operator substitutes the value of the left-hand side of the operator as the first argument to the right-hand side: 
 
-```{r pipe, eval = FALSE}
+```{r tidyverse-pipe, eval = FALSE}
 small_iris <- 
   iris %>% 
   arrange(Species) %>% 
@@ -93,7 +93,7 @@ The piped version of this sequence is more readable and the readability increase
 
 If you have used `ggplot2`, this is not unlike the layering of plot aspects into a `ggplot` object with the `+` operator. To make a scatterplot with a regression line, the initial `ggplot()` call is augmented with two additional operations:
 
-```{r ggplot-chain, eval = FALSE}
+```{r tidyverse-ggplot-chain, eval = FALSE}
 library(ggplot2)
 ggplot(mtcars, aes(x = wt, y = mpg)) +
   geom_point() + 
@@ -116,7 +116,7 @@ Things that I think that we'll need summaries of:
 ## A review of base R modeling syntax {#r-review}
 
 
-```{r cricket-data, include = FALSE}
+```{r tidyverse-cricket-data, include = FALSE}
 crickets <- 
   tibble::tribble(
            ~species,      ~temp,  ~rate,
@@ -161,7 +161,7 @@ The S language, on which R is based, has had a rich data analysis environment si
 
 To demonstrate the fundamentals, experimental data from @mcdonald2009 (by way of @mangiafico2015) are used. These data relate how the ambient temperature related to the rate of cricket chirps per minute. Data were collected for two species: _O. exclamationis_ and _O. niveus_. The data are contained in a data frame called `crickets` that contains a total of `r nrow(crickets)` data points. These data are shown via a `ggplot` graph. 
 
-```{r cricket-plot, out.width = '100%', fig.width=8, fig.height=6, warning = FALSE}
+```{r tidyverse-cricket-plot, out.width = '100%', fig.width=8, fig.height=6, warning = FALSE}
 names(crickets)
 
 # Plot the temperature on the x-axis, the chirp rate on the y-axis. The plot
@@ -225,7 +225,7 @@ In addition to the convenience of automatically creating indicator variables, th
 
 For the initial data analysis, the two-factor interaction model is used. In this book, the suffix `_fit` is used for R objects for fitted models. 
 
-```{r cricket-fit}
+```{r tidyverse-cricket-fit}
 interaction_fit <-  lm(rate ~ (temp + species)^2, data = crickets) 
 
 # To print a short summary of the model:
@@ -253,7 +253,7 @@ From a technical standpoint, R is _lazy_. Model fitting functions typically comp
 
 Our second order of business is to assess if the inclusion of the interaction term is necessary. The most appropriate approach for this model is to re-compute the model without the interaction term and use the `anova()` method. 
 
-```{r cricket-anova}
+```{r tidyverse-cricket-anova}
 # Fit a reduced model:
 main_effect_fit <-  lm(rate ~ temp + species, data = crickets) 
 
@@ -266,7 +266,7 @@ The results of the statistical test generates a p-value of `r format.pval(anova(
 Residual plots should be re-assessed to make sure that our theoretical assumptions are valid enough to trust the p-values produced by the model (not shown but spoiler alert: they are). 
 
 The `summary()` method is used to inspect the coefficients, standard errors, and p-values of each model term: 
-```{r main-coef}
+```{r tidyverse-main-coef}
 summary(main_effect_fit)
 ```
 
@@ -276,7 +276,7 @@ The only issue in this analysis is the intercept value. It indicates that at 0 C
 
 If there were a need to estimate the chirp rate at a temperature that was not observed in the experiment, the `predict()` method would be used. It takes the model object and a data frame of new values for prediction. For example, the model estimates the chirp rate for _O. exclamationis_ for temperatures between 15 C and 20 C can be computed via:
 
-```{r cricket-pred}
+```{r tidyverse-cricket-pred}
 new_values <- data.frame(species = "O. exclamationis", temp = 15:20)
 predict(main_effect_fit, new_values)
 ```
@@ -300,7 +300,7 @@ Finally, as previously mentioned, this framework was devised in 1992. Most of th
 
 One of the strengths of R is that it encourages developers to create a user-interface that fits their needs.  As an example, here are three common methods for creating a scatter plot of two numeric variables residing in a data frame called `plot_data`:
 
-```{r three-plots, eval = FALSE}
+```{r tidyverse-three-plots, eval = FALSE}
 plot(plot_data$x, plot_data$y)
 
 library(lattice)
@@ -320,13 +320,13 @@ The advantage of R's diversity of interfaces is that it it can evolve over time 
 
 Unfortunately, some of the syntactical diversity is due to a focus on the developer's needs instead of the needs of the end-user. For example, one issue with some existing methods in base R is that the manner in which some data are stored may not be the most useful. For example, in Section \@ref(r-review) the results of linear model were saved: 
 
-```{r show-in-model}
+```{r tidyverse-show-in-model}
 main_effect_fit
 ```
 
 The `summary()` method was used to print the results of the model fit, including a table with parameter values, their uncertainty estimates, and p-values. These particular results can also be saved:
 
-```{r lm-param}
+```{r tidyverse-lm-param}
 model_res <- summary(main_effect_fit)
 # The model coefficient table is accessible via the `coef`
 # method.
@@ -343,11 +343,11 @@ While these additional data formatting steps are not problematic they are a bit 
 
 As a solution, the `broom` package has methods to convert many types of objects to a tidy structure. For example, using the `tidy()` method on the linear model produces:
 
-```{r load-tm, include = FALSE}
+```{r tidyverse-load-tm, include = FALSE}
 library(tidymodels)
 ```
 
-```{r tidy-lm}
+```{r tidyverse-tidy-lm}
 library(tidymodels)  # includes the broom package
 tidy(main_effect_fit)
 ```
@@ -356,7 +356,7 @@ The column names are standardized across models and do not contain any additiona
  
 As another example of _unpredictability_, another convention in base R is related to missing data. The general rule is that missing data propagate more missing data; the average of a set of values with a missing data point is itself missing and so on. When models make predictions, the vast majority require all of the predictors to have complete values. There are several options based in to R at this point in the form of `na.action`.  This sets the policy for how a function should behave if there are missing values. The two most common policies are `na.fail` and `na.omit`. For former produces an error of missing data are involved while the latter removes the missing data prior to the calculations. From out previous example:
 
-```{r lm-missing, error = TRUE}
+```{r tidyverse-lm-missing, error = TRUE}
 # Add a missing value to the prediction set
 new_values$temp[1] <- NA
 
