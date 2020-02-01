@@ -6,6 +6,13 @@ knitr::opts_chunk$set(fig.path = "figures/fitting-")
 
 parsnip introduction
 
+formula vs non-formula method
 
+differences in arguments and syntax
 
+different software to fit the same structural model (define this first)
+
+model mode
+
+prediction stuff
 
