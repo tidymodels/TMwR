@@ -1,4 +1,4 @@
-```{r a-tale-of-two-models-setup, include = FALSE}
+```{r two-models-setup, include = FALSE}
 knitr::opts_chunk$set(fig.path = "figures/tale-")
 ```
 
