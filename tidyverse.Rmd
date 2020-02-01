@@ -58,7 +58,7 @@ boot_samp
 class(boot_samp)
 ```
 
-In doing so, a variety of vector-based functions can be used with these columns, such as `vapply()` or `purrr::map()`. This object has multiple classes but inherits some methods for data frames and tibbles. Additionally, new columns can be added to the results without affecting the class of the data. This is much easier and versatile for users to work with than new object type that does not make its data structure obvious. 
+In doing so, a variety of vector-based functions can be used with these columns, such as `vapply()` or `purrr::map()`^[If you've never seen `::` in R code before, it is a method to be explicit about what function you are calling. The value of the right-hand side is the _namespace_ where the function lives (usually a package name). The left-hand side is the function name. In cases where two packages use the same function name, this syntax will ensure that the correct function is invoked.]. This object has multiple classes but inherits some methods for data frames and tibbles. Additionally, new columns can be added to the results without affecting the class of the data. This is much easier and versatile for users to work with than new object type that does not make its data structure obvious. 
 
 One downside to replying on common data structures is the potential loss of computational performance. In some situations, data can be represented in specialized formats that are more efficient representations of the data. For example: 
 
@@ -111,7 +111,7 @@ Before diving into examples, it is important to discuss how the tidyverse relies
 
 ```{r tidyverse-names}
 # Wants valid names:
-data.frame(`variable 1` = 1:2)
+data.frame(`variable 1` = 1:2, two = 3:4)
 # But can be coerced to use them with an extra option:
 df <- data.frame(`variable 1` = 1:2, two = 3:4, check.names = FALSE)
 df
@@ -166,7 +166,7 @@ The initial tidyverse pipeline will conduct the following tasks, in order:
 
 1. The data are filtered to eliminate a few columns that are not needed (such as the station ID) and the column `stationname` is changed to `station`. The function `select()` is used. When filtering, the names of the column names can be used or a `dplyr()` selector function. When selecting names, the new variable can be declared using the argument format `new_name = old_name`.
 
-1. The date field is converted to the R date format using the `mdy()` function from the `lubridate` package. The ridership numbers are also converted to thousands. Both of these computations are executed using the `dplyr` `mutate()` function. This 
+1. The date field is converted to the R date format using the `mdy()` function from the `lubridate` package. The ridership numbers are also converted to thousands. Both of these computations are executed using the `dplyr::mutate()` function. This 
 
 1. There are a small number of days that have replicate ridership numbers at certain stations. To mitigate this issue, the maximum number of rides will be used for each station and day combination. To do this, the data will be _grouped_ by station and day then the ridership data within each of the `r num_combos` unique combinations will be _summarized_ with the maximum statistic. 
 
@@ -243,23 +243,23 @@ wide_stations %>%
 
 Another data format that will be used extensively is _nested format_. Columns in data frames have to be the same data type (e.g., all numeric, all dates, etc). Data frames can also contain _list columns_. As long as the number of elements in the list is the same as the number of rows in the data frame, the list can contain any type of data, such as model objects or more data frames. 
 
-To create an example, the `tidy` `nest()` function will be used to create a tibble with one row per station and a list column containing data frames with the station dates and ridership values. 
+To create an example, the `tidy::nest()` function will be used to create a tibble with one row per station and a list column containing data frames with the station dates and ridership values. 
 
 ```{r tidyverse-nest-stations}
-nested_by_date <-
+nested_by_station <-
   long_format %>% 
-  nest(station_data= c(date, rides))
+  nest(station_data = c(date, rides))
 
-nested_by_date
+nested_by_station
 
-# The data for the first day:
-nested_by_date$station_data[[1]]
+# The data for O'Hare Airport:
+nested_by_station$station_data[[1]]
 ```
 
 As another example, suppose there was interest in fitting a different linear model for each station where ridership was modeled as a simple function of date. This could be done with the current nested version of the data: **TODO this uses map**
 
 ```{r tidyverse-nest-by-lm}
-nested_by_date %>% 
+nested_by_station %>% 
   mutate(models = map(station_data, ~ lm(rides ~ date, data = .x)))
 ```
 
@@ -323,7 +323,7 @@ The S language, on which R is based, has had a rich data analysis environment si
 
 To demonstrate the fundamentals, experimental data from @mcdonald2009 (by way of @mangiafico2015) are used. These data relate how the ambient temperature related to the rate of cricket chirps per minute. Data were collected for two species: _O. exclamationis_ and _O. niveus_. The data are contained in a data frame called `crickets` that contains a total of `r nrow(crickets)` data points. These data are shown via a `ggplot` graph. 
 
-```{r tidyverse-cricket-plot, out.width = '100%', fig.width=8, fig.height=6, warning = FALSE}
+```{r tidyverse-cricket-plot, out.width = '70%', fig.width=6, fig.height=4, warning = FALSE}
 names(crickets)
 
 # Plot the temperature on the x-axis, the chirp rate on the y-axis. The plot
@@ -548,7 +548,7 @@ Finally, one other potential stumbling block can be inconsistencies between pack
 
 Note that the last example has a custom _function_ to make predictions instead of using the model common `predict()` interface.  
 
-There are a few R packages that provide a unified interface to harmonize these modeling APIs, such as `caret` and `mlr`. tidymodels takes a similar approach to unification of the function interface as well as enforcing consistency in the function names and return values (e.g., `broom::tidy()`)^[If you've never seen `::` in R code before, it is a method to be explicit about what function you are calling. The value of the right-hand side is the _namespace_ where the function lives (usually a package name). The left-hand side is the function name. In cases where two packages use the same function name, this syntax will ensure that the correct function is invoked.].  
+There are a few R packages that provide a unified interface to harmonize these modeling APIs, such as `caret` and `mlr`. tidymodels takes a similar approach to unification of the function interface as well as enforcing consistency in the function names and return values (e.g., `broom::tidy()`).  
 
 
 ## Some additional tidy principals for modeling. 
