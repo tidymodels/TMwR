@@ -283,6 +283,12 @@ if (knitr::is_html_output()) {
     kable_styling() %>% 
     column_spec(2, width = "25%") %>%
     column_spec(1, width = "75%", italic = TRUE)
+} else {
+  tab <- 
+    monolog %>% 
+    dplyr::select(Thoughts, Activity) %>% 
+    kable() %>%
+    kable_styling()
 }
 tab
 ```

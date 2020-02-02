@@ -3,7 +3,8 @@
 .RData
 .Ruserdata
 .DS_Store
-^_book$
+_book
 _main.rds
-^figures$
-^libs$
+figures/*
+libs
+
