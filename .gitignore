@@ -5,6 +5,5 @@
 .DS_Store
 _book
 _main.rds
-figures/*
 libs
-
+figures

@@ -152,9 +152,9 @@ Finally, before starting a data analysis process, there should be clear expectat
 ```{r introduction-data-science-model, echo = FALSE, out.width = '80%', fig.cap = "The data science process (from R for Data Science)."}
 
 if (knitr:::is_html_output()) {
-  knitr::include_graphics("figures-premade/data-science-model.svg")
+  knitr::include_graphics("premade/data-science-model.svg")
 } else {
-   knitr::include_graphics("figures-premade/data-science-model.pdf")
+   knitr::include_graphics("premade/data-science-model.pdf")
 }
 ```
 

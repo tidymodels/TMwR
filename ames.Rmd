@@ -58,6 +58,6 @@ ggmap(get_stamenmap(loc, zoom = 15, maptype = "toner-lines")) +
   scale_color_manual(values = col_key)
 ```
 ```{r ames-map, echo = FALSE, fig.cap = "Neighborhoods in Ames IA."}
-knitr::include_graphics(path = "figures-premade/ames.png")
+knitr::include_graphics(path = "premade/ames.png")
 ```
 
