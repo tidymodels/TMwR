@@ -1,5 +1,6 @@
 ```{r two-models-setup, include = FALSE}
-knitr::opts_chunk$set(fig.path = "figures/tale-")
+knitr::opts_chunk$set(fig.path = "figures/")
+library(tidymodels)
 ```
 
 # A tale of two models  {#two-models}

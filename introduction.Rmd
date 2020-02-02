@@ -1,7 +1,7 @@
 # Introduction
 
 ```{r introduction-setup, include = FALSE}
-knitr::opts_chunk$set(fig.path = "figures/introduction-")
+knitr::opts_chunk$set(fig.path = "figures/")
 library(tidyverse)
 library(gridExtra)
 library(AmesHousing)
@@ -46,7 +46,7 @@ Before proceeding, lets describe a taxa for types of models, grouped by _purpose
 
 For example, large scale measurements of RNA have been possible for some time using _microarrays_. Early laboratory methods place a biological sample on a small microchip. Very small locations on the chip would be able to assess a measure of signal based on the abundance of a specific RNA sequence. The chip would contain thousands (or more) outcomes, each a quantification of the RNA related to some biological process. However, there could be quality issued on the chip that might lead to poor results. A fingerprint accidentally left on a portion of the chip might cause inaccurate measurements when scanned. 
 
-An early method for evaluating such issues were _probe-level models_, or PLM's [@bolstad2004]. A statistical model would be created that accounted for the _known_ differences for the data from the chip, such as the RNA sequence, the type of sequence, and so on. If there were other, unwanted factors in the data, these would be contained in the model residuals. When the residuals were plotted by their location on the chip, a good quality chip would show no patterns. When an issue did occur, some sort of spatial pattern would be discernible. Often the type of pattern would suggest the underlying issue (e.g. a fingerprint) and a possible solution (wipe the chip off and rescan, repeat the sample, etc.). Figure \@ref(fig:descr-examples)(a) shows an application of this method for two microarrays taken from @Gentleman2005. The images show two different colors; red is where the signal intensity was larger than the model expects while the blue color shows lower than expected values. The left-hand panel demonstrates a fairly random pattern while the right-hand panel shows some type of unwanted artifact in the middle of the chip. 
+An early method for evaluating such issues were _probe-level models_, or PLM's [@bolstad2004]. A statistical model would be created that accounted for the _known_ differences for the data from the chip, such as the RNA sequence, the type of sequence, and so on. If there were other, unwanted factors in the data, these would be contained in the model residuals. When the residuals were plotted by their location on the chip, a good quality chip would show no patterns. When an issue did occur, some sort of spatial pattern would be discernible. Often the type of pattern would suggest the underlying issue (e.g. a fingerprint) and a possible solution (wipe the chip off and rescan, repeat the sample, etc.). Figure \@ref(fig:introduction-descr-examples)(a) shows an application of this method for two microarrays taken from @Gentleman2005. The images show two different colors; red is where the signal intensity was larger than the model expects while the blue color shows lower than expected values. The left-hand panel demonstrates a fairly random pattern while the right-hand panel shows some type of unwanted artifact in the middle of the chip. 
 
 ```{r introduction-descr-examples, echo = FALSE, fig.cap = "Two examples of how descriptive models can be used to illustrate specific patterns.", out.width = '80%', dev = "png", fig.height = 8, warning = FALSE, message = FALSE}
 load("RData/plm_resids.RData")
@@ -86,7 +86,7 @@ ames_plot <-
 grid.arrange(plm_plot, ames_plot, ncol = 1)
 ```
 
-Another example of a descriptive model is the _locally estimated scatterplot smoothing_ model, more commonly known as LOESS [@cleveland1979]. Here, a smooth and flexible regression model is fit to a data set, usually with a single independent variable, and the fitted regression line is used to elucidate some trend in the data. These types of _smoothers_ are used to discover potential ways to represent a variable in a model. This is demonstrated in Figure \@ref(fig:descr-examples)(b) where a nonlinear trend is illuminated by the flexible smoother. From this plot, it is clear that there is a hhighly nonlinear relationship between the sale price of a house and its latitude. 
+Another example of a descriptive model is the _locally estimated scatterplot smoothing_ model, more commonly known as LOESS [@cleveland1979]. Here, a smooth and flexible regression model is fit to a data set, usually with a single independent variable, and the fitted regression line is used to elucidate some trend in the data. These types of _smoothers_ are used to discover potential ways to represent a variable in a model. This is demonstrated in Figure \@ref(fig:introduction-descr-examples)(b) where a nonlinear trend is illuminated by the flexible smoother. From this plot, it is clear that there is a hhighly nonlinear relationship between the sale price of a house and its latitude. 
 
 
 **Inferential Models**: In these situations, the goal is to produce a decision for a research question or to test a specific hypothesis. The goal is to make some statement of truth regarding some predefined conjecture or idea. In many (but not all) cases, some qualitative statement is produced.
@@ -152,13 +152,15 @@ Finally, before starting a data analysis process, there should be clear expectat
 ```{r introduction-data-science-model, echo = FALSE, out.width = '80%', fig.cap = "The data science process (from R for Data Science)."}
 
 if (knitr:::is_html_output()) {
+  file.copy("premade/data-science-model.svg", "_book/premade/data-science-model.svg")
   knitr::include_graphics("premade/data-science-model.svg")
 } else {
-   knitr::include_graphics("premade/data-science-model.pdf")
+  file.copy("premade/data-science-model.pdf", "_book/premade/data-science-model.pdf")
+  knitr::include_graphics("premade/data-science-model.pdf")
 }
 ```
 
-The process of investigating the data may not be simple. @wickham2016 contains an excellent illustration of the general data analysis process, reproduced with Figure \@ref(fig:data-science-model). Data ingestion and cleaning are shown as the initial steps. When the analytical steps commence, they are a heuristic process; we cannot pre-determine how long they may take. The cycle of analysis, modeling, and visualization often require multiple iterations. 
+The process of investigating the data may not be simple. @wickham2016 contains an excellent illustration of the general data analysis process, reproduced with Figure \@ref(fig:introduction-data-science-model). Data ingestion and cleaning are shown as the initial steps. When the analytical steps commence, they are a heuristic process; we cannot pre-determine how long they may take. The cycle of analysis, modeling, and visualization often require multiple iterations. 
 
 ```{r introduction-modeling-process, echo = FALSE, out.width = '100%', fig.width=8, fig.height=3, fig.cap = "A schematic for the typical modeling process (from Feature Engineering and Selection).", warning = FALSE}
 widths <- c(8, 4, 10, 2, 6, 6, 
@@ -224,9 +226,9 @@ ggplot(bar_loc) +
   ylim(c(.5, 2.25))
 ```
 
-This iterative process is especially true for modeling. Figure \@ref(fig:modeling-process) originates from @kuhn20202 and is meant to emulate the typical path to determining an appropriate model. The general phases are:
+This iterative process is especially true for modeling. Figure \@ref(fig:introduction-modeling-process) originates from @fes and is meant to emulate the typical path to determining an appropriate model. The general phases are:
 
- * Exploratory data analysis (EDA) and Quantitative Analysis (blue bars). Initially there is a back and forth between numerical analysis and visualization of the data (represented in Figure \@ref(fig:data-science-model)) where different discoveries lead to more questions and data analysis "side-quests" to gain more understanding. 
+ * Exploratory data analysis (EDA) and Quantitative Analysis (blue bars). Initially there is a back and forth between numerical analysis and visualization of the data (represented in Figure \@ref(fig:introduction-data-science-model)) where different discoveries lead to more questions and data analysis "side-quests" to gain more understanding. 
  * Feature engineering (green bars). Understanding results in the creation of specific model terms that make it easier to accurately model the observed data. This can include complex methodologies (e.g., PCA) or simpler features (using the ratio of two predictors). 
 
  * Model tuning and selection (red and gray bars). A variety of models are generated and their performance is compared. Some models require _parameter tuning_ where some structural parameters are required to be specified or optimized. 

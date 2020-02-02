@@ -1,9 +1,9 @@
 # A tidyverse primer {#tidyverse-primer}
 
 ```{r tidyverse-setup, include = FALSE}
+knitr::opts_chunk$set(fig.path = "figures/")
 library(tidyverse)
 library(lubridate)
-knitr::opts_chunk$set(fig.path = "figures/tidyverse-")
 ```
 
 The tidyverse is a collection of R packages for data analysis that are developed with common ideas and norms. From @tidyverse: 

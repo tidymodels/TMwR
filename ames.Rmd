@@ -1,5 +1,6 @@
 ```{r ames-setup, include = FALSE}
-knitr::opts_chunk$set(fig.path = "figures/ames-")
+knitr::opts_chunk$set(fig.path = "figures/")
+library(tidymodels)
 ```
 
 # Introducing the Ames housing data 

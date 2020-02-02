@@ -1,5 +1,6 @@
 ```{r performance-setup, include = FALSE}
-knitr::opts_chunk$set(fig.path = "figures/performance-")
+knitr::opts_chunk$set(fig.path = "figures/")
+library(tidymodels)
 ```
 
 # How good is our model? {#model-metrics}

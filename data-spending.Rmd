@@ -1,5 +1,6 @@
 ```{r spending-setup, include = FALSE}
-knitr::opts_chunk$set(fig.path = "figures/spending-")
+knitr::opts_chunk$set(fig.path = "figures/")
+library(tidymodels)
 ```
 
 # Spending our data {#data-spending}

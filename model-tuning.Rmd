@@ -1,5 +1,6 @@
 ```{r tuning-setup, include = FALSE}
-knitr::opts_chunk$set(fig.path = "figures/tuning-")
+knitr::opts_chunk$set(fig.path = "figures/")
+library(tidymodels)
 ```
 
 # Model tuning
