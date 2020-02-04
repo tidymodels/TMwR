@@ -227,8 +227,6 @@ num_combos <-
 
 To demonstrate some syntax, the tidyverse will be used to read in data that could be used in modeling. The data set comes from the city of Chicago's data portal and contains daily ridership data for the city's elevated train stations. The data set has columns for: the station identifier (numeric), the station name (character), the date (character in `mm/dd/yyyy` format), the day of the week (character), and the number of riders (numeric).
 
-The data are already in a tidy format. An _untidy format_ would have had the stations in columns with a single row for each day. **MORE HERE**
-
 The initial tidyverse pipeline will conduct the following tasks, in order: 
 
 1. The tidyverse package `readr` will be used to read the data and convert them into a tibble. To do this, the `read_delim()` function can determine the type of data by reading and initial number of rows. Alternatively, if the column names and types known, a column specification can be created in R and passed to `read_delim()`. 
@@ -637,7 +635,36 @@ A few more principles are discussed below.
 
 ### Be predictable, consistent, and unsurprising
 
-Smooth out diverse interfaces etc. 
+As seen in the previous section, consistency can be lacking between and within R packages. The tidymodels packages work to 
+
+ * Follow a consistent syntax in new functions. 
+
+ * Provide a consistent interface for existing functions. 
+
+ * Enforce consistency of _return values_ of functions. 
+
+The last point is a good idea for functional programming but also to reduce frustrations for users. Previously, it was mentioned that the `summary()` method for some functions has column names that changed with the type of model (e.g. `"Pr(>|t|)"`) and the `broom` package was used to harmonize the results with the `tidy()` methods. 
+
+There are other, more difficult examples, especially as they relate to model predictions. For example, the `ranger` package is an excellent tool for computing random forest models. However, instead of returning a data frame or vector as input, a specialized object is returned that have multiple values embedded (including the predicted values). This is just one more step for the data analyst to work around in their scripts. As another example, the `glmnet` package can return at least four different output types for predictions, depending on the model and characteristics of the data: 
+
+| Type of Prediction       | Returns a:                      |
+|--------------------------|---------------------------------|
+| numeric                  | numeric matrix                  |
+| class                    | _character_ matrix              |
+| probability (2 classes)  | numeric matrix (2nd level only) |
+| probability (3+ classes) | 3D numeric array (all levels)   |
+
+Additionally, the column names of the results contain coded values that map to vector in the `glmnet` model object. This excellent statistical method can be discouraging to use in practice because of all of the special cases one might encounter that require additional code to be useful. 
+
+The tidymodels packages always return consistent predicted values that follow several rules:
+
+ * The results are always a tibble. 
+
+ * The number of rows in the tibble always match the number of samples being predicted, regardless of missing values. 
+
+ * The names and formats of the columns are predictable.
+
+Finally, to help new R packages, the next section describes a tidymodels package called `hardhat` that enables package authors implement consistent interfaces and return values. 
 
 ### Encourage empirical validation and good methodology.
 
