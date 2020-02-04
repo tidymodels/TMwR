@@ -10,7 +10,7 @@ The tidyverse is a collection of R packages for data analysis that are developed
 
 > "At a high level, the tidyverse is a language for solving data science challenges with R code. Its primary goal is to facilitate a conversation between a human and a computer about data. Less abstractly, the tidyverse is a collection of R packages that share a high-level design philosophy and low-level grammar and data structures, so that learning one package makes it easier to learn the next."
 
-In this chapter, these principles are briefly discussed before diving into specific examples of syntax. After illustrating the details of the tidyverse code, some additional principles related to modeling are described that should help the reader understand the tactics used by the tidymodels packages. 
+In this chapter, these principles are briefly discussed before diving into specific examples of syntax in base R for modeling. Some additional principles related to modeling are described that should help the reader understand the tactics used by the tidymodels packages. 
 
 ## Principles
 
@@ -18,17 +18,17 @@ The full set of strategies and tactics for writing R code in the tidyverse style
 
 ### Design for humans
 
-The tidyverse focuses on designing R packages and functions that can be easily understood and used by people. Historically, a substantial percentage of R users are people who not programmers or people who are more focused on the end results of their analyses (rather than the software complexities of their tools). As such, there should not be the expectation that users have computer science backgrounds or would be capable or writing their own R packages.
+The tidyverse focuses on designing R packages and functions that can be easily understood and used by a broad range of people. Historically, a substantial percentage of R users are not programmers but people who are more focused on the end results of their analyses (rather than the software complexities of their tools). As such, there should not be the expectation that users have computer science backgrounds or would be capable or writing their own R packages.
 
-For this reason, it is critical that R code be easy to work with to accomplish your goals. Documentation, training, accessibility, and other factors play an important part in achieving this. However, if the syntax itself is difficult for people to easily comprehend, no amount of documentation can solve this problem. The software itself must be intuitive.
+For this reason, it is critical that R code be easy to work with to accomplish your goals. Documentation, training, accessibility, and other factors play an important part in achieving this. However, if the syntax itself is difficult for people to easily comprehend, documentation is a poor solution to this problem. The software itself must be intuitive.
 
-To contrast the tidyverse approach with more traditional R semantics, consider sorting a data frame. Using only the core language, sorting a data frame using one or more columns is achieved by reordering the columns via R's subscripting rules in conjunction with `order()` (as opposed to `sort()`). To sort the iris data by two of its columns, the call might look like:
+To contrast the tidyverse approach with more traditional R semantics, consider sorting a data frame. Using only the core language, sorting a data frame using one or more columns is achieved by reordering the rows via R's subscripting rules in conjunction with `order()` (as opposed to `sort()`). To sort the iris data by two of its columns, the call might look like:
 
 ```{r tidyverse-base-sort, eval = FALSE}
 iris[order(iris$Species, iris$Sepal.Length), ]
 ```
 
-While very computationally efficient, it would be difficult to argue that this is an intuitive user-interface. In `dplyr`, the arrange function takes a set of variable names as input arguments directly:
+While very computationally efficient, it would be difficult to argue that this is an intuitive user-interface. In `dplyr`, the `arrange()` function takes a set of variable names as input arguments directly:
 
 ```{r tidyverse-dplyr-sort, eval = FALSE}
 library(dplyr)
@@ -37,7 +37,7 @@ arrange(data = iris, Species, Sepal.Length)
 
 Note that the variable names are unquoted; where many traditional R functions require a character string to specify variables, tidyverse functions take unquoted names or _selector functions_. The selectors allow for one or more  readable rules that are applied to the column names. For example, `starts_with("Sepal")` would select the first two columns of the `iris` data frame.
 
-Additionally, the naming of things is crucial. If you were new to R and were writing data analysis code utilizing linear algebra, you might be stymied that there appears to be no matrix inverse function. Using `apropos("inv")` yields no candidates. It turns out that the function to use is `solve()` for solving systems of linear equations. For a matrix `X`, you would use `solve(X)` (with no vector for the right-hand side of the equation). This is only documented in the description in one of the arguments in the help file. In essence, you would need to know the name of the solution to be able to find the solution. 
+Additionally, the naming of things is crucial. If you were new to R and were writing data analysis code utilizing linear algebra, you might be stymied when searching for the function that computes the matrix inverse. Using `apropos("inv")` yields no candidates. It turns out that the function to use is `solve()` for solving systems of linear equations. For a matrix `X`, you would use `solve(X)` (with no vector for the right-hand side of the equation). This is only documented in the description in one of the arguments in the help file. In essence, you would need to know the name of the solution to be able to find the solution. 
 
 The tidyverse approach is use function names that are explicit and descriptive instead of those that are short and implicit. There is a focus on verbs (e.g. `fit`, `arrange`, etc.) as general methods. Verb-noun pairs are particularly effective; consider `invert_matrix()` as a function name. As noted below, in the context of modeling, it is also important to avoid highly technical jargon in names (e.g. Greek letters, etc). Names should be as self-documenting as possible. 
 
@@ -46,11 +46,11 @@ Also, when there are similar functions in a package, the function names are desi
 
 ## Reuse existing data structures
 
-Whenever possible, functions should avoid returning a novel data structure. If the results are conducive to an existing data structure, it should be used. The reason is that it reduces the cognitive load for using the package; no specific syntax or methods are required. Also, some existing functions can be used to work with the results. 
+Whenever possible, functions should avoid returning a novel data structure. If the results are conducive to an existing data structure, it should be used. The reason is that it reduces the cognitive load for using the package; no additional syntax or methods are required. 
 
-One data structure that should be used as much as possible is the data frame. Data frames enable multiple values (in rows) and the columns can represent different types of data. Tibbles, a type of data frame, are preferred since they contain additional properties that are helpful for data analysis. 
+One data structure that should be used as much as possible is the data frame. Data frames enable multiple values (in rows) and the columns can represent different types of data. Tibbles, a type of data frame described below, are preferred since they contain additional properties that are helpful for data analysis. 
 
-As an example, the `rsample` package can be used to create _resamples_ of a data set, such as cross-validation or the bootstrap. The resampling functions return a tibble of results that embed the objects that define the resampled data sets in a column called `splits`. For example, for three bootstrap samples of a data set might look like: 
+As an example, the `rsample` package can be used to create _resamples_ of a data set, such as cross-validation or the bootstrap (described in Chapter \@ref(resampling)). The resampling functions return a tibble of results that embed the objects that define the resampled data sets in a column called `splits`. For example, for three bootstrap samples of a data set might look like: 
 
 ```{r tidyverse-resample}
 boot_samp <- rsample::bootstraps(mtcars, times = 3)
@@ -60,13 +60,13 @@ class(boot_samp)
 
 In doing so, a variety of vector-based functions can be used with these columns, such as `vapply()` or `purrr::map()`^[If you've never seen `::` in R code before, it is a method to be explicit about what function you are calling. The value of the right-hand side is the _namespace_ where the function lives (usually a package name). The left-hand side is the function name. In cases where two packages use the same function name, this syntax will ensure that the correct function is invoked.]. This object has multiple classes but inherits some methods for data frames and tibbles. Additionally, new columns can be added to the results without affecting the class of the data. This is much easier and versatile for users to work with than new object type that does not make its data structure obvious. 
 
-One downside to replying on common data structures is the potential loss of computational performance. In some situations, data can be represented in specialized formats that are more efficient representations of the data. For example: 
+One downside to relying on common data structures is the potential loss of computational performance. In some situations, data can be encoded in specialized formats that are more efficient representations of the data. For example: 
 
- * In computational chemistry, the structure-data file format (SDF) is a tool to take chemical structures and encode them in a format that is computational efficient to work with. 
+ * In computational chemistry, the structure-data file format (SDF) is a tool to take chemical structures and encode them in a format that is computationally efficient to work with. 
 
  * Data that have a large number of values that are the same (such as zeros for binary data) can be stored in a _sparse matrix format_. This format can reduce the size of the data as well as enable more efficient computational techniques. 
 
-These are advantageous tools when the problem is _small in scope_ and the potential data processing methods are well defined. However, once the constraints on the data are violated, perhaps by requiring a new type of data, then system becomes overly restrictive. 
+These formats are advantageous when the problem is _small in scope_ and the potential data processing methods are well defined. However, once the constraints on the data are violated, perhaps by requiring a new type of data, then system becomes overly restrictive. For example, if a principal component analysis was needed for a sparse binary matrix, the results would no longer be sparse. Also, if no function exists to do these computations on a sparse format, the sparse matrix would need to be converted to a more conventional format before proceeding.    
 
 
 ## Design for the pipe and functional programming
@@ -74,8 +74,8 @@ These are advantageous tools when the problem is _small in scope_ and the potent
 The `magrittr` pipe operator (`%>%`) is a tool for chaining together a sequence of R commands. To demonstrate, these commands can be used to sort a data frame then retain the first 10 rows:
 
 ```{r tidyverse-no-pipe, eval = FALSE}
-small_iris <- arrange(small_iris, Species)
-small_iris <- slice(iris, 1:10)
+small_iris <- arrange(iris, Species)
+small_iris <- slice(small_iris, 1:10)
 
 # or more compactly: 
 small_iris <- slice(arrange(iris, Species), 1:10)
@@ -164,9 +164,9 @@ The initial tidyverse pipeline will conduct the following tasks, in order:
 
 1. The tidyverse package `readr` will be used to read the data and convert them into a tibble. To do this, the `read_delim()` function can determine the type of data by reading and initial number of rows. Alternatively, if the column names and types known, a column specification can be created in R and passed to `read_delim()`. 
 
-1. The data are filtered to eliminate a few columns that are not needed (such as the station ID) and the column `stationname` is changed to `station`. The function `select()` is used. When filtering, the names of the column names can be used or a `dplyr()` selector function. When selecting names, the new variable can be declared using the argument format `new_name = old_name`.
+1. The data are filtered to eliminate a few columns that are not needed (such as the station ID) and the column `stationname` is changed to `station`. The function `select()` is used. When filtering, the names of the column names can be used or a `dplyr()` selector function. When selecting names, a new variable name can be declared using the argument format `new_name = old_name`.
 
-1. The date field is converted to the R date format using the `mdy()` function from the `lubridate` package. The ridership numbers are also converted to thousands. Both of these computations are executed using the `dplyr::mutate()` function. This 
+1. The date field is converted to the R date format using the `mdy()` function from the `lubridate` package. The ridership numbers are also converted to thousands. Both of these computations are executed using the `dplyr::mutate()` function.  
 
 1. There are a small number of days that have replicate ridership numbers at certain stations. To mitigate this issue, the maximum number of rides will be used for each station and day combination. To do this, the data will be _grouped_ by station and day then the ridership data within each of the `r num_combos` unique combinations will be _summarized_ with the maximum statistic. 
 
@@ -273,7 +273,7 @@ long_format %>%
   do(models = lm(rides ~ date, data = .))
 ```
 
-
+**functional programming and `map()`**
 
 ## A review of base R modeling syntax {#r-review}
 
@@ -319,9 +319,9 @@ crickets <-
 
 This book is about software, specifically R syntax for creating models. Before descrbing how tidy principles can be used in data analysis, it makes sense to show how models are created and utilized using traditional base R code. This section is a brief illustration of the those conventions. It is not exhaustive but provides readers uninitiated to R ideas about the basic motifs that are commonly used. 
 
-The S language, on which R is based, has had a rich data analysis environment since the publication of @WhiteBook (commonly known as The White Book). This version of S introduced standard infrastructure components, such as symbolic model formulae, model matrices, data frames, as well as the standard object-oriented programming methods for data analysis. Much of these implementations have not substantively changes since then.  
+The S language, on which R is based, has had a rich data analysis environment since the publication of @WhiteBook (commonly known as The White Book). This version of S introduced standard infrastructure components, such as symbolic model formulae, model matrices, data frames, as well as the standard object-oriented programming methods for data analysis. These user-interfaces have not substantively changes since then.  
 
-To demonstrate the fundamentals, experimental data from @mcdonald2009 (by way of @mangiafico2015) are used. These data relate how the ambient temperature related to the rate of cricket chirps per minute. Data were collected for two species: _O. exclamationis_ and _O. niveus_. The data are contained in a data frame called `crickets` that contains a total of `r nrow(crickets)` data points. These data are shown via a `ggplot` graph. 
+To demonstrate the fundamentals, experimental data from @mcdonald2009 (by way of @mangiafico2015) are used. These data relate the ambient temperature to the rate of cricket chirps per minute. Data were collected for two species: _O. exclamationis_ and _O. niveus_. The data are contained in a data frame called `crickets` that contains a total of `r nrow(crickets)` data points. These data are shown via a `ggplot` graph. 
 
 ```{r tidyverse-cricket-plot, out.width = '70%', fig.width=6, fig.height=4, warning = FALSE}
 names(crickets)
@@ -338,7 +338,7 @@ ggplot(crickets, aes(x = temp, y = rate, col = species)) +
  
 The data show fairly linear trends for each species. For a given temperature, _O. exclamationis_ appears to have more chirps than the other species. For an inferential model, the researchers might have specified the following null hypotheses prior to seeing the data:
 
- * Temperature has no affect on the chirp rate (denoted as hypothesis #1)
+ * Temperature has no affect on the chirp rate.
 
  * There are no differences between the species in terms of chirp rate. 
 
@@ -363,7 +363,7 @@ There are no time measurements in these data but the species can be added to the
 rate ~ temp + species
 ```
 
-Species is not a quantitative variable; in the data frame, it is represented as a factor column with levels `"O. exclamationis"` and `"O. niveus"`. The vast majority of model functions cannot operate on non-numeric data. For species, the model needs to _encode_ the species data into a numeric format. The most common approach is to use indicator variables (also known as "dummy variables") in place of the original qualitative values. In this instance, since species has two possible values, the model formula will automatically encode this column as numeric by adding a new column that has a value of zero when the species is `"O. exclamationis"` and a value of one when the data correspond to `"O. niveus"`. The underlying formula machinery will automatically convert these data for the data used to create the model as well as for any new data points (for example, when the model is used for prediction). 
+Species is not a quantitative variable; in the data frame, it is represented as a factor column with levels `"O. exclamationis"` and `"O. niveus"`. The vast majority of model functions cannot operate on non-numeric data. For species, the model needs to _encode_ the species data into a numeric format. The most common approach is to use indicator variables (also known as "dummy variables") in place of the original qualitative values. In this instance, since species has two possible values, the model formula will automatically encode this column as numeric by adding a new column that has a value of zero when the species is `"O. exclamationis"` and a value of one when the data correspond to `"O. niveus"`. The underlying formula machinery will automatically convert these values for the data set used to create the model as well as for any new data points (for example, when the model is used for prediction). 
 
 Suppose there were five species. The model formula would automatically add _four_ additional binary columns that are binary indicators for four of the species. The _reference level_ of the factor (i.e., the first level) is always left out of the predictor set. The idea is that, if you know the values of the four indicator variables, the value of the species can be determined. 
 
@@ -379,13 +379,13 @@ rate ~ (temp + species)^2
 
 In addition to the convenience of automatically creating indicator variables, the formula offers a few other niceties: 
 
-* _In-line_ functions can be used in the formula. For example, if the natural log of the temperate were used, the formula `rate ~ log(temp)` could be used. Since the formula is symbolic by default, literal math can be done to the predictors using the identity function `I()`. For example, to use Fahrenheit units, the formula could be `rate ~ I( (temp * 9/5) + 32 )` to make the conversion.
+* _In-line_ functions can be used in the formula. For example, if the natural log of the temperate were used, the formula `rate ~ log(temp)` could be used. Since the formula is symbolic by default, literal math can also be done to the predictors using the identity function `I()`. For example, to use Fahrenheit units, the formula could be `rate ~ I( (temp * 9/5) + 32 )` to make the conversion.
 
 * R has many functions that are useful inside of formulas. For example, `poly(x, 3)` would create linear, quadratic, and cubic terms for `x` to the model as main effects. Also, the `splines` package has several functions to create nonlinear spline terms in the formula. 
 
 * For data sets where there are many predictors, the period shortcut is available. The period represents main effects for all of the columns that are not on the left-hand side of the tilde. For example, using `~ (.)^3` would create main effects as well as all two- and three-variable interactions to the model. 
 
-For the initial data analysis, the two-factor interaction model is used. In this book, the suffix `_fit` is used for R objects for fitted models. 
+For the initial data analysis, the two-factor interaction model is used. In this book, the suffix `_fit` is used for R objects that are fitted models. 
 
 ```{r tidyverse-cricket-fit}
 interaction_fit <-  lm(rate ~ (temp + species)^2, data = crickets) 
@@ -396,7 +396,7 @@ interaction_fit
 
 This output is a little hard to read. For the species indicator variables, R mashes the variable name (`species`) together with the factor level (`O. niveus`) with no delimiter. 
 
-Before going into any results for this model, the fit should be assessed using diagnostic plots. The `plot()` method for `lm` objects can be used. It produces a set of four plots for the object, each showing different aspects of the fit. Two plots are shown here:
+Before going into any inferental results for this model, the fit should be assessed using diagnostic plots. The `plot()` method for `lm` objects can be used. It produces a set of four plots for the object, each showing different aspects of the fit. Two plots are shown here:
 
 ```{r interaction-plots, out.width = '100%', fig.width=8, fig.height=4.5, warning = FALSE}
 # Place two plots next to one another:
@@ -432,9 +432,9 @@ The `summary()` method is used to inspect the coefficients, standard errors, and
 summary(main_effect_fit)
 ```
 
-From these values, the chirp rate for each species increases by `r round(coef(main_effect_fit)[2], 2)` chirps as the temperature increases by a single degree. This term shows strong statistical significance as evidenced by the p-value.  The species term has a value of `r round(coef(main_effect_fit)[3], 2)`. This indicates that, across all temperature values, _O. niveus_ is a  chirp rate that is about `r floor(abs(coef(main_effect_fit)[3]))` fewer chirps per minute. Similar to the temperature term, the species effect is associated with a very small p-value.  
+From these values, the chirp rate for each species increases by `r round(coef(main_effect_fit)[2], 2)` chirps as the temperature increases by a single degree. This term shows strong statistical significance as evidenced by the p-value.  The species term has a value of `r round(coef(main_effect_fit)[3], 2)`. This indicates that, across all temperature values, _O. niveus_ is a  chirp rate that is about `r floor(abs(coef(main_effect_fit)[3]))` fewer chirps per minute that _O. exclamationis_. Similar to the temperature term, the species effect is associated with a very small p-value.  
 
-The only issue in this analysis is the intercept value. It indicates that at 0 C, there are `r round(coef(main_effect_fit)[1], 2)` chirps per minute. While this is unreasonable, the data only go as low as `r min(crickets$temp)` C and interpreting the model at 0 C would be an _extrapolation_. This would be a bad idea. That said, the model fit is good within the _applicable range_ of the temperature values and the conclusions should be limited to the observed temperature range. 
+The only issue in this analysis is the intercept value. It indicates that at 0 C, there are negative chirps per minute for both species. While this is unreasonable, the data only go as low as `r min(crickets$temp)` C and interpreting the model at 0 C would be an _extrapolation_. This would be a bad idea. That said, the model fit is good within the _applicable range_ of the temperature values and the conclusions should be limited to the observed temperature range. 
 
 If there were a need to estimate the chirp rate at a temperature that was not observed in the experiment, the `predict()` method would be used. It takes the model object and a data frame of new values for prediction. For example, the model estimates the chirp rate for _O. exclamationis_ for temperatures between 15 C and 20 C can be computed via:
 
@@ -453,9 +453,7 @@ While this analysis has obviously not been an exhaustive demonstration of R's mo
 
  * There are numerous helper functions (e.g., `anova()`, `summary()` and `predict()`) that are used to conduct specific calculations after the fitted model is created. 
 
-Finally, as previously mentioned, this framework was devised in 1992. Most of the ideas and methods above were developed in that period and have remained remarkably relavant to this day. It highlights that the S language and, by extension R, has been designed as a language for data analysis since its inception.  
-
-
+Finally, as previously mentioned, this framework was devised in 1992. Most of the ideas and methods above were developed in that period and have remained remarkably relavant to this day. It highlights that the S language and, by extension R, has been designed for data analysis since its inception.  
 
 
 ## Why tidiness is important for modeling
@@ -516,7 +514,7 @@ tidy(main_effect_fit)
  
 The column names are standardized across models and do not contain any additional data (such as the type of statistical test). The data previously contained in the row names are now in a column called `terms` and so on. One additional principle in the tidymodels ecosystem is that a functions return values should be **predictable, consistent, and unsurprising**. 
  
-As another example of _unpredictability_, another convention in base R is related to missing data. The general rule is that missing data propagate more missing data; the average of a set of values with a missing data point is itself missing and so on. When models make predictions, the vast majority require all of the predictors to have complete values. There are several options based in to R at this point in the form of `na.action`.  This sets the policy for how a function should behave if there are missing values. The two most common policies are `na.fail` and `na.omit`. For former produces an error of missing data are involved while the latter removes the missing data prior to the calculations. From out previous example:
+As another example of _unpredictability_, another convention in base R is related to missing data. The general rule is that missing data propagate more missing data; the average of a set of values with a missing data point is itself missing and so on. When models make predictions, the vast majority require all of the predictors to have complete values. There are several options based in to R at this point in the form of `na.action`.  This sets the policy for how a function should behave if there are missing values. The two most common policies are `na.fail` and `na.omit`. For former produces an error of missing data are involved while the latter removes the missing data prior to the calculations by casewise-deletion. From our previous example:
 
 ```{r tidyverse-lm-missing, error = TRUE}
 # Add a missing value to the prediction set
@@ -555,11 +553,11 @@ There are a few R packages that provide a unified interface to harmonize these m
 
 To resolve the usage issues described in the last section, the tidymodels packages have a few additional design goals that complement those of the tidyverse. However, a considerable amount of the tidymodels goals fall under the existing rubric of _Design for Humans_ but for modeling code. Some examples: 
 
-* Make argument and function names less _jargony_. For example, many statistical regularization methods use the greek letter lambda to represent the amount of penalization that is used during parameter estimation. While very specific, the only users who know what this means are those who have read those parts of the technical literature. When naming things, we prefer more self-documenting (and obvious) choices be used. For example, "penalty" is probably a better name than "lambda". 
+* Make argument and function names less _jargony_. For example, many statistical regularization methods use the greek letter lambda ($\lambda$) to represent the amount of penalization that is used during parameter estimation. While very specific, the only users who know what this means are those who have read those parts of the technical literature. When naming things, we prefer more self-documenting (and obvious) choices be used. For example, "penalty" is probably a better name than "lambda". 
 
 * R has excellent capabilities for _object oriented programming_ and this should be used in lieu of creating new function names (such as `predict_samples()`). 
 
-* _Sensible defaults_ are very important. Whenever possible, functions should have no default for arguments when either one could never be created or if you want to force the user to make a choice. The latter should be used sparingly.
+* _Sensible defaults_ are very important. Whenever possible, functions should have no default for arguments when only when a default is impossible or if you want to force the user to make a choice. The latter should be used sparingly.
 
 * Similarly, argument values whose default _can_ be derived from the data should be. For example, for `glm()` the `family` argument could check the type of data in the outcome and, if no `family` was given, a default could be determined internally.
 
@@ -583,9 +581,11 @@ Protect users from making objectively poor choices. Examples:
 - Analyzing integers as categories
 - Down-sampling the test set
 
+These examples relate directly to the _pit of success_ mentioned earlier.  
+
 One aspect of machine learning models that is applicable to the majority model types is the use of a separate set of data to verify how well the model performs. _Data splitting_ usually reserves a set of the available data that is used after the model building activities are finished. These data serve as an unbiased method for evaluating the capabilities of the model. There is an emphasis on such _empirical validation_ in tidymodels is a more robust approach to establish the performance characteristics of the model.
 
-Similarly, tidymodels strongly leverage resampling methods as a way to empirically characterize characteristics of models. Resample methods, discussed in Chapter \@ref(resampling), is a type of simulation system that can re-evaluate the model under somewhat different scenarios. This enables the model to be characterized in the context of the observed data as opposed to an unobserved theoretical distribution. For example, in linear regression, we commonly assume normality of the model residuals and base confidence intervals and other quantities on this assumption. Using resampling, similar statistical quantities can be computed but using the _empirical distribution_ of the data. While  theoretical and empirical distribution can results in very similar results, it helps to have an additional verification of the results based on the _data at hand_. 
+Similarly, tidymodels strongly leverage resampling methods as a way to empirically characterize characteristics of models. Resampling methods, discussed in Chapter \@ref(resampling), is a type of simulation system that can re-evaluate the model under somewhat different scenarios. This enables the model to be characterized in the context of the observed data as opposed to an unobserved theoretical distribution. For example, in linear regression, we commonly assume normality of the model residuals and base confidence intervals and other quantities on this assumption. Using resampling, similar statistical quantities can be computed but using the _empirical distribution_ of the data. While  theoretical and empirical distribution can results in very similar results, it helps to have an additional verification of the results based on the _data at hand_. 
 
 ### Separate the user-interface from computational-interface
 
@@ -597,7 +597,9 @@ When the focus is solely on the computational interface, the user interface typi
 
 In summary, it is critical that people developing data analysis code take into account the needs of the users in addition to the needs of the computational algorithm. 
 
-However, we shouldn't require all developers to be expert software engineers or user interface experts. Because of this, there are R tools that can be used to enable developers to create good modeling packages that have good user- and computational-interfaces. For example, the `usethis` package is an excellent resource for creating R packages via code. There are functions that can create the basic package infrastructure along with easy access to good development tools for documentation, testing, source control, etc. Similarly, tidymodels contains the `hardhat` package. This builds off of `usethis` to create package skeletons for _modeling packages_. For example, `hardhat` will create the user-facing functions the enable the formula and other interface points. In this way, the package developer can focus on the computational aspects of their work (which is where their expertise resides) and "plug" their computational tools into `hardhat`'s predefined user-interface methods. Like the tidyverse, `hardhat` is _opinionated_ in that some subjective choices are made regarding the interface and how packages should be written. These choices reflect our model implementation guidelines. found at `https://tidymodels.github.io/model-implementation-principles`. 
+However, we shouldn't require all developers to be expert software engineers or user interface experts. Because of this, there are R tools that can be used to enable developers to create good modeling packages that have good user- and computational-interfaces. For example, the `usethis` package is an excellent resource for creating R packages via code. There are functions that can create the basic package infrastructure along with easy access to good development tools for documentation, testing, source control, etc. 
+
+Similarly, tidymodels contains the `hardhat` package. This builds off of `usethis` to create package skeletons for _modeling packages_. For example, `hardhat` will create the user-facing functions the enable the formula and other interface points. In this way, the package developer can focus on the computational aspects of their work (which is where their expertise resides) and "plug" their computational tools into `hardhat`'s predefined user-interface methods. Like the tidyverse, `hardhat` is _opinionated_ in that some subjective choices are made regarding the interface and how packages should be written. These choices reflect our model implementation guidelines. found at `https://tidymodels.github.io/model-implementation-principles`. 
 
 `hardhat` is discussed more in Chapter TBD. 
 
