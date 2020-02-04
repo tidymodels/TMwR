@@ -1,0 +1,64 @@
+```{r ames-setup, include = FALSE}
+knitr::opts_chunk$set(fig.path = "figures/")
+library(tidymodels)
+```
+
+# Introducing the Ames housing data 
+
+basics
+
+
+
+```{r ames-map-code, eval = FALSE, include = FALSE}
+col_key <- c(
+  North_Ames = '#0000FF',
+  College_Creek = '#FF0000',
+  Old_Town = '#FFFFFF',
+  Edwards = '#FF00B6',
+  Somerset = '#FF3030',
+  Northridge_Heights = '#009FFF',
+  Gilbert = '#DD00FF',
+  Sawyer = '#9A4D42',
+  Northwest_Ames = '#00FFBE',
+  Sawyer_West = '#1F9698',
+  Mitchell = '#FFACFD',
+  Brookside = '#720055',
+  Crawford = '#F1085C',
+  Iowa_DOT_and_Rail_Road = '#FE8F42',
+  Timberland = '#004CFF',
+  Northridge = '#ffff00',
+  Stone_Brook = '#B1CC71',
+  South_and_West_of_Iowa_State_University = '#02AD24',
+  Clear_Creek = '#FFD300',
+  Meadow_Village = '#886C00',
+  Briardale = '#FFB79F',
+  Bloomington_Heights = '#858567',
+  Veenker = '#A10300',
+  Northpark_Villa = '#00479E',
+  Blueste = '#DC5E93',
+  Greens = '#93D4FF',
+  Green_Hills = '#e5f2e5', 
+  Landmark = '#C8FF00'
+) 
+
+rngs <- list(lon = extendrange(ames$Longitude),
+          lat = extendrange(ames$Latitude))
+
+loc <- c(
+  left = rngs$lon[1],
+  right = rngs$lon[2],
+  top = rngs$lat[2],
+  bottom = rngs$lat[1]
+)
+ggmap(get_stamenmap(loc, zoom = 15, maptype = "toner-lines")) + 
+  geom_point(data = ames,
+             aes(x = Longitude, y = Latitude, col = Neighborhood),
+             cex = .5, alpha = .7) +
+  theme(legend.position = "none") + 
+  labs(x = "", y = "") + 
+  scale_color_manual(values = col_key)
+```
+```{r ames-map, echo = FALSE, fig.cap = "Neighborhoods in Ames IA."}
+knitr::include_graphics(path = "premade/ames.png")
+```
+

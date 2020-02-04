@@ -1,5 +1,6 @@
 ```{r workflow-setup, include = FALSE}
-knitr::opts_chunk$set(fig.path = "figures/workflow-")
+knitr::opts_chunk$set(fig.path = "figures/")
+library(tidymodels)
 ```
 
 # A model workflow {#workflows}

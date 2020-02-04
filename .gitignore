@@ -3,3 +3,8 @@
 .RData
 .Ruserdata
 .DS_Store
+_book
+_main.rds
+libs
+figures
+_bookdown_files

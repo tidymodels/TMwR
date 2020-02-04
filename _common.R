@@ -1,4 +1,5 @@
-options(digits = 3, width = 55)
+options(digits = 4, width = 80)
+options(dplyr.print_min = 6, dplyr.print_max = 6)
 
 knitr::opts_chunk$set(
   comment = "#>",
@@ -6,8 +7,6 @@ knitr::opts_chunk$set(
   fig.align = 'center',
   tidy = FALSE
 )
-
-options(dplyr.print_min = 6, dplyr.print_max = 6)
 
 transparent_theme <- function() {
   library(ggplot2)
@@ -22,3 +21,12 @@ transparent_theme <- function() {
     )
   theme_set(thm)
 }
+
+transparent_theme()
+
+version <- function() {
+  dt <- Sys.Date()
+  ver <- read.dcf("DESCRIPTION")[1, "Version"]
+  paste0("Version ", ver, " (", dt, ")")
+}
+

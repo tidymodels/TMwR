@@ -20,3 +20,5 @@ Formatting
  
  * Adhere as best as possible to the [`tidyverse` style guide](https://style.tidyverse.org/). 
  
+ * `knitr` code chunk should always be named. Names should used `-` to space words and the first word should illustrate which chapter you are in (e.g. `introduction-lm-model`). 
+ 

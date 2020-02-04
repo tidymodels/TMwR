@@ -1,5 +1,7 @@
+# Introduction
+
 ```{r introduction-setup, include = FALSE}
-knitr::opts_chunk$set(fig.path = "figures/introduction-")
+knitr::opts_chunk$set(fig.path = "figures/")
 library(tidyverse)
 library(gridExtra)
 library(AmesHousing)
@@ -7,17 +9,12 @@ library(tibble)
 library(kableExtra)
 
 ames <- make_ames()
-
-transparent_theme()
-
-options(digits = 4, width = 80)
 ```
 
-# Introduction
 
 Models are mathematical tools that create equations that are intended to mimic the data given to them. These equations can be used for various purposes, such as: predicting future events, determining if there is a difference between several groups, as an aid to a map-based visualization, discovering novel patterns in the data that could be further investigated, and so on. Their utility hinges on their ability to be reductive; the primary influences in the data can be captured mathematically in a way that is useful. 
 
-Since the start of the 21st century, mathematical models have become ubiquitous in our daily lives, in both obvious and subtle ways. A typical day for many people might involve checking the weather to see when a good time would be to walk the dog, ordering a product from a website, typing (and autocorrecting) a text message to a friend, and checking email. In each of these instances, there is a good chance that some type of model was used in an assistive way. In some cases, the contribution of the model might be easily perceived ("You might also be interested in purchasing product _X_") while in other cases the impact was the absence of something (e.g., spam email). Models are used to choose clothing that a customer might like, a molecule that should be evaluated as a drug candidate, and might even be the mechanism that a nefarious company uses avoid the discovery of cars that over-pollute.  For better or worse, models are here to stay.
+Since the start of the 21st century, mathematical models have become ubiquitous in our daily lives, in both obvious and subtle ways. A typical day for many people might involve checking the weather to see when a good time would be to walk the dog, ordering a product from a website, typing (and autocorrecting) a text message to a friend, and checking email. In each of these instances, there is a good chance that some type of model was used in an assistive way. In some cases, the contribution of the model might be easily perceived ("You might also be interested in purchasing product _X_") while in other cases the impact was the absence of something (e.g., spam email). Models are used to choose clothing that a customer might like, a molecule that should be evaluated as a drug candidate, and might even be the mechanism that a nefarious company uses to avoid the discovery of cars that over-pollute.  For better or worse, models are here to stay.
 
 There are two reasons that models permeate our lives: an abundance of _software_ exists to create models and _data_ has become more easily captured and accessible. In regard to software, it is obviously critical that software produces the _correct_ equations that represent the data. For the most part, determining mathematical correctness is possible. However, the creation of an appropriate model hinges on a few other aspects. 
 
@@ -49,9 +46,9 @@ Before proceeding, lets describe a taxa for types of models, grouped by _purpose
 
 For example, large scale measurements of RNA have been possible for some time using _microarrays_. Early laboratory methods place a biological sample on a small microchip. Very small locations on the chip would be able to assess a measure of signal based on the abundance of a specific RNA sequence. The chip would contain thousands (or more) outcomes, each a quantification of the RNA related to some biological process. However, there could be quality issued on the chip that might lead to poor results. A fingerprint accidentally left on a portion of the chip might cause inaccurate measurements when scanned. 
 
-An early method for evaluating such issues were _probe-level models_, or PLM's [@bolstad2004]. A statistical model would be created that accounted for the _known_ differences for the data from the chip, such as the RNA sequence, the type of sequence, and so on. If there were other, unwanted factors in the data, these would be contained in the model residuals. When the residuals were plotted by their location on the chip, a good quality chip would show no patterns. When an issue did occur, some sort of spatial pattern would be discernible. Often the type of pattern would suggest the underlying issue (e.g. a fingerprint) and a possible solution (wipe the chip off and rescan, repeat the sample, etc.). Figure \@ref(fig:descr-examples)(a) shows an application of this method for two microarrays taken from @Gentleman2005. The images show two different colors; red is where the signal intensity was larger than the model expects while the blue color shows lower than expected values. The left-hand panel demonstrates a fairly random pattern while the right-hand panel shows some type of unwanted artifact in the middle of the chip. 
+An early method for evaluating such issues were _probe-level models_, or PLM's [@bolstad2004]. A statistical model would be created that accounted for the _known_ differences for the data from the chip, such as the RNA sequence, the type of sequence, and so on. If there were other, unwanted factors in the data, these effects would be captured in the model residuals. When the residuals were plotted by their location on the chip, a good quality chip would show no patterns. When an issue did occur, some sort of spatial pattern would be discernible. Often the type of pattern would suggest the underlying issue (e.g. a fingerprint) and a possible solution (wipe the chip off and rescan, repeat the sample, etc.). Figure \@ref(fig:introduction-descr-examples)(a) shows an application of this method for two microarrays taken from @Gentleman2005. The images show two different colors; red is where the signal intensity was larger than the model expects while the blue color shows lower than expected values. The left-hand panel demonstrates a fairly random pattern while the right-hand panel shows some type of unwanted artifact in the middle of the chip. 
 
-```{r descr-examples, echo = FALSE, fig.cap = "Two examples of how descriptive models can be used to illustrate specific patterns.", out.width = '80%', dev = "png", fig.height = 8, warning = FALSE, message = FALSE}
+```{r introduction-descr-examples, echo = FALSE, fig.cap = "Two examples of how descriptive models can be used to illustrate specific patterns.", out.width = '80%', dev = "png", fig.height = 8, warning = FALSE, message = FALSE}
 load("RData/plm_resids.RData")
 
 resid_cols <- RColorBrewer::brewer.pal(8, "Set1")[1:2]
@@ -89,16 +86,16 @@ ames_plot <-
 grid.arrange(plm_plot, ames_plot, ncol = 1)
 ```
 
-Another example of a descriptive model is the _locally estimated scatterplot smoothing_ model, more commonly known as LOESS [@cleveland1979]. Here, a smooth and flexible regression model is fit to a data set, usually with a single independent variable, and the fitted regression line is used to elucidate some trend in the data. These types of _smoothers_ are used to discover potential ways to represent a variable in a model. This is demonstrated in Figure \@ref(fig:descr-examples)(b) where a nonlinear trend is illuminated by the flexible smoother. From this plot, it is clear that there is a hhighly nonlinear relationship between the sale price of a house and its latitude. 
+Another example of a descriptive model is the _locally estimated scatterplot smoothing_ model, more commonly known as LOESS [@cleveland1979]. Here, a smooth and flexible regression model is fit to a data set, usually with a single independent variable, and the fitted regression line is used to elucidate some trend in the data. These types of _smoothers_ are used to discover potential ways to represent a variable in a model. This is demonstrated in Figure \@ref(fig:introduction-descr-examples)(b) where a nonlinear trend is illuminated by the flexible smoother. From this plot, it is clear that there is a hhighly nonlinear relationship between the sale price of a house and its latitude. 
 
 
-**Inferential Models**: In these situations, the goal is to produce a decision for a research question or to test a specific hypothesis. The goal is to make some statement of truth regarding some predefined conjecture or idea. In many (but not all) cases, some qualitative statement is produced.
+**Inferential Models**: In these situations, the goal is to produce a decision for a research question or to test a specific hypothesis. The goal is to make some statement of truth regarding some predefined conjecture or idea. In many (but not all) cases, some qualitative statement is produced (e.g., that a difference was "statistically signficant").
 
 For example, in a clinical trial, the goal might be to provide confirmation that a new therapy does a better job in prolonging life than an alternative (e.g., an existing therapy or no treatment). If the clinical endpoint was related to survival of a patient, the _null hypothesis_ might be that the two therapeutic groups have equal median survival times with the alternative hypothesis being that the new therapy has higher median survival.  If this trial were evaluated using the traditional *null hypothesis significance testing* (NHST), a p-value would be produced using some pre-defined methodology based on a set of assumptions for the data. Small values of the p-value indicate that there is evidence that the new therapy does help patients live longer. If not, the conclusion is that there is a failure to show such an difference (which could be due to a number of reasons). 
 
-What are the important aspects of this type of analysis? Inferential techniques typically produce some type of probabilistic output, such as a p-value, confidence interval, or posterior probability. Generally, to compute such a quantity, formal assumptions must be made about the data and the underlying processes that generated the data. The quality of the statistical results are highly dependent on these pre-defined  assumptions as well as how much the observed data appear to agree with them. The most critical factors here are theoretical in nature: if my data were independent and follow distribution _X_, then test statistic _Y_ can be used to produce a p-value. Otherwise, the resulting p-value might be inaccurate.
+What are the important aspects of this type of analysis? Inferential techniques typically produce some type of probabilistic output, such as a p-value, confidence interval, or posterior probability. Generally, to compute such a quantity, formal probabilistic  assumptions must be made about the data and the underlying processes that generated the data. The quality of the statistical results are highly dependent on these pre-defined  assumptions as well as how much the observed data appear to agree with them. The most critical factors here are theoretical in nature: if my data were independent and follow distribution _X_, then test statistic _Y_ can be used to produce a p-value. Otherwise, the resulting p-value might be inaccurate.
 
-One aspect of inferential analyses is that there _tends_ to be a longer feedback loop that could help understand how well the data fit the assumptions. In our clinical trial example, if statistical (and clinical) significance indicated that the new therapy should be available for patients to use, it may be years before it is used in the field and enough data were generated to have an independent assessment of whether the original statistical analysis led to the appropriate decision. 
+One aspect of inferential analyses is that there _tends_ to be a delayed feedback loop that could help understand how well the data matched the assumptions. In our clinical trial example, if statistical (and clinical) significance indicated that the new therapy should be available for patients to use, it may be years before it is used in the field and enough data were generated to have an independent assessment of whether the original statistical analysis led to the appropriate decision. 
 
 **Predictive Models**: There are occasions where data are modeled in an effort to produce the most accurate prediction possible for new data. Here, the primary goal is that the predicted values have the highest possible fidelity to the true value of the new data. 
 
@@ -114,7 +111,7 @@ _Empirically driven models_ are those that have more vague assumptions that are 
 
 Broader discussions of these distinctions can be found in @breiman2001 and @shmueli2010. Note that we have defined the type of model by how it is used rather than its mathematical qualities. An ordinary linear regression model might fall into all three classes of models, depending on how it is used: 
 
-* Descriptive smoother, similar to LOESS, called _restricted smoothing splines_ [@Durrleman1989] can be used to describe trends in data using ordinary linear regression with specialized terms. 
+* A descriptive smoother, similar to LOESS, called _restricted smoothing splines_ [@Durrleman1989] can be used to describe trends in data using ordinary linear regression with specialized terms. 
 
 * An _analysis of variance_ (ANOVA) model is a popular method for producing the p-values used for inference. ANOVA models are a special case of linear regression. 
 
@@ -124,7 +121,7 @@ However, there are many more examples of predictive models that cannot (or at le
 
 There is an additional connection between the types of models. While the primary purpose of descriptive and inferential models might not be related to prediction, the predictive capacity of the model should not be ignored. For example, logistic regression is a popular model for data where the outcome is qualitative with two possible values. It can model how variables related to the probability of the outcomes. When used in an inferential manner, there is usually an abundance of attention paid to the _statistical qualities_ of the model. For example, analysts tend to strongly focus on the selection of which independent variables are contained in the model. Many iterations of model building are usually used to determine a minimal subset of independent variables that have a  "statistically significant" relationship to the outcome variable. This is usually achieved when all of the p-values for the independent variables are below some value (e.g. 0.05). From here, the analyst typically focuses on making qualitative statements about the relative influence that the variables have on the outcome (e.g., "There is a statistically signficant relationship between age and the odds of heart disease.").  
 
-A potential problem with this approach is that it can be dangerous when statistical significance is used as the _only_ measure of model quality.  It is certainly possible that this statistically optimized model has poor model accuracy (or some other measure of predictive capacity). While the model might not be used for prediction, how much should the inferences be trusted from a model that has all significant p-values but a  dismal accuracy? Predictive performance tends to be related to how close the model's fitted values are to the observed data. If the model has limited fidelity to the data, the inferences generated by the model should be highly suspect. In other words, statistical significance may not be sufficient proof that that the model is appropriate. This may seem intuitively obvious, but is often ignored in real-world data analysis.
+A potential problem with this approach is that it can be dangerous when statistical significance is used as the _only_ measure of model quality.  It is certainly possible that this statistically optimized model has poor model accuracy (or some other measure of predictive capacity). While the model might not be used for prediction, how much should the inferences be trusted from a model that has all significant p-values but dismal accuracy? Predictive performance tends to be related to how close the model's fitted values are to the observed data. If the model has limited fidelity to the data, the inferences generated by the model should be highly suspect. In other words, statistical significance may not be sufficient proof that that the model is appropriate. This may seem intuitively obvious, but is often ignored in real-world data analysis.
 
 ## Some terminology
 
@@ -152,18 +149,20 @@ Data cleaning can also overlap with the second phase of **understanding the data
 
 Finally, before starting a data analysis process, there should be clear expectations of the goal of the model and how performance (and success) will be judged. At least one _performance metric_ should be identified with realistic goals of what can be achieved. Common statistical metrics are classification accuracy, true and false positive rates, root mean squared error, and so on. The relative benefits and drawbacks of these metrics should be weighted. It is also important that the metric be germane (i.e., alignment with the broader data analysis goals is critical). 
 
-```{r data-science-model, echo = FALSE, out.width = '80%', fig.cap = "The data science process (from R for Data Science)."}
+```{r introduction-data-science-model, echo = FALSE, out.width = '80%', fig.cap = "The data science process (from R for Data Science)."}
 
 if (knitr:::is_html_output()) {
-  knitr::include_graphics("figures-premade/data-science-model.svg")
+  file.copy("premade/data-science-model.svg", "_book/premade/data-science-model.svg")
+  knitr::include_graphics("premade/data-science-model.svg")
 } else {
-   knitr::include_graphics("figures-premade/data-science-model.pdf")
+  file.copy("premade/data-science-model.pdf", "_book/premade/data-science-model.pdf")
+  knitr::include_graphics("premade/data-science-model.pdf")
 }
 ```
 
-The process of investigating the data may not be simple. @wickham2016 contains an excellent illustration of the general data analysis process, reproduced with Figure \@ref(fig:data-science-model). Data ingestion and cleaning are shown as the initial steps. When the analytical steps commence, they are a heuristic process; we cannot pre-determine how long they may take. The cycle of analysis, modeling, and visualization often require multiple iterations. 
+The process of investigating the data may not be simple. @wickham2016 contains an excellent illustration of the general data analysis process, reproduced with Figure \@ref(fig:introduction-data-science-model). Data ingestion and cleaning are shown as the initial steps. When the analytical steps commence, they are a heuristic process; we cannot pre-determine how long they may take. The cycle of analysis, modeling, and visualization often require multiple iterations. 
 
-```{r modeling-process, echo = FALSE, out.width = '100%', fig.width=8, fig.height=3, fig.cap = "A schematic for the typical modeling process (from Feature Engineering and Selection).", warning = FALSE}
+```{r introduction-modeling-process, echo = FALSE, out.width = '100%', fig.width=8, fig.height=3, fig.cap = "A schematic for the typical modeling process (from Feature Engineering and Selection).", warning = FALSE}
 widths <- c(8, 4, 10, 2, 6, 6, 
             rep(1, 19), 2,
             rep(1, 19), 2,
@@ -227,18 +226,18 @@ ggplot(bar_loc) +
   ylim(c(.5, 2.25))
 ```
 
-This iterative process is especially true for modeling. Figure \@ref(fig:modeling-process) originates from @kuhn20202 and is meant to emulate the typical path to determining an appropriate model. The general phases are:
+This iterative process is especially true for modeling. Figure \@ref(fig:introduction-modeling-process) originates from @fes and is meant to emulate the typical path to determining an appropriate model. The general phases are:
 
- * Exploratory data analysis (EDA) and Quantitative Analysis (blue bars). Initially there is a back and forth between numerical analysis and visualization of the data (represented in Figure \@ref(fig:data-science-model)) where different discoveries lead to more questions and data analysis "side-quests" to gain more understanding. 
+ * Exploratory data analysis (EDA) and Quantitative Analysis (blue bars). Initially there is a back and forth between numerical analysis and visualization of the data (represented in Figure \@ref(fig:introduction-data-science-model)) where different discoveries lead to more questions and data analysis "side-quests" to gain more understanding. 
  * Feature engineering (green bars). Understanding results in the creation of specific model terms that make it easier to accurately model the observed data. This can include complex methodologies (e.g., PCA) or simpler features (using the ratio of two predictors). 
 
  * Model tuning and selection (red and gray bars). A variety of models are generated and their performance is compared. Some models require _parameter tuning_ where some structural parameters are required to be specified or optimized. 
 
 After an initial sequence of these tasks, more understanding is gained regarding which types of models are superior as well as which sub-populations of the data are not being effectively estimated. This leads to additional EDA and feature engineering, another round of modeling, and so on. Once the data analysis goals are achieved, the last steps are typically to finalize and document the model. For predictive models, it is common at the end to validate the model on an additional set of data reserved for this specific purpose. 
 
-As an example, @kuhn20202 use data to model the daily ridership of Chicago's public train system using predictors such as the date, the 2-week old ridership results, the weather, and other factors. An approximation of their "inner monolog" when analyzing these data is, in order:
+As an example, @fes use data to model the daily ridership of Chicago's public train system using predictors such as the date, the 2-week old ridership results, the weather, and other factors. An approximation of their "inner monolog" when analyzing these data is, in order:
 
-```{r monolog, echo = FALSE, results = 'as-is'}
+```{r introduction-monolog, echo = FALSE, results = 'as-is'}
 monolog <- 
   tribble(
     ~Activity, ~`Analysis Cycle`, ~Thoughts,
@@ -286,6 +285,12 @@ if (knitr::is_html_output()) {
     kable_styling() %>% 
     column_spec(2, width = "25%") %>%
     column_spec(1, width = "75%", italic = TRUE)
+} else {
+  tab <- 
+    monolog %>% 
+    dplyr::select(Thoughts, Activity) %>% 
+    kable() %>%
+    kable_styling()
 }
 tab
 ```
@@ -317,6 +322,8 @@ This will come into play when topics such as resampling (Chapter \@ref(resamplin
 
 ## Outline of future chapters
 
-The first order of business is to introduce (or review) the ideas and syntax of the tidyverse in Chapter \@ref(tidyverse-primer). In this chapter, we also summarize the unmet needs for modeling when using R. This provides good motivation for why model-specific tidyverse techniques are needed. This chapter also outlines some additional principles related to this challenges. 
+The first order of business is to introduce (or review) the ideas and syntax of the tidyverse in Chapter \@ref(tidyverse-primer). In this chapter, we also summarize the unmet needs for modeling when using R. This provides good motivation for why model-specific tidyverse techniques are needed. This chapter also outlines some additional principles related to these challenges. 
 
-Chapter \@ref(two-models) shows two different data analyses for the same data where one is focused on prediction and the other is for inference. This should illustrates the challenges for each approach and what issues are most relavant for each.  
+(more here as chapters are created)
+
+

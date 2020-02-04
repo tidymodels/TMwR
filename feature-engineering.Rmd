@@ -1,5 +1,6 @@
 ```{r engineering-setup, include = FALSE}
-knitr::opts_chunk$set(fig.path = "figures/engineering-")
+knitr::opts_chunk$set(fig.path = "figures/")
+library(tidymodels)
 ```
 
 # Feature engineering
