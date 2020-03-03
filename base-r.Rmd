@@ -376,5 +376,5 @@ model_by_species %>%
   unnest(cols = c(coef))
 ```
 
-List columns can be very powerful to use. These provide containers for any type of R objects that can be coupled with the helpful data frame structure. 
+As previously mentioned, list columns can be very powerful to use. These provide containers for any type of R objects that can be coupled with the helpful data frame structure. 
  

@@ -68,6 +68,8 @@ One downside to relying on common data structures is the potential loss of compu
 
 These formats are advantageous when the problem is _small in scope_ and the potential data processing methods are well defined. However, once the constraints on the data are violated, perhaps by requiring a new type of data, then system becomes overly restrictive. For example, if a principal component analysis was needed for a sparse binary matrix, the results would no longer be sparse. Also, if no function exists to do these computations on a sparse format, the sparse matrix would need to be converted to a more conventional format before proceeding.    
 
+One important feature in the tibble produced by `rsample` is that the `splits` column is a list. In this instance, each element of the list has the same type of object: an `rsplit` object that contains the information about which rows of `mtcars` belong in the bootstrap sample. _List columns_ can be very useful in data analysis and, as will be seem throughout this book, are very important to the tidyverse. 
+
 
 ###  Design for the pipe and functional programming {-}
 
