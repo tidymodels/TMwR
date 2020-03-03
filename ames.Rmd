@@ -117,7 +117,15 @@ A few noticeable patterns can be seen. First, there is a void of data points in 
 
 As previously described in the introduction, it is critical to conduct _exploratory data analysis_ prior to beginning any data analysis. These data contain a number of elements that present interesting questions about how the data should be processed and analyses. Many of these are described in later chapters. 
 
+Finally, the data contain several columns related to the _quality_ of the house: 
 
+```{r ames-quality}
+ames %>% 
+  select(matches("Qu")) %>% 
+  glimpse()
+```
+
+These are mostly factors variables that are determined by the assessor's office when examining the property. As expected, many of these columns have strong relationships with sale price. However, are they _predictive_ of the outcome? They are impressionistic measurements of worth and, as such, would be more appropriately categorized as a separate set of _outcomes_ rather than predictors. This is a relatively subjective notion itself since one could argue that they are predictors. However, in subsequent analyses, these quality-related columns are _not_ included as model predictors. 
 
 
 
