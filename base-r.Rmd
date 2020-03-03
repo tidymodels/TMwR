@@ -208,7 +208,7 @@ In comparison, the _Python Developer's Guide_ espouses the notion that, when app
 
 The advantage of R's diversity of interfaces is that it it can evolve over time and fit different types of needs for different users. 
 
-Unfortunately, some of the syntactical diversity is due to a focus on the developer's needs instead of the needs of the end-user. For example, one issue with some existing methods in base R is that the manner in which some data are stored may not be the most useful. For example, in Section \@ref(r-review) the results of linear model were saved: 
+Unfortunately, some of the syntactical diversity is due to a focus on the developer's needs instead of the needs of the end-user. For example, one issue with some existing methods in base R is that the manner in which some data are stored may not be the most useful. Previously, the results of linear model were saved: 
 
 ```{r base-r-show-in-model}
 main_effect_fit
@@ -297,7 +297,7 @@ Many of these ideas are described in the tidymodels guidelines for model impleme
 
 A few more principles are discussed below. 
 
-### Be predictable, consistent, and unsurprising
+**Be predictable, consistent, and unsurprising**
 
 As seen in the previous section, consistency can be lacking between and within R packages. The tidymodels packages work to 
 
@@ -330,7 +330,7 @@ The tidymodels packages always return consistent predicted values that follow se
 
 Finally, to help new R packages, the next section describes a tidymodels package called `hardhat` that enables package authors implement consistent interfaces and return values. 
 
-### Encourage empirical validation and good methodology.
+**Encourage empirical validation and good methodology**
 
 Enable a wider variety of methodologies
 
