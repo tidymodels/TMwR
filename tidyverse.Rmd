@@ -129,8 +129,8 @@ However, in some cases, the element-wise operation is too complex for a vectoriz
 compute_log_ratio <- function(sepal, petal) {
   log_base <- getOption("log_base", default = exp(1)) # gets external data
   results <- log(sepal/petal, base = log_base)
-  print(mean(results)) # prints to the console
-  done <<- TRUE # sets external data
+  print(mean(results))                                # prints to the console
+  done <<- TRUE                                       # sets external data
   results
 }
 ```

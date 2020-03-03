@@ -348,3 +348,33 @@ Similarly, tidymodels strongly leverage resampling methods as a way to empirical
 
 ## Combining base R models and the tidyverse
 
+Traditional R modeling functions can be used in conjunction with the tidyverse, especially with the `dplyr`, `purrr`, and `tidyr` packages. For example, if there was interest in fitting separate models for each species, the data can first be broken out by this column using `dplyr::group_by()` and `tidy::nest()`: 
+
+```{r base-r-by-species-split}
+split_by_species <- 
+  crickets %>% 
+  group_by(species) %>% 
+  nest()
+split_by_species
+```
+
+The `data` column contains the `rate` and `temp` columns from `crickets` in a _list column_. From this, the `purrr::map()` function can create individual models for each species:
+
+```{r base-r-species-models}
+model_by_species <- 
+  split_by_species %>% 
+  mutate(model = map(data, ~ lm(rate ~ temp, data = .x)))
+model_by_species
+```
+
+If there is interest in collecting the coefficients for each of these models, it is helpful to use `broom::tidy()` to convert them to a consistent data frame format and then these can be unested:
+
+```{r base-r-species-coefs}
+model_by_species %>% 
+  mutate(coef = map(model, tidy)) %>% 
+  select(species, coef) %>% 
+  unnest(cols = c(coef))
+```
+
+List columns can be very powerful to use. These provide containers for any type of R objects that can be coupled with the helpful data frame structure. 
+ 
