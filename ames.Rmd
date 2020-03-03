@@ -7,7 +7,7 @@ ames <- make_ames()
 
 # Introducing the Ames housing data 
 
-The Ames housing data set ([De Cock (2011, Journal of Statistics Education)](http://ww2.amstat.org/publications/jse/v19n3/decock.pdf)) is an excellent teaching resource and will be used in several parts of this book. It contains data on `r nrow(ames)` properties in Ames Iowa, including columns related to 
+The Ames housing data set [@ames] is an excellent teaching resource and will be used in several parts of this book. It contains data on `r nrow(ames)` properties in Ames Iowa, including columns related to 
 
  * House components (bedrooms, garage, fireplace, pool, porch, etc.).
  * Location (neighborhood).

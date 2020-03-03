@@ -23,7 +23,6 @@ How should we conduct this split of the data? This depends on the context. Suppo
 ```{r ames-split}
 library(tidymodels) # Includes rsample
 library(AmesHousing)
-theme_set(theme_bw())
 
 # Remove the quality-related columns
 ames <- 
