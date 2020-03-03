@@ -9,8 +9,8 @@ rmd_files: [
   "data-spending.Rmd",
   "how-good-is-our-model.Rmd",
   "feature-engineering.Rmd",
-  "the-model-workflow.Rmd",
   "fitting-models.Rmd",
+  "the-model-workflow.Rmd",
   "resampling.Rmd",
   "over-fitting.Rmd",
   "model-tuning.Rmd"
