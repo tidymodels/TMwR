@@ -4,6 +4,7 @@ rmd_files: [
   "index.Rmd",
   "introduction.Rmd",
   "tidyverse.Rmd",
+  "base-r.Rmd",
   "ames.Rmd",
   "data-spending.Rmd",
   "how-good-is-our-model.Rmd",
