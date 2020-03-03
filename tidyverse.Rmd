@@ -16,7 +16,7 @@ In this chapter, these principles are briefly discussed before diving into speci
 
 The full set of strategies and tactics for writing R code in the tidyverse style can be found at the website [`https://design.tidyverse.org`](https://design.tidyverse.org/). The following sections describe a few ideas and their motivation. 
 
-### Design for humans
+### Design for humans {-}
 
 The tidyverse focuses on designing R packages and functions that can be easily understood and used by a broad range of people. Historically, a substantial percentage of R users are not programmers but people who are more focused on the end results of their analyses (rather than the software complexities of their tools). As such, there should not be the expectation that users have computer science backgrounds or would be capable or writing their own R packages.
 
@@ -44,7 +44,7 @@ The tidyverse approach is use function names that are explicit and descriptive i
 Also, when there are similar functions in a package, the function names are designed to be optimized for tab-complete. For example, the `glue` package has a collection of functions starting with a common prefix (`glue_`) that enables users to quickly find the function that they are looking for. 
 
 
-###  Reuse existing data structures
+###  Reuse existing data structures {-}
 
 Whenever possible, functions should avoid returning a novel data structure. If the results are conducive to an existing data structure, it should be used. The reason is that it reduces the cognitive load for using the package; no additional syntax or methods are required. 
 
@@ -69,7 +69,7 @@ One downside to relying on common data structures is the potential loss of compu
 These formats are advantageous when the problem is _small in scope_ and the potential data processing methods are well defined. However, once the constraints on the data are violated, perhaps by requiring a new type of data, then system becomes overly restrictive. For example, if a principal component analysis was needed for a sparse binary matrix, the results would no longer be sparse. Also, if no function exists to do these computations on a sparse format, the sparse matrix would need to be converted to a more conventional format before proceeding.    
 
 
-###  Design for the pipe and functional programming
+###  Design for the pipe and functional programming {-}
 
 The `magrittr` pipe operator (`%>%`) is a tool for chaining together a sequence of R commands. To demonstrate, these commands can be used to sort a data frame then retain the first 10 rows:
 
