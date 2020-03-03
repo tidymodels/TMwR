@@ -1,13 +1,64 @@
 ```{r ames-setup, include = FALSE}
 knitr::opts_chunk$set(fig.path = "figures/")
 library(tidymodels)
+library(AmesHousing)
+ames <- make_ames()
 ```
 
 # Introducing the Ames housing data 
 
-basics
+The Ames housing data set ([De Cock (2011, Journal of Statistics Education)](http://ww2.amstat.org/publications/jse/v19n3/decock.pdf)) is an excellent teaching resource and will be used in several parts of this book. It contains data on `r nrow(ames)` properties in Ames Iowa, including columns related to 
 
+ * House components (bedrooms, garage, fireplace, pool, porch, etc.).
+ * Location (neighborhood).
+ * Lot information (zoning, shape, size, etc.).
+ * Ratings of condition and quality. 
+ * Sale price.
 
+Our goal for these data are to predict the sale price of a house based on its other characteristics. 
+
+The raw data are provided by the authors. However, in our analyses, the `AmesHousing` package will be used. This package makes several improvements to the data. For example, the longitude and latitude values were determined for each property. Also, in the raw data, some columns were modified to be more analysis ready. For example: 
+
+ * If a house did not have a particular feature, it was instinctively encoded as missing. For example, there were `r sum(ames$Alley == "No_Alley_Access")` properties that did not have an alleyway. Instead of leave these as missing, they were relabeled to indicate that no alley was available.
+
+ * The categorical predictors were converted to R factor columns. While the tidyverse and base R have moved away from reading data in as factors, when modeling, this data structure is a much better approach for storing qualitative data than simple strings.  
+
+To see the complete account of the differences, see `?make_ames`. `?ames_raw` also lists the definitions of each of the columns in the data. 
+
+To load the data: 
+
+```{r ames-load}
+library(AmesHousing)
+
+# Create the data set:
+ames <- make_ames()
+dim(ames)
+```
+
+The remainder of this chapter points out some interesting features of the data. 
+
+It makes sense to start with the outcome: the last sale price of the house (in USD): 
+
+```{r ames-sale_price, out.width = '100%', fig.width=8, fig.height=3}
+ggplot(ames, aes(x = Sale_Price)) + 
+  geom_histogram(bins = 50)
+```
+
+The data are right-skewed; there are more inexpensive houses than expensive ones. The median sale price is \$`r format(median(ames$Sale_Price), big.mark = ",")` and the most expensive house is \$`r format(max(ames$Sale_Price), big.mark = ",")`. When modeling this outcome, a strong argument can be made that the price should be log-transformed. The advantages of doing this are that no houses would be predicted with negative sale prices and that errors in predicting expensive houses will not have an undue influence on the model. From a statistical perspective, log transform may also _stabilize the variance_ in a way that makes inference more legitimate. The transformed data are:
+
+```{r ames-log-sale_price, out.width = '100%', fig.width=8, fig.height=3}
+ggplot(ames, aes(x = Sale_Price)) + 
+  geom_histogram(bins = 50) +
+  scale_x_log10()
+```
+
+While not perfect, this will probably result in better models than using the unlogged data. 
+
+The downside to transforming the outcome is mostly related to interpretation.  The units of the model coefficients might be more difficult to interpret as will measures of performance. For example, the root mean squared error (RMSE) is a common performance metric that is used in regression models. It uses the difference between the observed and predicted values in its calculations. If the sale price is on the log scale, these differences (i.e. the residuals) are also in log units. For this reason, it is difficult to rationalize the quality of a model whose RMSE is 0.15 log units. 
+
+Despite these drawbacks, the models used in this book utilize the log transformation for this outcome. 
+
+Another aspect of these data are their geographic location. This quality is contained in the data in two ways: a qualitatve `neighborhood` label as well as quantitiative longitude and latidue data. To visualize the data, both can be used to plot the data on a map and color by neighborhood: 
 
 ```{r ames-map-code, eval = FALSE, include = FALSE}
 col_key <- c(
@@ -61,4 +112,12 @@ ggmap(get_stamenmap(loc, zoom = 15, maptype = "toner-lines")) +
 ```{r ames-map, echo = FALSE, fig.cap = "Neighborhoods in Ames IA."}
 knitr::include_graphics(path = "premade/ames.png")
 ```
+
+A few noticeable patterns can be seen. First, there is a void of data points in the center of Ames. This corresponds to Iowa State University. Second, while there are a number of neighborhoods that are geographically isolated, there are others that are adjacent. A detailed inspection of the map also shows that the neighborhood labels are not completely reliable. For example, there are some properties labeled as being in Northridge that are surrounded by houses in the adjacent Somerset neighborhood. 
+
+As previously described in the introduction, it is critical to conduct _exploratory data analysis_ prior to beginning any data analysis. These data contain a number of elements that present interesting questions about how the data should be processed and analyses. Many of these are described in later chapters. 
+
+
+
+
 
