@@ -35,7 +35,9 @@ library(dplyr)
 arrange(data = iris, Species, Sepal.Length)
 ```
 
-Note that the variable names are unquoted; where many traditional R functions require a character string to specify variables, tidyverse functions take unquoted names or _selector functions_. The selectors allow for one or more  readable rules that are applied to the column names. For example, `starts_with("Sepal")` would select the first two columns of the `iris` data frame.
+```{block, type = "rmdnote"}
+Variable names above are unquoted; where many traditional R functions require a character string to specify variables, tidyverse functions take unquoted names or _selector functions_. The selectors allow for one or more  readable rules that are applied to the column names. For example, `starts_with("Sepal")` would select the first two columns of the `iris` data frame.
+```
 
 Additionally, the naming of things is crucial. If you were new to R and were writing data analysis code utilizing linear algebra, you might be stymied when searching for the function that computes the matrix inverse. Using `apropos("inv")` yields no candidates. It turns out that the function to use is `solve()` for solving systems of linear equations. For a matrix `X`, you would use `solve(X)` (with no vector for the right-hand side of the equation). This is only documented in the description in one of the arguments in the help file. In essence, you would need to know the name of the solution to be able to find the solution. 
 

@@ -173,7 +173,9 @@ new_values <- data.frame(species = "O. exclamationis", temp = 15:20)
 predict(main_effect_fit, new_values)
 ```
 
+```{block, type = "rmdnote"}
 Note that the non-numeric value of `species` is given to the predict method (as opposed to the binary indicator variable).  
+```
 
 While this analysis has obviously not been an exhaustive demonstration of R's modeling capabilities, it does highlight some of the major features: 
 
