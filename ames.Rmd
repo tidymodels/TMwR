@@ -27,7 +27,7 @@ To see the complete account of the differences, see `?make_ames`. `?ames_raw` al
 
 To load the data: 
 
-```{r ames-load}
+```{r ames-load, warning = FALSE, message = FALSE}
 library(AmesHousing)
 
 # Create the data set:
@@ -109,7 +109,7 @@ ggmap(get_stamenmap(loc, zoom = 15, maptype = "toner-lines")) +
   labs(x = "", y = "") + 
   scale_color_manual(values = col_key)
 ```
-```{r ames-map, out.width = "80%", echo = FALSE, fig.cap = "Neighborhoods in Ames IA."}
+```{r ames-map, out.width = "90%", echo = FALSE, fig.cap = "Neighborhoods in Ames IA."}
 knitr::include_graphics(path = "premade/ames.png")
 ```
 

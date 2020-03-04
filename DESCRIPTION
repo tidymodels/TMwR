@@ -17,4 +17,9 @@ Imports:
   kableExtra,
   sessioninfo,
   gridExtra,
-  rmarkdown
+  rmarkdown,
+  recipes,
+  tune
+Remotes:
+  tidymodels/recipes,
+  tidymodels/tune

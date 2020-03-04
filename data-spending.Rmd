@@ -38,7 +38,7 @@ ames_split <- initial_split(ames, prob = 0.80)
 ames_split
 ```
 
-The printed information denotes the amount of data in the training set ($n = `r nrow(training(ames_split))`$), the amount in the test set ($n = `r nrow(testing(ames_split))`$), and the size of the original pool of samples  ($n = `r nrow(ames)`$). The object `ames_split` only contains the splitting information; to get separate data objects, two more functions are applied:
+The printed information denotes the amount of data in the training set ($n = `r format(nrow(training(ames_split)), big.mark = ",")`$), the amount in the test set ($n = `r format(nrow(testing(ames_split)), big.mark = ",")`$), and the size of the original pool of samples  ($n = `r format(nrow(ames), big.mark = ",")`$). The object `ames_split` only contains the splitting information; to get separate data objects, two more functions are applied:
 
 ```{r ames-split-df}
 ames_train <- training(ames_split)
