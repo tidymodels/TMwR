@@ -7,7 +7,7 @@ ames <- make_ames()
 
 # Introducing the Ames housing data 
 
-The Ames housing data set [@ames] is an excellent teaching resource and will be used in several parts of this book. It contains data on `r nrow(ames)` properties in Ames Iowa, including columns related to 
+The Ames housing data set [@ames] is an excellent teaching resource and will be used in several parts of this book. It contains data on `r format(nrow(ames), big.mark = ",")` properties in Ames Iowa, including columns related to 
 
  * House components (bedrooms, garage, fireplace, pool, porch, etc.).
  * Location (neighborhood).
@@ -19,7 +19,7 @@ Our goal for these data are to predict the sale price of a house based on its ot
 
 The raw data are provided by the authors. However, in our analyses, the `AmesHousing` package will be used. This package makes several improvements to the data. For example, the longitude and latitude values were determined for each property. Also, in the raw data, some columns were modified to be more analysis ready. For example: 
 
- * If a house did not have a particular feature, it was instinctively encoded as missing. For example, there were `r sum(ames$Alley == "No_Alley_Access")` properties that did not have an alleyway. Instead of leave these as missing, they were relabeled to indicate that no alley was available.
+ * If a house did not have a particular feature, it was instinctively encoded as missing. For example, there were `r format(sum(ames$Alley == "No_Alley_Access"), big.mark = ",")` properties that did not have an alleyway. Instead of leave these as missing, they were relabeled to indicate that no alley was available.
 
  * The categorical predictors were converted to R factor columns. While the tidyverse and base R have moved away from reading data in as factors, when modeling, this data structure is a much better approach for storing qualitative data than simple strings.  
 
@@ -44,7 +44,7 @@ ggplot(ames, aes(x = Sale_Price)) +
   geom_histogram(bins = 50)
 ```
 
-The data are right-skewed; there are more inexpensive houses than expensive ones. The median sale price is \$`r format(median(ames$Sale_Price), big.mark = ",")` and the most expensive house is \$`r format(max(ames$Sale_Price), big.mark = ",")`. When modeling this outcome, a strong argument can be made that the price should be log-transformed. The advantages of doing this are that no houses would be predicted with negative sale prices and that errors in predicting expensive houses will not have an undue influence on the model. From a statistical perspective, log transform may also _stabilize the variance_ in a way that makes inference more legitimate. The transformed data are:
+The data are right-skewed; there are more inexpensive houses than expensive ones. The median sale price was \$`r format(median(ames$Sale_Price), big.mark = ",")` and the most expensive house was \$`r format(max(ames$Sale_Price), big.mark = ",")`. When modeling this outcome, a strong argument can be made that the price should be log-transformed. The advantages of doing this are that no houses would be predicted with negative sale prices and that errors in predicting expensive houses will not have an undue influence on the model. From a statistical perspective, log transform may also _stabilize the variance_ in a way that makes inference more legitimate. The transformed data are:
 
 ```{r ames-log-sale_price, out.width = '100%', fig.width=8, fig.height=3}
 ggplot(ames, aes(x = Sale_Price)) + 
@@ -109,7 +109,7 @@ ggmap(get_stamenmap(loc, zoom = 15, maptype = "toner-lines")) +
   labs(x = "", y = "") + 
   scale_color_manual(values = col_key)
 ```
-```{r ames-map, echo = FALSE, fig.cap = "Neighborhoods in Ames IA."}
+```{r ames-map, out.width = "80%", echo = FALSE, fig.cap = "Neighborhoods in Ames IA."}
 knitr::include_graphics(path = "premade/ames.png")
 ```
 
@@ -121,11 +121,18 @@ Finally, the data contain several columns related to the _quality_ of the house:
 
 ```{r ames-quality}
 ames %>% 
-  select(matches("Qu")) %>% 
+  select(matches("_Qu")) %>% 
   glimpse()
 ```
 
-These are mostly factors variables that are determined by the assessor's office when examining the property. As expected, many of these columns have strong relationships with sale price. However, are they _predictive_ of the outcome? They are impressionistic measurements of worth and, as such, would be more appropriately categorized as a separate set of _outcomes_ rather than predictors. This is a relatively subjective notion itself since one could argue that they are predictors. However, in subsequent analyses, these quality-related columns are _not_ included as model predictors. 
+These are mostly factors variables that are determined by the assessor's office when examining the property. As expected, many of these columns have strong relationships with sale price. However, are they _predictive_ of the outcome? They are impressionistic measurements of worth and, as such, would be more appropriately categorized as a separate set of _outcomes_ rather than predictors. This is a relatively subjective notion itself since one could argue that they are predictors. However, in subsequent analyses, these quality-related columns are _not_ included as model predictors. To do this:
+
+```{r ames-subset}
+ames <- 
+  make_ames() %>% 
+  # Remove columns that contain "_Qu"
+  dplyr::select(-matches("_Qu"))
+```
 
 
 

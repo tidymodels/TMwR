@@ -27,7 +27,7 @@ library(AmesHousing)
 # Remove the quality-related columns
 ames <- 
   make_ames() %>% 
-  dplyr::select(-matches("Qu"))
+  dplyr::select(-matches("_Qu"))
 
 # Set the random number stream using `set.seed()` so that the results can be 
 # reproduced later. 
