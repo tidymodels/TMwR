@@ -301,7 +301,7 @@ and so on. Eventually, a model is selected that is able to achieve sufficient pe
 
 The first order of business is to introduce (or review) the ideas and syntax of the tidyverse in Chapter \@ref(tidyverse-primer). Chapter \@ref(base-r) is a quick tour of conventional base R modeling functions and summarize the unmet needs for modeling. 
 
-The next set of chapters introduce an example data set and introduce some of the fundamental packages: `recipes`, `parsnip`, `yardstick`, and others.  
+Part I introduces an example data set and introduce some of the fundamental packages: `recipes`, `parsnip`, `yardstick`, and others. 
 
 (more here as chapters are created)
 
