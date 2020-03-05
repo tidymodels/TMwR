@@ -18,9 +18,9 @@ The primary approach when using empirical validation would be to split the exist
 
 The other portion of the data are placed into the _test set_. This is held in reserve until one or two models are chosen as the best methods. The test set is then used as the final arbiter to determine the efficacy of the model. It is critical to only look at the test set once; otherwise it becomes part of the modeling process. 
 
-How should we conduct this split of the data? This depends on the context. Suppose 75% of the data are allocated to the training set and the remaining 25% is used for testing.  The most common method is to use simple random sampling. The `rsample` package has tools for making data splits and the function `intial_split()` was created for this purpose. It takes the data frame as an argument as well as the proportion to be placed into training. For example: 
+How should we conduct this split of the data? This depends on the context. Suppose 80% of the data are allocated to the training set and the remaining 20% is used for testing.  The most common method is to use simple random sampling. The `rsample` package has tools for making data splits and the function `intial_split()` was created for this purpose. It takes the data frame as an argument as well as the proportion to be placed into training. For example: 
 
-```{r ames-split}
+```{r ames-split, message = FALSE, warning = FALSE}
 library(tidymodels) # Includes rsample
 library(AmesHousing)
 
