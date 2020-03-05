@@ -210,7 +210,7 @@ df[, "two"]
 tbbl[, "two"]
 ```
 
-There are various other advantages to using tibbles instead of data frames, such as better printing and so on.  
+There are various other advantages to using tibbles instead of data frames, such as better printing and so on.  [Chapter 10](https://r4ds.had.co.nz/tibbles.html) of @wickham2016 has more details on tibbles.
 
 ```{r tidyverse-import-raw, include = FALSE}
 url <- "chi.csv"
