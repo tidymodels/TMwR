@@ -242,27 +242,15 @@ The initial tidyverse pipeline will conduct the following tasks, in order:
 
 The tidyverse code for these steps is:
 
-```{r tidyverse-import}
+```{r tidyverse-import, message = FALSE}
 library(tidyverse)
 library(lubridate)
 
 url <- "chi.csv"
 
-# Pre-define the data types for the different columns that
-# are imported from the URL. The `col_()` functions tell `read_delim()` what
-# type of data to expect.
-train_cols <- 
-  cols(
-    station_id  = col_double(),
-    stationname = col_character(),
-    date        = col_character(),
-    daytype     = col_character(),
-    rides       = col_double()
-  )
-
 all_stations <- 
   # Step 1: Read in the data.
-  read_delim(url, delim = ",", col_types = train_cols) %>% 
+  read_delim(url, delim = ",") %>% 
   # Step 2: filter columns and rename stationname
   dplyr::select(station = stationname, date, rides) %>% 
   # Step 3: Convert the character date field to a date encoding.
