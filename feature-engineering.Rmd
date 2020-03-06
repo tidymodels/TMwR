@@ -324,7 +324,7 @@ plot_smoother <- function(deg_free) {
 
 The `ns()` function in the `splines` package generated feature columns using called _natural splines_.
 
-Some panels clearly fit poorly; three terms _under-fits_ the data while 50 terms _over-fits_. The panels with five and 20 terms seem like a reasonably smooth fits that catch the main patterns of the data. This indicates that the proper amount of "non-linear-ness" is required. The number of spline terms would then be thought of as a _tuning parameter_ for this model. These types of parameters are explored model in Chapter \@ref(tuning). 
+Some panels clearly fit poorly; two terms _under-fit_ the data while 50 terms _over-fit_. The panels with five and 20 terms seem like a reasonably smooth fits that catch the main patterns of the data. This indicates that the proper amount of "non-linear-ness" is required. The number of spline terms would then be thought of as a _tuning parameter_ for this model. These types of parameters are explored model in Chapter \@ref(tuning). 
 
 In recipes, there are multiple steps that can create these types of terms. To add this predictor a natural spline representation:
 
