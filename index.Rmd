@@ -2,7 +2,7 @@
 knit: "bookdown::render_book"
 title: "Tidy Modeling with R"
 author: ["Max Kuhn and Davis Vaughan"]
-date: "`r version()`"
+date: "`r tmwr_version()`"
 description: "Modeling of data is integral to science, business, politics, and many other aspects of our lives. The goals of this book are to: introduce neophytes to models and the tidyverse, demonstrate the `tidymodels` packages, and to outline good practices for the phases of the modeling process."
 github-repo: topepo/TMwR
 twitter-handle: topepos
@@ -39,10 +39,10 @@ pd_version <- rmarkdown::pandoc_version()
 ``` 
 
 ```{r pkg-list, echo = FALSE}
-pkg_list <- c("broom", "dials", "discrim", "dplyr", "ggplot2", "infer", "parsnip",
-              "patchwork", "purrr", "recipes", "rlang", "rsample", "tibble", "tune", 
-              "workflows", "yardstick", "AmesHousing", "bookdown", "knitr", 
-              "kableExtra", "tidymodels", "tidyverse")
+pkg_list <- c("AmesHousing", "bookdown", "broom", "dials", "discrim", "dplyr",
+              "ggplot2", "infer", "kableExtra", "knitr", "parsnip", "patchwork",
+              "purrr", "recipes", "rlang", "rsample", "splines", "tibble",
+              "tidymodels", "tidyverse", "tune", "workflows", "yardstick")
 library(sessioninfo)
 sinfo <- sessioninfo::session_info()
 cls <- class(sinfo$packages)
