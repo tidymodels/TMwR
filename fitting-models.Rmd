@@ -116,6 +116,14 @@ lm_form_fit
 lm_xy_fit
 ```
 
+```{block, type = "rmdwarning"}
+The differences are between `fit()` and `fit_xy()` may not be obvious. 
+
+If `fit()` is used, this _almost always_ means that dummy variables will be created from qualitative predictors. If the underlying function requires a matrix (like `glmnet`), it will make them. However, if the underlying function uses a formula, `fit()` just passes for formula to that function. 99% of modeling functions using formulas make dummy variables. The other 1% include tree-based methods that do not require purely numeric predictors. 
+
+`fit_xy()` always passes the data as-is to the underlying model function. It will not create dummy variables before doing so.
+```
+
 As shown above, `parsnip` can enable a consistent model interface for different packages. It also provides consistency in the _model arguments_. It is common for different functions, which fit the same model, to have different argument names. Random forest model functions are a good example. Three commonly used arguments are: the number of trees in the ensemble, the number of predictors to randomly sampling with each tree's splits, and the number of data points required to make a split. For three different packages, those arguments are:
 
 ```{r, models-rf-arg-names, echo = FALSE, results = "asis"}
@@ -184,5 +192,11 @@ rand_forest(trees = 1000, min_n = 5) %>%
 
 
 ## Using the model results
+
+
+```{block, type = "rmdwarning"}
+Never pass the `fit` object to a model prediction function. If the data were pre-processed in any way, incorrect predictions will be generated (sometimes, without errors). The underlying model's prediction function has no idea if any transformations have been made to the data prior to running the model.
+```
+
 
 ## Making predictions
