@@ -1,19 +1,188 @@
-```{r spending-setup, include = FALSE}
+```{r models-setup, include = FALSE}
 knitr::opts_chunk$set(fig.path = "figures/")
 library(tidymodels)
+library(kknn)
+library(AmesHousing)
+library(kableExtra)
+
+ames <- make_ames()
+
+set.seed(833961)
+ames_split <- initial_split(ames, prob = 0.80, strata = Sale_Price)
+ames_train <- training(ames_split)
+ames_test  <-  testing(ames_split)
 ```
 
 # Fitting Models 
 
-parsnip introduction
 
-formula vs non-formula method
+## Creating a model
 
-differences in arguments and syntax
+Once the data have been encoded into a usable format, they can be used in the model building process.  
 
-different software to fit the same structural model (define this first)
+Suppose that a linear regression model was the initial choice for the model. This is equivalent to specifying that the outcome data is numeric and the predictors are related to the model in terms of simple slopes and intercepts: 
 
-model mode
+$$y_i = \beta_0 + \beta_1 x_{1i} + \ldots + \beta_p x_{pi}$$
 
-prediction stuff
+There are a variety of methods that can be used to estimate the model parameters, including: 
 
+ * _Ordinary linear regression_ where the traditional method of least squares is used to solve for the model parameters. 
+
+ * _Regularized linear regression_ that adds a penalty to the least squares method to encourage simplicity by removing predictors and/or shrinking their coefficients towards zero. This can be executed using Bayesian or non-Bayesian techniques. 
+
+In R, the `stats` package can be used for the first case. The syntax for `lm()` is 
+
+```r
+model <- lm(formula, data, ...)
+```
+
+where `...` symbolizes other options to pass to `lm()`. 
+
+For regularization, a Bayesian model can be fit using the `rstanarm` package: 
+
+```r
+model <- stan_glm(formula, data, family = "gaussian", ...)
+```
+
+In this case, the other options would include arguments for the _prior distributions_ of the parameters as well as specifics about the numerical aspects of the model. 
+
+A popular non-Bayesian approach to regularized regression in the `glmnet` model (ref). Its syntax is
+
+```r
+model <- glmnet(x = matrix, y = vector, family = "gaussian", ...)
+```
+
+In this case, the predictor data must already be formatted into a numeric matrix. 
+
+Note that these interfaces are heterogeneous in either how the data are passed to the model function or in terms of their arguments. The first issue is that, to fit models across different packages, the data must be formatted in different ways. `lm()` and `stan_glm()` only have formula interfaces while `glmnet()` does not. For other types of models, the interfaces may be more disparate. For a person trying to do data analysis, these differences would require the memorization of each package's syntax and can be very frustrating. 
+
+For tidy models, the approach to specifying a model is fairly simple: 
+
+1. Specify the _type_ of model based on it's mathematical structure (e.g., linear regression, random forest, _K_-nearest neighbors, etc). 
+
+2. Specify the _engine_ for fitting the model. Most often this reflects the software package that should be used. 
+
+3. When required, declare the _mode_ of the model. The mode reflects the type of prediction outcome. For numeric outcomes, the mode is _regression_ and for qualitative outcomes, it is _classification_. If a model can only create one type of model, such as linear regression, the mode is already set. 
+
+These specifications are done _without referencing the data_. For example, for the three cases above: 
+
+```{r models-lin-reg-spec}
+linear_reg() %>% set_engine("lm")
+
+linear_reg() %>% set_engine("glmnet") 
+
+linear_reg() %>% set_engine("stan")
+```
+
+could be used. 
+
+Once the details of the model have been specified, the model estimation can be done with either the `fit()` function (to use a formula) or the `fit_xy()` function (when your data are already pre-processed). `parsnip` let's the user be indifferent to the interface that the underlying model uses; you can always use a formula even if the modeling packages function only has the x/y interface. 
+
+To demonstrate this, the `translate()` function can provide details on how `parsnip` converts the user's code to the package's syntax: 
+
+```{r models-lin-reg-trans}
+linear_reg() %>% set_engine("lm") %>% translate()
+
+linear_reg() %>% set_engine("glmnet") %>% translate()
+
+linear_reg() %>% set_engine("stan") %>% translate()
+```
+
+`missing_arg()` is just a placeholder for the data that has yet to be provided. 
+
+```{block, type = "rmdnote"}
+Note that, for the Stan and `glmnet` engines, the `family` argument was automatically added as a default. However, as will be shown below, this option can be changed.  
+```
+
+As a simple demonstration, the sale price of the houses in the Ames data can be predicted as a function of just longitude and latitude. 
+
+```{r models-ames-geocodes}
+lm_model <- 
+  linear_reg() %>% 
+  set_engine("lm")
+
+lm_form_fit <- 
+  lm_model %>% 
+  fit(log10(Sale_Price) ~ Longitude + Latitude, data = ames_train)
+
+lm_xy_fit <- 
+  lm_model %>% 
+  fit_xy(
+    x = ames_train %>% select(Longitude, Latitude),
+    y = ames_train %>% mutate(Sale_Price = log10(Sale_Price)) %>% pull(Sale_Price)
+    )
+    
+lm_form_fit
+lm_xy_fit
+```
+
+As shown above, `parsnip` can enable a consistent model interface for different packages. It also provides consistency in the _model arguments_. It is common for different functions, which fit the same model, to have different argument names. Random forest model functions are a good example. Three commonly used arguments are: the number of trees in the ensemble, the number of predictors to randomly sampling with each tree's splits, and the number of data points required to make a split. For three different packages, those arguments are:
+
+```{r, models-rf-arg-names, echo = FALSE, results = "asis"}
+arg_info <- 
+  tribble(
+    ~ `Argument Type`, ~parsnip,
+    "# trees", "trees",
+    "# sampled predictors", "mtry",
+    "# data points to split", "min_n"
+  )
+
+arg_info <-
+  get_from_env("rand_forest_args") %>% 
+  select(engine, parsnip, original) %>% 
+  full_join(arg_info, by = "parsnip") %>% 
+  mutate(package = ifelse(engine == "spark", "sparklyr", engine))
+
+arg_info %>%
+  select(package, `Argument Type`, original) %>%
+  # mutate(original = paste0("<tt>", original, "</tt>")) %>% 
+  pivot_wider(
+    id_cols = c(`Argument Type`),
+    values_from = c(original),
+    names_from = c(package)
+  ) %>% 
+  kable() %>% 
+  kable_styling()
+```
+
+In an effort to make argument specification less painful, `parsnip` uses common argument names within- and between-packages. For random forests, `parsnip` models use: 
+
+```{r, models-parsnip-names, echo = FALSE, results = "asis"}
+
+arg_info %>%
+  select(`Argument Type`, parsnip) %>%
+  distinct() %>% 
+  # mutate(parsnip = paste0("<tt>", parsnip, "</tt>")) %>% 
+  kable() %>% 
+  kable_styling(full_width = FALSE)
+```
+
+Admittedly, this is one more set of arguments to memorize. However, when other types of models have the same argument types, these names still apply. For example, boosted tree ensembles also create a large number of tree-based models, so `trees` is also used there (as is `num_n`) and so on. 
+
+Also, some of the original argument names can be fairly jarony. For example, to specify the amount of regularization to use in a `glmnet` model, the greek letter `lambda` is used. While this mathematical notation is commonly used in the literature, it is not obvious to many people what `lambda` represents (especially those who consume the model results). Since this is the penalty used in regularization, `parsnip` standardizes on the argument name `penalty`. Similarly, the number of neighbors in a _K_-nearest neighbors model is called `neighbors` instead of `k`. Our run of thumb when standardizing argument names is: if a partitioner were to include these names in a plot or table, would the people viewing those results understand the name? To understand how the `parsnip` argument names map to the original names, the help file for the model can be used as well as the `translate()` function: 
+
+```{r models-glmnet-trans}
+rand_forest(trees = 1000, min_n = 5) %>% 
+  set_engine("ranger") %>% 
+  set_mode("regression") %>% 
+  translate()
+```
+
+`parsnip` modeling functions separate model arguments into two categories: 
+
+ * _Main arguments_ are those that are commonly used and tend to be available across engines. 
+
+ * _Engine arguments_ are either specific to a particular engine or used more rarely. 
+
+For example, in the translation of the random forest code above, the arguments `num.threads`, `verbose`, and `seed` were added by default. These arguments are specific to the `ranger` implementation of random forest models and wouldn't make sense as main arguments. Engine-specific arguments can be specified in `set_engine()`. For example, to have the `ranger::ranger()` print out more information about the fit:
+
+```{r models-ranger-verb}
+rand_forest(trees = 1000, min_n = 5) %>% 
+  set_engine("ranger", verbose = TRUE) %>% 
+  set_mode("regression") 
+```
+
+
+## Using the model results
+
+## Making predictions

@@ -40,9 +40,10 @@ pd_version <- rmarkdown::pandoc_version()
 
 ```{r pkg-list, echo = FALSE}
 pkg_list <- c("AmesHousing", "bookdown", "broom", "dials", "discrim", "dplyr",
-              "ggplot2", "infer", "kableExtra", "knitr", "parsnip", "patchwork",
-              "purrr", "recipes", "rlang", "rsample", "splines", "tibble",
-              "tidymodels", "tidyverse", "tune", "workflows", "yardstick")
+              "ggplot2", "infer", "kableExtra", "kknn", "knitr", "parsnip",
+              "patchwork", "purrr", "recipes", "rlang", "rsample", "splines", 
+              "tibble", "tidymodels", "tidyverse", "tune", "workflows", 
+              "yardstick")
 library(sessioninfo)
 sinfo <- sessioninfo::session_info()
 cls <- class(sinfo$packages)
