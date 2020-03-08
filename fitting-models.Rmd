@@ -15,7 +15,10 @@ ames_test  <-  testing(ames_split)
 
 # Fitting Models 
 
+The tidymodels package that is focused on model creation is `parsnip`. It provides a clean and standardized interface to a variety of different models. This chapter shows how the use the package and gives some motivation for why a common interface is beneficial. 
 
+In the last chapter, recipe objects were discussed as methods to pre-process the data prior to being given to the model. Recipes are not discussed here so that the focus is on the model; the next chapter illustrates how to combine models and recipes together into something called a `workflow` object. 
+ 
 ## Creating a model
 
 Once the data have been encoded into a usable format, they can be used in the model building process.  
@@ -46,7 +49,7 @@ model <- stan_glm(formula, data, family = "gaussian", ...)
 
 In this case, the other options would include arguments for the _prior distributions_ of the parameters as well as specifics about the numerical aspects of the model. 
 
-A popular non-Bayesian approach to regularized regression in the `glmnet` model (ref). Its syntax is
+A popular non-Bayesian approach to regularized regression in the `glmnet` model [@glmnet]. Its syntax is
 
 ```r
 model <- glmnet(x = matrix, y = vector, family = "gaussian", ...)
@@ -149,7 +152,7 @@ arg_info %>%
     values_from = c(original),
     names_from = c(package)
   ) %>% 
-  kable() %>% 
+  kable(escape = FALSE) %>% 
   kable_styling()
 ```
 
@@ -161,7 +164,7 @@ arg_info %>%
   select(`Argument Type`, parsnip) %>%
   distinct() %>% 
   # mutate(parsnip = paste0("<tt>", parsnip, "</tt>")) %>% 
-  kable() %>% 
+  kable(escape = FALSE) %>% 
   kable_styling(full_width = FALSE)
 ```
 
@@ -182,7 +185,7 @@ rand_forest(trees = 1000, min_n = 5) %>%
 
  * _Engine arguments_ are either specific to a particular engine or used more rarely. 
 
-For example, in the translation of the random forest code above, the arguments `num.threads`, `verbose`, and `seed` were added by default. These arguments are specific to the `ranger` implementation of random forest models and wouldn't make sense as main arguments. Engine-specific arguments can be specified in `set_engine()`. For example, to have the `ranger::ranger()` print out more information about the fit:
+For example, in the translation of the random forest code above, the arguments `num.threads`, `verbose`, and `seed` were added by default. These arguments are specific to the `ranger` implementation of random forest models and wouldn't make sense as main arguments. Engine-specific arguments can be specified in `set_engine()`. For example, to have the `ranger::ranger()` function print out more information about the fit:
 
 ```{r models-ranger-verb}
 rand_forest(trees = 1000, min_n = 5) %>% 
@@ -193,10 +196,134 @@ rand_forest(trees = 1000, min_n = 5) %>%
 
 ## Using the model results
 
+Once the model is create, there are a variety of activities that can be accomplished. One might desire to plot, print, or otherwise examine the results. Several quantities are stored in the `parsnip` model objects, including the fitted model object. This can be found in an element called `fit`, which can be easily returned using the `purrr::pluck()` function:
+
+```{r models-pluck}
+lm_form_fit %>% pluck("fit")
+```
+Using this object, the normal methods can be used, such as printing, plotting, and so on: 
+
+```{r models-pluck-coef}
+lm_form_fit %>% pluck("fit") %>% vcov()
+```
 
 ```{block, type = "rmdwarning"}
 Never pass the `fit` object to a model prediction function. If the data were pre-processed in any way, incorrect predictions will be generated (sometimes, without errors). The underlying model's prediction function has no idea if any transformations have been made to the data prior to running the model.
 ```
 
+However, one issue with some existing methods in base R is that the manner in which some data are stored may not be the most useful. For example, the `summary()` method can be used used to print the results of the model fit, including a table with parameter values, their uncertainty estimates, and p-values. These particular results can also be saved:
+
+```{r models-lm-param}
+model_res <- 
+  lm_form_fit %>% 
+  pluck("fit") %>% 
+  summary()
+
+# The model coefficient table is accessible via the `coef` method.
+param_est <- coef(model_res)
+class(param_est)
+param_est
+```
+
+There are a few things to notice about this result. First, the object is a numeric matrix. This data structure was mostly likely chosen since all of the calculated results are numeric and a matrix object is stored more efficiently than a data frame. This choice was probably made in the late 1970's when the level of computational efficiency was critical. Second, the non-numeric data (the labels for the coefficients) are contained in the row names. Keeping the parameter labels as row names is very consistent with the conventions in the original S language. 
+
+A reasonable course of action would be to create a visualization of the parameters values (perhaps using one of the plotting methods shown above). To do this, it would be sensible to convert the parameter matrix to a data frame. In doing so, a new column could be created with the variable names so that they can be used in the plot. However, note that several of the matrix column names would not be valid R object names (e.g. `"Pr(>|t|)"`.  Another complication is the consistency of the column names. For `lm` objects, the column for the test statistic is `"Pr(>|t|)"`. However, for other models, a different test might be used and, as a result, the column name is different (e.g., `"Pr(>|z|)"`) and the type of test is _encoded in the column name_.  
+ 
+While these additional data formatting steps are not problematic they are a bit of an inconvenience, especially since they might be different for different types of models. The matrix is not a highly reusable data structure mostly because it must constrains the data to be of a single type (e.g. numeric). Additionally, keeping some data in the dimension names is also problematic since those data must be extracted to be of general use. For these reasons, the tidyverse places a large degree of importance on data frames and _tibbles_. 
+
+As a solution, the `broom` package has methods to convert many types of objects to a tidy structure. For example, using the `tidy()` method on the linear model produces:
+
+
+```{r models-tidy-lm}
+tidy(lm_form_fit)
+```
+ 
+The column names are standardized across models and do not contain any additional data (such as the type of statistical test). The data previously contained in the row names are now in a column called `terms` and so on. One additional principle in the tidymodels ecosystem is that a functions return values should be _predictable, consistent, and unsurprising_. 
+
+
+
+
 
 ## Making predictions
+
+One area where `parsnip` diverges the most from conventional R modeling functions is the format of return value for `predict()`. For predictions, `parsnip` always conform to the following rules: 
+
+ 1. The results are always a tibble.
+ 2. The column names of the tibble are always predictable. 
+ 3. There are as many rows in the tibble as there are in the input data set. 
+
+For example, when numeric data are predicted: 
+
+```{r models-small-pred}
+ames_test_small <- ames_test %>% slice(1:5)
+predict(lm_form_fit, new_data = ames_test_small)
+```
+
+The row order of the predictions are always the same as the original data. 
+
+```{block, type = "rmdnote"}
+Why are there leading dot in some of the column names? Some tidyverse and tidymodels arguments and return values contain periods. This is to protect against merging data with duplicate names. There are some data sets that contain predictors names `pred`. 
+```
+
+These three rules make it easy to merge predictions with the original data: 
+
+```{r models-small-int}
+ames_test_small %>% 
+  select(Sale_Price) %>% 
+  mutate(Sale_Price = log10(Sale_Price)) %>% 
+  bind_cols(predict(lm_form_fit, ames_test_small)) %>% 
+  # Add 95% prediction intervals to the results:
+  bind_cols(predict(lm_form_fit, ames_test_small, type = "pred_int")) 
+```
+
+The motivation for the first rule comes from some R package producing disparate data types from prediction functions. For example, the `ranger` package is an excellent tool for computing random forest models. However, instead of returning a data frame or vector as input, a specialized object is returned that have multiple values embedded (including the predicted values). This is just one more step for the data analyst to work around in their scripts. As another example, the `glmnet` package can return at least four different output types for predictions, depending on the model and characteristics of the data: 
+
+| Type of Prediction       | Returns a:                      |
+|--------------------------|---------------------------------|
+| numeric                  | numeric matrix                  |
+| class                    | _character_ matrix              |
+| probability (2 classes)  | numeric matrix (2nd level only) |
+| probability (3+ classes) | 3D numeric array (all levels)   |
+
+Additionally, the column names of the results contain coded values that map to vector in the `glmnet` model object. This excellent statistical method can be discouraging to use in practice because of all of the special cases one might encounter that require additional code to be useful.
+
+For the second rule, the column names for different types of predictions are: 
+
+```{r model-pred-info, echo = FALSE, results = "asis"}
+  tribble(
+    ~ `type value`, ~ `column name(s)`,
+    "`numeric`", "`.pred`",
+    "`class`", "`.pred_class`",
+    "`prob`", "`.pred_{levels}`",
+    "`conf_int`", "`.pred_lower`, `.pred_upper`",
+    "`pred_int`", "`.pred_lower`, `.pred_upper`"
+  ) %>% 
+  kable() %>% 
+  kable_styling(full_width = FALSE)
+```
+
+The third rule regarding the number of rows in the output is critical. For example, if any rows of the new data contain missing values, the output will be padded with missing results for those rows. Additionally, there are some types of predictions where multiple values are produce for each row of the new data being predicted. Take quantile regression where the model predicts values of the outcome distribution for a set of pre-defined set of quantile values. In those cases, the output would consist of a set of nested tibbles for each row. Each nested tibble would contain a column called `.pred` as well as a column for the corresponding quantile value. This maintains the ability to easily merge the original data with the predictions and `tidyr::unnest()` can be used to expand the nested tibbles.  
+
+Another advantage of standardizing the model interface and prediction types in `parsnip` is that, when different models are used, the syntax is identical. Suppose that a decision tree were used to model these data. Outside of the model specification, there are no significant differences in the code pipeline: 
+
+```{r models-cart}
+cart_model <- 
+  decision_tree() %>% 
+  set_engine("rpart") %>% 
+  set_mode("regression")
+
+cart_fit <- 
+  cart_model %>% 
+  fit(log10(Sale_Price) ~ Longitude + Latitude, data = ames_train)
+
+ames_test_small %>% 
+  select(Sale_Price) %>% 
+  mutate(Sale_Price = log10(Sale_Price)) %>% 
+  bind_cols(predict(cart_fit, ames_test_small))
+```
+
+This demonstrates the benefit of homogenizing the data analysis process and syntax across different models. It enables the user to spend their type on the results and interpretation rather than having to focus on the syntactical differences between R packages. 
+
+## `parsnip` adjacent packages
+
+`parsnip` itself contains interfaces to a number of models. However, to be more modular, there are other packages in the tidymodels repository that have `parsnip` model definitions for clusters of similar models. For example, the `discrim` package has model definitions for the set of classification techniques called _disciminant analysis_ methods (such as linear or quadratic discriminant analysis). In this way, the package dependencies required for installing `parsnip` are reduced. A list of _all_ of the models that can be used with `parsnip` (across different packages) can be found TBD.   

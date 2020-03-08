@@ -4,6 +4,7 @@
 knitr::opts_chunk$set(fig.path = "figures/")
 library(tidyverse)
 library(lubridate)
+library(tidymodels)
 ```
 
 ```{r base-r-cricket-data, include = FALSE}
@@ -210,41 +211,9 @@ In comparison, the _Python Developer's Guide_ espouses the notion that, when app
 
 The advantage of R's diversity of interfaces is that it it can evolve over time and fit different types of needs for different users. 
 
-Unfortunately, some of the syntactical diversity is due to a focus on the developer's needs instead of the needs of the end-user. For example, one issue with some existing methods in base R is that the manner in which some data are stored may not be the most useful. Previously, the results of linear model were saved: 
-
-```{r base-r-show-in-model}
-main_effect_fit
-```
-
-The `summary()` method was used to print the results of the model fit, including a table with parameter values, their uncertainty estimates, and p-values. These particular results can also be saved:
-
-```{r base-r-lm-param}
-model_res <- summary(main_effect_fit)
-# The model coefficient table is accessible via the `coef`
-# method.
-param_est <- coef(model_res)
-class(param_est)
-param_est
-```
-
-There are a few things to notice about this result. First, the object is a numeric matrix. This data structure was mostly likely chosen since all of the calculated results are numeric and a matrix object is stored more efficiently than a data frame. This choice was probably made in the late 1970's when the level of computational efficiency was critical. Second, the non-numeric data (the labels for the coefficients) are contained in the row names. Keeping the parameter labels as row names is very consistent with the conventions in the original S language. 
-
-A reasonable course of action would be to create a visualization of the parameters values (perhaps using one of the plotting methods shown above). To do this, it would be sensible to convert the parameter matrix to a data frame. In doing so, a new column could be created with the variable names so that they can be used in the plot. However, note that several of the matrix column names would not be valid R object names (e.g. `"Pr(>|t|)"`.  Another complication is the consistency of the column names. For `lm` objects, the column for the test statistic is `"Pr(>|t|)"`. However, for other models, a different test might be used and, as a result, the column name is different (e.g., `"Pr(>|z|)"`) and the type of test is _encoded in the column name_.  
+Unfortunately, some of the syntactical diversity is due to a focus on the developer's needs instead of the needs of the end-user. 
  
-While these additional data formatting steps are not problematic they are a bit of an inconvenience, especially since they might be different for different types of models. The matrix is not a highly reusable data structure mostly because it must constrains the data to be of a single type (e.g. numeric). Additionally, keeping some data in the dimension names is also problematic since those data must be extracted to be of general use. For these reasons, the tidyverse places a large degree of importance on data frames and _tibbles_. Tibbles are data frames with a few extra features and, while they can use them, row names are eschewed. 
-
-As a solution, the `broom` package has methods to convert many types of objects to a tidy structure. For example, using the `tidy()` method on the linear model produces:
-
-```{r base-r-load-tm, include = FALSE}
-library(tidymodels)
-```
-
-```{r base-r-tidy-lm}
-library(tidymodels)  # includes the broom package
-tidy(main_effect_fit)
-```
- 
-The column names are standardized across models and do not contain any additional data (such as the type of statistical test). The data previously contained in the row names are now in a column called `terms` and so on. One additional principle in the tidymodels ecosystem is that a functions return values should be **predictable, consistent, and unsurprising**. 
+**TODO** add back in some more general issues and reference content in later chapters.
  
 As another example of _unpredictability_, another convention in base R is related to missing data. The general rule is that missing data propagate more missing data; the average of a set of values with a missing data point is itself missing and so on. When models make predictions, the vast majority require all of the predictors to have complete values. There are several options based in to R at this point in the form of `na.action`.  This sets the policy for how a function should behave if there are missing values. The two most common policies are `na.fail` and `na.omit`. For former produces an error of missing data are involved while the latter removes the missing data prior to the calculations by case-wise deletion. From our previous example:
 
@@ -311,16 +280,7 @@ As seen in the previous section, consistency can be lacking between and within R
 
 The last point is a good idea for functional programming but also to reduce frustrations for users. Previously, it was mentioned that the `summary()` method for some functions has column names that changed with the type of model (e.g. `"Pr(>|t|)"`) and the `broom` package was used to harmonize the results with the `tidy()` methods. 
 
-There are other, more difficult examples, especially as they relate to model predictions. For example, the `ranger` package is an excellent tool for computing random forest models. However, instead of returning a data frame or vector as input, a specialized object is returned that have multiple values embedded (including the predicted values). This is just one more step for the data analyst to work around in their scripts. As another example, the `glmnet` package can return at least four different output types for predictions, depending on the model and characteristics of the data: 
 
-| Type of Prediction       | Returns a:                      |
-|--------------------------|---------------------------------|
-| numeric                  | numeric matrix                  |
-| class                    | _character_ matrix              |
-| probability (2 classes)  | numeric matrix (2nd level only) |
-| probability (3+ classes) | 3D numeric array (all levels)   |
-
-Additionally, the column names of the results contain coded values that map to vector in the `glmnet` model object. This excellent statistical method can be discouraging to use in practice because of all of the special cases one might encounter that require additional code to be useful. 
 
 The tidymodels packages always return consistent predicted values that follow several rules:
 
@@ -372,6 +332,7 @@ model_by_species
 If there is interest in collecting the coefficients for each of these models, it is helpful to use `broom::tidy()` to convert them to a consistent data frame format and then these can be unested:
 
 ```{r base-r-species-coefs}
+library(tidymodels) # Includes the broom package
 model_by_species %>% 
   mutate(coef = map(model, tidy)) %>% 
   select(species, coef) %>% 
