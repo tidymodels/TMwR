@@ -18,7 +18,7 @@ val_list <- function(x) {
 }
 ```
 
-# Feature engineering with recipes
+# Feature engineering with recipes {#recipes}
 
 Feature engineering encompasses activities that reformat the predictor values in a way that make them as easy as possible for the model to consume them. In some cases, this includes transformations or encodings of the data to best represent the important parts of the data. For example, two predictors might be more effectively represented when given to the model as a ratio. Take the location of a house in Ames as an example. There are a variety of ways the this data can be exposed to the model, including: neighborhood, longitude/latitude, distance to nearest school or Iowa State University, and so on. When choosing a way to encode these data for the model one might choose a form of location that seems to be most associate with the outcome and in other cases the format of the data (e.g. numeric versus categorical) could be a driving factor. 
 
@@ -375,7 +375,7 @@ Finally, recipes can also handle data that are not in the traditional structure 
 
 Data are given to recipes at different stages. When calling `recipe(..., data)`, the data set is used to determine the data types of each column so that selectors such as `all_numeric()` can be used. When preparing the data using `prep(recipe, training)`, the data in `training` are use for all estimation operations, including determining factor levels and other fairly innocuous tasks. It is important to realize that all pre-processing and feature engineering steps only utilize the training data. Otherwise, information leakage can negatively impact the model. When using `bake(recipe, new_data)`, no quantities are re-estimate using the values in `new_data`. Take center and scaling using `step_normalize()`. Using this step, the means and standard deviations from the appropriate columns are determined from the training set and new samples are standardized using this value when `bake()` is invoked. 
 
-## Using a recipe with traditional modeling functions
+## Using a recipe with traditional modeling functions {#recipes-manual}
 
 In subsequent chapters recipes will be used to define how the predictors feed different types of models. There are high-level API's that take a recipe as an input argument and automatically handle the `prep()`-then-`bake()` process of preparing data for the model. This section shows how to use a recipe outside those tidymodels high-levels API's.
 
