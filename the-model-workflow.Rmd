@@ -195,4 +195,6 @@ lm_wflow_fit %>%
 **passing another formula to the model**
 
 
+## Future plans
+
 

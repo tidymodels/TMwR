@@ -12,7 +12,7 @@ When there are copious amounts of data, a smart strategy would be to allocate sp
 
 If the initial pool of data is not huge, there will be some overlap of usage and a solid methodology for data spending is important. This chapter demonstrates the basics of _data splitting_ our initial pool of samples for different purposes. 
 
-## Common methods for splitting data
+## Common methods for splitting data {#splitting-methods}
 
 The primary approach when using empirical validation would be to split the existing pool of data into two distinct sets. Some data are used to develop and optimize the model. This _training set_ is usually the majority of the data. These data are the _sandbox_ for model building where different models can be fit, feature engineering strategies are investigated, and so on. The modeling process spends the vast majority of the time using the training set as the substrate that is used to advance the model.  
 

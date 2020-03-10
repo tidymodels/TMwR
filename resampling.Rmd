@@ -39,6 +39,9 @@ library(tidymodels)
 
 # Resampling for evaluating performance  {#resampling}
 
+
+
+
 ```{r resampling-scheme, echo = FALSE, out.width = '65%'}
 if (knitr:::is_html_output()) {
   file.copy("premade/resampling.svg", "_book/premade/resampling.svg")
@@ -49,7 +52,12 @@ if (knitr:::is_html_output()) {
 }
 ```
 
+The next three section provide details on three important resampling methods. 
+
+
 ## Cross-validation
+
+Cross-validation is an old resampling technique. While there are a number of variations, the most common cross-validation method is called _V_-fold cross-validation. In this case, the data are randomly partitioned into _V_ sets of roughly equal size (called the "folds"). Common values of _V_ are 10 or 5. For illustration, _V_ = 3 is shown below for a data set of thirty training set points. 
 
 ```{r resampling-three-cv, echo = FALSE, out.width = '25%'}
 
@@ -62,6 +70,11 @@ if (knitr:::is_html_output()) {
 }
 ```
 
+The number inside the symbols are the sample numbers while the color and shape of the symbols represent their randomly assigned folds. The assignment to folds can be done via random sampling or, as was discussed on Section \@ref(splitting-methods), stratified assignment can be used. 
+
+For 3-fold cross-validation, the three iterations of resampling are illustrated below. The first iteration removes the data for the first fold and fits the model to the remaining two folds. This model is used to predict the data from the first fold and model performance is estimated from these data. On the second iteration, the model is fit not the first and third folds and the second fold is used to compute another set of performance metrics. A similar process is used for the third fold. 
+
+The result is a collection of three replicates for each of the performance statistics. The final resampling estimate of performance averages each of the _V_ replicates. 
 
 
 ```{r resampling-three-cv-iter, echo = FALSE, out.width = '55%'}
