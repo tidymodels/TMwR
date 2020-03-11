@@ -1,40 +1,15 @@
-```{r include=FALSE, cache=FALSE}
-options(digits = 4, width = 80)
-options(dplyr.print_min = 6, dplyr.print_max = 6)
-
-knitr::opts_chunk$set(
-  comment = "#>",
-  collapse = TRUE,
-  fig.align = 'center',
-  tidy = FALSE
-)
-
-transparent_theme <- function() {
-  library(ggplot2)
-  thm <- 
-    theme_bw() + 
-    theme(
-      panel.background = element_rect(fill = "transparent", colour = NA), 
-      plot.background = element_rect(fill = "transparent", colour = NA),
-      legend.position = "top",
-      legend.background = element_rect(fill = "transparent", colour = NA),
-      legend.key = element_rect(fill = "transparent", colour = NA)
-    )
-  theme_set(thm)
-}
-
-transparent_theme()
-
-tmwr_version <- function() {
-  dt <- Sys.Date()
-  ver <- read.dcf("DESCRIPTION")[1, "Version"]
-  paste0("Version ", ver, " (", dt, ")")
-}
-
-```
 ```{r resampling-setup, include = FALSE}
 knitr::opts_chunk$set(fig.path = "figures/")
 library(tidymodels)
+library(AmesHousing)
+library(kableExtra)
+
+ames <- make_ames()
+
+set.seed(833961)
+ames_split <- initial_split(ames, prob = 0.80, strata = Sale_Price)
+ames_train <- training(ames_split)
+ames_test  <-  testing(ames_split)
 ```
 
 # Resampling for evaluating performance  {#resampling}
@@ -42,7 +17,7 @@ library(tidymodels)
 
 
 
-```{r resampling-scheme, echo = FALSE, out.width = '65%'}
+```{r resampling-scheme, echo = FALSE, out.width = '85%'}
 if (knitr:::is_html_output()) {
   file.copy("premade/resampling.svg", "_book/premade/resampling.svg")
   knitr::include_graphics("premade/resampling.svg")
@@ -57,7 +32,7 @@ The next three section provide details on three important resampling methods.
 
 ## Cross-validation
 
-Cross-validation is an old resampling technique. While there are a number of variations, the most common cross-validation method is called _V_-fold cross-validation. In this case, the data are randomly partitioned into _V_ sets of roughly equal size (called the "folds"). Common values of _V_ are 10 or 5. For illustration, _V_ = 3 is shown below for a data set of thirty training set points. 
+Cross-validation is an old resampling technique. While there are a number of variations, the most common cross-validation method is called _V_-fold cross-validation. In this case, the data are randomly partitioned into _V_ sets of roughly equal size (called the "folds"). For illustration, _V_ = 3 is shown below for a data set of thirty training set points and a completely random fold allocation. 
 
 ```{r resampling-three-cv, echo = FALSE, out.width = '25%'}
 
@@ -74,9 +49,6 @@ The number inside the symbols are the sample numbers while the color and shape o
 
 For 3-fold cross-validation, the three iterations of resampling are illustrated below. The first iteration removes the data for the first fold and fits the model to the remaining two folds. This model is used to predict the data from the first fold and model performance is estimated from these data. On the second iteration, the model is fit not the first and third folds and the second fold is used to compute another set of performance metrics. A similar process is used for the third fold. 
 
-The result is a collection of three replicates for each of the performance statistics. The final resampling estimate of performance averages each of the _V_ replicates. 
-
-
 ```{r resampling-three-cv-iter, echo = FALSE, out.width = '55%'}
 if (knitr:::is_html_output()) {
   file.copy("premade/three-CV-iter.svg", "_book/premade/three-CV-iter.svg")
@@ -87,6 +59,43 @@ if (knitr:::is_html_output()) {
 }
 ```
 
+The result is a collection of three replicates for each of the performance statistics. The final resampling estimate of performance averages each of the _V_ replicates. 
+
+_V_ = 3 is a good choice to illustrate cross-validation but is a poor choice in practice. Values of _V_ are most often 5 or 10; here, we generally prefer 10-fold cross-validation as a default. 
+
+```{block, type = "rmdnote"}
+What are the effects of changing _V_? Larger values result in resampling estimates with reduced bias but increased noise. Smaller bias have large bias but better noise. 10-fold is preferred since noise can be reduced by replication, as shown below, but bias cannot. See [Section **3.4**]() of @fes for a longer description. 
+```
+
+use ames as example
+
+```{r resampling-ames-cv}
+library(tidymodels)
+ames_folds <- vfold_cv(ames_train, v = 10)
+ames_folds
+class(ames_folds)
+```
+
+split object `r gsub("split ", "", type_sum(ames_folds$splits[[1]]))`. 
+
+
+replication
+
+normal approx for noise use ames 
+
+
+```{r resampling-cv-reduction, echo = FALSE}
+cv_info <- 
+  tibble(replicates = rep(1:10, 2), V = rep(c(5, 10), each = 10)) %>% 
+  mutate(B = V * replicates, reduction = 1/B, V = format(V))
+
+ggplot(cv_info, aes(x = replicates, y = reduction, col = V)) + 
+  geom_line() + 
+  geom_point() + 
+  labs(y = "Reduction in Variance", x = "Number of CV Replicates") +
+  theme_bw() + 
+  theme(legend.position = "top")
+```
 
 ## Bootstrapping
 
