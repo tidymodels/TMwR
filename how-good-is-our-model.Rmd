@@ -7,11 +7,18 @@ library(tidymodels)
 
 (or how well does our model work? Superman does good; a model can work well)
 
-Measuring performance 
+Different performance metrics
 
 Don't revaluate the training set
 
 Statistical significance as a measure of effectiveness.
+
+class imbalances; unintended cosequences
+
+when to set a cutoff
+
+cost-sensitive metrics
+
 
 
 

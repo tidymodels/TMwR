@@ -10,15 +10,15 @@ There are a variety of steps involved with creating a useful model. For example:
 
 When there are copious amounts of data, a smart strategy would be to allocate specific amounts of data for various tasks (as opposed to adding the largest possible amount to the model fit). With a new modeling project, there may be many questions that must be answered with limited prior knowledge. For example, if a large number of predictors are available and an excessive amount of data is available, one strategy would be to spend a specific amount on data analysis that is focused on determining which predictors are informative. As data are reused for multiple tasks, the higher the risk of adding bias and other methodological errors.
 
-If the initial pool of data is not huge, there will be some overlap of usage and a solid methodology for data spending is important. This chapter demonstrates the basics of _data splitting_ our initial pool of samples for different purposes. 
+If the initial pool of data is not huge, there will be some overlap of usage and a solid methodology for data spending is important. This chapter demonstrates the basics of _splitting_ our initial pool of samples for different purposes. 
 
 ## Common methods for splitting data {#splitting-methods}
 
 The primary approach when using empirical validation would be to split the existing pool of data into two distinct sets. Some data are used to develop and optimize the model. This _training set_ is usually the majority of the data. These data are the _sandbox_ for model building where different models can be fit, feature engineering strategies are investigated, and so on. The modeling process spends the vast majority of the time using the training set as the substrate that is used to advance the model.  
 
-The other portion of the data are placed into the _test set_. This is held in reserve until one or two models are chosen as the best methods. The test set is then used as the final arbiter to determine the efficacy of the model. It is critical to only look at the test set once; otherwise it becomes part of the modeling process. 
+The other portion of the data are placed into the _test set_. This is held in reserve until one or two models are chosen as the methods that are mostly likely to succeed. The test set is then used as the final arbiter to determine the efficacy of the model. It is critical to only look at the test set once; otherwise it becomes part of the modeling process. 
 
-How should we conduct this split of the data? This depends on the context. Suppose 80% of the data are allocated to the training set and the remaining 20% is used for testing.  The most common method is to use simple random sampling. The `rsample` package has tools for making data splits and the function `intial_split()` was created for this purpose. It takes the data frame as an argument as well as the proportion to be placed into training. For example: 
+How should we conduct this split of the data? This depends on the context. Suppose 80% of the data were to be allocated to the training set and the remaining 20% would be used for testing.  The most common method is to use simple random sampling. The `rsample` package has tools for making data splits and the function `intial_split()` was created for this purpose. It takes the data frame as an argument as well as the proportion to be **placed into training**. For example: 
 
 ```{r ames-split, message = FALSE, warning = FALSE}
 library(tidymodels) # Includes rsample
@@ -38,7 +38,9 @@ ames_split <- initial_split(ames, prob = 0.80)
 ames_split
 ```
 
-The printed information denotes the amount of data in the training set ($n = `r format(nrow(training(ames_split)), big.mark = ",")`$), the amount in the test set ($n = `r format(nrow(testing(ames_split)), big.mark = ",")`$), and the size of the original pool of samples  ($n = `r format(nrow(ames), big.mark = ",")`$). The object `ames_split` only contains the splitting information; to get separate data objects, two more functions are applied:
+The printed information denotes the amount of data in the training set ($n = `r format(nrow(training(ames_split)), big.mark = ",")`$), the amount in the test set ($n = `r format(nrow(testing(ames_split)), big.mark = ",")`$), and the size of the original pool of samples  ($n = `r format(nrow(ames), big.mark = ",")`$). 
+
+The object `ames_split` is an `rsplit` object and only contains the partitioning information; to get the resulting data sets, two more functions are applied:
 
 ```{r ames-split-df}
 ames_train <- training(ames_split)
@@ -47,7 +49,7 @@ ames_test  <-  testing(ames_split)
 dim(ames_train)
 ```
 
-The resulting objects are data frames with the same columns as the original data but only contain the appropriate rows. 
+These objects are data frames with the same columns as the original data but only contain the appropriate rows. 
 
 ```{r ames-sale-price, echo = FALSE, fig.cap = "The distribution of sale price for the Ames housing data. The vertical lines indicate the quartiles of the data."}
 sale_dens <- 

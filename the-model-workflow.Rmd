@@ -19,7 +19,7 @@ In previous chapters, the `recipes` and `parsnip` packages have been discussed. 
 
 ## Where does the model begin and end? {#begin-model-end}
 
-So far, "the model" has been defined as a structural equation that relates some predictors to one or more outcomes. Let's consider again linear regression as a simple and well known example. The outcome data are denoted as $y_i$, where there are $i = 1 \ldots n$ samples in the data set. Suppose that there are $p$ predictors $x_{i1}, \ldots, x_{ip}$ that are used to predict the outcome. Linear regression produces a model equation of 
+So far, "the model" has been defined as a structural equation that relates some predictors to one or more outcomes. Let's consider again linear regression as an example. The outcome data are denoted as $y_i$, where there are $i = 1 \ldots n$ samples in the training set. Suppose that there are $p$ predictors $x_{i1}, \ldots, x_{ip}$ that are used in the model. Linear regression produces a model equation of 
 
 $$ \hat{y}_i = \hat{\beta}_0 + \hat{\beta}_1x_{i1} + \ldots + \hat{\beta}_px_{ip} $$
 
@@ -38,12 +38,12 @@ These examples have a common characteristic of requiring data for derivations th
 It is very important to focus on the broader _model fitting process_ instead of the specific model being used to estimate parameters. This would include any pre-processing steps, the model fit itself, as well as potential post-processing activities. Here, this will be referred to as the **model workflow** and would include any data-driven activities that are used to produce a final model equation. 
 
 ```{block, type = "rmdnote"}
-In other programs, such as python or Spark, similar collections of steps are called a _pipeline_. In tidymodels, the term "pipeline" already connotes a sequence of operations chained together with a pipe operator (such as `%>%`). Rather than confusing terminology, the sequence of computational operations related to modeling will be called workflows. 
+In other programs, such as python or Spark, similar collections of steps are called  _pipelines_. In tidymodels, the term "pipeline" already connotes a sequence of operations chained together with a pipe operator (such as `%>%`). Rather than confusing terminology, the sequence of computational operations related to modeling will be called workflows. 
 ``` 
 
 Binding together the analytical components of a data analysis is important for another reason. Future chapters will demonstrate how to accurately measure performance as well as how to optimize structural parameters (i.e. model tuning). To correctly quantify model performance on the training set, Chapter \@ref(resampling) advocates using _resampling_ methods. To do this properly, no data-driven parts of the analysis should be excluded from validation. To this end, the workflow should include all significant estimation steps.
 
-For example, suppose that a linear model was being used to model a data set with an abundance of correlated predictors. One method for handling the correlation would be to using _principal component analysis (PCA)_ to replace the correlated predictors with new artificial predictors that are uncorrelated and capture most of the information in the original set. These _PCA components_ would be used as the predictors and least square regression could be used to estimate the model parameters. 
+PCA signal extraction was previously mentioned in Section \@ref(other-steps) as a way to replace the correlated predictors with new artificial predictors that are uncorrelated and capture most of the information in the original set. The new features would be used as the predictors and least square regression could be used to estimate the model parameters. 
 
 There are two ways of thinking about the model workflow. The _incorrect_ method would be to think of the PCA pre-processing step as not being part of the modeling process: 
 
@@ -103,14 +103,15 @@ lm_wflow <-
   add_formula(log10(Sale_Price) ~ Longitude + Latitude)
 lm_wflow
 ```
-Workflows have a simple `fit()` method that can be used
+
+Workflows have a simple `fit()` method that can be used to create the model
 
 ```{r workflows-form-fit}
 lm_wflow_fit <- fit(lm_wflow, ames_train)
 lm_wflow_fit
 ```
 
-as well as `predict()`
+as well as a `predict()` method:
 
 
 ```{r workflows-form-pred}
@@ -119,13 +120,12 @@ predict(lm_wflow_fit, ames_test %>% slice(1:3))
 
 Both the model and formula can be removed or updated 
 
-
 ```{r workflows-form-update}
 lm_wflow_fit %>% 
   update_formula(log10(Sale_Price) ~ Longitude)
 ```
 
-Note that, in this object, the previous fitted model was removed since the new formula was inconsistent with the previous model fit. 
+Note that, in this new object, the output shows that the previous fitted model was removed since the new formula was inconsistent with the previous model fit. 
 
 **more here about the differences in the formula method and how `model.matrix()` does things**
 
@@ -144,7 +144,7 @@ ames_rec <-
   step_other(Neighborhood, threshold = 0.01) %>% 
   step_dummy(all_nominal()) %>% 
   step_interact(~ Gr_Liv_Area:starts_with("Bldg_Type_")) %>% 
-  step_ns(Latitude, Longitude, deg_free = 5)
+  step_ns(Latitude, Longitude, deg_free = 20)
 ```
 
 This can be attached to the workflow...
@@ -170,7 +170,7 @@ From Section \@ref(recipes-manual), the `prep()`, `bake()`, and `juice()` functi
 # Does `prep()`, `juice()`, and `fit()` in one step:
 lm_wflow_fit <- fit(lm_wflow, ames_train)
 
-# Does `bake()` and `predict()`:
+# Does `bake()` and `predict()` automatically:
 predict(lm_wflow_fit, ames_test %>% slice(1:3))
 ```
 
@@ -182,10 +182,13 @@ lm_wflow_fit %>%
   pull_workflow_prepped_recipe() %>% 
   tidy()
 
-# Get the parsnip object, the pluck the fit out and tidy: 
+# To tidy the model fit: 
 lm_wflow_fit %>% 
+  # This returns the parsnip object:
   pull_workflow_fit() %>% 
+  # As before, `pluck()` is used to get the `fit` element:
   pluck("fit") %>% 
+  # Now tidy the linear model object:
   tidy() %>% 
   slice(1:5)
 ```
@@ -199,4 +202,5 @@ lm_wflow_fit %>%
 
 Currently, a workflow can accept two types of pre-processors: a model formula or a recipe. While recipes are very flexible, they do not encompass everything that a user might want to do to the data prior to modeling. For example, a _supervised feature filter_ might be of interest. This would screen predictors against the outcome using the training set and use the results to remove the least relevant predictors. In the future, a specification for this type of pre-model operation will be passed to a workflow to include it in the modeling process. This is a critical step that can have a profound effect on model performance. As discussed in the next chapter, a common pitfall in modeling is to exclude this step from the model evaluation process. 
 
-There are also operations that might occur _after_ the model is fit. An example of such a _post-processor_ would be cutoff selection for two-class problems. In many instances, the default 50% probability cutoff may not make the appropriate tradeoff between false positives and false negatives. In these cases, the user might want to change or optimize the definition of an event. In the future, workflows will be able to attach a custom cutoff that is applied to probabilities after the model fit. Other approaches, such as probability calibration, could also be added as post-processors. 
+There are also operations that might occur _after_ the model is fit. An example of such a _post-processor_ would be cutoff selection for two-class problems. Previously in this chapter, the idea of modifying the cutoff for a two-class problem was discussed. In the future, workflows will be able to attach a custom cutoff that is applied to probabilities after the model fit. Other approaches, such as probability calibration, could also be added as post-processors. 
+  
