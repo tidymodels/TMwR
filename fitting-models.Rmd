@@ -168,7 +168,7 @@ arg_info %>%
   kable_styling(full_width = FALSE)
 ```
 
-Admittedly, this is one more set of arguments to memorize. However, when other types of models have the same argument types, these names still apply. For example, boosted tree ensembles also create a large number of tree-based models, so `trees` is also used there (as is `num_n`) and so on. 
+Admittedly, this is one more set of arguments to memorize. However, when other types of models have the same argument types, these names still apply. For example, boosted tree ensembles also create a large number of tree-based models, so `trees` is also used there (as is `num_n`) and so on. `parsnip` argument names have also been standardized with similar recipe arguments. 
 
 Also, some of the original argument names can be fairly jarony. For example, to specify the amount of regularization to use in a `glmnet` model, the greek letter `lambda` is used. While this mathematical notation is commonly used in the literature, it is not obvious to many people what `lambda` represents (especially those who consume the model results). Since this is the penalty used in regularization, `parsnip` standardizes on the argument name `penalty`. Similarly, the number of neighbors in a _K_-nearest neighbors model is called `neighbors` instead of `k`. Our rule of thumb when standardizing argument names is: if a partitioner were to include these names in a plot or table, would the people viewing those results understand the name? To understand how the `parsnip` argument names map to the original names, the help file for the model can be used as well as the `translate()` function: 
 
