@@ -265,6 +265,10 @@ bind_cols(ord_data, ord_contrasts) %>%
 
 While this is not unreasonable, it is not an approach that people tend to find useful. For example, a 11-degree polynomial is probably not the most effective way of encoding an ordinal factor for moths.  `recipes` has several steps related to ordered factors, such as `step_unorder()`,  to convert to regular factors, and `step_ordinalscore()` which maps specific numeric values to each factor level. 
 
+```{block, type = "rmdnote"}
+Recipe steps can have different effects on the columns of the data. For example, `step_log()` modifies a column in-place without changing the name. Other steps, such as `step_dummy()` eliminate the original data column and replace it with one or more columns with different names. This behavior depends on the type of operation being done. 
+```
+
 ## Interaction terms
 
 Interaction effects occur when when two or more predictors have an effect on the outcome that is contingent to the other terms in the interaction. For example, if one were trying to predict their morning commute time, two potential predictors could be the amount of traffic and the time of day. However, the relationship between commute time and the amount of traffic is different for different times of day. In this case, an interaction term between the two predictors would be added to the model along with the original two predictors (which are called the "main effects"). Numerically, an interaction term between predictors is encoded as their product. Interactions are only defined in terms of their effect on the outcome and can be combinations of different types of factors (e.g., numeric, categorical, etc). [Chapter 7](https://bookdown.org/max/FES/detecting-interaction-effects.html) of @fes discussed interactions and how to detect them in greater detail. 
