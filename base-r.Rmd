@@ -268,7 +268,7 @@ Many of these ideas are described in the tidymodels guidelines for model impleme
 
 A few more principles are discussed below. 
 
-**Be predictable, consistent, and unsurprising**
+***Be predictable, consistent, and unsurprising***
 
 As seen in the previous section, consistency can be lacking between and within R packages. The tidymodels packages work to 
 
@@ -292,7 +292,7 @@ The tidymodels packages always return consistent predicted values that follow se
 
 Finally, to help new R packages, the next section describes a tidymodels package called `hardhat` that enables package authors implement consistent interfaces and return values. 
 
-**Encourage empirical validation and good methodology**
+***Encourage empirical validation and good methodology***
 
 Enable a wider variety of methodologies
 
