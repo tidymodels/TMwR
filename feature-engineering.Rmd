@@ -503,9 +503,28 @@ Suppose you were interested in knowing what neighborhoods were retained by `step
 tidy(ames_rec_prepped, id = "other_rPQJW")
 ```
 
-Each `tidy()` method returns the relavant information about that step. For example, the `tidy()` method for `step_dummy()` returns a column with the variables that were converted to dummy variables and another column with all of the known levels for each column. 
+Each `tidy()` method returns the relevant information about that step. For example, the `tidy()` method for `step_dummy()` returns a column with the variables that were converted to dummy variables and another column with all of the known levels for each column. 
 
+## Columns roles
+
+When a formula is used with the initial call to `recipes()` it assigns _roles_ to each of the column depending on which side of the tilde that they are on. Those roles are either `"predictor"` or `"outcome"`. However, other roles can be assigned as needed. 
+
+For example, in our Ames data set, the original raw data contained a fields for address^[However, the `AmesHousing` package does not keep that column.]. There may be interest in keeping that column in the data so that, after predictions are made, problematic results can be investigated in detail. In other words, the column is important but isn't a predictor or outcome. 
+
+To solve this, the `add_role()`, `remove_role()`, and `update_role()` functions can be helpful. For example, for the house price data, the street address column could be modified using
+
+```r
+ames_rec %>% update_role(address, new_role = "street address")
+```
+
+Any character string can be used as a role. Also, columns can have multiple roles so that they can be selected under more than one context. 
+
+This can be help when, in later chapters, the data are _resampled_. It helps to keep the columns that are _not_ involved with the model fit in the same data frame (rather than in an external vector). Resampling, described in Chapter \@ref(resampling)}, creates alternate versions of the data mostly by row subscripting. If the street address were in another column, additional subscripting would be required and might lead to more complex code and possibly errors. 
+
+Finally, all step functions have a `role` field that can assign roles to the results of the step. In many cases, columns affected by a step retain their existing role. For example, the `step_log()` calls to the `ames_rec` object above affected `Sale_Price` as well as `Gr_Liv_Area`. For that step, the default behavior is to keep the existing role for these columns (since no new columns are created). As a counter-example, the step to produce splines defaults new columns to have a role of `"predictor"` since that is usually how spline columns are used in a model. Most steps have sensible defaults but, since the defaults can be different, make sure to check the documentation page to understand what which role(s) will be assigned. 
 
 ## Recipe steps
 
-Between the `recipes` package and other package that extend `recipes`, there are over 100 available steps. All possibl recipe steps are enumerated TBD. `recipes` provides a rich data manipulation environment for pre-processing and transforming data prior to modeling. 
+Between the `recipes` package and other package that extend `recipes`, there are over 100 available steps. All possible recipe steps are enumerated TBD. `recipes` provides a rich data manipulation environment for pre-processing and transforming data prior to modeling. 
+
+Additionally, the `recipes` website shows how custom steps can be created. 
