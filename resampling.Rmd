@@ -99,6 +99,17 @@ ggplot(cv_info, aes(x = replicates, y = reduction, col = V)) +
 
 ## Bootstrapping
 
+```{r resampling-bootstraps, echo = FALSE, out.width = '60%'}
+if (knitr:::is_html_output()) {
+  file.copy("premade/bootstraps.svg", "_book/premade/bootstraps.svg")
+  knitr::include_graphics("premade/bootstraps.svg")
+} else {
+  file.copy("premade/bootstraps.pdf", "_book/premade/bootstraps.pdf")
+  knitr::include_graphics("premade/bootstraps.pdf")
+}
+```
+
+
 
 ## Rolling origin forcasting
 
