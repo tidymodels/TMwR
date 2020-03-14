@@ -3,7 +3,7 @@ knitr::opts_chunk$set(fig.path = "figures/")
 library(tidymodels)
 ```
 
-# How good is our model? {#model-metrics}
+# How good is our model? {#performance}
 
 (or how well does our model work? Superman does good; a model can work well)
 

@@ -4,7 +4,7 @@ library(tidymodels)
 library(AmesHousing)
 ```
 
-# Spending our data {#data-spending}
+# Spending our data {#splitting}
 
 There are a variety of steps involved with creating a useful model. For example: parameter estimation, model selection and tuning, performance assessment, calibration, and so on. At the start of a new project, there is usually an initial pool of data available for these tasks. How should the data be applied to these tasks? The idea of _data spending_ is an important first consideration when modeling, especially as it related to empirical validation. 
 

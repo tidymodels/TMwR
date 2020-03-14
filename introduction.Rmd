@@ -36,7 +36,7 @@ The software is based on the R programming language [@baseR]. R has been designe
 
 R is open-source and free of charge. It is a powerful programming language that can be used for many different purposes but specializes in data analysis, modeling, and machine learning. R is easily _extensible_; it has a vast ecosystem of *packages*; these are mostly user-contributed modules that focus on a specific theme, such as modeling, visualization, and so on.
 
-One collection of packages is called the **_tidyverse_** [@tidyverse]. The tidyverse is an opinionated collection of R packages designed for data science. All packages share an underlying design philosophy, grammar, and data structures. Several of these design philosophies are directly related to the aspects of software described above. If you've never used the tidyverse packages, Chapter \@ref(tidyverse-primer) contains a review. Within the tidyverse, the subset of packages specifically focused on modeling are referred to as the ***tidymodels*** packages. This book is an extended software manual for conducting modeling using the tidyverse. It shows how to use a set of packages, each with its own specific purpose, together to create high-quality models.  
+One collection of packages is called the **_tidyverse_** [@tidyverse]. The tidyverse is an opinionated collection of R packages designed for data science. All packages share an underlying design philosophy, grammar, and data structures. Several of these design philosophies are directly related to the aspects of software described above. If you've never used the tidyverse packages, Chapter \@ref(tidyverse) contains a review. Within the tidyverse, the subset of packages specifically focused on modeling are referred to as the ***tidymodels*** packages. This book is an extended software manual for conducting modeling using the tidyverse. It shows how to use a set of packages, each with its own specific purpose, together to create high-quality models.  
 
 ## Types of models
 
@@ -299,7 +299,7 @@ and so on. Eventually, a model is selected that is able to achieve sufficient pe
 
 ## Outline of future chapters
 
-The first order of business is to introduce (or review) the ideas and syntax of the tidyverse in Chapter \@ref(tidyverse-primer). Chapter \@ref(base-r) is a quick tour of conventional base R modeling functions and summarize the unmet needs for modeling. 
+The first order of business is to introduce (or review) the ideas and syntax of the tidyverse in Chapter \@ref(tidyverse). Chapter \@ref(base-r) is a quick tour of conventional base R modeling functions and summarize the unmet needs for modeling. 
 
 The book is separated into parts. The first introduces an example data set and introduce some of the fundamental packages: `recipes`, `parsnip`, `workflows`, `yardstick`, and others. 
 

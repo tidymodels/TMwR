@@ -1,4 +1,4 @@
-# A tidyverse primer {#tidyverse-primer}
+# A tidyverse primer {#tidyverse}
 
 ```{r tidyverse-setup, include = FALSE}
 knitr::opts_chunk$set(fig.path = "figures/")

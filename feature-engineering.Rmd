@@ -443,7 +443,7 @@ Data are given to recipes at different stages. When calling `recipe(..., data)`,
 
 ## Using a recipe with traditional modeling functions {#recipes-manual}
 
-In subsequent chapters recipes will be used to define how the predictors feed different types of models. There are high-level API's that take a recipe as an input argument and automatically handle the `prep()`-then-`bake()` process of preparing data for the model (described in Chapters \@ref(workflows), and \@ref(tune)). This section shows how to use a recipe outside those high-levels API's.
+In subsequent chapters recipes will be used to define how the predictors feed different types of models. There are high-level API's that take a recipe as an input argument and automatically handle the `prep()`-then-`bake()` process of preparing data for the model (described in Chapters \@ref(workflows), and \@ref(tuning)). This section shows how to use a recipe outside those high-levels API's.
 
 A slightly augmented version of the last recipe, which now includes longitude, is used:
 

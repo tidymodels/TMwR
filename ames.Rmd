@@ -5,7 +5,7 @@ library(AmesHousing)
 ames <- make_ames()
 ```
 
-# Introducing the Ames housing data 
+# Introducing the Ames housing data {#ames}
 
 The Ames housing data set [@ames] is an excellent teaching resource and will be used in several parts of this book. It contains data on `r format(nrow(ames), big.mark = ",")` properties in Ames Iowa, including columns related to 
 
