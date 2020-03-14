@@ -12,6 +12,7 @@ rmd_files: [
   "feature-engineering.Rmd",
   "fitting-models.Rmd",
   "the-model-workflow.Rmd",
+  "tools.Rmd",
   "resampling.Rmd",
   "over-fitting.Rmd",
   "model-tuning.Rmd"
