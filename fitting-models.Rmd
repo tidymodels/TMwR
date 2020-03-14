@@ -13,7 +13,7 @@ ames_train <- training(ames_split)
 ames_test  <-  testing(ames_split)
 ```
 
-# Fitting Models 
+# Fitting models {#models}
 
 The tidymodels package that is focused on model creation is `parsnip`. It provides a clean and standardized interface to a variety of different models. This chapter shows how the use the package and gives some motivation for why a common interface is beneficial. 
 
