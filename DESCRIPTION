@@ -1,6 +1,6 @@
 Package: TMwR
 Title: Tidy Modeling with R.
-Version: 0.0.1.9001
+Version: 0.0.1.9002
 Authors@R: c(
     person(
       given = "Max",

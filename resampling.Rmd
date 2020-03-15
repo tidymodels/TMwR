@@ -2,7 +2,7 @@
 knitr::opts_chunk$set(fig.path = "figures/")
 library(tidymodels)
 library(AmesHousing)
-library(kableExtra)
+library(doMC)
 
 ames <- make_ames()
 
@@ -11,7 +11,6 @@ ames_split <- initial_split(ames, prob = 0.80, strata = Sale_Price)
 ames_train <- training(ames_split)
 ames_test  <-  testing(ames_split)
 
-library(doMC)
 registerDoMC(cores = parallel::detectCores())
 ```
 
@@ -137,7 +136,7 @@ split object `[2K/220]`.
 
 replication
 
-Due to the central limit theorem, the summary statistics that are produced by each model tend toward a normal distribution. For example, for the RMSE statistic, the mean residual is computed using about `r floor(nrow(ames_train) * .1)` houses when 10-fold cross-validation is used. A collection of ten of these statistics can often be reasonably  approximated using a Gaussian distribution. If this collection has a theoretical standard deviation of $\sigma$, so the standard error is $\sigma/\sqrt{10}$. How would replication affect this? Using 5- and 10-fold cross-validation with $R$ replicates, this plot shows how quickly the standard error^[These are _approximate_ standard errors. As will be discussed below, there is a within-replicate correlation that is typical of resampled results. By ignoring this extra component of variation, the simple calculations shown in the plot are over-estimates of the reduction in noise in the standard errors.] decreases with replicates: 
+Due to the central limit theorem, the summary statistics that are produced by each model tend toward a normal distribution. For example, for the RMSE statistic, the mean residual is computed using about `r floor(nrow(ames_train) * .1)` houses when 10-fold cross-validation is used. A collection of ten of these statistics can often be reasonably  approximated using a Gaussian distribution. If this collection has a theoretical standard deviation of $\sigma$, so the standard error is $\sigma/\sqrt{10}$. How would replication affect this? Using 5- and 10-fold cross-validation with $R$ replicates, this plot shows how quickly the standard error^[These are _approximate_ standard errors. As will be discussed in the next chapter, there is a within-replicate correlation that is typical of resampled results. By ignoring this extra component of variation, the simple calculations shown in the plot are over-estimates of the reduction in noise in the standard errors.] decreases with replicates: 
 
 ```{r resampling-cv-reduction, echo = FALSE}
 cv_info <- 
@@ -227,8 +226,9 @@ rf_res <-
   fit_resamples(resamples = ames_folds, control = keep_pred)
 rf_res
 ```
-
-
+```{r resampling-checkpoint, include = FALSE}
+save(rf_res, file = "RData/rf_resampled.RData", version = 2, compress = "xz")
+```
 
 
 ```{r resampling-cv-stats}
@@ -276,65 +276,6 @@ In these analyses, the resampling results are very close to the test set results
 ```
 
 ## Parallel processing {#parallel}
-
-## Between-model comparisons {#compare}
-
-
-```{r resamples-lin-reg}
-ames_rec <- 
-  recipe(Sale_Price ~ Neighborhood + Gr_Liv_Area + Year_Built + Bldg_Type + 
-           Latitude + Longitude, data = ames_train) %>%
-  step_log(Sale_Price, base = 10)%>%
-  step_log(Gr_Liv_Area, base = 10) %>% 
-  step_other(Neighborhood, threshold = 0.01) %>% 
-  step_dummy(all_nominal()) %>% 
-  step_interact(~ Gr_Liv_Area:starts_with("Bldg_Type_")) %>% 
-  step_ns(Latitude, Longitude, deg_free = 20)
-
-lm_wflow <- 
-  workflow() %>% 
-  add_recipe(ames_rec) %>% 
-  add_model(linear_reg() %>% set_engine("lm"))
-
-lm_res <- 
-  lm_wflow %>% 
-  fit_resamples(resamples = ames_folds, control = keep_pred)
-lm_res
-```
-
-```{r resamples-collect}
-lm_rmse <- 
-  collect_metrics(lm_res, summarize = FALSE) %>% 
-  filter(.metric == "rmse") %>% 
-  select(id, lin_reg = .estimate)
-
-rf_rmse <- 
-  collect_metrics(rf_res, summarize = FALSE) %>% 
-  filter(.metric == "rmse") %>% 
-  select(id, rand_forest = .estimate)  
-
-rmse_estimates <- inner_join(lm_rmse, rf_rmse, by = "id")
-rmse_estimates
-
-cor.test(rmse_estimates$lin_reg, rmse_estimates$rand_forest) %>% 
-  tidy() %>% 
-  select(estimate, starts_with("conf"))
-```
-
-
-```{r resamples-rmse-plot}
-rmse_estimates %>% 
-  pivot_longer(cols = c(-id), names_to = "model", values_to = "rmse") %>% 
-  ggplot(aes(x = model, y = rmse, group = id, col = id)) + 
-  geom_line(alpha = .5, lwd = 1.5) + 
-  theme(legend.position = "none")
-```
-
-
-```{r resamples-compare}
-t.test(rmse_estimates$lin_reg, rmse_estimates$rand_forest, paired = TRUE) %>%
-  tidy()
-```
 
 ## Saving the resampled objects
 
