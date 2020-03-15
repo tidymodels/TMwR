@@ -52,7 +52,7 @@ The S language, on which R is based, has had a rich data analysis environment si
 
 ## An example
 
-To demonstrate the fundamentals, experimental data from @mcdonald2009 (by way of @mangiafico2015) are used. These data relate the ambient temperature to the rate of cricket chirps per minute. Data were collected for two species: _O. exclamationis_ and _O. niveus_. The data are contained in a data frame called `crickets` that contains a total of `r nrow(crickets)` data points. These data are shown via a `ggplot` graph. 
+To demonstrate the fundamentals, experimental data from @mcdonald2009, by way of @mangiafico2015, are used. These data relate the ambient temperature to the rate of cricket chirps per minute. Data were collected for two species: _O. exclamationis_ and _O. niveus_. The data are contained in a data frame called `crickets` that contains a total of `r nrow(crickets)` data points. These data are shown via a `ggplot` graph. 
 
 ```{r base-r-cricket-plot, out.width = '70%', fig.width=6, fig.height=4, warning = FALSE}
 names(crickets)
@@ -211,10 +211,21 @@ In comparison, the _Python Developer's Guide_ espouses the notion that, when app
 
 The advantage of R's diversity of interfaces is that it it can evolve over time and fit different types of needs for different users. 
 
-Unfortunately, some of the syntactical diversity is due to a focus on the developer's needs instead of the needs of the end-user. 
- 
-**TODO** add back in some more general issues and reference content in later chapters.
- 
+Unfortunately, some of the syntactical diversity is due to a focus on the developer's needs instead of the needs of the end-user. For example, one other potential stumbling block can be inconsistencies between packages. Suppose a modeling project had an outcome with two classes. There are a variety of statistical and machine learning models that can be used. In order to produce class probability estimate for each sample, it is common for a model function to have a corresponding `predict()`method. However, there is significant heterogeneity in the argument values used by those methods to make class probability predictions. A sampling of these argument values for different models is: 
+
+| Function     | Package      | Code                                       |
+| :----------- | :----------- | :----------------------------------------- |
+| `lda`        | `MASS`       | `predict(object)`                             |
+| `glm`        | `stats`      | `predict(object, type = "response")`          |
+| `gbm`        | `gbm`        | `predict(object, type = "response", n.trees)` |
+| `mda`        | `mda`        | `predict(object, type = "posterior")`         |
+| `rpart`      | `rpart`      | `predict(object, type = "prob")`              |
+| various      | `RWeka`      | `predict(object, type = "probability")`       |
+| `logitboost` | `LogitBoost` | `predict(object, type = "raw", nIter)`        |
+| `pamr.train` | `pamr`       | `pamr.predict(object, type = "posterior")`    |
+
+Note that the last example has a custom _function_ to make predictions instead of using the model common `predict()` interface (as opposed to the generic `predict()` _method_).  
+
 As another example of _unpredictability_, another convention in base R is related to missing data. The general rule is that missing data propagate more missing data; the average of a set of values with a missing data point is itself missing and so on. When models make predictions, the vast majority require all of the predictors to have complete values. There are several options based in to R at this point in the form of `na.action`.  This sets the policy for how a function should behave if there are missing values. The two most common policies are `na.fail` and `na.omit`. For former produces an error of missing data are involved while the latter removes the missing data prior to the calculations by case-wise deletion. From our previous example:
 
 ```{r base-r-lm-missing, error = TRUE}
@@ -232,29 +243,7 @@ predict(main_effect_fit, new_values, na.action = na.omit)
 
 From a user's point of view, `na.omit()` can be problematic. In our example, `new_values` has `r nrow(new_values)` rows but only `r nrow(new_values) - 1` would be returned. To compensate for this, the user would have to determine which row had the missing value and interleave a missing values in the appropriate place if the predictions were merged into `new_values`^[A base R policy called `na.exclude()` does exactly this.]. While it is rare that a prediction function uses `na.omit()` as its missing data policy, this does occur. Users who have determined this as the cause of an error in their code find it _quite memorable_. 
 
-Finally, one other potential stumbling block can be inconsistencies between packages. Suppose a modeling project had an outcome with two classes. There are a variety of statistical and machine learning models that can be used. In order to produce class probability estimate for each sample, it is common for a model function to have a corresponding `predict()`method. However, there is significant heterogeneity in the argument values used by those methods to make class probability predictions. A sampling of these argument values for different models is: 
-
-| Function     | Package      | Code                                       |
-| :----------- | :----------- | :----------------------------------------- |
-| `lda`        | `MASS`       | `predict(object)`                             |
-| `glm`        | `stats`      | `predict(object, type = "response")`          |
-| `gbm`        | `gbm`        | `predict(object, type = "response", n.trees)` |
-| `mda`        | `mda`        | `predict(object, type = "posterior")`         |
-| `rpart`      | `rpart`      | `predict(object, type = "prob")`              |
-| various      | `RWeka`      | `predict(object, type = "probability")`       |
-| `logitboost` | `LogitBoost` | `predict(object, type = "raw", nIter)`        |
-| `pamr.train` | `pamr`       | `pamr.predict(object, type = "posterior")`    |
-
-Note that the last example has a custom _function_ to make predictions instead of using the model common `predict()` interface.  
-
-There are a few R packages that provide a unified interface to harmonize these modeling APIs, such as `caret` and `mlr`. tidymodels takes a similar approach to unification of the function interface as well as enforcing consistency in the function names and return values (e.g., `broom::tidy()`).  
-
-
-## Some additional tidy principals for modeling. 
-
 To resolve the usage issues described in the last section, the tidymodels packages have a few additional design goals that complement those of the tidyverse. However, a considerable amount of the tidymodels goals fall under the existing rubric of _Design for Humans_ but for modeling code. Some examples: 
-
-* Make argument and function names less _jargony_. For example, many statistical regularization methods use the greek letter lambda ($\lambda$) to represent the amount of penalization that is used during parameter estimation. While very specific, the only users who know what this means are those who have read those parts of the technical literature. When naming things, we prefer more self-documenting (and obvious) choices be used. For example, "penalty" is probably a better name than "lambda". 
 
 * R has excellent capabilities for _object oriented programming_ and this should be used in lieu of creating new function names (such as `predict_samples()`). 
 
@@ -264,49 +253,36 @@ To resolve the usage issues described in the last section, the tidymodels packag
 
 * Functions should take the **data structures that users have** as opposed to the data structure required by the underlying computational code. For example, a model function's _only_ interface should not be constrained to matrices. Frequently, users will have non-numeric predictors such as factors. 
 
-Many of these ideas are described in the tidymodels guidelines for model implementation^[`https://tidymodels.github.io/model-implementation-principles`]
+Many of these ideas are described in the tidymodels guidelines for model implementation^[`https://tidymodels.github.io/model-implementation-principles`]. In subsequent chapters, examples of existing issues (and their solutions) will be illustrated. 
 
-A few more principles are discussed below. 
+There are a few existing R packages that provide a unified interface to harmonize these modeling APIs, such as `caret` and `mlr`. tidymodels takes a similar approach to unification of the function interface as well as enforcing consistency in the function names and return values. 
 
-***Be predictable, consistent, and unsurprising***
+The `broom::tidy()` function, as will be shown several times, is another tool for standardizing the structure of R objects. It can return many types of R objects in a more usable format. For example, suppose that predictors are being screened based on their correlation to the outcome column. Using `purr::map()`, the results from `cor.test()` can be returned in a list for each predictor: 
 
-As seen in the previous section, consistency can be lacking between and within R packages. The tidymodels packages work to 
+```{r base-r-corr-list}
+corr_res <- map(mtcars %>% select(-mpg), cor.test, y = mtcars$mpg)
+corr_res[[1]]
+```
 
- * Follow a consistent syntax in new functions. 
+Suppose that these results were to be used in a plot. The standard format of hypothesis test results are not very useful. The `tidy()` method can return this as a tibble with standardized names: 
 
- * Provide a consistent interface for existing functions. 
+```{r base-r-corr-tidy}
+tidy(corr_res[[1]])
+```
 
- * Enforce consistency of _return values_ of functions. 
+These results can be stacked and added to a `ggplot`: 
 
-The last point is a good idea for functional programming but also to reduce frustrations for users. Previously, it was mentioned that the `summary()` method for some functions has column names that changed with the type of model (e.g. `"Pr(>|t|)"`) and the `broom` package was used to harmonize the results with the `tidy()` methods. 
+```{r base-r-corr-plot}
+corr_res %>% 
+  # Convert each to a tidy format; `map_dfr()` stacks the data frames 
+  map_dfr(tidy, .id = "predictor") %>% 
+  ggplot(aes(x = predictor)) + 
+  geom_point(aes(y = estimate)) + 
+  geom_errorbar(aes(ymin = conf.low, ymax = conf.high), width = .1) +
+  ylab("Correlation with mpg")
+```
 
-
-
-The tidymodels packages always return consistent predicted values that follow several rules:
-
- * The results are always a tibble. 
-
- * The number of rows in the tibble always match the number of samples being predicted, regardless of missing values. 
-
- * The names and formats of the columns are predictable.
-
-Finally, to help new R packages, the next section describes a tidymodels package called `hardhat` that enables package authors implement consistent interfaces and return values. 
-
-***Encourage empirical validation and good methodology***
-
-Enable a wider variety of methodologies
-
-Protect users from making objectively poor choices. Examples:
-
-- *Information leakage* of training set data into evaluation sets.
-- Analyzing integers as categories
-- Down-sampling the test set
-
-These examples relate directly to the _pit of success_ mentioned earlier.  
-
-One aspect of machine learning models that is applicable to the majority model types is the use of a separate set of data to verify how well the model performs. _Data splitting_ usually reserves a set of the available data that is used after the model building activities are finished. These data serve as an unbiased method for evaluating the capabilities of the model. There is an emphasis on such _empirical validation_ in tidymodels is a more robust approach to establish the performance characteristics of the model.
-
-Similarly, tidymodels strongly leverage resampling methods as a way to empirically characterize characteristics of models. Resampling methods, discussed in Chapter \@ref(resampling), is a type of simulation system that can re-evaluate the model under somewhat different scenarios. This enables the model to be characterized in the context of the observed data as opposed to an unobserved theoretical distribution. For example, in linear regression, we commonly assume normality of the model residuals and base confidence intervals and other quantities on this assumption. Using resampling, similar statistical quantities can be computed but using the _empirical distribution_ of the data. While  theoretical and empirical distribution can results in very similar results, it helps to have an additional verification of the results based on the _data at hand_. 
+This is not difficult to do using base R, but automatically reformatting the results makes for more concise code with less potential for errors. 
 
 ## Combining base R models and the tidyverse
 
@@ -329,7 +305,7 @@ model_by_species <-
 model_by_species
 ```
 
-If there is interest in collecting the coefficients for each of these models, it is helpful to use `broom::tidy()` to convert them to a consistent data frame format and then these can be unested:
+If there is interest in collecting the coefficients for each of these models, it is helpful to use `broom::tidy()` to convert them to a consistent data frame format so that they can be unested:
 
 ```{r base-r-species-coefs}
 library(tidymodels) # Includes the broom package
