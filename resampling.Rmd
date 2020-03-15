@@ -10,12 +10,67 @@ set.seed(833961)
 ames_split <- initial_split(ames, prob = 0.80, strata = Sale_Price)
 ames_train <- training(ames_split)
 ames_test  <-  testing(ames_split)
+
+library(doMC)
+registerDoMC(cores = parallel::detectCores())
 ```
 
 # Resampling for evaluating performance  {#resampling}
 
 
 
+```{r resampling-rand-forest-spec}
+rf_model <- 
+  rand_forest(trees = 1000) %>% 
+  set_engine("ranger") %>% 
+  set_mode("regression")
+
+rf_rec <- 
+  recipe(Sale_Price ~ Neighborhood + Gr_Liv_Area + Year_Built + Bldg_Type + 
+           Latitude + Longitude, data = ames_train) %>%
+  step_log(Sale_Price, base = 10)
+
+rf_wflow <- 
+  workflow() %>% 
+  add_recipe(rf_rec) %>% 
+  add_model(rf_model)
+```
+
+```{r resampling-fit, cache = TRUE}
+rf_res <- 
+  rf_wflow %>% 
+  fit(data = ames_train)
+```
+
+
+```{r resampling-eval-train, cache = TRUE}
+check_rf <- function(model, dat) {
+  reg_metrics <- metric_set(rmse, rsq)
+  
+  model %>% 
+    predict(dat) %>% 
+    bind_cols(
+      dat %>% 
+        select(Sale_Price) %>% 
+        mutate(Sale_Price = log10(Sale_Price))
+    ) %>% 
+    reg_metrics(Sale_Price, .pred)
+}
+check_rf(rf_res, ames_train)
+```
+
+
+```{r resampling-eval-test, cache = TRUE}
+check_rf(rf_res, ames_test)
+```
+
+Why not re-predict the training set
+
+don't want to go to a test set. 
+
+
+
+## Resampling methods
 
 ```{r resampling-scheme, echo = FALSE, out.width = '85%'}
 if (knitr:::is_html_output()) {
@@ -30,11 +85,11 @@ if (knitr:::is_html_output()) {
 The next three section provide details on three important resampling methods. 
 
 
-## Cross-validation
+### Cross-validation {#cv}
 
 Cross-validation is an old resampling technique. While there are a number of variations, the most common cross-validation method is called _V_-fold cross-validation. In this case, the data are randomly partitioned into _V_ sets of roughly equal size (called the "folds"). For illustration, _V_ = 3 is shown below for a data set of thirty training set points and a completely random fold allocation. 
 
-```{r resampling-three-cv, echo = FALSE, out.width = '25%'}
+```{r resampling-three-cv, echo = FALSE, out.width = '40%'}
 
 if (knitr:::is_html_output()) {
   file.copy("premade/three-CV.svg", "_book/premade/three-CV.svg")
@@ -49,7 +104,7 @@ The number inside the symbols are the sample numbers while the color and shape o
 
 For 3-fold cross-validation, the three iterations of resampling are illustrated below. The first iteration removes the data for the first fold and fits the model to the remaining two folds. This model is used to predict the data from the first fold and model performance is estimated from these data. On the second iteration, the model is fit not the first and third folds and the second fold is used to compute another set of performance metrics. A similar process is used for the third fold. 
 
-```{r resampling-three-cv-iter, echo = FALSE, out.width = '55%'}
+```{r resampling-three-cv-iter, echo = FALSE, out.width = '42%'}
 if (knitr:::is_html_output()) {
   file.copy("premade/three-CV-iter.svg", "_book/premade/three-CV-iter.svg")
   knitr::include_graphics("premade/three-CV-iter.svg")
@@ -70,19 +125,18 @@ What are the effects of changing _V_? Larger values result in resampling estimat
 use ames as example
 
 ```{r resampling-ames-cv}
-library(tidymodels)
+set.seed(1352)
 ames_folds <- vfold_cv(ames_train, v = 10)
 ames_folds
+
 class(ames_folds)
 ```
 
-split object `r gsub("split ", "", type_sum(ames_folds$splits[[1]]))`. 
-
+split object `[2K/220]`. 
 
 replication
 
-normal approx for noise use ames 
-
+Due to the central limit theorem, the summary statistics that are produced by each model tend toward a normal distribution. For example, for the RMSE statistic, the mean residual is computed using about `r floor(nrow(ames_train) * .1)` houses when 10-fold cross-validation is used. A collection of ten of these statistics can often be approximated using a Gaussian distribution. If this collection has a theoretical standard deviation of $\sigma$, so the standard error is $\sigma/\sqrt{10}$. How would replication affect this? Using 5- and 10-fold cross-validation with $R$ replicates, this plot shows how quickly the standard error^[These are _approximate_ standard errors. As will be discussed below, there is a within-replicate correlation that is typical of resampled results. By ignoring this extra component of variation, the simple calculations shown in the plot are over-estimates of the reduction in noise in the standard errors.] decreases with replicates: 
 
 ```{r resampling-cv-reduction, echo = FALSE}
 cv_info <- 
@@ -92,14 +146,40 @@ cv_info <-
 ggplot(cv_info, aes(x = replicates, y = reduction, col = V)) + 
   geom_line() + 
   geom_point() + 
-  labs(y = "Reduction in Variance", x = "Number of CV Replicates") +
+  labs(
+    y = expression(paste("Multiplier on ", sigma)),
+    x = "Number of CV Replicates"
+  ) +
   theme_bw() + 
-  theme(legend.position = "top")
+  theme(legend.position = "top") + 
+  scale_x_continuous(breaks = 1:10)
 ```
 
-## Bootstrapping
+Larger number of replicates tend to have less impact on the standard error. If the baseline value of $\sigma$ is impractically large, the diminishing returns on replication may still be worth the extra computational power. 
 
-```{r resampling-bootstraps, echo = FALSE, out.width = '60%'}
+
+
+loo and mc
+
+
+
+### Validation sets {#validation}
+
+
+```{r resampling-validation, echo = FALSE, out.width = '50%'}
+if (knitr:::is_html_output()) {
+  file.copy("premade/validation.svg", "_book/premade/validation.svg")
+  knitr::include_graphics("premade/validation.svg")
+} else {
+  file.copy("premade/validation.pdf", "_book/premade/validation.pdf")
+  knitr::include_graphics("premade/validation.pdf")
+}
+```
+
+
+### Bootstrapping {#bootstrap}
+
+```{r resampling-bootstraps, echo = FALSE, out.width = '50%'}
 if (knitr:::is_html_output()) {
   file.copy("premade/bootstraps.svg", "_book/premade/bootstraps.svg")
   knitr::include_graphics("premade/bootstraps.svg")
@@ -111,11 +191,148 @@ if (knitr:::is_html_output()) {
 
 
 
-## Rolling origin forcasting
+### Rolling origin forcasting {#rolling}
 
 
-## Estimating performance
+```{r resampling-rolling, echo = FALSE, out.width = '75%'}
+if (knitr:::is_html_output()) {
+  file.copy("premade/rolling.svg", "_book/premade/rolling.svg")
+  knitr::include_graphics("premade/rolling.svg")
+} else {
+  file.copy("premade/rolling.pdf", "_book/premade/rolling.pdf")
+  knitr::include_graphics("premade/rolling.pdf")
+}
+```
 
 
-Maybe inlcude some simple examples of comparing models using resampling (perhaps go full `tidyposterior`?)
 
+
+## Estimating performance {#resampling-performance}
+
+Any of these resampling methods can be used to effectively measure performance of a modeling process (e.g., pre-processing, model fitting, etc). They do this in an effective way by having different groups of data that are used to fit and assess a model. To reiterate the process: 
+
+1. During resampling, the analysis set is used to pre-process the data using the training set, apply the pre-processing to the training set, and then use these process data to fit the model. 
+
+2. The assessment set is used to estimate performance for all of the preceding estimation steps.  
+
+This sequence is conducted for every resample. If there are _B_ resamples, there are _B_ replicates of each of the performance metrics. The final resampling estimate is the average of these _B_ statistics. If _B_ = 1, as with a validation set, the individual statistic is used to represent overall performance. 
+
+Let's reconsider the random forest model used previously. 
+
+```{r resampling-cv-ames}
+keep_pred <- control_resamples(save_pred = TRUE)
+
+set.seed(598)
+rf_res <- 
+  rf_wflow %>% 
+  fit_resamples(resamples = ames_folds, control = keep_pred)
+rf_res
+```
+
+
+
+
+```{r resampling-cv-stats}
+collect_metrics(rf_res)
+```
+
+```{r resampling-cv-replicates}
+collect_metrics(rf_res, summarize = FALSE) %>% 
+  select(-.estimator) %>% 
+  pivot_wider(id_cols = c(id), names_from = .metric, values_from = .estimate)
+```
+
+
+```{r resampling-cv-pred}
+assess_res <- collect_predictions(rf_res)
+assess_res
+```
+
+
+```{r resampling-cv-pred-plot}
+assess_res %>% 
+  ggplot(aes(x = Sale_Price, y = .pred)) + 
+  geom_point(alpha = .15) +
+  geom_abline(col = "red") + 
+  coord_equal() + 
+  ylab("Predicted")
+```
+
+
+```{r resampling-val-ames}
+set.seed(4290)
+val_set <- mc_cv(ames_train, times = 1, prop = 3/4)
+
+val_res <- 
+  rf_wflow %>% 
+  fit_resamples(resamples = val_set)
+val_res
+
+collect_metrics(val_res)
+```
+
+
+## Parallel processing {#parallel}
+
+## Between-model comparisons {#compare}
+
+
+```{r resamples-lin-reg}
+ames_rec <- 
+  recipe(Sale_Price ~ Neighborhood + Gr_Liv_Area + Year_Built + Bldg_Type + 
+           Latitude + Longitude, data = ames_train) %>%
+  step_log(Sale_Price, base = 10)%>%
+  step_log(Gr_Liv_Area, base = 10) %>% 
+  step_other(Neighborhood, threshold = 0.01) %>% 
+  step_dummy(all_nominal()) %>% 
+  step_interact(~ Gr_Liv_Area:starts_with("Bldg_Type_")) %>% 
+  step_ns(Latitude, Longitude, deg_free = 20)
+
+lm_wflow <- 
+  workflow() %>% 
+  add_recipe(ames_rec) %>% 
+  add_model(linear_reg() %>% set_engine("lm"))
+
+lm_res <- 
+  lm_wflow %>% 
+  fit_resamples(resamples = ames_folds, control = keep_pred)
+lm_res
+```
+
+```{r resamples-collect}
+lm_rmse <- 
+  collect_metrics(lm_res, summarize = FALSE) %>% 
+  filter(.metric == "rmse") %>% 
+  select(id, lin_reg = .estimate)
+
+rf_rmse <- 
+  collect_metrics(rf_res, summarize = FALSE) %>% 
+  filter(.metric == "rmse") %>% 
+  select(id, rand_forest = .estimate)  
+
+rmse_estimates <- inner_join(lm_rmse, rf_rmse, by = "id")
+rmse_estimates
+
+cor.test(rmse_estimates$lin_reg, rmse_estimates$rand_forest) %>% 
+  tidy() %>% 
+  select(estimate, starts_with("conf"))
+```
+
+
+```{r resamples-rmse-plot}
+rmse_estimates %>% 
+  pivot_longer(cols = c(-id), names_to = "model", values_to = "rmse") %>% 
+  ggplot(aes(x = model, y = rmse, group = id, col = id)) + 
+  geom_line(alpha = .5, lwd = 1.5) + 
+  theme(legend.position = "none")
+```
+
+
+```{r resamples-compare}
+t.test(rmse_estimates$lin_reg, rmse_estimates$rand_forest, paired = TRUE) %>%
+  tidy()
+```
+
+## Saving the resampled objects
+
+ 
