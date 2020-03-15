@@ -1,25 +1,43 @@
 Package: TMwR
 Title: Tidy Modeling with R.
-Version: 0.0.1.9000
+Version: 0.0.1.9001
 Authors@R: c(
-  person("Max", "Kuhn", , "max@rstudio.com", c("aut", "cre")),
-  person("Davis", "Vaughan", , "davis@rstudio.com", "aut")
+    person(
+      given = "Max",
+      family = "Kuhn",
+      email = "max@rstudio.com",
+      comment = c(ORCID = "0000-0003-2402-136X"),
+      role = c("aut", "cre")
+    ),
+    person(
+      given = "Davis", 
+      family = "Vaughan", 
+      email = "davis@rstudio.com", 
+      role = "aut"
+    )
   )
 Depends: R (>= 3.5.0)
 URL: https://github.com/topepo/TMwR
 Imports:
+  AmesHousing,
+  bookdown,
+  doMC,
+  gridExtra,
+  kableExtra,
+  kknn,
+  knitr,
+  lubridate,
+  modeldata,
+  patchwork,
+  ranger,
+  recipes,
+  rmarkdown,
+  rpart,
+  sessioninfo,
   tidymodels,
   tidyverse,
-  AmesHousing,
-  modeldata,
-  bookdown,
-  knitr,
-  kableExtra,
-  sessioninfo,
-  gridExtra,
-  rmarkdown,
-  recipes,
   tune
 Remotes:
   tidymodels/recipes,
+  tidymodels/tidymodels,
   tidymodels/tune
