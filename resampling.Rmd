@@ -37,7 +37,7 @@ rf_wflow <-
 ```
 
 ```{r resampling-fit, cache = TRUE}
-rf_res <- 
+rf_fit_res <- 
   rf_wflow %>% 
   fit(data = ames_train)
 ```
@@ -56,13 +56,15 @@ check_rf <- function(model, dat) {
     ) %>% 
     reg_metrics(Sale_Price, .pred)
 }
-check_rf(rf_res, ames_train)
+check_rf(rf_fit_res, ames_train)
 ```
 
 
 ```{r resampling-eval-test, cache = TRUE}
-check_rf(rf_res, ames_test)
+check_rf(rf_fit_res, ames_test)
 ```
+
+`r round(check_rf(rf_fit_res, ames_test)$.estimate[[1]]/check_rf(rf_fit_res, ames_train)$.estimate[[1]], 1)`)-fold off of test set. 
 
 Why not re-predict the training set
 
@@ -90,7 +92,6 @@ The next three section provide details on three important resampling methods.
 Cross-validation is an old resampling technique. While there are a number of variations, the most common cross-validation method is called _V_-fold cross-validation. In this case, the data are randomly partitioned into _V_ sets of roughly equal size (called the "folds"). For illustration, _V_ = 3 is shown below for a data set of thirty training set points and a completely random fold allocation. 
 
 ```{r resampling-three-cv, echo = FALSE, out.width = '40%'}
-
 if (knitr:::is_html_output()) {
   file.copy("premade/three-CV.svg", "_book/premade/three-CV.svg")
   knitr::include_graphics("premade/three-CV.svg")
@@ -136,7 +137,7 @@ split object `[2K/220]`.
 
 replication
 
-Due to the central limit theorem, the summary statistics that are produced by each model tend toward a normal distribution. For example, for the RMSE statistic, the mean residual is computed using about `r floor(nrow(ames_train) * .1)` houses when 10-fold cross-validation is used. A collection of ten of these statistics can often be approximated using a Gaussian distribution. If this collection has a theoretical standard deviation of $\sigma$, so the standard error is $\sigma/\sqrt{10}$. How would replication affect this? Using 5- and 10-fold cross-validation with $R$ replicates, this plot shows how quickly the standard error^[These are _approximate_ standard errors. As will be discussed below, there is a within-replicate correlation that is typical of resampled results. By ignoring this extra component of variation, the simple calculations shown in the plot are over-estimates of the reduction in noise in the standard errors.] decreases with replicates: 
+Due to the central limit theorem, the summary statistics that are produced by each model tend toward a normal distribution. For example, for the RMSE statistic, the mean residual is computed using about `r floor(nrow(ames_train) * .1)` houses when 10-fold cross-validation is used. A collection of ten of these statistics can often be reasonably  approximated using a Gaussian distribution. If this collection has a theoretical standard deviation of $\sigma$, so the standard error is $\sigma/\sqrt{10}$. How would replication affect this? Using 5- and 10-fold cross-validation with $R$ replicates, this plot shows how quickly the standard error^[These are _approximate_ standard errors. As will be discussed below, there is a within-replicate correlation that is typical of resampled results. By ignoring this extra component of variation, the simple calculations shown in the plot are over-estimates of the reduction in noise in the standard errors.] decreases with replicates: 
 
 ```{r resampling-cv-reduction, echo = FALSE}
 cv_info <- 
@@ -157,9 +158,7 @@ ggplot(cv_info, aes(x = replicates, y = reduction, col = V)) +
 
 Larger number of replicates tend to have less impact on the standard error. If the baseline value of $\sigma$ is impractically large, the diminishing returns on replication may still be worth the extra computational power. 
 
-
-
-loo and mc
+Other types of rs: loo and mc
 
 
 
@@ -271,6 +270,10 @@ val_res
 collect_metrics(val_res)
 ```
 
+
+```{block, type = "rmdnote"}
+In these analyses, the resampling results are very close to the test set results. The two types of estimates tend to be well correlated. However, this could be from random chance. A seed value of 1352 was used to fix the random numbers before creating the resamples. Try changing this value and re-running the analyses to investigate of the resampled estimates match the test set results as well.
+```
 
 ## Parallel processing {#parallel}
 
