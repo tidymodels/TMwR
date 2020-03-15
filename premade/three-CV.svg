@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg version="1.1" xmlns:xl="http://www.w3.org/1999/xlink" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns="http://www.w3.org/2000/svg" viewBox="-79.5 -80.5 206 482" width="206" height="482">
+<svg xmlns:dc="http://purl.org/dc/elements/1.1/" version="1.1" xmlns:xl="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg" viewBox="-266.658 100.5 393.158 301" width="393.158" height="301">
   <defs>
     <font-face font-family="Helvetica Neue" font-size="14" panose-1="2 0 5 3 0 0 0 2 0 4" units-per-em="1000" underline-position="-100" underline-thickness="50" slope="0" x-height="517" cap-height="714" ascent="951.9958" descent="-212.99744" font-weight="400">
       <font-face-src>
@@ -9,9 +9,9 @@
     </font-face>
   </defs>
   <metadata> Produced by OmniGraffle 7.13.1 
-    <dc:date>2020-03-10 01:40:39 +0000</dc:date>
+    <dc:date>2020-03-15 00:14:09 +0000</dc:date>
   </metadata>
-  <g id="Canvas_1" stroke-dasharray="none" fill="none" stroke="none" fill-opacity="1" stroke-opacity="1">
+  <g id="Canvas_1" stroke="none" stroke-opacity="1" fill-opacity="1" stroke-dasharray="none" fill="none">
     <title>Canvas 1</title>
     <g id="Canvas_1: Layer 1">
       <title>Layer 1</title>
@@ -226,34 +226,34 @@
         </text>
       </g>
       <g id="Graphic_127">
-        <path d="M -10.15 16 L -.85 16 C 2.25 16 3.8 16 5.66 16.64 C 7.21 17.28 8.76 18.88 9.38 20.48 C 10 22.4 10 24 10 27.2 L 10 36.8 C 10 40 10 41.6 9.38 43.52 C 8.76 45.12 7.21 46.72 5.66 47.36 C 3.8 48 2.25 48 -.85 48 L -10.15 48 C -13.25 48 -14.8 48 -16.66 47.36 C -18.21 46.72 -19.76 45.12 -20.38 43.52 C -21 41.6 -21 40 -21 36.8 L -21 27.2 C -21 24 -21 22.4 -20.38 20.48 C -19.76 18.88 -18.21 17.28 -16.66 16.64 C -14.8 16 -13.25 16 -10.15 16 M -10.15 16" fill="#ffffc0"/>
-        <path d="M -10.15 16 L -.85 16 C 2.25 16 3.8 16 5.66 16.64 C 7.21 17.28 8.76 18.88 9.38 20.48 C 10 22.4 10 24 10 27.2 L 10 36.8 C 10 40 10 41.6 9.38 43.52 C 8.76 45.12 7.21 46.72 5.66 47.36 C 3.8 48 2.25 48 -.85 48 L -10.15 48 C -13.25 48 -14.8 48 -16.66 47.36 C -18.21 46.72 -19.76 45.12 -20.38 43.52 C -21 41.6 -21 40 -21 36.8 L -21 27.2 C -21 24 -21 22.4 -20.38 20.48 C -19.76 18.88 -18.21 17.28 -16.66 16.64 C -14.8 16 -13.25 16 -10.15 16 M -10.15 16" stroke="gray" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+        <path d="M -254.308 279 L -245.008 279 C -241.908 279 -240.358 279 -238.498 279.64 C -236.948 280.28 -235.398 281.88 -234.778 283.48 C -234.158 285.4 -234.158 287 -234.158 290.2 L -234.158 299.8 C -234.158 303 -234.158 304.6 -234.778 306.52 C -235.398 308.12 -236.948 309.72 -238.498 310.36 C -240.358 311 -241.908 311 -245.008 311 L -254.308 311 C -257.408 311 -258.958 311 -260.818 310.36 C -262.368 309.72 -263.918 308.12 -264.538 306.52 C -265.158 304.6 -265.158 303 -265.158 299.8 L -265.158 290.2 C -265.158 287 -265.158 285.4 -264.538 283.48 C -263.918 281.88 -262.368 280.28 -260.818 279.64 C -258.958 279 -257.408 279 -254.308 279 M -254.308 279" fill="#ffffc0"/>
+        <path d="M -254.308 279 L -245.008 279 C -241.908 279 -240.358 279 -238.498 279.64 C -236.948 280.28 -235.398 281.88 -234.778 283.48 C -234.158 285.4 -234.158 287 -234.158 290.2 L -234.158 299.8 C -234.158 303 -234.158 304.6 -234.778 306.52 C -235.398 308.12 -236.948 309.72 -238.498 310.36 C -240.358 311 -241.908 311 -245.008 311 L -254.308 311 C -257.408 311 -258.958 311 -260.818 310.36 C -262.368 309.72 -263.918 308.12 -264.538 306.52 C -265.158 304.6 -265.158 303 -265.158 299.8 L -265.158 290.2 C -265.158 287 -265.158 285.4 -264.538 283.48 C -263.918 281.88 -262.368 280.28 -260.818 279.64 C -258.958 279 -257.408 279 -254.308 279 M -254.308 279" stroke="gray" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
       </g>
       <g id="Graphic_126">
-        <path d="M -5.5 -33 L 10 -24.25 L 10 -6.75 L -5.5 2 L -21 -6.75 L -21 -24.25 Z" fill="#ffc0c0"/>
-        <path d="M -5.5 -33 L 10 -24.25 L 10 -6.75 L -5.5 2 L -21 -6.75 L -21 -24.25 Z" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+        <path d="M -249.658 230 L -234.158 238.75 L -234.158 256.25 L -249.658 265 L -265.158 256.25 L -265.158 238.75 Z" fill="#ffc0c0"/>
+        <path d="M -249.658 230 L -234.158 238.75 L -234.158 256.25 L -249.658 265 L -265.158 256.25 L -265.158 238.75 Z" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
       </g>
       <g id="Graphic_125">
-        <path d="M -22 -80 L 10 -80 L 3.6 -50 L -15.6 -50 Z" fill="#c0ffc0"/>
-        <path d="M -22 -80 L 10 -80 L 3.6 -50 L -15.6 -50 Z" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+        <path d="M -266.158 183 L -234.158 183 L -240.558 213 L -259.758 213 Z" fill="#c0ffc0"/>
+        <path d="M -266.158 183 L -234.158 183 L -240.558 213 L -259.758 213 Z" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
       </g>
       <g id="Graphic_128">
-        <text transform="translate(27 -74.392)" fill="black">
+        <text transform="translate(-217.158 188.608)" fill="black">
           <tspan font-family="Helvetica Neue" font-size="14" font-weight="400" fill="black" x="0" y="13">Fold 1</tspan>
         </text>
       </g>
       <g id="Graphic_129">
-        <text transform="translate(27 -26.196)" fill="black">
+        <text transform="translate(-217.158 236.804)" fill="black">
           <tspan font-family="Helvetica Neue" font-size="14" font-weight="400" fill="black" x="0" y="13">Fold 2</tspan>
         </text>
       </g>
       <g id="Graphic_130">
-        <text transform="translate(27 24)" fill="black">
+        <text transform="translate(-217.158 287)" fill="black">
           <tspan font-family="Helvetica Neue" font-size="14" font-weight="400" fill="black" x="0" y="13">Fold 3</tspan>
         </text>
       </g>
       <g id="Line_133">
-        <line x1="-73" y1="78" x2="109" y2="77" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+        <line x1="-116" y1="108" x2="-115" y2="401" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
       </g>
     </g>
   </g>
