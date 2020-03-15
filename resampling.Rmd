@@ -64,7 +64,7 @@ check_rf(rf_fit_res, ames_train)
 check_rf(rf_fit_res, ames_test)
 ```
 
-`r round(check_rf(rf_fit_res, ames_test)$.estimate[[1]]/check_rf(rf_fit_res, ames_train)$.estimate[[1]], 1)`)-fold off of test set. 
+2-fold off of test set. 
 
 Why not re-predict the training set
 
