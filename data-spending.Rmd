@@ -96,7 +96,7 @@ Previously, when describing the goals of data splitting, the test set was single
 
 It is common to hear about _validation sets_, especially in the neural network and deep learning literature. The validation set was originally defined in the early days of neural networks when there was a realization that when performance was measured by re-predicting the training set samples, the results were significantly over-optimistic. This led to models that overfit, meaning that they performed very well on the training set but poorly on the test set^[This is discussed in much greater detail in Chapter \@ref(over-fitting).]. To combat this issue, a small validation set of data were held back and these would be used to measure performance as the network was trained. Once the validation set error rate began to rise, the training would be halted. In other words, the validation set was a means to get a rough sense of how well the model performed prior to the test set. 
 
-It is largely semantics as to whether validation sets are a subset of the training set or a third allocation in the initial split of the data. Here, validation sets are discussed more in Chapter \@ref(resampling) as a special case of _resampling_ methods that are used on the training set.
+It is largely semantics as to whether validation sets are a subset of the training set or a third allocation in the initial split of the data. Here, validation sets are discussed more in Section \@ref(validation) as a special case of _resampling_ methods that are used on the training set.
 
 ## Other considerations 
 
