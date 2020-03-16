@@ -103,7 +103,7 @@ if (knitr:::is_html_output()) {
 
 The number inside the symbols are the sample numbers while the color and shape of the symbols represent their randomly assigned folds. The assignment to folds can be done via random sampling or, as was discussed on Section \@ref(splitting-methods), stratified assignment can be used. 
 
-For 3-fold cross-validation, the three iterations of resampling are illustrated below. The first iteration removes the data for the first fold and fits the model to the remaining two folds. This model is used to predict the data from the first fold and model performance is estimated from these data. On the second iteration, the model is fit not the first and third folds and the second fold is used to compute another set of performance metrics. A similar process is used for the third fold. 
+For 3-fold cross-validation, the three iterations of resampling are illustrated below. The first iteration removes the data for the first fold and fits the model to the remaining two folds. This model is used to predict the data from the first fold and model performance is estimated from these data. On the second iteration, the model is fit with the first and third folds and the second fold is used to compute another set of performance metrics. A similar process is used for the third fold. 
 
 ```{r resampling-three-cv-iter, echo = FALSE, out.width = '42%'}
 if (knitr:::is_html_output()) {
