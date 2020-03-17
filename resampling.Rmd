@@ -90,7 +90,7 @@ The next three section provide details on three important resampling methods.
 
 Cross-validation is an old resampling technique. While there are a number of variations, the most common cross-validation method is called _V_-fold cross-validation. In this case, the data are randomly partitioned into _V_ sets of roughly equal size (called the "folds"). For illustration, _V_ = 3 is shown below for a data set of thirty training set points and a completely random fold allocation. 
 
-```{r resampling-three-cv, echo = FALSE, out.width = '40%'}
+```{r resampling-three-cv, echo = FALSE, out.width = '50%'}
 if (knitr:::is_html_output()) {
   file.copy("premade/three-CV.svg", "_book/premade/three-CV.svg")
   knitr::include_graphics("premade/three-CV.svg")
@@ -104,7 +104,7 @@ The number inside the symbols are the sample numbers while the color and shape o
 
 For 3-fold cross-validation, the three iterations of resampling are illustrated below. The first iteration removes the data for the first fold and fits the model to the remaining two folds. This model is used to predict the data from the first fold and model performance is estimated from these data. On the second iteration, the model is fit not the first and third folds and the second fold is used to compute another set of performance metrics. A similar process is used for the third fold. 
 
-```{r resampling-three-cv-iter, echo = FALSE, out.width = '42%'}
+```{r resampling-three-cv-iter, echo = FALSE, out.width = '70%'}
 if (knitr:::is_html_output()) {
   file.copy("premade/three-CV-iter.svg", "_book/premade/three-CV-iter.svg")
   knitr::include_graphics("premade/three-CV-iter.svg")
@@ -177,7 +177,7 @@ if (knitr:::is_html_output()) {
 
 ### Bootstrapping {#bootstrap}
 
-```{r resampling-bootstraps, echo = FALSE, out.width = '50%'}
+```{r resampling-bootstraps, echo = FALSE, out.width = '90%'}
 if (knitr:::is_html_output()) {
   file.copy("premade/bootstraps.svg", "_book/premade/bootstraps.svg")
   knitr::include_graphics("premade/bootstraps.svg")
