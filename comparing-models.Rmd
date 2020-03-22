@@ -46,9 +46,19 @@ rf_rsq <-
   select(id, `random forest` = .estimate)  
 
 rsq_estimates <- 
-  inner_join(lm_rsq, rf_rsq, by = "id")
+  inner_join(lm_rsq, rf_rsq, by = "id") %>% 
+  mutate(difference = `random forest` -  `linear regression`)
 rsq_estimates
+```
 
+
+$$y_{ij} = \beta_0 + \beta_1x_{ij} + \epsilon_{ij}$$
+
+
+
+
+
+```{r compare-resample-cor}
 cor.test(rsq_estimates$`linear regression`, 
          rsq_estimates$`random forest`) %>% 
   tidy() %>% 
@@ -78,9 +88,26 @@ t.test(
   paired = TRUE
 ) %>%
   tidy()
+
+# or use an ANOVA model on the differences
+lm(difference ~ 1, data = rsq_estimates) %>% 
+  tidy(conf.int = TRUE)
 ```
 
+what about 3+ models? 
+
+what about real probability statements? 
+
+
 ## Bayesian methods
+
+$$y_{ij} = (\beta_0 + b_{i}) + \beta_1x_{ij} + \epsilon_{ij}$$
+
+$\beta_j \sim N(0, \sigma)$, and $b_i \sim t(1)$ 
+
+
+
+
 
 ```{r compare-bayes, results = "hide"}
 ames_two_models <- 
