@@ -133,7 +133,7 @@ The test set RMSE estimate, `r all_res %>% filter(object == "rf_fit") %>% pull("
 Many predictive models are very capable of representing complex trends in the data. In statistics, these are commonly referred to as _low bias models_. 
 
 ```{block, type = "rmdnote"}
-In this context, _bias_ is the different between the true data pattern and the types of patterns that the model can emulate. Many black-box machine learning models are low bias. Other models (such as linear/logistic regression, discriminant analysis, and others) are not as adaptable and would be considered _high-bias_ models. See Section [1.2.5](https://bookdown.org/max/FES/important-concepts.html) of <span class="citation">Kuhn and Johnson (<a href="#ref-fes" role="doc-biblioref">2020</a>)</span> for a discussion.
+In this context, _bias_ is the different between the true data pattern and the types of patterns that the model can emulate. Many black-box machine learning models are low bias. Other models (such as linear/logistic regression, discriminant analysis, and others) are not as adaptable and would be considered _high-bias_ models. See Section [1.2.5](https://bookdown.org/max/FES/important-concepts.html#model-bias-and-variance) of <span class="citation">Kuhn and Johnson (<a href="#ref-fes" role="doc-biblioref">2020</a>)</span> for a discussion.
 ```
 
 For a low-bias techniques, model complexity can sometimes result in the model to nearly memorizing the training set data. As an obvious example, consider a 1-nearest neighbor model -- it will always provide perfect predictions for the training set no matter how well the model truly works on other data sets. Random forest effectively has the same characteristic; re-predicting the training set will always result in an artificially optimistic estimate of performance.  
@@ -315,7 +315,8 @@ rf_res
 ```{r resampling-checkpoint, include = FALSE}
 lm_wflow <- 
   workflow() %>% 
-  add_recipe(ames_rec)
+  add_recipe(ames_rec) %>% 
+  add_model(linear_reg() %>% set_engine("lm"))
 save(rf_res, lm_wflow, rf_wflow, file = "RData/resampling.RData", version = 2, compress = "xz")
 ```
 

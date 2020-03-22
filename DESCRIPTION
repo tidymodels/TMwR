@@ -1,6 +1,6 @@
 Package: TMwR
 Title: Tidy Modeling with R.
-Version: 0.0.1.9002
+Version: 0.0.1.9003
 Authors@R: c(
     person(
       given = "Max",
@@ -35,6 +35,7 @@ Imports:
   rpart,
   sessioninfo,
   tidymodels,
+  tidyposterior,
   tidyverse,
   tune
 Remotes:

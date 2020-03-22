@@ -3,6 +3,8 @@ knitr::opts_chunk$set(fig.path = "figures/")
 library(tidymodels)
 library(AmesHousing)
 library(doMC)
+library(tidyposterior)
+library(rstanarm)
 
 ames <- make_ames()
 
@@ -15,7 +17,7 @@ ames_folds <- vfold_cv(ames_train, v = 10)
 
 registerDoMC(cores = parallel::detectCores())
 
-load("RData/rf_resampled.RData")
+load("RData/resampling.RData")
 
 keep_pred <- control_resamples(save_pred = TRUE)
 ```
@@ -24,20 +26,7 @@ keep_pred <- control_resamples(save_pred = TRUE)
 
 
 ```{r compare-lin-reg}
-ames_rec <- 
-  recipe(Sale_Price ~ Neighborhood + Gr_Liv_Area + Year_Built + Bldg_Type + 
-           Latitude + Longitude, data = ames_train) %>%
-  step_log(Sale_Price, base = 10)%>%
-  step_log(Gr_Liv_Area, base = 10) %>% 
-  step_other(Neighborhood, threshold = 0.01) %>% 
-  step_dummy(all_nominal()) %>% 
-  step_interact(~ Gr_Liv_Area:starts_with("Bldg_Type_")) %>% 
-  step_ns(Latitude, Longitude, deg_free = 20)
-
-lm_wflow <- 
-  workflow() %>% 
-  add_recipe(ames_rec) %>% 
-  add_model(linear_reg() %>% set_engine("lm"))
+lm_wflow
 
 lm_res <- 
   lm_wflow %>% 
@@ -46,40 +35,92 @@ lm_res
 ```
 
 ```{r compare-collect}
-lm_rmse <- 
+lm_rsq <- 
   collect_metrics(lm_res, summarize = FALSE) %>% 
-  filter(.metric == "rmse") %>% 
+  filter(.metric == "rsq") %>% 
   select(id, `linear regression` = .estimate)
 
-rf_rmse <- 
+rf_rsq <- 
   collect_metrics(rf_res, summarize = FALSE) %>% 
-  filter(.metric == "rmse") %>% 
+  filter(.metric == "rsq") %>% 
   select(id, `random forest` = .estimate)  
 
-rmse_estimates <- inner_join(lm_rmse, rf_rmse, by = "id")
-rmse_estimates
+rsq_estimates <- 
+  inner_join(lm_rsq, rf_rsq, by = "id")
+rsq_estimates
 
-cor.test(rmse_estimates$`linear regression`, 
-         rmse_estimates$`random forest`) %>% 
+cor.test(rsq_estimates$`linear regression`, 
+         rsq_estimates$`random forest`) %>% 
   tidy() %>% 
   select(estimate, starts_with("conf"))
 ```
 
 
-```{r compare-rmse-plot}
-rmse_estimates %>% 
-  pivot_longer(cols = c(-id), names_to = "model", values_to = "rmse") %>% 
-  ggplot(aes(x = model, y = rmse, group = id, col = id)) + 
+```{r compare-rsq-plot}
+rsq_estimates %>% 
+  pivot_longer(cols = c(-id), names_to = "model", values_to = "rsq") %>% 
+  ggplot(aes(x = model, y = rsq, group = id, col = id)) + 
   geom_line(alpha = .5, lwd = 1.25) + 
   theme(legend.position = "none")
 ```
 
 
+Effect size
+
+
+
 ## Simple hypothesis testing methods
 
 ```{r compare-t-test}
-t.test(rmse_estimates$`linear regression`, 
-       rmse_estimates$`random forest`, 
-       paired = TRUE) %>%
+t.test(
+  rsq_estimates$`random forest`, 
+  rsq_estimates$`linear regression`, 
+  paired = TRUE
+) %>%
   tidy()
+```
+
+## Bayesian methods
+
+```{r compare-bayes, results = "hide"}
+ames_two_models <- 
+  ames_folds %>% 
+  bind_cols(rsq_estimates %>% arrange(id))
+
+library(tidyposterior)
+library(rstanarm)
+
+rsq_anova <-
+  perf_mod(
+    ames_two_models,
+    prior_intercept = student_t(df = 1),
+    iter = 5000,
+    seed = 9791
+  )
+```
+
+```{r compare-group-posteriors, results = "hide"}
+rsq_anova %>% 
+  tidy(seed = 3742) %>% 
+  as_tibble() %>% 
+  ggplot(aes(x = posterior)) + 
+  geom_histogram(bins = 50, col = "white", fill = "blue", alpha = 0.4) + 
+  facet_wrap(~ model, ncol = 1)
+```
+
+
+```{r compare-difference-posterior}
+rqs_diff <-
+  contrast_models(rsq_anova,
+                  list_1 = "random forest",
+                  list_2 = "linear regression",
+                  seed = 6541)
+
+rqs_diff %>% 
+  as_tibble() %>% 
+  ggplot(aes(x = difference)) + 
+  geom_histogram(bins = 50, col = "white", fill = "red", alpha = 0.4) + 
+  xlab("Mean Difference in Rsq (RF - LR)")
+
+summary(rqs_diff, size = 0.02)
 ```

@@ -57,7 +57,7 @@ tab %>%
 
 Footnotes: 
 
-1. Decorrelating predictors may not help improve performance. However, fewer correlated predictors can improve the estimation of variance importance scores. Essentially, the selection of highly correlated predictors is almost random. 
+1. Decorrelating predictors may not help improve performance. However, fewer correlated predictors can improve the estimation of variance importance scores (see [Fig. 11.4](https://bookdown.org/max/FES/recursive-feature-elimination.html#fig:greedy-rf-imp) of \@ref(fes)). Essentially, the selection of highly correlated predictors is almost random. 
 
 The notation of `r symbol$sup_plus` means that the answer depends on the implementation. Specifically: 
 
