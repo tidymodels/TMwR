@@ -15,17 +15,17 @@ It has been said previously that the type of pre-processing is dependent on the 
 
 This Appendix provides recommendations for baseline levels of pre-processing that are needed for various model functions. In the table below, the pre-processing methods are categorized as: 
 
- * `dummy`: Do qualitative predictors require a numeric encoding (e.g. via dummy variables or other methods). 
+ * **dummy**: Do qualitative predictors require a numeric encoding (e.g. via dummy variables or other methods). 
  
- * `zv`: Should columns with a single column be removed? 
+ * **zv**: Should columns with a single column be removed? 
  
- * `impute`: If some predictors are missing, should they be estimated via imputation? 
+ * **impute**: If some predictors are missing, should they be estimated via imputation? 
  
- * `decorrelate`: If there are correlated predictors, should this correlation be mitigated? This might mean filtering out predictors, using principal component analysis, or a model-based technique (e.g. regularization). 
+ * **decorrelate**: If there are correlated predictors, should this correlation be mitigated? This might mean filtering out predictors, using principal component analysis, or a model-based technique (e.g. regularization). 
   
- * `normalize`: Should predictors be centered and scaled? 
+ * **normalize**: Should predictors be centered and scaled? 
  
- * `transform`: Is it helpful to transform predictors to be more symmetric? 
+ * **transform**: Is it helpful to transform predictors to be more symmetric? 
 
 The information in the table below is not exhaustive and somewhat depends on the implementation. For example, as noted below the table, some models may not require a particular pre-processing operation but the implementation may require it. In the table, `r tk` indicates that the method is required for the model and `r x` indicates that it is not. The `r cl` symbol means that the model _may_ be helped by the technique but it is not required.
 
