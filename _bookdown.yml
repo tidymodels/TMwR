@@ -16,7 +16,9 @@ rmd_files: [
   "resampling.Rmd",
   "comparing-models.Rmd",
   "over-fitting.Rmd",
-  "model-tuning.Rmd"
+  "model-tuning.Rmd",
+  "appendix.Rmd",
+  "pre-proc-table.Rmd"
 ]
 
 before_chapter_script: "_common.R"

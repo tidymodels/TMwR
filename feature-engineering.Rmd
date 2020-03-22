@@ -64,7 +64,7 @@ In other cases, data _pre-processing_ can involve reformatting required by the m
  
  * Models that use variance-type measures may benefit from coercing the distribution of some skewed predictors to be symmetric by _estimating a transformation_. 
  
-Different models have different pre-processing requirements and some, such as tree-based models, require very little pre-processing.
+Different models have different pre-processing requirements and some, such as tree-based models, require very little pre-processing. Appendix \@ref(pre-proc-table) contains a small table of recommended pre-processing techniques for different models. 
 
 In this chapter, the `recipes` package is introduced as a means to encapsulate different feature engineering and pre-processing tasks into a single object and then to apply these transformations to different data sets. 
 

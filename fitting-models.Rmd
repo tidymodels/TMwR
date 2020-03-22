@@ -65,7 +65,7 @@ For tidy models, the approach to specifying a model is fairly simple:
 
 2. Specify the _engine_ for fitting the model. Most often this reflects the software package that should be used. 
 
-3. When required, declare the _mode_ of the model. The mode reflects the type of prediction outcome. For numeric outcomes, the mode is _regression_ and for qualitative outcomes, it is _classification_. If a model can only create one type of model, such as linear regression, the mode is already set. 
+3. When required, declare the _mode_ of the model. The mode reflects the type of prediction outcome. For numeric outcomes, the mode is _regression_ and for qualitative outcomes, it is _classification_^[Note that `parsnip` constrains classification models to have the outcome column encoded as a _factor_; using binary numeric values will result in an error.]. If a model can only create one type of model, such as linear regression, the mode is already set. 
 
 These specifications are done _without referencing the data_. For example, for the three cases above: 
 
