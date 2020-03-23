@@ -132,8 +132,8 @@ The test set RMSE estimate, `r all_res %>% filter(object == "rf_fit") %>% pull("
 
 Many predictive models are very capable of representing complex trends in the data. In statistics, these are commonly referred to as _low bias models_. 
 
-```{block, type = "rmdnote"}
-In this context, _bias_ is the different between the true data pattern and the types of patterns that the model can emulate. Many black-box machine learning models are low bias. Other models (such as linear/logistic regression, discriminant analysis, and others) are not as adaptable and would be considered _high-bias_ models. See Section [1.2.5](https://bookdown.org/max/FES/important-concepts.html#model-bias-and-variance) of <span class="citation">Kuhn and Johnson (<a href="#ref-fes" role="doc-biblioref">2020</a>)</span> for a discussion.
+```{block2, type = "rmdnote"}
+In this context, _bias_ is the different between the true data pattern and the types of patterns that the model can emulate. Many black-box machine learning models are low bias. Other models (such as linear/logistic regression, discriminant analysis, and others) are not as adaptable and would be considered _high-bias_ models. See Section [1.2.5](https://bookdown.org/max/FES/important-concepts.html#model-bias-and-variance) of @fes for a discussion.
 ```
 
 For a low-bias techniques, model complexity can sometimes result in the model to nearly memorizing the training set data. As an obvious example, consider a 1-nearest neighbor model -- it will always provide perfect predictions for the training set no matter how well the model truly works on other data sets. Random forest effectively has the same characteristic; re-predicting the training set will always result in an artificially optimistic estimate of performance.  
@@ -155,6 +155,10 @@ If the test set should not be used immediately and re-predicting the training se
 
 ## Resampling methods
 
+Resampling methods can be thought of as empirical simulation systems. They take slightly different versions of the training set, fit the model, then compute performance on data that was not used for the fit. Resampling methods do this repeatedly and build as set of replicated performance statistics. The final resampling estimates of performance are averages of these replicates. 
+
+This diagram illustrates how data are used by resampling methods.
+
 ```{r resampling-scheme, echo = FALSE, out.width = '85%'}
 if (knitr:::is_html_output()) {
   file.copy("premade/resampling.svg", "_book/premade/resampling.svg")
@@ -165,8 +169,17 @@ if (knitr:::is_html_output()) {
 }
 ```
 
-The next three section provide details on several important resampling methods and their variants. 
+Importantly note that resampling is only conducted on the training set. The test set is not involved. For a specific iteration of resampling, the data are partitioned into two subsamples: 
 
+ * The **analysis set** is used to fit the model. 
+
+ * The **assessment set** is used to evaluate the model. 
+
+These are somewhat analogous to training and test sets. Our language of _analysis_ and _assessment_ data are used to avoid confusion with other splits of the data. These data sets are mutually exclusive. The partitioning scheme used to create the analysis and assessment sets are the main characteristic that defines a particular resampling method. 
+
+Similar partitions are conducted for each iteration of resampling. Suppose 20 iterations of resampling are conducted and RMSE is used to measure model effectiveness. Each assessment set yields its own RMSE statistics and the overall resampling estimate for the model would be the average of the 20 replicate RMSE statistics. 
+
+The next section defines and discussed the most often used methods and their pros and cons. 
 
 ### Cross-validation {#cv}
 
@@ -196,7 +209,7 @@ if (knitr:::is_html_output()) {
 }
 ```
 
-The result is a collection of three replicates for each of the performance statistics. The final resampling estimate of performance averages each of the _V_ replicates. 
+For this method and when _V_ = 3, the analysis sets are 2/3 of the training set and each assessment set is a distinct 1/3. The result is a collection of three replicates for each of the performance statistics. The final resampling estimate of performance averages each of the _V_ replicates. 
 
 _V_ = 3 is a good choice to illustrate cross-validation but is a poor choice in practice. Values of _V_ are most often 5 or 10; here, we generally prefer 10-fold cross-validation as a default. 
 
@@ -204,7 +217,7 @@ _V_ = 3 is a good choice to illustrate cross-validation but is a poor choice in 
 What are the effects of changing _V_? Larger values result in resampling estimates with reduced bias but increased noise. Smaller bias have large bias but better noise. 10-fold is preferred since noise can be reduced by replication, as shown below, but bias cannot. See [Section **3.4**]() of @fes for a longer description. 
 ```
 
-use ames as example
+For create a set of cross-validation folds, the `vold_cv()` function in `rsample` is used. It takes the data frame containing the training set as well as any options specified by the user: 
 
 ```{r resampling-ames-cv}
 set.seed(1352)
@@ -214,11 +227,23 @@ ames_folds
 class(ames_folds)
 ```
 
-split object `[2K/220]`. 
+The `splits` column is a list object of `rsplit` objects that define the partition into the analysis and assessment sets. The print method inside of the tibble shows the frequency of each: `[2K/220]` indicates that roughly two thousand samples are in the analysis set and 220 are in that particular assessment set. 
 
-replication
+To manually retrieve the partitioned data, the `analysis()` and `assessment()` functions are used to return a data frame with the appropriate rows for that partition: 
 
-Due to the central limit theorem, the summary statistics that are produced by each model tend toward a normal distribution. For example, for the RMSE statistic, the mean residual is computed using about `r floor(nrow(ames_train) * .1)` houses when 10-fold cross-validation is used. A collection of ten of these statistics can often be reasonably  approximated using a Gaussian distribution. If this collection has a theoretical standard deviation of $\sigma$, so the standard error is $\sigma/\sqrt{10}$. How would replication affect this? Using 5- and 10-fold cross-validation with $R$ replicates, this plot shows how quickly the standard error^[Even if the statistics truly follow a Gaussian distribution, these are _approximate_ standard errors. As will be discussed in the next chapter, there is a within-replicate correlation that is typical of resampled results. By ignoring this extra component of variation, the simple calculations shown in the plot are over-estimates of the reduction in noise in the standard errors.] decreases with replicates: 
+```{r resampling-analysis}
+ames_folds$splits[[1]] %>% analysis() %>% dim()
+```
+
+tidymodels packages, such as `tune` contain high-level user interfaces so that these functions are not generally needed for day-to-day work. One function to fit a model over these resamples is shown in the next section. 
+
+The `rsample` objects also always contain a character column called `id` with a description of the partition. For some resampling methods, multiple `id` fields are needed.  
+
+There are a variety of variations of _V_-fold cross-validation. The most important is called _repeated_ cross-validation. Depending on the size or other characterisics of the data, the resampling estimate produced by _V_-fold cross-validation may be excessively noisy^[For more details, see [Section 3.4.6](https://bookdown.org/max/FES/resampling.html#resample-var-bias) of @fes.]. As with many statistical problems, one way to reduce noise is to gather more data. For cross-validation, this means averaging more than _V_ statistics. 
+
+To create _R_ repeats of _V_-fold cross-validation, the same partitioning process is redone _R_ times to generate _R_ sets of _V_ partitions. Now, instead of averaging _V_ statistics, $V \times R$ are used to produce the final resampling estimate.
+
+Due to the central limit theorem, the summary statistics that are produced by each model tend toward a normal distribution. For example, for the RMSE statistic, the mean residual is computed using about `r floor(nrow(ames_train) * .1)` houses when 10-fold cross-validation is used. A collection of ten of these statistics can often be reasonably  approximated using a Gaussian distribution. If this collection has a theoretical standard deviation of $\sigma$, so the standard error is $\sigma/\sqrt{10}$. How would replication affect this? Using 10-fold cross-validation with $R$ replicates, this plot shows how quickly the standard error^[Even if the statistics truly follow a Gaussian distribution, these are _approximate_ standard errors. As will be discussed in the next chapter, there is a within-replicate correlation that is typical of resampled results. By ignoring this extra component of variation, the simple calculations shown in the plot are over-estimates of the reduction in noise in the standard errors.] decreases with replicates: 
 
 ```{r resampling-cv-reduction, echo = FALSE}
 cv_info <- 
@@ -238,12 +263,25 @@ ggplot(cv_info, aes(x = replicates, y = reduction)) +
 
 Larger number of replicates tend to have less impact on the standard error. If the baseline value of $\sigma$ is impractically large, the diminishing returns on replication may still be worth the extra computational power. 
 
-Other types of rs: loo and mc
+To create repeats, `vfold_cv()` is invoked with another argument: 
 
+```{r resampling-repeated}
+vfold_cv(ames_train, v = 10, repeats = 5)
+```
 
+One early variation of cross-validation is leave-one-out (LOO) cross-validation where _V_ is the number of data points in the training set. If there are $n$ training set samples, $n$ models are created (using $n-1$ rows of the training set). For each, the single data point that was excluded is predicted. At the end of resampling, this collection of $n$ predictions are pooled and a single set of performance metrics are generated (as opposed to averaging _V_ replicates). 
+
+Leave-one-out methods are fairly deprecated in favor of almost any other method. For anything but small samples, LOO is computationally excessive and may not have the best statistical properties. `rsample` contains a `loo_cv()` function, but these objects are not generally integrated into the broader tidymodels frameworks.  
+
+Finally, another variant of _V_-fold cross-validation is called _Monte Carlo_ cross-validation (MCCV). Like _V_-fold cross-validation, it leaves out $1/V$ of the data out at each iteration. The difference is that, for MCCV, this proportion of the data is chosen at random each time. While it leaves the same amount in the analysis and assessment sets as _V_-fold cross-validation, the assessment sets are not mutually exclusive. To create these resampling objects: 
+
+```{r resampling-mccv}
+mc_cv(ames_train, prop = 9/10, times = 20)
+```
 
 ### Validation sets {#validation}
 
+Previously mentioned in Section \@ref(what-about-a-validation-set), this is a single partition that is set aside to be used to estimate performance (before using the test set). Graphically: 
 
 ```{r resampling-validation, echo = FALSE, out.width = '50%'}
 if (knitr:::is_html_output()) {
@@ -255,10 +293,40 @@ if (knitr:::is_html_output()) {
 }
 ```
 
+Validation sets are often used when the original pool of data is very large. In this case, a single large partition may be adequate to characterize model performance without having to do multiple iterations of resampling. 
+
+With `rsample`, a validation set is treated like any other resampling object; this one only has a single iteration^[In essence, a validation set can be considered a single Monte Carlo cross-validation with a single iteration.]: 
+
+
+```{r resampling-validation-alt, echo = FALSE, out.width = '45%'}
+if (knitr:::is_html_output()) {
+  file.copy("premade/validation-alt.svg", "_book/premade/validation-alt.svg")
+  knitr::include_graphics("premade/validation-alt.svg")
+} else {
+  file.copy("premade/validation-alt.pdf", "_book/premade/validation-alt.pdf")
+  knitr::include_graphics("premade/validation-alt.pdf")
+}
+```
+
+To create a validation set object that uses 3/4 of the data for model fitting: 
+
+
+```{r resampling-validation-split}
+set.seed(4290)
+val_set <- validation_split(ames_train, prop = 3/4)
+val_set
+```
+
 
 ### Bootstrapping {#bootstrap}
 
-```{r resampling-bootstraps, echo = FALSE, out.width = '90%'}
+Bootstrap resampling was originally invented as a method for approximating the sampling distribution of statistics where the theoretical properties are intractable. Using it to estimate model performance is a secondary application of the method. 
+
+A bootstrap samples of the training set is a sample that is the same size as the training set but is drawn _with replacement_. This means that the same training set data point can be selected multiple times for the analysis set. Because of this, each data point has a `r round((1-exp(-1)) * 100, 2)`% chance of being included in the training set at least once. The assessment set contains all of the training set samples that were not selected for the analysis set (on average, with `r round((exp(-1)) * 100, 2)`% of the training set). When boostrapping, the assessment set is also called the "out-of-bag sample". 
+
+For a training set of 30 samples, a schematic of three bootstrap samples is: 
+
+```{r resampling-bootstraps, echo = FALSE, out.width = '80%'}
 if (knitr:::is_html_output()) {
   file.copy("premade/bootstraps.svg", "_book/premade/bootstraps.svg")
   knitr::include_graphics("premade/bootstraps.svg")
@@ -267,13 +335,27 @@ if (knitr:::is_html_output()) {
   knitr::include_graphics("premade/bootstraps.pdf")
 }
 ```
+Note thast the sizes of the assessment sets can vary. 
 
+Using `rsample`: 
 
+```{r resampling-boot-set}
+bootstraps(ames_train, times = 5)
+```
+
+Bootstrap samples produce performance estimates that have very low variance (unlike cross-validation) but have significant pessimistic bias. This means that, if the true accuracy of a model is 90%, the bootstrap would tend to estimate the value to be comparatively less than 90%. The amount of bias cannot be accurately estimated and probably changes over the scale of the performance metric. For example, the bias is likely to be different when the accuracy is 90% versus when it is 70%. 
+
+The bootstrap is also used inside of many models. For example, the random forest model mentioned earlier contained 1,000 individual decision trees. Each one was created using a different bootstrap sample of the training set. 
 
 ### Rolling origin forcasting {#rolling}
 
+When the data have a strong time component, a resampling method should attempt to be able to estimate seasonal and other temporal trends on the data. A technique that randomly samples values from the training set might disrupt the models ability to estimate these patterns. 
 
-```{r resampling-rolling, echo = FALSE, out.width = '75%'}
+Rolling forecast origin resampling emulates how temporal might be partitioned; historical data would be used to estimate the model and the most recent data would be allocated for evaluation. For this type of resampling, the size of the initial analysis and assessment sets are specified. This is the first iteration of resampling. The second iteration uses the same data sizes but shifts over by one sample. 
+
+To illustrate, a training set of 15 samples is resampled with an analysis size of eight samples and an assessment set size of three. The second iteration discards the first training set sample and both data sets shift forward by one. This configuration results in five resamples: 
+
+```{r resampling-rolling, echo = FALSE, out.width = '65%'}
 if (knitr:::is_html_output()) {
   file.copy("premade/rolling.svg", "_book/premade/rolling.svg")
   knitr::include_graphics("premade/rolling.svg")
@@ -283,6 +365,27 @@ if (knitr:::is_html_output()) {
 }
 ```
 
+There are a few different configurations of this method: 
+
+ * The analysis set can cumulative grow. After the first initial analysis set, new samples are accrued without discarding the earlier data. 
+
+ * The resamples need not increment by one. For example, for large data sets, the incremental block could be a week or month instead of a day. 
+
+For a year's worth of data, suppose that six sets of 30 day blocks were used as the analysis set. For assessment sets of 30 days with a 29 day skip, the `rsample` code is: 
+
+```{r resampling-rolling-forcast}
+time_slices <- 
+  tibble(x = 1:365) %>% 
+  rolling_origin(initial = 6 * 30, assess = 30, skip = 29, cumulative = FALSE)
+
+data_range <- function(x) {
+  x %>% 
+    summarize(first = min(x), last = max(x))
+}
+
+map_dfr(time_slices$splits, ~ analysis(.x) %>% data_range())
+map_dfr(time_slices$splits, ~ assessment(.x) %>% data_range())
+```
 
 
 
