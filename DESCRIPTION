@@ -33,6 +33,7 @@ Imports:
   recipes,
   rmarkdown,
   rpart,
+  rstanarm,
   sessioninfo,
   tidymodels,
   tidyposterior,

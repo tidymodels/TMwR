@@ -16,6 +16,7 @@ rmd_files: [
   "resampling.Rmd",
   "comparing-models.Rmd",
   "over-fitting.Rmd",
+  "tuning-parameters.Rmd",
   "model-tuning.Rmd",
   "appendix.Rmd",
   "pre-proc-table.Rmd"
