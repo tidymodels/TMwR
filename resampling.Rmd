@@ -57,7 +57,7 @@ lm_fit <-
   fit(data = ames_train)
 ```
 
-A different type of model is also fit to these data. _Random forests_ is a tree ensemble method that creates a large number of decision trees that are somewhat different. This collection of trees make up the ensemble. When making predictions, a new sample is predicted by each ensemble member and these predictions are averaged and this average is the final ensemble prediction. 
+A different type of model is also fit to these data. _Random forests_ is a tree ensemble method that creates a large number of decision trees that are somewhat different [@breiman2001random]. This collection of trees make up the ensemble. When making predictions, a new sample is predicted by each ensemble member and these predictions are averaged and this average is the final ensemble prediction. 
 
 Random forest models are very powerful; these have been shown to be able to emulate the underlying data patterns very closely. While this model can be computationally intensive it is very low-maintainence. Very little pre-processing is required (as documented in Appendix \@ref(pre-proc-table)).
 
@@ -279,7 +279,7 @@ One early variation of cross-validation is leave-one-out (LOO) cross-validation 
 
 Leave-one-out methods are fairly deprecated in favor of almost any other method. For anything but small samples, LOO is computationally excessive and may not have the best statistical properties. `rsample` contains a `loo_cv()` function, but these objects are not generally integrated into the broader tidymodels frameworks.  
 
-Finally, another variant of _V_-fold cross-validation is called _Monte Carlo_ cross-validation (MCCV). Like _V_-fold cross-validation, it leaves out $1/V$ of the data out at each iteration. The difference is that, for MCCV, this proportion of the data is chosen at random each time. While it leaves the same amount in the analysis and assessment sets as _V_-fold cross-validation, the assessment sets are not mutually exclusive. To create these resampling objects: 
+Finally, another variant of _V_-fold cross-validation is called _Monte Carlo_ cross-validation (MCCV, @xu2001monte). Like _V_-fold cross-validation, it leaves out $1/V$ of the data out at each iteration. The difference is that, for MCCV, this proportion of the data is chosen at random each time. While it leaves the same amount in the analysis and assessment sets as _V_-fold cross-validation, the assessment sets are not mutually exclusive. To create these resampling objects: 
 
 ```{r resampling-mccv}
 mc_cv(ames_train, prop = 9/10, times = 20)
@@ -326,7 +326,7 @@ val_set
 
 ### Bootstrapping {#bootstrap}
 
-Bootstrap resampling was originally invented as a method for approximating the sampling distribution of statistics where the theoretical properties are intractable. Using it to estimate model performance is a secondary application of the method. 
+Bootstrap resampling was originally invented as a method for approximating the sampling distribution of statistics where the theoretical properties are intractable [@davison1997bootstrap]. Using it to estimate model performance is a secondary application of the method. 
 
 A bootstrap samples of the training set is a sample that is the same size as the training set but is drawn _with replacement_. This means that the same training set data point can be selected multiple times for the analysis set. Because of this, each data point has a `r round((1-exp(-1)) * 100, 2)`% chance of being included in the training set at least once. The assessment set contains all of the training set samples that were not selected for the analysis set (on average, with `r round((exp(-1)) * 100, 2)`% of the training set). When bootstrapping, the assessment set is also called the "out-of-bag sample". 
 
@@ -353,11 +353,11 @@ Bootstrap samples produce performance estimates that have very low variance (unl
 
 The bootstrap is also used inside of many models. For example, the random forest model mentioned earlier contained 1,000 individual decision trees. Each one was created using a different bootstrap sample of the training set. 
 
-### Rolling origin forecasting {#rolling}
+### Rolling forecasting origin resampling {#rolling}
 
 When the data have a strong time component, a resampling method should attempt to be able to estimate seasonal and other temporal trends on the data. A technique that randomly samples values from the training set might disrupt the models ability to estimate these patterns. 
 
-Rolling forecast origin resampling emulates how temporal might be partitioned; historical data would be used to estimate the model and the most recent data would be allocated for evaluation. For this type of resampling, the size of the initial analysis and assessment sets are specified. This is the first iteration of resampling. The second iteration uses the same data sizes but shifts over by one sample. 
+Rolling forecast origin resampling [@hyndman2018forecasting] emulates how temporal might be partitioned; historical data would be used to estimate the model and the most recent data would be allocated for evaluation. For this type of resampling, the size of the initial analysis and assessment sets are specified. This is the first iteration of resampling. The second iteration uses the same data sizes but shifts over by one sample. 
 
 To illustrate, a training set of 15 samples is resampled with an analysis size of eight samples and an assessment set size of three. The second iteration discards the first training set sample and both data sets shift forward by one. This configuration results in five resamples: 
 
@@ -529,7 +529,7 @@ For `fit_resamples()`, and other functions in `tune`, parallel processing occurs
 library(doMC)
 registerDoMC(cores = 2)
 
-# Now run fit_resamples()`...
+# Now run fit_resamples()...
 ```
 
 This would instruct `fit_resamples()` to split the computations in half and to run each set on a separate core. The reset the computations to be run sequentially: 
