@@ -46,7 +46,7 @@ crickets <-
   mutate(species = factor(species))
 ```
 
-This book is about using R to create models. Before describing how tidy data principles can be used to create models, it makes sense to review R modeling fundamentals and to show how models are created, trained, and used in the core R language, often called "base R". This section is a brief illustration of those traditional conventions. It is not exhaustive but provides readers (especially those new to R) the basic, most commonly used motifs. 
+This book is about creating models with R. Before describing how tidy data principles can be used it makes sense to review how models are created, trained, and used in the core R language (often called "base R"). This section is a brief illustration of those conventions. It is not exhaustive but provides readers (especially those new to R) the basic, most commonly used motifs. 
 
 The S language, on which R is based, has had a rich data analysis environment since the publication of @WhiteBook (commonly known as The White Book). This version of S introduced standard infrastructure components familiar to R users today, such as symbolic model formulae, model matrices, and data frames, as well as standard object-oriented programming methods for data analysis. These user-interfaces have not substantively changed since then.  
 
@@ -106,6 +106,10 @@ rate ~ temp + species + temp:species
 # A shortcut can be used to expand all interactions containing
 # interactions with two variables:
 rate ~ (temp + species)^2
+
+# Another shortcut to expand factors to include all possible
+# interactions (equivalent for this example):
+rate ~ (temp * species)^2
 ```
 
 In addition to the convenience of automatically creating indicator variables, the formula offers a few other niceties: 
@@ -187,7 +191,7 @@ While this analysis has obviously not been an exhaustive demonstration of R's mo
 
  * There are numerous helper functions (e.g., `anova()`, `summary()` and `predict()`) that you can use to conduct specific calculations after the fitted model is created. 
 
-Finally, as previously mentioned, this framework was devised in 1992. Most of the ideas and methods above were developed in that period but have remained remarkably relevant to this day. It highlights that the S language and, by extension R, has been designed for data analysis since its inception.  
+Finally, as previously mentioned, this framework was first published in 1992. Most of the ideas and methods above were developed in that period but have remained remarkably relevant to this day. It highlights that the S language and, by extension R, has been designed for data analysis since its inception.  
 
 
 ## Why tidiness is important for modeling
@@ -212,7 +216,9 @@ In comparison, the _Python Developer's Guide_ espouses the notion that, when app
 
 R is quite different in this respect. An advantage of R's diversity of interfaces is that it can evolve over time and fit different types of needs for different users. 
 
-Unfortunately, some of the syntactical diversity is due to a focus on the developer's needs instead of the needs of the end-user. For example, a potential stumbling block can be inconsistencies between packages. Suppose your modeling project had an outcome with two classes. There are a variety of statistical and machine learning models you could choose from. In order to produce a class probability estimate for each sample, it is common for a model function to have a corresponding `predict()`method. However, there is significant heterogeneity in the argument values used by those methods to make class probability predictions; this heterogeneity can be difficult for even experienced users to navigate. A sampling of these argument values for different models is: 
+Unfortunately, some of the syntactical diversity is due to a focus on the developer's needs instead of the needs of the end-user. For example, a potential stumbling block can be inconsistencies between packages. 
+
+Suppose your modeling project had an outcome with two classes. There are a variety of statistical and machine learning models you could choose from. In order to produce a class probability estimate for each sample, it is common for a model function to have a corresponding `predict()`method. However, there is significant heterogeneity in the argument values used by those methods to make class probability predictions; this heterogeneity can be difficult for even experienced users to navigate. A sampling of these argument values for different models is: 
 
 | Function     | Package      | Code                                       |
 | :----------- | :----------- | :----------------------------------------- |
@@ -225,7 +231,7 @@ Unfortunately, some of the syntactical diversity is due to a focus on the develo
 | `logitboost` | `LogitBoost` | `predict(object, type = "raw", nIter)`        |
 | `pamr.train` | `pamr`       | `pamr.predict(object, type = "posterior")`    |
 
-Note that the last example has a custom _function_ to make predictions instead of using the more common `predict()` interface (the generic `predict()` _method_). This lack of consistency is a barrier to fluent modeling work.
+Note that the last example has a custom _function_ to make predictions instead of using the more common `predict()` interface (the generic `predict()` _method_). This lack of consistency is a barrier to day-to-day usage of R for modeling.
 
 As another example of _unpredictability_, the R language has conventions for missing data which are handled inconsistently. The general rule is that missing data propagate more missing data; the average of a set of values with a missing data point is itself missing and so on. When models make predictions, the vast majority require all of the predictors to have complete values. There are several options baked in to R at this point with the generic function `na.action()`.  This sets the policy for how a function should behave if there are missing values. The two most common policies are `na.fail()` and `na.omit()`. The former produces an error if missing data are present while the latter removes the missing data prior to calculations by case-wise deletion. From our previous example:
 
@@ -248,11 +254,11 @@ To resolve the usage issues described here, the tidymodels packages have a set o
 
 * R has excellent capabilities for _object oriented programming_ and we use this in lieu of creating new function names (such as a hypothetical new `predict_samples()` function). 
 
-* _Sensible defaults_ are very important. Whenever possible, functions should have no default for arguments only when a default is impossible or if you want to force the user to make a choice. The latter should be used sparingly.
+* _Sensible defaults_ are very important. Also, functions should have no default for arguments in order to force the user to make a choice (e.g., the file name argument for `read_csv()`).
 
 * Similarly, argument values whose default _can_ be derived from the data should be. For example, for `glm()` the `family` argument could check the type of data in the outcome and, if no `family` was given, a default could be determined internally.
 
-* Functions should take the **data structures that users have** as opposed to the data structure required by the underlying computational code. For example, a model function's _only_ interface should not be constrained to matrices. Frequently, users will have non-numeric predictors such as factors. 
+* Functions should take the **data structures that users have** as opposed to the data structure that developers want. For example, a model function's _only_ interface should not be constrained to matrices. Frequently, users will have non-numeric predictors such as factors. 
 
 Many of these ideas are described in the tidymodels guidelines for model implementation^[`https://tidymodels.github.io/model-implementation-principles`]. In subsequent chapters, we will illustrate examples of existing issues (and their solutions). 
 
@@ -262,6 +268,8 @@ The `broom::tidy()` function, which we will use throughout this book, is another
 
 ```{r base-r-corr-list}
 corr_res <- map(mtcars %>% select(-mpg), cor.test, y = mtcars$mpg)
+
+# The first of ten results in the vector: 
 corr_res[[1]]
 ```
 
@@ -283,17 +291,16 @@ corr_res %>%
   ylab("Correlation with mpg")
 ```
 
-This is not impossible to do using core R language functions, but automatically reformatting the results makes for more concise code with less potential for errors. 
+This is possible using core R language functions, but automatically reformatting the results makes for more concise code with less potential for errors. 
 
 ## Combining base R models and the tidyverse
 
-R modeling functions from the core language or other R packages can be used in conjunction with the tidyverse, especially with the `dplyr`, `purrr`, and `tidyr` packages. For example, if we wanted to fit separate models for each cricket species, we can first break out the cricket data by this column using `dplyr::group_by()` and `tidy::nest()`: 
+R modeling functions from the core language or other R packages can be used in conjunction with the tidyverse, especially with the `dplyr`, `purrr`, and `tidyr` packages. For example, if we wanted to fit separate models for each cricket species, we can first break out the cricket data by this column using `dplyr::group_nest()`: 
 
 ```{r base-r-by-species-split}
 split_by_species <- 
   crickets %>% 
-  group_by(species) %>% 
-  nest()
+  group_nest(species) 
 split_by_species
 ```
 

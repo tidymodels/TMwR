@@ -4,6 +4,7 @@ library(tidymodels)
 library(AmesHousing)
 library(doMC)
 library(kableExtra)
+library(tidyr)
 
 ames <- make_ames()
 
@@ -39,7 +40,7 @@ basic_rec <-
 # Add to the basic recipe to re-create the Ames recipe from Chapter TODO
 ames_rec <- 
   basic_rec %>%
-  step_log(Gr_Liv_Area, base = 10) %>% 
+  step_log(Gr_Liv_Area, base = 10, skip = TRUE) %>% 
   step_other(Neighborhood, threshold = 0.01) %>% 
   step_dummy(all_nominal()) %>% 
   step_interact(~ Gr_Liv_Area:starts_with("Bldg_Type_")) %>% 

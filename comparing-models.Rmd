@@ -6,6 +6,7 @@ library(doMC)
 library(tidyposterior)
 library(rstanarm)
 library(kableExtra)
+library(tidyr)
 
 ames <- make_ames()
 

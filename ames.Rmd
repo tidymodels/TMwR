@@ -121,7 +121,7 @@ A detailed inspection of the map also shows that the neighborhood labels are not
 
 As previously described in the introduction, it is critical to conduct _exploratory data analysis_ prior to beginning any data analysis. These data contain a number of elements that present interesting questions about how the data should be processed and analyses. Many of these are described in later chapters. Some basic questions that could be examined: 
 
- * Are there any odds or noticeable things about the distributions of the individual predictors? Is there much skewness or pathological distributions? 
+ * Are there any odd or noticeable things about the distributions of the individual predictors? Is there much skewness or pathological distributions? 
 
  * Are there high correlations between predictors? For example, there are multiple predictors related to the size of the house. Are some redundant?
 

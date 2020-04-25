@@ -4,6 +4,7 @@ library(tidymodels)
 library(kknn)
 library(AmesHousing)
 library(kableExtra)
+library(tidyr)
 
 ames <- make_ames()
 
