@@ -404,7 +404,7 @@ Any of these resampling methods can be used to evaluate the modeling process (e.
 
 1. During resampling, the analysis set is used to pre-process the data, apply the pre-processing to itself, and use these processed data to fit the model. 
 
-2. The assessment set is only used to estimate performance.  
+2. The same pre-processing is applied to the assessment set and these data are predicted in order to estimate performance.  
 
 This sequence is conducted for every resample. If there are _B_ resamples, there are _B_ replicates of each of the performance metrics. The final resampling estimate is the average of these _B_ statistics. If _B_ = 1, as with a validation set, the individual statistics are used to represent overall performance. 
 
