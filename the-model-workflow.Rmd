@@ -75,7 +75,7 @@ In this way, the PCA pre-processing is considered part of the modeling process.
 
 ## Workflow basics
 
-The `workflow` package allows the user to bind modeling objects together. Let's start again with the Ames data with a simple linear model:
+The `workflows` package allows the user to bind modeling objects together. Let's start again with the Ames data with a simple linear model:
 
 ```{r workflows-simple}
 library(tidymodels)  # Includes the workflows package
