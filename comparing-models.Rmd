@@ -26,9 +26,9 @@ keep_pred <- control_resamples(save_pred = TRUE)
 
 # Comparing models with resampling {#compare}
 
-Once two or more models have been evaluated using the same set of resamples, the next step is usually to compare them. In some cases, comparisons might be _within-model_, where the same model might be evaluated with different features or pre-processing methods. Alternatively, _between-model_ comparisons, like the previous chapter where linear regression and random forest were considered, is the more common scenario.  
+Once two or more models have been evaluated using the same set of resamples, the next step is usually to compare them. In some cases, comparisons might be _within-model_, where the same model might be evaluated with different features or pre-processing methods. Alternatively, _between-model_ comparisons, like the previous chapter where linear regression and random forest were considered, are the more common scenario.  
 
-In either case, there is a collection of resampled summary statistics (e.g. RMSE, accuracy, etc) for each model. In the next section, important aspects of these data are discussed. Tow more sections follow that contain approaches for formally comparing models. 
+In either case, there is a collection of resampled summary statistics (e.g. RMSE, accuracy, etc) for each model. In the next section, important aspects of these statistics are discussed. Two additional sections follow that describe how to formally comparing models. 
 
 
 ## Aspects of resampled performance statistics {#resampled-stats}
@@ -73,7 +73,7 @@ collect_metrics(lm_with_splines)
 
 Considering these results, it would appear that the additional terms do not substantively improve the _mean_ RMSE or R<sup>2</sup> statistics. Even though the difference is small, it might be larger than the experimental noise in the system (i.e., be considered statistically significant). 
 
-However, before proceeding with model comparison methods, there is a specific aspect of resampling statistics that is important to discuss: the within-resample correlation. Each of these models has been measured with the same cross-validation folds. There tends to be an effect in the individual resampling statistics such that _results for the same resample tend to be similar_. In other words, there are some resamples where performance across models tends to be low and others where it tends to be high. In statistics, this would be a resample-to-resample component of variation. 
+However, before proceeding with model comparison methods, there is a specific aspect of resampling statistics that is important to discuss: the within-resample correlation. Each of these models has been measured with the same cross-validation folds. There tends to be an effect in the individual resampling statistics such that _results for the same resample tend to be similar_. In other words, there are some resamples where performance across models tends to be low and others where it tends to be high. In statistics, this would be a called a resample-to-resample component of variation. 
 
 To illustrate, let's gather the individual resampling statistics for the two linear models and the random forest. In this chapter, the focus will be on the R<sup>2</sup> statistics for each model. 
 
@@ -132,7 +132,7 @@ What effect does the extra correlation have to do with our analysis? Consider th
 
 $$Var[X - Y] = Var[X] + Var[Y]  - 2 Cov[X, Y]$$
 
-The last term is the covariance between two items. If there is a significant positive covariance, then any statistical test of these difference would be critically under-powered to make the comparison. In other words, ignoring the resample-to-resample effect would bias our model comparisons towards finding no differences between models. 
+The last term is the covariance between two items. If there is a significant positive covariance, then any statistical test of these difference would be critically under-powered comparing the difference in two models. In other words, ignoring the resample-to-resample effect would bias our model comparisons towards finding no differences between models. 
 
 This characteristic of resampling statistics will come into play in the next two sections. 
 
@@ -146,7 +146,7 @@ Consider the familiar linear statistical model:
 
 $$y_{ij} = \beta_0 + \beta_1x_{i1} + \ldots + \beta_px_{ip} + \epsilon_{ij}$$
 
-This versatile model can be used to create regression models as well as being the basis for the popular analysis of variance (ANOVA) technique for comparing groups. With the ANOVA model, the predictors ($x_{ij}$) would be binary dummy variables for different groups. From this, the model parameters can be used to evaluate if two or more groups are different from one another using hypothesis testing techniques.  
+This versatile model can be used to create regression models as well as being the basis for the popular analysis of variance (ANOVA) technique for comparing groups. With the ANOVA model, the predictors ($x_{ij}$) would be binary dummy variables for different groups. From this, the $\beta$ parameters can be used to evaluate if two or more groups are different from one another using hypothesis testing techniques.  
 
 The relevance for our specific problem is that this type of model can be used for model comparisons. Suppose the individual resampled R<sup>2</sup> statistics were treated as the _the outcome data_ here (.i.e, the $y_{ij}$) and the models as the predictors in the ANOVA model. A sampling of this data structure would be: 
 
@@ -171,13 +171,13 @@ $$y_{ij} = \beta_0 + \beta_1x_{i1} + \beta_2x_{i2} + \epsilon_{ij}$$
 
 where
 
- * $\beta_0$ is the estimate of the mean R<sup>2</sup> statistic across models
+ * $\beta_0$ is the estimate of the mean R<sup>2</sup> statistic for linear models using splines
  
- * $\beta_1$ is the estimate of the effect on the mean R<sup>2</sup> statistic when the linear model with splines was used. 
+ * $\beta_1$ is the _change_ in mean R<sup>2</sup> when splines were used. 
  
- * $\beta_2$ is the estimate of the effect on the mean R<sup>2</sup> statistic when the random forest model was used. 
+ * $\beta_2$ is the _change_ in mean R<sup>2</sup> when a random forest model was used. 
 
-From these model parameters, hypothesis tests and p-values could be generated to statistically compare models. The issue to contend with is how to handle the resample-to-resample effect. Historically, this could be considered a _block effect_ and a term could be added to the model. Alternatively, the resample effect could be thought of as a _random effect_ where these particular resamples were drawn at random from a larger population of possible data resamples. We aren't really interested in these effects but want to adjust for them in the model so that the variances of interesting differences are properly estimated. 
+From these model parameters, hypothesis tests and p-values could be generated to statistically compare models. The issue to contend with is how to handle the resample-to-resample effect. Historically, this could be considered a _block effect_ and a term could be added to the model. Alternatively, the resample effect could be thought of as a _random effect_ where these particular resamples were drawn at random from a larger population of possible resamples. We aren't really interested in these effects but want to adjust for them in the model so that the variances of interesting differences are properly estimated. 
 
 Treating the resamples as random effects is theoretically appealing. One method of fitting an ANOVA model with random effects would be to use the linear mixed model [@faraway2016extending]. However, a different approach to fitting such a model is demonstrated in the next section. 
 
@@ -206,7 +206,7 @@ lm_t <-
 ```
 
 
-Each pair-wise difference could be evaluated. Note that the p-value indicates a statistically significant signal; these terms do appear to have an effect but that effect is estimated to be `r round(lm_t$estimate * 100, 2)`%. If our practical effect size were 2%, we might not consider these terms as being worth including in the model.
+Each pair-wise difference could be evaluated. Note that the p-value indicates a statistically significant signal; these terms do appear to have an effect but the difference in R<sup>2</sup> is estimated to be `r round(lm_t$estimate * 100, 2)`%. If our practical effect size were 2%, we might not consider these terms as being worth including in the model.
 
 ```{block2, type = "rmdnote"}
 What's a p-value? From \@ref(pvalue): "Informally, a p-value is the probability under a specified statistical model that a statistical summary of the data (e.g., the sample mean difference between two compared groups) would be equal to or more extreme than its observed value." 
@@ -226,7 +226,7 @@ $$y_{ij} = \beta_0 + \beta_1x_{i1} + \beta_2x_{i2} + \epsilon_{ij}$$
 
 where the residuals $\epsilon_{ij}$ were assumed to be independent and follow a Gaussian distribution with zero mean and constant standard deviation of $\sigma$. From this assumption, statistical theory shows that the estimated regression parameters follow a multivariate Gaussian distribution and, from this, p-values and confidence intervals are derived.  
 
-A Bayesian linear model would make different assumptions. In addition to specifying a distribution for the residuals, _prior distributions_ for the model parameters must also be specified. These are distributions for the parameters that the model assumes before being exposed to the observed data. For example, a simple set of prior distributions for our model might be 
+A Bayesian linear model would make additional assumptions. In addition to specifying a distribution for the residuals, _prior distributions_ for the model parameters ( $\beta_j$ and $\sigma$ ) must also be specified. These are distributions for the parameters that the model assumes before being exposed to the observed data. For example, a simple set of prior distributions for our model might be 
 
 
 $$
@@ -237,7 +237,7 @@ $$
 \end{align}
 $$
 
-These priors set the possible/probably ranges of the model parameters and are have no unknown parameters. For example, the prior on $\sigma$ indicates that values must be larger than zero, are very right-skewed, and have values that are usually less than 3 or 4. 
+These priors set the possible/probable ranges of the model parameters and are have no unknown parameters. For example, the prior on $\sigma$ indicates that values must be larger than zero, are very right-skewed, and have values that are usually less than 3 or 4. 
 
 Note that the regression parameters have a pretty wide prior distribution (with a standard deviation of 10). In many cases, we might not have a strong opinion about the prior beyond it being symmetric and bell shaped. The large standard deviation implies a fairly uninformative prior; it is not overly restrictive in terms of the possible values that the parameters might take on. This allows the data to have more of an influence during parameter estimation. 
 
@@ -305,7 +305,7 @@ model_post %>%
 
 There is some overlap in the posterior distributions, especially for the two linear models. 
 
-One wonderful aspect of using with Bayesian models is that, once we have the posteriors for the parameters, it is trivial to get the posterior distributions for combinations of those parameters. For example, to compare the two linear regression models, the difference in means would be of interest. The posterior of this difference is computed by sampling from the individual posteriors and taking the differences. The `contrast_models()` function can do this. To specify the comparisons to make, the `list_1` and `list_2` parameters take character vectors and compute the differences between the models in those lists (parameterized as `list_1 - list_2`). 
+One wonderful aspect of using with Bayesian models is that, once we have the posteriors for the parameters, it is trivial to get the posterior distributions for combinations of the $\beta$ parameters. For example, to compare the two linear regression models, the difference in means would be of interest. The posterior of this difference is computed by sampling from the individual posteriors and taking the differences. The `contrast_models()` function can do this. To specify the comparisons to make, the `list_1` and `list_2` parameters take character vectors and compute the differences between the models in those lists (parameterized as `list_1 - list_2`). 
 
 To compare the linear models: 
 
@@ -332,7 +332,7 @@ summary(rqs_diff) %>%
   select(-starts_with("pract"))
 ```
 
-The `probability` column reflects the proportion of the posterior that is freater than zero. This is the probability that the positive difference is real. The value is near one, which provides a strong case for _statistical significance_. 
+The `probability` column reflects the proportion of the posterior that is greater than zero. This is the probability that the positive difference is real. The value is near one, which provides a strong case for _statistical significance_. 
 
 However, the estimate of the mean difference is fairly close to zero. Recall that the practical effect size used previously is 2%. With a posterior distribution, the _probability of being practically significant_ can also be computed. In Bayesian analysis, this is called a ROPE estimate (for Region Of Practical Equivalence, @kruschke2018bayesian). To estimate this, the `size` option to the summary function can be used: 
 
