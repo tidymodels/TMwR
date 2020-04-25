@@ -14,15 +14,17 @@ ames_train <- training(ames_split)
 ames_test  <-  testing(ames_split)
 
 registerDoMC(cores = parallel::detectCores())
+
+options(digits = 3)
 ```
 
 # Resampling for evaluating performance  {#resampling}
 
-Previously, in Chapter \@ref(performance), various statistics for measuring performance were described. In some cases, there were different analytical estimators for the statistic. Another aspect of measuring performance is _which data are used to compute these statistics_. In Chapter \@ref(splitting), the idea of data spending was introduced and the test set was described as a specific data set that was used to obtain an unbiased estimate of performance using data that was not used for any other purpose. 
+Previously, in Chapter \@ref(performance), various statistics for measuring performance were described. In some cases, there were different analytical estimators for the statistic. Another aspect of measuring performance is _which data are used to compute these statistics_. In Chapter \@ref(splitting), the idea of data spending was introduced and the test set was described as a specific data set that was used to obtain an unbiased estimate of performance. 
 
-However, there is often the need to understand the effectivness of the model before using the test set. In fact, one could not decide on final model to take to the test set without making comparisons. 
+However, there is often the need to understand the effectivness of the model before using the test set. In fact, one could not decide on _which_ final model to take to the test set without making such comparisons. 
 
-In this chapter, different resampling methods will be described. These are statistical approaches for calculating performance estimates that should generalize to other data sets. The follow chapter complements this one by demonstrating analytical methods that use the resampling results to make formal statistical inferences about the differences between packages. 
+In this chapter, different resampling methods will be described. These are statistical approaches for  performance estimation that generalize to other data sets. The follow chapter complements this one by demonstrating analytical methods that use the resampling results to make formal statistical inferences about the differences between techniques. 
 
 Before going forward, it is helpful to consider a sub-optimal approach for comparing models in order to understand the need for better methods. 
 
@@ -40,7 +42,7 @@ basic_rec <-
 # Add to the basic recipe to re-create the Ames recipe from Chapter TODO
 ames_rec <- 
   basic_rec %>%
-  step_log(Gr_Liv_Area, base = 10, skip = TRUE) %>% 
+  step_log(Gr_Liv_Area, base = 10) %>% 
   step_other(Neighborhood, threshold = 0.01) %>% 
   step_dummy(all_nominal()) %>% 
   step_interact(~ Gr_Liv_Area:starts_with("Bldg_Type_")) %>% 
@@ -80,7 +82,7 @@ rf_fit <-
   fit(data = ames_train)
 ```
 
-There are two models to compare now. How should this be conducted? For demonstration, the training set is predicted to produce what is known as the "apparent error rate" or the  "resubstitution error rate". A function is used to make these predictions and format the results: 
+There are two models to compare now. How should this happen? For demonstration, the training set is predicted to produce what is known as the "apparent error rate" or the  "resubstitution error rate". A function is used to make these predictions and format the results: 
 
 ```{r resampling-eval-func}
 estimate_perf <- function(model, dat) {
@@ -143,7 +145,7 @@ Many predictive models are very capable of representing complex trends in the da
 In this context, _bias_ is the different between the true data pattern and the types of patterns that the model can emulate. Many black-box machine learning models are low bias. Other models (such as linear/logistic regression, discriminant analysis, and others) are not as adaptable and would be considered _high-bias_ models. See Section [1.2.5](https://bookdown.org/max/FES/important-concepts.html#model-bias-and-variance) of @fes for a discussion.
 ```
 
-For a low-bias techniques, model complexity can sometimes result in the model to nearly memorizing the training set data. As an obvious example, consider a 1-nearest neighbor model -- it will always provide perfect predictions for the training set no matter how well it truly works for other data sets. Random forest has a similar effect; re-predicting the training set will always result in an artificially optimistic estimate of performance.  
+For a low-bias techniques, model complexity can sometimes result in the model nearly memorizing the training set data. As an obvious example, consider a 1-nearest neighbor model -- it will always provide perfect predictions for the training set no matter how well it truly works for other data sets. Random forest has a similar effect; re-predicting the training set will always result in an artificially optimistic estimate of performance.  
 
 For both fitted models, this table summarizes the RMSE estimate for both data sets: 
 
@@ -162,7 +164,7 @@ If the test set should not be used immediately and re-predicting the training se
 
 ## Resampling methods
 
-Resampling methods can be thought of as empirical simulation systems. They take slightly different versions of the training set, fit the model, then compute performance on data that were not used for training. Resampling methods do this repeatedly and build a set of replicated performance statistics. The final resampling estimates of performance are averages of these replicates. 
+Resampling methods can be thought of as empirical simulation systems. They take slightly different versions of the training set, fit the model, then compute performance on data that were not used for fitting Resampling methods do this repeatedly and build a set of replicated performance statistics. The final resampling estimates of performance are averages of these replicates. 
 
 This diagram illustrates how data are used:
 
@@ -202,7 +204,7 @@ if (knitr:::is_html_output()) {
 }
 ```
 
-The number inside the symbols is the sample numbers while the color of the symbols represent their randomly assigned folds. The assignment to folds can be also be done via  stratified assignment (previously discussed in Section \@ref(splitting-methods)). 
+The number inside the symbols is the sample number while the color of the symbols represent their randomly assigned folds. The assignment to folds can be also be done via  stratified assignment (previously discussed in Section \@ref(splitting-methods)). 
 
 For 3-fold cross-validation, the three iterations of resampling are illustrated below. The first iteration removes the data for the first fold and fits the model to the remaining two folds. This model is used to predict the data from the first fold and model performance is estimated from these data. On the second iteration, the model is fit not the first and third folds and the second fold is used to compute another set of performance metrics. A similar process is used for the third fold. 
 
@@ -216,7 +218,7 @@ if (knitr:::is_html_output()) {
 }
 ```
 
-For this method and when _V_ = 3, the analysis sets are 2/3 of the training set and each assessment set is a distinct 1/3. The result is a collection of three replicates for each of the performance statistics. The final resampling estimate of performance averages each of the _V_ replicates. 
+When _V_ = 3, the analysis sets are 2/3 of the training set and each assessment set is a distinct 1/3. The result is a collection of three replicates for each of the performance statistics. The final resampling estimate of performance averages each of the _V_ replicates. 
 
 _V_ = 3 is a good choice to illustrate cross-validation but is a poor choice in practice. Values of _V_ are most often 5 or 10; here, we generally prefer 10-fold cross-validation as a default. 
 
@@ -250,7 +252,7 @@ There are a variety of cross-validation variations. The most important is called
 
 To create _R_ repeats of _V_-fold cross-validation, the same fold generation process is redone _R_ times to generate _R_ sets of _V_ partitions. Now, instead of averaging _V_ statistics, $V \times R$ are used to produce the final resampling estimate.
 
-Due to the central limit theorem, the summary statistics that are produced by each model tend toward a normal distribution. For example, for the RMSE statistic, the mean residual is computed using about `r floor(nrow(ames_train) * .1)` houses when 10-fold cross-validation is used. A collection of ten of these statistics can often be reasonably  approximated using a Gaussian distribution. If this collection has a theoretical standard deviation of $\sigma$, so the standard error is $\sigma/\sqrt{10}$. How would replication affect this? Using 10-fold cross-validation with $R$ replicates, this plot shows how quickly the standard error^[Even if the statistics truly follow a Gaussian distribution, these are _approximate_ standard errors. As will be discussed in the next chapter, there is a within-replicate correlation that is typical of resampled results. By ignoring this extra component of variation, the simple calculations shown in the plot are over-estimates of the reduction in noise in the standard errors.] decreases with replicates: 
+Due to the central limit theorem, the summary statistics that are produced by each model tend toward a normal distribution. For example, for the RMSE statistic, the mean residual is computed using about `r floor(nrow(ames_train) * .1)` houses when 10-fold cross-validation is used. A collection of ten of these statistics can often be reasonably  approximated using a Gaussian distribution. If this collection has a theoretical standard deviation of $\sigma$, so the standard error of the mean is $\sigma/\sqrt{10}$. How would replication affect this? Using 10-fold cross-validation with $R$ replicates, this plot shows how quickly the standard error^[Even if the statistics truly follow a Gaussian distribution, these are _approximate_ standard errors. As will be discussed in the next chapter, there is a within-replicate correlation that is typical of resampled results. By ignoring this extra component of variation, the simple calculations shown in the plot are over-estimates of the reduction in noise in the standard errors.] decreases with replicates: 
 
 ```{r resampling-cv-reduction, echo = FALSE}
 cv_info <- 
@@ -268,7 +270,7 @@ ggplot(cv_info, aes(x = replicates, y = reduction)) +
   scale_x_continuous(breaks = 1:10)
 ```
 
-Larger number of replicates tend to have less impact on the standard error. However, if the baseline value of $\sigma$ is impractically large, the diminishing returns on replication may still be worth the extra computational power. 
+Larger number of replicates tend to have less impact on the standard error. However, if the baseline value of $\sigma$ is impractically large, the diminishing returns on replication may still be worth the extra computational costs. 
 
 To create repeats, `vfold_cv()` is invoked with another argument: 
 
@@ -278,7 +280,7 @@ vfold_cv(ames_train, v = 10, repeats = 5)
 
 One early variation of cross-validation is leave-one-out (LOO) cross-validation where _V_ is the number of data points in the training set. If there are $n$ training set samples, $n$ models are created (using $n-1$ rows of the training set). For each, the single data point that was excluded is predicted. At the end of resampling, this collection of $n$ predictions are pooled and a single set of performance metrics is generated (as opposed to averaging _V_ replicates). 
 
-Leave-one-out methods are fairly deprecated in favor of almost any other method. For anything but small samples, LOO is computationally excessive and may not have the best statistical properties. `rsample` contains a `loo_cv()` function, but these objects are not generally integrated into the broader tidymodels frameworks.  
+Leave-one-out methods are fairly deprecated in favor of almost any other method. For anything but pathologically small samples, LOO is computationally excessive and may not have the best statistical properties. `rsample` contains a `loo_cv()` function, but these objects are not generally integrated into the broader tidymodels frameworks.  
 
 Finally, another variant of _V_-fold cross-validation is called _Monte Carlo_ cross-validation (MCCV, @xu2001monte). Like _V_-fold cross-validation, it leaves out a fixed proportion of the data out at each iteration. The difference is that, for MCCV, this proportion of the data is chosen at random each time. This results in  assessment sets that are not mutually exclusive. To create these resampling objects: 
 
@@ -400,7 +402,7 @@ map_dfr(time_slices$splits, ~ assessment(.x) %>% data_range())
 
 Any of these resampling methods can be used to evaluate the modeling process (e.g., pre-processing, model fitting, etc). They do this in an effective way by having different groups of data that are used to traing the model and to assess a model. To reiterate the process: 
 
-1. During resampling, the analysis set is used to pre-process the data, apply the pre-processing to itself, and use these processed data to train the model. 
+1. During resampling, the analysis set is used to pre-process the data, apply the pre-processing to itself, and use these processed data to fit the model. 
 
 2. The assessment set is only used to estimate performance.  
 
@@ -455,7 +457,7 @@ The return value is the `rsample` tibble along with some extra columns:
  
  * `.prediction` is present when `save_pred = TRUE` is invoked. This list column has the predictions for the assessment set results. 
  
-While these list columns make look daunting, they can be easily reconfigured using `tidyr` or with a number of convenience functions. For example, to return the performance metrics in a usable format: 
+While these list columns may look daunting, they can be easily reconfigured using `tidyr` or with a number of convenience functions. For example, to return the performance metrics in a usable format: 
 
 ```{r resampling-cv-stats}
 collect_metrics(rf_res)
@@ -541,6 +543,7 @@ The different between these two values is related to the computer's processor. F
 For `fit_resamples()`, and other functions in `tune`, parallel processing occurs when the user registers a _parallel backend package_. These R packages define how the parallel processing should be carried out. For example, on unix and macOS operating systems one method of splitting computations is by forking threads. To enable this, the `doMC` package is loaded and the number of parallel cores that should be used is registered with `foreach`: 
 
 ```{r resampling-mc, eval = FALSE}
+# Unix and macOS only
 library(doMC)
 registerDoMC(cores = 2)
 
@@ -556,6 +559,7 @@ registerDoSEQ()
 Alternatively, a different approach to parallelizing computations is to use network sockets. The `doParallel` package enables this method on all operating systems: 
 
 ```{r resampling-psock, eval = FALSE}
+# All operating systems
 library(doParallel)
 
 # Create a cluster object and then register: 

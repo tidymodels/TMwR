@@ -12,6 +12,8 @@ set.seed(833961)
 ames_split <- initial_split(ames, prob = 0.80, strata = Sale_Price)
 ames_train <- training(ames_split)
 ames_test  <-  testing(ames_split)
+
+options(digits = 3)
 ```
 
 # Fitting models {#models}
@@ -22,7 +24,7 @@ In the last chapter, recipe objects were discussed as methods to pre-process the
  
 ## Creating a model
 
-Once the data have been encoded into a usable format, they can be used in the model building process.  
+Once the data have been encoded into a usable format, such as a model matrix, they can be used in the model building process.  
 
 Suppose that a linear regression model was the initial choice for the model. This is equivalent to specifying that the outcome data is numeric and that the predictors are related to the model in terms of simple slopes and intercepts: 
 
@@ -324,4 +326,4 @@ This demonstrates the benefit of homogenizing the data analysis process and synt
 
 ## `parsnip` adjacent packages
 
-`parsnip` itself contains interfaces to a number of models. However, to be more modular, there are other packages in the tidymodels repository that have `parsnip` model definitions for clusters of similar models. For example, the `discrim` package has model definitions for the set of classification techniques called _disciminant analysis_ methods (such as linear or quadratic discriminant analysis). In this way, the package dependencies required for installing `parsnip` are reduced. A list of _all_ of the models that can be used with `parsnip` (across different packages that are on CRAN) can be found at TBD.   
+`parsnip` itself contains interfaces to a number of models. However, to be more modular, there are other packages in the tidymodels repository that have `parsnip` model definitions for clusters of similar models. For example, the `discrim` package has model definitions for the set of classification techniques called _disciminant analysis_ methods (such as linear or quadratic discriminant analysis). In this way, the package dependencies required for installing `parsnip` are reduced. A list of _all_ of the models that can be used with `parsnip` (across different packages that are on CRAN) can be found at [`tidymodels.org/find`](https://www.tidymodels.org/find/).   
