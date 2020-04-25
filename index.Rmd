@@ -18,7 +18,7 @@ colorlinks: yes
 
 This is the website for _Tidy Modeling with R_. Its purpose is to be a guide to using a new collection of software in the R programming language for model building. There are few goals, depending on your background. First, if you are new to modeling and R, we hope to provide an introduction on how to use our software to create models. The focus will be on a dialect of R called _the tidyverse_ that is designed to be a better interface for common tasks using R. If you've never heard of the tidyverse, there is a chapter that provides an introduction. The second (and primary) goal is to demonstrate how the tidyverse can be used to produce high quality models. The tools used to do this are referred to as the _tidymodels packages_. The third goal is to use the tidymodels packages to encourage good methodology and statistical practice. Many models, especially complex predictive or machine learning models, can work very well on the data at hand but may also fail when exposed to new data. Often, this issue is due to poor choices that were made during the development and/or selection of the models. Whenever possible, our software attempts to prevent these and other pitfalls. 
 
-This book is not intended to be a reference on different types of modeling techniques We suggest other resources to learn the nuances of models. A general source for information about the most common type of model, the _linear model_, we suggest @fox08. Another excellent resource for investigating and analyzing data is @wickham2016. For predictive models, @apm is a good resource. For pure machine learning methods, @Goodfellow is an excellent (but formal) source of information.  In some cases, we describe some models that are used in this text but in a way that is less mathematical (and hopefully more intuitive). 
+This book is not intended to be a reference on different types of modeling techniques We suggest other resources to learn the nuances of models. A general source for information about the most common type of model, the _linear model_, we suggest @fox08. Another excellent resource for investigating and analyzing data is @wickham2016. For predictive models, @apm is a good resource. Also, @fes is reference heavily here, mostly because it is freely available on-line.  For pure machine learning methods, @Goodfellow is an excellent (but formal) source of information.  In some cases, we describe some models that are used in this text but in a way that is less mathematical (and hopefully more intuitive). 
 
 We do not assume that readers will have had extensive experience in model building and statistics. Some statistical knowledge is required, such as: random sampling, variance, correlation, basic linear regression, and other topics that are usually found in a basic undergraduate statistics or data analysis course. 
 
@@ -29,21 +29,20 @@ This openness also allows users to contribute if they wish. Most often, this com
 In terms of software lifecycle, the tidymodels packages are fairly young. We will do our best to maintain backwards compatibility and, at the completion of this work, will archive the specific versions of software that were used to produce it. The primary packages, and their versions, used to create this website are:
 
 ```{r tidymodels-attach, include = FALSE}
-library(tidyverse)
-library(AmesHousing)
-library(bookdown)
-library(rmarkdown)
+pkg_list <- c("AmesHousing", "bookdown", "broom", "dials", "discrim", "dplyr",
+              "ggplot2", "infer", "kableExtra", "kknn", "knitr", "parsnip",
+              "patchwork", "purrr", "ranger", "recipes", "rlang", "rpart", 
+              "rsample", "splines", "tibble", "tidymodels", "tidyverse", "tune", 
+              "workflows", "yardstick")
+for (i in pkg_list) {
+  library(i, character.only = TRUE)
+}
 options(width = 80)
 
 pd_version <- rmarkdown::pandoc_version()
 ``` 
 
 ```{r pkg-list, echo = FALSE}
-pkg_list <- c("AmesHousing", "bookdown", "broom", "dials", "discrim", "dplyr",
-              "ggplot2", "infer", "kableExtra", "kknn", "knitr", "parsnip",
-              "patchwork", "purrr", "recipes", "rlang", "rsample", "splines", 
-              "tibble", "tidymodels", "tidyverse", "tune", "workflows", 
-              "yardstick")
 library(sessioninfo)
 sinfo <- sessioninfo::session_info()
 cls <- class(sinfo$packages)
