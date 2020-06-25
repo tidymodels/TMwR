@@ -37,7 +37,7 @@ The Ames data will be used once again to demonstrate the concepts in this chapte
 basic_rec <- 
   recipe(Sale_Price ~ Neighborhood + Gr_Liv_Area + Year_Built + Bldg_Type + 
            Latitude + Longitude, data = ames_train) %>%
-  step_log(Sale_Price, base = 10)
+  step_log(Sale_Price, base = 10, skip = TRUE)
 
 # Add to the basic recipe to re-create the Ames recipe from Chapter TODO
 ames_rec <- 
@@ -594,7 +594,7 @@ Let's fit a linear regression model using the recipe shown at the end of Chapter
 ames_rec <- 
   recipe(Sale_Price ~ Neighborhood + Gr_Liv_Area + Year_Built + Bldg_Type + 
            Latitude + Longitude, data = ames_train) %>%
-  step_log(Sale_Price, base = 10) %>% 
+  step_log(Sale_Price, base = 10, skip = TRUE) %>% 
   step_log(Gr_Liv_Area, base = 10) %>% 
   step_other(Neighborhood, threshold = 0.01) %>% 
   step_dummy(all_nominal()) %>% 
