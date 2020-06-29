@@ -4,11 +4,10 @@
 knitr::opts_chunk$set(fig.path = "figures/")
 library(tidyverse)
 library(gridExtra)
-library(AmesHousing)
 library(tibble)
 library(kableExtra)
 
-ames <- make_ames()
+data(ames, package = "modeldata")
 ```
 
 

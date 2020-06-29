@@ -22,12 +22,8 @@ How should we conduct this split of the data? This depends on the context. Suppo
 
 ```{r ames-split, message = FALSE, warning = FALSE}
 library(tidymodels) # Includes rsample
-library(AmesHousing)
 
-# Remove the quality-related columns
-ames <- 
-  make_ames() %>% 
-  dplyr::select(-matches("_Qu"))
+data(ames, package = "modeldata")
 
 # Set the random number stream using `set.seed()` so that the results can be 
 # reproduced later. 
