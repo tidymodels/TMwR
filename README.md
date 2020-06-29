@@ -29,6 +29,15 @@ remotes::install_github("topepo/TMwR")
 
 Although we rigorously try to use the current CRAN versions of all packages, the code above may install some development versions. 
 
+The content is created using the `bookdown` package. To compile the book, use
+
+```r
+bookdown::render_book("index.Rmd", "bookdown::gitbook")
+```
+
+This will create the HTML files in a directory called `_book`. **Note** that, before the first compile, you'll need to make `_book` and copy the `premade` directory in this repository to `_book` so that existing diagrams will be found. 
+
+
 # Problems, questions, or issues
 
 ## Code of Conduct
