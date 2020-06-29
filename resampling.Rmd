@@ -1,12 +1,11 @@
 ```{r resampling-setup, include = FALSE}
 knitr::opts_chunk$set(fig.path = "figures/")
 library(tidymodels)
-library(AmesHousing)
 library(doMC)
 library(kableExtra)
 library(tidyr)
 
-ames <- make_ames()
+data(ames, package = "modeldata")
 
 set.seed(833961)
 ames_split <- initial_split(ames, prob = 0.80, strata = Sale_Price)
