@@ -1,7 +1,6 @@
 ```{r spending-setup, include = FALSE}
 knitr::opts_chunk$set(fig.path = "figures/")
 library(tidymodels)
-library(AmesHousing)
 ```
 
 # Spending our data {#splitting}

@@ -1,7 +1,6 @@
 ```{r tuning-param-setup, include = FALSE}
 knitr::opts_chunk$set(fig.path = "figures/")
 library(tidymodels)
-library(AmesHousing)
 ```
 
 # Tuning parameters

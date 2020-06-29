@@ -29,11 +29,12 @@ This openness also allows users to contribute if they wish. Most often, this com
 In terms of software lifecycle, the tidymodels packages are fairly young. We will do our best to maintain backwards compatibility and, at the completion of this work, will archive the specific versions of software that were used to produce it. The primary packages, and their versions, used to create this website are:
 
 ```{r tidymodels-attach, include = FALSE}
-pkg_list <- c("AmesHousing", "bookdown", "broom", "dials", "discrim", "dplyr",
-              "ggplot2", "infer", "kableExtra", "kknn", "knitr", "parsnip",
+pkg_list <- c("bookdown", "broom", "dials", "discrim", "dplyr", "ggplot2", 
+              "infer", "kableExtra", "kknn", "knitr", "modeldata", "parsnip", 
               "patchwork", "purrr", "ranger", "recipes", "rlang", "rpart", 
-              "rsample", "splines", "tibble", "tidymodels", "tidyverse", "tune", 
-              "workflows", "yardstick")
+              "rsample", "splines", "tibble", "tidymodels", "tidyverse", 
+              "tune", "workflows", "yardstick")
+
 for (i in pkg_list) {
   library(i, character.only = TRUE)
 }

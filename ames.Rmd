@@ -1,7 +1,6 @@
 ```{r ames-setup, include = FALSE}
 knitr::opts_chunk$set(fig.path = "figures/")
 library(tidymodels)
-library(modeldata)
 data(ames, package = "modeldata")
 ```
 
@@ -28,7 +27,7 @@ The raw data are provided by the authors. However, in our analyses, the `modelda
 To load the data: 
 
 ```{r ames-load, warning = FALSE, message = FALSE}
-library(modeldata)
+library(modeldata) # This is also loaded by the tidymodels package
 data(ames)
 
 # or, in one line:
