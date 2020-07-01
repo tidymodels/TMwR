@@ -1,0 +1,347 @@
+@import url('https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap');
+
+p.caption {
+  color: #777;
+  margin-top: 10px;
+}
+p code {
+  white-space: inherit;
+}
+pre {
+  word-break: normal;
+  word-wrap: normal;
+}
+pre code {
+  white-space: inherit;
+}
+
+/*----- Toolbar line at top----- */
+
+/* The next two rules make the horizontal line go straight across in top navbar */
+
+.summary > li:first-child {
+	height: 50px;
+	padding-top: 10px;
+	border-bottom: 1px solid transparent;
+}
+
+.book .book-summary ul.summary li.divider {
+	height: 0px;
+}
+
+/* TOC book title */
+
+.summary > li:first-child {
+    font-size: 1em;
+    height: auto;
+    padding: 1em 20px;
+    line-height: 2em;
+}
+
+.summary > li:first-child a {
+    font-size: 12.8px;
+    font-weight: bold;
+    text-transform: uppercase;
+    white-space: normal !important;
+    color: #CA225E !important;
+    padding: 0 !important;
+    border-left: none;
+    letter-spacing: 2pt;
+
+}
+
+.summary > li:first-child a:hover {
+  border-left: none;
+}
+
+.book .book-summary > nav > ul > li > a {
+  border-left: 1pt solid white;
+}
+
+.book-summary .divider + .chapter > a {
+  white-space: normal !important;
+}
+
+li.part:first-child {
+   border-top: none;
+}
+
+/*.book .book-summary ul.summary li.divider {
+    height: 0;
+} */
+
+.book .book-header.fixed {
+  border-bottom: 1px solid transparent;
+}
+
+.book .book-header .btn {
+  color: #1a162d99;
+}
+
+.book .book-header .btn:hover {
+  color: #1a162d;
+}
+
+
+
+/*------------- Body and header text---------------- */
+
+.book.font-family-1 {
+  font-family: 'Lato', sans-serif;
+  color: #404040;
+}
+
+h1, h2, h3, h4 {
+  font-family: 'Lato', sans-serif;
+  font-weight: normal;
+}
+
+h2, h3 {   
+  font-family: 'Lato', sans-serif;
+  font-size: 1.3em;
+  text-transform: uppercase;
+  letter-spacing: 1.5pt;
+}
+
+h1 {
+  color: #CA225E;
+  font-size: 41px !important;
+}
+
+h2 {
+  color: #1a162d;
+}
+
+h3 {
+  font-size: 1.1em;
+  color: #1a162d90;
+}
+
+h4 {
+  font-size: 1.1em;
+  color: #1a162d90;
+}
+
+h2 code,
+h3 code,
+h4 code {
+  text-transform: none !important;
+  font-size: 1em !important;
+}
+
+.title {
+  font-family: 'Lato', sans-serif;
+  font-size: 3em !important;
+  color: #CA225E;
+  text-transform: none !important;
+}
+
+.subtitle {
+  font-family: 'Lato', sans-serif;
+  color: #CA225E !important;
+}
+
+.subtitle em {
+  font-style: normal !important;
+}
+
+.author {
+  color: #1A162D !important;
+  text-tranform: uppercase;
+  letter-spacing: 2pt;
+}
+
+p.author em {
+  font-style: normal !important;
+}
+
+
+
+/*-----Body Links-------*/
+
+.book .book-body .page-wrapper .page-inner section.normal a {
+  color: #ca225e;
+}
+
+.book .book-body .page-wrapper .page-inner section.normal a:hover {
+ color: #ca225e; /* darker color when hovering */
+ text-decoration: underline;
+}
+    
+    
+
+/* -----------Section anchors -------------*/
+
+.book .book-body .page-wrapper .page-inner section.normal {
+  overflow: visible !important; /*so anchor link doesn't get cut off */
+}
+
+a.anchor {
+  margin-left: -30px;
+  padding-right: 3px;
+  display:inline-block;
+  width: 30px;
+  height: 30px;
+  /*visibility: hidden;*/
+  background-image: url(https://image.flaticon.com/icons/svg/34/34735.svg) !important;
+  background-repeat: no-repeat !important;
+  background-size: 20px 20px !important;
+  background-position: center bottom !important;
+  opacity: 0;
+}
+
+
+.hasAnchor:hover a.anchor, a.anchor:hover {
+  /*visibility: visible;*/
+  opacity: 0.6;
+}
+
+@media (max-width: 1144px) { /* don't show anchor link on small screens */
+  .hasAnchor:hover a.anchor {
+    visibility: hidden;
+  }
+}
+
+
+/*TOC */
+
+/*------------ TOC --------------*/
+
+.book .book-summary {
+  background: white;
+  border-right: #d9d9d9 solid 1pt;
+}
+
+.summary{
+  font-family: 'Lato', sans-serif;
+}
+
+/*---- numbers  */
+
+li a b  {
+  padding-right: 1em;
+}
+
+/* all TOC list items, basically */
+.book .book-summary ul.summary li a, 
+.book .book-summary ul.summary li span {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 15px;
+  padding-right: 15px;
+  color: #1a162dad;
+}
+
+.summary a:hover {
+  color: #1a162dde !important;
+} 
+
+.book .book-summary ul.summary li.active>a { /*active TOC links*/
+  color: #CA225E !important;
+} 
+    
+li.appendix span, li.part span { /* for TOC part names */
+  margin-top: 1.5em;
+  color: #1A162D;
+  opacity: 1 !important;
+  text-transform: uppercase;
+  letter-spacing: 2pt;
+  font-size: 12.8px !important;
+  font-weight: bold;
+  white-space: normal !important;
+}
+
+
+
+/*------------- CODE --------------*/
+
+.book .book-body .page-wrapper .page-inner section.normal code, 
+.book .book-body .page-wrapper .page-inner section.normal pre {
+  font-family: 'Source Code Pro', monospace;
+  font-size: 1em;
+}
+
+.sourceCode pre {
+  margin: 0 !important; /* makes space above and below symmetrical*/
+}
+
+.sourceCode {
+  margin-bottom: 0.85em; /* adds same amount of margin beneath chunk as a <p> would */
+}
+
+/*------------- BLOCK QUOTES --------------*/
+
+blockquote > p:last-child {
+  text-align: right;
+}
+
+blockquote > p:first-child {
+  text-align: inherit;
+}
+
+
+/* ----- For Large Screens -----*/
+
+.book .book-header.fixed {
+  left: 500px;
+}
+
+@media (min-width: 1900px) {
+  
+  /* Content width */
+  .book.with-summary .book-body {
+      left: 500px;
+  }
+  
+  /* TOC */
+  .book .book-summary {
+    width: 500px;
+    left: -500px;
+  }
+
+  .book.with-summary .book-header.fixed {
+      left: 500px;
+      
+  }
+}
+
+
+@media (min-width: 1500px) {
+  
+  /* Content width */
+  .book.with-summary .book-body {
+      left: 400px;
+  }
+  
+  /* TOC */
+  .book .book-summary {
+    width: 400px;
+    left: -400px;
+
+  }
+
+  .book.with-summary .book-header.fixed {
+      left: 400px;
+  }
+}
+
+
+@media (min-width: 1400px) {
+  
+  /* Content width */
+  .book.with-summary .book-body {
+      left: 350px;
+  }
+  
+  /* TOC */
+  .book .book-summary {
+      width: 350px;
+      left: -400px;
+  }
+
+  .book.with-summary .book-header.fixed {
+      left: 350px;
+  }
+} 
+
+
