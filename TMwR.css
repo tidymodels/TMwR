@@ -147,7 +147,7 @@ h4 code {
 
 .author {
   color: #1A162D !important;
-  text-tranform: uppercase;
+  text-transform: uppercase;
   letter-spacing: 2pt;
 }
 
@@ -167,43 +167,7 @@ p.author em {
  color: #ca225e; /* darker color when hovering */
  text-decoration: underline;
 }
-    
-    
 
-/* -----------Section anchors -------------*/
-
-.book .book-body .page-wrapper .page-inner section.normal {
-  overflow: visible !important; /*so anchor link doesn't get cut off */
-}
-
-a.anchor {
-  margin-left: -30px;
-  padding-right: 3px;
-  display:inline-block;
-  width: 30px;
-  height: 30px;
-  /*visibility: hidden;*/
-  background-image: url(https://image.flaticon.com/icons/svg/34/34735.svg) !important;
-  background-repeat: no-repeat !important;
-  background-size: 20px 20px !important;
-  background-position: center bottom !important;
-  opacity: 0;
-}
-
-
-.hasAnchor:hover a.anchor, a.anchor:hover {
-  /*visibility: visible;*/
-  opacity: 0.6;
-}
-
-@media (max-width: 1144px) { /* don't show anchor link on small screens */
-  .hasAnchor:hover a.anchor {
-    visibility: hidden;
-  }
-}
-
-
-/*TOC */
 
 /*------------ TOC --------------*/
 
@@ -216,13 +180,13 @@ a.anchor {
   font-family: 'Lato', sans-serif;
 }
 
-/*---- numbers  */
+/* numbers */
 
 li a b  {
   padding-right: 1em;
 }
 
-/* all TOC list items, basically */
+/* list items*/
 .book .book-summary ul.summary li a, 
 .book .book-summary ul.summary li span {
   padding-top: 8px;
@@ -240,7 +204,9 @@ li a b  {
   color: #CA225E !important;
 } 
     
-li.appendix span, li.part span { /* for TOC part names */
+/* parts */
+
+li.appendix span, li.part span { 
   margin-top: 1.5em;
   color: #1A162D;
   opacity: 1 !important;
@@ -269,7 +235,7 @@ li.appendix span, li.part span { /* for TOC part names */
   margin-bottom: 0.85em; /* adds same amount of margin beneath chunk as a <p> would */
 }
 
-/*------------- BLOCK QUOTES --------------*/
+/*------------- block quotes --------------*/
 
 blockquote > p:last-child {
   text-align: right;
@@ -277,6 +243,52 @@ blockquote > p:last-child {
 
 blockquote > p:first-child {
   text-align: inherit;
+}
+
+/* Div tips */
+
+
+div.rmdnote, 
+div.rstudio-tip, 
+div.rmdwarning {
+  padding: 1em;
+  margin: 1em 0;
+  padding-left: 100px;
+  background-size: 70px;
+  background-repeat: no-repeat;
+  background-position: 15px 1.5em;
+  min-height: 120px;
+  color: #1a162dcc;
+  background-color: #91CBD738;
+  border-top: 7pt solid #a19ea936;
+  max-width: 100%;
+  line-height: 1.75em;
+  font-size: 0.85em;
+  letter-spacing: 1pt;
+}
+
+div.rmdnote {
+  background-image: url("images/robot.png");
+}
+
+div.rstudio-tip {
+  background-image: url("images/rstudio.png");
+}
+
+div.rmdwarning {
+  background-image: url("images/error.png");
+  background-color: #eab0c41a !important;
+}
+
+div.rmdnote code, 
+div.rstudio-tip code {
+  background-color: #91CBD765 !important;
+  font-size: 1em;
+}
+
+div.rmdwarning code {
+  background-color: #cb9faf52 !important;
+  font-size: 1em;
 }
 
 
@@ -343,5 +355,4 @@ blockquote > p:first-child {
       left: 350px;
   }
 } 
-
 
