@@ -4,8 +4,7 @@
 .Ruserdata
 .DS_Store
 _book
-_main.rds
+_main.*
 libs
 figures
 _bookdown_files
-resampling_cache

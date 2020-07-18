@@ -4,11 +4,10 @@
 knitr::opts_chunk$set(fig.path = "figures/")
 library(tidyverse)
 library(gridExtra)
-library(AmesHousing)
 library(tibble)
 library(kableExtra)
 
-ames <- make_ames()
+data(ames, package = "modeldata")
 ```
 
 
@@ -16,7 +15,7 @@ Models are mathematical tools that create equations that are intended to mimic t
 
 Since the start of the 21st century, mathematical models have become ubiquitous in our daily lives, in both obvious and subtle ways. A typical day for many people might involve checking the weather to see when a good time would be to walk the dog, ordering a product from a website, typing (and autocorrecting) a text message to a friend, and checking email. In each of these instances, there is a good chance that some type of model was used in an assistive way. In some cases, the contribution of the model might be easily perceived ("You might also be interested in purchasing product _X_") while in other cases the impact was the absence of something (e.g., spam email). Models are used to choose clothing that a customer might like, a molecule that should be evaluated as a drug candidate, and might even be the mechanism that a nefarious company uses to avoid the discovery of cars that over-pollute.  For better or worse, models are here to stay.
 
-There are two reasons that models permeate our lives: an abundance of _software_ exists to create models and _data_ has become more easily captured and accessible. In regard to software, it is obviously critical that software produces the _correct_ equations that represent the data. For the most part, determining mathematical correctness is possible. However, the creation of an appropriate model hinges on a few other aspects. 
+There are two reasons that models permeate our lives: an abundance of _software_ exists to create models and _data_ have become more easily captured and accessible. In regard to software, it is obviously critical that software produces the _correct_ equations that represent the data. For the most part, determining mathematical correctness is possible. However, the creation of an appropriate model hinges on a few other aspects. 
 
 First, it is important that it is easy to operate the software in a _proper way_. For example, the user interface should not be so arcane that the user would not know that they used it inappropriately. As an analogy, one might have a high quality kitchen measuring cup capable of great precision but if the chef adds a cup of salt instead of a cup of sugar, the results would be unpalatable. As a specific example of this issue, @baggerly2009 report myriad problems in the data analysis in a high profile computational biology publication. One of the issues was related to how the users were required to add the names of the model inputs. The user-interface of the software was poor enough that it was easy to _offset_ the column names of the data from the actual data columns. In the analysis of the data, this resulted in the wrong genes being identified as important for treating cancer patients. This, and many other issues, led to the stoppage of numerous clinical trials [@Carlson2012]. 
 
@@ -28,13 +27,13 @@ Data analysis software should also espouse this idea.
 
 The second important aspect of model building is related to _scientific methodology_. For models that are used to make complex predictions, it can be easy to unknowingly commit errors related to logical fallacies or inappropriate assumptions. Many machine learning models are so adept at finding patterns, they can effortlessly find empirical patterns in the data that fail to reproduce later. Some of these types of methodological errors are insidious in that the issue might be undetectable until a later time when new data that contain the true result are obtained. In short, as our models become more powerful and complex it has also become easier to commit latent errors. This also relates to programming. Whenever possible, the software should be able to protect users from committing such mistakes. Software should make it easy for users to **do the right thing**. 
 
-These two aspects of model creation are crucial. Since tools for creating models are easily obtained and models can have such a profound impact, many more people are creating them. In terms of technical expertise and training, their backgrounds will vary. It is important that their tools be _robust_ to the experience of the user. On one hand, they tools should be powerful enough to create high-performance models but, on the other hand, should be easy to use in an appropriate way.  This book describes a suite of software that can can create different types of models that has been designed with these additional characteristics in mind.
+These two aspects of model development are crucial. Since tools for creating models are easily obtained and models can have such a profound impact, many more people are creating them. In terms of technical expertise and training, their backgrounds will vary. It is important that their tools be _robust_ to the experience of the user. On one hand, they tools should be powerful enough to create high-performance models but, on the other hand, should be easy to use in an appropriate way.  This book describes a suite of software that can can create different types of models which has been designed with these additional characteristics in mind.
 
 The software is based on the R programming language [@baseR]. R has been designed especially for data analysis and modeling. It is based on the _S language_ which was created in the 1970's to
 
 > "turn ideas into software, quickly and faithfully" [@Chambers:1998]
 
-R is open-source and free of charge. It is a powerful programming language that can be used for many different purposes but specializes in data analysis, modeling, and machine learning. R is easily _extensible_; it has a vast ecosystem of *packages*; these are mostly user-contributed modules that focus on a specific theme, such as modeling, visualization, and so on.
+R is open-source and free of charge. It is a powerful programming language that can be used for many different purposes but specializes in data analysis, modeling, visualization, and machine learning. R is easily _extensible_; it has a vast ecosystem of *packages*; these are mostly user-contributed modules that focus on a specific theme, such as modeling, visualization, and so on.
 
 One collection of packages is called the **_tidyverse_** [@tidyverse]. The tidyverse is an opinionated collection of R packages designed for data science. All packages share an underlying design philosophy, grammar, and data structures. Several of these design philosophies are directly related to the aspects of software described above. If you've never used the tidyverse packages, Chapter \@ref(tidyverse) contains a review. Within the tidyverse, the subset of packages specifically focused on modeling are referred to as the ***tidymodels*** packages. This book is an extended software manual for conducting modeling using the tidyverse. It shows how to use a set of packages, each with its own specific purpose, together to create high-quality models.  
 
@@ -44,9 +43,9 @@ Before proceeding, lets describe a taxa for types of models, grouped by _purpose
 
 **Descriptive Models**: The purpose here would be to model the data so that it can be used to describe or illustrate characteristics of some data.  The analysis might have no other purpose than to visually emphasize some trend or artifact in the data. 
 
-For example, large scale measurements of RNA have been possible for some time using _microarrays_. Early laboratory methods place a biological sample on a small microchip. Very small locations on the chip would be able to assess a measure of signal based on the abundance of a specific RNA sequence. The chip would contain thousands (or more) outcomes, each a quantification of the RNA related to some biological process. However, there could be quality issued on the chip that might lead to poor results. A fingerprint accidentally left on a portion of the chip might cause inaccurate measurements when scanned. 
+For example, large scale measurements of RNA have been possible for some time using _microarrays_. Early laboratory methods place a biological sample on a small microchip. Very small locations on the chip can  measure a signal based on the abundance of a specific RNA sequence. The chip would contain thousands (or more) outcomes, each a quantification of the RNA related to some biological process. However, there could be quality issued on the chip that might lead to poor results. A fingerprint accidentally left on a portion of the chip might cause inaccurate measurements when scanned. 
 
-An early method for evaluating such issues were _probe-level models_, or PLM's [@bolstad2004]. A statistical model would be created that accounted for the _known_ differences for the data from the chip, such as the RNA sequence, the type of sequence, and so on. If there were other, unwanted factors in the data, these effects would be captured in the model residuals. When the residuals were plotted by their location on the chip, a good quality chip would show no patterns. When an issue did occur, some sort of spatial pattern would be discernible. Often the type of pattern would suggest the underlying issue (e.g. a fingerprint) and a possible solution (wipe the chip off and rescan, repeat the sample, etc.). Figure \@ref(fig:introduction-descr-examples)(a) shows an application of this method for two microarrays taken from @Gentleman2005. The images show two different colors; red is where the signal intensity was larger than the model expects while the blue color shows lower than expected values. The left-hand panel demonstrates a fairly random pattern while the right-hand panel shows some type of unwanted artifact in the middle of the chip. 
+An early method for evaluating such issues were _probe-level models_, or PLM's [@bolstad2004]. A statistical model would be created that accounted for the _known_ differences in the data (e.g., the chip, such as the RNA sequence, the type of sequence, and so on). If there were other, unwanted factors in the data, these effects would be captured in the model residuals. When the residuals were plotted by their location on the chip, a good quality chip would show no patterns. When an issue did occur, some sort of spatial pattern would be discernible. Often the type of pattern would suggest the underlying issue (e.g. a fingerprint) and a possible solution (wipe the chip off and rescan, repeat the sample, etc.). Figure \@ref(fig:introduction-descr-examples)(a) shows an application of this method for two microarrays taken from @Gentleman2005. The images show two different colors; red is where the signal intensity was larger than the model expects while the blue color shows lower than expected values. The left-hand panel demonstrates a fairly random pattern while the right-hand panel shows some type of unwanted artifact in the middle of the chip. 
 
 ```{r introduction-descr-examples, echo = FALSE, fig.cap = "Two examples of how descriptive models can be used to illustrate specific patterns.", out.width = '80%', dev = "png", fig.height = 8, warning = FALSE, message = FALSE}
 load("RData/plm_resids.RData")
@@ -86,7 +85,7 @@ ames_plot <-
 grid.arrange(plm_plot, ames_plot, ncol = 1)
 ```
 
-Another example of a descriptive model is the _locally estimated scatterplot smoothing_ model, more commonly known as LOESS [@cleveland1979]. Here, a smooth and flexible regression model is fit to a data set, usually with a single independent variable, and the fitted regression line is used to elucidate some trend in the data. These types of _smoothers_ are used to discover potential ways to represent a variable in a model. This is demonstrated in Figure \@ref(fig:introduction-descr-examples)(b) where a nonlinear trend is illuminated by the flexible smoother. From this plot, it is clear that there is a hhighly nonlinear relationship between the sale price of a house and its latitude. 
+Another example of a descriptive model is the _locally estimated scatterplot smoothing_ model, more commonly known as LOESS [@cleveland1979]. Here, a smooth and flexible regression model is fit to a data set, usually with a single independent variable, and the fitted regression line is used to elucidate some trend in the data. These types of _smoothers_ are used to discover potential ways to represent a variable in a model. This is demonstrated in Figure \@ref(fig:introduction-descr-examples)(b) where a nonlinear trend is illuminated by the flexible smoother. From this plot, it is clear that there is a highly nonlinear relationship between the sale price of a house and its latitude. 
 
 
 **Inferential Models**: In these situations, the goal is to produce a decision for a research question or to test a specific hypothesis. The goal is to make some statement of truth regarding some predefined conjecture or idea. In many (but not all) cases, some qualitative statement is produced (e.g., that a difference was "statistically signficant").
@@ -137,7 +136,7 @@ These are imperfect definitions and do not account for all possible types of mod
 
 In terms of data, the main species are quantitative and qualitative. Examples of the former are real numbers and integers. Qualitative values, also known as nominal data, are those that represent some sort of discrete state that cannot be naturally placed on a numeric scale. 
 
-Different variables can have different _roles_ in an analysis. Outcomes (otherwise known as the labels, endpoints, or dependent variables) are the value being predicted in supervised models. The independent variables, which are the substrate for making predictions of the outcome, also referred to as predictors, features, or covariates (depending on the context). Here, the terms _outcomes_ and _predictors_ are used most frequently here. 
+Different variables can have different _roles_ in an analysis. Outcomes (otherwise known as the labels, endpoints, or dependent variables) are the value being predicted in supervised models. The independent variables, which are the substrate for making predictions of the outcome, also referred to as predictors, features, or covariates (depending on the context). The terms _outcomes_ and _predictors_ are used most frequently here. 
 
 ## How does modeling fit into the data analysis/scientific process? {#model-phases}
 
@@ -254,7 +253,7 @@ monolog <-
     "Feature Engineering", " ",
     "Maybe PCA could be used on the correlated predictors to make it easier for the models to use them. ",
     "Feature Engineering", " ",
-    "Daily weather records should probably be summarized into daily measurements. ",
+    "Hourly weather records should probably be summarized into daily measurements. ",
     "Model Fitting", "1",
     "Let’s start with simple linear regression, K-nearest neighbors, and a boosted decision tree. ",
     "Model Tuning", "1",
@@ -299,7 +298,7 @@ and so on. Eventually, a model is selected that is able to achieve sufficient pe
 
 ## Outline of future chapters
 
-The first order of business is to introduce (or review) the ideas and syntax of the tidyverse in Chapter \@ref(tidyverse). Chapter \@ref(base-r) is a quick tour of conventional base R modeling functions and summarize the unmet needs for modeling. 
+The first order of business is to introduce (or review) the ideas and syntax of the tidyverse in Chapter \@ref(tidyverse). Chapter \@ref(base-r) is a quick tour of conventional base R modeling functions and summarize the unmet needs in that area. 
 
 The book is separated into parts. The first introduces an example data set and introduce some of the fundamental packages: `recipes`, `parsnip`, `workflows`, `yardstick`, and others. 
 

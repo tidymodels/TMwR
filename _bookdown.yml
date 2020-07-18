@@ -14,8 +14,12 @@ rmd_files: [
   "the-model-workflow.Rmd",
   "tools.Rmd",
   "resampling.Rmd",
+  "comparing-models.Rmd",
   "over-fitting.Rmd",
-  "model-tuning.Rmd"
+  "tuning-parameters.Rmd",
+  "model-tuning.Rmd",
+  "appendix.Rmd",
+  "pre-proc-table.Rmd"
 ]
 
 before_chapter_script: "_common.R"

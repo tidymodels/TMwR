@@ -1,10 +1,9 @@
 ```{r workflow-setup, include = FALSE}
 knitr::opts_chunk$set(fig.path = "figures/")
 library(tidymodels)
-library(AmesHousing)
 library(kableExtra)
 
-ames <- make_ames()
+data(ames, package = "modeldata")
 
 set.seed(833961)
 ames_split <- initial_split(ames, prob = 0.80, strata = Sale_Price)
@@ -14,7 +13,7 @@ ames_test  <-  testing(ames_split)
 
 # A model workflow {#workflows}
 
-In previous chapters, the `recipes` and `parsnip` packages have been discussed. They can be used to prepare the data for analysis and fitting the model. In this chapter, another object is described called a _model workflow_. The purpose of this object is to encapsulate the important pieces of the modeling _process_ (previously discussed in Section \@ref(model-phases)). As will be shown below, the workflow is important in two ways. First, the workflow encourages good methodology since it is a single point of entry to the estimation components of a data analysis. Second, it enables the user to better organize their projects. These two points are discussed in the following sections.  
+In previous chapters, the `recipes` and `parsnip` packages have been discussed. They can be used to prepare the data for analysis and fitting the model. In this chapter, another object is described called a _model workflow_. The purpose of this object is to encapsulate the major pieces of the modeling _process_ (previously discussed in Section \@ref(model-phases)). As will be shown below, the workflow is important in two ways. First, the workflow encourages good methodology since it is a single point of entry to the estimation components of a data analysis. Second, it enables the user to better organize their projects. These two points are discussed in the following sections.  
 
 
 ## Where does the model begin and end? {#begin-model-end}
@@ -27,8 +26,8 @@ While this is a _linear_ model, it is only linear in the parameters. The predict
 
 The conventional way of thinking is that the modeling _process_ only includes the model fit. For many data sets that are straight-forward in nature, this is the case. However, there are a variety of _choices_ and additional steps that often occur before the data are ready to be added to the model. Some examples:
 
-* While our model has $p$ predictors, it is common to start with more than this number of candidate predictors. Through exploratory data analysis or previous experience, some of the predictors may be excluded from the analysis. In other cases, some feature selection algorithm may have been used to make a data-driven choice for the minimum predictors set to be used in the model. 
-* There are times when the value of an important predictor is not known. Rather than eliminating this sample from the data set, the missing value could be _imputed_ using other values in the data. For example, if $x_1$ were missing but was correlated with predictors $x_2$ and $x_3$, an imputation method could estimate the missing $x_1$ observation from the values of $x_2$ and $x_3$. 
+* While our model has $p$ predictors, it is common to start with more than $p$ candidate predictors. Through exploratory data analysis or previous experience, some of the predictors may be excluded from the analysis. In other cases, some feature selection algorithm may have been used to make a data-driven choice for the minimum predictors set for the model. 
+* There are times when the value of an important predictor is missing. Rather than eliminating this sample from the data set, the missing value could be _imputed_ using other values in the data. For example, if $x_1$ were missing but was correlated with predictors $x_2$ and $x_3$, an imputation method could estimate the missing $x_1$ observation from the values of $x_2$ and $x_3$. 
 * As previously mentioned, it may be beneficial to transform the scale of a predictor. If there is **not** _a priori_ information on what the new scale should be, it might be estimated using a transformation technique. Here, the existing data would be used to statistically _estimate_ the proper scale that optimizes some criterion. Other transformations, such as the previously mentioned PCA, take groups of predictors and transform them into new features that are used as the predictors.
 
 While the examples above are related to steps that occur before the model fit, there may also be operations that occur after the model is created. For example, when a classification model is created where the outcome is binary (e.g., `event` and `non-event`), it is customary to use a 50% probability cutoff to create a discrete class prediction (also known as a "hard prediction"). For example, a classification model might estimate that the probability of an event was 62%. Using the typical default, the hard prediction would be `event`. However, the model may need to be more focused on reducing false positive results (i.e., where true non-events are classified as events). One way to do this is to _raise_ the cutoff from 50% to some greater value. This increases the level of evidence required to call a new sample as an event. While this reduces the true positive rate (which is bad), it may have a more profound effect on reducing false positives. The choice of the cutoff value should be optimized using data. This is an example of a _post-processing_ step that has a significant effect on how well the model works even though it is not contained in the model fitting step. 
@@ -38,12 +37,12 @@ These examples have a common characteristic of requiring data for derivations th
 It is very important to focus on the broader _model fitting process_ instead of the specific model being used to estimate parameters. This would include any pre-processing steps, the model fit itself, as well as potential post-processing activities. Here, this will be referred to as the **model workflow** and would include any data-driven activities that are used to produce a final model equation. 
 
 ```{block, type = "rmdnote"}
-In other programs, such as python or Spark, similar collections of steps are called  _pipelines_. In tidymodels, the term "pipeline" already connotes a sequence of operations chained together with a pipe operator (such as `%>%`). Rather than confusing terminology, the sequence of computational operations related to modeling will be called workflows. 
+In other programs, such as python or Spark, similar collections of steps are called  _pipelines_. In tidymodels, the term "pipeline" already connotes a sequence of operations chained together with a pipe operator (such as `%>%`). Rather than confusing terminology, the sequence of computational operations related to modeling will be called **workflows**. 
 ``` 
 
 Binding together the analytical components of a data analysis is important for another reason. Future chapters will demonstrate how to accurately measure performance as well as how to optimize structural parameters (i.e. model tuning). To correctly quantify model performance on the training set, Chapter \@ref(resampling) advocates using _resampling_ methods. To do this properly, no data-driven parts of the analysis should be excluded from validation. To this end, the workflow should include all significant estimation steps.
 
-PCA signal extraction was previously mentioned in Section \@ref(other-steps) as a way to replace the correlated predictors with new artificial predictors that are uncorrelated and capture most of the information in the original set. The new features would be used as the predictors and least square regression could be used to estimate the model parameters. 
+To illustrate, consider PCA signal extraction. This was previously mentioned in Section \@ref(other-steps) as a way to replace the correlated predictors with new artificial features that are uncorrelated and capture most of the information in the original set. The new features would be used as the predictors and least square regression could be used to estimate the model parameters. 
 
 There are two ways of thinking about the model workflow. The _incorrect_ method would be to think of the PCA pre-processing step as not being part of the modeling process: 
 
@@ -126,6 +125,8 @@ lm_wflow_fit %>%
 ```
 
 Note that, in this new object, the output shows that the previous fitted model was removed since the new formula was inconsistent with the previous model fit. 
+
+### The role of model formulas in base R 
 
 **more here about the differences in the formula method and how `model.matrix()` does things**
 
