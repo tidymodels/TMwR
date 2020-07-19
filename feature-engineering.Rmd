@@ -337,20 +337,56 @@ Finally, there is a subtle issue with our current recipe. The step
  step_log(Sale_Price, base = 10)
 ```
 
-will cause a failure when the recipe is applied to new properties when the sale price is not known. Since that is what we are trying to predict, there probably won't be a column in the data for this variable. Each step function as an option called `skip` that, when set to `TRUE`, will ignore the step when using the `bake()` function. 
+will cause a failure when the recipe is applied to new properties when the sale price is not known. Since that is what we are trying to predict, there probably won't be a column in the data for this variable. In fact, to avoid _information leakage_, many tidymodels packages isolate the data being used when making any predictions. This means that the training set and any outcome columns are not available for use at prediction-time. 
+
+For simple transformations of the outcome column(s), we strongly suggest that those operations be _conducted outside of the recipe_:
 
 ```{r engineering-last-ames-recipe}
+data(ames, package = "modeldata")
+
+ames <- mutate(ames, Sale_Price = log10(Sale_Price))
+
+set.seed(833961)
+ames_split <- initial_split(ames, prob = 0.80, strata = Sale_Price)
+ames_train <- training(ames_split)
+ames_test  <-  testing(ames_split)
+
 simple_ames <- 
   recipe(Sale_Price ~ Neighborhood + Gr_Liv_Area + Year_Built + Bldg_Type,
          data = ames_train) %>%
-  step_log(Sale_Price, base = 10, skip = TRUE)%>%
   step_log(Gr_Liv_Area, base = 10) %>% 
   step_other(Neighborhood, threshold = 0.01) %>% 
   step_dummy(all_nominal()) %>% 
   step_interact(~ Gr_Liv_Area:starts_with("Bldg_Type_"))
 ```
 
-In this way, you can isolate the steps that affect the outcome data without causing errors when applied to new samples. However, the outcome will be log transformed when using `juice()`. 
+However, there are other circumstances where this is not an adequate solution. For example, in classification models where there is a severe class imbalance, it is common to conduct _sub-sampling_ of the data that are given to the modeling function. For example, suppose that there were two classes and a 10% event rate. A simple, albeit controversial, approach would be to _down-sample_ the data so that the model is provided with all of the events and a random 10% of the non-event samples. 
+
+The problem is that the same sub-sampling process **should not be applied** to the data being predicted. As a result, when using a recipe, we need a mechanism to ensure that some operations are only applied to the data that are given to the model. Each step function as an option called `skip` that, when set to `TRUE`, will be ignored by the `bake()` function. In this way, you can isolate the steps that affect the modeling data without causing errors when applied to new samples. However, all steps will be applied when using `juice()`. 
+
+```{r engineering-skips, include = FALSE}
+library(recipes)
+library(themis)
+
+preps <- as.character(methods("prep"))
+steps <- gsub("prep\\.", "", preps)
+steps <- grep("^step", steps, value = TRUE)
+
+skip <- rep(rlang::na_lgl, length(steps))
+for (i in seq_along(skip)) {
+  x_code <- try(getFromNamespace(steps[i], "recipes"), silent = TRUE)
+  if (inherits(x_code, "try-error")) {
+    x_code <- try(getFromNamespace(steps[i], "themis"), silent = TRUE)
+  }
+  if (!inherits(x_code, "try-error")) {
+    skip[i] <- formals(x_code)$skip
+  }
+}
+
+skip_list <- paste0("`", steps[skip], "()`")
+```
+
+At the time of this writing, the step functions in the `recipes` and `themis` packages that are only applied to the modeling data are: `r knitr::combine_words(skip_list)`.
 
 ## Other examples of recipe steps {#other-steps}
 
@@ -377,19 +413,18 @@ plot_smoother <- function(deg_free) {
     ggtitle(paste(deg_free, "Spline Terms"))
 }
 
-( plot_smoother(2) + plot_smoother(5) ) / ( plot_smoother(20) + plot_smoother(50) )
+( plot_smoother(2) + plot_smoother(5) ) / ( plot_smoother(20) + plot_smoother(100) )
 ```
 
 The `ns()` function in the `splines` package generated feature columns using called _natural splines_.
 
-Some panels clearly fit poorly; two terms _under-fit_ the data while 50 terms _over-fit_. The panels with five and 20 terms seem like a reasonably smooth fits that catch the main patterns of the data. This indicates that the proper amount of "non-linear-ness" matters. The number of spline terms would then be thought of as a _tuning parameter_ for this model. These types of parameters are explored model in Chapter \@ref(tuning). 
+Some panels clearly fit poorly; two terms _under-fit_ the data while 100 terms _over-fit_. The panels with five and 20 terms seem like a reasonably smooth fits that catch the main patterns of the data. This indicates that the proper amount of "non-linear-ness" matters. The number of spline terms would then be thought of as a _tuning parameter_ for this model. These types of parameters are explored model in Chapter \@ref(tuning). 
 
 In recipes, there are multiple steps that can create these types of terms. To add this predictor a natural spline representation:
 
 ```{r engineering-spline-rec, eval = FALSE}
 recipe(Sale_Price ~ Neighborhood + Gr_Liv_Area + Year_Built + Bldg_Type + Latitude,
          data = ames_train) %>%
-  step_log(Sale_Price, base = 10, skip = TRUE)%>%
   step_log(Gr_Liv_Area, base = 10) %>% 
   step_other(Neighborhood, threshold = 0.01) %>% 
   step_dummy(all_nominal()) %>% 
@@ -414,13 +449,9 @@ Note that all of these columns are measured in square feet. PCA assumes that all
 
 There are existing recipes steps for other extraction methods, such as: independent component analysis (ICA), non-negative matrix factorization (NNMF), multidimensional scaling (MDS), uniform manifold approximation and projection (UMAP), and others. 
 
-***`dplyr`-related steps***
-
-There are simple step functions such as `step_filter()`, `step_sample()`, `step_slice()`, and `step_arrange()`, which mirror their `dplyr` cousins. 
-
 ***Row sampling steps***
 
-Recipe steps can affect the rows of a data set as well. For example, a row-wise technique that can be used is _sub-sampling_ for class imbalances. Suppose a binary classification data set has only 5% of the data in one category. Many models will find parameter estimates that, in effect, maximize accuracy. This often leads to models that predict all samples to be the majority class (and would be 95% accurate). One possible remedy for this is the modify the size of the training set. There are several possibilities: 
+Recipe steps can affect the rows of a data set as well. For example, the previously mentioned _sub-sampling_ technique for class imbalances will change the data being given to the model. There are several possible approaches to try:
 
  * _Down-sampling_ the data would keep the minority class and take a random sample of the majority class so that class frequencies become balanced. 
 
@@ -435,6 +466,13 @@ The `themis` package has recipe steps the can be used for this purpose. For simp
 ```
 
 An important aspect of this: only the training set should be affected by these techniques. The test set or other holdout samples should be left as-is when processed using the recipe. For this reason, all of the subsampling steps default the aforementioned `skip` argument to have a value of `TRUE`. 
+
+Additionally, there are other step functions that are row-based: `step_filter()`, `step_sample()`, `step_slice()`, and `step_arrange()`. In almost all uses of these steps, the `skip` aregument should be set to `TRUE`. 
+
+**General transformations**
+
+Mirroring the original `dplyr` operations, `step_mutate()` and `step_mutate_at()` can be used to conduct a variety of basic operations to the data. 
+
 
 ***Natural language processing***
 
@@ -456,7 +494,6 @@ A slightly augmented version of the last recipe, which now includes longitude, i
 ames_rec <- 
   recipe(Sale_Price ~ Neighborhood + Gr_Liv_Area + Year_Built + Bldg_Type + 
            Latitude + Longitude, data = ames_train) %>%
-  step_log(Sale_Price, base = 10, skip = TRUE)%>%
   step_log(Gr_Liv_Area, base = 10) %>% 
   step_other(Neighborhood, threshold = 0.01) %>% 
   step_dummy(all_nominal()) %>% 
@@ -505,7 +542,7 @@ The `id` field can be specified by the user in a step function call but is other
 Suppose you were interested in knowing what neighborhoods were retained by `step_other()`. The `tidy()` method can be called again along with the step identifier to get these results:
 
 ```{r engineering-ames-tidy-other}
-tidy(ames_rec_prepped, id = "other_rPQJW")
+tidy(ames_rec_prepped, id = "other_VYU2G")
 ```
 
 Each `tidy()` method returns the relevant information about that step. For example, the `tidy()` method for `step_dummy()` returns a column with the variables that were converted to dummy variables and another column with all of the known levels for each column. 
@@ -514,7 +551,7 @@ Each `tidy()` method returns the relevant information about that step. For examp
 
 When a formula is used with the initial call to `recipes()` it assigns _roles_ to each of the column depending on which side of the tilde that they are on. Those roles are either `"predictor"` or `"outcome"`. However, other roles can be assigned as needed. 
 
-For example, in our Ames data set, the original raw data contained a fields for address^[However, the `AmesHousing` package does not keep that column.]. There may be interest in keeping that column in the data so that, after predictions are made, problematic results can be investigated in detail. In other words, the column is important but isn't a predictor or outcome. 
+For example, in our Ames data set, the original raw data contained a fields for address^[However, opur version of these data does not keep that column.]. There may be interest in keeping that column in the data so that, after predictions are made, problematic results can be investigated in detail. In other words, the column is important but isn't a predictor or outcome. 
 
 To solve this, the `add_role()`, `remove_role()`, and `update_role()` functions can be helpful. For example, for the house price data, the street address column could be modified using
 

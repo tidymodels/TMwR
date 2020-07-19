@@ -7,6 +7,8 @@ library(tidyr)
 
 data(ames, package = "modeldata")
 
+ames <- mutate(ames, Sale_Price = log10(Sale_Price))
+
 set.seed(833961)
 ames_split <- initial_split(ames, prob = 0.80, strata = Sale_Price)
 ames_train <- training(ames_split)
@@ -21,7 +23,7 @@ options(digits = 3)
 
 Previously, in Chapter \@ref(performance), various statistics for measuring performance were described. In some cases, there were different analytical estimators for the statistic. Another aspect of measuring performance is _which data are used to compute these statistics_. In Chapter \@ref(splitting), the idea of data spending was introduced and the test set was described as a specific data set that was used to obtain an unbiased estimate of performance. 
 
-However, there is often the need to understand the effectivness of the model before using the test set. In fact, one could not decide on _which_ final model to take to the test set without making such comparisons. 
+However, there is often the need to understand the effectiveness of the model before using the test set. In fact, one could not decide on _which_ final model to take to the test set without making such comparisons. 
 
 In this chapter, different resampling methods will be described. These are statistical approaches for  performance estimation that generalize to other data sets. The follow chapter complements this one by demonstrating analytical methods that use the resampling results to make formal statistical inferences about the differences between techniques. 
 
@@ -35,8 +37,7 @@ The Ames data will be used once again to demonstrate the concepts in this chapte
 # First make a very basic recipe that will be used by multiple models
 basic_rec <- 
   recipe(Sale_Price ~ Neighborhood + Gr_Liv_Area + Year_Built + Bldg_Type + 
-           Latitude + Longitude, data = ames_train) %>%
-  step_log(Sale_Price, base = 10, skip = TRUE)
+           Latitude + Longitude, data = ames_train) 
 
 # Add to the basic recipe to re-create the Ames recipe from Chapter TODO
 ames_rec <- 
@@ -61,7 +62,7 @@ lm_fit <-
 
 A different type of model is also fit to these data. _Random forests_ is a tree ensemble method that creates a large number of decision trees that are somewhat different [@breiman2001random]. This collection of trees make up the ensemble. When making predictions, a new sample is predicted by each ensemble member and these predictions are averaged. This average is the final ensemble prediction for the new data point. 
 
-Random forest models are very powerful; these have been shown to be able to emulate the underlying data patterns very closely. While this model can be computationally intensive it is very low-maintainence. Very little pre-processing is required (as documented in Appendix \@ref(pre-proc-table)).
+Random forest models are very powerful; these have been shown to be able to emulate the underlying data patterns very closely. While this model can be computationally intensive it is very low-maintenance. Very little pre-processing is required (as documented in Appendix \@ref(pre-proc-table)).
 
 Using the same predictor set as the previous linear model (without the extra pre-processing steps), the random forest is fit to the training set using the underlying `ranger` package: 
 
@@ -97,9 +98,7 @@ estimate_perf <- function(model, dat) {
   model %>% 
     predict(dat) %>% 
     bind_cols(
-      dat %>% 
-        select(Sale_Price) %>% 
-        mutate(Sale_Price = log10(Sale_Price))
+      dat %>% select(Sale_Price)
     ) %>% 
     reg_metrics(Sale_Price, .pred) %>% 
     select(-.estimator) %>% 
@@ -487,7 +486,7 @@ assess_res %>%
   ggplot(aes(x = Sale_Price, y = .pred)) + 
   geom_point(alpha = .15) +
   geom_abline(col = "red") + 
-  coord_equal() + 
+  coord_obs_pred() + 
   ylab("Predicted")
 ```
 
@@ -593,8 +592,6 @@ Let's fit a linear regression model using the recipe shown at the end of Chapter
 ames_rec <- 
   recipe(Sale_Price ~ Neighborhood + Gr_Liv_Area + Year_Built + Bldg_Type + 
            Latitude + Longitude, data = ames_train) %>%
-  step_log(Sale_Price, base = 10, skip = TRUE) %>% 
-  step_log(Gr_Liv_Area, base = 10) %>% 
   step_other(Neighborhood, threshold = 0.01) %>% 
   step_dummy(all_nominal()) %>% 
   step_interact(~ Gr_Liv_Area:starts_with("Bldg_Type_")) %>% 

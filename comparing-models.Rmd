@@ -9,6 +9,8 @@ library(tidyr)
 
 data(ames, package = "modeldata")
 
+ames <- mutate(ames, Sale_Price = log10(Sale_Price))
+
 set.seed(833961)
 ames_split <- initial_split(ames, prob = 0.80, strata = Sale_Price)
 ames_train <- training(ames_split)
@@ -40,7 +42,6 @@ To do this, two model workflow objects are created with different recipe steps:
 no_splines <- 
   recipe(Sale_Price ~ Neighborhood + Gr_Liv_Area + Year_Built + Bldg_Type + 
            Latitude + Longitude, data = ames_train) %>%
-  step_log(Sale_Price, base = 10) %>% 
   step_log(Gr_Liv_Area, base = 10) %>% 
   step_other(Neighborhood, threshold = 0.01) %>% 
   step_dummy(all_nominal()) %>% 
@@ -299,7 +300,7 @@ model_post %>%
   ggplot(aes(x = posterior)) + 
   geom_histogram(bins = 50, col = "white", fill = "blue", alpha = 0.4) + 
   facet_wrap(~ model, ncol = 1) + 
-  labs(x = expression(paste(beta, " posterior for mean ", R^2)))
+  labs(x = expression(paste("Posterior for mean ", R^2)))
 ```
 
 There is some overlap in the posterior distributions, especially for the two linear models. 
@@ -308,7 +309,7 @@ One wonderful aspect of using with Bayesian models is that, once we have the pos
 
 To compare the linear models: 
 
-```{r compare-lm-difference-posterior}
+```{r compare-lm-difference-posterior, fig.height = 3}
 rqs_diff <-
   contrast_models(rsq_anova,
                   list_1 = "with splines",

@@ -1,6 +1,6 @@
 Package: TMwR
 Title: Tidy Modeling with R.
-Version: 0.0.1.9004
+Version: 0.0.1.9005
 Authors@R: c(
     person(
       given = "Max",
@@ -8,15 +8,9 @@ Authors@R: c(
       email = "max@rstudio.com",
       comment = c(ORCID = "0000-0003-2402-136X"),
       role = c("aut", "cre")
-    ),
-    person(
-      given = "Davis", 
-      family = "Vaughan", 
-      email = "davis@rstudio.com", 
-      role = "aut"
     )
   )
-Depends: R (>= 3.5.0)
+Depends: R (>= 4.0.0)
 URL: https://github.com/topepo/TMwR
 Imports:
   bookdown,
