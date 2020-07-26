@@ -206,3 +206,7 @@ Currently, a workflow can accept two types of pre-processors: a model formula or
 
 There are also operations that might occur _after_ the model is fit. An example of such a _post-processor_ would be cutoff selection for two-class problems. Previously in this chapter, the idea of modifying the cutoff for a two-class problem was discussed. In the future, workflows will be able to attach a custom cutoff that is applied to probabilities after the model fit. Other approaches, such as probability calibration, could also be added as post-processors. 
   
+
+```{r workflows-save, include = FALSE}
+save(lm_wflow_fit, file = "RData/lm_wflow_fit.RData", version = 2, compress = "xz")
+```

@@ -1,0 +1,223 @@
+```{r performance-setup, include = FALSE}
+knitr::opts_chunk$set(fig.path = "figures/")
+library(tidymodels)
+library(kableExtra)
+
+data(ames, package = "modeldata")
+
+ames <- mutate(ames, Sale_Price = log10(Sale_Price))
+
+set.seed(833961)
+ames_split <- initial_split(ames, prob = 0.80, strata = Sale_Price)
+ames_train <- training(ames_split)
+ames_test  <-  testing(ames_split)
+
+load("RData/lm_wflow_fit.RData")
+```
+
+# Judging model effectiveness {#performance}
+
+(or how well does our model work? Superman does good; a model can work well)
+
+Different performance metrics
+
+Don't reevaluate the training set
+
+Statistical significance as a measure of effectiveness.
+
+class imbalances; unintended consequences
+
+when to set a cutoff
+
+cost-sensitive metrics
+
+
+
+## Regression metrics 
+
+Recall that the tidymodels prediction functions produce tibbles that include columns for the predicted values. These columns have consistent names. The functions in the `yardstick` package that produce performance metrics have consistent interfaces: 
+
+```r
+function(data, truth, estimate, ...)
+```
+
+where `data` is a data frame or tibble, `truth` is the column with the observed outcome values, and `estimate` is the predicted values. The supplemental arguments "`...`" are also used for some metrics (see below).
+
+To illustrate, let's take the model from last chapter. The `lm_wflow_fit` object was a linear regression model whose predictor set was supplemented with an interaction and spline functions for longitude and latitude. It was created from a training set (named `ames_train`). Although we do not advise using the test set at this juncture of the modeling process, it will be used to illustrate functionality. The data frame `ames_test` consists of `r nrow(ames_test)` properties. To start, let's produce predictions: 
+
+```{r performance-predict-ames}
+ames_test_res <- predict(lm_wflow_fit, new_data = ames_test %>% select(-Sale_Price))
+ames_test_res
+```
+
+As expected, the predicted numeric outcome from the regression model is named "`.pred`". We also need to match the predicted values with their corresponding observed outcome values: 
+
+```{r performance-ames-outcome}
+ames_test_res <- bind_cols(ames_test_res, ames_test %>% select(Sale_Price))
+```
+
+Note that both the predicted and observed outcomes are in log10 units. It is customary to analyze the predictions on the transformed scale (if one were used) even if the predictions are reported using the original units. 
+
+Let's plot the data before computing metrics: 
+
+```{r performance-ames-plot}
+ggplot(ames_test_res, aes(x = Sale_Price, y = .pred)) + 
+  # Create a diagonal line
+  geom_abline(lty = 2) + 
+  geom_point(alpha = 0.5) +
+  # Scale and size the x- and y-axis uniformly
+  coord_obs_pred() + 
+  labs(y = "Predicted Sale Price (log10)", x = "Sale Price (log10)")
+```
+
+There is one property that is substantially over-predicted. 
+
+Let's compute the root mean squared error (RMSE) for this model using the `rmse()` function: 
+
+```{r performance-ames-rmse}
+rmse(ames_test_res, truth = Sale_Price, estimate = .pred)
+```
+The output above shows the standard format of the output of `yardstick` functions. The `.estimator` is usually "standard". The definition of "standard" depends on the method; consult the function help pages for details. Examples of non-standard  will be shown below for classification. 
+
+If there is interest in multiple metrics, a _metric set_ can be created so that a single function can be used. Let's add the coefficient of determination (a.k.a. $R^2$), and the mean absolute error: 
+
+```{r performance-metric-set}
+ames_metrics <- metric_set(rmse, rsq, mae)
+ames_metrics(ames_test_res, truth = Sale_Price, estimate = .pred)
+```
+
+This tidy data format stacks the metrics vertically. 
+
+## Classification metrics 
+
+To illustrate other aspects of these functions, we will switch to a different example. The `modeldata` package contains an example of predictions from a test data set with two classes ("Class1" and "Class2"):
+
+```{r performance-two-class-example}
+data(two_class_example, package = "modeldata")
+str(two_class_example)
+```
+
+The second and third columns are the predicted class probabilities for the test set while `predicted` are the discrete predictions. 
+
+For the hard class predictions, there are a variety of `yardstick` metrics that are helpful: 
+
+```{r performance-class-metrics}
+# A confusion matrix: 
+conf_mat(two_class_example, truth = truth, estimate = predicted)
+
+accuracy(two_class_example, truth = truth, estimate = predicted)
+f_meas(two_class_example, truth, predicted)
+```
+
+For binary classification data sets, these functions have a standard argument called `event_level`. The _default_ is that the **first** level of the outcome factor is the event of interest. There is some heterogeneity in R functions in this regard; some use the first level and others the second. Logically, it would be more intuitive that the first level is the most important. Unfortunately, the second level logic is borne out of the use of encoding the data are 0/1 (in which case the second value is the event). However, tidymodels (and many R packages) _require_ a categorical outcome to be encoded as a factor and, for this reason, the legacy justification for the second level becomes irrelevant.  
+As an example where the second class is the event: 
+
+```{r performance-2nd-level}
+f_meas(two_class_example, truth, predicted, event_level = "second")
+```
+
+There are numerous classification metrics that generated using the predicted probabilities. For example, the receiver operating characteristic (ROC) curve computes the sensitivity and specificity over a continuum of different event thresholds. The predicted class column is not used. There are two `yardstick` functions for this method: `roc_curve()` computes the data points that make up the ROC curve and `roc_auc()` computes the area under the curve. 
+
+The interfaces to these types of metric functions use the `...` argument placeholder to pass in the appropriate class probability column. For two-class problems, the probability column for the event of interest is passed into the function:
+
+```{r performance-2class-roc}
+two_class_curve <- roc_curve(two_class_example, truth, Class1)
+two_class_curve
+
+roc_auc(two_class_example, truth, Class1)
+```
+
+The `two_class_curve` object can be used in a `ggplot` call to visualize the curve. There is also an `autplot()` method that will take care of the details:
+
+```{r performance-2class-roc-curve}
+autoplot(two_class_curve)
+```
+
+There are other functions for methods that use the probability estimates: `gain_curve()`, `lift_curve()`, and `pr_curve()`. 
+
+What about data with three or more classes? To demonstrate, a different example data set is used that has four classes: 
+
+```{r performance-hpc-example}
+data(hpc_cv, package = "modeldata")
+str(hpc_cv)
+```
+
+As before, there is are factors for the observed and predicted outcomes along with four other columns of predicted probabilities for each class. These results also include a `Resample` column. These results are for out-of-sample predictions associated with 10-fold cross-validation (discussed in Chapter \@ref(resampling)). For the time being, this column will be ignored. 
+
+The functions for metrics that use the discrete class probabilities are identical: 
+
+```{r performance-mutliclass-pred}
+accuracy(hpc_cv, obs, pred)
+# Matthews correlation coefficient:
+mcc(hpc_cv, obs, pred)
+```
+There are some metrics that are specific to cases with two classes. In most situations, there are either multi-class analogs that can be used. For example, the Matthews correlation coefficient output shown above has specific equations for three or more classes. However, a metric such as sensitivity measures the true positive rate which, by definition, requires two classes. In these situation, there are options for macro-, micro-, and macro-weighted averaging: 
+
+ * Macro averaging computes a set of one-versus-all metrics using the standard two-class statistics. These are averaged. 
+ 
+ * Macro weighted averaging does the same but the average is weighted by the number of samples in each class.  
+ 
+ * Micro averaging computes the contribution for each class, aggregates them, then computes a single metric from the aggregates. 
+
+Using sensitivity as an example, the usually two-class metric is a ratio of the number of correctly predicted events divided by the number of true events. The "manual" calculations for these averaging methods are: 
+
+```{r performance-sens-manual}
+class_totals <- 
+  count(hpc_cv, obs, name = "totals") %>% 
+  mutate(class_wts = totals/sum(totals))
+class_totals
+
+cell_counts <- 
+  hpc_cv %>% 
+  group_by(obs, pred) %>% 
+  count() %>% 
+  ungroup()
+
+# Compute the four sensitivities using 1-vs-all
+one_versus_all <- 
+  cell_counts %>% 
+  filter(obs == pred) %>% 
+  full_join(class_totals, by = "obs") %>% 
+  mutate(sens = n/totals)
+one_versus_all
+
+# Three different estimates:
+one_versus_all %>% 
+  summarize(
+    macro = mean(sens), 
+    macro_wts = weighted.mean(sens, class_wts),
+    micro = sum(n)/sum(totals)
+  )
+```
+
+Thankfully, there are easier methods for obtaining these results: 
+
+```{r performance-sens}
+sensitivity(hpc_cv, obs, pred, estimator = "macro")
+sensitivity(hpc_cv, obs, pred, estimator = "macro_weighted")
+sensitivity(hpc_cv, obs, pred, estimator = "micro")
+```
+
+For metrics using probability estimates, there are some cases with multi-class analogs. For example, @HandTill determined a multi-class technique for ROC curves. In this case, _all_ of the class probability columns must be given to the function:
+
+```{r performance-multi-class-roc}
+roc_auc(hpc_cv, obs, VF, F, M, L)
+```
+
+Finally, all of these performance metrics can be computed using `dplyr` groupings. Recall that these data have a column for the resampling column. Passing a grouped data frame to the metric function will compute the metrics for each group: 
+
+```{r performance-multi-class-acc-grouped}
+hpc_cv %>% 
+  group_by(Resample) %>% 
+  accuracy(obs, pred)
+```
+
+The groupings also translate to the `autoplot()` methods:
+
+```{r performance-multi-class-roc-grouped}
+# Four 1-vs all ROC curves for each fold
+hpc_cv %>% 
+  group_by(Resample) %>% 
+  roc_curve(obs, VF, F, M, L) %>% 
+  autoplot()
+```
