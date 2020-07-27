@@ -199,6 +199,42 @@ lm_wflow_fit %>%
 
 **passing another formula to the model**
 
+## How does a workflow use the formula? {#workflow-encoding}
+
+Recall from Sections \@ref(formula) and \@ref(a-simple-recipe-for-the-ames-housing-data) that the formula method has multiple purposes. One of these was to properly encode the original data into an analysis ready format. In many cases, this involves executing in-line transformations (e.g., `log(x)`), creating dummy variable columns, creating interactions or other column expansions, and so on. However, there are many statistical methods that require different types of encodings: 
+
+ * Most packages for tree-based models use the formula interface but **do not** encode the categorical predictors into dummy variables. 
+ 
+ * Packages can have special in-line functions that tell the model function how to treat the predictor in the analysis. For example, in survival analysis models, a formula term such as `strata(site)` would indicate that the column `site` should not be treated as a regular predictor and does not have a corresponding location parameter estimate in the model. 
+
+ * A few R packages have extended the formula in ways that the typical base R functions cannot parse or execute. For example, in multilevel models (e.g. mixed models or hierarchical Bayesian models), a model term such as `(week | subject)` indicates that the column `week` is a random effect that has different parameter estimates for each value of the `subject` column. 
+
+A workflow is a general purpose interface. When `ad_formula()` us used, how should the workflow pre-process the data? Since the pre-processing is model dependent, workflows attempts to emulate what the underlying model would do _whenever possible_. If it is not possible, the formula processing should not do anything to the columns used in the formula. To look at this in more detail, here are some examples: 
+
+### Tree-based models {-}
+
+When a tree is to be fit to the data, the `parsnip` package understands what the modeling function would do. For example, if a random forest model is fit using the `ranger` or `randomForest` packages, the workflow will understand that predictors columns that are factors should be left as-is. As a counter example, a boosted tree created with the `xgboost` package requires the user to create dummy variables from factor predictors (since `xgboost::xgb.train()` will not). This requirement is embedded into the model specification object and a workflow using `xgboost` will create the indicator columns for this engine. Also not that a different engine for boosted trees, `C5.0`, does require dummy variables so none are made. This determination is made for _each model and engine combination_. 
+
+### Special in-line functions {-}
+
+For R packages with specific in-line functions, such as the `survival::strata()` function, the workflow does no additional encoding for the data. 
+
+_However_, there is an issue with using this special function in `add_formula()`: 
+
+```{r workflows-strata, error=TRUE}
+library(survival)
+
+parametric_model <- 
+  surv_reg() %>% 
+  set_engine("survival")
+
+parametric_workflow <- 
+  workflow() %>% 
+  add_model(parametric_model) %>% 
+  add_formula(Surv(futime, fustat) ~ age + strata(rx))
+
+fit(parametric_workflow, data = ovarian)
+```
 
 ## Future plans
 
