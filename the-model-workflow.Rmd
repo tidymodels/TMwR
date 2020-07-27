@@ -128,12 +128,6 @@ lm_wflow_fit %>%
 
 Note that, in this new object, the output shows that the previous fitted model was removed since the new formula was inconsistent with the previous model fit. 
 
-### The role of model formulas in base R 
-
-**more here about the differences in the formula method and how `model.matrix()` does things**
-
-**describe blueprints and show when to use them here?**
-
 ## Workflows and recipes
 
 Instead of using model formulas, recipe objects can also be used. From the previous chapter, the following recipe was derived: 
@@ -197,7 +191,6 @@ lm_wflow_fit %>%
 
 **changing models and/or recipes**
 
-**passing another formula to the model**
 
 ## How does a workflow use the formula? {#workflow-encoding}
 
@@ -215,13 +208,26 @@ A workflow is a general purpose interface. When `ad_formula()` us used, how shou
 
 When a tree is to be fit to the data, the `parsnip` package understands what the modeling function would do. For example, if a random forest model is fit using the `ranger` or `randomForest` packages, the workflow will understand that predictors columns that are factors should be left as-is. As a counter example, a boosted tree created with the `xgboost` package requires the user to create dummy variables from factor predictors (since `xgboost::xgb.train()` will not). This requirement is embedded into the model specification object and a workflow using `xgboost` will create the indicator columns for this engine. Also not that a different engine for boosted trees, `C5.0`, does require dummy variables so none are made. This determination is made for _each model and engine combination_. 
 
-### Special in-line functions {-}
+### Special formulas and in-line functions {-}
 
-For R packages with specific in-line functions, such as the `survival::strata()` function, the workflow does no additional encoding for the data. 
+A number of multilevel models have standardized on a formula specification devised on the `lme4` package. For example, to fit a regression model that has random effects due to a subject where the slopes and intercepts are random effects: 
 
-_However_, there is an issue with using this special function in `add_formula()`: 
+```r
+library(lme4)
+lmer(distance ~ age + Sex + (1 | Subject), data = Orthodont)
+```
 
-```{r workflows-strata, error=TRUE}
+The problem is that proper processing of this formula can't be accomplished using the standard R methods: 
+
+```{r workflows-rand-mm, error=TRUE}
+model.matrix(distance ~ age + Sex + (1 | Subject), data = Orthodont)
+```
+
+The results is a zero row data frame. The issue is that the special formula has to be processed by the underlying package code. Even if it could be used with `model.matrix()`, it would be an issues since the formula specification also specifies the statistical attributes of the model. 
+
+The solution in `workflows` is to have an optional supplementary model formula that can be given to `add_model()`. For example, using the previously mentioned `strata()` in the `survival` package, the `add_formula()` specification provides the bare column names and the actual formula given to the model is set in `add_model()`:  
+
+```{r workflows-strata}
 library(survival)
 
 parametric_model <- 
@@ -230,11 +236,18 @@ parametric_model <-
 
 parametric_workflow <- 
   workflow() %>% 
-  add_model(parametric_model) %>% 
-  add_formula(Surv(futime, fustat) ~ age + strata(rx))
+  # This formula passes the data along as-is: 
+  add_formula(futime + fustat ~ age + rx) %>% 
+  add_model(parametric_model, 
+            # This formula is given to the model
+            formula = Surv(futime, fustat) ~ age + strata(rx))
 
 fit(parametric_workflow, data = ovarian)
 ```
+Note that, in the call printed above, the model-specific formula was used. 
+
+There are additional pre-processor interfaces in the works that can allow tidy specifications of the variables without using a formula. Also, a recipe would also be an effective approach to specify the variables (with minimal-to-no preprocessing) as an alternative to having two formulas in a workflow. 
+
 
 ## Future plans
 
