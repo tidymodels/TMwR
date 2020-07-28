@@ -196,7 +196,7 @@ Recall from Sections \@ref(formula) and \@ref(a-simple-recipe-for-the-ames-housi
 
  * Most packages for tree-based models use the formula interface but **do not** encode the categorical predictors into dummy variables. 
  
- * Packages can have special in-line functions that tell the model function how to treat the predictor in the analysis. For example, in survival analysis models, a formula term such as `strata(site)` would indicate that the column `site` is a stratification variable. This means that should not be treated as a regular predictor and does not have a corresponding location parameter estimate in the model. 
+ * Packages can have special in-line functions that tell the model function how to treat the predictor in the analysis. For example, in survival analysis models, a formula term such as `strata(site)` would indicate that the column `site` is a stratification variable. This means that it should not be treated as a regular predictor and does not have a corresponding location parameter estimate in the model. 
 
  * A few R packages have extended the formula in ways that base R functions cannot parse or execute. For example, in multilevel models (e.g. mixed models or hierarchical Bayesian models), a model term such as `(week | subject)` indicates that the column `week` is a random effect that has different slope parameter estimates for each value of the `subject` column. 
 
