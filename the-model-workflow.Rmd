@@ -60,7 +60,7 @@ if (knitr:::is_html_output()) {
 }
 ```
 
-The fallacy here is that, although PCA does significant computations to produce the components, its operations is assumed to have no uncertainty associated with it. In effect, the PCA components would be treated as _known_ and, if not included in the model workflow, the effect of PCA could not be adequately measured. 
+The fallacy here is that, although PCA does significant computations to produce the components, its operations are assumed to have no uncertainty associated with them. In effect, the PCA components would be treated as _known_ and, if not included in the model workflow, the effect of PCA could not be adequately measured. 
 
 An _appropriate_ approach would be: 
 
