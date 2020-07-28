@@ -206,7 +206,7 @@ A workflow is a general purpose interface. When `add_formula()` is used, how sho
 
 When a tree is to be fit to the data, the `parsnip` package understands what the modeling function would do. For example, if a random forest model is fit using the `ranger` or `randomForest` packages, the workflow will understand that predictors columns that are factors should be left as-is. 
 
-As a counter example, a boosted tree created with the `xgboost` package requires the user to create dummy variables from factor predictors (since `xgboost::xgb.train()` will not). This requirement is embedded into the model specification object and a workflow using `xgboost` will create the indicator columns for this engine. Also not that a different engine for boosted trees, `C5.0`, does not require dummy variables so none are made by the workflow. 
+As a counter example, a boosted tree created with the `xgboost` package requires the user to create dummy variables from factor predictors (since `xgboost::xgb.train()` will not). This requirement is embedded into the model specification object and a workflow using `xgboost` will create the indicator columns for this engine. Also note that a different engine for boosted trees, `C5.0`, does not require dummy variables so none are made by the workflow. 
 
 This determination is made for _each model and engine combination_. 
 
