@@ -212,7 +212,7 @@ This determination is made for _each model and engine combination_.
 
 ### Special formulas and in-line functions {-}
 
-A number of multilevel models have standardized on a formula specification devised in the `lme4` package. For example, to fit a regression model that has random effects for subjects, the following fomrula would be used: 
+A number of multilevel models have standardized on a formula specification devised in the `lme4` package. For example, to fit a regression model that has random effects for subjects, the following formula would be used: 
 
 ```r
 library(lme4)
