@@ -251,7 +251,7 @@ random_effects
 ```
 Note that, in the call printed above, the model-specific formula was used. 
 
-An an alternative to using two formulas, a simple recipe can also be used: 
+As an alternative to using two formulas, a simple recipe can also be used: 
 
 
 ```{r workflows-strata-recipe}
