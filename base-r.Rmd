@@ -209,7 +209,7 @@ For the most part, our conception of what the formula does is dominated by the l
 (temp + species)^2
 ```
 
-Our focus, when seeing this, is that there are two predictors and the model should contain their main effects and the two-factor interactions.  However, it also implies that, since `species` is a factor, that it should also create indicator variable columns for this predictors (see Section \@ref(dummies)) and multiply those columns by the `temp` column to create the interactions. Is is the second bullet post above; the formula also defines _how each column is encoded_ and can also create additional columns that are not in the original data. 
+Our focus, when seeing this, is that there are two predictors and the model should contain their main effects and the two-factor interactions.  However, it also implies that, since `species` is a factor, it should also create indicator variable columns for this predictor (see Section \@ref(dummies)) and multiply those columns by the `temp` column to create the interactions. This transformation represents the second bullet point above; the formula also defines _how each column is encoded_ and can create additional columns that are not in the original data. 
 
 ```{block, type = "rmdnote"}
 This is an important point which will come up multiple times in this text. There are some limitations of the formula and our approaches to overcoming them will have to contend with all three aspects of the formula listed above. 
