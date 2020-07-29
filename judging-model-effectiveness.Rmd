@@ -233,7 +233,7 @@ data(hpc_cv, package = "modeldata")
 str(hpc_cv)
 ```
 
-As before, there is are factors for the observed and predicted outcomes along with four other columns of predicted probabilities for each class. These data also include a `Resample` column. These results are for out-of-sample predictions associated with 10-fold cross-validation (discussed in Chapter \@ref(resampling)). For the time being, this column will be ignored. 
+As before, there are factors for the observed and predicted outcomes along with four other columns of predicted probabilities for each class. These data also include a `Resample` column. These results are for out-of-sample predictions associated with 10-fold cross-validation (discussed in Chapter \@ref(resampling)). For the time being, this column will be ignored. 
 
 The functions for metrics that use the discrete class probabilities are identical: 
 
