@@ -13,11 +13,13 @@ cl <- symbol$circle_dotted
 
 It has been said previously that the type of pre-processing is dependent on the type of model being fit. For example, models that use distance functions or dot products should have all of their predictors on the same scale so that distance is measured appropriately. 
 
+To learn more about each of these models, and others that might be available, a linked list can be found at [`tidymodels.org/find/parsnip`](https://www.tidymodels.org/find/parsnip/). 
+
 This Appendix provides recommendations for baseline levels of pre-processing that are needed for various model functions. In the table below, the pre-processing methods are categorized as: 
 
  * **dummy**: Do qualitative predictors require a numeric encoding (e.g. via dummy variables or other methods). 
  
- * **zv**: Should columns with a single column be removed? 
+ * **zv**: Should columns with a single unique value be removed? 
  
  * **impute**: If some predictors are missing, should they be estimated via imputation? 
  
@@ -37,6 +39,17 @@ xp  <- paste0(symbol$times, symbol$sup_plus)
 tab <- 
   tribble(
     ~ model,            ~ dummy,   ~ zv, ~ impute, ~ decorrelate, ~ normalize, ~ transform, 
+    "discrim_flexible()",    tk,     tk,       tk,            tk,           x,          cl,
+    "discrim_linear()",      tk,     tk,       tk,            tk,           x,          cl,
+    "discrim_regularized()", tk,     tk,       tk,            tk,           x,          cl,
+    "naive_Bayes()",          x,     tk,       tk,           cl1,           x,           x,
+    "C5_rules()",             x,      x,        x,             x,           x,           x,
+    "cubist_rules()",         x,      x,        x,             x,           x,           x,
+    "rule_fit()",            tk,      x,       tk,           cl1,           x,           x,
+    "bag_mars()",            tk,      x,       tk,            cl,           x,          cl,
+    "bag_tree()",             x,      x,        x,           cl1,           x,           x,
+    "pls()",                 tk,     tk,       tk,             x,          tk,          tk,
+    "poisson_reg()",         tk,     tk,       tk,            tk,           x,          cl,
     "linear_reg()",          tk,     tk,       tk,            tk,           x,          cl,
     "mars()",                tk,      x,       tk,            cl,           x,          cl,
     "logistic_reg()",        tk,     tk,       tk,            tk,           x,          cl,
@@ -50,6 +63,7 @@ tab <-
   ) 
 
 tab %>% 
+  arrange(model) %>% 
   mutate(model = paste0("<tt>", model, "</tt>")) %>% 
   kable(escape = FALSE, align = c("l", rep("c", ncol(tab) - 1))) %>% 
   kable_styling(full_width = FALSE)
