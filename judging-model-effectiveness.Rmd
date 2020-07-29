@@ -222,7 +222,7 @@ The `two_class_curve` object can be used in a `ggplot` call to visualize the cur
 autoplot(two_class_curve)
 ```
 
-There are other functions for methods that use the probability estimates: `gain_curve()`, `lift_curve()`, and `pr_curve()`. 
+There are a number of other functions that use probability estimates, including: `gain_curve()`, `lift_curve()`, and `pr_curve()`. 
 
 ## Multi-class classification metrics 
 
