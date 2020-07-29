@@ -167,7 +167,7 @@ This tidy data format stacks the metrics vertically.
 
 ## Binary classification metrics 
 
-To illustrate other aspects of these functions, we will switch to a different example. The `modeldata` package contains an example of predictions from a test data set with two classes ("Class1" and "Class2"):
+To illustrate other aspects of these functions, we will switch to a different example. The `modeldata` package contains example predictions from a test data set with two classes ("Class1" and "Class2"):
 
 ```{r performance-two-class-example}
 data(two_class_example, package = "modeldata")
