@@ -8,10 +8,10 @@ rmd_files: [
   "basics.Rmd",
   "ames.Rmd",
   "data-spending.Rmd",
-  "how-good-is-our-model.Rmd",
   "feature-engineering.Rmd",
   "fitting-models.Rmd",
   "the-model-workflow.Rmd",
+  "judging-model-effectiveness.Rmd",
   "tools.Rmd",
   "resampling.Rmd",
   "comparing-models.Rmd",
@@ -19,7 +19,8 @@ rmd_files: [
   "tuning-parameters.Rmd",
   "model-tuning.Rmd",
   "appendix.Rmd",
-  "pre-proc-table.Rmd"
+  "pre-proc-table.Rmd",
+  "references.Rmd"
 ]
 
 before_chapter_script: "_common.R"
