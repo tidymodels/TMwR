@@ -17,7 +17,8 @@ rmd_files: [
   "comparing-models.Rmd",
   "over-fitting.Rmd",
   "tuning-parameters.Rmd",
-  "model-tuning.Rmd",
+  "grid-search.Rmd",
+  "iterative-search.Rmd",
   "appendix.Rmd",
   "pre-proc-table.Rmd",
   "references.Rmd"

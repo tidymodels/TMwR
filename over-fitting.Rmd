@@ -3,7 +3,7 @@ knitr::opts_chunk$set(fig.path = "figures/")
 library(tidymodels)
 ```
 
-# The Dangers of over-fitting models {#over-fitting}
+# The dangers of over-fitting models {#over-fitting}
 
 basics
 

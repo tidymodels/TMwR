@@ -1,0 +1,17 @@
+```{r iterative-setup, include = FALSE}
+knitr::opts_chunk$set(fig.path = "figures/")
+library(tidymodels)
+```
+
+# Iterative search {#iterative-search}
+
+
+## Simulated annealing 
+
+
+## Bayesian  optimization
+
+
+
+
+
