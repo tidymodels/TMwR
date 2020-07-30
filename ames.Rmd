@@ -8,11 +8,11 @@ data(ames, package = "modeldata")
 
 The Ames housing data set [@ames] is an excellent teaching resource that we will use throughout this book. It contains data on `r format(nrow(ames), big.mark = ",")` properties in Ames, Iowa, including columns related to 
 
- * House charateristics (bedrooms, garage, fireplace, pool, porch, etc.),
- * Location (neighborhood),
- * Lot information (zoning, shape, size, etc.),
- * Ratings of condition and quality, and
- * Sale price.
+ * house characteristics (bedrooms, garage, fireplace, pool, porch, etc.),
+ * location (neighborhood),
+ * lot information (zoning, shape, size, etc.),
+ * ratings of condition and quality, and
+ * sale price.
 
 ```{block, type = "rmdnote"}
 Our goal for these data are to predict the sale price of a house based on its other characteristics. 
@@ -57,8 +57,6 @@ ggplot(ames, aes(x = Sale_Price)) +
 ```
 
 While not perfect, this will probably result in better models than using the untransformed data. 
-
-The downside to transforming the outcome is mostly related to interpretation.  
 
 ```{block, type = "rmdwarning"}
 The downside to transforming the outcome is mostly related to interpretation.  
@@ -119,7 +117,7 @@ ggmap(get_stamenmap(loc, zoom = 15, maptype = "toner-lines")) +
   labs(x = "", y = "") + 
   scale_color_manual(values = col_key)
 ```
-```{r ames-map, out.width = "90%", echo = FALSE, fig.cap = "Neighborhoods in Ames IA."}
+```{r ames-map, out.width = "90%", echo = FALSE, fig.cap = "Neighborhoods in Ames IA"}
 knitr::include_graphics(path = "premade/ames.png")
 ```
 
