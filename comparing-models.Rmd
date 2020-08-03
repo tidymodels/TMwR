@@ -220,7 +220,7 @@ In other words, if this analysis were repeated a large number of times under the
 The next section takes a more general approach to making formal comparisons between models using random effects and Bayesian statistics [@mcelreath2020statistical]. While the model is more complex than the ANOVA method shown above, the interpretation is more simplistic and straight-forward than the p-value approach.  
 
 
-## Bayesian methods
+## Bayesian methods {#tidyposterior}
 
 The previous ANOVA model for these data had the form: 
 
