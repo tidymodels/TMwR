@@ -21,6 +21,7 @@ ames_folds <- vfold_cv(ames_train, v = 10)
 registerDoMC(cores = parallel::detectCores())
 
 load("RData/resampling.RData")
+load("RData/post_intervals.RData")
 
 keep_pred <- control_resamples(save_pred = TRUE)
 ```
@@ -346,5 +347,18 @@ The `pract_equiv` column is the proportion of the posterior that is within `[-si
 
 To compare between models, the same process is followed to compare the random forest model to one or both of the linear regressions that were resampled. 
 
+How does the number of resamples affect this analysis? More resamples increases the precision of the overall resampling estimate and that precision propagates to this type of analysis. For illustration, additional resamples we added using repeated cross-validation. How did the posterior distribution change? The figure below shows the 90% credible intervals with up to 100 resamples. 
+
+```{r compare-cred-int, fig.height = 3, echo = FALSE}
+# calculations in extras/ames_posterior_intervals.R
+ggplot(intervals,
+       aes(x = resamples, y = mean)) +
+  geom_path() +
+  geom_ribbon(aes(ymin = lower, ymax = upper), fill = "red", alpha = .1) +
+  labs(y = expression(paste("Mean difference in ", R^2)),
+       x = "Number of Resamples (repeated 10-fold cross-validation)")
+```
+
+The width of the intervals decreases but is fairly stable after roughly 50 resamples (i.e., five repeats of 10-fold cross-validation). These results would vary for other data sets but indicate that more resamples add clarity to performance evaluations. 
 
 
