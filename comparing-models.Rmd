@@ -210,12 +210,11 @@ lm_t <-
 
 Each pair-wise difference could be evaluated. Note that the p-value indicates a statistically significant signal; these terms do appear to have an effect but the difference in R<sup>2</sup> is estimated at `r round(lm_t$estimate * 100, 2)`%. If our practical effect size were 2%, we might not consider these terms as being worth including in the model.
 
-```{block2, type = "rmdnote"}
+:::rmdnote
 What's a p-value? From @pvalue: "Informally, a p-value is the probability under a specified statistical model that a statistical summary of the data (e.g., the sample mean difference between two compared groups) would be equal to or more extreme than its observed value." 
 
 In other words, if this analysis were repeated a large number of times under the null hypothesis of no differences, the p-value reflects how extreme our _observed_ results would be in comparison.
-
-```
+:::
 
 The next section takes a more general approach to making formal comparisons between models using random effects and Bayesian statistics [@mcelreath2020statistical]. While the model is more complex than the ANOVA method shown above, the interpretation is more simplistic and straight-forward than the p-value approach.  
 

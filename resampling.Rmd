@@ -139,9 +139,9 @@ The test set RMSE estimate, `r all_res %>% filter(object == "rf_fit") %>% pull("
 
 Many predictive models are very capable of representing complex trends in the data. In statistics, these are commonly referred to as _low bias models_. 
 
-```{block2, type = "rmdnote"}
+:::rmdnote
 In this context, _bias_ is the different between the true data pattern and the types of patterns that the model can emulate. Many black-box machine learning models are low bias. Other models (such as linear/logistic regression, discriminant analysis, and others) are not as adaptable and are considered _high-bias_ models. See Section [1.2.5](https://bookdown.org/max/FES/important-concepts.html#model-bias-and-variance) of @fes for a discussion.
-```
+:::
 
 For a low-bias techniques, model complexity can sometimes result in the model nearly memorizing the training set data. As an obvious example, consider a 1-nearest neighbor model. It will always provide perfect predictions for the training set no matter how well it truly works for other data sets. Random forest has a similar effect; re-predicting the training set will always result in an artificially optimistic estimate of performance.  
 
@@ -220,9 +220,9 @@ When _V_ = 3, the analysis sets are 2/3 of the training set and each assessment 
 
 _V_ = 3 is a good choice to illustrate cross-validation but is a poor choice in practice. Values of _V_ are most often 5 or 10; here, we generally prefer 10-fold cross-validation as a default. 
 
-```{block, type = "rmdnote"}
+:::rmdnote
 What are the effects of changing _V_? Larger values result in resampling estimates with reduced bias but increased noise. Smaller values of _V_ have large bias but better noise. We prefer 10-fold since noise is reduced by replication, as shown below, but bias cannot. See [Section **3.4**]() of @fes for a longer description. 
-```
+:::
 
 The `vold_cv()` function in `rsample`creates a set of cross-validation folds. It takes the data frame containing the training set as well as any options specified by the user: 
 
@@ -475,9 +475,9 @@ assess_res
 The prediction column names follow the conventions discussed for `parsnip` models. The observed outcome column always uses the original column name from the source data. The `.row` column is an integer that matches the row of the original training set so that these results can be properly arranged and integrated with the original data. 
 
 
-```{block, type = "rmdnote"}
+:::rmdnote
 For some resampling methods, such as the bootstrap or repeated cross-validation, there will be multiple predictions per row of the original training set. To obtain summarized values (averages of the replicate predictions) use `collect_predictions(object, summarize = TRUE)`. 
-```
+:::
 
 Since this analysis used 10-fold cross-validation, there is one unique prediction for each training set sample. These data can generate helpful plots of the model to understand where it potentially failed. For example, the observed and predicted values are compared: 
 
@@ -518,9 +518,9 @@ collect_metrics(val_res)
 
 These results are also much closer to the test set results than the resubstitution estimates of performance. 
 
-```{block, type = "rmdnote"}
+:::rmdnote
 In these analyses, the resampling results are very close to the test set results. The two types of estimates tend to be well correlated. However, this could be from random chance. A seed value of 1352 fixed the random numbers before creating the resamples. Try changing this value and re-running the analyses to investigate whether the resampled estimates match the test set results as well.
-```
+:::
 
 ## Parallel processing {#parallel}
 
@@ -572,9 +572,9 @@ stopCluster(cl)
 
 Another R package that facilitates parallel processing is the `future` package. Like `foreach`, it provides a framework for parallelism. It is used in conjunction with `foreach` via the `doFuture` package. 
 
-```{block2, type = "rmdnote"}
+:::rmdnote
 The R packages with parallel backends for `foreach` start with the prefix `"do"`. 
-```
+:::
 
 Parallel processing with `tune` tends to provide linear speed-ups for the first few cores. This means that, with two cores, the computations are twice as fast. Depending on the data and type of model, the linear speedup deteriorates after 4-5 cores. Using more cores will still reduce the time it takes to complete the task; there are diminishing returns for the additional cores. 
 
