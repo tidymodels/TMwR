@@ -182,9 +182,9 @@ if (knitr:::is_html_output()) {
 }
 ```
 
-```{block, type = "rmdnote"}
+:::rmdnote
 However, as will be shown in Chapter \@ref(workflows), there are high level functions that will handle the second two phases automatically. In these cases, the user would not have to manually use `prep()`, `bake()`, or `juice()` to include a recipe in the modeling process. 
-```
+:::
 
 ## Encoding qualitative data into a numeric format  {#dummies}
 
