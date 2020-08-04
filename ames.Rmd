@@ -14,10 +14,9 @@ The Ames housing data set [@ames] is an excellent teaching resource that we will
  * ratings of condition and quality, and
  * sale price.
 
-```{block, type = "rmdnote"}
+:::rmdnote
 Our goal for these data are to predict the sale price of a house based on its other characteristics. 
-```
-
+:::
 
 The raw data are provided by the authors, but in our analyses in this book, we use a transformed version available in the `modeldata` package. This version has several changes and improvements to the data^[For a complete account of the differences, see [this script](https://github.com/topepo/AmesHousing/blob/master/R/make_ames.R).]. For example, the longitude and latitude values have been determined for each property. Also, some columns were modified to be more analysis ready. For example: 
 
@@ -58,9 +57,9 @@ ggplot(ames, aes(x = Sale_Price)) +
 
 While not perfect, this will probably result in better models than using the untransformed data. 
 
-```{block, type = "rmdwarning"}
+:::rmdwarning
 The downside to transforming the outcome is mostly related to interpretation.  
-```
+:::
 
 The units of the model coefficients might be more difficult to interpret, as will measures of performance. For example, the root mean squared error (RMSE) is a common performance metric that is used in regression models. It uses the difference between the observed and predicted values in its calculations. If the sale price is on the log scale, these differences (i.e. the residuals) are also in log units. For this reason, it can be difficult to understand the quality of a model whose RMSE is 0.15 log units. 
 
