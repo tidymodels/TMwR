@@ -15,7 +15,7 @@ The Ames housing data set [@ames] is an excellent teaching resource that we will
  * sale price.
 
 :::rmdnote
-Our goal for these data are to predict the sale price of a house based on its other characteristics. 
+Our goal for these data is to predict the sale price of a house based on its other characteristics. 
 :::
 
 The raw data are provided by the authors, but in our analyses in this book, we use a transformed version available in the `modeldata` package. This version has several changes and improvements to the data^[For a complete account of the differences, see [this script](https://github.com/topepo/AmesHousing/blob/master/R/make_ames.R).]. For example, the longitude and latitude values have been determined for each property. Also, some columns were modified to be more analysis ready. For example: 
