@@ -1,1 +1,1 @@
-# (PART\*) Tools for Effectively Creating Models {-} 
+# (PART\*) Tools for Creating Effective Models {-} 
