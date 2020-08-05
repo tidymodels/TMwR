@@ -53,11 +53,11 @@ val_list <- function(x) {
 
 # Feature engineering with recipes {#recipes}
 
-Feature engineering encompasses activities that reformat the predictor values to make them as easier for the model to use effectively. In some cases, this includes transformations or encodings of the data to best represent their important characteristics. For example, two predictors might be more effectively represented when given to the model as a ratio. Take the location of a house in Ames as an example. There are a variety of ways the this data can be exposed to the model, including: neighborhood, longitude/latitude, distance to nearest school or Iowa State University, and so on. When choosing a way to encode these data for the model one might choose a form of location that seems to be the most associated with the outcome. In other cases, the format of the data (e.g. numeric versus categorical) could be a driving factor. 
+Feature engineering encompasses activities that reformat predictor values to make them easier for a model to use effectively. This includes transformations or encodings of the data to best represent their important characteristics. For example, two predictors might be more effectively represented when given to the model as a ratio. Take the location of a house in Ames as another example. There are a variety of ways that this data can be exposed to a model, including neighborhood (a qualitative measure), longitude/latitude, distance to the nearest school or Iowa State University, and so on. When choosing a way to encode these data in modeling we might choose a format that we believe most associated with the outcome. In other cases, the original format of the data (e.g. numeric versus categorical) could be a driving factor in feature engineering choices. 
 
-Similarly, data _pre-processing_ can involve reformatting required by the model. There are some models that use distance measures and, consequently, numeric predictors should be centered and scaled so that they are in the same units. Otherwise, the distance values would be biased by the scale of each column. Some other examples of pre-processing are: 
+Similarly, data _pre-processing_ can involve reformatting required by the model. Some models use distance measures and, consequently, numeric predictors should be centered and scaled so that they are all in the same units. Otherwise, the distance values would be biased by the scale of each column. There are many other examples of pre-processing: 
 
- * A reduction in the correlation between the predictors via feature extraction or the removal of some predictors. 
+ * Correlation between predictors can be reduced via feature extraction or the removal of some predictors. 
  
  * When some predictors have missing values, they can be _imputed_ using a sub-model.
  
@@ -65,39 +65,39 @@ Similarly, data _pre-processing_ can involve reformatting required by the model.
  
 Different models have different pre-processing requirements and some, such as tree-based models, require very little pre-processing. Appendix \@ref(pre-proc-table) contains a small table of recommended pre-processing techniques for different models. 
 
-In this chapter, the `recipes` package is introduced as a means to encapsulate different feature engineering and pre-processing tasks into a single object and then to apply these transformations to different data sets. 
+In this chapter, we introduce the [recipes](https://recipes.tidymodels.org/) package as a means to encapsulate different feature engineering and pre-processing tasks into a single object and then to apply these transformations to different data sets. 
 
 ## A simple recipe for the Ames housing data 
 
-Going back to the Ames data, Figure \@ref(fig:ames-sale-price) showed that the sale price outcome had a fairly right-skewed distribution. It might make sense to model these data in terms of the logarithm of the sale price. This transformation might make it easier for the model to succeed and also prevents it from making any negative sale price predictions. If the model is to be used for inference, this might also provide a _variance stabilizing transformation_ for the data. 
+Going back to the Ames data, Figure \@ref(fig:ames-sale-price) showed that the sale price outcome had a fairly right-skewed distribution. With such a distribution, it might make sense to model these data in terms of the logarithm of the sale price. We can expect this transformation to help our model to fit successfully, and it also prevents a model from making any negative sale price predictions. If we use our model for inference, this choice can also provide a _variance stabilizing transformation_ for the data. 
 
-In this analysis, we will focus on a small subset of predictors from the data: 
+In this section, we will focus on a small subset of the predictors available in the data: 
 
  * The neighborhood (qualitative, with `r length(levels(ames_train$Neighborhood))` neighborhoods in the training set)
 
- * The general living area (named `Gr_Liv_Area`), continuous.
+ * The general living area (continuous, named `Gr_Liv_Area`)
 
- * The year built (`Year_Built`).
+ * The year built (`Year_Built`)
 
  * The type of building (`Bldg_Type` with values `r val_list(ames_train$Bldg_Type)`)
 
-Suppose that an initial ordinary linear regression model were fit to these data. A standard call to `lm()` might look like
+Suppose that an initial ordinary linear regression model were fit to these data. A standard call to `lm()` might look like:
 
 ```{r engineering-ames-simple-formula, eval = FALSE}
 lm(log10(Sale_Price) ~ Neighborhood + Gr_Liv_Area + Year_Built + Bldg_Type)
 ```
 
-When this function is executed, the data are converted from a data frame to a numeric _design matrix_ (also called a _model matrix_) and then the least squares method is used to estimate parameters. Recall that Section \@ref(formula) listed the multiple purposes of the R model formula. Focusing on the data manipulation aspects, the formula above can be decomposed into a series of _steps_:
+When this function is executed, the data are converted from a data frame to a numeric _design matrix_ (also called a _model matrix_) and then the least squares method is used to estimate parameters. Recall that Section \@ref(formula) listed the multiple purposes of the R model formula; let's focus only on the data manipulation aspects for now. What the formula above does can be decomposed into a series of _steps_:
 
-1. Sale price is defined as the outcome and neighborhood, general living area, the year built, and building type variables are all predicators. 
+1. Sale price is defined as the outcome while neighborhood, general living area, the year built, and building type variables are all defined as predictors. 
 
 1. A log transformation is applied to the outcome. 
 
-1. The neighborhood and building type columns should be converted from a non-numeric format to a numeric format (since least squares required numeric predictors). 
+1. The neighborhood and building type columns are converted from a non-numeric format to a numeric format (since least squares requires numeric predictors). 
 
-As mentioned in a previous chapter, the formula method will apply these data manipulations to any data that are passed to the `predict()` function. 
+As mentioned in Chapter \@ref(base-r), the formula method will apply these data manipulations to any data that are passed to the `predict()` function. 
 
-A recipe is an object that also defines a series of steps for data processing. Unlike the formula method inside a modeling function, the recipe defines the steps without immediately executing them; it is just a specification of what _should_ be done. Here is an equivalent recipe: 
+A recipe is an object that also defines a series of steps for data processing. Unlike the formula method inside a modeling function, the recipe defines the steps without immediately executing them; it is only a specification of what _should_ be done. Here is a recipe equivalent to the formula above: 
 
 ```{r engineering-ames-simple-recipe}
 library(tidymodels) # Includes the recipes package
@@ -116,14 +116,15 @@ Breaking this down:
 
 1. `step_log()` declares that the sale price should be log transformed. 
 
-1. `step_dummy()` is used to specify which variables should be converted from a qualitative format to a quantitative format (in this case, using dummy or indicator variables). The function `all_nominal()` captures the names of any columns that are currently factor or character (i.e., nominal) in nature. This is a `dplyr` selector function similar to `starts_with()` or `matches()` but is only used inside of a recipe. 
+1. `step_dummy()` is used to specify which variables should be converted from a qualitative format to a quantitative format, in this case, using dummy or indicator variables. An indicator or dummy variable is a binary numeric variable (a column of ones and zeroes) that encodes qualitative information; we will dig deeper into these kinds of variables in Section \@ref(dummies). 
 
+The function `all_nominal()` captures the names of any columns that are currently factor or character (i.e., nominal) in nature. This is a dplyr selector function similar to `starts_with()` or `matches()` but can only be used inside of a recipe. 
 
-```{block, type = "rmdnote"}
-Other selectors specific to the `recipes` package are: `all_numeric()`, `all_predictors()`, and `all_outcomes()`. As with `dplyr`, one or more unquoted expressions, separated by commas, can be used to select which columns are affected by each step.
-```
+:::rmdnote
+Other selectors specific to the recipes package are: `all_numeric()`, `all_predictors()`, and `all_outcomes()`. As with dplyr, one or more unquoted expressions, separated by commas, can be used to select which columns are affected by each step.
+:::
 
-What is the advantage to a recipe? There are a few, including:
+What is the advantage to using a recipe? There are a few, including:
 
  * These computations can be recycled across models since they are not tightly coupled to the modeling function. 
  
@@ -131,11 +132,11 @@ What is the advantage to a recipe? There are a few, including:
  
  * The syntax can be very compact. For example, `all_nominal()` can be used to capture many variables for specific types of processing while a formula would require each to be explicitly listed. 
  
- * All data processing can be encapsulated in a single R object instead of in scripts that are repeated in different files.  
+ * All data processing can be encapsulated in a single R object instead of in scripts that are repeated, or even spread across different files.  
  
 ## Using recipes
  
-As previously mentioned, during invokation of the `recipe()` function, the steps are not executed in any way. This is not unlike a `ggplot` where the plot is not rendered until triggered by a function like `print()`. 
+Remember that during invokation of the `recipe()` function, the steps are not executed in any way. This is not unlike a `ggplot` where the plot is not rendered until triggered by a function like `print()`. 
 
 The second phase for using a recipe is to estimate any quantities required by the steps using the `prep()` function. For example, `step_normalize()` prescribes centering and scaling for any predictors selected in the step. When `prep(recipe, training)` is called, it estimates the required means and standard deviations from the data in the `training` argument. During the process of sequentially executing the steps, the transformations specified by each step are immediate enacted on the data set. Again, using normalization as the example, the newly estimated means and variances are then used to standardize the columns. It is important to realize that, when specifying a step, the data available to that step have been affected by the previous operations. There are some steps that may remove columns or change their data type, so care must be taken when writing selectors downstream. 
 
@@ -539,10 +540,10 @@ tidy(ames_rec_prepped)
 
 The `id` field can be specified by the user in a step function call but is otherwise generated using a random suffix. This field can be helpful if the same type of step is added to the recipe more than once (as was done with `step_log()` above).
 
-Suppose you were interested in knowing what neighborhoods were retained by `step_other()`. The `tidy()` method can be called again along with the step identifier to get these results:
+Suppose you were interested in knowing what neighborhoods were retained by `step_other()`. The `tidy()` method can be called again along with the `number` identifier (or the `id` identifier) to get these results:
 
 ```{r engineering-ames-tidy-other}
-tidy(ames_rec_prepped, id = "other_VYU2G")
+tidy(ames_rec_prepped, number = 2)
 ```
 
 Each `tidy()` method returns the relevant information about that step. For example, the `tidy()` method for `step_dummy()` returns a column with the variables that were converted to dummy variables and another column with all of the known levels for each column. 
