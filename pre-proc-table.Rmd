@@ -1,0 +1,80 @@
+```{r pre-proc-table-setup, include = FALSE}
+knitr::opts_chunk$set(fig.path = "figures/")
+library(tidymodels)
+library(cli)
+library(kableExtra)
+
+tk <- symbol$tick
+x  <- symbol$times
+cl <- symbol$circle_dotted
+```
+
+# Recommended pre-processing {#pre-proc-table}
+
+It has been said previously that the type of pre-processing is dependent on the type of model being fit. For example, models that use distance functions or dot products should have all of their predictors on the same scale so that distance is measured appropriately. 
+
+To learn more about each of these models, and others that might be available, a linked list can be found at [`tidymodels.org/find/parsnip`](https://www.tidymodels.org/find/parsnip/). 
+
+This Appendix provides recommendations for baseline levels of pre-processing that are needed for various model functions. In the table below, the pre-processing methods are categorized as: 
+
+ * **dummy**: Do qualitative predictors require a numeric encoding (e.g. via dummy variables or other methods). 
+ 
+ * **zv**: Should columns with a single unique value be removed? 
+ 
+ * **impute**: If some predictors are missing, should they be estimated via imputation? 
+ 
+ * **decorrelate**: If there are correlated predictors, should this correlation be mitigated? This might mean filtering out predictors, using principal component analysis, or a model-based technique (e.g. regularization). 
+  
+ * **normalize**: Should predictors be centered and scaled? 
+ 
+ * **transform**: Is it helpful to transform predictors to be more symmetric? 
+
+The information in the table below is not exhaustive and somewhat depends on the implementation. For example, as noted below the table, some models may not require a particular pre-processing operation but the implementation may require it. In the table, `r tk` indicates that the method is required for the model and `r x` indicates that it is not. The `r cl` symbol means that the model _may_ be helped by the technique but it is not required.
+
+```{r pre-proc-table, echo = FALSE, results = "asis"}
+tkp <- paste0(symbol$tick, symbol$sup_plus)
+cl1 <- paste0(symbol$circle_dotted, symbol$sup_1)
+xp  <- paste0(symbol$times, symbol$sup_plus)
+
+tab <- 
+  tribble(
+    ~ model,            ~ dummy,   ~ zv, ~ impute, ~ decorrelate, ~ normalize, ~ transform, 
+    "discrim_flexible()",    tk,     tk,       tk,            tk,           x,          cl,
+    "discrim_linear()",      tk,     tk,       tk,            tk,           x,          cl,
+    "discrim_regularized()", tk,     tk,       tk,            tk,           x,          cl,
+    "naive_Bayes()",          x,     tk,       tk,           cl1,           x,           x,
+    "C5_rules()",             x,      x,        x,             x,           x,           x,
+    "cubist_rules()",         x,      x,        x,             x,           x,           x,
+    "rule_fit()",            tk,      x,       tk,           cl1,           x,           x,
+    "bag_mars()",            tk,      x,       tk,            cl,           x,          cl,
+    "bag_tree()",             x,      x,        x,           cl1,           x,           x,
+    "pls()",                 tk,     tk,       tk,             x,          tk,          tk,
+    "poisson_reg()",         tk,     tk,       tk,            tk,           x,          cl,
+    "linear_reg()",          tk,     tk,       tk,            tk,           x,          cl,
+    "mars()",                tk,      x,       tk,            cl,           x,          cl,
+    "logistic_reg()",        tk,     tk,       tk,            tk,           x,          cl,
+    "multinom_reg()",        tk,     tk,       tk,            tk,           x,          cl,
+    "decision_tree()",        x,      x,        x,           cl1,           x,           x,
+    "rand_forest()",          x,     cl,      tkp,           cl1,           x,           x,
+    "boost_tree()",          xp,     cl,      tkp,           cl1,           x,           x,
+    "mlp()",                 tk,     tk,       tk,            tk,          tk,          tk,
+    "svm_*()",               tk,     tk,       tk,            tk,          tk,          tk,
+    "nearest_neighbor()",    tk,     tk,       tk,            cl,          tk,          tk
+  ) 
+
+tab %>% 
+  arrange(model) %>% 
+  mutate(model = paste0("<tt>", model, "</tt>")) %>% 
+  kable(escape = FALSE, align = c("l", rep("c", ncol(tab) - 1))) %>% 
+  kable_styling(full_width = FALSE)
+```
+
+Footnotes: 
+
+1. Decorrelating predictors may not help improve performance. However, fewer correlated predictors can improve the estimation of variance importance scores (see [Fig. 11.4](https://bookdown.org/max/FES/recursive-feature-elimination.html#fig:greedy-rf-imp) of @fes). Essentially, the selection of highly correlated predictors is almost random. 
+
+The notation of `r symbol$sup_plus` means that the answer depends on the implementation. Specifically: 
+
+ * _Theoretically_, any tree-based model does not require imputation. However, many tree ensemble implementations require imputation. 
+ 
+ * While tree-based boosting methods generally do not require the creation of dummy variables, models using the `xgboost` engine do. 

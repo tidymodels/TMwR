@@ -1,4 +1,5 @@
 bookdown::gitbook:
+  css: [style.css, TMwR.css]
   dev: svg
   config:
     toc:

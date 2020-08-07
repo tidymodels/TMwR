@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xl="http://www.w3.org/1999/xlink" version="1.1" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns="http://www.w3.org/2000/svg" viewBox=".5 4731 830 279.75" width="830" height="279.75">
+  <defs>
+    <font-face font-family="Helvetica Neue" font-size="16" panose-1="2 0 5 3 0 0 0 2 0 4" units-per-em="1000" underline-position="-100" underline-thickness="50" slope="0" x-height="517" cap-height="714" ascent="951.9958" descent="-212.99744" font-weight="400">
+      <font-face-src>
+        <font-face-name name="HelveticaNeue"/>
+      </font-face-src>
+    </font-face>
+    <marker orient="auto" overflow="visible" markerUnits="strokeWidth" id="FilledArrow_Marker" stroke-linejoin="miter" stroke-miterlimit="10" viewBox="-1 -4 10 8" markerWidth="10" markerHeight="8" color="black">
+      <g>
+        <path d="M 8 0 L 0 -3 L 0 3 Z" fill="currentColor" stroke="currentColor" stroke-width="1"/>
+      </g>
+    </marker>
+  </defs>
+  <metadata> Produced by OmniGraffle 7.13.1 
+    <dc:date>2020-03-08 20:31:13 +0000</dc:date>
+  </metadata>
+  <g id="Canvas_1" stroke="none" stroke-dasharray="none" stroke-opacity="1" fill="none" fill-opacity="1">
+    <title>Canvas 1</title>
+    <g id="Canvas_1: Layer 1">
+      <title>Layer 1</title>
+      <g id="Graphic_204">
+        <ellipse cx="78.25" cy="4784.6875" rx="77.2501234379215" ry="46.500074302439" fill="white"/>
+        <ellipse cx="78.25" cy="4784.6875" rx="77.2501234379215" ry="46.500074302439" stroke="gray" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+        <text transform="translate(21.45 4775.4635)" fill="black">
+          <tspan font-family="Helvetica Neue" font-size="16" font-weight="400" fill="black" x="40.056" y="15">Data</tspan>
+        </text>
+      </g>
+      <g id="Graphic_201">
+        <text transform="translate(396.40625 4736)" fill="black">
+          <tspan font-family="Helvetica Neue" font-size="16" font-weight="400" fill="black" x="22026825e-20" y="15">Model Workflow</tspan>
+        </text>
+      </g>
+      <g id="Graphic_199">
+        <path d="M 18.5 4925.75 L 138 4925.75 L 138 4993.35 C 102.15 4984.9 54.35 5018.7 18.5 5001.8 Z" fill="white"/>
+        <path d="M 18.5 4925.75 L 138 4925.75 L 138 4993.35 C 102.15 4984.9 54.35 5018.7 18.5 5001.8 Z" stroke="gray" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+        <text transform="translate(23.5 4954.551)" fill="black">
+          <tspan font-family="Helvetica Neue" font-size="16" font-weight="400" fill="black" x="18.158" y="15">Predictors</tspan>
+        </text>
+      </g>
+      <g id="Graphic_197">
+        <path d="M 505.75 4807 L 573.51274 4852.9504 L 547.62975 4927.2996 L 463.87025 4927.2996 L 437.98726 4852.9504 Z" fill="white"/>
+        <path d="M 505.75 4807 L 573.51274 4852.9504 L 547.62975 4927.2996 L 463.87025 4927.2996 L 437.98726 4852.9504 Z" stroke="gray" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+        <text transform="translate(453.75 4861.702)" fill="black">
+          <tspan font-family="Helvetica Neue" font-size="16" font-weight="400" fill="black" x="1.912" y="15">Least squares </tspan>
+          <tspan font-family="Helvetica Neue" font-size="16" font-weight="400" fill="black" x="14.952" y="33.448">estimation</tspan>
+        </text>
+      </g>
+      <g id="Graphic_206">
+        <path d="M 261.875 4807 L 329.63774 4852.9504 L 303.75475 4927.2996 L 219.99525 4927.2996 L 194.11226 4852.9504 Z" fill="white"/>
+        <path d="M 261.875 4807 L 329.63774 4852.9504 L 303.75475 4927.2996 L 219.99525 4927.2996 L 194.11226 4852.9504 Z" stroke="gray" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+        <text transform="translate(209.875 4852.478)" fill="black">
+          <tspan font-family="Helvetica Neue" font-size="16" font-weight="400" fill="black" x="21.04" y="15">Principal </tspan>
+          <tspan font-family="Helvetica Neue" font-size="16" font-weight="400" fill="black" x="9.76" y="33.448">Component </tspan>
+          <tspan font-family="Helvetica Neue" font-size="16" font-weight="400" fill="black" x="22.52" y="51.895996">Analysis</tspan>
+        </text>
+      </g>
+      <g id="Graphic_208">
+        <ellipse cx="758.75" cy="4873.5" rx="71.2501138505102" ry="71.5001142499849" fill="white"/>
+        <ellipse cx="758.75" cy="4873.5" rx="71.2501138505102" ry="71.5001142499849" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+        <text transform="translate(706.75 4855.052)" fill="black">
+          <tspan font-family="Helvetica Neue" font-size="16" font-weight="400" fill="black" x="31.552" y="15">Fitted </tspan>
+          <tspan font-family="Helvetica Neue" font-size="16" font-weight="400" fill="black" x="29.624" y="33.448">Model</tspan>
+        </text>
+      </g>
+      <g id="Line_209">
+        <line x1="138.47412" y1="4813.8156" x2="195.72245" y2="4841.5045" marker-end="url(#FilledArrow_Marker)" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+      </g>
+      <g id="Line_210">
+        <line x1="138" y1="4937.2505" x2="201.67222" y2="4904.4825" marker-end="url(#FilledArrow_Marker)" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+      </g>
+      <g id="Graphic_213">
+        <rect x="391.40625" y="4769.156" width="237.8125" height="208.6875" stroke="gray" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+      </g>
+      <g id="Line_231">
+        <line x1="322.48387" y1="4873.5" x2="381.50625" y2="4873.5" marker-end="url(#FilledArrow_Marker)" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+      </g>
+      <g id="Line_232">
+        <line x1="629.21875" y1="4873.5" x2="677.6" y2="4873.5" marker-end="url(#FilledArrow_Marker)" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+      </g>
+    </g>
+  </g>
+</svg>

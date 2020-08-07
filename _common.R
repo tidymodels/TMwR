@@ -1,5 +1,6 @@
-options(digits = 4, width = 80)
+options(digits = 4, width = 84)
 options(dplyr.print_min = 6, dplyr.print_max = 6)
+options(cli.width = 85)
 
 knitr::opts_chunk$set(
   comment = "#>",
@@ -24,7 +25,7 @@ transparent_theme <- function() {
 
 transparent_theme()
 
-version <- function() {
+tmwr_version <- function() {
   dt <- Sys.Date()
   ver <- read.dcf("DESCRIPTION")[1, "Version"]
   paste0("Version ", ver, " (", dt, ")")
