@@ -192,23 +192,21 @@ if (knitr:::is_html_output()) {
 As we discuss in Chapter \@ref(workflows), there are high level functions that handle the second two phases automatically. In these cases, we do not have to manually use `prep()`, `bake()`, or `juice()` to include a recipe in the modeling process. 
 :::
 
-## Encoding qualitative data into a numeric format  {#dummies}
+## Encoding qualitative data in a numeric format  {#dummies}
 
-There are a few different steps that can alter the factor levels of a qualitative column prior to making dummy variables. For example, if it makes sense to change missing values to a dedicated factor level, `step_unknown()` can be used for this purpose. Similarly, if one anticipates that a new factor level may be encountered in future data, `step_novel()` can allot a new level for this purpose. 
+One of the most common feature engineering tasks is transforming nominal or qualitative data (factors or characters) so that they can be encoded or represented numerically. Sometimes we can alter the factor levels of a qualitative column in helpful ways _prior_ to such a transformation. For example, `step_unknown()` can be used to change missing values to a dedicated factor level. Similarly, if we anticipate that a new factor level may be encountered in future data, `step_novel()` can allot a new level for this purpose. 
 
-Additionally, `step_other()` can be used to analyze the frequencies of the factor levels in the training set and convert infrequently occurring values to a catch-all level of "other" (depending on the threshold that is specified). A good example is the neighborhood predictor in our data:
+Additionally, `step_other()` can be used to analyze the frequencies of the factor levels in the training set and convert infrequently occurring values to a catch-all level of "other", with a specific threshold that can be specified. A good example is the `Neighborhood` predictor in our data:
 
 ```{r engineering-ames-neighborhood-bar}
-## TODO use new ggplot2 version to avoid coord_flip()
-ggplot(ames_train, aes(x = Neighborhood)) + 
+ggplot(ames_train, aes(y = Neighborhood)) + 
   geom_bar() + 
-  coord_flip() + 
-  xlab("")
+  labs(y = NULL)
 ```
 
-Here there are two neighborhoods that only have less than five properties in the training data; in this case, no houses in the Landmark data were included in the training set. For some models, it may be problematic to have dummy variables that have a single non-zero entry in the column. At the minimum, it is highly improbably that these features would be considered important to a model. If the recipe contained `step_other(Neighborhood, threshold = 0.01)` the bottom 1% of the neighborhoods would be lumped into a new levels called "other". In this training set, this would catch `r sum(table(ames_train$Neighborhood)/nrow(ames_train) <= .01)` neighborhoods.  
+Here there are two neighborhoods that have less than five properties in the training data; in this case, no houses at all in the Landmark neighborhood were included in the training set. For some models, it may be problematic to have dummy variables with a single non-zero entry in the column. At a minimum, it is highly improbable that these features would be important to a model. If we add `step_other(Neighborhood, threshold = 0.01)` to our recipe, the bottom 1% of the neighborhoods will be lumped into a new level called "other". In this training set, this will catch `r sum(table(ames_train$Neighborhood)/nrow(ames_train) <= .01)` neighborhoods.  
 
-For the Ames data, we might amend the recipe to use:
+For the Ames data, we can amend the recipe to use:
 
 ```{r engineering-ames-recipe-other}
 simple_ames <- 
@@ -219,11 +217,11 @@ simple_ames <-
   step_dummy(all_nominal())
 ```
 
-```{block, type = "rmdnote"}
-Many, but not all, underlying model calculations require the predictor values to be encoded as numbers. Notable exceptions are tree- and rule-based models, naive Bayes models, and others. 
-```
+:::rmdnote
+Many, but not all, underlying model calculations require predictor values to be encoded as numbers. Notable exceptions include tree-based models, rule-based models, and naive Bayes models. 
+:::
 
-There are a few strategies for making the conversion of a factor predictor to a numeric format. The most common method is to create "dummy" or indicator variables. Let's take the predictor in the Ames data for the building type, which is a factor variable with five levels. In this case, the `Bldg_Type` column would be substituted with four numeric columns whose values are either zero or one. These binary variables represent specific factor level values. In R, the convention is to _exclude_ a column for the first factor level (`OneFam`, in this case). The `Bldg_Type` column would be replaced with a column called `TwoFmCon` that is one when the row has that value and zero otherwise. Three other columns are similarly created: 
+There are a few strategies for converting a factor predictor to a numeric format. The most common method is to create "dummy" or indicator variables. Let's take the predictor in the Ames data for the building type, which is a factor variable with five levels. For dummy variables, the single `Bldg_Type` column would be replaced with four numeric columns whose values are either zero or one. These binary variables represent specific factor level values. In R, the convention is to _exclude_ a column for the first factor level (`OneFam`, in this case). The `Bldg_Type` column would be replaced with a column called `TwoFmCon` that is one when the row has that value and zero otherwise. Three other columns are similarly created: 
 
 ```{r engineering-all-dummies, echo = FALSE, results = 'asis'}
 show_rows <- 
@@ -244,17 +242,17 @@ recipe(~Bldg_Type, data = ames_train) %>%
 ```
 
 
-Why not all three? The most simple reason is simplicity; if you know the value for these four columns, you can determine the last value. More technically, the classical justification is that a number of models, including ordinary linear regression, have numerical issues when there are linear dependencies between columns. If all five building type indicator columns are included, they would add up to the intercept column (if there is one). This would cause an issue, or perhaps an outright error, in the underlying matrix algebra.  
+Why not all five? The most basic reason is simplicity; if you know the value for these four columns, you can determine the last value because these are mutually exclusive categories. More technically, the classical justification is that a number of models, including ordinary linear regression, have numerical issues when there are linear dependencies between columns. If all five building type indicator columns are included, they would add up to the intercept column (if there is one). This would cause an issue, or perhaps an outright error, in the underlying matrix algebra.  
 
 The full set of encodings can be used for some models. This is traditionally called the "one-hot" encoding and can be achieved using the `one_hot` argument of `step_dummy()`. 
 
-One nice feature of `step_dummy()` is that there is more control over how the resulting dummy variables are named. In base R, a dummy variable names mashed the variable name with the level, such as `NeighborhoodVeenker`. Recipes, by default, use an underscore the separator between the name and class (e.g., `Neighborhood_Veenker`) and there is an option to use custom formatting of the names. With the default naming convention in recipes, it also makes it easier to capture those new columns in future steps using a selector such as `starts_with("Neighborhood_")`. 
+One helpful feature of `step_dummy()` is that there is more control over how the resulting dummy variables are named. In base R, dummy variable names mash the variable name with the level, resulting in names like `NeighborhoodVeenker`. Recipes, by default, use an underscore as the separator between the name and level (e.g., `Neighborhood_Veenker`) and there is an option to use custom formatting for the names. The default naming convention in recipes makes it easier to capture those new columns in future steps using a selector, such as `starts_with("Neighborhood_")`. 
 
-Traditional dummy variables require that all of the possible categories be known to create a full set of numeric features. There are other methods for doing the translation to numeric. _Feature hashing_ methods only consider the value of the category to assign it to a predefine pool of dummy variables. This can be a good strategy when there are large number of possible categories but the statistical properties may not be optimal. For example, it may unnecessarily _alias_ categories together (by assigning them to the same dummy variable). This is sub-optimal since it reduces the specificity of the encoding and, if that dummy variable were important, it would be difficult to determine which of the categories is driving the effect. 
+Traditional dummy variables require that all of the possible categories be known to create a full set of numeric features. There are other methods for doing this transformation to a numeric format. _Feature hashing_ methods only consider the value of the category to assign it to a predefined pool of dummy variables. This can be a good strategy when there are a large number of possible categories, but the statistical properties may not be optimal. For example, it may unnecessarily _alias_ categories together (by assigning them to the same dummy variable). This reduces the specificity of the encoding and, if that dummy variable were important, it would be difficult to determine which of the categories is driving the effect. 
 
-Another method that is useful when there are a large number of categories is called _effect_ or _likelihood encodings_. This method replaces the original data with a single numeric column that measures the _effect_ of those data. For example, for the neighborhood predictor, the mean sale price is computed for each neighborhood and these means are substituted for the original data values. This can be effective but should be used with care. In effect, a mini-model is being added to the actual model and this could lead to over-fitting. To be cautious, this type of encoding should be rigorously resampled (see Chapter \@ref(resampling)). Within a recipe, the `embed` package has several step functions, such as `step_lencode_mixed()`, for effect encodings. Both feature hashing and effect encoding can methods can also seamlessly handle situations where a novel factor level is encountered in the data. 
+Another method that is useful when there are a large number of categories is called _effect_ or _likelihood encodings_. This method replaces the original data with a single numeric column that measures the _effect_ of those data. For example, for the neighborhood predictor, the mean sale price is computed for each neighborhood and these means are substituted for the original data values. This can be effective but should be used with care. In effect, a mini-model is being added to the actual model and this can lead to over-fitting. To be cautious, this type of encoding should be rigorously resampled (see Chapter \@ref(resampling)). Within a recipe, the `embed` package has several step functions, such as `step_lencode_mixed()`, for effect encodings. Both feature hashing and effect encoding methods can also seamlessly handle situations where a novel factor level is encountered in the data. 
 
-There are some data sets where qualitative columns can be _ordered_, such as "low", "medium", "high". In base R, the default encoding strategy is to make new numeric columns that are polynomial expansions of the data. For columns that have five ordinal values, the factor column would be replaced with columns for linear, quadratic, cubic, and quartic terms: 
+Sometimes qualitative columns can be _ordered_, such as "low", "medium", "high". In base R, the default encoding strategy is to make new numeric columns that are polynomial expansions of the data. For columns that have five ordinal values, the factor column would be replaced with columns for linear, quadratic, cubic, and quartic terms: 
 
 ```{r engineering-ordered-table, echo = FALSE, results = 'asis'}
 ord_vals <- c("none", "a little", "some", "a bunch", "copious amounts")
@@ -270,11 +268,11 @@ bind_cols(ord_data, ord_contrasts) %>%
   kable_styling(full_width = FALSE)
 ```
 
-While this is not unreasonable, it is not an approach that people tend to find useful. For example, a 11-degree polynomial is probably not the most effective way of encoding an ordinal factor for months.  `recipes` has several steps related to ordered factors, such as `step_unorder()`,  to convert to regular factors, and `step_ordinalscore()` which maps specific numeric values to each factor level. 
+While this is not unreasonable, it is not an approach that people tend to find useful. For example, a 11-degree polynomial is probably not the most effective way of encoding an ordinal factor for months.  Instead, consider trying recipe steps related to ordered factors, such as `step_unorder()`, to convert to regular factors, and `step_ordinalscore()` which maps specific numeric values to each factor level. 
 
-```{block, type = "rmdnote"}
-Recipe steps can have different effects on the columns of the data. For example, `step_log()` modifies a column in-place without changing the name. Other steps, such as `step_dummy()` eliminate the original data column and replace it with one or more columns with different names. This behavior depends on the type of operation being done. 
-```
+:::rmdnote
+Different recipe steps can have different effects on columns of the data. For example, `step_log()` modifies a column in-place without changing the name. Other steps, such as `step_dummy()` eliminate the original data column and replace it with one or more columns with different names. This behavior depends on the type of operation being done. 
+:::
 
 ## Interaction terms
 
