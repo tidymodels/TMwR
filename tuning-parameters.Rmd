@@ -3,7 +3,7 @@ knitr::opts_chunk$set(fig.path = "figures/")
 library(tidymodels)
 ```
 
-# Tuning parameters
+# Tuning parameters {#tuning}
 
 ## Examples
 
