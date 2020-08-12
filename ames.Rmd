@@ -4,25 +4,27 @@ library(tidymodels)
 data(ames, package = "modeldata")
 ```
 
-# Introducing the Ames housing data {#ames}
+# The Ames housing data {#ames}
 
-The Ames housing data set [@ames] is an excellent teaching resource and will be used in several parts of this book. It contains data on `r format(nrow(ames), big.mark = ",")` properties in Ames Iowa, including columns related to 
+The Ames housing data set [@ames] is an excellent teaching resource that we will use throughout this book. It contains data on `r format(nrow(ames), big.mark = ",")` properties in Ames, Iowa, including columns related to 
 
- * House components (bedrooms, garage, fireplace, pool, porch, etc.).
- * Location (neighborhood).
- * Lot information (zoning, shape, size, etc.).
- * Ratings of condition and quality. 
- * Sale price.
+ * house characteristics (bedrooms, garage, fireplace, pool, porch, etc.),
+ * location (neighborhood),
+ * lot information (zoning, shape, size, etc.),
+ * ratings of condition and quality, and
+ * sale price.
 
-Our goal for these data are to predict the sale price of a house based on its other characteristics. 
+:::rmdnote
+Our goal for these data is to predict the sale price of a house based on its other characteristics. 
+:::
 
-The raw data are provided by the authors. However, in our analyses, the `modeldata` package will be used. This version contains several improvements to the data^[The complete account of the differences, see [this site](https://github.com/topepo/AmesHousing/blob/master/R/make_ames.R).]. For example, the longitude and latitude values were determined for each property. Also, in the raw data, some columns were modified to be more analysis ready. For example: 
+The raw data are provided by the authors, but in our analyses in this book, we use a transformed version available in the `modeldata` package. This version has several changes and improvements to the data^[For a complete account of the differences, see [this script](https://github.com/topepo/AmesHousing/blob/master/R/make_ames.R).]. For example, the longitude and latitude values have been determined for each property. Also, some columns were modified to be more analysis ready. For example: 
 
- * If a house did not have a particular feature, it was instinctively encoded as missing. For example, there were `r format(sum(ames$Alley == "No_Alley_Access"), big.mark = ",")` properties that did not have an alleyway. Instead of leaving these as missing, they were relabeled to indicate that no alley was available.
+ * In the raw data, if a house did not have a particular feature, it was implicitly encoded as missing. For example, there were `r format(sum(ames$Alley == "No_Alley_Access"), big.mark = ",")` properties that did not have an alleyway. Instead of leaving these as missing, they were relabeled in the transformed version to indicate that no alley was available.
 
- * The categorical predictors were converted to R factor columns. While the tidyverse and base R have moved away from reading data in as factors, when modeling, this data structure is a much better approach for storing qualitative data than simple strings.  
+ * The categorical predictors were converted to R's factor data type. While both the tidyverse and base R have moved away from importing data as factors by default, this data type is a better approach for storing qualitative data for _modeling_ than simple strings.  
  
- * A set of _quality_ descriptors for the house were removed since they were outcomes rather than predictors.
+ * We removed a set of quality descriptors for each house since they are more like outcomes than predictors.
 
 To load the data: 
 
@@ -36,16 +38,16 @@ data(ames, package = "modeldata")
 dim(ames)
 ```
 
-The remainder of this chapter points out some interesting features of the data. 
+The remainder of this chapter explores some important features of the data for our modeling goals. 
 
-It makes sense to start with the outcome: the last sale price of the house (in USD): 
+It makes sense to start with the outcome we want to predict: the last sale price of the house (in USD): 
 
 ```{r ames-sale_price, out.width = '100%', fig.width=8, fig.height=3}
 ggplot(ames, aes(x = Sale_Price)) + 
   geom_histogram(bins = 50)
 ```
 
-The data are right-skewed; there are more inexpensive houses than expensive ones. The median sale price was \$`r format(median(ames$Sale_Price), big.mark = ",")` and the most expensive house was \$`r format(max(ames$Sale_Price), big.mark = ",")`. When modeling this outcome, a strong argument can be made that the price should be log-transformed. The advantages of doing this are that no houses would be predicted with negative sale prices and that errors in predicting expensive houses will not have an undue influence on the model. Also, from a statistical perspective, a log transform may also _stabilize the variance_ in a way that makes inference more legitimate. The transformed data are:
+The data are right-skewed; there are more inexpensive houses than expensive ones. The median sale price was \$`r format(median(ames$Sale_Price), big.mark = ",")` and the most expensive house was \$`r format(max(ames$Sale_Price), big.mark = ",")`. When modeling this outcome, a strong argument can be made that the price should be log-transformed. The advantages of doing this are that no houses would be predicted with negative sale prices and that errors in predicting expensive houses will not have an undue influence on the model. Also, from a statistical perspective, a logarithmic transform may also _stabilize the variance_ in a way that makes inference more legitimate. Let's visualize the transformed data:
 
 ```{r ames-log-sale_price, out.width = '100%', fig.width=8, fig.height=3}
 ggplot(ames, aes(x = Sale_Price)) + 
@@ -53,13 +55,17 @@ ggplot(ames, aes(x = Sale_Price)) +
   scale_x_log10()
 ```
 
-While not perfect, this will probably result in better models than using the unlogged data. 
+While not perfect, this will probably result in better models than using the untransformed data. 
 
-The downside to transforming the outcome is mostly related to interpretation.  The units of the model coefficients might be more difficult to interpret, as will measures of performance. For example, the root mean squared error (RMSE) is a common performance metric that is used in regression models. It uses the difference between the observed and predicted values in its calculations. If the sale price is on the log scale, these differences (i.e. the residuals) are also in log units. For this reason, it is difficult to rationalize the quality of a model whose RMSE is 0.15 log units. 
+:::rmdwarning
+The downside to transforming the outcome is mostly related to interpretation.  
+:::
+
+The units of the model coefficients might be more difficult to interpret, as will measures of performance. For example, the root mean squared error (RMSE) is a common performance metric that is used in regression models. It uses the difference between the observed and predicted values in its calculations. If the sale price is on the log scale, these differences (i.e. the residuals) are also in log units. For this reason, it can be difficult to understand the quality of a model whose RMSE is 0.15 log units. 
 
 Despite these drawbacks, the models used in this book utilize the log transformation for this outcome. 
 
-Another aspect of these data are their geographic location. This quality is contained in the data in two ways: a qualitative `neighborhood` label as well as quantitative longitude and latitude data. To visualize the data, both can be used to plot the data on a map and color by neighborhood: 
+Another important aspect of these data for our modeling are their geographic locations. This spatial information is contained in the data in two ways: a qualitative `neighborhood` label as well as quantitative longitude and latitude data. To visualize the spatial information, let's use both together to plot the data on a map and color by neighborhood: 
 
 ```{r ames-map-code, eval = FALSE, include = FALSE}
 col_key <- c(
@@ -110,24 +116,24 @@ ggmap(get_stamenmap(loc, zoom = 15, maptype = "toner-lines")) +
   labs(x = "", y = "") + 
   scale_color_manual(values = col_key)
 ```
-```{r ames-map, out.width = "90%", echo = FALSE, fig.cap = "Neighborhoods in Ames IA."}
+```{r ames-map, out.width = "90%", echo = FALSE, fig.cap = "Neighborhoods in Ames IA"}
 knitr::include_graphics(path = "premade/ames.png")
 ```
 
-A few noticeable patterns can be seen. First, there is a void of data points in the center of Ames. This corresponds to Iowa State University. Second, while there are a number of neighborhoods that are geographically isolated, there are others that are adjacent to multiple neighborhoods. While Timberland located apart from other neighborhoods, the Meadow Village neighborhood in Southeast Ames appears as an island of properties ensconced inside the sea of properties that make up the Mitchell neighborhood. 
+We can see a few noticeable patterns. First, there is a void of data points in the center of Ames. This corresponds to Iowa State University. Second, while there are a number of neighborhoods that are geographically isolated, there are others that are adjacent to multiple neighborhoods. While Timberland is located apart from other neighborhoods, the Meadow Village neighborhood in Southeast Ames appears as an island of properties ensconced inside the sea of properties that make up the Mitchell neighborhood. 
  
-Also notable is the "Iowa Department of Transportation (DOT) and Rail Road" neighborhood adjacent to the main road on the east side of Ames. There are clusters go houses within this neighborhood and some are longitudinal outliers; the two houses furthest east are isolated from the other locations. 
+Also notable is the "Iowa Department of Transportation (DOT) and Rail Road" neighborhood adjacent to the main road on the east side of Ames. There are clusters of houses within this neighborhood and some are longitudinal outliers; the two houses furthest east are isolated from the other locations. 
 
-A detailed inspection of the map also shows that the neighborhood labels are not completely reliable. For example, there are some properties labeled as being in Northridge that are surrounded by houses in the adjacent Somerset neighborhood. Also, there are isolated 10 houses labeled as being in Crawford but are not close to the majority of the other data in that neighborhood.
+A detailed inspection of the map also shows that the neighborhood labels are not completely reliable. For example, there are some properties labeled as being in Northridge that are surrounded by houses in the adjacent Somerset neighborhood. Also, there are ten isolated houses labeled as being in Crawford but are not close to the majority of the other data in that neighborhood.
 
-As previously described in the introduction, it is critical to conduct _exploratory data analysis_ prior to beginning any data analysis. These data contain a number of elements that present interesting questions about how the data should be processed and analyses. Many of these are described in later chapters. Some basic questions that could be examined: 
+As previously described in the [introduction](/introduction), it is critical to conduct _exploratory data analysis_ prior to beginning any data analysis. These data contain a number of elements that present interesting questions about how the data should be processed and analyzed. We describe many of these in later chapters. Some basic questions that could be examined include: 
 
- * Are there any odd or noticeable things about the distributions of the individual predictors? Is there much skewness or pathological distributions? 
+ * Are there any odd or noticeable things about the distributions of the individual predictors? Is there much skewness or any pathological distributions? 
 
  * Are there high correlations between predictors? For example, there are multiple predictors related to the size of the house. Are some redundant?
 
  * Are there associations between predictors and the outcomes? 
 
-Many of these questions will be revisted as these data are used in upcoming examples. 
+Many of these questions will be revisited as these data are used in upcoming examples. 
 
  
