@@ -652,3 +652,4 @@ filter(all_coef, term == "Year_Built")
 
 Chapter \@ref(grid-search) and \@ref(iterative-search) discuss a suite of functions for tuning models. Their interfaces are similar to `fit_resamples()` and many of the features described here apply to those functions.  
 
+## Chapter summary {#resampling-summary}

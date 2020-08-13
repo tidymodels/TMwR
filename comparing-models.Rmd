@@ -360,4 +360,5 @@ ggplot(intervals,
 
 The width of the intervals decreases but is fairly stable after roughly 50 resamples (i.e., five repeats of 10-fold cross-validation). These results would vary for other data sets but indicate that more resamples add clarity to performance evaluations. 
 
+## Chapter summary {#compare-summary}
 

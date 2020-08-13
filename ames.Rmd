@@ -136,4 +136,5 @@ As previously described in the [introduction](/introduction), it is critical to 
 
 Many of these questions will be revisited as these data are used in upcoming examples. 
 
+## Chapter summary {#ames-summary}
  

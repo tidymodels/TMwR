@@ -327,3 +327,5 @@ hpc_cv %>%
 ```
 
 This can be a quick visualization method for the results. 
+
+## Chapter summary {#performance-summary}

@@ -326,3 +326,6 @@ This demonstrates the benefit of homogenizing the data analysis process and synt
 ## `parsnip` adjacent packages
 
 `parsnip` itself contains interfaces to a number of models. However, to be more modular, there are other packages in the tidymodels repository that have `parsnip` model definitions for clusters of similar models. For example, the `discrim` package has model definitions for the set of classification techniques called _disciminant analysis_ methods (such as linear or quadratic discriminant analysis). In this way, the package dependencies required for installing `parsnip` are reduced. A list of _all_ of the models that can be used with `parsnip` (across different packages that are on CRAN) can be found at [`tidymodels.org/find`](https://www.tidymodels.org/find/).   
+
+## Chapter summary {#models-summary}
+

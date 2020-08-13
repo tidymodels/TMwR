@@ -571,7 +571,7 @@ This can be helpful when the data are _resampled_. It helps to keep the columns 
 
 Finally, all step functions have a `role` field that can assign roles to the results of the step. In many cases, columns affected by a step retain their existing role. For example, the `step_log()` calls to the `ames_rec` object above affected `Sale_Price` as well as `Gr_Liv_Area`. For that step, the default behavior is to keep the existing role for these columns since no new columns are created. As a counter-example, the step to produce splines defaults new columns to have a role of `"predictor"` since that is usually how spline columns are used in a model. Most steps have sensible defaults but, since the defaults can be different, be sure to check the documentation page to understand what which role(s) will be assigned. 
 
-## Chapter summary {#summary-recipes}
+## Chapter summary {#recipes-summary}
 
 In this chapter, you learned about using recipes for flexible feature engineering and data preprocessing, from creating dummy variables to handling class imbalance and more. Feature engineering is an important part of the modeling process where information leakage can easily occur and good practices must be adopted. Between the recipes package and other packages that extend recipes, there are over 100 available steps. All possible recipe steps are enumerated at [`tidymodels.org/find`](https://www.tidymodels.org/find/). The recipes framework provides a rich data manipulation environment for pre-processing and transforming data prior to modeling. 
 Additionally, [`tidymodels.org/learn/develop/recipes/`](https://www.tidymodels.org/learn/develop/recipes/) shows how custom steps can be created.
@@ -599,3 +599,6 @@ ames_rec <-
 
 ames_rec
 ```
+
+
+
