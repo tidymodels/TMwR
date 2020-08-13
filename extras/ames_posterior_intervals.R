@@ -9,7 +9,7 @@ data(ames, package = "modeldata")
 
 ames <- mutate(ames, Sale_Price = log10(Sale_Price))
 
-set.seed(833961)
+set.seed(123)
 ames_split <- initial_split(ames, prob = 0.80, strata = Sale_Price)
 ames_train <- training(ames_split)
 ames_test  <-  testing(ames_split)
@@ -20,7 +20,7 @@ registerDoMC(cores = crs)
 
 ## -----------------------------------------------------------------------------
 
-set.seed(1352)
+set.seed(55)
 ames_folds <- vfold_cv(ames_train, v = 10, repeats = 10)
 
 ames_rec <-
@@ -80,7 +80,7 @@ for(i in 10:100) {
     add_recipe(with_splines) %>%
     fit_resamples(resamples = tmp_rset)
 
-  set.seed(598)
+  set.seed(12)
   rf_res <-
     rf_wflow %>%
     fit_resamples(resamples = tmp_rset)

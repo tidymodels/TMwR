@@ -5,18 +5,10 @@ library(doMC)
 library(kableExtra)
 library(tidyr)
 
-data(ames, package = "modeldata")
-
-ames <- mutate(ames, Sale_Price = log10(Sale_Price))
-
-set.seed(123)
-ames_split <- initial_split(ames, prob = 0.80, strata = Sale_Price)
-ames_train <- training(ames_split)
-ames_test  <-  testing(ames_split)
-
 registerDoMC(cores = parallel::detectCores())
 
-options(digits = 3)
+source("ames_snippets.R")
+load("RData/lm_fit.RData")
 ```
 
 # Resampling for evaluating performance  {#resampling}
@@ -31,40 +23,13 @@ To motivate this chapter, the next section demonstrates how naive performance es
 
 ## The resubstitution approach
 
-The Ames data is used once again to demonstrate the concepts in this chapter. From Chapter \@ref(recipes), a useful recipe for these data was:  
-
-```{r resampling-ames-rec}
-# First make a very basic recipe that will be used by multiple models
-basic_rec <- 
-  recipe(Sale_Price ~ Neighborhood + Gr_Liv_Area + Year_Built + Bldg_Type + 
-           Latitude + Longitude, data = ames_train) 
-
-# Add to the basic recipe to re-create the Ames recipe from Chapter TODO
-ames_rec <- 
-  basic_rec %>%
-  step_log(Gr_Liv_Area, base = 10) %>% 
-  step_other(Neighborhood, threshold = 0.01) %>% 
-  step_dummy(all_nominal()) %>% 
-  step_interact(~ Gr_Liv_Area:starts_with("Bldg_Type_")) %>% 
-  step_ns(Latitude, Longitude, deg_free = 20)
-```
-
-Using the training and test set split developed in Chapter \@ref(splitting), an ordinary linear regression model is fit to the training set contained in the data frame `ames_train` using a workflow object: 
-
-```{r resampling-lm}
-# Fit a simple linear regression model using this recipe. 
-lm_fit <- 
-  workflow() %>% 
-  add_recipe(ames_rec) %>% 
-  add_model(linear_reg() %>% set_engine("lm")) %>% 
-  fit(data = ames_train)
-```
+The Ames data is used once again to demonstrate the concepts in this chapter. Section \@ref(workflows-summary) encapsulates the state of the Ames analysis. It includes a recipe object named `ames_rec` as well as a workflow using that recipe along with a linear model (called `lm_wflow`). This workflow was fit on the training set, resulting in `lm_fit`. 
 
 For a comparison, a different type of model is also fit. _Random forests_ is a tree ensemble method that creates a large number of decision trees from slightly different versions of the training set [@breiman2001random]. This collection of trees make up the ensemble. When predicting a new sample, each ensemble member predicts creates a separate prediction. These are averaged to create the final ensemble prediction for the new data point. 
 
 Random forest models are very powerful; they can emulate the underlying data patterns very closely. While this model can be computationally intensive, it is very low-maintenance. Very little pre-processing is required (as documented in Appendix \@ref(pre-proc-table)).
 
-Using the same predictor set as the linear model (without the extra pre-processing steps), a random forest is fit to the training set using via the `ranger` package: 
+Using the same predictor set as the linear model (without the extra pre-processing steps), a random forest is fit to the training set using via the `ranger` package. This model requires no preprocessing so a simple formula can be used:
 
 ```{r resampling-rand-forest-spec}
 rf_model <- 
@@ -74,7 +39,9 @@ rf_model <-
 
 rf_wflow <- 
   workflow() %>% 
-  add_recipe(basic_rec) %>% 
+  add_formula(
+    Sale_Price ~ Neighborhood + Gr_Liv_Area + Year_Built + Bldg_Type + 
+      Latitude + Longitude) %>% 
   add_model(rf_model) 
 
 rf_fit <- rf_wflow %>% fit(data = ames_train)
@@ -222,7 +189,7 @@ _V_ = 3 is a good choice to illustrate cross-validation but is a poor choice in 
 What are the effects of changing _V_? Larger values result in resampling estimates with small bias but substantial noise. Smaller values of _V_ have large bias but low noise. We prefer 10-fold since noise is reduced by replication, as shown below, but bias is not. See [Section **3.4**](https://bookdown.org/max/FES/resampling.html) of @fes for a longer description. 
 :::
 
-The primary inout is the training set data frame as well as the number of folds (defaulting to 10): 
+The primary input is the training set data frame as well as the number of folds (defaulting to 10): 
 
 ```{r resampling-ames-cv}
 set.seed(55)
@@ -653,3 +620,55 @@ filter(all_coef, term == "Year_Built")
 Chapter \@ref(grid-search) and \@ref(iterative-search) discuss a suite of functions for tuning models. Their interfaces are similar to `fit_resamples()` and many of the features described here apply to those functions.  
 
 ## Chapter summary {#resampling-summary}
+
+This chapter describes one of the fundamental tools of data analysis; the ability of measure the performance and variation in model results. Resampling enables us to determine how well the model works without using the test set. 
+
+An important function from the tune package, called `fit_resamples()`, was introduced. The interface for this function is also used in future chapters that describe model tuning tools. 
+
+The data analysis code, to date, for the Ames data is:
+
+```{r resampling-summary, eval = FALSE}
+library(tidymodels)
+data(ames)
+ames <- mutate(ames, Sale_Price = log10(Sale_Price))
+
+set.seed(123)
+ames_split <- initial_split(ames, prob = 0.80, strata = Sale_Price)
+ames_train <- training(ames_split)
+ames_test  <-  testing(ames_split)
+
+ames_rec <- 
+  recipe(Sale_Price ~ Neighborhood + Gr_Liv_Area + Year_Built + Bldg_Type + 
+           Latitude + Longitude, data = ames_train) %>%
+  step_log(Gr_Liv_Area, base = 10) %>% 
+  step_other(Neighborhood, threshold = 0.01) %>% 
+  step_dummy(all_nominal()) %>% 
+  step_interact(~ Gr_Liv_Area:starts_with("Bldg_Type_")) %>% 
+  step_ns(Latitude, Longitude, deg_free = 20)
+
+lm_model <- linear_reg() %>% set_engine("lm")
+
+lm_wflow <- 
+  workflow() %>% 
+  add_model(lm_model) %>% 
+  add_recipe(ames_rec)
+
+lm_fit <- fit(lm_wflow, ames_train)
+
+rf_model <- 
+  rand_forest(trees = 1000) %>% 
+  set_engine("ranger") %>% 
+  set_mode("regression")
+
+rf_wflow <- 
+  workflow() %>% 
+  add_formula(
+    Sale_Price ~ Neighborhood + Gr_Liv_Area + Year_Built + Bldg_Type + 
+      Latitude + Longitude) %>% 
+  add_model(rf_model) 
+
+set.seed(55)
+ames_folds <- vfold_cv(ames_train, v = 10)
+```
+
+

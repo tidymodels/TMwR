@@ -3,16 +3,7 @@ knitr::opts_chunk$set(fig.path = "figures/")
 library(tidymodels)
 library(kableExtra)
 
-data(ames, package = "modeldata")
-
-ames <- mutate(ames, Sale_Price = log10(Sale_Price))
-
-set.seed(833961)
-ames_split <- initial_split(ames, prob = 0.80, strata = Sale_Price)
-ames_train <- training(ames_split)
-ames_test  <-  testing(ames_split)
-
-options(digits = 4, width = 60)
+source("ames_snippets.R")
 ```
 
 # A model workflow {#workflows}
@@ -107,46 +98,32 @@ lm_wflow <-
 lm_wflow
 ```
 
-Workflows have a simple `fit()` method that can be used to create the model
+Workflows have a simple `fit()` method that can be used to create the model. Using the objects create in Section \@ref(models-summary):
 
 ```{r workflows-form-fit}
-lm_wflow_fit <- fit(lm_wflow, ames_train)
-lm_wflow_fit
+lm_fit <- fit(lm_wflow, ames_train)
+lm_fit
 ```
 
 as well as a `predict()` method:
 
 
 ```{r workflows-form-pred}
-predict(lm_wflow_fit, ames_test %>% slice(1:3))
+predict(lm_fit, ames_test %>% slice(1:3))
 ```
 The `predict()` method follows all of the same rules and naming conventions that were previously described for the `parsnip` package. 
 
 Both the model and formula can be removed or updated 
 
 ```{r workflows-form-update}
-lm_wflow_fit %>% 
-  update_formula(Sale_Price ~ Longitude)
+lm_fit %>% update_formula(Sale_Price ~ Longitude)
 ```
 
 Note that, in this new object, the output shows that the previous fitted model was removed since the new formula was inconsistent with the previous model fit. 
 
 ## Workflows and recipes
 
-Instead of using model formulas, recipe objects can also be used. From a previous chapter, the following recipe was derived: 
-
-```{r workflows-ames-recipe}
-ames_rec <- 
-  recipe(Sale_Price ~ Neighborhood + Gr_Liv_Area + Year_Built + Bldg_Type + 
-           Latitude + Longitude, data = ames_train) %>%
-  step_log(Gr_Liv_Area, base = 10) %>% 
-  step_other(Neighborhood, threshold = 0.01) %>% 
-  step_dummy(all_nominal()) %>% 
-  step_interact(~ Gr_Liv_Area:starts_with("Bldg_Type_")) %>% 
-  step_ns(Latitude, Longitude, deg_free = 20)
-```
-
-This can be attached to the workflow...
+Instead of using model formulas, recipe objects can also be used. Section \@ref(models-summary) summarized a recipe that specified several preprocessing and feature engineering steps. These were encapsulated inside the object `ames_rec`. This can be attached to the workflow...
 
 ```{r workflows-fail, error = TRUE}
 lm_wflow %>% 
@@ -167,22 +144,22 @@ From Section \@ref(recipes-manual), the `prep()`, `bake()`, and `juice()` functi
 
 ```{r workflows-recipe-fit}
 # Does `prep()`, `juice()`, and `fit()` in one step:
-lm_wflow_fit <- fit(lm_wflow, ames_train)
+lm_fit <- fit(lm_wflow, ames_train)
 
 # Does `bake()` and `predict()` automatically:
-predict(lm_wflow_fit, ames_test %>% slice(1:3))
+predict(lm_fit, ames_test %>% slice(1:3))
 ```
 
 In case the bare model object or recipe are needed, there are `pull_*` functions that can retrieve them: 
 
 ```{r workflows-pull}
 # Get the recipe and run `tidy()` method: 
-lm_wflow_fit %>% 
+lm_fit %>% 
   pull_workflow_prepped_recipe() %>% 
   tidy()
 
 # To tidy the model fit: 
-lm_wflow_fit %>% 
+lm_fit %>% 
   # This returns the parsnip object:
   pull_workflow_fit() %>% 
   # Now tidy the linear model object:
@@ -277,9 +254,40 @@ There are also operations that might occur _after_ the model is fit. An example 
 
 ## Chapter summary {#workflows-summary}
 
+Workflows tie together objects that define the stages of creating a model. A parsnip model is always required and the preprocessing can include different interfaces (e.g. formulas, recipes, etc.). 
 
+For  the Ames data, the current code for analysis is:
+
+```{r workflows-summary, eval = FALSE}
+library(tidymodels)
+data(ames)
+ames <- mutate(ames, Sale_Price = log10(Sale_Price))
+
+set.seed(123)
+ames_split <- initial_split(ames, prob = 0.80, strata = Sale_Price)
+ames_train <- training(ames_split)
+ames_test  <-  testing(ames_split)
+
+ames_rec <- 
+  recipe(Sale_Price ~ Neighborhood + Gr_Liv_Area + Year_Built + Bldg_Type + 
+           Latitude + Longitude, data = ames_train) %>%
+  step_log(Gr_Liv_Area, base = 10) %>% 
+  step_other(Neighborhood, threshold = 0.01) %>% 
+  step_dummy(all_nominal()) %>% 
+  step_interact(~ Gr_Liv_Area:starts_with("Bldg_Type_")) %>% 
+  step_ns(Latitude, Longitude, deg_free = 20)
+
+lm_model <- linear_reg() %>% set_engine("lm")
+
+lm_wflow <- 
+  workflow() %>% 
+  add_model(lm_model) %>% 
+  add_recipe(ames_rec)
+
+lm_fit <- fit(lm_wflow, ames_train)
+```
 
 
 ```{r workflows-save, include = FALSE}
-save(lm_wflow_fit, file = "RData/lm_wflow_fit.RData", version = 2, compress = "xz")
+save(lm_fit, file = "RData/lm_fit.RData", version = 2, compress = "xz")
 ```

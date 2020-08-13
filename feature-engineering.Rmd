@@ -1,54 +1,15 @@
-```{r include=FALSE, cache=FALSE}
-options(digits = 4, width = 80)
-options(dplyr.print_min = 6, dplyr.print_max = 6)
-
-knitr::opts_chunk$set(
-  comment = "#>",
-  collapse = TRUE,
-  fig.align = 'center',
-  tidy = FALSE
-)
-
-transparent_theme <- function() {
-  library(ggplot2)
-  thm <- 
-    theme_bw() + 
-    theme(
-      panel.background = element_rect(fill = "transparent", colour = NA), 
-      plot.background = element_rect(fill = "transparent", colour = NA),
-      legend.position = "top",
-      legend.background = element_rect(fill = "transparent", colour = NA),
-      legend.key = element_rect(fill = "transparent", colour = NA)
-    )
-  theme_set(thm)
-}
-
-transparent_theme()
-
-tmwr_version <- function() {
-  dt <- Sys.Date()
-  ver <- read.dcf("DESCRIPTION")[1, "Version"]
-  paste0("Version ", ver, " (", dt, ")")
-}
-
-```
 ```{r engineering-setup, include = FALSE}
 knitr::opts_chunk$set(fig.path = "figures/")
 library(tidymodels)
 library(kableExtra)
-
-data(ames, package = "modeldata")
-
-set.seed(833961)
-ames_split <- initial_split(ames, prob = 0.80, strata = Sale_Price)
-ames_train <- training(ames_split)
-ames_test  <-  testing(ames_split)
 
 val_list <- function(x) {
   x <- format(table(x), big.mark = ",")
   x <- paste0("`", names(x), "` ($n = ", unname(x), "$)")
   knitr::combine_words(x)
 }
+
+source("ames_snippets.R")
 ```
 
 # Feature engineering with recipes {#recipes}
@@ -67,6 +28,8 @@ Different models have different pre-processing requirements and some, such as tr
 
 In this chapter, we introduce the [recipes](https://recipes.tidymodels.org/) package as a means to encapsulate different feature engineering and pre-processing tasks into a single object and then to apply these transformations to different data sets. 
 
+The chapter uses the R objects created in previous chapters, summarized in Section \@ref(splitting-summary).
+
 ## A simple recipe for the Ames housing data 
 
 Going back to the Ames data, Figure \@ref(fig:ames-sale-price) showed that the sale price outcome had a fairly right-skewed distribution. With such a distribution, it might make sense to model these data in terms of the logarithm of the sale price. We can expect this transformation to help our model to fit successfully, and it also prevents a model from making any negative sale price predictions. If we use our model for inference, this choice can also provide a _variance stabilizing transformation_ for the data. 
@@ -83,6 +46,8 @@ In this section, we will focus on a small subset of the predictors available in 
 
 Suppose that an initial ordinary linear regression model were fit to these data. A standard call to `lm()` might look like:
 
+TODO remove log from y and add to `Gr_Liv_Area`; other changes about pre-logging
+
 ```{r engineering-ames-simple-formula, eval = FALSE}
 lm(log10(Sale_Price) ~ Neighborhood + Gr_Liv_Area + Year_Built + Bldg_Type)
 ```
@@ -97,7 +62,7 @@ When this function is executed, the data are converted from a data frame to a nu
 
 As mentioned in Chapter \@ref(base-r), the formula method will apply these data manipulations to any data that are passed to the `predict()` function. 
 
-A recipe is an object that also defines a series of steps for data processing. Unlike the formula method inside a modeling function, the recipe defines the steps without immediately executing them; it is only a specification of what _should_ be done. Here is a recipe equivalent to the formula above: 
+A recipe is an object that also defines a series of steps for data processing. Unlike the formula method inside a modeling function, the recipe defines the steps without immediately executing them; it is only a specification of what _should_ be done. Here is a recipe equivalent to the formula above that builds on the code summary in Section \@ref(splitting-summary):
 
 ```{r engineering-ames-simple-recipe}
 library(tidymodels) # Includes the recipes package
@@ -105,7 +70,7 @@ library(tidymodels) # Includes the recipes package
 simple_ames <- 
   recipe(Sale_Price ~ Neighborhood + Gr_Liv_Area + Year_Built + Bldg_Type,
          data = ames_train) %>%
-  step_log(Sale_Price, base = 10) %>% 
+  step_log(Gr_Liv_Area, base = 10) %>% 
   step_dummy(all_nominal())
 simple_ames
 ```
@@ -346,15 +311,6 @@ will cause a failure when the recipe is applied to new properties when the sale 
 For simple transformations of the outcome column(s), we strongly suggest that those operations be _conducted outside of the recipe_:
 
 ```{r engineering-last-ames-recipe}
-data(ames, package = "modeldata")
-
-ames <- mutate(ames, Sale_Price = log10(Sale_Price))
-
-set.seed(123)
-ames_split <- initial_split(ames, prob = 0.80, strata = Sale_Price)
-ames_train <- training(ames_split)
-ames_test  <-  testing(ames_split)
-
 simple_ames <- 
   recipe(Sale_Price ~ Neighborhood + Gr_Liv_Area + Year_Built + Bldg_Type,
          data = ames_train) %>%
@@ -578,9 +534,9 @@ Additionally, [`tidymodels.org/learn/develop/recipes/`](https://www.tidymodels.o
 
 The recipe that we will use in later chapters is:
 
-```{r engineering-ames-summary}
-data(ames, package = "modeldata")
-
+```{r engineering-summary, eval = FALSE}
+library(tidymodels)
+data(ames)
 ames <- mutate(ames, Sale_Price = log10(Sale_Price))
 
 set.seed(123)
@@ -596,8 +552,6 @@ ames_rec <-
   step_dummy(all_nominal()) %>% 
   step_interact(~ Gr_Liv_Area:starts_with("Bldg_Type_")) %>% 
   step_ns(Latitude, Longitude, deg_free = 20)
-
-ames_rec
 ```
 
 

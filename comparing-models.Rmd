@@ -6,20 +6,9 @@ library(tidyposterior)
 library(rstanarm)
 library(kableExtra)
 library(tidyr)
-
-data(ames, package = "modeldata")
-
-ames <- mutate(ames, Sale_Price = log10(Sale_Price))
-
-set.seed(123)
-ames_split <- initial_split(ames, prob = 0.80, strata = Sale_Price)
-ames_train <- training(ames_split)
-ames_test  <-  testing(ames_split)
-set.seed(55)
-ames_folds <- vfold_cv(ames_train, v = 10)
-
 registerDoMC(cores = parallel::detectCores())
 
+source("ames_snippets.R")
 load("RData/resampling.RData")
 load("RData/post_intervals.RData")
 
@@ -35,7 +24,9 @@ In either case, there is a collection of resampled summary statistics (e.g. RMSE
 
 ## Aspects of resampled performance statistics {#resampled-stats}
 
-In the last chapter, a random forest model for the Ames data was resampled with 10-fold cross-validation. We'll estimate two additional models with the same resamples. First, the previous linear regression model, using the pre-processing defined in the `ames_rec` recipe, is resampled. Secondly, a smaller recipe, where the splines terms for longitude and latitude are _removed_, is evaluated to determine if the extra 40 spline terms are worth keeping. 
+In the last chapter, a random forest model for the Ames data was resampled with 10-fold cross-validation. See Section \@ref(resampling-summary) for a summary of the code used so far. 
+
+We'll estimate two additional models with the same resamples. First, the previous linear regression model, using the pre-processing defined in the `ames_rec` recipe, is resampled. Secondly, a smaller recipe, where the splines terms for longitude and latitude are _removed_, is evaluated to determine if the extra 40 spline terms are worth keeping. 
 
 To do this, we create two model workflow objects with different recipe steps: 
 

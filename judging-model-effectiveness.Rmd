@@ -3,18 +3,10 @@ knitr::opts_chunk$set(fig.path = "figures/")
 library(tidymodels)
 library(kableExtra)
 
-data(ames, package = "modeldata")
+source("ames_snippets.R")
+load("RData/lm_fit.RData")
 
-ames <- mutate(ames, Sale_Price = log10(Sale_Price))
-
-set.seed(833961)
-ames_split <- initial_split(ames, prob = 0.80, strata = Sale_Price)
-ames_train <- training(ames_split)
-ames_test  <-  testing(ames_split)
-
-load("RData/lm_wflow_fit.RData")
-
-data(ad_data, package = "modeldata")
+data(ad_data)
 set.seed(245)
 ad_folds <- vfold_cv(ad_data, repeats = 5)
 ```
@@ -118,10 +110,10 @@ function(data, truth, ...)
 
 where `data` is a data frame or tibble and `truth` is the column with the observed outcome values. The ellipses or other arguments are used to specify the column(s) containing the predictions. 
 
-To illustrate, let's take the model from last chapter. The `lm_wflow_fit` object was a linear regression model whose predictor set was supplemented with an interaction and spline functions for longitude and latitude. It was created from a training set (named `ames_train`). Although we do not advise using the test set at this juncture of the modeling process, it will be used to illustrate functionality. The data frame `ames_test` consists of `r nrow(ames_test)` properties. To start, let's produce predictions: 
+To illustrate, let's take the model from last chapter (summarized in Section \@ref(workflows-summary)). The `lm_fit` object was a linear regression model whose predictor set was supplemented with an interaction and spline functions for longitude and latitude. It was created from a training set (named `ames_train`). Although we do not advise using the test set at this juncture of the modeling process, it will be used to illustrate functionality. The data frame `ames_test` consists of `r nrow(ames_test)` properties. To start, let's produce predictions: 
 
 ```{r performance-predict-ames}
-ames_test_res <- predict(lm_wflow_fit, new_data = ames_test %>% select(-Sale_Price))
+ames_test_res <- predict(lm_fit, new_data = ames_test %>% select(-Sale_Price))
 ames_test_res
 ```
 
@@ -170,7 +162,7 @@ This tidy data format stacks the metrics vertically.
 To illustrate other aspects of these functions, we will switch to a different example. The `modeldata` package contains example predictions from a test data set with two classes ("Class1" and "Class2"):
 
 ```{r performance-two-class-example}
-data(two_class_example, package = "modeldata")
+data(two_class_example)
 str(two_class_example)
 ```
 
@@ -229,7 +221,7 @@ There are a number of other functions that use probability estimates, including:
 What about data with three or more classes? To demonstrate, a different example data set is used that has four classes: 
 
 ```{r performance-hpc-example}
-data(hpc_cv, package = "modeldata")
+data(hpc_cv)
 str(hpc_cv)
 ```
 
@@ -329,3 +321,6 @@ hpc_cv %>%
 This can be a quick visualization method for the results. 
 
 ## Chapter summary {#performance-summary}
+
+yardstick functions measure the effectiveness of the model using data. The primary interface is based on data frames (as opposed to having vector arguments). There are a variety of regression and classification metrics and, within these, there are sometimes different estimators for the statistics. 
+

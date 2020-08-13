@@ -1,7 +1,7 @@
 ```{r ames-setup, include = FALSE}
 knitr::opts_chunk$set(fig.path = "figures/")
 library(tidymodels)
-data(ames, package = "modeldata")
+data(ames)
 ```
 
 # The Ames housing data {#ames}
@@ -63,7 +63,11 @@ The downside to transforming the outcome is mostly related to interpretation.
 
 The units of the model coefficients might be more difficult to interpret, as will measures of performance. For example, the root mean squared error (RMSE) is a common performance metric that is used in regression models. It uses the difference between the observed and predicted values in its calculations. If the sale price is on the log scale, these differences (i.e. the residuals) are also in log units. For this reason, it can be difficult to understand the quality of a model whose RMSE is 0.15 log units. 
 
-Despite these drawbacks, the models used in this book utilize the log transformation for this outcome. 
+Despite these drawbacks, the models used in this book utilize the log transformation for this outcome. _From this point on_, the outcome column is pre-logged in the `ames` data frame: 
+
+```{r ames-log}
+ames <- ames %>% mutate(Sale_Price = log10(Sale_Price))
+```
 
 Another important aspect of these data for our modeling are their geographic locations. This spatial information is contained in the data in two ways: a qualitative `neighborhood` label as well as quantitative longitude and latitude data. To visualize the spatial information, let's use both together to plot the data on a map and color by neighborhood: 
 
@@ -138,3 +142,11 @@ Many of these questions will be revisited as these data are used in upcoming exa
 
 ## Chapter summary {#ames-summary}
  
+This chapter introduced a data set used in later chapters to demonstrate tidymodels syntax. The important code snippets that will carry forward in subsequent chapters is:
+ 
+ 
+```{r ames-summary, eval = FALSE}
+library(tidymodels)
+data(ames)
+ames <- ames %>% mutate(Sale_Price = log10(Sale_Price))
+``` 

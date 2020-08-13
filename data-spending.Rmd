@@ -1,6 +1,8 @@
 ```{r spending-setup, include = FALSE}
 knitr::opts_chunk$set(fig.path = "figures/")
 library(tidymodels)
+
+source("ames_snippets.R")
 ```
 
 # Spending our data {#splitting}
@@ -25,13 +27,9 @@ The other portion of the observations are placed into the _test set_. This is he
 How should we conduct this split of the data? This depends on the context. 
 :::
 
-Suppose we allocate 80% of the data to the training set and the remaining 20% for testing.  The most common method is to use simple random sampling. The [rsample](https://rsample.tidymodels.org/) package has tools for making data splits such as this; the function `intial_split()` was created for this purpose. It takes the data frame as an argument as well as the proportion to be **placed into training**. For example: 
+Suppose we allocate 80% of the data to the training set and the remaining 20% for testing.  The most common method is to use simple random sampling. The [rsample](https://rsample.tidymodels.org/) package has tools for making data splits such as this; the function `intial_split()` was created for this purpose. It takes the data frame as an argument as well as the proportion to be **placed into training**. Using the previous produced by the code snippet from the summary in Section \@ref(ames-summary): 
 
 ```{r ames-split, message = FALSE, warning = FALSE}
-library(tidymodels) # Includes rsample
-
-data(ames, package = "modeldata")
-
 # Set the random number stream using `set.seed()` so that the results can be 
 # reproduced later. 
 set.seed(123)
@@ -56,7 +54,7 @@ These objects are data frames with the same _columns_ as the original data but o
 
 Simple random sampling is appropriate in many cases but there are exceptions. When there is a dramatic _class imbalance_ in classification problems, one class occurs much less frequently than another. Using a simple random sample may haphazardly allocate these infrequent samples disproportionately into the training or test set. To avoid this, _stratified sampling_ can be used. The training/test split is conducted separately within each class and then these subsamples are combined into the overall training and test set. For regression problems, the outcome data can be artificially binned into _quartiles_ and then stratified sampling conducted four separate times. This is an effective method for keeping the distributions of the outcome similar between the training and test set. 
 
-```{r ames-sale-price, echo = FALSE, fig.cap = "The distribution of sale price for the Ames housing data. The vertical lines indicate the quartiles of the data."}
+```{r ames-sale-price, echo = FALSE, fig.cap = "The distribution of the sale price (in log units) for the Ames housing data. The vertical lines indicate the quartiles of the data."}
 sale_dens <- 
   density(ames$Sale_Price, n = 2^10) %>% 
   tidy() 
@@ -70,7 +68,7 @@ quart_plot <-
   geom_segment(data = quartiles,
                aes(x = value, xend = value, y = 0, yend = y),
                lty = 2) +
-  xlab("Sale Price (USD)")
+  xlab("Sale Price (log-10 USD)")
 quart_plot
 ```
 
@@ -141,3 +139,17 @@ Finally, at the beginning of this chapter, we warned about using the same data f
 
 ## Chapter summary {#splitting-summary}
  
+Data splitting is the fundamental tool for empirical validation. Several strategies were discussed for partitioning the data into distinct groups for modeling and evaluation. 
+
+At this checkpoint, the important code snippets are:
+
+```{r splitting-summary, eval = FALSE}
+library(tidymodels)
+data(ames)
+ames <- ames %>% mutate(Sale_Price = log10(Sale_Price))
+
+set.seed(123)
+ames_split <- initial_split(ames, prob = 0.80, strata = Sale_Price)
+ames_train <- training(ames_split)
+ames_test  <-  testing(ames_split)
+``` 
