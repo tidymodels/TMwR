@@ -1,7 +1,7 @@
 ---
 knit: "bookdown::render_book"
 title: "Tidy Modeling with R"
-author: ["Max Kuhn"]
+author: ["Max Kuhn and Julia Silge"]
 date: "`r tmwr_version()`"
 site: bookdown::bookdown_site
 description: "Modeling of data is integral to science, business, politics, and many other aspects of our lives. The goals of this book are to: introduce neophytes to models and the tidyverse, demonstrate the `tidymodels` packages, and to outline good practices for the phases of the modeling process."
