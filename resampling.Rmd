@@ -228,8 +228,6 @@ The primary inout is the training set data frame as well as the number of folds 
 set.seed(55)
 ames_folds <- vfold_cv(ames_train, v = 10)
 ames_folds
-
-class(ames_folds)
 ```
 
 The column named `splits` contains the information on how to split the data (similar to the object used to create the initial training/test partition). While each row of `splits` has an embedded copy of the entire training set, R is smart enough not to make copies of the data in memory. The print method inside of the tibble shows the frequency of each: `[2K/220]` indicates that roughly two thousand samples are in the analysis set and 220 are in that particular assessment set. 
@@ -254,7 +252,7 @@ To create _R_ repeats of _V_-fold cross-validation, the same fold generation pro
 
 Due to the Central Limit Theorem, the summary statistics from each model tend toward a normal distribution. Consider the Ames data. On average, 10-fold cross-validation uses  assessment sets that contain roughly `r floor(nrow(ames_train) * .1)` properties. 
 
-If the RMSE is the statistic of choice, we'll denote that estimate's standard deviation as $\sigma$. With simple 10-fold cross-validation, the standard error of the mean RMSE is $\sigma/\sqrt{10}$. If this is too noisy, repeats reduce the standard error to $\sigma/\sqrt{10R}$. Using 5- and 10-fold cross-validation with $R$ replicates, the plot below shows how quickly the standard error^[These are _approximate_ standard errors. As will be discussed in the next chapter, there is a within-replicate correlation that is typical of resampled results. By ignoring this extra component of variation, the simple calculations shown in this plot are over-estimates of the reduction in noise in the standard errors.] decreases with replicates: 
+If the RMSE is the statistic of choice, we'll denote that estimate's standard deviation as $\sigma$. With simple 10-fold cross-validation, the standard error of the mean RMSE is $\sigma/\sqrt{10}$. If this is too noisy, repeats reduce the standard error to $\sigma/\sqrt{10R}$. For 10-fold cross-validation with $R$ replicates, the plot below shows how quickly the standard error^[These are _approximate_ standard errors. As will be discussed in the next chapter, there is a within-replicate correlation that is typical of resampled results. By ignoring this extra component of variation, the simple calculations shown in this plot are over-estimates of the reduction in noise in the standard errors.] decreases with replicates: 
 
 ```{r resampling-cv-reduction, echo = FALSE, fig.height= 4}
 cv_info <- 
@@ -337,7 +335,7 @@ val_set
 
 Bootstrap resampling was originally invented as a method for approximating the sampling distribution of statistics whose theoretical properties are intractable [@davison1997bootstrap]. Using it to estimate model performance is a secondary application of the method. 
 
-A bootstrap sample of the training set is a sample that is the same size as the training set but is drawn _with replacement_. This means that the some training set data point are selected multiple times for the analysis set. Because of this, each data point has a `r round((1-exp(-1)) * 100, 2)`% chance of inclusion in the training set _at least once_. The assessment set contains all of the training set samples that were not selected for the analysis set (on average, with `r round((exp(-1)) * 100, 2)`% of the training set). When bootstrapping, the assessment set is often called the "out-of-bag" sample. 
+A bootstrap sample of the training set is a sample that is the same size as the training set but is drawn _with replacement_. This means that the some training set data point are selected multiple times for the analysis set. Because of this, each data point has a `r round((1-exp(-1)) * 100, 1)`% chance of inclusion in the training set _at least once_. The assessment set contains all of the training set samples that were not selected for the analysis set (on average, with `r round((exp(-1)) * 100, 1)`% of the training set). When bootstrapping, the assessment set is often called the "out-of-bag" sample. 
 
 For a training set of 30 samples, a schematic of three bootstrap samples is: 
 
@@ -394,11 +392,10 @@ time_slices <-
   rolling_origin(initial = 6 * 30, assess = 30, skip = 29, cumulative = FALSE)
 
 data_range <- function(x) {
-  x %>% 
-    summarize(first = min(x), last = max(x))
+  summarize(x, first = min(x), last = max(x))
 }
 
-map_dfr(time_slices$splits, ~ analysis(.x) %>% data_range())
+map_dfr(time_slices$splits, ~   analysis(.x) %>% data_range())
 map_dfr(time_slices$splits, ~ assessment(.x) %>% data_range())
 ```
 
@@ -419,7 +416,7 @@ Let's reconsider the previous random forest model contained in the `rf_wflow` ob
 ```{r resampling-usage, eval = FALSE}
 model_spec %>% fit_resamples(formula,  resamples, ...)
 model_spec %>% fit_resamples(recipe,   resamples, ...)
-workflow   %>% fit_resamples(resamples,           ...)
+workflow   %>% fit_resamples(          resamples, ...)
 ```
 
 There are a number of options, such as: 
@@ -488,7 +485,7 @@ For some resampling methods, such as the bootstrap or repeated cross-validation,
 
 Since this analysis used 10-fold cross-validation, there is one unique prediction for each training set sample. These data can generate helpful plots of the model to understand where it potentially failed. For example, the observed and predicted values are compared: 
 
-```{r resampling-cv-pred-plot}
+```{r resampling-cv-pred-plot, fig.height=5, fig.width=5}
 assess_res %>% 
   ggplot(aes(x = Sale_Price, y = .pred)) + 
   geom_point(alpha = .15) +
