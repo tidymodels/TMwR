@@ -65,7 +65,7 @@ rf_wflow <-
 posteriors <- NULL
 
 for(i in 10:100) {
-
+  if (i %% 10 == 0) cat(i, "... ")
   tmp_rset <- rsample:::df_reconstruct(ames_folds %>% slice(1:i), ames_folds)
 
   lm_no_splines <-
