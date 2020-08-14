@@ -27,9 +27,9 @@ The Ames data is used once again to demonstrate the concepts in this chapter. Se
 
 For a comparison, a different type of model is also fit. _Random forests_ is a tree ensemble method that creates a large number of decision trees from slightly different versions of the training set [@breiman2001random]. This collection of trees make up the ensemble. When predicting a new sample, each ensemble member predicts creates a separate prediction. These are averaged to create the final ensemble prediction for the new data point. 
 
-Random forest models are very powerful; they can emulate the underlying data patterns very closely. While this model can be computationally intensive, it is very low-maintenance. Very little pre-processing is required (as documented in Appendix \@ref(pre-proc-table)).
+Random forest models are very powerful; they can emulate the underlying data patterns very closely. While this model can be computationally intensive, it is very low-maintenance. Very little preprocessing is required (as documented in Appendix \@ref(pre-proc-table)).
 
-Using the same predictor set as the linear model (without the extra pre-processing steps), a random forest is fit to the training set using via the `ranger` package. This model requires no preprocessing so a simple formula can be used:
+Using the same predictor set as the linear model (without the extra preprocessing steps), a random forest is fit to the training set using via the `ranger` package. This model requires no preprocessing so a simple formula can be used:
 
 ```{r resampling-rand-forest-spec}
 rf_model <- 
@@ -219,7 +219,7 @@ To create _R_ repeats of _V_-fold cross-validation, the same fold generation pro
 
 Due to the Central Limit Theorem, the summary statistics from each model tend toward a normal distribution. Consider the Ames data. On average, 10-fold cross-validation uses  assessment sets that contain roughly `r floor(nrow(ames_train) * .1)` properties. 
 
-If the RMSE is the statistic of choice, we'll denote that estimate's standard deviation as $\sigma$. With simple 10-fold cross-validation, the standard error of the mean RMSE is $\sigma/\sqrt{10}$. If this is too noisy, repeats reduce the standard error to $\sigma/\sqrt{10R}$. For 10-fold cross-validation with $R$ replicates, the plot below shows how quickly the standard error^[These are _approximate_ standard errors. As will be discussed in the next chapter, there is a within-replicate correlation that is typical of resampled results. By ignoring this extra component of variation, the simple calculations shown in this plot are over-estimates of the reduction in noise in the standard errors.] decreases with replicates: 
+If the RMSE is the statistic of choice, we'll denote that estimate's standard deviation as $\sigma$. With simple 10-fold cross-validation, the standard error of the mean RMSE is $\sigma/\sqrt{10}$. If this is too noisy, repeats reduce the standard error to $\sigma/\sqrt{10R}$. For 10-fold cross-validation with $R$ replicates, the plot below shows how quickly the standard error^[These are _approximate_ standard errors. As will be discussed in the next chapter, there is a within-replicate correlation that is typical of resampled results. By ignoring this extra component of variation, the simple calculations shown in this plot are overestimates of the reduction in noise in the standard errors.] decreases with replicates: 
 
 ```{r resampling-cv-reduction, echo = FALSE, fig.height= 4}
 cv_info <- 
@@ -370,11 +370,11 @@ map_dfr(time_slices$splits, ~ assessment(.x) %>% data_range())
 
 ## Estimating performance {#resampling-performance}
 
-Any of these resampling methods can evaluate the modeling process (e.g., pre-processing, model fitting, etc). They do this in an effective way by having different groups of data to train the model and assess a model. To reiterate the process: 
+Any of these resampling methods can evaluate the modeling process (e.g., preprocessing, model fitting, etc). They do this in an effective way by having different groups of data to train the model and assess a model. To reiterate the process: 
 
-1. During resampling, the analysis set is used to pre-process the data, apply the pre-processing to itself, and use these processed data to fit the model. 
+1. During resampling, the analysis set is used to preprocess the data, apply the preprocessing to itself, and use these processed data to fit the model. 
 
-2. The pre-processing statistics prduced by the analysis set is applied to the assessment set. The predictions from the assessment set estimate performance.  
+2. The preprocessing statistics produced by the analysis set is applied to the assessment set. The predictions from the assessment set estimate performance.  
 
 This sequence repeats for every resample. If there are _B_ resamples, there are _B_ replicates of each of the performance metrics. The final resampling estimate is the average of these _B_ statistics. If _B_ = 1, as with a validation set, the individual statistics represent overall performance. 
 
@@ -461,7 +461,7 @@ assess_res %>%
   ylab("Predicted")
 ```
 
-There was one house in the training set with a low observed sale price that is significantly over-predicted by the model. Which house was that? 
+There was one house in the training set with a low observed sale price that is significantly overpredicted by the model. Which house was that? 
 
 ```{r resampling-investigate}
 over_predicted <- 

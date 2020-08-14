@@ -17,7 +17,7 @@ keep_pred <- control_resamples(save_pred = TRUE)
 
 # Comparing models with resampling {#compare}
 
-Once two or more models are evaluated using the same set of resamples, the next step is usually to compare them. In some cases, comparisons might be _within-model_, where the same model might be evaluated with different features or pre-processing methods. Alternatively, _between-model_ comparisons, like the previous chapter that illustrated linear regression and random forest models, are the more common scenario.  
+Once two or more models are evaluated using the same set of resamples, the next step is usually to compare them. In some cases, comparisons might be _within-model_, where the same model might be evaluated with different features or preprocessing methods. Alternatively, _between-model_ comparisons, like the previous chapter that illustrated linear regression and random forest models, are the more common scenario.  
 
 In either case, there is a collection of resampled summary statistics (e.g. RMSE, accuracy, etc) for each model. The next section discusses important aspects of these statistics. Two additional sections follow that describe how to formally comparing models. 
 
@@ -26,7 +26,7 @@ In either case, there is a collection of resampled summary statistics (e.g. RMSE
 
 In the last chapter, a random forest model for the Ames data was resampled with 10-fold cross-validation. See Section \@ref(resampling-summary) for a summary of the code used so far. 
 
-We'll estimate two additional models with the same resamples. First, the previous linear regression model, using the pre-processing defined in the `ames_rec` recipe, is resampled. Secondly, a smaller recipe, where the splines terms for longitude and latitude are _removed_, is evaluated to determine if the extra 40 spline terms are worth keeping. 
+We'll estimate two additional models with the same resamples. First, the previous linear regression model, using the preprocessing defined in the `ames_rec` recipe, is resampled. Secondly, a smaller recipe, where the splines terms for longitude and latitude are _removed_, is evaluated to determine if the extra 40 spline terms are worth keeping. 
 
 To do this, we create two model workflow objects with different recipe steps: 
 
