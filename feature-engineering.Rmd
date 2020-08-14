@@ -297,7 +297,7 @@ _Order matters_.  The general living area is log transformed prior to the intera
 
 ## Skipping steps for new data {#skip-equals-true}
 
-The sale prince data are already log transformed in the `ames` data frame. Why not use:
+The sale price data are already log transformed in the `ames` data frame. Why not use:
 
 ```r
  step_log(Sale_Price, base = 10)
