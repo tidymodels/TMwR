@@ -28,7 +28,7 @@ ames_rec <-
            Latitude + Longitude, data = ames_train) %>%
   step_other(Neighborhood, threshold = 0.01) %>%
   step_dummy(all_nominal()) %>%
-  step_interact(~ Gr_Liv_Area:starts_with("Bldg_Type_")) %>%
+  step_interact( ~ Gr_Liv_Area:starts_with("Bldg_Type_") ) %>%
   step_ns(Latitude, Longitude, deg_free = 20)
 
 no_splines <-
@@ -37,7 +37,7 @@ no_splines <-
   step_log(Gr_Liv_Area, base = 10) %>%
   step_other(Neighborhood, threshold = 0.01) %>%
   step_dummy(all_nominal()) %>%
-  step_interact(~ Gr_Liv_Area:starts_with("Bldg_Type_"))
+  step_interact( ~ Gr_Liv_Area:starts_with("Bldg_Type_") )
 
 with_splines <-
   no_splines %>%
