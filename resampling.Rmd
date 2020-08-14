@@ -669,6 +669,11 @@ rf_wflow <-
 
 set.seed(55)
 ames_folds <- vfold_cv(ames_train, v = 10)
+
+keep_pred <- control_resamples(save_pred = TRUE)
+
+set.seed(130)
+rf_res <- rf_wflow %>% fit_resamples(resamples = ames_folds, control = keep_pred)
 ```
 
 

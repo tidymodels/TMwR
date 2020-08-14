@@ -43,3 +43,7 @@ rf_wflow <-
 
 set.seed(55)
 ames_folds <- vfold_cv(ames_train, v = 10)
+
+# cached in RData/resampling.RData
+# set.seed(130)
+# rf_res <- rf_wflow %>% fit_resamples(resamples = ames_folds, control = keep_pred)
