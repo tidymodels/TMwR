@@ -242,10 +242,10 @@ Interaction effects involve two or more predictors. Such an effect occurs when o
 After exploring the Ames training set, we might find that the regression slopes for the general living area differ for different building types: 
 
 ```{r engineering-ames-feature-plots}
-ggplot(ames_train, aes(x = Gr_Liv_Area, y = Sale_Price)) + 
+ggplot(ames_train, aes(x = Gr_Liv_Area, y = 10^Sale_Price)) + 
   geom_point(alpha = .2) + 
   facet_wrap(~ Bldg_Type) + 
-  geom_smooth(method = lm, se = FALSE, col = "red") + 
+  geom_smooth(method = lm, formula = y ~ x, se = FALSE, col = "red") + 
   scale_x_log10() + 
   scale_y_log10() + 
   labs(x = "General Living Area", y = "Sale Price (USD)")
@@ -378,7 +378,7 @@ recipe(Sale_Price ~ Neighborhood + Gr_Liv_Area + Year_Built + Bldg_Type + Latitu
   step_other(Neighborhood, threshold = 0.01) %>% 
   step_dummy(all_nominal()) %>% 
   step_interact( ~ Gr_Liv_Area:starts_with("Bldg_Type_") ) %>% 
-  step_ns(Latitude, deg_free = 5)
+  step_ns(Latitude, deg_free = 20)
 ```
 
 The user would need to determine if both neighborhood and latitude should be in the model since they both represent the same underlying data in different ways.
@@ -521,7 +521,7 @@ Finally, all step functions have a `role` field that can assign roles to the res
 In this chapter, you learned about using recipes for flexible feature engineering and data preprocessing, from creating dummy variables to handling class imbalance and more. Feature engineering is an important part of the modeling process where information leakage can easily occur and good practices must be adopted. Between the recipes package and other packages that extend recipes, there are over 100 available steps. All possible recipe steps are enumerated at [`tidymodels.org/find`](https://www.tidymodels.org/find/). The recipes framework provides a rich data manipulation environment for pre-processing and transforming data prior to modeling. 
 Additionally, [`tidymodels.org/learn/develop/recipes/`](https://www.tidymodels.org/learn/develop/recipes/) shows how custom steps can be created.
 
-The recipe that we will use in later chapters is:
+The code that we will use in later chapters is:
 
 ```{r engineering-summary, eval = FALSE}
 library(tidymodels)
