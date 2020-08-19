@@ -15,25 +15,25 @@ ames_test  <-  testing(ames_split)
 options(digits = 3)
 ```
 
-# Fitting models {#models}
+# Fitting models with parsnip {#models}
 
-The tidymodels package that is focused on model creation is `parsnip`. It provides a clean and standardized interface to a variety of different models. This chapter shows how the use the package and gives some motivation for why a common interface is beneficial. 
+The parsnip package provides a fluent and standardized interface for a variety of different models. In this chapter, we both give some motivation for why a common interface is beneficial and show how the use the package. 
 
-In the last chapter, recipe objects were discussed as methods to pre-process the data prior to being given to the model. Recipes are not discussed here so that the focus is on the model; the next chapter illustrates how to combine models and recipes together into something called a `workflow` object. 
+In Chapter \@ref(recipes), we discussed recipe objects for feature engineering and data preprocessing prior to modeling. Recipes are not discussed in this chapter in order to focus on the model itself; Chapter \@ref(workflows) illustrates how to combine models and recipes together into something called a `workflow` object. 
  
-## Creating a model
+## Create a model
 
-Once the data have been encoded into a usable format, such as a model matrix, they can be used in the model building process.  
+Once the data have been encoded in a format ready for a modeling algorithm, such as a numeric matrix, they can be used in the model building process.  
 
-Suppose that a linear regression model was the initial choice for the model. This is equivalent to specifying that the outcome data is numeric and that the predictors are related to the model in terms of simple slopes and intercepts: 
+Suppose that a linear regression model was our initial choice for the model. This is equivalent to specifying that the outcome data is numeric and that the predictors are related to the model in terms of simple slopes and intercepts: 
 
 $$y_i = \beta_0 + \beta_1 x_{1i} + \ldots + \beta_p x_{pi}$$
 
-There are a variety of methods that can be used to estimate the model parameters, including: 
+There are a variety of methods that can be used to estimate the model parameters: 
 
- * _Ordinary linear regression_ where the traditional method of least squares is used to solve for the model parameters. 
+ * _Ordinary linear regression_ uses the traditional method of least squares to solve for the model parameters. 
 
- * _Regularized linear regression_ that adds a penalty to the least squares method to encourage simplicity by removing predictors and/or shrinking their coefficients towards zero. This can be executed using Bayesian or non-Bayesian techniques. 
+ * _Regularized linear regression_ adds a penalty to the least squares method to encourage simplicity by removing predictors and/or shrinking their coefficients towards zero. This can be executed using Bayesian or non-Bayesian techniques. 
 
 In R, the `stats` package can be used for the first case. The syntax for `lm()` is 
 
@@ -41,35 +41,35 @@ In R, the `stats` package can be used for the first case. The syntax for `lm()` 
 model <- lm(formula, data, ...)
 ```
 
-where `...` symbolizes other options to pass to `lm()`. The function does _not_ have an x/y interface. 
+where `...` symbolizes other options to pass to `lm()`. The function does _not_ have an `x`/`y` interface, where we might pass in our outcome as `y` and our predictors as `x`. 
 
-For regularization, a Bayesian model can be fit using the `rstanarm` package: 
+To estimate with regularization, a Bayesian model can be fit using the `rstanarm` package: 
 
 ```r
 model <- stan_glm(formula, data, family = "gaussian", ...)
 ```
 
-In this case, the other options would include arguments for the _prior distributions_ of the parameters as well as specifics about the numerical aspects of the model. As with `lm()`, only the formula interface is available. 
+In this case, the other options passed via `...` would include arguments for the _prior distributions_ of the parameters as well as specifics about the numerical aspects of the model. As with `lm()`, only the formula interface is available. 
 
-A popular non-Bayesian approach to regularized regression in the `glmnet` model [@glmnet]. Its syntax is
+A popular non-Bayesian approach to regularized regression is the glmnet model [@glmnet]. Its syntax is:
 
 ```r
 model <- glmnet(x = matrix, y = vector, family = "gaussian", ...)
 ```
 
-In this case, the predictor data must already be formatted into a numeric matrix; there is no formula method. 
+In this case, the predictor data must already be formatted into a numeric matrix; there is only and `x`/`y` method and no formula method. 
 
-Note that these interfaces are heterogeneous in either how the data are passed to the model function or in terms of their arguments. The first issue is that, to fit models across different packages, the data must be formatted in different ways. `lm()` and `stan_glm()` only have formula interfaces while `glmnet()` does not. For other types of models, the interfaces may be more disparate. For a person trying to do data analysis, these differences would require the memorization of each package's syntax and can be very frustrating. 
+Note that these interfaces are heterogeneous in either how the data are passed to the model function or in terms of their arguments. The first issue is that, to fit models across different packages, the data must be formatted in different ways. `lm()` and `stan_glm()` only have formula interfaces while `glmnet()` does not. For other types of models, the interfaces may be even more disparate. For a person trying to do data analysis, these differences require the memorization of each package's syntax and can be very frustrating. 
 
-For tidy models, the approach to specifying a model is fairly simple: 
+For tidymodels, the approach to specifying a model is intended to be more unified: 
 
-1. Specify the _type_ of model based on it's mathematical structure (e.g., linear regression, random forest, _K_-nearest neighbors, etc). 
+1. **Specify the _type_ of model based on its mathematical structure** (e.g., linear regression, random forest, _K_-nearest neighbors, etc). 
 
-2. Specify the _engine_ for fitting the model. Most often this reflects the software package that should be used. 
+2. **Specify the _engine_ for fitting the model.** Most often this reflects the software package that should be used. 
 
-3. When required, declare the _mode_ of the model. The mode reflects the type of prediction outcome. For numeric outcomes, the mode is _regression_ and for qualitative outcomes, it is _classification_^[Note that `parsnip` constrains classification models to have the outcome column encoded as a _factor_; using binary numeric values will result in an error.]. If a model can only create one type of model, such as linear regression, the mode is already set. 
+3. **When required, declare the _mode_ of the model.** The mode reflects the type of prediction outcome. For numeric outcomes, the mode is _regression_; for qualitative outcomes, it is _classification_^[Note that parsnip constrains the outcome column of a classification models to be encoded as a _factor_; using binary numeric values will result in an error.]. If a model can only create one type of model, such as linear regression, the mode is already set. 
 
-These specifications are done _without referencing the data_. For example, for the three cases above: 
+These specifications are built _without referencing the data_. For example, for the three cases above: 
 
 ```{r models-lin-reg-spec}
 linear_reg() %>% set_engine("lm")
@@ -79,11 +79,10 @@ linear_reg() %>% set_engine("glmnet")
 linear_reg() %>% set_engine("stan")
 ```
 
-could be used. 
 
-Once the details of the model have been specified, the model estimation can be done with either the `fit()` function (to use a formula) or the `fit_xy()` function (when your data are already pre-processed). `parsnip` let's the user be indifferent to the interface that the underlying model uses; you can always use a formula even if the modeling packages function only has the x/y interface. 
+Once the details of the model have been specified, the model estimation can be done with either the `fit()` function (to use a formula) or the `fit_xy()` function (when your data are already pre-processed). The parsnip package allows the user to be indifferent to the interface of the underlying model; you can always use a formula even if the modeling package's function only has the `x`/`y` interface. 
 
-To demonstrate this, the `translate()` function can provide details on how `parsnip` converts the user's code to the package's syntax: 
+The `translate()` function can provide details on how parsnip converts the user's code to the package's syntax: 
 
 ```{r models-lin-reg-trans}
 linear_reg() %>% set_engine("lm") %>% translate()
@@ -93,13 +92,13 @@ linear_reg() %>% set_engine("glmnet") %>% translate()
 linear_reg() %>% set_engine("stan") %>% translate()
 ```
 
-`missing_arg()` is just a placeholder for the data that has yet to be provided. 
+Note that `missing_arg()` is just a placeholder for the data that has yet to be provided. 
 
-```{block, type = "rmdnote"}
-Note that, for the Stan and `glmnet` engines, the `family` argument was automatically added as a default. However, as will be shown below, this option can be changed.  
-```
+:::rmdnote
+Note that, for the Stan and glmnet engines, the `family` argument was automatically added as a default. As will be shown below, this option can be changed.  
+:::
 
-As a simple demonstration, the sale price of the houses in the Ames data can be predicted as a function of just longitude and latitude. 
+Let's walk through how to predict the sale price of houses in the Ames data as a function of only longitude and latitude. 
 
 ```{r models-ames-geocodes}
 lm_model <- 
@@ -121,15 +120,15 @@ lm_form_fit
 lm_xy_fit
 ```
 
-```{block, type = "rmdwarning"}
+:::rmdwarning
 The differences are between `fit()` and `fit_xy()` may not be obvious. 
 
-If `fit()` is used, this _almost always_ means that dummy variables will be created from qualitative predictors. If the underlying function requires a matrix (like `glmnet`), it will make them. However, if the underlying function uses a formula, `fit()` just passes for formula to that function. 99% of modeling functions using formulas make dummy variables. The other 1% include tree-based methods that do not require purely numeric predictors. 
+If `fit()` is used, this _almost always_ means that dummy variables will be created from qualitative predictors. If the underlying function requires a matrix (like glmnet), it will make them. However, if the underlying function uses a formula, `fit()` just passes the formula to that function. We estimate that 99% of modeling functions using formulas make dummy variables. The other 1% include tree-based methods that do not require purely numeric predictors. 
 
-`fit_xy()` always passes the data as-is to the underlying model function. It will not create dummy variables before doing so.
-```
+The `fit_xy()` function always passes the data as-is to the underlying model function. It will not create dummy variables before doing so.
+:::
 
-As shown above, `parsnip` can enable a consistent model interface for different packages. It also provides consistency in the _model arguments_. It is common for different functions, which fit the same model, to have different argument names. Random forest model functions are a good example. Three commonly used arguments are: the number of trees in the ensemble, the number of predictors to randomly sample with each split within a tree, and the number of data points required to make a split. For three different packages, those arguments are:
+Not only does parsnip enable a consistent model interface for different packages, it also provides consistency in the _model arguments_. It is common for different functions which fit the same model to have different argument names. Random forest model functions are a good example. Three commonly used arguments are the number of trees in the ensemble, the number of predictors to randomly sample with each split within a tree, and the number of data points required to make a split. For three different R packages implementing this algorithm, those arguments are:
 
 ```{r, models-rf-arg-names, echo = FALSE, results = "asis"}
 arg_info <- 
@@ -158,7 +157,7 @@ arg_info %>%
   kable_styling()
 ```
 
-In an effort to make argument specification less painful, `parsnip` uses common argument names within- and between-packages. For random forests, `parsnip` models use: 
+In an effort to make argument specification less painful, parsnip uses common argument names within and between packages. For random forests, parsnip models use: 
 
 ```{r, models-parsnip-names, echo = FALSE, results = "asis"}
 
@@ -170,9 +169,13 @@ arg_info %>%
   kable_styling(full_width = FALSE)
 ```
 
-Admittedly, this is one more set of arguments to memorize. However, when other types of models have the same argument types, these names still apply. For example, boosted tree ensembles also create a large number of tree-based models, so `trees` is also used there (as is `num_n`) and so on. `parsnip` argument names have also been standardized with similar recipe arguments. 
+Admittedly, this is one more set of arguments to memorize. However, when other types of models have the same argument types, these names still apply. For example, boosted tree ensembles also create a large number of tree-based models, so `trees` is also used there, as is `num_n`, and so on. The parsnip argument names have also been standardized with similar recipe arguments. 
 
-Also, some of the original argument names can be fairly jarony. For example, to specify the amount of regularization to use in a `glmnet` model, the greek letter `lambda` is used. While this mathematical notation is commonly used in the literature, it is not obvious to many people what `lambda` represents (especially those who consume the model results). Since this is the penalty used in regularization, `parsnip` standardizes on the argument name `penalty`. Similarly, the number of neighbors in a _K_-nearest neighbors model is called `neighbors` instead of `k`. Our rule of thumb when standardizing argument names is: if a partitioner were to include these names in a plot or table, would the people viewing those results understand the name? To understand how the `parsnip` argument names map to the original names, the help file for the model can be used as well as the `translate()` function: 
+Some of the original argument names can be fairly jargon-y. For example, to specify the amount of regularization to use in a glmnet model, the Greek letter `lambda` is used. While this mathematical notation is commonly used in the statistics literature, it is not obvious to many people what `lambda` represents (especially those who consume the model results). Since this is the penalty used in regularization, parsnip standardizes on the argument name `penalty`. Similarly, the number of neighbors in a _K_-nearest neighbors model is called `neighbors` instead of `k`. Our rule of thumb when standardizing argument names is:
+
+> If a practitioner were to include these names in a plot or table, would the people viewing those results understand the name? 
+
+To understand how the parsnip argument names map to the original names, use the help file for the model (available via `?rand_forest`) as well as the `translate()` function: 
 
 ```{r models-glmnet-trans}
 rand_forest(trees = 1000, min_n = 5) %>% 
@@ -181,13 +184,13 @@ rand_forest(trees = 1000, min_n = 5) %>%
   translate()
 ```
 
-`parsnip` modeling functions separate model arguments into two categories: 
+Modeling functions in parsnip separate model arguments into two categories: 
 
- * _Main arguments_ are those that are commonly used and tend to be available across engines. 
+ * _Main arguments_ are more commonly used and tend to be available across engines. 
 
  * _Engine arguments_ are either specific to a particular engine or used more rarely. 
 
-For example, in the translation of the random forest code above, the arguments `num.threads`, `verbose`, and `seed` were added by default. These arguments are specific to the `ranger` implementation of random forest models and wouldn't make sense as main arguments. Engine-specific arguments can be specified in `set_engine()`. For example, to have the `ranger::ranger()` function print out more information about the fit:
+For example, in the translation of the random forest code above, the arguments `num.threads`, `verbose`, and `seed` were added by default. These arguments are specific to the ranger implementation of random forest models and wouldn't make sense as main arguments. Engine-specific arguments can be specified in `set_engine()`. For example, to have the `ranger::ranger()` function print out more information about the fit:
 
 ```{r models-ranger-verb}
 rand_forest(trees = 1000, min_n = 5) %>% 
@@ -196,24 +199,25 @@ rand_forest(trees = 1000, min_n = 5) %>%
 ```
 
 
-## Using the model results
+## Use the model results
 
-Once the model is created, there are a variety of activities that can be accomplished. One might desire to plot, print, or otherwise examine the results. Several quantities are stored in the `parsnip` model objects, including the fitted model. This can be found in an element called `fit`, which can be easily returned using the `purrr::pluck()` function:
+Once the model is created and fit, we can use the results in a variety of ways; we might want to plot, print, or otherwise examine the model output. Several quantities are stored in a parsnip model object, including the fitted model. This can be found in an element called `fit`, which can be returned using the `purrr::pluck()` function:
 
 ```{r models-pluck}
 lm_form_fit %>% pluck("fit")
 ```
-Using this object, the normal methods can be used, such as printing, plotting, and so on: 
+
+Normal methods can be applied to this object, such as printing, plotting, and so on: 
 
 ```{r models-pluck-coef}
 lm_form_fit %>% pluck("fit") %>% vcov()
 ```
 
-```{block, type = "rmdwarning"}
-Never pass the `fit` object to a model prediction function. If the data were pre-processed in any way, incorrect predictions will be generated (sometimes, without errors). The underlying model's prediction function has no idea if any transformations have been made to the data prior to running the model.
-```
+:::rmdwarning
+Never pass the `fit` element of a parsnip model to a model prediction function; see Section \@ref(parsnip-predictions) for making predictions. If the data were preprocessed in any way, incorrect predictions will be generated (sometimes, without errors). The underlying model's prediction function has no idea if any transformations have been made to the data prior to running the model.
+:::
 
-However, one issue with some existing methods in base R is that the manner in which the results are stored may not be the most useful. For example, the `summary()` method for `lm` objects can be used used to print the results of the model fit, including a table with parameter values, their uncertainty estimates, and p-values. These particular results can also be saved:
+One issue with some existing methods in base R is that the results are stored in a manner that may not be the most useful. For example, the `summary()` method for `lm` objects can be used used to print the results of the model fit, including a table with parameter values, their uncertainty estimates, and p-values. These particular results can also be saved:
 
 ```{r models-lm-param}
 model_res <- 
@@ -229,11 +233,11 @@ param_est
 
 There are a few things to notice about this result. First, the object is a numeric matrix. This data structure was mostly likely chosen since all of the calculated results are numeric and a matrix object is stored more efficiently than a data frame. This choice was probably made in the late 1970's when computational efficiency was extremely critical. Second, the non-numeric data (the labels for the coefficients) are contained in the row names. Keeping the parameter labels as row names is very consistent with the conventions in the original S language. 
 
-A reasonable course of action might be to create a visualization of the parameters values. To do this, it would be sensible to convert the parameter matrix to a data frame. In doing so, the row names could be added as a column so that they can be used in the plot. However, note that several of the existing matrix column names would not be valid R object names for ordinary data frames (e.g. `"Pr(>|t|)"`.  Another complication is the consistency of the column names. For `lm` objects, the column for the test statistic is `"Pr(>|t|)"`. However, for other models, a different test might be used and, as a result, the column name is different (e.g., `"Pr(>|z|)"`) and the type of test is _encoded in the column name_.  
+A reasonable next step might be to create a visualization of the parameters values. To do this, it would be sensible to convert the parameter matrix to a data frame. We could add the row names as a column so that they can be used in a plot. However, notice that several of the existing matrix column names would not be valid R column names for ordinary data frames (e.g. `"Pr(>|t|)"`.  Another complication is the consistency of the column names. For `lm` objects, the column for the test statistic is `"Pr(>|t|)"`, but for other models, a different test might be used and, as a result, the column name would be different (e.g., `"Pr(>|z|)"`) and the type of test would be _encoded in the column name_.  
  
-While these additional data formatting steps are not problematic they are a bit of an inconvenience, especially since they might be different for different types of models. The matrix is not a highly reusable data structure mostly because it must constrains the data to be of a single type (e.g. numeric). Additionally, keeping some data in the dimension names is also problematic since those data must be extracted to be of general use.
+While these additional data formatting steps are not impossible to overcome, they are a hindrance, especially since they might be different for different types of models. The matrix is not a highly reusable data structure mostly because it constrains the data to be of a single type (e.g. numeric). Additionally, keeping some data in the dimension names is also problematic since those data must be extracted to be of general use.
 
-As a solution, the `broom` package has methods to convert many types of objects to a tidy structure. For example, using the `tidy()` method on the linear model produces:
+As a solution, the broom package has methods to convert many types of model objects to a tidy structure. For example, using the `tidy()` method on the linear model produces:
 
 
 ```{r models-tidy-lm}
@@ -243,9 +247,9 @@ tidy(lm_form_fit)
 The column names are standardized across models and do not contain any additional data (such as the type of statistical test). The data previously contained in the row names are now in a column called `terms` and so on. One important principle in the tidymodels ecosystem is that a function should return values that are _predictable, consistent, and unsurprising_. 
 
 
-## Making predictions
+## Make predictions {#parsnip-predictions}
 
-Another area where `parsnip` diverges the most from conventional R modeling functions is the format of return value for `predict()`. For predictions, `parsnip` always conform to the following rules: 
+Another area where parsnip diverges from conventional R modeling functions is the format of values returned from `predict()`. For predictions, parsnip always conforms to the following rules: 
 
  1. The results are always a tibble.
  2. The column names of the tibble are always predictable. 
@@ -260,11 +264,11 @@ predict(lm_form_fit, new_data = ames_test_small)
 
 The row order of the predictions are always the same as the original data. 
 
-```{block, type = "rmdnote"}
-Why are there leading dot in some of the column names? Some tidyverse and tidymodels arguments and return values contain periods. This is to protect against merging data with duplicate names. There are some data sets that contain predictors names `pred`. 
-```
+:::rmdnote
+Why are there leading dot in some of the column names? Some tidyverse and tidymodels arguments and return values contain periods. This is to protect against merging data with duplicate names. There are some data sets that contain predictors names `pred`! 
+:::
 
-These three rules make it easy to merge predictions with the original data: 
+These three rules make it easier to merge predictions with the original data: 
 
 ```{r models-small-int}
 ames_test_small %>% 
@@ -275,7 +279,7 @@ ames_test_small %>%
   bind_cols(predict(lm_form_fit, ames_test_small, type = "pred_int")) 
 ```
 
-The motivation for the first rule comes from some R package producing dissimilar data types from prediction functions. For example, the `ranger` package is an excellent tool for computing random forest models. However, instead of returning a data frame or vector as output, a specialized object is returned that have multiple values embedded within it (including the predicted values). This is just one more step for the data analyst to work around in their scripts. As another example, the `glmnet` package can return at least four different output types for predictions, depending on the model and characteristics of the data: 
+The motivation for the first rule comes from some R packages producing dissimilar data types from prediction functions. For example, the ranger package is an excellent tool for computing random forest models. However, instead of returning a data frame or vector as output, a specialized object is returned that has multiple values embedded within it (including the predicted values). This is just one more step for the data analyst to work around in their scripts. As another example, the glmnet package can return at least four different output types for predictions, depending on the model and characteristics of the data: 
 
 | Type of Prediction       | Returns a:                      |
 |--------------------------|---------------------------------|
@@ -284,9 +288,9 @@ The motivation for the first rule comes from some R package producing dissimilar
 | probability (2 classes)  | numeric matrix (2nd level only) |
 | probability (3+ classes) | 3D numeric array (all levels)   |
 
-Additionally, the column names of the results contain coded values that map to vector called `lambda` within the `glmnet` model object. This excellent statistical method can be discouraging to use in practice because of all of the special cases one might encounter that require additional code to be useful.
+Additionally, the column names of the results contain coded values that map to a vector called `lambda` within the glmnet model object. This excellent statistical method can be discouraging to use in practice because of all of the special cases an analyst might encounter that require additional code to be useful.
 
-For the second tidymodels prediction rule, the column names for different types of predictions are: 
+For the second tidymodels prediction rule, the predictable column names for different types of predictions are: 
 
 ```{r model-pred-info, echo = FALSE, results = "asis"}
   tribble(
@@ -301,9 +305,9 @@ For the second tidymodels prediction rule, the column names for different types 
   kable_styling(full_width = FALSE)
 ```
 
-The third rule regarding the number of rows in the output is critical. For example, if any rows of the new data contain missing values, the output will be padded with missing results for those rows. Additionally, there are some types of predictions where multiple values are produce for each row of the new data being predicted. Take quantile regression where the model predicts values of the outcome distribution for a set of pre-defined set of quantile values. In those cases, the output would consist of a set of nested tibbles for each row. Each nested tibble would contain a column called `.pred` as well as well as a column for the corresponding quantile value. This maintains the ability to easily merge the original data with the predictions and `tidyr::unnest()` can be used to expand the nested tibbles.  
+The third rule regarding the number of rows in the output is critical. For example, if any rows of the new data contain missing values, the output will be padded with missing results for those rows. Additionally, there are some types of predictions where multiple values are produced for each row of the new data being predicted. Take quantile regression where the model predicts values of the outcome distribution for a set of pre-defined set of quantile values. In those cases, the output would consist of a set of nested tibbles for each row. Each nested tibble would contain a column called `.pred` as well as well as a column for the corresponding quantile value. This maintains the ability to easily merge the original data with the predictions; `tidyr::unnest()` can then be used to expand the nested tibbles.  
 
-Another advantage of standardizing the model interface and prediction types in `parsnip` is that, when different models are used, the syntax is identical. Suppose that a decision tree were used to model these data. Outside of the model specification, there are no significant differences in the code pipeline: 
+A main advantage of standardizing the model interface and prediction types in parsnip is that, when different models are used, the syntax is identical. Suppose that we used a decision tree to model the Ames data. Outside of the model specification, there are no significant differences in the code pipeline: 
 
 ```{r models-cart}
 tree_model <- 
@@ -321,8 +325,8 @@ ames_test_small %>%
   bind_cols(predict(tree_fit, ames_test_small))
 ```
 
-This demonstrates the benefit of homogenizing the data analysis process and syntax across different models. It enables the user to spend their type on the results and interpretation rather than having to focus on the syntactical differences between R packages. 
+This demonstrates the benefit of homogenizing the data analysis process and syntax across different models. It enables the user to spend their time on the results and interpretation rather than having to focus on the syntactical differences between R packages. 
 
-## `parsnip` adjacent packages
+## parsnip-adjacent packages
 
-`parsnip` itself contains interfaces to a number of models. However, to be more modular, there are other packages in the tidymodels repository that have `parsnip` model definitions for clusters of similar models. For example, the `discrim` package has model definitions for the set of classification techniques called _disciminant analysis_ methods (such as linear or quadratic discriminant analysis). In this way, the package dependencies required for installing `parsnip` are reduced. A list of _all_ of the models that can be used with `parsnip` (across different packages that are on CRAN) can be found at [`tidymodels.org/find`](https://www.tidymodels.org/find/).   
+The parsnip package itself contains interfaces to a number of models. However, for ease of package installation and maintenance, there are other tidymodels packages that have parsnip model definitions for other sets of models. The discrim package has model definitions for the set of classification techniques called _disciminant analysis_ methods (such as linear or quadratic discriminant analysis). In this way, the package dependencies required for installing parsnip are reduced. A list of _all_ of the models that can be used with parsnip (across different packages that are on CRAN) can be found at [`tidymodels.org/find`](https://www.tidymodels.org/find/).   
