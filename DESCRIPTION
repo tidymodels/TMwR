@@ -21,6 +21,7 @@ Imports:
   knitr,
   lubridate,
   modeldata,
+  nlme,
   patchwork,
   ranger,
   recipes,
