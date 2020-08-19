@@ -7,9 +7,9 @@ source("ames_snippets.R")
 
 # Spending our data {#splitting}
 
-There are a variety of steps to create a useful model, including parameter estimation, model selection and tuning, performance assessment, calibration, and so on. At the start of a new project, there is usually an initial pool of data available for these tasks. How should the data be applied to these tasks? The idea of _data spending_ is an important first consideration when modeling, especially as it related to empirical validation. 
+There are several steps to create a useful model, including parameter estimation, model selection and tuning, and performance assessment. At the start of a new project, there is usually an initial finite pool of data available for all these tasks. How should the data be applied to these steps? The idea of _data spending_ is an important first consideration when modeling, especially as it relates to empirical validation. 
 
-When there are copious amounts of data available, a smart strategy is to allocate specific subsets of data for various tasks (as opposed to allocating the largest possible amount to the model parameter estimation only). With a new modeling project, there may be many questions that must be answered with limited prior knowledge. For example, with a large number of predictors and amount of data available, one possible strategy is to spend a specific subset on data analysis focused on determining which predictors are informative. 
+When there are copious amounts of data available, a smart strategy is to allocate specific subsets of data for different tasks, as opposed to allocating the largest possible amount to the model parameter estimation only. There may be questions about many modeling project steps that must be answered with limited prior knowledge. For example, one possible strategy (when both data and predictors are abundant) is to spend a specific subset of data to determine which predictors are informative, before considering parameter estimation at all. 
 
 :::rmdwarning
 As data are reused for multiple tasks, certain risks increase, such as the risks of adding bias or large effects from methodological errors.
@@ -19,7 +19,7 @@ If the initial pool of data available is not huge, there will be some overlap of
 
 ## Common methods for splitting data {#splitting-methods}
 
-The primary approach for empirical model validation is to split the existing pool of data into two distinct sets. Some observations are used to develop and optimize the model. This _training set_ is usually the majority of the data. These data are a _sandbox_ for model building where different models can be fit, feature engineering strategies are investigated, and so on. We as modeling practitioners spend the vast majority of the modeling process using the training set as the substrate to develop the model.  
+The primary approach for empirical model validation is to split the existing pool of data into two distinct sets. Some observations are used to develop and optimize the model. This _training set_ is usually the majority of the data. These data are a sandbox for model building where different models can be fit, feature engineering strategies are investigated, and so on. We as modeling practitioners spend the vast majority of the modeling process using the training set as the substrate to develop the model.  
 
 The other portion of the observations are placed into the _test set_. This is held in reserve until one or two models are chosen as the methods that are mostly likely to succeed. The test set is then used as the final arbiter to determine the efficacy of the model. It is critical to only look at the test set once; otherwise, it becomes part of the modeling process. 
 
@@ -27,7 +27,7 @@ The other portion of the observations are placed into the _test set_. This is he
 How should we conduct this split of the data? This depends on the context. 
 :::
 
-Suppose we allocate 80% of the data to the training set and the remaining 20% for testing.  The most common method is to use simple random sampling. The [rsample](https://rsample.tidymodels.org/) package has tools for making data splits such as this; the function `intial_split()` was created for this purpose. It takes the data frame as an argument as well as the proportion to be **placed into training**. Using the previous produced by the code snippet from the summary in Section \@ref(ames-summary): 
+Suppose we allocate 80% of the data to the training set and the remaining 20% for testing.  The most common method is to use simple random sampling. The [rsample](https://rsample.tidymodels.org/) package has tools for making data splits such as this; the function `intial_split()` was created for this purpose. It takes the data frame as an argument as well as the proportion to be placed into training. Using the previous produced by the code snippet from the summary in Section \@ref(ames-summary): 
 
 ```{r ames-split, message = FALSE, warning = FALSE}
 # Set the random number stream using `set.seed()` so that the results can be 
@@ -97,7 +97,7 @@ The amount of data that should be allocated when splitting the data is highly de
 
 ## What about a validation set? 
 
-Previously, when describing the goals of data splitting, we singled out the test set as the data that should be used to conduct a proper evaluation of model performance on the models that are viewed as best. This begs the question of, "How can we tell what is best if we don't measure performance until the test set?" 
+Previously, when describing the goals of data splitting, we singled out the test set as the data that should be used to conduct a proper evaluation of model performance on the final model(s). This begs the question of, "How can we tell what is best if we don't measure performance until the test set?" 
 
 It is common to hear about _validation sets_ as an answer to this question, especially in the neural network and deep learning literature. The validation set was originally defined in the early days of neural networks when researchers realized that measuring performance by re-predicting the training set samples led to results that were overly optimistic (significantly, unrealistically so). This led to models that overfit, meaning that they performed very well on the training set but poorly on the test set^[This is discussed in much greater detail in Section \@ref(overfitting-bad).]. To combat this issue, a small validation set of data were held back and used to measure performance as the network was trained. Once the validation set error rate began to rise, the training would be halted. In other words, the validation set was a means to get a rough sense of how well the model performed prior to the test set. 
 
@@ -139,7 +139,7 @@ Finally, at the beginning of this chapter, we warned about using the same data f
 
 ## Chapter summary {#splitting-summary}
  
-Data splitting is the fundamental tool for empirical validation. Several strategies were discussed for partitioning the data into distinct groups for modeling and evaluation. 
+Data splitting is the fundamental tool for empirical validation for models. Even in the era of unrestrained data collection, a typical modeling project has a limited amount of appropriate data and wise "spending" of a project's data is necessary. In this chapter, we discussed several strategies for partitioning the data into distinct groups for modeling and evaluation. 
 
 At this checkpoint, the important code snippets are:
 
