@@ -118,7 +118,7 @@ lm_xy_fit
 :::rmdwarning
 The differences are between `fit()` and `fit_xy()` may not be obvious. 
 
-If `fit()` is used, this _almost always_ means that dummy variables will be created from qualitative predictors. If the underlying function requires a matrix (like glmnet), it will make them. However, if the underlying function uses a formula, `fit()` just passes the formula to that function. We estimate that 99% of modeling functions using formulas make dummy variables. The other 1% include tree-based methods that do not require purely numeric predictors. 
+When `fit()` is used with a model specification, this _almost always_ means that dummy variables will be created from qualitative predictors. If the underlying function requires a matrix (like glmnet), it will make them. However, if the underlying function uses a formula, `fit()` just passes the formula to that function. We estimate that 99% of modeling functions using formulas make dummy variables. The other 1% include tree-based methods that do not require purely numeric predictors.^[See Section \@ref(workflow-encoding) for more about using formulas in tidymodels.]
 
 The `fit_xy()` function always passes the data as-is to the underlying model function. It will not create dummy variables before doing so.
 :::
@@ -325,9 +325,9 @@ The parsnip package itself contains interfaces to a number of models. However, f
 
 ## Chapter summary {#models-summary}
 
-This chapter introduced the parsnip package. parsnip enables a common interface across R packages using standard syntax. The interface and resulting objects have a predictable structure. 
+This chapter introduced the parsnip package, which provides a common interface for models across R packages using a standard syntax. The interface and resulting objects have a predictable structure. 
 
-The additions to the current code snippets for modeling the Ames data are:
+The code for modeling the Ames data that we will use moving forward is:
 
 ```{r models-summary, eval = FALSE}
 library(tidymodels)

@@ -203,7 +203,7 @@ lmer(distance ~ Sex + (age | Subject), data = Orthodont)
 
 The effect of this is that each subject will have an estimated intercept and slope parameter for `age`. 
 
-The problem is that standard R methods can't properly processing this formula: 
+The problem is that standard R methods can't properly process this formula: 
 
 ```{r echo=FALSE}
 data(Orthodont, package = "nlme")
@@ -269,7 +269,7 @@ There are also operations that might occur _after_ the model is fit. An example 
 
 ## Chapter summary {#workflows-summary}
 
-In this chapter, you learned that the modeling process encompasses more than just estimating the parameters of an algorithm that connects predictors to an outcome. This process also includes preprocessing steps, such as those outlined in Chapter \@ref(recipes), and steps operations taken after a model is fit. We introduced a concept called a **model workflow** that can capture the important components of the modeling process. 
+In this chapter, you learned that the modeling process encompasses more than just estimating the parameters of an algorithm that connects predictors to an outcome. This process also includes preprocessing steps, such as those outlined in Chapter \@ref(recipes), and operations taken after a model is fit. We introduced a concept called a **model workflow** that can capture the important components of the modeling process. 
 
 For the Ames data, the code used in later chapters is:
 

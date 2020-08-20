@@ -337,5 +337,5 @@ This can be a quick visualization method for model effectiveness.
 
 ## Chapter summary {#performance-summary}
 
-yardstick functions measure the effectiveness of the model using data. The primary interface is based on data frames (as opposed to having vector arguments). There are a variety of regression and classification metrics and, within these, there are sometimes different estimators for the statistics. 
+Functions from the yardstick package measure the effectiveness of a model using data. The primary interface is based on data frames (as opposed to having vector arguments). There are a variety of regression and classification metrics and, within these, there are sometimes different estimators for the statistics. 
 
