@@ -298,8 +298,7 @@ For the second tidymodels prediction rule, the predictable column names for diff
   kable_styling(full_width = FALSE)
 ```
 
-The third rule regarding the number of rows in the output is critical. For example, if any rows of the new data contain missing values, the output will be padded with missing results for those rows. Additionally, there are some types of predictions where multiple values are produced for each row of the new data being predicted. Take quantile regression where the model predicts values of the outcome distribution for a set of pre-defined set of quantile values. In those cases, the output would consist of a set of nested tibbles for each row. Each nested tibble would contain a column called `.pred` as well as well as a column for the corresponding quantile value. This maintains the ability to easily merge the original data with the predictions; `tidyr::unnest()` can then be used to expand the nested tibbles.  
-
+The third rule regarding the number of rows in the output is critical. For example, if any rows of the new data contain missing values, the output will be padded with missing results for those rows. 
 A main advantage of standardizing the model interface and prediction types in parsnip is that, when different models are used, the syntax is identical. Suppose that we used a decision tree to model the Ames data. Outside of the model specification, there are no significant differences in the code pipeline: 
 
 ```{r models-cart}
