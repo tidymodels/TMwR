@@ -556,7 +556,9 @@ Let's wrap up with one final note about parallelism. For each of these technolog
 
 ## Saving the resampled objects {#extract}
 
-While the models created during resampling are not retained, there is a method for keeping them or some of their components. The `extract` option of `control_resamples()` specifies a function that takes a single argument; we'll use `x`. When executed, `x` results in a fitted workflow object, regardless of whether you provided `fit_resamples()` with a workflow. Recall that the workflows package has functions that can pull the different components of the objects (e.g. the model, recipe, etc.). 
+The models created during resampling are not retained. These models are trained for the purpose of evaluating performance, and we typically do not need them after we have computed performance statistics. If a particular modeling approach does turn out to be the best option for our data set, then the best choice is to fit again to the whole training set so the model parameters can be estimated with more data.
+
+While these models created during resampling are not preserved, there is a method for keeping them or some of their components. The `extract` option of `control_resamples()` specifies a function that takes a single argument; we'll use `x`. When executed, `x` results in a fitted workflow object, regardless of whether you provided `fit_resamples()` with a workflow. Recall that the workflows package has functions that can pull the different components of the objects (e.g. the model, recipe, etc.). 
 
 Let's fit a linear regression model using the recipe shown at the end of Chapter \@ref(recipes):
 
