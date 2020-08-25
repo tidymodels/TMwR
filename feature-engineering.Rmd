@@ -482,15 +482,36 @@ To make predictions on the test set, we use the standard syntax:
 predict(lm_fit, ames_test_prepped %>% head())
 ```
 
-There is also a `tidy()` method for recipes. Calling it with no other arguments gives a summary of the recipe steps:
+## Tidy a recipe
+
+In Section \@ref(tidiness-modeling), we introduced the `tidy()` verb for statistical objects and in Section \@ref(recipes-manual), we showed how to `tidy()` a model. There is also a `tidy()` method for recipes. Calling it with no other arguments gives a summary of the recipe steps:
 
 ```{r engineering-ames-tidy-rec}
 tidy(ames_rec_prepped)
 ```
 
-The `id` field can be specified by the user in a step function call but is otherwise generated using a random suffix. This field can be helpful if the same type of step is added to the recipe more than once (as was done with `step_log()` above).
+We can specify the `id` field in a step function call but otherwise it is generated using a random suffix. This field can be helpful if the same type of step is added to the recipe more than once. Let's specify the `id` ahead of time for `step_log()`, since we want to `tidy()` it:
 
-Suppose you were interested in knowing what neighborhoods were retained by `step_other()`. The `tidy()` method can be called again along with the `number` identifier (or the `id` identifier) to get these results:
+```{r engineering-lm-recipe-id}
+ames_rec <- 
+  recipe(Sale_Price ~ Neighborhood + Gr_Liv_Area + Year_Built + Bldg_Type + 
+           Latitude + Longitude, data = ames_train) %>%
+  step_log(Gr_Liv_Area, base = 10, id = "my_id") %>% 
+  step_other(Neighborhood, threshold = 0.01) %>% 
+  step_dummy(all_nominal()) %>% 
+  step_interact( ~ Gr_Liv_Area:starts_with("Bldg_Type_") ) %>% 
+  step_ns(Latitude, Longitude, deg_free = 20)
+
+ames_rec_prepped <- prep(ames_rec)
+```
+
+Suppose you were interested in knowing what neighborhoods were retained by `step_log()` The `tidy()` method can be called again along with the `id` identifier we specified to get these results:
+
+```{r engineering-lm-tidy-log}
+tidy(ames_rec_prepped, id = "my_id")
+```
+
+The `tidy()` method can be called with the `number` identifier as well, if we know which step in the recipe we need:
 
 ```{r engineering-ames-tidy-other}
 tidy(ames_rec_prepped, number = 2)

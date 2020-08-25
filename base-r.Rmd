@@ -215,7 +215,7 @@ Our focus, when seeing this, is that there are two predictors and the model shou
 This is an important point which will come up multiple times in this text. There are some limitations of the formula and our approaches to overcoming them will have to contend with all three aspects of the formula listed above. 
 ```
 
-## Why tidiness is important for modeling
+## Why tidiness is important for modeling {#tidiness-modeling}
 
 One of the strengths of R is that it encourages developers to create a user-interface that fits their needs.  As an example, here are three common methods for creating a scatter plot of two numeric variables in a data frame called `plot_data`:
 
