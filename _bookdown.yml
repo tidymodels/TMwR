@@ -15,7 +15,6 @@ rmd_files: [
   "tools.Rmd",
   "resampling.Rmd",
   "comparing-models.Rmd",
-  "over-fitting.Rmd",
   "tuning-parameters.Rmd",
   "grid-search.Rmd",
   "iterative-search.Rmd",

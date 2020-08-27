@@ -1,12 +1,12 @@
 ```{r ames-setup, include = FALSE}
 knitr::opts_chunk$set(fig.path = "figures/")
 library(tidymodels)
-data(ames, package = "modeldata")
+data(ames)
 ```
 
 # The Ames housing data {#ames}
 
-The Ames housing data set [@ames] is an excellent teaching resource that we will use throughout this book. It contains data on `r format(nrow(ames), big.mark = ",")` properties in Ames, Iowa, including columns related to 
+The Ames housing data set [@ames] is an excellent resource for learning about models that we will use throughout this book. It contains data on `r format(nrow(ames), big.mark = ",")` properties in Ames, Iowa, including columns related to 
 
  * house characteristics (bedrooms, garage, fireplace, pool, porch, etc.),
  * location (neighborhood),
@@ -38,7 +38,7 @@ data(ames, package = "modeldata")
 dim(ames)
 ```
 
-The remainder of this chapter explores some important features of the data for our modeling goals. 
+## Exploring important features
 
 It makes sense to start with the outcome we want to predict: the last sale price of the house (in USD): 
 
@@ -63,9 +63,13 @@ The downside to transforming the outcome is mostly related to interpretation.
 
 The units of the model coefficients might be more difficult to interpret, as will measures of performance. For example, the root mean squared error (RMSE) is a common performance metric that is used in regression models. It uses the difference between the observed and predicted values in its calculations. If the sale price is on the log scale, these differences (i.e. the residuals) are also in log units. For this reason, it can be difficult to understand the quality of a model whose RMSE is 0.15 log units. 
 
-Despite these drawbacks, the models used in this book utilize the log transformation for this outcome. 
+Despite these drawbacks, the models used in this book utilize the log transformation for this outcome. _From this point on_, the outcome column is pre-logged in the `ames` data frame: 
 
-Another important aspect of these data for our modeling are their geographic locations. This spatial information is contained in the data in two ways: a qualitative `neighborhood` label as well as quantitative longitude and latitude data. To visualize the spatial information, let's use both together to plot the data on a map and color by neighborhood: 
+```{r ames-log}
+ames <- ames %>% mutate(Sale_Price = log10(Sale_Price))
+```
+
+Another important aspect of these data for our modeling are their geographic locations. This spatial information is contained in the data in two ways: a qualitative `Neighborhood` label as well as quantitative longitude and latitude data. To visualize the spatial information, let's use both together to plot the data on a map and color by neighborhood: 
 
 ```{r ames-map-code, eval = FALSE, include = FALSE}
 col_key <- c(
@@ -126,7 +130,7 @@ Also notable is the "Iowa Department of Transportation (DOT) and Rail Road" neig
 
 A detailed inspection of the map also shows that the neighborhood labels are not completely reliable. For example, there are some properties labeled as being in Northridge that are surrounded by houses in the adjacent Somerset neighborhood. Also, there are ten isolated houses labeled as being in Crawford but are not close to the majority of the other data in that neighborhood.
 
-As previously described in the [introduction](/introduction), it is critical to conduct _exploratory data analysis_ prior to beginning any data analysis. These data contain a number of elements that present interesting questions about how the data should be processed and analyzed. We describe many of these in later chapters. Some basic questions that could be examined include: 
+As previously described in Chapter @ref(introduction), it is critical to conduct _exploratory data analysis_ prior to beginning any modeling. These housing data have characteristics that present interesting challenges about how the data should be processed and modeled. We describe many of these in later chapters. Some basic questions that could be examined include: 
 
  * Are there any odd or noticeable things about the distributions of the individual predictors? Is there much skewness or any pathological distributions? 
 
@@ -136,4 +140,15 @@ As previously described in the [introduction](/introduction), it is critical to 
 
 Many of these questions will be revisited as these data are used in upcoming examples. 
 
+## Chapter summary {#ames-summary}
  
+This chapter introduced a data set used in later chapters to demonstrate tidymodels syntax and investigated some of its characteristics. Exploratory data analysis like this is an essential component of any modeling project; EDA uncovers information that contributes to better modeling practice.
+
+The important code that we will carry forward into subsequent chapters is:
+ 
+ 
+```{r ames-summary, eval = FALSE}
+library(tidymodels)
+data(ames)
+ames <- ames %>% mutate(Sale_Price = log10(Sale_Price))
+``` 

@@ -5,14 +5,7 @@ library(kknn)
 library(kableExtra)
 library(tidyr)
 
-data(ames, package = "modeldata")
-
-set.seed(833961)
-ames_split <- initial_split(ames, prob = 0.80, strata = Sale_Price)
-ames_train <- training(ames_split)
-ames_test  <-  testing(ames_split)
-
-options(digits = 3)
+source("ames_snippets.R")
 ```
 
 # Fitting models with parsnip {#models}
@@ -98,7 +91,8 @@ Note that `missing_arg()` is just a placeholder for the data that has yet to be 
 Note that, for the Stan and glmnet engines, the `family` argument was automatically added as a default. As will be shown below, this option can be changed.  
 :::
 
-Let's walk through how to predict the sale price of houses in the Ames data as a function of only longitude and latitude. 
+Let's walk through how to predict the sale price of houses in the Ames data as a function of only longitude and latitude. This code builds on the current analysis shown in Section \@ref(recipes-summary):
+
 
 ```{r models-ames-geocodes}
 lm_model <- 
@@ -107,13 +101,14 @@ lm_model <-
 
 lm_form_fit <- 
   lm_model %>% 
-  fit(log10(Sale_Price) ~ Longitude + Latitude, data = ames_train)
+  # Recall that Sale_Price has been pre-logged
+  fit(Sale_Price ~ Longitude + Latitude, data = ames_train)
 
 lm_xy_fit <- 
   lm_model %>% 
   fit_xy(
     x = ames_train %>% select(Longitude, Latitude),
-    y = ames_train %>% mutate(Sale_Price = log10(Sale_Price)) %>% pull(Sale_Price)
+    y = ames_train %>% pull(Sale_Price)
     )
     
 lm_form_fit
@@ -123,7 +118,7 @@ lm_xy_fit
 :::rmdwarning
 The differences are between `fit()` and `fit_xy()` may not be obvious. 
 
-If `fit()` is used, this _almost always_ means that dummy variables will be created from qualitative predictors. If the underlying function requires a matrix (like glmnet), it will make them. However, if the underlying function uses a formula, `fit()` just passes the formula to that function. We estimate that 99% of modeling functions using formulas make dummy variables. The other 1% include tree-based methods that do not require purely numeric predictors. 
+When `fit()` is used with a model specification, this _almost always_ means that dummy variables will be created from qualitative predictors. If the underlying function requires a matrix (like glmnet), it will make them. However, if the underlying function uses a formula, `fit()` just passes the formula to that function. We estimate that 99% of modeling functions using formulas make dummy variables. The other 1% include tree-based methods that do not require purely numeric predictors.^[See Section \@ref(workflow-encoding) for more about using formulas in tidymodels.]
 
 The `fit_xy()` function always passes the data as-is to the underlying model function. It will not create dummy variables before doing so.
 :::
@@ -160,7 +155,6 @@ arg_info %>%
 In an effort to make argument specification less painful, parsnip uses common argument names within and between packages. For random forests, parsnip models use: 
 
 ```{r, models-parsnip-names, echo = FALSE, results = "asis"}
-
 arg_info %>%
   select(`Argument Type`, parsnip) %>%
   distinct() %>% 
@@ -273,7 +267,6 @@ These three rules make it easier to merge predictions with the original data:
 ```{r models-small-int}
 ames_test_small %>% 
   select(Sale_Price) %>% 
-  mutate(Sale_Price = log10(Sale_Price)) %>% 
   bind_cols(predict(lm_form_fit, ames_test_small)) %>% 
   # Add 95% prediction intervals to the results:
   bind_cols(predict(lm_form_fit, ames_test_small, type = "pred_int")) 
@@ -305,8 +298,7 @@ For the second tidymodels prediction rule, the predictable column names for diff
   kable_styling(full_width = FALSE)
 ```
 
-The third rule regarding the number of rows in the output is critical. For example, if any rows of the new data contain missing values, the output will be padded with missing results for those rows. Additionally, there are some types of predictions where multiple values are produced for each row of the new data being predicted. Take quantile regression where the model predicts values of the outcome distribution for a set of pre-defined set of quantile values. In those cases, the output would consist of a set of nested tibbles for each row. Each nested tibble would contain a column called `.pred` as well as well as a column for the corresponding quantile value. This maintains the ability to easily merge the original data with the predictions; `tidyr::unnest()` can then be used to expand the nested tibbles.  
-
+The third rule regarding the number of rows in the output is critical. For example, if any rows of the new data contain missing values, the output will be padded with missing results for those rows. 
 A main advantage of standardizing the model interface and prediction types in parsnip is that, when different models are used, the syntax is identical. Suppose that we used a decision tree to model the Ames data. Outside of the model specification, there are no significant differences in the code pipeline: 
 
 ```{r models-cart}
@@ -317,11 +309,10 @@ tree_model <-
 
 tree_fit <- 
   tree_model %>% 
-  fit(log10(Sale_Price) ~ Longitude + Latitude, data = ames_train)
+  fit(Sale_Price ~ Longitude + Latitude, data = ames_train)
 
 ames_test_small %>% 
   select(Sale_Price) %>% 
-  mutate(Sale_Price = log10(Sale_Price)) %>% 
   bind_cols(predict(tree_fit, ames_test_small))
 ```
 
@@ -329,4 +320,32 @@ This demonstrates the benefit of homogenizing the data analysis process and synt
 
 ## parsnip-adjacent packages
 
-The parsnip package itself contains interfaces to a number of models. However, for ease of package installation and maintenance, there are other tidymodels packages that have parsnip model definitions for other sets of models. The discrim package has model definitions for the set of classification techniques called _disciminant analysis_ methods (such as linear or quadratic discriminant analysis). In this way, the package dependencies required for installing parsnip are reduced. A list of _all_ of the models that can be used with parsnip (across different packages that are on CRAN) can be found at [`tidymodels.org/find`](https://www.tidymodels.org/find/).   
+The parsnip package itself contains interfaces to a number of models. However, for ease of package installation and maintenance, there are other tidymodels packages that have parsnip model definitions for other sets of models. The discrim package has model definitions for the set of classification techniques called _disciminant analysis_ methods (such as linear or quadratic discriminant analysis). In this way, the package dependencies required for installing parsnip are reduced. A list of _all_ of the models that can be used with parsnip (across different packages that are on CRAN) can be found at [`tidymodels.org/find`](https://www.tidymodels.org/find/).  
+
+## Chapter summary {#models-summary}
+
+This chapter introduced the parsnip package, which provides a common interface for models across R packages using a standard syntax. The interface and resulting objects have a predictable structure. 
+
+The code for modeling the Ames data that we will use moving forward is:
+
+```{r models-summary, eval = FALSE}
+library(tidymodels)
+data(ames)
+ames <- mutate(ames, Sale_Price = log10(Sale_Price))
+
+set.seed(123)
+ames_split <- initial_split(ames, prob = 0.80, strata = Sale_Price)
+ames_train <- training(ames_split)
+ames_test  <-  testing(ames_split)
+
+ames_rec <- 
+  recipe(Sale_Price ~ Neighborhood + Gr_Liv_Area + Year_Built + Bldg_Type + 
+           Latitude + Longitude, data = ames_train) %>%
+  step_log(Gr_Liv_Area, base = 10) %>% 
+  step_other(Neighborhood, threshold = 0.01) %>% 
+  step_dummy(all_nominal()) %>% 
+  step_interact( ~ Gr_Liv_Area:starts_with("Bldg_Type_") ) %>% 
+  step_ns(Latitude, Longitude, deg_free = 20)
+
+lm_model <- linear_reg() %>% set_engine("lm")
+```

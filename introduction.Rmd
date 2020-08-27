@@ -1,4 +1,4 @@
-# Introduction
+# Introduction {#introduction}
 
 ```{r introduction-setup, include = FALSE}
 knitr::opts_chunk$set(fig.path = "figures/")

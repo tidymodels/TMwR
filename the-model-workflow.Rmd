@@ -3,16 +3,7 @@ knitr::opts_chunk$set(fig.path = "figures/")
 library(tidymodels)
 library(kableExtra)
 
-data(ames, package = "modeldata")
-
-ames <- mutate(ames, Sale_Price = log10(Sale_Price))
-
-set.seed(833961)
-ames_split <- initial_split(ames, prob = 0.80, strata = Sale_Price)
-ames_train <- training(ames_split)
-ames_test  <-  testing(ames_split)
-
-options(digits = 4, width = 60)
+source("ames_snippets.R")
 ```
 
 # A model workflow {#workflows}
@@ -112,17 +103,17 @@ lm_wflow <-
 lm_wflow
 ```
 
-Workflows have a `fit()` method that can be used to create the model:
+Workflows have a `fit()` method that can be used to create the model. Using the objects create in Section \@ref(models-summary):
 
 ```{r workflows-form-fit}
-lm_wflow_fit <- fit(lm_wflow, ames_train)
-lm_wflow_fit
+lm_fit <- fit(lm_wflow, ames_train)
+lm_fit
 ```
 
 We can also `predict()` on the fitted workflow:
 
 ```{r workflows-form-pred}
-predict(lm_wflow_fit, ames_test %>% slice(1:3))
+predict(lm_fit, ames_test %>% slice(1:3))
 ```
 
 The `predict()` method follows all of the same rules and naming conventions that we described for the parsnip package in Section \@ref(parsnip-predictions). 
@@ -130,28 +121,14 @@ The `predict()` method follows all of the same rules and naming conventions that
 Both the model and preprocessor can be removed or updated:
 
 ```{r workflows-form-update}
-lm_wflow_fit %>% 
-  update_formula(Sale_Price ~ Longitude)
+lm_fit %>% update_formula(Sale_Price ~ Longitude)
 ```
 
 Note that, in this new object, the output shows that the previous _fitted_ model was removed since the new formula is inconsistent with the previous model fit. 
 
 ## Workflows and recipes
 
-Instead of using model formulas, recipe objects can also be used to preprocess data for modeling. We built the following recipe in Chapter \@ref(recipes): 
-
-```{r workflows-ames-recipe}
-ames_rec <- 
-  recipe(Sale_Price ~ Neighborhood + Gr_Liv_Area + Year_Built + Bldg_Type + 
-           Latitude + Longitude, data = ames_train) %>%
-  step_log(Gr_Liv_Area, base = 10) %>% 
-  step_other(Neighborhood, threshold = 0.01) %>% 
-  step_dummy(all_nominal()) %>% 
-  step_interact(~ Gr_Liv_Area:starts_with("Bldg_Type_")) %>% 
-  step_ns(Latitude, Longitude, deg_free = 20)
-```
-
-This can be attached to the workflow:
+Instead of using model formulas, recipe objects can also be used to preprocess data for modeling. Section \@ref(models-summary) summarized a recipe that specified several preprocessing and feature engineering steps. These are encapsulated inside the object `ames_rec` and are attached to the workflow:
 
 ```{r workflows-fail, error = TRUE}
 lm_wflow %>% 
@@ -172,22 +149,22 @@ We described the `prep()`, `bake()`, and `juice()` functions in Section \@ref(re
 
 ```{r workflows-recipe-fit}
 # Does `prep()`, `juice()`, and `fit()` in one step:
-lm_wflow_fit <- fit(lm_wflow, ames_train)
+lm_fit <- fit(lm_wflow, ames_train)
 
 # Does `bake()` and `predict()` automatically:
-predict(lm_wflow_fit, ames_test %>% slice(1:3))
+predict(lm_fit, ames_test %>% slice(1:3))
 ```
 
 If we need the bare model object or recipe, there are `pull_*` functions that can retrieve them: 
 
 ```{r workflows-pull}
 # Get the recipe and run `tidy()` method: 
-lm_wflow_fit %>% 
+lm_fit %>% 
   pull_workflow_prepped_recipe() %>% 
   tidy()
 
 # To tidy the model fit: 
-lm_wflow_fit %>% 
+lm_fit %>% 
   # This returns the parsnip object:
   pull_workflow_fit() %>% 
   # Now tidy the linear model object:
@@ -226,7 +203,7 @@ lmer(distance ~ Sex + (age | Subject), data = Orthodont)
 
 The effect of this is that each subject will have an estimated intercept and slope parameter for `age`. 
 
-The problem is that standard R methods can't properly processing this formula: 
+The problem is that standard R methods can't properly process this formula: 
 
 ```{r echo=FALSE}
 data(Orthodont, package = "nlme")
@@ -290,14 +267,15 @@ Currently, a workflow can accept two types of preprocessors: a model formula or 
 There are also operations that might occur _after_ the model is fit. An example of such a _post-processor_ would be cutoff selection for two-class problems. Previously in this chapter, we discussed the idea of modifying the cutoff for a two-class problem. In the future, workflows will be able to attach a custom cutoff that is applied to probabilities after the model fit. Other approaches, such as probability calibration, could also be added as post-processors. 
   
 
-## Chapter summary 
+## Chapter summary {#workflows-summary}
 
-In this chapter, you learned that the modeling process encompasses more than just estimating the parameters of an algorithm that connects predictors to an outcome. This process also includes preprocessing steps, such as those outlined in Chapter \@ref(recipes), and steps operations taken after a model is fit. We introduced a concept called a **model workflow** that can capture the important components of the modeling process. 
+In this chapter, you learned that the modeling process encompasses more than just estimating the parameters of an algorithm that connects predictors to an outcome. This process also includes preprocessing steps, such as those outlined in Chapter \@ref(recipes), and operations taken after a model is fit. We introduced a concept called a **model workflow** that can capture the important components of the modeling process. 
 
-The workflow that we will use in later chapters is:
+For the Ames data, the code used in later chapters is:
 
-```{r workflows-summary}
-data(ames, package = "modeldata")
+```{r workflows-summary, eval = FALSE}
+library(tidymodels)
+data(ames)
 
 ames <- mutate(ames, Sale_Price = log10(Sale_Price))
 
@@ -312,23 +290,21 @@ ames_rec <-
   step_log(Gr_Liv_Area, base = 10) %>% 
   step_other(Neighborhood, threshold = 0.01) %>% 
   step_dummy(all_nominal()) %>% 
-  step_interact(~ Gr_Liv_Area:starts_with("Bldg_Type_")) %>% 
+  step_interact( ~ Gr_Liv_Area:starts_with("Bldg_Type_") ) %>% 
   step_ns(Latitude, Longitude, deg_free = 20)
 
-lm_model <- 
-  linear_reg() %>% 
-  set_engine("lm")
+lm_model <- linear_reg() %>% set_engine("lm")
 
 lm_wflow <- 
   workflow() %>% 
-  add_model(lm_model) %>%
+  add_model(lm_model) %>% 
   add_recipe(ames_rec)
 
-lm_wflow_fit <- fit(lm_wflow, ames_train)
+lm_fit <- fit(lm_wflow, ames_train)
 ```
 
 
 ```{r workflows-save, include = FALSE}
-save(lm_wflow_fit, file = "RData/lm_wflow_fit.RData", version = 2, compress = "xz")
+save(lm_fit, file = "RData/lm_fit.RData", version = 2, compress = "xz")
 ```
 

@@ -9,7 +9,7 @@ data(ames, package = "modeldata")
 
 ames <- mutate(ames, Sale_Price = log10(Sale_Price))
 
-set.seed(833961)
+set.seed(123)
 ames_split <- initial_split(ames, prob = 0.80, strata = Sale_Price)
 ames_train <- training(ames_split)
 ames_test  <-  testing(ames_split)
@@ -20,7 +20,7 @@ registerDoMC(cores = crs)
 
 ## -----------------------------------------------------------------------------
 
-set.seed(1352)
+set.seed(55)
 ames_folds <- vfold_cv(ames_train, v = 10, repeats = 10)
 
 ames_rec <-
@@ -28,7 +28,7 @@ ames_rec <-
            Latitude + Longitude, data = ames_train) %>%
   step_other(Neighborhood, threshold = 0.01) %>%
   step_dummy(all_nominal()) %>%
-  step_interact(~ Gr_Liv_Area:starts_with("Bldg_Type_")) %>%
+  step_interact( ~ Gr_Liv_Area:starts_with("Bldg_Type_") ) %>%
   step_ns(Latitude, Longitude, deg_free = 20)
 
 no_splines <-
@@ -37,7 +37,7 @@ no_splines <-
   step_log(Gr_Liv_Area, base = 10) %>%
   step_other(Neighborhood, threshold = 0.01) %>%
   step_dummy(all_nominal()) %>%
-  step_interact(~ Gr_Liv_Area:starts_with("Bldg_Type_"))
+  step_interact( ~ Gr_Liv_Area:starts_with("Bldg_Type_") )
 
 with_splines <-
   no_splines %>%
@@ -65,7 +65,7 @@ rf_wflow <-
 posteriors <- NULL
 
 for(i in 10:100) {
-
+  if (i %% 10 == 0) cat(i, "... ")
   tmp_rset <- rsample:::df_reconstruct(ames_folds %>% slice(1:i), ames_folds)
 
   lm_no_splines <-
@@ -80,7 +80,7 @@ for(i in 10:100) {
     add_recipe(with_splines) %>%
     fit_resamples(resamples = tmp_rset)
 
-  set.seed(598)
+  set.seed(12)
   rf_res <-
     rf_wflow %>%
     fit_resamples(resamples = tmp_rset)
