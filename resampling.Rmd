@@ -239,7 +239,7 @@ ggplot(cv_info, aes(x = replicates, y = reduction)) +
 
 Larger number of replicates tend to have less impact on the standard error. However, if the baseline value of $\sigma$ is impractically large, the diminishing returns on replication may still be worth the extra computational costs. 
 
-To create repeats, invoked `vfold_cv()` with an additional argument `repeats`: 
+To create repeats, invoke `vfold_cv()` with an additional argument `repeats`: 
 
 ```{r resampling-repeated}
 vfold_cv(ames_train, v = 10, repeats = 5)
@@ -679,5 +679,4 @@ keep_pred <- control_resamples(save_pred = TRUE)
 set.seed(130)
 rf_res <- rf_wflow %>% fit_resamples(resamples = ames_folds, control = keep_pred)
 ```
-
 
