@@ -71,66 +71,53 @@ ames <- ames %>% mutate(Sale_Price = log10(Sale_Price))
 
 Another important aspect of these data for our modeling are their geographic locations. This spatial information is contained in the data in two ways: a qualitative `Neighborhood` label as well as quantitative longitude and latitude data. To visualize the spatial information, let's use both together to plot the data on a map and color by neighborhood: 
 
-```{r ames-map-code, eval = FALSE, include = FALSE}
-col_key <- c(
-  North_Ames = '#0000FF',
-  College_Creek = '#FF0000',
-  Old_Town = '#FFFFFF',
-  Edwards = '#FF00B6',
-  Somerset = '#FF3030',
-  Northridge_Heights = '#009FFF',
-  Gilbert = '#DD00FF',
-  Sawyer = '#9A4D42',
-  Northwest_Ames = '#00FFBE',
-  Sawyer_West = '#1F9698',
-  Mitchell = '#FFACFD',
-  Brookside = '#720055',
-  Crawford = '#F1085C',
-  Iowa_DOT_and_Rail_Road = '#FE8F42',
-  Timberland = '#004CFF',
-  Northridge = '#ffff00',
-  Stone_Brook = '#B1CC71',
-  South_and_West_of_Iowa_State_University = '#02AD24',
-  Clear_Creek = '#FFD300',
-  Meadow_Village = '#886C00',
-  Briardale = '#FFB79F',
-  Bloomington_Heights = '#858567',
-  Veenker = '#A10300',
-  Northpark_Villa = '#00479E',
-  Blueste = '#DC5E93',
-  Greens = '#93D4FF',
-  Green_Hills = '#e5f2e5', 
-  Landmark = '#C8FF00'
-) 
-
-rngs <- list(lon = extendrange(ames$Longitude),
-          lat = extendrange(ames$Latitude))
-
-loc <- c(
-  left = rngs$lon[1],
-  right = rngs$lon[2],
-  top = rngs$lat[2],
-  bottom = rngs$lat[1]
-)
-ggmap(get_stamenmap(loc, zoom = 15, maptype = "toner-lines")) + 
-  geom_point(data = ames,
-             aes(x = Longitude, y = Latitude, col = Neighborhood),
-             cex = .5, alpha = .7) +
-  theme(legend.position = "none") + 
-  labs(x = "", y = "") + 
-  scale_color_manual(values = col_key)
-```
-```{r ames-map, out.width = "90%", echo = FALSE, fig.cap = "Neighborhoods in Ames IA"}
-knitr::include_graphics(path = "premade/ames.png")
+```{r ames-map, out.width = "100%", echo = FALSE, fig.cap = "Neighborhoods in Ames IA"}
+# See file extras/ames_sf.R
+res <- file.copy("premade/ames.png", "_book/premade/ames.png")
+knitr::include_graphics("premade/ames.png")
 ```
 
-We can see a few noticeable patterns. First, there is a void of data points in the center of Ames. This corresponds to Iowa State University. Second, while there are a number of neighborhoods that are geographically isolated, there are others that are adjacent to multiple neighborhoods. While Timberland is located apart from other neighborhoods, the Meadow Village neighborhood in Southeast Ames appears as an island of properties ensconced inside the sea of properties that make up the Mitchell neighborhood. 
+We can see a few noticeable patterns. First, there is a void of data points in the center of Ames. This corresponds to Iowa State University. Second, while there are a number of neighborhoods that are geographically isolated, there are others that are adjacent to multiple neighborhoods. For example,  Timberland is located apart from almost all other neighborhoods:
+
+```{r ames-timberland , out.width = "80%", echo = FALSE}
+# See file extras/ames_sf.R
+res <- file.copy("premade/timberland.png", "_book/premade/timberland.png")
+knitr::include_graphics("premade/timberland.png")
+```
+
+Additionally, the Meadow Village neighborhood in Southwest Ames appears as an island of properties ensconced inside the sea of properties that make up the Mitchell neighborhood: 
+
+```{r ames-mitchell , out.width = "70%", echo = FALSE}
+# See file extras/ames_sf.R
+res <- file.copy("premade/mitchell.png", "_book/premade/mitchell.png")
+knitr::include_graphics("premade/mitchell.png")
+```
  
+A detailed inspection of the map also shows that the neighborhood labels are not completely reliable. For example, there are some properties labeled as being in Northridge that are surrounded by houses in the adjacent Somerset neighborhood: 
+
+```{r ames-northridge , out.width = "90%", echo = FALSE}
+# See file extras/ames_sf.R
+res <- file.copy("premade/northridge.png", "_book/premade/northridge.png")
+knitr::include_graphics("premade/northridge.png")
+```
+
+Also, there are ten isolated houses labeled as being in Crawford but are not close to the majority of the other data in that neighborhood:
+
+```{r ames-crawford , out.width = "80%", echo = FALSE}
+# See file extras/ames_sf.R
+res <- file.copy("premade/crawford.png", "_book/premade/crawford.png")
+knitr::include_graphics("premade/crawford.png")
+```
+
 Also notable is the "Iowa Department of Transportation (DOT) and Rail Road" neighborhood adjacent to the main road on the east side of Ames. There are clusters of houses within this neighborhood and some are longitudinal outliers; the two houses furthest east are isolated from the other locations. 
 
-A detailed inspection of the map also shows that the neighborhood labels are not completely reliable. For example, there are some properties labeled as being in Northridge that are surrounded by houses in the adjacent Somerset neighborhood. Also, there are ten isolated houses labeled as being in Crawford but are not close to the majority of the other data in that neighborhood.
+```{r ames-dot_rr , out.width = "100%", echo = FALSE}
+# See file extras/ames_sf.R
+res <- file.copy("premade/dot_rr.png", "_book/premade/dot_rr.png")
+knitr::include_graphics("premade/dot_rr.png")
+```
 
-As previously described in Chapter @ref(introduction), it is critical to conduct _exploratory data analysis_ prior to beginning any modeling. These housing data have characteristics that present interesting challenges about how the data should be processed and modeled. We describe many of these in later chapters. Some basic questions that could be examined include: 
+As previously described in Chapter \@ref(introduction), it is critical to conduct _exploratory data analysis_ prior to beginning any modeling. These housing data have characteristics that present interesting challenges about how the data should be processed and modeled. We describe many of these in later chapters. Some basic questions that could be examined include: 
 
  * Are there any odd or noticeable things about the distributions of the individual predictors? Is there much skewness or any pathological distributions? 
 
