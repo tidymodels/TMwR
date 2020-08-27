@@ -87,7 +87,7 @@ knitr::include_graphics("premade/timberland.png")
 
 Additionally, the Meadow Village neighborhood in Southwest Ames appears as an island of properties ensconced inside the sea of properties that make up the Mitchell neighborhood: 
 
-```{r ames-mitchell , out.width = "70%", echo = FALSE}
+```{r ames-mitchell , out.width = "60%", echo = FALSE}
 # See file extras/ames_sf.R
 res <- file.copy("premade/mitchell.png", "_book/premade/mitchell.png")
 knitr::include_graphics("premade/mitchell.png")
