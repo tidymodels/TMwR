@@ -125,7 +125,7 @@ The `fit_xy()` function always passes the data as-is to the underlying model fun
 
 Not only does `r pkg(parsnip)` enable a consistent model interface for different packages, it also provides consistency in the _model arguments_. It is common for different functions which fit the same model to have different argument names. Random forest model functions are a good example. Three commonly used arguments are the number of trees in the ensemble, the number of predictors to randomly sample with each split within a tree, and the number of data points required to make a split. For three different R packages implementing this algorithm, those arguments are:
 
-```{r, models-rf-arg-names, echo = FALSE, results = "asis"}
+```{r, models-rf-arg-names, echo = FALSE, results = "asis", eval = FALSE}
 arg_info <- 
   tribble(
     ~ `Argument Type`, ~parsnip,
@@ -151,10 +151,40 @@ arg_info %>%
   kable(escape = FALSE) %>% 
   kable_styling()
 ```
+<table class="table" style="margin-left: auto; margin-right: auto;">
+ <thead>
+  <tr>
+   <th style="text-align:left;"> Argument Type </th>
+   <th style="text-align:left;"> <span class="pkg">ranger </span></th>
+   <th style="text-align:left;"> <span class="pkg">randomForest </span></th>
+   <th style="text-align:left;"> <span class="pkg">sparklyr </span></th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;"> # sampled predictors </td>
+   <td style="text-align:left;"> <tt>mtry</tt> </td>
+   <td style="text-align:left;"> <tt>mtry</tt> </td>
+   <td style="text-align:left;"> <tt>feature_subset_strategy</tt> </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> # trees </td>
+   <td style="text-align:left;"> <tt>num.trees</tt> </td>
+   <td style="text-align:left;"> <tt>ntree</tt> </td>
+   <td style="text-align:left;"> <tt>num_trees</tt> </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> # data points to split </td>
+   <td style="text-align:left;"> <tt>min.node.size</tt> </td>
+   <td style="text-align:left;"> <tt>nodesize</tt> </td>
+   <td style="text-align:left;"> <tt>min_instances_per_node</tt> </td>
+  </tr>
+</tbody>
+</table>
 
 In an effort to make argument specification less painful, `r pkg(parsnip)` uses common argument names within and between packages. For random forests, `r pkg(parsnip)` models use: 
 
-```{r, models-parsnip-names, echo = FALSE, results = "asis"}
+```{r, models-parsnip-names, echo = FALSE, results = "asis", eval = FALSE}
 arg_info %>%
   select(`Argument Type`, parsnip) %>%
   distinct() %>% 
@@ -162,6 +192,28 @@ arg_info %>%
   kable(escape = FALSE) %>% 
   kable_styling(full_width = FALSE)
 ```
+<table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
+ <thead>
+  <tr>
+   <th style="text-align:left;"> Argument Type </th>
+   <th style="text-align:left;"> <span class="pkg">parsnip</span> </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;"> # sampled predictors </td>
+   <td style="text-align:left;"> <tt>mtry</tt> </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> # trees </td>
+   <td style="text-align:left;"> <tt>trees</tt> </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> # data points to split </td>
+   <td style="text-align:left;"> <tt>min_n</tt> </td>
+  </tr>
+</tbody>
+</table>
 
 Admittedly, this is one more set of arguments to memorize. However, when other types of models have the same argument types, these names still apply. For example, boosted tree ensembles also create a large number of tree-based models, so `trees` is also used there, as is `num_n`, and so on. The `r pkg(parsnip)` argument names have also been standardized with similar recipe arguments. 
 
