@@ -232,7 +232,7 @@ li.appendix span, li.part span {
 }
 
 .sourceCode {
-  margin-bottom: 0.85em; /* adds same amount of margin beneath chunk as a <p> would */
+  margin-bottom: 1.5em; /* adds same amount of margin beneath chunk as a <p> would */
 }
 
 /*------------- block quotes --------------*/
@@ -265,6 +265,7 @@ div.rmdwarning {
   line-height: 1.75em;
   font-size: 0.85em;
   letter-spacing: 1pt;
+  margin-bottom: 1.5em;
 }
 
 div.rmdnote {
@@ -356,3 +357,55 @@ div.rmdwarning code {
   }
 } 
 
+/* ----References css bug fix----- */
+
+
+.page-inner+h3 {
+  max-width: 800px;
+  margin: 0 auto;
+  font-size: 24px;
+  padding-left: 15px;
+  padding-right: 15px;
+}
+
+.page-inner + h3 + .references, 
+.page-inner + h3 + .references + .footnotes {
+  max-width: 800px;
+  margin: 0 auto;
+  color: #333333;
+  padding-left: 15px;
+  padding-right: 15px;
+  line-height: 1.7em;
+}
+
+.page-inner + h3 + .references + .footnotes hr {
+  max-width: 800px;
+  margin: 27.2px auto;
+  background-color: #e7e7e7;
+  height: 4px;
+  border: none;
+}
+
+.page-inner + h3 + .references a,
+.page-inner + h3 + .references + .footnotes a {
+  color: #CA225E;
+}
+
+
+/* Package Names */
+
+span.pkg {  
+  font-weight: bold;
+  letter-spacing: 0.5pt;
+  color: #0080a4;
+}
+
+/* White space */
+
+p, ul, ol, dl, blockquote, table, pre {
+  margin-bottom: 1.5em !important;
+}
+
+li p {
+  margin-bottom: 1em !important;
+}
