@@ -31,3 +31,8 @@ tmwr_version <- function() {
   paste0("Version ", ver, " (", dt, ")")
 }
 
+pkg <- function(x) {
+  cl <- match.call()
+  x <- as.character(cl$x)
+  paste0('<span class="pkg">', x, '</span>')
+}
