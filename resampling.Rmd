@@ -31,7 +31,7 @@ For a comparison to this linear model, we can also fit a different type of model
 
 Random forest models are very powerful and they can emulate the underlying data patterns very closely. While this model can be computationally intensive, it is very low-maintenance; very little preprocessing is required (as documented in Appendix \@ref(pre-proc-table)).
 
-Using the same predictor set as the linear model (without the extra preprocessing steps), we can fit a random forest model to the training set using via the ranger package. This model requires no preprocessing so a simple formula can be used:
+Using the same predictor set as the linear model (without the extra preprocessing steps), we can fit a random forest model to the training set using via the `r pkg(ranger)` package. This model requires no preprocessing so a simple formula can be used:
 
 ```{r resampling-rand-forest-spec}
 rf_model <- 
@@ -208,9 +208,9 @@ To manually retrieve the partitioned data, the `analysis()` and `assessment()` f
 ames_folds$splits[[1]] %>% analysis() %>% dim()
 ```
 
-The tidymodels packages, such as tune, contain high-level user interfaces so that functions like `analysis()` are not generally needed for day-to-day work. Section \@ref(resampling-performance) demonstrates a function to fit a model over these resamples. 
+The `r pkg(tidymodels)` packages, such as `r pkg(tune)`, contain high-level user interfaces so that functions like `analysis()` are not generally needed for day-to-day work. Section \@ref(resampling-performance) demonstrates a function to fit a model over these resamples. 
 
-These rsample objects also always contain a character column called `id` that labels the partition. Some resampling methods require multiple `id` fields.  
+These `r pkg(rsample)` objects also always contain a character column called `id` that labels the partition. Some resampling methods require multiple `id` fields.  
 
 
 ### Repeated cross-validation {-}
@@ -249,7 +249,7 @@ vfold_cv(ames_train, v = 10, repeats = 5)
 
 One early variation of cross-validation was leave-one-out (LOO) cross-validation where _V_ is the number of data points in the training set. If there are $n$ training set samples, $n$ models are fit using $n-1$ rows of the training set. Each model predicts the single excluded data point. At the end of resampling, the $n$ predictions are pooled to produce a single performance statistic. 
 
-Leave-one-out methods are deficient compared to almost any other method. For anything but pathologically small samples, LOO is computationally excessive and it may not have good statistical properties. Although rsample contains a `loo_cv()` function, these objects are not generally integrated into the broader tidymodels frameworks.  
+Leave-one-out methods are deficient compared to almost any other method. For anything but pathologically small samples, LOO is computationally excessive and it may not have good statistical properties. Although `r pkg(rsample)` contains a `loo_cv()` function, these objects are not generally integrated into the broader tidymodels frameworks.  
 
 ### _Monte Carlo_ cross-validation {-}
 
@@ -275,7 +275,7 @@ if (knitr:::is_html_output()) {
 
 Validation sets are often used when the original pool of data is very large. In this case, a single large partition may be adequate to characterize model performance without having to do multiple iterations of resampling. 
 
-With rsample, a validation set is like any other resampling object; this type is different only in that it has a single iteration^[In essence, a validation set can be considered a single iteration of Monte Carlo cross-validation.]: 
+With `r pkg(rsample)`, a validation set is like any other resampling object; this type is different only in that it has a single iteration^[In essence, a validation set can be considered a single iteration of Monte Carlo cross-validation.]: 
 
 
 ```{r resampling-validation-alt, echo = FALSE, out.width = '45%'}
@@ -317,7 +317,7 @@ if (knitr:::is_html_output()) {
 ```
 Note that the sizes of the assessment sets vary. 
 
-Using rsample: 
+Using `r pkg(rsample)`: 
 
 ```{r resampling-boot-set}
 bootstraps(ames_train, times = 5)
@@ -351,7 +351,7 @@ There are a few different configurations of this method:
 
  * The resamples need not increment by one. For example, for large data sets, the incremental block could be a week or month instead of a day. 
 
-For a year's worth of data, suppose that six sets of 30-day blocks define the analysis set. For assessment sets of 30 days with a 29 day skip, the rsample code is: 
+For a year's worth of data, suppose that six sets of 30-day blocks define the analysis set. For assessment sets of 30 days with a 29 day skip, the `r pkg(rsample)` code is: 
 
 ```{r resampling-rolling-forcast}
 time_slices <- 
@@ -427,7 +427,7 @@ The return value is a tibble similar to the input resamples, along with some ext
  
  * `.predictions` is present when `save_pred = TRUE`. This list column contains tibbles with the out-of-sample predictions. 
  
-While these list columns may look daunting, they can be easily reconfigured using `tidyr` or with  convenience functions that tidymodels provides. For example, to return the performance metrics in a more usable format: 
+While these list columns may look daunting, they can be easily reconfigured using `r pkg(tidyr)` or with  convenience functions that tidymodels provides. For example, to return the performance metrics in a more usable format: 
 
 ```{r resampling-cv-stats}
 collect_metrics(rf_res)
@@ -444,7 +444,7 @@ assess_res <- collect_predictions(rf_res)
 assess_res
 ```
 
-The prediction column names follow the conventions discussed for parsnip models. The observed outcome column always uses the original column name from the source data. The `.row` column is an integer that matches the row of the original training set so that these results can be properly arranged and joined with the original data. 
+The prediction column names follow the conventions discussed for `r pkg(parsnip)` models. The observed outcome column always uses the original column name from the source data. The `.row` column is an integer that matches the row of the original training set so that these results can be properly arranged and joined with the original data. 
 
 :::rmdnote
 For some resampling methods, such as the bootstrap or repeated cross-validation, there will be multiple predictions per row of the original training set. To obtain summarized values (averages of the replicate predictions) use `collect_predictions(object, summarize = TRUE)`. 
@@ -478,7 +478,7 @@ ames_train %>%
 
 These results can help us investigate why the prediction was poor for this house. 
 
-How can we use a validation set instead of cross-validation? From our previous rsample object:
+How can we use a validation set instead of cross-validation? From our previous `r pkg(rsample)` object:
 
 ```{r resampling-val-ames}
 val_res <- rf_wflow %>% fit_resamples(resamples = val_set)
@@ -495,9 +495,9 @@ In these analyses, the resampling results are very close to the test set results
 
 ## Parallel processing {#parallel}
 
-The models created during resampling are independent of one another. Computations of this kind are sometimes called "embarrassingly parallel"; each model _could_ be fit simultaneously without issues. The tune package uses the foreach package to facilitate parallel computations. These computations could be split across processors on the same computer or across different computers, depending on the chosen technology. 
+The models created during resampling are independent of one another. Computations of this kind are sometimes called "embarrassingly parallel"; each model _could_ be fit simultaneously without issues. The `r pkg(tune)` package uses the `r pkg(foreach)` package to facilitate parallel computations. These computations could be split across processors on the same computer or across different computers, depending on the chosen technology. 
 
-For computations conducted on a single computer, the number of possible "worker processes" is  determined by the parallel package: 
+For computations conducted on a single computer, the number of possible "worker processes" is  determined by the `r pkg(parallel)` package: 
 
 ```{r resampling-find-cores}
 # The number of physical cores in the hardware:
@@ -510,7 +510,7 @@ parallel::detectCores(logical = TRUE)
 
 The difference between these two values is related to the computer's processor. For example, most Intel processors use hyper-threading which creates two _virtual cores_ for each physical core. While these extra resources can improve performance, most of the speed-ups produced by parallel processing occur when processing uses fewer than the number of physical cores. 
 
-For `fit_resamples()` and other functions in tune, parallel processing occurs when the user registers a _parallel backend package_. These R packages define how to execute parallel processing. On Unix and macOS operating systems, one method of splitting computations is by forking threads. To enable this, load the doMC package and register the number of parallel cores with foreach: 
+For `fit_resamples()` and other functions in `r pkg(tune)`, parallel processing occurs when the user registers a _parallel backend package_. These R packages define how to execute parallel processing. On Unix and macOS operating systems, one method of splitting computations is by forking threads. To enable this, load the `r pkg(doMC)` package and register the number of parallel cores with `r pkg(foreach)`: 
 
 ```{r resampling-mc, eval = FALSE}
 # Unix and macOS only
@@ -520,13 +520,13 @@ registerDoMC(cores = 2)
 # Now run fit_resamples()...
 ```
 
-This instructs `fit_resamples()` to run half of the computations on each of two cores. To reset the computations to  sequential prcoessing: 
+This instructs `fit_resamples()` to run half of the computations on each of two cores. To reset the computations to  sequential processing: 
 
 ```{r resampling-seq, eval = FALSE}
 registerDoSEQ()
 ```
  
-Alternatively, a different approach to parallelizing computations uses network sockets. The doParallel package enables this method (usable by all operating systems): 
+Alternatively, a different approach to parallelizing computations uses network sockets. The `r pkg(doParallel)` package enables this method (usable by all operating systems): 
 
 ```{r resampling-psock, eval = FALSE}
 # All operating systems
@@ -541,13 +541,13 @@ registerDoParallel(cl)
 stopCluster(cl)
 ```
 
-Another R package that facilitates parallel processing is the future package. Like foreach, it provides a framework for parallelism. It is used in conjunction with foreach via the doFuture package. 
+Another R package that facilitates parallel processing is the `r pkg(future)` package. Like `r pkg(foreach)`, it provides a framework for parallelism. It is used in conjunction with `r pkg(foreach)` via the `r pkg(doFuture)` package. 
 
 :::rmdnote
-The R packages with parallel backends for foreach start with the prefix `"do"`. 
+The R packages with parallel backends for `r pkg(foreach)` start with the prefix `"do"`. 
 :::
 
-Parallel processing with tune tends to provide linear speed-ups for the first few cores. This means that, with two cores, the computations are twice as fast. Depending on the data and type of model, the linear speedup deteriorates after 4-5 cores. Using more cores will still reduce the time it takes to complete the task; there are just diminishing returns for the additional cores. 
+Parallel processing with `r pkg(tune)` tends to provide linear speed-ups for the first few cores. This means that, with two cores, the computations are twice as fast. Depending on the data and type of model, the linear speedup deteriorates after 4-5 cores. Using more cores will still reduce the time it takes to complete the task; there are just diminishing returns for the additional cores. 
 
 Let's wrap up with one final note about parallelism. For each of these technologies, the memory requirements multiply for each additional core used. For example, if the current data set is 2 GB in memory and three cores are used, the total memory requirement is 8 GB (2 for each worker process plus the original). Using too many cores might cause the computations (and the computer) to slow considerably.
 
@@ -558,7 +558,7 @@ Let's wrap up with one final note about parallelism. For each of these technolog
 
 The models created during resampling are not retained. These models are trained for the purpose of evaluating performance, and we typically do not need them after we have computed performance statistics. If a particular modeling approach does turn out to be the best option for our data set, then the best choice is to fit again to the whole training set so the model parameters can be estimated with more data.
 
-While these models created during resampling are not preserved, there is a method for keeping them or some of their components. The `extract` option of `control_resamples()` specifies a function that takes a single argument; we'll use `x`. When executed, `x` results in a fitted workflow object, regardless of whether you provided `fit_resamples()` with a workflow. Recall that the workflows package has functions that can pull the different components of the objects (e.g. the model, recipe, etc.). 
+While these models created during resampling are not preserved, there is a method for keeping them or some of their components. The `extract` option of `control_resamples()` specifies a function that takes a single argument; we'll use `x`. When executed, `x` results in a fitted workflow object, regardless of whether you provided `fit_resamples()` with a workflow. Recall that the `r pkg(workflows)` package has functions that can pull the different components of the objects (e.g. the model, recipe, etc.). 
 
 Let's fit a linear regression model using the recipe shown at the end of Chapter \@ref(recipes):
 
@@ -627,7 +627,7 @@ Chapters \@ref(grid-search) and \@ref(iterative-search) discuss a suite of funct
 
 This chapter describes one of the fundamental tools of data analysis, the ability to measure the performance and variation in model results. Resampling enables us to determine how well the model works without using the test set. 
 
-An important function from the tune package, called `fit_resamples()`, was introduced. The interface for this function is also used in future chapters that describe model tuning tools. 
+An important function from the `r pkg(tune)` package, called `fit_resamples()`, was introduced. The interface for this function is also used in future chapters that describe model tuning tools. 
 
 The data analysis code, to date, for the Ames data is:
 

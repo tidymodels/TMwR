@@ -43,7 +43,7 @@ ggplot(reg_ex, aes(x = observed, y = predicted)) +
 
 A model optimized for RMSE has more variability but has relatively uniform accuracy across the range of the outcome. The right panel shows that there is a tighter correlation between the observed and predicted values but this model performs poorly in the tails. 
 
-This chapter will largely focus on the yardstick package. Before illustrating syntax, let's explore whether empirical validation using performance metrics is worthwhile when a model is focused on inference rather than prediction. 
+This chapter will largely focus on the `r pkg(yardstick)` package. Before illustrating syntax, let's explore whether empirical validation using performance metrics is worthwhile when a model is focused on inference rather than prediction. 
 
 ## Performance metrics and inference
 
@@ -111,7 +111,7 @@ In the remainder of this chapter, general approaches for evaluating models via e
 
 ## Regression metrics 
 
-Recall from Section \@ref(parsnip-predictions) that tidymodels prediction functions produce tibbles with columns for the predicted values. These columns have consistent names, and the functions in the yardstick package that produce performance metrics have consistent interfaces. The functions are data frame-based, as opposed to vector-based, with the general syntax of: 
+Recall from Section \@ref(parsnip-predictions) that tidymodels prediction functions produce tibbles with columns for the predicted values. These columns have consistent names, and the functions in the `r pkg(yardstick)` package that produce performance metrics have consistent interfaces. The functions are data frame-based, as opposed to vector-based, with the general syntax of: 
 
 ```r
 function(data, truth, ...)
@@ -157,7 +157,7 @@ Let's compute the root mean squared error for this model using the `rmse()` func
 rmse(ames_test_res, truth = Sale_Price, estimate = .pred)
 ```
 
-The output above shows the standard format of the output of yardstick functions. Metrics for numeric outcomes usually have a value of "standard" for the `.estimator` column. Examples with different values for this column are shown below.
+The output above shows the standard format of the output of `r pkg(yardstick)` functions. Metrics for numeric outcomes usually have a value of "standard" for the `.estimator` column. Examples with different values for this column are shown below.
 
 To compute multiple metrics at once, we can create a _metric set_. Let's add $R^2$ and the mean absolute error: 
 
@@ -169,12 +169,12 @@ ames_metrics(ames_test_res, truth = Sale_Price, estimate = .pred)
 This tidy data format stacks the metrics vertically. 
 
 :::rmdwarning
-The yardstick package does _not_ contain a function for adjusted $R^2$. This commonly used modification of the coefficient of determination is needed when the same data used to fit the model are used to evaluate the model. This metric is not full supported in tidymodels because it is always a better approach to compute performance on a separate data set than the one used to fit the model.  
+The `r pkg(yardstick)` package does _not_ contain a function for adjusted $R^2$. This commonly used modification of the coefficient of determination is needed when the same data used to fit the model are used to evaluate the model. This metric is not full supported in tidymodels because it is always a better approach to compute performance on a separate data set than the one used to fit the model.  
 :::
 
 ## Binary classification metrics 
 
-To illustrate other ways to measure model performance, we will switch to a different example. The modeldata package contains example predictions from a test data set with two classes ("Class1" and "Class2"):
+To illustrate other ways to measure model performance, we will switch to a different example. The `r pkg(modeldata)` package contains example predictions from a test data set with two classes ("Class1" and "Class2"):
 
 ```{r performance-two-class-example}
 data(two_class_example)
@@ -183,7 +183,7 @@ str(two_class_example)
 
 The second and third columns are the predicted class probabilities for the test set while `predicted` are the discrete predictions. 
 
-For the hard class predictions, there are a variety of yardstick functions that are helpful: 
+For the hard class predictions, there are a variety of `r pkg(yardstick)` functions that are helpful: 
 
 ```{r performance-class-metrics}
 # A confusion matrix: 
@@ -212,7 +212,7 @@ f_meas(two_class_example, truth, predicted, event_level = "second")
 
 In the output above, the `.estimator` value of "binary" indicates that the standard formula for binary classes will be used. 
 
-There are numerous classification metrics that use the predicted probabilities as inputs rather than the hard class predictions. For example, the receiver operating characteristic (ROC) curve computes the sensitivity and specificity over a continuum of different event thresholds. The predicted class column is not used. There are two yardstick functions for this method: `roc_curve()` computes the data points that make up the ROC curve and `roc_auc()` computes the area under the curve. 
+There are numerous classification metrics that use the predicted probabilities as inputs rather than the hard class predictions. For example, the receiver operating characteristic (ROC) curve computes the sensitivity and specificity over a continuum of different event thresholds. The predicted class column is not used. There are two `r pkg(yardstick)` functions for this method: `roc_curve()` computes the data points that make up the ROC curve and `roc_auc()` computes the area under the curve. 
 
 The interfaces to these types of metric functions use the `...` argument placeholder to pass in the appropriate class probability column. For two-class problems, the probability column for the event of interest is passed into the function:
 
@@ -315,7 +315,7 @@ Macro-averaging is also available:
 roc_auc(hpc_cv, obs, VF, F, M, L, estimator = "macro_weighted")
 ```
 
-Finally, all of these performance metrics can be computed using `dplyr` groupings. Recall that these data have a column for the resampling groups. Passing a grouped data frame to the metric function will compute the metrics for each group: 
+Finally, all of these performance metrics can be computed using `r pkg(dplyr)` groupings. Recall that these data have a column for the resampling groups. Passing a grouped data frame to the metric function will compute the metrics for each group: 
 
 ```{r performance-multi-class-acc-grouped}
 hpc_cv %>% 
@@ -337,5 +337,5 @@ This can be a quick visualization method for model effectiveness.
 
 ## Chapter summary {#performance-summary}
 
-Functions from the yardstick package measure the effectiveness of a model using data. The primary interface is based on data frames (as opposed to having vector arguments). There are a variety of regression and classification metrics and, within these, there are sometimes different estimators for the statistics. 
+Functions from the `r pkg(yardstick)` package measure the effectiveness of a model using data. The primary interface is based on data frames (as opposed to having vector arguments). There are a variety of regression and classification metrics and, within these, there are sometimes different estimators for the statistics. 
 

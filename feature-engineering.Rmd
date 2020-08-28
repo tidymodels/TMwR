@@ -79,10 +79,10 @@ Breaking this down:
 
 1. `step_dummy()` is used to specify which variables should be converted from a qualitative format to a quantitative format, in this case, using dummy or indicator variables. An indicator or dummy variable is a binary numeric variable (a column of ones and zeroes) that encodes qualitative information; we will dig deeper into these kinds of variables in Section \@ref(dummies). 
 
-The function `all_nominal()` captures the names of any columns that are currently factor or character (i.e., nominal) in nature. This is a dplyr selector function similar to `starts_with()` or `matches()` but can only be used inside of a recipe. 
+The function `all_nominal()` captures the names of any columns that are currently factor or character (i.e., nominal) in nature. This is a `r pkg(dplyr)` selector function similar to `starts_with()` or `matches()` but can only be used inside of a recipe. 
 
 :::rmdnote
-Other selectors specific to the recipes package are: `all_numeric()`, `all_predictors()`, and `all_outcomes()`. As with dplyr, one or more unquoted expressions, separated by commas, can be used to select which columns are affected by each step.
+Other selectors specific to the `r pkg(recipes)` package are: `all_numeric()`, `all_predictors()`, and `all_outcomes()`. As with `r pkg(dplyr)`, one or more unquoted expressions, separated by commas, can be used to select which columns are affected by each step.
 :::
 
 What is the advantage to using a recipe? There are a few, including:
@@ -211,7 +211,7 @@ One helpful feature of `step_dummy()` is that there is more control over how the
 
 Traditional dummy variables require that all of the possible categories be known to create a full set of numeric features. There are other methods for doing this transformation to a numeric format. _Feature hashing_ methods only consider the value of the category to assign it to a predefined pool of dummy variables. This can be a good strategy when there are a large number of possible categories, but the statistical properties may not be optimal. For example, it may unnecessarily _alias_ categories together (by assigning them to the same dummy variable). This reduces the specificity of the encoding and, if that dummy variable were important, it would be difficult to determine which of the categories is driving the effect. 
 
-Another method that is useful when there are a large number of categories is called _effect_ or _likelihood encodings_. This method replaces the original data with a single numeric column that measures the _effect_ of those data. For example, for the neighborhood predictor, the mean sale price is computed for each neighborhood and these means are substituted for the original data values. This can be effective but should be used with care. In effect, a mini-model is being added to the actual model and this can lead to over-fitting. To be cautious, this type of encoding should be rigorously resampled (see Chapter \@ref(resampling)). Within a recipe, the [embed](https://embed.tidymodels.org/) package has several step functions, such as `step_lencode_mixed()`, for effect encodings. Both feature hashing and effect encoding methods can also seamlessly handle situations where a novel factor level is encountered in the data. 
+Another method that is useful when there are a large number of categories is called _effect_ or _likelihood encodings_. This method replaces the original data with a single numeric column that measures the _effect_ of those data. For example, for the neighborhood predictor, the mean sale price is computed for each neighborhood and these means are substituted for the original data values. This can be effective but should be used with care. In effect, a mini-model is being added to the actual model and this can lead to over-fitting. To be cautious, this type of encoding should be rigorously resampled (see Chapter \@ref(resampling)). Within a recipe, the [`r pkg(embed)`](https://embed.tidymodels.org/) package has several step functions, such as `step_lencode_mixed()`, for effect encodings. Both feature hashing and effect encoding methods can also seamlessly handle situations where a novel factor level is encountered in the data. 
 
 Sometimes qualitative columns can be _ordered_, such as "low", "medium", "high". In base R, the default encoding strategy is to make new numeric columns that are polynomial expansions of the data. For columns that have five ordinal values, the factor column would be replaced with columns for linear, quadratic, cubic, and quartic terms: 
 
@@ -288,7 +288,7 @@ This is telling the underlying (base R) code used by `step_interact()` to make d
 This behavior gives you more control, but is different from R's standard model formula. 
 ```
 
-As with naming dummy variables, `recipes` provides more coherent names for interaction terms. In this case, the interaction is named `Gr_Liv_Area_x_Bldg_Type_Duplex` instead of  `Gr_Liv_Area:Bldg_TypeDuplex` (which is not a valid column name for a data frame).
+As with naming dummy variables, `r pkg(recipes)` provides more coherent names for interaction terms. In this case, the interaction is named `Gr_Liv_Area_x_Bldg_Type_Duplex` instead of  `Gr_Liv_Area:Bldg_TypeDuplex` (which is not a valid column name for a data frame).
 
 
 :::rmdnote
@@ -335,7 +335,7 @@ for (i in seq_along(skip)) {
 skip_list <- paste0("`", steps[skip], "()`")
 ```
 
-At the time of this writing, the step functions in the `recipes` and `themis` packages that are only applied to the modeling data are: `r knitr::combine_words(skip_list)`.
+At the time of this writing, the step functions in the `r pkg(recipes)` and `r pkg(themis)` packages that are only applied to the modeling data are: `r knitr::combine_words(skip_list)`.
 
 ## Other examples of recipe steps {#other-steps}
 
@@ -365,7 +365,7 @@ plot_smoother <- function(deg_free) {
 ( plot_smoother(2) + plot_smoother(5) ) / ( plot_smoother(20) + plot_smoother(100) )
 ```
 
-The `ns()` function in the `splines` package generates feature columns using functions called _natural splines_.
+The `ns()` function in the `r pkg(splines)` package generates feature columns using functions called _natural splines_.
 
 Some panels clearly fit poorly; two terms _under-fit_ the data while 100 terms _over-fit_. The panels with five and 20 terms seem like a reasonably smooth fits that catch the main patterns of the data. This indicates that the proper amount of "non-linear-ness" matters. The number of spline terms could then be considered a _tuning parameter_ for this model. These types of parameters are explored model in Chapter \@ref(tuning). 
 
@@ -408,7 +408,7 @@ Recipe steps can affect the rows of a data set as well. For example, the previou
 
  * _Hybrid methods_ do a combination of both. 
 
-The [themis](https://themis.tidymodels.org/) package has recipe steps the can be used for this purpose. For simple down-sampling, we would use:
+The [`r pkg(themis)`](https://themis.tidymodels.org/) package has recipe steps the can be used for this purpose. For simple down-sampling, we would use:
 
 ```r
   step_downsample(outcome_column_name)
@@ -422,12 +422,12 @@ There are other step functions that are row-based as well: `step_filter()`, `ste
 
 ### General transformations {-}
 
-Mirroring the original dplyr operations, `step_mutate()` and `step_mutate_at()` can be used to conduct a variety of basic operations to the data. 
+Mirroring the original `r pkg(dplyr)` operations, `step_mutate()` and `step_mutate_at()` can be used to conduct a variety of basic operations to the data. 
 
 
 ### Natural language processing {-}
 
-Recipes can also handle data that are not in the traditional structure where the columns are features. For example, the [textrecipes](https://textrecipes.tidymodels.org/) package can apply natural language processing methods to the data. The input column is typically a string of text and different steps can be used to tokenize the data (e.g., split the text into separate words), filter out words, and create new features appropriate for modeling. 
+Recipes can also handle data that are not in the traditional structure where the columns are features. For example, the [`r pkg(textrecipes)`](https://textrecipes.tidymodels.org/) package can apply natural language processing methods to the data. The input column is typically a string of text and different steps can be used to tokenize the data (e.g., split the text into separate words), filter out words, and create new features appropriate for modeling. 
 
 ## How data are used by the recipe
 
@@ -464,7 +464,7 @@ ames_test_prepped <- bake(ames_rec_prepped, ames_test)
 lm_fit <- lm(Sale_Price ~ ., data = ames_train_prepped)
 ```
 
-The `broom` package has methods that make it easier to work with model objects. First, `broom::glance()` shows a succinct summary of the model in a handy tibble format:
+The `r pkg(broom)` package has methods that make it easier to work with model objects. First, `broom::glance()` shows a succinct summary of the model in a handy tibble format:
 
 ```{r engineering-lm-ames-glance}
 glance(lm_fit)
@@ -539,7 +539,7 @@ Finally, all step functions have a `role` field that can assign roles to the res
 
 ## Chapter summary {#recipes-summary}
 
-In this chapter, you learned about using recipes for flexible feature engineering and data preprocessing, from creating dummy variables to handling class imbalance and more. Feature engineering is an important part of the modeling process where information leakage can easily occur and good practices must be adopted. Between the recipes package and other packages that extend recipes, there are over 100 available steps. All possible recipe steps are enumerated at [`tidymodels.org/find`](https://www.tidymodels.org/find/). The recipes framework provides a rich data manipulation environment for pre-processing and transforming data prior to modeling. 
+In this chapter, you learned about using recipes for flexible feature engineering and data preprocessing, from creating dummy variables to handling class imbalance and more. Feature engineering is an important part of the modeling process where information leakage can easily occur and good practices must be adopted. Between the `r pkg(recipes)` package and other packages that extend recipes, there are over 100 available steps. All possible recipe steps are enumerated at [`tidymodels.org/find`](https://www.tidymodels.org/find/). The recipes framework provides a rich data manipulation environment for pre-processing and transforming data prior to modeling. 
 Additionally, [`tidymodels.org/learn/develop/recipes/`](https://www.tidymodels.org/learn/develop/recipes/) shows how custom steps can be created.
 
 The code that we will use in later chapters is:

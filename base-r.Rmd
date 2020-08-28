@@ -116,7 +116,7 @@ In addition to the convenience of automatically creating indicator variables, th
 
 * _In-line_ functions can be used in the formula. For example, to use the natural log of the temperature, we can create the formula `rate ~ log(temp)`. Since the formula is symbolic by default, literal math can also be done to the predictors using the identity function `I()`. To use Fahrenheit units, the formula could be `rate ~ I( (temp * 9/5) + 32 )` to convert from Celsius.
 
-* R has many functions that are useful inside of formulas. For example, `poly(x, 3)` would create linear, quadratic, and cubic terms for `x` to the model as main effects. The `splines` package also has several functions to create nonlinear spline terms in the formula. 
+* R has many functions that are useful inside of formulas. For example, `poly(x, 3)` would create linear, quadratic, and cubic terms for `x` to the model as main effects. The `r pkg(splines)` package also has several functions to create nonlinear spline terms in the formula. 
 
 * For data sets where there are many predictors, the period shortcut is available. The period represents main effects for all of the columns that are not on the left-hand side of the tilde. Using `~ (.)^3` would create main effects as well as all two- and three-variable interactions to the model. 
 
@@ -283,7 +283,7 @@ To resolve the usage issues described here, the tidymodels packages have a set o
 
 Many of these ideas are described in the tidymodels guidelines for model implementation^[`https://tidymodels.github.io/model-implementation-principles`]. In subsequent chapters, we will illustrate examples of existing issues (and their solutions). 
 
-There are a few existing R packages that provide a unified interface to harmonize these heterogeneous modeling APIs, such as `caret` and `mlr`. tidymodels takes a similar approach to unification of the function interface as well as enforcing consistency in the function names and return values. 
+There are a few existing R packages that provide a unified interface to harmonize these heterogeneous modeling APIs, such as `r pkg(caret)` and `r pkg(mlr)`. tidymodels takes a similar approach to unification of the function interface as well as enforcing consistency in the function names and return values. 
 
 The `broom::tidy()` function, which we will use throughout this book, is another tool for standardizing the structure of R objects. It can return many types of R objects in a more usable format. For example, suppose that predictors are being screened based on their correlation to the outcome column. Using `purr::map()`, the results from `cor.test()` can be returned in a list for each predictor: 
 
@@ -316,7 +316,7 @@ This is possible using core R language functions, but automatically reformatting
 
 ## Combining base R models and the tidyverse
 
-R modeling functions from the core language or other R packages can be used in conjunction with the tidyverse, especially with the `dplyr`, `purrr`, and `tidyr` packages. For example, if we wanted to fit separate models for each cricket species, we can first break out the cricket data by this column using `dplyr::group_nest()`: 
+R modeling functions from the core language or other R packages can be used in conjunction with the tidyverse, especially with the `r pkg(dplyr)`, `r pkg(purrr)`, and `r pkg(tidyr)` packages. For example, if we wanted to fit separate models for each cricket species, we can first break out the cricket data by this column using `dplyr::group_nest()`: 
 
 ```{r base-r-by-species-split}
 split_by_species <- 

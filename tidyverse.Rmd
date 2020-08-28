@@ -28,7 +28,7 @@ To contrast the tidyverse approach with more traditional R semantics, consider s
 iris[order(iris$Species, iris$Sepal.Length), ]
 ```
 
-While very computationally efficient, it would be difficult to argue that this is an intuitive user-interface. In `dplyr` by contrast, the tidyverse function `arrange()` takes a set of variable names as input arguments directly:
+While very computationally efficient, it would be difficult to argue that this is an intuitive user-interface. In `r pkg(dplyr)` by contrast, the tidyverse function `arrange()` takes a set of variable names as input arguments directly:
 
 ```{r tidyverse-dplyr-sort, eval = FALSE}
 library(dplyr)
@@ -43,7 +43,7 @@ Additionally, naming is crucial. If you were new to R and were writing data anal
 
 The tidyverse approach is use function names that are explicit and descriptive over those that are short and implicit. There is a focus on verbs (e.g. `fit`, `arrange`, etc.) for general methods. Verb-noun pairs are particularly effective; consider `invert_matrix()` as a hypothetical function name. In the context of modeling, it is also important to avoid highly technical jargon in names (such as Greek letters or obscure terms). Names should be as self-documenting as possible. 
 
-When there are similar functions in a package, function names are designed to be optimized for tab-completion. For example, the `glue` package has a collection of functions starting with a common prefix (`glue_`) that enables users to quickly find the function they are looking for. 
+When there are similar functions in a package, function names are designed to be optimized for tab-completion. For example, the `r pkg(glue)` package has a collection of functions starting with a common prefix (`glue_`) that enables users to quickly find the function they are looking for. 
 
 
 ### Reuse existing data structures
@@ -52,7 +52,7 @@ Whenever possible, functions should avoid returning a novel data structure. If t
 
 One data structure that is used as much as possible in tidyverse and tidymodels packages is the data frame. Data frames can represent different types of data in each column, and multiple values in each row. Tibbles, a type of data frame described below, are preferred since they have additional properties that are helpful for data analysis. 
 
-As an example, the `rsample` package can be used to create _resamples_ of a data set, such as cross-validation or the bootstrap (described in Chapter \@ref(resampling)). The resampling functions return a tibble with a column called `splits` of objects that define the resampled data sets. Three bootstrap samples of a data set might look like: 
+As an example, the `r pkg(rsample)` package can be used to create _resamples_ of a data set, such as cross-validation or the bootstrap (described in Chapter \@ref(resampling)). The resampling functions return a tibble with a column called `splits` of objects that define the resampled data sets. Three bootstrap samples of a data set might look like: 
 
 ```{r tidyverse-resample}
 boot_samp <- rsample::bootstraps(mtcars, times = 3)
@@ -70,12 +70,12 @@ One downside to relying on common data structures is the potential loss of compu
 
 These formats are advantageous when the problem is well scoped and the potential data processing methods are both well defined and suited to such a format^[Not all algorithms can take advantage of sparse representations of data. In such cases, a sparse matrix must be converted to a more conventional format before proceeding.]. However, once such constraints are violated, specialized data formats are less useful. For example, if we perform a transformration of the data that converts the data into fractional numbers, the output is no longer sparse; the sparse matrix representation is helpful for one specific algorithmic step in modeling but this is often not true before or after that specific step. A specialized data structure is not flexible enough for an entire modeling workflow in the way that a common data structure is. 
 
-One important feature in the tibble produced by `rsample` is that the `splits` column is a list. In this instance, each element of the list has the same type of object: an `rsplit` object that contains the information about which rows of `mtcars` belong in the bootstrap sample. _List columns_ can be very useful in data analysis and, as will be seen throughout this book, are important to the tidyverse. 
+One important feature in the tibble produced by `r pkg(rsample)` is that the `splits` column is a list. In this instance, each element of the list has the same type of object: an `rsplit` object that contains the information about which rows of `mtcars` belong in the bootstrap sample. _List columns_ can be very useful in data analysis and, as will be seen throughout this book, are important to the tidyverse. 
 
 
 ### Design for the pipe and functional programming
 
-The `magrittr` pipe operator (`%>%`) is a tool for chaining together a sequence of R commands. To demonstrate, consider the following commands which sort a data frame and then retain the first 10 rows:
+The `r pkg(magrittr)` pipe operator (`%>%`) is a tool for chaining together a sequence of R commands. To demonstrate, consider the following commands which sort a data frame and then retain the first 10 rows:
 
 ```{r tidyverse-no-pipe, eval = FALSE}
 small_iris <- arrange(iris, Species)
@@ -96,7 +96,7 @@ small_iris <-
 
 The piped version of this sequence is more readable; this readability increases as more operations are added to a sequence. This approach to programming works in this example because all of the functions we used return the same data structure (a data frame) that is then the first argument to the next function. This is by design. When possible, create functions that can be incorporated into a pipeline of operations. 
 
-If you have used `ggplot2`, this is not unlike the layering of plot components into a `ggplot` object with the `+` operator. To make a scatter plot with a regression line, the initial `ggplot()` call is augmented with two additional operations:
+If you have used `r pkg(ggplot2)`, this is not unlike the layering of plot components into a `ggplot` object with the `+` operator. To make a scatter plot with a regression line, the initial `ggplot()` call is augmented with two additional operations:
 
 ```{r tidyverse-ggplot-chain, eval = FALSE}
 library(ggplot2)
@@ -105,7 +105,7 @@ ggplot(mtcars, aes(x = wt, y = mpg)) +
   geom_smooth(method = lm)
 ```
 
-While similar to the `dplyr` pipeline, note that the first argument to this pipeline is a data set (`mtcars`) and that each function call returns a `ggplot` object. Not all pipelines need to keep the returned values (plot objects) the same as the initial value (a data frame). Using the the pipe operator with `dplyr` operations has acclimated many R users to expect to return a data frame when pipelines are used; as shown with `ggplot`, this does not need to be the case. Pipelines are incredibly useful in modeling workflows but modeling pipelines can return, instead of a data frame, objects such as model components.
+While similar to the `r pkg(dplyr)` pipeline, note that the first argument to this pipeline is a data set (`mtcars`) and that each function call returns a `ggplot` object. Not all pipelines need to keep the returned values (plot objects) the same as the initial value (a data frame). Using the the pipe operator with `r pkg(dplyr)` operations has acclimated many R users to expect to return a data frame when pipelines are used; as shown with `ggplot`, this does not need to be the case. Pipelines are incredibly useful in modeling workflows but modeling pipelines can return, instead of a data frame, objects such as model components.
 
 R has excellent tools for creating, changing, and operating on functions, making it a great language for _functional programming_. This approach can replace iterative loops in many situations, such as when a function returns a value without other side effects ^[Examples of function side effects could include changing global data or printing a value.]. 
 
@@ -146,7 +146,7 @@ compute_log_ratio <- function(sepal, petal, log_base = exp(1)) {
 }
 ```
 
-The `purrr` package contains tools for functional programming. Let's focus on the `map()` family of functions, which operates on vectors and always returns the same type of output. The most basic function, `map()`, always returns a list and uses the basic syntax of `map(vector, function)`. For example, to take the square-root of our data, we could: 
+The `r pkg(purrr)` package contains tools for functional programming. Let's focus on the `map()` family of functions, which operates on vectors and always returns the same type of output. The most basic function, `map()`, always returns a list and uses the basic syntax of `map(vector, function)`. For example, to take the square-root of our data, we could: 
 
 ```{r map-basic}
 map(head(iris$Sepal.Length, 3), sqrt)
@@ -239,11 +239,11 @@ To demonstrate some syntax, let's use tidyverse functions to read in data that c
 
 Our tidyverse pipeline will conduct the following tasks, in order: 
 
-1. We will use the tidyverse package `readr` to read the data and convert them into a tibble. To do this, the `read_delim()` function can determine the type of data by reading an initial number of rows. Alternatively, if the column names and types are already known, a column specification can be created in R and passed to `read_delim()`. 
+1. We will use the tidyverse package `r pkg(readr)` to read the data and convert them into a tibble. To do this, the `read_delim()` function can determine the type of data by reading an initial number of rows. Alternatively, if the column names and types are already known, a column specification can be created in R and passed to `read_delim()`. 
 
-1. We filter the data to eliminate a few columns that are not needed (such as the station ID) and change the column `stationname` to `station`. The function `select()` is used for this. When filtering, use either the names of the column names or a `dplyr()` selector function. When selecting names, a new variable name can be declared using the argument format `new_name = old_name`.
+1. We filter the data to eliminate a few columns that are not needed (such as the station ID) and change the column `stationname` to `station`. The function `select()` is used for this. When filtering, use either the names of the column names or a `r pkg(dplyr)` selector function. When selecting names, a new variable name can be declared using the argument format `new_name = old_name`.
 
-1. The date field is converted to the R date format using the `mdy()` function from the `lubridate` package. We also convert the ridership numbers to thousands. Both of these computations are executed using the `dplyr::mutate()` function.  
+1. The date field is converted to the R date format using the `mdy()` function from the `r pkg(lubridate)` package. We also convert the ridership numbers to thousands. Both of these computations are executed using the `dplyr::mutate()` function.  
 
 1. There are a small number of days that have replicate ridership numbers at certain stations. To mitigate this issue, we use the maximum number of rides for each station and day combination. We _group_ the ridership data by station and day, and then _summarize_ within each of the `r num_combos` unique combinations with the maximum statistic. 
 
