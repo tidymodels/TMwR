@@ -26,7 +26,7 @@ Similarly, data _pre-processing_ can involve reformatting required by the model.
  
 Different models have different pre-processing requirements and some, such as tree-based models, require very little pre-processing. Appendix \@ref(pre-proc-table) contains a small table of recommended pre-processing techniques for different models. 
 
-In this chapter, we introduce the [recipes](https://recipes.tidymodels.org/) package as a means to encapsulate different feature engineering and pre-processing tasks into a single object and then to apply these transformations to different data sets. 
+In this chapter, we introduce the [`r pkg(recipes)`](https://recipes.tidymodels.org/) package as a means to encapsulate different feature engineering and pre-processing tasks into a single object and then to apply these transformations to different data sets. 
 
 The chapter uses the R objects created in previous chapters, summarized in Section \@ref(splitting-summary).
 
@@ -369,7 +369,7 @@ The `ns()` function in the `r pkg(splines)` package generates feature columns us
 
 Some panels clearly fit poorly; two terms _under-fit_ the data while 100 terms _over-fit_. The panels with five and 20 terms seem like a reasonably smooth fits that catch the main patterns of the data. This indicates that the proper amount of "non-linear-ness" matters. The number of spline terms could then be considered a _tuning parameter_ for this model. These types of parameters are explored model in Chapter \@ref(tuning). 
 
-In recipes, there are multiple steps that can create these types of terms. To add a natural spline representation for this predictor:
+In `r pkg(recipes)`, there are multiple steps that can create these types of terms. To add a natural spline representation for this predictor:
 
 ```{r engineering-spline-rec, eval = FALSE}
 recipe(Sale_Price ~ Neighborhood + Gr_Liv_Area + Year_Built + Bldg_Type + Latitude,
