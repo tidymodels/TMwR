@@ -77,7 +77,7 @@ res <- file.copy("premade/ames.png", "_book/premade/ames.png")
 knitr::include_graphics("premade/ames.png")
 ```
 
-We can see a few noticeable patterns. First, there is a void of data points in the center of Ames. This corresponds to Iowa State University. Second, while there are a number of neighborhoods that are geographically isolated, there are others that are adjacent to multiple neighborhoods. For example,  Timberland is located apart from almost all other neighborhoods:
+We can see a few noticeable patterns. First, there is a void of data points in the center of Ames. This corresponds to Iowa State University. Second, while there are a number of neighborhoods that are geographically isolated, there are others that are adjacent to each other. For example, Timberland is located apart from almost all other neighborhoods:
 
 ```{r ames-timberland , out.width = "80%", echo = FALSE}
 # See file extras/ames_sf.R
@@ -85,7 +85,7 @@ res <- file.copy("premade/timberland.png", "_book/premade/timberland.png")
 knitr::include_graphics("premade/timberland.png")
 ```
 
-Additionally, the Meadow Village neighborhood in Southwest Ames appears as an island of properties ensconced inside the sea of properties that make up the Mitchell neighborhood: 
+The Meadow Village neighborhood in Southwest Ames is like an island of properties ensconced inside the sea of properties that make up the Mitchell neighborhood: 
 
 ```{r ames-mitchell , out.width = "60%", echo = FALSE}
 # See file extras/ames_sf.R
@@ -101,7 +101,7 @@ res <- file.copy("premade/northridge.png", "_book/premade/northridge.png")
 knitr::include_graphics("premade/northridge.png")
 ```
 
-Also, there are ten isolated houses labeled as being in Crawford but are not close to the majority of the other data in that neighborhood:
+Also, there are ten isolated houses labeled as being in Crawford but are not close to the majority of the other houses in that neighborhood:
 
 ```{r ames-crawford , out.width = "80%", echo = FALSE}
 # See file extras/ames_sf.R
@@ -109,7 +109,7 @@ res <- file.copy("premade/crawford.png", "_book/premade/crawford.png")
 knitr::include_graphics("premade/crawford.png")
 ```
 
-Also notable is the "Iowa Department of Transportation (DOT) and Rail Road" neighborhood adjacent to the main road on the east side of Ames. There are clusters of houses within this neighborhood and some are longitudinal outliers; the two houses furthest east are isolated from the other locations. 
+Also notable is the "Iowa Department of Transportation (DOT) and Rail Road" neighborhood adjacent to the main road on the east side of Ames. There are several clusters of houses within this neighborhood as well as some longitudinal outliers; the two houses furthest east are isolated from the other locations. 
 
 ```{r ames-dot_rr , out.width = "100%", echo = FALSE}
 # See file extras/ames_sf.R
