@@ -241,16 +241,16 @@ Unfortunately, some of the syntactical diversity is due to a focus on the develo
 
 Suppose your modeling project had an outcome with two classes. There are a variety of statistical and machine learning models you could choose from. In order to produce a class probability estimate for each sample, it is common for a model function to have a corresponding `predict()`method. However, there is significant heterogeneity in the argument values used by those methods to make class probability predictions; this heterogeneity can be difficult for even experienced users to navigate. A sampling of these argument values for different models is: 
 
-| Function     | Package      | Code                                       |
-| :----------- | :----------- | :----------------------------------------- |
-| `lda`        | `MASS`       | `predict(object)`                             |
-| `glm`        | `stats`      | `predict(object, type = "response")`          |
-| `gbm`        | `gbm`        | `predict(object, type = "response", n.trees)` |
-| `mda`        | `mda`        | `predict(object, type = "posterior")`         |
-| `rpart`      | `rpart`      | `predict(object, type = "prob")`              |
-| various      | `RWeka`      | `predict(object, type = "probability")`       |
-| `logitboost` | `LogitBoost` | `predict(object, type = "raw", nIter)`        |
-| `pamr.train` | `pamr`       | `pamr.predict(object, type = "posterior")`    |
+| Function     | Package                             | Code                                          |
+| :----------- | :---------------------------------- | :-------------------------------------------- |
+| `lda`        | <span class="pkg">MASS</span>       | `predict(object)`                             |
+| `glm`        | <span class="pkg">stats</span>      | `predict(object, type = "response")`          |
+| `gbm`        | <span class="pkg">gbm</span>        | `predict(object, type = "response", n.trees)` |
+| `mda`        | <span class="pkg">mda</span>        | `predict(object, type = "posterior")`         |
+| `rpart`      | <span class="pkg">rpart</span>      | `predict(object, type = "prob")`              |
+| various      | <span class="pkg">RWeka</span>      | `predict(object, type = "probability")`       |
+| `logitboost` | <span class="pkg">LogitBoost</span> | `predict(object, type = "raw", nIter)`        |
+| `pamr.train` | <span class="pkg">pamr</span>       | `pamr.predict(object, type = "posterior")`    |
 
 Note that the last example has a custom _function_ to make predictions instead of using the more common `predict()` interface (the generic `predict()` _method_). This lack of consistency is a barrier to day-to-day usage of R for modeling.
 
