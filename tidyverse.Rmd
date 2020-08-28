@@ -22,21 +22,21 @@ The tidyverse focuses on designing R packages and functions that can be easily u
 
 For this reason, it is critical that R code be easy to work with to accomplish your goals. Documentation, training, accessibility, and other factors play an important part in achieving this. However, if the syntax itself is difficult for people to easily comprehend, documentation is a poor solution. The software itself must be intuitive.
 
-To contrast the tidyverse approach with more traditional R semantics, consider sorting a data frame. Using only the core language, we can sort a data frame using one or more columns by reordering the rows via R's subscripting rules in conjunction with `order()` (as opposed to a function you might be tempted to use in such a situation because of its name, `sort()`). To sort the iris data by two of its columns, the call might look like:
+To contrast the tidyverse approach with more traditional R semantics, consider sorting a data frame. Using only the core language, we can sort a data frame using one or more columns by reordering the rows via R's subscripting rules in conjunction with `order()` (as opposed to a function you might be tempted to use in such a situation because of its name, `sort()`). To sort the `mtcars` data by two of its columns, the call might look like:
 
 ```{r tidyverse-base-sort, eval = FALSE}
-iris[order(iris$Species, iris$Sepal.Length), ]
+mtcars[order(mtcars$gear, mtcars$mpg), ]
 ```
 
 While very computationally efficient, it would be difficult to argue that this is an intuitive user-interface. In `r pkg(dplyr)` by contrast, the tidyverse function `arrange()` takes a set of variable names as input arguments directly:
 
 ```{r tidyverse-dplyr-sort, eval = FALSE}
 library(dplyr)
-arrange(data = iris, Species, Sepal.Length)
+arrange(data = mtcars, gear, mpg)
 ```
 
 ```{block, type = "rmdnote"}
-Variable names above are unquoted; where many traditional R functions require a character string to specify variables, tidyverse functions take unquoted names or _selector functions_. The selectors allow for one or more readable rules that are applied to the column names. For example, `starts_with("Sepal")` would select the first two columns of the `iris` data frame.
+Variable names above are unquoted; where many traditional R functions require a character string to specify variables, tidyverse functions take unquoted names or _selector functions_. The selectors allow for one or more readable rules that are applied to the column names. For example, `ends_with("t")` would select the `drat` and `wt` columns of the `mtcars` data frame.
 ```
 
 Additionally, naming is crucial. If you were new to R and were writing data analysis or modeling code involving linear algebra, you might be stymied when searching for a function that computes the matrix inverse. Using `apropos("inv")` yields no candidates. It turns out that the base R function for this task is `solve()`, for solving systems of linear equations. For a matrix `X`, you would use `solve(X)` to invert `X` (with no vector for the right-hand side of the equation). This is only documented in the description of one of the _arguments_ in the help file. In essence, you need to know the name of the solution to be able to find the solution. 
@@ -78,19 +78,19 @@ One important feature in the tibble produced by `r pkg(rsample)` is that the `sp
 The `r pkg(magrittr)` pipe operator (`%>%`) is a tool for chaining together a sequence of R commands. To demonstrate, consider the following commands which sort a data frame and then retain the first 10 rows:
 
 ```{r tidyverse-no-pipe, eval = FALSE}
-small_iris <- arrange(iris, Species)
-small_iris <- slice(small_iris, 1:10)
+small_mtcars <- arrange(mtcars, gear)
+small_mtcars <- slice(small_mtcars, 1:10)
 
 # or more compactly: 
-small_iris <- slice(arrange(iris, Species), 1:10)
+small_mtcars <- slice(arrange(mtcars, gear), 1:10)
 ```
 
 The pipe operator substitutes the value of the left-hand side of the operator as the first argument to the right-hand side, so we can implement the same result as above with: 
 
 ```{r tidyverse-pipe, eval = FALSE}
-small_iris <- 
-  iris %>% 
-  arrange(Species) %>% 
+small_mtcars <- 
+  mtcars %>% 
+  arrange(gear) %>% 
   slice(1:10)
 ```
 
@@ -109,13 +109,13 @@ While similar to the `r pkg(dplyr)` pipeline, note that the first argument to th
 
 R has excellent tools for creating, changing, and operating on functions, making it a great language for _functional programming_. This approach can replace iterative loops in many situations, such as when a function returns a value without other side effects ^[Examples of function side effects could include changing global data or printing a value.]. 
 
-Let's look at an example. Suppose you are interested in the logarithm of the ratio of the sepal length to the petal length in irises. To those new to R and/or coming from other programming languages, a loop might seem like a good option:
+Let's look at an example. Suppose you are interested in the logarithm of the ratio of the feul efficiency to the car weight. To those new to R and/or coming from other programming languages, a loop might seem like a good option:
 
 ```{r tidyverse-loop}
-n <- nrow(iris)
+n <- nrow(mtcars)
 ratios <- rep(NA_real_, n)
-for (flower in 1:n) {
-  ratios[flower] <- log(iris$Sepal.Length[flower]/iris$Petal.Length[flower])
+for (car in 1:n) {
+  ratios[car] <- log(mtcars$mpg[car]/mtcars$wt[car])
 }
 head(ratios)
 ```
@@ -123,15 +123,15 @@ head(ratios)
 Those with more experience in R may know that there is a much simpler and faster _vectorized version_ that can be computed by:
 
 ```{r tidyverse-vectorized}
-ratios <- log(iris$Sepal.Length/iris$Petal.Length)
+ratios <- log(mtcars$mpg/mtcars$wt)
 ```
 
 However, in many real-world cases, the element-wise operation of interest is too complex for a vectorized solution. In such a case, a good approach is to write a _function_ to do the computations. When we design for functional programming, it is important that the output only depends on the inputs and that the function has no side effects. Violations of these ideas in the following function are shown with comments:
 
 ```{r tidyverse-non-functional}
-compute_log_ratio <- function(sepal, petal) {
+compute_log_ratio <- function(mpg, wt) {
   log_base <- getOption("log_base", default = exp(1)) # gets external data
-  results <- log(sepal/petal, base = log_base)
+  results <- log(mpg/wt, base = log_base)
   print(mean(results))                                # prints to the console
   done <<- TRUE                                       # sets external data
   results
@@ -141,34 +141,34 @@ compute_log_ratio <- function(sepal, petal) {
 A better version would be:
 
 ```{r tidyverse-better-function}
-compute_log_ratio <- function(sepal, petal, log_base = exp(1)) {
-  log(sepal/petal, base = log_base)
+compute_log_ratio <- function(mpg, wt, log_base = exp(1)) {
+  log(mpg/wt, base = log_base)
 }
 ```
 
 The `r pkg(purrr)` package contains tools for functional programming. Let's focus on the `map()` family of functions, which operates on vectors and always returns the same type of output. The most basic function, `map()`, always returns a list and uses the basic syntax of `map(vector, function)`. For example, to take the square-root of our data, we could: 
 
 ```{r map-basic}
-map(head(iris$Sepal.Length, 3), sqrt)
+map(head(mtcars$mpg, 3), sqrt)
 ``` 
 
 There are specialized variants of `map()` that return values when we know or expect that the function will generate one of the basic vector types. For example, since the square-root returns a double-precision number: 
 
 ```{r map-dbl}
-map_dbl(head(iris$Sepal.Length, 3), sqrt)
+map_dbl(head(mtcars$mpg, 3), sqrt)
 ``` 
 
 There are also mapping functions that operate across multiple vectors: 
 
 ```{r map2}
-ratios <- map2_dbl(iris$Sepal.Length, iris$Petal.Length, compute_log_ratio)
+ratios <- map2_dbl(mtcars$mpg, mtcars$wt, compute_log_ratio)
 head(ratios)
 ```
 
 The `map()` functions also allow for temporary, anonymous functions defined using the tilde character. The argument values are `.x` and `.y` for `map2()`:
 
 ```{r map2-inline}
-map2_dbl(iris$Sepal.Length, iris$Petal.Length, ~ log(.x/.y)) %>% 
+map2_dbl(mtcars$mpg, mtcars$wt, ~ log(.x/.y)) %>% 
   head()
 ```
 
