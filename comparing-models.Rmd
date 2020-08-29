@@ -249,7 +249,7 @@ This is not an unreasonable model for resampled statistics which, when plotted a
 
 For this model configuration, an additional assumption is made for the prior distribution of random effects. A reasonable approach is another symmetric distribution such as another bell-shaped curve. Given the effective sample size of 10 in our data, let's use a prior that is wider than a standard normal distribution. We'll use a t-distribution with a single degree of freedom (i.e. $b_i \sim t(1)$), which has heavier tails than an analogous Gaussian distribution. 
 
-The `tidyposterior` package has functions to fit such Bayesian models for the purpose of comparing resampled models. For an object created using the `rsample` package (such as our `ames_folds` tibble), the corresponding resampling estimates of performance are in columns of the data frame. From this object, the `perf_mod()` function determines an appropriate Bayesian model and fits using the resampling statistics. For example, let's fit a model to the three sets of model R<sup>2</sup> statistics: 
+The `r pkg(tidyposterior)` package has functions to fit such Bayesian models for the purpose of comparing resampled models. For an object created using the `r pkg(rsample)` package (such as our `ames_folds` tibble), the corresponding resampling estimates of performance are in columns of the data frame. From this object, the `perf_mod()` function determines an appropriate Bayesian model and fits using the resampling statistics. For example, let's fit a model to the three sets of model R<sup>2</sup> statistics: 
 
 ```{r compare-collect-data}
 # Bring the R^2 values into the original rsample object:
@@ -260,7 +260,7 @@ ames_two_models <-
 ames_two_models %>% slice(1:4)
 ```
 
-The `tidyposterior` package uses the Stan software for specifying and fitting the models via the `rstanarm` package. The functions within that package have default priors (see `?priors` for more details). The model below uses the default priors for all parameters except for the random intercepts (which follow a  _t_-distribution). The estimation process uses random numbers so the seed is set within the function call. The estimation process is iterative and is replicated several times in collections called _chains_. The `iter` parameter tells the function how long to run the estimation process in each chain. When several chains are used, their results are combined (assume that this is validated by diagnostic assessments).  
+The `r pkg(tidyposterior)` package uses the Stan software for specifying and fitting the models via the `r pkg(rstanarm)` package. The functions within that package have default priors (see `?priors` for more details). The model below uses the default priors for all parameters except for the random intercepts (which follow a  _t_-distribution). The estimation process uses random numbers so the seed is set within the function call. The estimation process is iterative and is replicated several times in collections called _chains_. The `iter` parameter tells the function how long to run the estimation process in each chain. When several chains are used, their results are combined (assume that this is validated by diagnostic assessments).  
 
 ```{r compare-fit-stan, results = "hide"}
 library(tidyposterior)

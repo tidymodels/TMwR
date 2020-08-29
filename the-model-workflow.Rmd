@@ -8,7 +8,7 @@ source("ames_snippets.R")
 
 # A model workflow {#workflows}
 
-In the previous two chapters, we discussed the recipes and parsnip packages. These packages can be used to prepare the data for analysis and fitting the model. This chapter introduces a new object called a _model workflow_. The purpose of this object is to encapsulate the major pieces of the modeling _process_ (previously discussed in Section \@ref(model-phases)). The workflow is important in two ways. First, using a workflow object encourages good methodology since it is a single point of entry to the estimation components of a data analysis. Second, it enables the user to better organize their projects. These two points are discussed in the following sections.  
+In the previous two chapters, we discussed the `r pkg(recipes)` and `r pkg(parsnip)` packages. These packages can be used to prepare the data for analysis and fitting the model. This chapter introduces a new object called a _model workflow_. The purpose of this object is to encapsulate the major pieces of the modeling _process_ (previously discussed in Section \@ref(model-phases)). The workflow is important in two ways. First, using a workflow object encourages good methodology since it is a single point of entry to the estimation components of a data analysis. Second, it enables the user to better organize their projects. These two points are discussed in the following sections.  
 
 
 ## Where does the model begin and end? {#begin-model-end}
@@ -71,7 +71,7 @@ In this way, the PCA preprocessing is considered part of the modeling process.
 
 ## Workflow basics
 
-The workflows package allows the user to bind modeling and preprocessing objects together. Let's start again with the Ames data and a simple linear model:
+The `r pkg(workflows)` package allows the user to bind modeling and preprocessing objects together. Let's start again with the Ames data and a simple linear model:
 
 ```{r workflows-simple}
 library(tidymodels)  # Includes the workflows package
@@ -81,7 +81,7 @@ lm_model <-
   set_engine("lm")
 ```
 
-A workflow always requires a parsnip model object:
+A workflow always requires a `r pkg(parsnip)` model object:
 
 ```{r workflows-model-only}
 lm_wflow <- 
@@ -116,7 +116,7 @@ We can also `predict()` on the fitted workflow:
 predict(lm_fit, ames_test %>% slice(1:3))
 ```
 
-The `predict()` method follows all of the same rules and naming conventions that we described for the parsnip package in Section \@ref(parsnip-predictions). 
+The `predict()` method follows all of the same rules and naming conventions that we described for the `r pkg(parsnip)` package in Section \@ref(parsnip-predictions). 
 
 Both the model and preprocessor can be removed or updated:
 
@@ -186,15 +186,15 @@ A workflow is a general purpose interface. When `add_formula()` is used, how sho
 
 ### Tree-based models {-}
 
-When we fit a tree to the data, the parsnip package understands what the modeling function would do. For example, if a random forest model is fit using the ranger or randomForest packages, the workflow knows predictors columns that are factors should be left as-is. 
+When we fit a tree to the data, the `r pkg(parsnip)` package understands what the modeling function would do. For example, if a random forest model is fit using the `r pkg(ranger)` or `r pkg(randomForest)` packages, the workflow knows predictors columns that are factors should be left as-is. 
 
-As a counter example, a boosted tree created with the xgboost package requires the user to create dummy variables from factor predictors (since `xgboost::xgb.train()` will not). This requirement is embedded into the model specification object and a workflow using xgboost _will_ create the indicator columns for this engine. Also note that a different engine for boosted trees, C5.0, does not require dummy variables so none are made by the workflow. 
+As a counter example, a boosted tree created with the `r pkg(xgboost)` package requires the user to create dummy variables from factor predictors (since `xgboost::xgb.train()` will not). This requirement is embedded into the model specification object and a workflow using `r pkg(xgboost)` _will_ create the indicator columns for this engine. Also note that a different engine for boosted trees, C5.0, does not require dummy variables so none are made by the workflow. 
 
 This determination is made for _each model and engine combination_. 
 
 ### Special formulas and in-line functions {-}
 
-A number of multilevel models have standardized on a formula specification devised in the lme4 package. For example, to fit a regression model that has random effects for subjects, we would use the following formula: 
+A number of multilevel models have standardized on a formula specification devised in the `r pkg(lme4)` package. For example, to fit a regression model that has random effects for subjects, we would use the following formula: 
 
 ```r
 library(lme4)
@@ -221,7 +221,7 @@ The issue is that the special formula has to be processed by the underlying pack
 
 Even if this formula could be used with `model.matrix()`, this would still present a problem since the formula also specifies the statistical attributes of the model. 
 
-The solution in `workflows` is an optional supplementary model formula that can be passed to `add_model()`. For example, using the previously mentioned `strata()` function in the `survival` package, the `add_formula()` specification provides the bare column names and then the actual formula given to the model is set within `add_model()`:  
+The solution in `workflows` is an optional supplementary model formula that can be passed to `add_model()`. For example, using the previously mentioned `strata()` function in the `r pkg(survival)` package, the `add_formula()` specification provides the bare column names and then the actual formula given to the model is set within `add_model()`:  
 
 ```{r workflows-strata}
 library(survival)

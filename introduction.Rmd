@@ -300,7 +300,7 @@ and so on. Eventually, a model is selected that is able to achieve sufficient pe
 
 The first order of business is to introduce (or review) the ideas and syntax of the tidyverse in Chapter \@ref(tidyverse). Chapter \@ref(base-r) is a quick tour of conventional base R modeling functions and summarize the unmet needs in that area. 
 
-The book is separated into parts. The first introduces an example data set and introduce some of the fundamental packages: `recipes`, `parsnip`, `workflows`, `yardstick`, and others. 
+The book is separated into parts. The first introduces an example data set and introduce some of the fundamental packages: `r pkg(recipes)`, `r pkg(parsnip)`, `r pkg(workflows)`, `r pkg(yardstick)`, and others. 
 
 The second part of the book introduces topics related to the process of creating a good model. This includes more tools and concepts related to creating good estimates of performance as well as topics related to _tuning_ model parameters. 
 
