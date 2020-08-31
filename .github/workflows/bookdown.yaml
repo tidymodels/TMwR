@@ -22,6 +22,11 @@ jobs:
 
       - name: Install pandoc and pandoc citeproc
         uses: r-lib/actions/setup-pandoc@master
+        
+      - name: Install system dependencies
+        run: |
+          brew cask install xquartz
+          brew install pkg-config cairo
 
       - name: Query dependencies
         run: |
