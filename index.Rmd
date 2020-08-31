@@ -27,32 +27,18 @@ _Tidy Modeling with R_ is currently a work in progress. As we create it, this we
 
 This openness also allows users to contribute if they wish. Most often, this comes in the form of correcting typos, grammar, and other aspects of our work that could use improvement. Instructions for making contributions can be found in the [`contributing.md`](https://github.com/topepo/TMwR/blob/master/contributing.md) file. Also, be aware that this effort has a code of conduct, which can be found at [`code_of_conduct.md`](https://github.com/topepo/TMwR/blob/master/code_of_conduct.md). 
 
-In terms of software lifecycle, the tidymodels packages are fairly young. We will do our best to maintain backwards compatibility and, at the completion of this work, will archive the specific versions of software that were used to produce it. The primary packages, and their versions, used to create this website are:
+In terms of software lifecycle, the tidymodels packages are fairly young. We will do our best to maintain backwards compatibility and, at the completion of this work, will archive the specific versions of software that were used to produce it. This version of the book was built with `r R.version.string` and the following packages:
 
-```{r tidymodels-attach, include = FALSE}
-pkg_list <- c("bookdown", "broom", "dials", "discrim", "dplyr", "ggplot2", 
-              "infer", "kableExtra", "kknn", "knitr", "modeldata", "parsnip", 
-              "patchwork", "purrr", "ranger", "recipes", "rlang", "rpart", 
-              "rsample", "splines", "tibble", "tidymodels", "tidyverse", 
-              "tune", "workflows", "yardstick")
-
-for (i in pkg_list) {
-  library(i, character.only = TRUE)
-}
-options(width = 80)
-
-pd_version <- rmarkdown::pandoc_version()
-``` 
-
-```{r pkg-list, echo = FALSE}
-library(sessioninfo)
-sinfo <- sessioninfo::session_info()
-cls <- class(sinfo$packages)
-sinfo$packages <- 
-  sinfo$packages %>% 
-  dplyr::filter(package %in% pkg_list)
-class(sinfo$packages) <- cls
-print(sinfo)
-``` 
+```{r pkg-list, echo = FALSE, results="asis"}
+deps <- desc::desc_get_deps()
+pkgs <- sort(deps$package[deps$type == "Imports"])
+pkgs <- sessioninfo::package_info(pkgs, dependencies = FALSE)
+df <- tibble(
+  package = pkgs$package,
+  version = pkgs$ondiskversion,
+  source = gsub("@", "\\\\@", pkgs$source)
+)
+knitr::kable(df, format = "markdown")
+```
 
 [`pandoc`](https://pandoc.org/) is also instrumental in creating this work. The version used here is `r pd_version`. 

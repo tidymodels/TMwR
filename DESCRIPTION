@@ -14,7 +14,11 @@ Depends: R (>= 4.0.0)
 URL: https://github.com/topepo/TMwR
 Imports:
   bookdown,
+  broom,
+  dials,
   doMC,
+  dplyr,
+  ggplot2,
   gridExtra,
   kableExtra,
   kknn,
@@ -22,17 +26,24 @@ Imports:
   lubridate,
   modeldata,
   nlme,
+  parsnip,
   patchwork,
+  purrr,
   ranger,
   recipes,
+  rlang,
   rmarkdown,
   rpart,
+  rsample,
   rstanarm,
   sessioninfo,
+  tibble,
   tidymodels,
   tidyposterior,
   tidyverse,
-  tune
+  tune,
+  workflows,
+  yardstick
 Remotes:
   tidymodels/recipes,
   tidymodels/tidymodels,
