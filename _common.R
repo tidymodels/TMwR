@@ -9,8 +9,9 @@ knitr::opts_chunk$set(
   tidy = FALSE
 )
 
+library(ggplot2)
+
 transparent_theme <- function() {
-  library(ggplot2)
   thm <- 
     theme_bw() + 
     theme(

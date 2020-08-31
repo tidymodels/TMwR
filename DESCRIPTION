@@ -45,6 +45,6 @@ Imports:
   workflows,
   yardstick
 Remotes:
+  tidymodels/tune,
   tidymodels/recipes,
-  tidymodels/tidymodels,
-  tidymodels/tune
+  tidymodels/tidymodels
