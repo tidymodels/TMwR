@@ -47,4 +47,5 @@ Imports:
 Remotes:
   tidymodels/tune,
   tidymodels/recipes,
+  tidymodels/dials,
   tidymodels/tidymodels
