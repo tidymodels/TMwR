@@ -33,7 +33,7 @@ In terms of software lifecycle, the tidymodels packages are fairly young. We wil
 deps <- desc::desc_get_deps()
 pkgs <- sort(deps$package[deps$type == "Imports"])
 pkgs <- sessioninfo::package_info(pkgs, dependencies = FALSE)
-df <- tibble(
+df <- tibble::tibble(
   package = pkgs$package,
   version = pkgs$ondiskversion,
   source = gsub("@", "\\\\@", pkgs$source)
