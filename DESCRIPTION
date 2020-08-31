@@ -41,6 +41,7 @@ Imports:
   tidymodels,
   tidyposterior,
   tidyverse,
+  themis,
   tune,
   workflows,
   yardstick
