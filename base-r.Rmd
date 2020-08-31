@@ -345,3 +345,7 @@ model_by_species %>%
 ```
 
 As previously mentioned, list columns can be very powerful in modeling projects. List columns provide containers for any type of R objects, from a fitted model itself to the important data frame structure. 
+
+## Chapter summary
+
+This chapter, reviewed basic R code for creating and using models. The formula operator was shown to be an expressive and important aspect of fitting models in R. Some limitations of the traditional R approaches were also described. 
