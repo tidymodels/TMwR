@@ -271,3 +271,6 @@ all_stations <-
 
 This pipeline of operations illustrates why the tidyverse is popular. A series of data manipulations are used that have simple and easy to understand user-interfaces that are bundled together in a streamlined and readable way. The focus is on how the user interacts with the software. This approach enables more people to learn R and achieve their analysis goals, and adopting these same principles for modeling in R has the same benefits. 
 
+## Chapter summary 
+
+This chapter introduced the tidyverse. The chapter described many differences in conventions between tidyverse and base R. Two important components of the system, tibbles and the pipe operator, were introduced and illustrated using a mundane but important data processing task.  
