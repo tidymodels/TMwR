@@ -1,6 +1,7 @@
 options(digits = 4, width = 84)
 options(dplyr.print_min = 6, dplyr.print_max = 6)
 options(cli.width = 85)
+options(crayon.enabled = FALSE)
 
 knitr::opts_chunk$set(
   comment = "#>",
@@ -9,21 +10,25 @@ knitr::opts_chunk$set(
   tidy = FALSE
 )
 
-transparent_theme <- function() {
-  library(ggplot2)
-  thm <- 
-    theme_bw() + 
-    theme(
-      panel.background = element_rect(fill = "transparent", colour = NA), 
-      plot.background = element_rect(fill = "transparent", colour = NA),
-      legend.position = "top",
-      legend.background = element_rect(fill = "transparent", colour = NA),
-      legend.key = element_rect(fill = "transparent", colour = NA)
-    )
-  theme_set(thm)
+
+
+theme_transparent <- function(...) {
+
+  ret <- ggplot2::theme_bw(...)
+  
+  trans_rect <- ggplot2::element_rect(fill = "transparent", colour = NA)
+  ret$panel.background  <- trans_rect
+  ret$plot.background   <- trans_rect
+  ret$legend.background <- trans_rect
+  ret$legend.key        <- trans_rect
+  
+  ret$legend.position <- "top"
+  
+  ret
 }
 
-transparent_theme()
+library(ggplot2)
+theme_set(theme_transparent())
 
 tmwr_version <- function() {
   dt <- Sys.Date()

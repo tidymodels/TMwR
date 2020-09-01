@@ -133,7 +133,7 @@ If the test set should not be used immediately, and re-predicting the training s
 
 Resampling methods are empirical simulation systems that emulate the process of using some data for modeling and different data for evaluation. Most resampling methods are iterative, meaning that this process is repeated multiple times. This diagram illustrates how resampling methods generally operate:
 
-```{r resampling-scheme, echo = FALSE, out.width = '85%'}
+```{r resampling-scheme, echo = FALSE, out.width = '85%', warning = FALSE}
 if (knitr:::is_html_output()) {
   file.copy("premade/resampling.svg", "_book/premade/resampling.svg")
   knitr::include_graphics("premade/resampling.svg")
@@ -159,7 +159,7 @@ The next section defines several commonly used methods and discusses their pros 
 
 Cross-validation is a well established resampling method. While there are a number of variations, the most common cross-validation method is _V_-fold cross-validation. The data are randomly partitioned into _V_ sets of roughly equal size (called the "folds"). For illustration, _V_ = 3 is shown below for a data set of thirty training set points with random fold allocations. The number inside the symbols is the sample number:
 
-```{r resampling-three-cv, echo = FALSE, out.width = '50%'}
+```{r resampling-three-cv, echo = FALSE, out.width = '50%', warning = FALSE}
 if (knitr:::is_html_output()) {
   file.copy("premade/three-CV.svg", "_book/premade/three-CV.svg")
   knitr::include_graphics("premade/three-CV.svg")
@@ -173,7 +173,7 @@ The color of the symbols represent their randomly assigned folds. Stratified sam
 
 For 3-fold cross-validation, the three iterations of resampling are illustrated below. For each iteration, one fold is held out for assessment statistics and the remaining folds are substrate for the model. This process continues for each fold so that three models produce three sets of performance statistics. 
 
-```{r resampling-three-cv-iter, echo = FALSE, out.width = '70%'}
+```{r resampling-three-cv-iter, echo = FALSE, out.width = '70%', warning = FALSE}
 if (knitr:::is_html_output()) {
   file.copy("premade/three-CV-iter.svg", "_book/premade/three-CV-iter.svg")
   knitr::include_graphics("premade/three-CV-iter.svg")
@@ -263,7 +263,7 @@ mc_cv(ames_train, prop = 9/10, times = 20)
 
 Previously mentioned in Section \@ref(what-about-a-validation-set), a validation set is a single partition that is set aside to estimate performance, before using the test set: 
 
-```{r resampling-validation, echo = FALSE, out.width = '50%'}
+```{r resampling-validation, echo = FALSE, out.width = '50%', warning = FALSE}
 if (knitr:::is_html_output()) {
   file.copy("premade/validation.svg", "_book/premade/validation.svg")
   knitr::include_graphics("premade/validation.svg")
@@ -278,7 +278,7 @@ Validation sets are often used when the original pool of data is very large. In 
 With `r pkg(rsample)`, a validation set is like any other resampling object; this type is different only in that it has a single iteration^[In essence, a validation set can be considered a single iteration of Monte Carlo cross-validation.]: 
 
 
-```{r resampling-validation-alt, echo = FALSE, out.width = '45%'}
+```{r resampling-validation-alt, echo = FALSE, out.width = '45%', warning = FALSE}
 if (knitr:::is_html_output()) {
   file.copy("premade/validation-alt.svg", "_book/premade/validation-alt.svg")
   knitr::include_graphics("premade/validation-alt.svg")
@@ -306,7 +306,7 @@ A bootstrap sample of the training set is a sample that is the same size as the 
 
 For a training set of 30 samples, a schematic of three bootstrap samples is: 
 
-```{r resampling-bootstraps, echo = FALSE, out.width = '80%'}
+```{r resampling-bootstraps, echo = FALSE, out.width = '80%', warning = FALSE}
 if (knitr:::is_html_output()) {
   file.copy("premade/bootstraps.svg", "_book/premade/bootstraps.svg")
   knitr::include_graphics("premade/bootstraps.svg")
@@ -335,7 +335,7 @@ Rolling forecast origin resampling [@hyndman2018forecasting] provides a method t
 
 To illustrate, a training set of fifteen samples was resampled with an analysis size of eight samples and an assessment set size of three. The second iteration discards the first training set sample and both data sets shift forward by one. This configuration results in five resamples: 
 
-```{r resampling-rolling, echo = FALSE, out.width = '65%'}
+```{r resampling-rolling, echo = FALSE, out.width = '65%', warning = FALSE}
 if (knitr:::is_html_output()) {
   file.copy("premade/rolling.svg", "_book/premade/rolling.svg")
   knitr::include_graphics("premade/rolling.svg")

@@ -17,42 +17,38 @@ colorlinks: yes
 
 # Hello World {-} 
 
-This is the website for _Tidy Modeling with R_. Its purpose is to be a guide to using a new collection of software in the R programming language for model building. There are few goals, depending on your background. First, if you are new to modeling and R, we hope to provide an introduction on how to use our software to create models. The focus will be on a dialect of R called _the tidyverse_ that is designed to be a better interface for common tasks using R. If you've never heard of the tidyverse, there is a chapter that provides an introduction. The second (and primary) goal is to demonstrate how the tidyverse can be used to produce high quality models. The tools used to do this are referred to as the _tidymodels packages_. The third goal is to use the tidymodels packages to encourage good methodology and statistical practice. Many models, especially complex predictive or machine learning models, can work very well on the data at hand but may also fail when exposed to new data. Often, this issue is due to poor choices that were made during the development and/or selection of the models. Whenever possible, our software attempts to prevent these and other pitfalls. 
+This is the website for _Tidy Modeling with R_. This book is a guide to using a new collection of software in the R programming language for model building, and it has two main goals: 
 
-This book is not intended to be a reference on different types of modeling techniques We suggest other resources to learn the nuances of models. A general source for information about the most common type of model, the _linear model_, we suggest @fox08. Another excellent resource for investigating and analyzing data is @wickham2016. For predictive models, @apm is a good resource. Also, @fes is reference heavily here, mostly because it is freely available on-line.  For pure machine learning methods, @Goodfellow is an excellent (but formal) source of information.  In some cases, we describe some models that are used in this text but in a way that is less mathematical (and hopefully more intuitive). 
+- First and foremost, this book provides an introduction to **how to use** our software to create models. We focus on a dialect of R called _[the tidyverse](https://www.tidyverse.org/)_ that is designed to be a better interface for common tasks using R. If you've never heard of or used the tidyverse, Chapter \@ref(tidyverse) provides an introduction. In this book, we demonstrate how the tidyverse can be used to produce high quality models. The tools used to do this are referred to as the _tidymodels packages_. 
 
-We do not assume that readers will have had extensive experience in model building and statistics. Some statistical knowledge is required, such as: random sampling, variance, correlation, basic linear regression, and other topics that are usually found in a basic undergraduate statistics or data analysis course. 
+- Second, we use the tidymodels packages to **encourage good methodology and statistical practice**. Many models, especially complex predictive or machine learning models, can work very well on the data at hand but may fail when exposed to new data. Often, this issue is due to poor choices made during the development and/or selection of the models. Whenever possible, our software, documentation, and other materials attempt to prevent these and other pitfalls. 
 
+This book is not intended to be a comprehensive reference on modeling techniques; we suggest other resources to learn such nuances. For general background on the most common type of model, the linear model, we suggest @fox08.  For predictive models, @apm is a good resource. Also, @fes is referenced heavily here, mostly because it is freely available online.  For machine learning methods, @Goodfellow is an excellent (but formal) source of information. In some cases, we describe models that are used in this text but in a way that is less mathematical, and hopefully more intuitive. 
+
+::rmdnote
+Investigating and analyzing data are an important part of the model process, and an excellent resource on this topic is @wickham2016.
+:::
+
+We do not assume that readers have extensive experience in model building and statistics. Some statistical knowledge is required, such as random sampling, variance, correlation, basic linear regression, and other topics that are usually found in a basic undergraduate statistics or data analysis course. 
+
+:::rmdwarning
 _Tidy Modeling with R_ is currently a work in progress. As we create it, this website is updated. Be aware that, until it is finalized, the content and/or structure of the book may change. 
+:::
 
 This openness also allows users to contribute if they wish. Most often, this comes in the form of correcting typos, grammar, and other aspects of our work that could use improvement. Instructions for making contributions can be found in the [`contributing.md`](https://github.com/topepo/TMwR/blob/master/contributing.md) file. Also, be aware that this effort has a code of conduct, which can be found at [`code_of_conduct.md`](https://github.com/topepo/TMwR/blob/master/code_of_conduct.md). 
 
-In terms of software lifecycle, the tidymodels packages are fairly young. We will do our best to maintain backwards compatibility and, at the completion of this work, will archive the specific versions of software that were used to produce it. The primary packages, and their versions, used to create this website are:
+The tidymodels packages are fairly young in the software lifecycle. We will do our best to maintain backwards compatibility and, at the completion of this work, will archive and tag the specific versions of software that were used to produce it. 
 
-```{r tidymodels-attach, include = FALSE}
-pkg_list <- c("bookdown", "broom", "dials", "discrim", "dplyr", "ggplot2", 
-              "infer", "kableExtra", "kknn", "knitr", "modeldata", "parsnip", 
-              "patchwork", "purrr", "ranger", "recipes", "rlang", "rpart", 
-              "rsample", "splines", "tibble", "tidymodels", "tidyverse", 
-              "tune", "workflows", "yardstick")
+This book was written in [RStudio](http://www.rstudio.com/ide/) using [bookdown](http://bookdown.org/). The [website](linkhere) is hosted via [Netlify](http://netlify.com/), and automatically built after every push by [GitHub Actions](https://help.github.com/actions). The complete source is available on [GitHub](https://github.com/topepo/TMwR). We generated all plots in this book using [ggplot2](https://ggplot2.tidyverse.org/) and its black and white theme (`theme_bw()`). This version of the book was built with `r R.version.string`, [pandoc](https://pandoc.org/) version `r rmarkdown::pandoc_version()`, and the following packages:
 
-for (i in pkg_list) {
-  library(i, character.only = TRUE)
-}
-options(width = 80)
-
-pd_version <- rmarkdown::pandoc_version()
-``` 
-
-```{r pkg-list, echo = FALSE}
-library(sessioninfo)
-sinfo <- sessioninfo::session_info()
-cls <- class(sinfo$packages)
-sinfo$packages <- 
-  sinfo$packages %>% 
-  dplyr::filter(package %in% pkg_list)
-class(sinfo$packages) <- cls
-print(sinfo)
-``` 
-
-[`pandoc`](https://pandoc.org/) is also instrumental in creating this work. The version used here is `r pd_version`. 
+```{r pkg-list, echo = FALSE, results="asis"}
+deps <- desc::desc_get_deps()
+pkgs <- sort(deps$package[deps$type == "Imports"])
+pkgs <- sessioninfo::package_info(pkgs, dependencies = FALSE)
+df <- tibble::tibble(
+  package = pkgs$package,
+  version = pkgs$ondiskversion,
+  source = gsub("@", "\\\\@", pkgs$source)
+)
+knitr::kable(df, format = "markdown")
+```
