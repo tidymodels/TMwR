@@ -1,9 +1,65 @@
 ```{r iterative-setup, include = FALSE}
 knitr::opts_chunk$set(fig.path = "figures/")
 library(tidymodels)
+library(doMC)
+registerDoMC(cores = parallel::detectCores(logical = TRUE))
+
+## -----------------------------------------------------------------------------
+
+data(cells)
+cells <- cells %>% select(-case)
+set.seed(33)
+cell_folds <- vfold_cv(cells)
+roc_res <- metric_set(roc_auc)
 ```
 
 # Iterative search {#iterative-search}
+
+
+```{r iterative-svm-defs}
+svm_rec <- 
+  recipe(class ~ ., data = cells) %>%
+  step_YeoJohnson(all_predictors()) %>% 
+  step_normalize(all_predictors())
+                 
+svm_spec <- 
+ svm_rbf(cost = tune(), rbf_sigma = tune()) %>% 
+ set_engine("kernlab") %>% 
+ set_mode("classification")
+
+svm_wflow <- 
+  workflow() %>% 
+  add_model(svm_spec) %>% 
+  add_recipe(svm_rec)
+
+svm_param <- 
+ svm_wflow %>% 
+ parameters() %>% 
+ update(rbf_sigma = rbf_sigma(c(-10, -1)))
+```
+
+```{r iterative-roc-surface, out.width = "100%", echo = FALSE, warning = FALSE}
+# See file extras/cells_svm_large.R
+res <- file.copy("premade/roc_surface.png", "_book/premade/roc_surface.png")
+knitr::include_graphics("premade/roc_surface.png")
+```
+
+```{r iterative-svm-initial}
+start_grid <- 
+ svm_param %>% 
+ update(
+  cost = cost(c(-6, 1)),
+  rbf_sigma = rbf_sigma(c(-7, -4))
+ ) %>% 
+ grid_random(size = 4)
+
+set.seed(2)
+svm_initial <- 
+  svm_wflow %>% 
+  tune_grid(resamples = cell_folds, grid = start_grid, metrics = roc_res)
+
+collect_metrics(svm_initial)
+```
 
 
 ## Simulated annealing 

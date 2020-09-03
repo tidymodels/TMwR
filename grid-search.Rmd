@@ -1,6 +1,11 @@
 ```{r grid-setup, include = FALSE}
 knitr::opts_chunk$set(fig.path = "figures/")
 library(tidymodels)
+library(finetune)
+data(cells)
+
+library(doMC)
+registerDoMC(cores = parallel::detectCores(logical = TRUE))
 ```
 
 
@@ -8,7 +13,95 @@ library(tidymodels)
 
 ## Regular and non-regular grids
 
+```{r grid-mlp}
+mlp_spec <- 
+ mlp(hidden_units = tune(), penalty = tune(), epochs = tune()) %>% 
+ set_engine("nnet", trace = 0) %>% 
+ set_mode("classification")
+```
+
 ## Evaluating the grid
+
+```{r grid-cells}
+data(cells)
+cells <- cells %>% select(-case)
+```
+
+```{r grid-cells-folds}
+set.seed(33)
+cell_folds <- vfold_cv(cells)
+```
+
+
+```{r grid-cells-objects}
+mlp_rec <-
+  recipe(class ~ ., data = cells) %>%
+  step_YeoJohnson(all_predictors()) %>% 
+  step_normalize(all_predictors()) %>% 
+  step_pca(all_predictors(), num_comp = tune())
+
+mlp_wflow <- 
+  workflow() %>% 
+  add_model(mlp_spec) %>% 
+  add_recipe(mlp_rec)
+
+mlp_param <- 
+  mlp_wflow %>% 
+  parameters() %>% 
+  update(
+    epochs = epochs(c(50, 200)),
+    num_comp = num_comp(c(0, 40))
+  )
+```
+
+
+```{r grid-cells-sdf, cache = TRUE}
+roc_res <- metric_set(roc_auc)
+set.seed(99)
+mlp_sfd_tune <-
+  mlp_wflow %>%
+  tune_grid(
+    cell_folds,
+    grid = 20,
+    param_info = mlp_param,
+    metrics = roc_res
+  )
+mlp_sfd_tune
+```
+
+```{r grid-cells-sdf-plot}
+autoplot(mlp_sfd_tune)
+```
+
+
+```{r grid-cells-sdf-best}
+show_best(mlp_sfd_tune) %>% select(-.estimator)
+```
+
+
+```{r grid-cells-regular, cache = TRUE}
+set.seed(99)
+mlp_reg_tune <-
+  mlp_wflow %>%
+  tune_grid(
+    cell_folds,
+    grid = mlp_param %>% grid_regular(levels = 3),
+    param_info = mlp_param,
+    metrics = roc_res
+  )
+```
+
+
+```{r grid-cells-reg-plot, fig.height = 6, fig.width = 6}
+autoplot(mlp_reg_tune)
+```
+
+
+```{r grid-cells-reg-best}
+show_best(mlp_reg_tune) %>% select(-.estimator)
+```
+
+
 
 ## Finalizing the model
 
