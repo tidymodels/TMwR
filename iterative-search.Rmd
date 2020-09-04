@@ -1,6 +1,7 @@
 ```{r iterative-setup, include = FALSE}
 knitr::opts_chunk$set(fig.path = "figures/")
 library(tidymodels)
+library(finetune)
 library(doMC)
 registerDoMC(cores = parallel::detectCores(logical = TRUE))
 
@@ -22,7 +23,6 @@ svm_rec <-
   step_YeoJohnson(all_predictors()) %>%
   step_normalize(all_predictors())
 
-                 
 svm_spec <- 
  svm_rbf(cost = tune(), rbf_sigma = tune()) %>% 
  set_engine("kernlab") %>% 
@@ -49,13 +49,14 @@ knitr::include_graphics("premade/roc_surface.png")
 ```
 
 ```{r iterative-svm-initial, cache = TRUE}
+set.seed(234)
 start_grid <- 
  svm_param %>% 
  update(
   cost = cost(c(-6, 1)),
-  rbf_sigma = rbf_sigma(c(-7, -4))
+  rbf_sigma = rbf_sigma(c(-6, -4))
  ) %>% 
- grid_random(size = 4)
+ grid_regular(levels = 2)
 
 set.seed(2)
 svm_initial <- 
@@ -85,18 +86,48 @@ svm_bo <-
  )
 ```
 
+```{r echo = FALSE, eval = FALSE}
+# remotes::install_github("tidymodels/tune@testing-gp")
+initial_points <-
+ svm_initial %>% 
+ collect_metrics() %>% 
+ filter(.metric == "roc_auc")
 
+bo_bound_points <-
+ svm_bo %>%
+ collect_metrics() %>%
+ filter(.metric == "roc_auc" & .iter > 0) %>%
+ arrange(.iter)
 
-`
+save(initial_points, bo_bound_points, file = "~/tmp/gp_test/other.RData")
+```
+
 ```{r iterative-bo-iter, fig.height = 4}
 autoplot(svm_bo, type = "performance")
 ```
 
 
-```{r iterative-bo-progress, out.width = "50%", echo = FALSE, warning = FALSE}
+```{r iterative-bo-progress, out.width = "100%", echo = FALSE, warning = FALSE}
 res <- file.copy("premade/exp_improve.gif", "_book/premade/exp_improve.gif")
 knitr::include_graphics("premade/exp_improve.gif")
 ```
 
 
 ## Simulated annealing 
+
+```{r iterative-cells-sa, cache = TRUE}
+ctrl_sa <- control_sim_anneal(no_improve = Inf, radius = 0.1)
+
+set.seed(123)
+svm_sa <-
+ svm_wflow %>%
+ tune_sim_anneal(
+  resamples = cell_folds,
+  metrics = roc_res,
+  initial = svm_initial,
+  param_info = svm_param,
+  iter = 50,
+  control = ctrl_sa
+ )
+```
+
