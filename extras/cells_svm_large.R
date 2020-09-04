@@ -15,7 +15,7 @@ roc_res <- metric_set(roc_auc)
 
 svm_rec <- 
   recipe(class ~ ., data = cells) %>%
-  step_YeoJohnson(all_predictors()) %>% 
+  step_YeoJohnson(all_predictors()) %>%
   step_normalize(all_predictors())
 
 svm_spec <- 
@@ -31,17 +31,14 @@ svm_wflow <-
 svm_param <- 
   svm_wflow %>% 
   parameters() %>% 
-  update(rbf_sigma = rbf_sigma(c(-10, -1)))
+  update(
+    cost = cost(c(-10, 5)),
+    rbf_sigma = rbf_sigma(c(-7, -1))
+  )
 
 ## -----------------------------------------------------------------------------
 
-large_grid <- 
-  svm_param %>% 
-  update(
-    cost = cost(c(-6, 1)),
-    rbf_sigma = rbf_sigma(c(-7, -4))
-  ) %>% 
-  grid_regular(levels = 50)
+large_grid <- grid_regular(svm_param, levels = 50)
 
 set.seed(2)
 svm_large <- 

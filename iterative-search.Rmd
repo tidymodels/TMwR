@@ -19,8 +19,9 @@ roc_res <- metric_set(roc_auc)
 ```{r iterative-svm-defs}
 svm_rec <- 
   recipe(class ~ ., data = cells) %>%
-  step_YeoJohnson(all_predictors()) %>% 
+  step_YeoJohnson(all_predictors()) %>%
   step_normalize(all_predictors())
+
                  
 svm_spec <- 
  svm_rbf(cost = tune(), rbf_sigma = tune()) %>% 
@@ -35,7 +36,10 @@ svm_wflow <-
 svm_param <- 
  svm_wflow %>% 
  parameters() %>% 
- update(rbf_sigma = rbf_sigma(c(-10, -1)))
+  update(
+    cost = cost(c(-10, 5)),
+    rbf_sigma = rbf_sigma(c(-7, -1))
+  )
 ```
 
 ```{r iterative-roc-surface, out.width = "100%", echo = FALSE, warning = FALSE}
@@ -44,7 +48,7 @@ res <- file.copy("premade/roc_surface.png", "_book/premade/roc_surface.png")
 knitr::include_graphics("premade/roc_surface.png")
 ```
 
-```{r iterative-svm-initial}
+```{r iterative-svm-initial, cache = TRUE}
 start_grid <- 
  svm_param %>% 
  update(
@@ -62,12 +66,37 @@ collect_metrics(svm_initial)
 ```
 
 
-## Simulated annealing 
-
 
 ## Bayesian  optimization
 
+```{r iterative-cells-bo, cache = TRUE}
+ctrl <- control_bayes(no_improve = Inf, verbose = TRUE)
+
+set.seed(55)
+svm_bo <-
+ svm_wflow %>%
+ tune_bayes(
+  resamples = cell_folds,
+  metrics = roc_res,
+  initial = svm_initial,
+  param_info = svm_param,
+  iter = 25,
+  control = ctrl
+ )
+```
 
 
 
+`
+```{r iterative-bo-iter, fig.height = 4}
+autoplot(svm_bo, type = "performance")
+```
 
+
+```{r iterative-bo-progress, out.width = "50%", echo = FALSE, warning = FALSE}
+res <- file.copy("premade/exp_improve.gif", "_book/premade/exp_improve.gif")
+knitr::include_graphics("premade/exp_improve.gif")
+```
+
+
+## Simulated annealing 
