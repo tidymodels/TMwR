@@ -48,19 +48,34 @@ svm_large <-
 ## -----------------------------------------------------------------------------
 
 if (interactive()) {
+
+  svm_roc <-   
+    svm_large %>% 
+    collect_metrics()
   
   large_plot <-
-    svm_large %>% 
-    collect_metrics() %>% 
+    svm_roc %>% 
     ggplot(aes(x = rbf_sigma, y = cost)) + 
     geom_raster(aes(fill = mean)) + 
+    geom_point(data = top_n(svm_roc, 1, mean)) + 
     scale_x_log10() + 
     scale_y_continuous(trans = "log2") +
     scale_fill_distiller(palette = "Blues") +
     theme_minimal() + 
-    theme(legend.position = "bottom") + 
+    theme(
+      legend.position = "bottom",
+      legend.key.width = grid::unit(2, "cm"),
+      plot.title = element_text(hjust = 0.5)
+    ) + 
     guides(title.position = "bottom") + 
-    labs(x = "rbf_sigma\n\n\n\n", title = NULL)
+    labs(x = "rbf_sigma\n\n\n\n", title = "ROC AUC surface") + 
+    coord_fixed(ratio = 1/2.5)
+  
+  agg_png("roc_surface.png", height = 4 * 480, width = 4 * 480, res = 72 * 3, scaling = 1)
+  print(large_plot)
+  dev.off()
+  
+  
   
   plot_gg(
     large_plot,
