@@ -42,7 +42,7 @@ svm_param <-
   )
 ```
 
-```{r iterative-roc-surface, out.width = "100%", echo = FALSE, warning = FALSE}
+```{r iterative-roc-surface, out.width = "80%", echo = FALSE, warning = FALSE}
 # See file extras/cells_svm_large.R
 res <- file.copy("premade/roc_surface.png", "_book/premade/roc_surface.png")
 knitr::include_graphics("premade/roc_surface.png")
@@ -70,7 +70,27 @@ collect_metrics(svm_initial)
 
 ## Bayesian  optimization
 
-```{r iterative-cells-bo, cache = TRUE}
+
+```{r iterative-cells-bo-calcs, echo = FALSE, cache = TRUE}
+ctrl <- control_bayes(no_improve = Inf, verbose = TRUE)
+
+sa_output <- capture.output({
+  set.seed(55)
+  svm_bo <-
+    svm_wflow %>%
+    tune_bayes(
+      resamples = cell_folds,
+      metrics = roc_res,
+      initial = svm_initial,
+      param_info = svm_param,
+      iter = 25,
+      control = ctrl
+    )
+}, 
+type = "output")
+```
+
+```{r iterative-cells-bo, eval = FALSE}
 ctrl <- control_bayes(no_improve = Inf, verbose = TRUE)
 
 set.seed(55)
@@ -85,6 +105,31 @@ svm_bo <-
   control = ctrl
  )
 ```
+```{r iterative-cells-bo-print-first, echo = FALSE}
+so_stop <- "Iteration 3"
+so_stop_index <- grep(so_stop, sa_output) 
+if (length(so_stop_index) > 0) {
+  cat(sa_output[1:(so_stop_index - 2)], sep = "\n")
+}
+```
+
+```{r iterative-cells-bo-print-impr, echo = FALSE}
+all_imp_index <- grep("♥", sa_output)
+so_stop_index <- all_imp_index[length(all_imp_index)]
+if (length(all_imp_index) > 0) {
+  so_start_index <- so_stop_index - 11
+  cat(sa_output[so_start_index:(so_stop_index + 1)], sep = "\n")
+}
+```
+
+```{r iterative-cells-bo-print-last, echo = FALSE}
+so_start <- "Iteration 25"
+so_start_index <- grep(so_start, sa_output)
+if (length(so_start_index) > 0) {
+  cat(sa_output[so_start_index:length(sa_output)], sep = "\n")
+}
+```
+
 
 ```{r echo = FALSE, eval = FALSE}
 # remotes::install_github("tidymodels/tune@testing-gp")
@@ -115,19 +160,41 @@ knitr::include_graphics("premade/exp_improve.gif")
 
 ## Simulated annealing 
 
-```{r iterative-cells-sa, cache = TRUE}
+```{r iterative-cells-sa-calcs, include = FALSE, cache = TRUE}
 ctrl_sa <- control_sim_anneal(no_improve = Inf, radius = 0.1)
 
-set.seed(123)
-svm_sa <-
- svm_wflow %>%
- tune_sim_anneal(
-  resamples = cell_folds,
-  metrics = roc_res,
-  initial = svm_initial,
-  param_info = svm_param,
-  iter = 50,
-  control = ctrl_sa
- )
+sa_output <- capture.output({
+  set.seed(123)
+  svm_sa <-
+    svm_wflow %>%
+    tune_sim_anneal(
+      resamples = cell_folds,
+      metrics = roc_res,
+      initial = svm_initial,
+      param_info = svm_param,
+      iter = 50,
+      control = ctrl_sa
+    )
+}, 
+type = "message")
 ```
+```{r iterative-cells-sa, eval = FALSE}
+ctrl_sa <- control_sim_anneal(no_improve = Inf, radius = 0.1)
+
+sa_output <- capture.output({
+  set.seed(123)
+  svm_sa <-
+    svm_wflow %>%
+    tune_sim_anneal(
+      resamples = cell_folds,
+      metrics = roc_res,
+      initial = svm_initial,
+      param_info = svm_param,
+      iter = 50,
+      control = ctrl_sa
+    )
+})
+```
+
+
 
