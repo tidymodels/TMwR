@@ -19,6 +19,7 @@ Imports:
   dials,
   doMC,
   dplyr,
+  ggforce,
   ggplot2,
   gridExtra,
   kableExtra,
