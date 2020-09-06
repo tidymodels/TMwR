@@ -3,10 +3,17 @@ knitr::opts_chunk$set(fig.path = "figures/")
 library(tidymodels)
 library(finetune)
 library(ggforce)
+library(lme4)
 data(cells)
 
 library(doMC)
 registerDoMC(cores = parallel::detectCores(logical = TRUE))
+
+library(kableExtra)
+
+## -----------------------------------------------------------------------------
+
+load("RData/mlp_times.RData")
 ```
 
 
@@ -14,7 +21,7 @@ registerDoMC(cores = parallel::detectCores(logical = TRUE))
 
 Recall from the last chapter that users can mark arguments in recipes and/or model specifications for optimization using a value of `tune()`.  Once we know _what_ to optimize, there is the question of _how_ to optimize the parameters. This chapter describes _grid search_ methods that specify the possible values of the parameters _a priori_. We'll start by describing two main approaches for assembling a grid. 
 
-## Regular and non-regular grids
+## Regular and non-regular grids {#grids}
 
 There are two main types of grids. The first is a _regular grid_ where each parameter has a corresponding set of possible values. A regular grid combines these factorially, i.e., by using all combinations of the sets. Alternatively, a non-regular grid is one where the parameter combinations are not formed from a small set of points. 
 
@@ -83,41 +90,41 @@ One advantage to using a regular grid is that the relationships and patterns bet
 There a several options for creating non-regular grids. The first is to use random sampling across the range of parameters. `grid_random()` generates independent uniform random numbers across the parameter ranges. If the parameter object has an associated transformation (such as we have for `penalty`), the random numbers are generated on the transformed scale.  For example: 
 
 ```{r grid-rand}
-set.seed(100)
+set.seed(10)
 mlp_param %>% 
   grid_random(size = 1000) %>% # 'size' is the number of combinations
   summary()
 ```
 For `penalty`, the random numbers are uniform on the log (based 10) scale but the values in the grid are in the natural units. 
 
-The issue with random grids is that, with small-to-medium grids, random values can result in overlapping parameter combinations. Also, the random grid should cover the whole parameter space but the likelihood of this occurring increases with the number of grid values. For a sample of 20 candidate points, this plot shows some overlap between points: 
+The issue with random grids is that, with small-to-medium grids, random values can result in overlapping parameter combinations. Also, the random grid should cover the whole parameter space but the likelihood of this occurring increases with the number of grid values. For a sample of 15 candidate points, this plot shows some overlap between points: 
 
 ```{r grid-random-matrix, fig.height = 6, fig.width = 6}
 library(ggforce)
-set.seed(100)
+set.seed(200)
 mlp_param %>% 
   # The 'original = FALSE' option keeps penalty in log10 units
-  grid_random(size = 20, original = FALSE) %>% 
+  grid_random(size = 15, original = FALSE) %>% 
   ggplot(aes(x = .panel_x, y = .panel_y)) + 
   geom_point() +
   geom_blank() +
   facet_matrix(vars(hidden_units, penalty, epochs), layer.diag = 2) + 
-  labs(title = "Random design with 20 candidates")
+  labs(title = "Random design with 15 candidates")
 ```
 
 A much better approach uses a set of experimental designs called _space-filling designs_. While different design methods have slightly different goals, they generally find a configuration of points that cover the parameter space with the smallest chance of overlapping or redundant values. Examples of such designs are latin hypercubes [@lhd], maximum entropy designs [@maxent], maximum projection designs [@maxproj], and others. See @santner2003design for an overview. 
 
-`r pkg(dials)` contains functions for latin hypercube and maximum entropy designs. As with `grid_random()`, the primary inputs are the number of parameter combinations and a parameters object. Let's compare a random design with a latin hypercube design for 20 candidate parameter values. 
+`r pkg(dials)` contains functions for latin hypercube and maximum entropy designs. As with `grid_random()`, the primary inputs are the number of parameter combinations and a parameters object. Let's compare a random design with a latin hypercube design for 15 candidate parameter values. 
 
 ```{r grid-sfd-compare, fig.height = 6, fig.width = 6}
-set.seed(100)
+set.seed(200)
 mlp_param %>% 
-  grid_latin_hypercube(size = 20, original = FALSE) %>% 
+  grid_latin_hypercube(size = 15, original = FALSE) %>% 
   ggplot(aes(x = .panel_x, y = .panel_y)) + 
   geom_point() +
   geom_blank() +
   facet_matrix(vars(hidden_units, penalty, epochs), layer.diag = 2) + 
-  labs(title = "Latin Hypercube design with 20 candidates")
+  labs(title = "Latin Hypercube design with 15 candidates")
 ```
 
 While not perfect, this design spaces the points further away from one another.  
@@ -282,6 +289,150 @@ This object is used to make future predictions.
 
 ## Tools for efficient grid search {#efficient-grids}
 
-parallelism, sub-models, and racing  
+A few different tricks and optimization are possible to make grid search more computationally efficient. This section describes several techniques. 
+
+### Submodel optimization
+
+There are types of models where, from a single model fit, multiple tuning parameters can be evaluated without refitting. 
+
+For example, partial least squares (PLS) is a supervised version of principal component analysis REF. It creates components that maximize the variation in the predictors (like PCA) but simultaneously tries to maximize the correlation between these predictors and the outcome. One tuning parameter is the number of PLS components to retain. Suppose that a data set with 100 predictors is fit using PLS. The number of possible components to retain can range from one to fifty. However, in many implementations, a single model fit can compute predicted values across many values of `num_comp`. As a result, a PLS model created with 100 components can also make predictions for any `num_comp <= 100`. The saves time since, instead of creating redundant model fits, a single fit can be used to evaluate many _submodels_.
+
+While not all models have exploit this feature, some do: 
+
+* Boosting models can typically make predictions across multiple values for the number of boosting iterations. 
+
+* Regularization methods, such as the `glmnet` model, can make simultaneous predictions across the amount of regularization used to fit the model. 
+
+* Multivariate adaptive regression splines (MARS) adds a set of nonlinear features features to a linear regression models. The number of terms to retain is a tuning parameter and it is computationally fast to make predictions across many values of this parameter from a single model fit. 
+
+The `r pkg(tune)` package automatically applies this type of optimization whenever an applicable model is tuned. 
+
+For example, if a boosted C5.0 classification model was fit to the cell data, we can tune the number of boosting iterations can. With all other parameters set at their default values, iterations from 1 to 100 were evaluated on the same resamples as used previously:
+
+```{r grid-c5, eval = FALSE}
+c5_spec <- 
+  boost_tree(trees = tune()) %>% 
+  set_engine("C5.0") %>% 
+  set_mode("classification")
+
+set.seed(2)
+c5_spec %>%
+  tune_grid(
+    class ~ .,
+    resamples = cell_folds,
+    grid = data.frame(trees = 1:100),
+    metrics = roc_res
+  )
+```
+
+Without the submodel optimization, the call to `tune_grid()` used `r round(3636.685/60, 1)` minutes to evaluate 100 submodels. With the optimization, the same call took 102 _seconds_ (a speedup of `r round(3636.685/101.878, 0)`-fold). The reduced time is the difference in `tune_grid()` fitting 1000 models versus 10 models. 
+
+### Parallel processing
+
+As previously mentioned in Section \@ref(parallel), parallel processing is an effective method for creasing training time, especially when models are resampled. This advantage conveys to model tuning with grid search. 
+Currently, the `r pkg(tune)` package only parallel processes over resamples (instead of resamples and tuning parameter combinations). The rationale is that this is the optimal scenario when the preprocessing method is expensive. However, it currently limits the achievable speed-ups when the preprocessing is not expensive.  
+
+The multilayer perceptron `tune_grid()` code from Section \@ref(grids) was re-run with different numbers of parallel workers using a computer with 10 physical cores. The results show that parallel process effectively reduces the total execution time for this model: 
+
+```{r grid-parallel, echo = FALSE, results = "asis"}
+options(knitr.kable.NA = '')
+times %>% 
+  mutate(speed_up = ifelse(cores == 1, NA, speed_up)) %>% 
+  arrange(`Grid Type`, cores) %>% 
+  select(
+    `# Workers` = cores,
+    `Time (s)` = time,
+    `Time/Fit (s)` = time_per_fit,
+    `Speed-Up` = speed_up
+  ) %>%
+  kable(
+    row.names = FALSE, 
+    digits = 2
+  ) %>% 
+  kable_paper("striped", full_width = FALSE) %>%
+  pack_rows("Regular Grid", 1, 3) %>%
+  pack_rows("Space-Filling Design", 4 , 6)
+```
+
+Note that the speed-up in computations will vary from model-to-model. A very computationally efficient model may not benefit as much from parallel processing. 
 
 
+### Racing methods
+
+On issue with grid search is that all models need to be fit across all resamples before any tuning parameters can be evaluated. It would be helpful if, at some point during tuning, an interim analysis is conducted to eliminate any truly awful parameter candidates. This would be akin to _futility analysis_ in clinical trials. If a new drug is performing excessively poorly (or well), it is potentially unethical to wait until the trial finishes to make a decision.  
+
+In machine learning, the set of techniques called _racing method_ provide a similar function. Here, the tuning process evaluates all models on an initial subset of resamples. Based on their current performance metrics, some parameter sets are not considered in subsequent resamples. 
+
+As an example, in the previous multilayer perceptron tuning process with a regular grid, what would the results look after the first three folds? Using techniques similar to those shown in Chapter \@ref(compare), a model is fit where the outcome is the resampled area under the ROC curve and the predictor is an indicator for the parameter combination. The model takes the resample-to-resample effect into account and produces point and interval estimates for each parameter settings. The results of the model are one-sided 95% confidence intervals that measure the loss of the ROC value relative to the currently best performing parameters: 
+
+```{r grid-mlp-racing, echo = FALSE}
+roc_resamples <- 
+  mlp_sfd_tune %>% 
+  collect_metrics(summarize = FALSE) %>% 
+  filter(id %in% paste0("Fold0", 1:3))
+
+# order by best model
+
+config_order <- 
+  roc_resamples %>% 
+  group_by(.config) %>% 
+  summarize(mean = mean(.estimate), .groups = "drop") %>% 
+  ungroup() %>% 
+  arrange(desc(mean)) %>% 
+  pull(.config)
+
+roc_resamples$.config <- factor(roc_resamples$.config, levels = config_order)
+
+roc_model <- lmer(.estimate ~ .config + (1|id), data = roc_resamples)
+
+point_est <- 
+  summary(roc_model) %>% 
+  pluck("coefficients") %>% 
+  as_tibble(rownames = ".config") %>% 
+  select(.config, estimate = Estimate)
+
+interval_est <- 
+  confint(roc_model, quiet = TRUE) %>% 
+  as_tibble(rownames = ".config") %>% 
+  select(.config, upper = `97.5 %`)
+
+roc_estimates <- 
+  inner_join(point_est, interval_est, by = ".config") %>% 
+  filter(.config != "(Intercept)") %>% 
+  mutate(
+    .config = gsub(".config", "", .config, fixed = TRUE),
+    .config = factor(.config, levels = rev(config_order))
+  )
+
+roc_estimates %>% 
+  ggplot(aes(x = -estimate, y = .config)) + 
+  geom_vline(xintercept = 0, lty = 2, col = "green") +
+  geom_point(size = 2) + 
+  geom_errorbarh(aes(xmin = -estimate, xmax = -upper), height = .5) + 
+  labs(x = "Drop in ROC AUC from current best candidate", y = NULL)
+```
+Any parameter set whose confidence interval includes zero would have performance that is not statistically different from the best. We retain `r sum(roc_estimates$upper >= 0)` settings; these are resampled more. The remaining `r sum(roc_estimates$upper < 0)` submodels are no longer considered. 
+
+The process continues for each resample; after the next set of performance metrics, a new model is fit to these statistics, and more  submodels are potentially discarded. See @kuhn2014futility for more details on the computational aspects of this approach. 
+
+Racing methods can be more efficient that basic grid search as long as the interim analysis is fast and some parameter settings have poor performance. It also is most helpful when the model does not have the abilities to exploit submodel predictions (as discussed in the last section). 
+
+There are other interim analysis techniques for discarding settings. For example, @krueger15a uses traditional sequential analysis methods whereas @kuhn2014futility treats the data as a sports competition and uses the Bradley-Terry model [@bradley1952rank] to measure the winning ability of parameter settings. 
+
+
+
+## Chapter summary {#grid-summary}
+
+We discussed two main classes of grid (regular and non-regular) and demonstrated how to construct them using the family of `grid_*()` functions. The `tune_grid()` function was used to evaluate the candidate sets using resampling. The chapter also showed how to update a model, recipe, or workflow to update the parameter values for the final fit. 
+
+The data analysis code that will be reused in the next chapter is:  
+
+```{r resampling-summary, eval = FALSE}
+library(tidymodels)
+
+data(cells)
+cells <- cells %>% select(-case)
+
+set.seed(33)
+cell_folds <- vfold_cv(cells)
+```

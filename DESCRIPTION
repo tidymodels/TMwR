@@ -8,6 +8,13 @@ Authors@R: c(
       email = "max@rstudio.com",
       comment = c(ORCID = "0000-0003-2402-136X"),
       role = c("aut", "cre")
+    ),
+    person(
+      given = "Julia",
+      family = "Silge",
+      email = "julia.silge@rstudio.com",
+      comment = c(ORCID = "0000-0002-3671-836X"),
+      role = c("aut", "cre")
     )
   )
 Depends: R (>= 4.0.0)
@@ -22,10 +29,11 @@ Imports:
   ggforce,
   ggplot2,
   gridExtra,
-  kableExtra,
+  kableExtra (>= 1.2.1),
   kernlab,
   kknn,
   knitr,
+  lme4,
   lubridate,
   modeldata,
   nlme,
