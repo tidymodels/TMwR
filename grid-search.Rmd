@@ -325,7 +325,7 @@ c5_spec %>%
   )
 ```
 
-Without the submodel optimization, the call to `tune_grid()` used `r round(3636.685/60, 1)` minutes to evaluate 100 submodels. With the optimization, the same call took 102 _seconds_ (a speedup of `r round(3636.685/101.878, 0)`-fold). The reduced time is the difference in `tune_grid()` fitting 1000 models versus 10 models. 
+Without the submodel optimization, the call to `tune_grid()` used `r round(3734.249/60, 1)` minutes to resample 100 submodels. With the optimization, the same call took 100 _seconds_ (a speedup of `r round(3734.249/100.147, 0)`-fold). The reduced time is the difference in `tune_grid()` fitting 1000 models versus 10 models. 
 
 ### Parallel processing
 
@@ -354,18 +354,19 @@ times %>%
   pack_rows("Space-Filling Design", 4 , 6)
 ```
 
-Note that the speed-up in computations will vary from model-to-model. A very computationally efficient model may not benefit as much from parallel processing. 
+As another example, the C5.0 classification model shown in the previous section was also run in parallel with ten workers. The parallel computations took 13.3 seconds for a speed-up of `r round(100.147/13.265, 1)`-fold (both runs used the submodel optimization trick). 
 
+Note that the speed-up in computations will vary from model-to-model and is also affected by the size of the grid. A very computationally efficient model may not benefit as much from parallel processing. 
 
 ### Racing methods
 
 On issue with grid search is that all models need to be fit across all resamples before any tuning parameters can be evaluated. It would be helpful if, at some point during tuning, an interim analysis is conducted to eliminate any truly awful parameter candidates. This would be akin to _futility analysis_ in clinical trials. If a new drug is performing excessively poorly (or well), it is potentially unethical to wait until the trial finishes to make a decision.  
 
-In machine learning, the set of techniques called _racing method_ provide a similar function. Here, the tuning process evaluates all models on an initial subset of resamples. Based on their current performance metrics, some parameter sets are not considered in subsequent resamples. 
+In machine learning, the set of techniques called _racing method_ provide a similar function [@maron1994hoeffding]. Here, the tuning process evaluates all models on an initial subset of resamples. Based on their current performance metrics, some parameter sets are not considered in subsequent resamples. 
 
 As an example, in the previous multilayer perceptron tuning process with a regular grid, what would the results look after the first three folds? Using techniques similar to those shown in Chapter \@ref(compare), a model is fit where the outcome is the resampled area under the ROC curve and the predictor is an indicator for the parameter combination. The model takes the resample-to-resample effect into account and produces point and interval estimates for each parameter settings. The results of the model are one-sided 95% confidence intervals that measure the loss of the ROC value relative to the currently best performing parameters: 
 
-```{r grid-mlp-racing, echo = FALSE}
+```{r grid-mlp-racing, echo = FALSE, fig.height=4.5}
 roc_resamples <- 
   mlp_sfd_tune %>% 
   collect_metrics(summarize = FALSE) %>% 
@@ -407,15 +408,16 @@ roc_estimates <-
 roc_estimates %>% 
   ggplot(aes(x = -estimate, y = .config)) + 
   geom_vline(xintercept = 0, lty = 2, col = "green") +
-  geom_point(size = 2) + 
+  geom_point(size = 3) + 
   geom_errorbarh(aes(xmin = -estimate, xmax = -upper), height = .5) + 
   labs(x = "Drop in ROC AUC from current best candidate", y = NULL)
 ```
-Any parameter set whose confidence interval includes zero would have performance that is not statistically different from the best. We retain `r sum(roc_estimates$upper >= 0)` settings; these are resampled more. The remaining `r sum(roc_estimates$upper < 0)` submodels are no longer considered. 
+
+Any parameter set whose confidence interval includes zero would lack evidence that its performance is not statistically different from the best results. We retain `r sum(roc_estimates$upper >= 0)` settings; these are resampled more. The remaining `r sum(roc_estimates$upper < 0)` submodels are no longer considered. 
 
 The process continues for each resample; after the next set of performance metrics, a new model is fit to these statistics, and more  submodels are potentially discarded. See @kuhn2014futility for more details on the computational aspects of this approach. 
 
-Racing methods can be more efficient that basic grid search as long as the interim analysis is fast and some parameter settings have poor performance. It also is most helpful when the model does not have the abilities to exploit submodel predictions (as discussed in the last section). 
+Racing methods can be more efficient that basic grid search as long as the interim analysis is fast and some parameter settings have poor performance. It also is most helpful when the model does not have the abilities to exploit submodel predictions (as previously discussed). 
 
 There are other interim analysis techniques for discarding settings. For example, @krueger15a uses traditional sequential analysis methods whereas @kuhn2014futility treats the data as a sports competition and uses the Bradley-Terry model [@bradley1952rank] to measure the winning ability of parameter settings. 
 
