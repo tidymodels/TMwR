@@ -38,7 +38,7 @@ times <-
   full_join(all_times, seq, by = c("grid")) %>% 
   mutate(
     num_sub_models = ifelse(grid == "sfd", 20, 81),
-    time_per_fit = time/num_sub_models,
+    time_per_fit = time/(num_sub_models * 10),
     speed_up = seq_time/time,
     `Grid Type` = ifelse(grid == "sfd", "Space-Filling", "Regular")
   )

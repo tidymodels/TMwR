@@ -25,7 +25,7 @@ Type 'q()' to quit R.
 ✔ ggplot2   3.3.2          ✔ tidyr     1.1.2     
 ✔ infer     0.5.2          ✔ tune      0.1.1     
 ✔ modeldata 0.0.2          ✔ workflows 0.1.3     
-✔ parsnip   0.1.3          ✔ yardstick 0.0.7     
+✔ parsnip   0.1.3.9000     ✔ yardstick 0.0.7     
 ✔ purrr     0.3.4          
 ── Conflicts ───────────────────────────────────────── tidymodels_conflicts() ──
 ✖ purrr::discard() masks scales::discard()
@@ -67,24 +67,40 @@ The following objects are masked from ‘package:base’:
 +   group_by(cores, grid) %>% 
 +   summarize(time = mean(time), .groups = "drop") %>% 
 +   ungroup()
-Error: Can't subset columns that don't exist.
-✖ Column `sfd` doesn't exist.
-Backtrace:
-     █
-  1. └─`%>%`(...)
-  2.   ├─base::withVisible(eval(quote(`_fseq`(`_lhs`)), env, env))
-  3.   └─base::eval(quote(`_fseq`(`_lhs`)), env, env)
-  4.     └─base::eval(quote(`_fseq`(`_lhs`)), env, env)
-  5.       └─`_fseq`(`_lhs`)
-  6.         └─magrittr::freduce(value, `_function_list`)
-  7.           └─function_list[[i]](value)
-  8.             ├─tidyr::pivot_longer(...)
-  9.             └─tidyr:::pivot_longer.data.frame(...)
- 10.               └─tidyr::build_longer_spec(...)
- 11.                 └─tidyselect::eval_select(enquo(cols), data[unique(names(data))])
- 12.                   └─tidyselect:::eval_select_impl(...)
- 13.                     ├─tidyselect:::with_subscript_errors(...)
- 14.                     │ ├─base::tryCatch(...)
- 15.                     │ │ └─base:::tryCatchList(expr, classes, parentenv, handlers)
- 16.     
-Execution halted
+> 
+> seq <- 
++   all_times %>% 
++   filter(cores == 1) %>% 
++   dplyr::rename(seq_time = time) %>% 
++   select(-cores)
+> 
+> times <- 
++   full_join(all_times, seq, by = c("grid")) %>% 
++   mutate(
++     num_sub_models = ifelse(grid == "sfd", 20, 81),
++     time_per_fit = time/(num_sub_models * 10),
++     speed_up = seq_time/time,
++     `Grid Type` = ifelse(grid == "sfd", "Space-Filling", "Regular")
++   )
+> 
+> 
+> if (interactive()) {
++   ggplot(times, aes(x = cores, y = time_per_fit, col = `Grid Type`)) + 
++     geom_point() + 
++     geom_line() +
++     labs(x = "Number of Workers", y = "Time per Submodel")
++   
++   ggplot(times, aes(x = cores, y = speed_up, col = `Grid Type`)) + 
++     geom_abline() + 
++     geom_point() + 
++     geom_line() + 
++     coord_obs_pred() +
++     labs(x = "Number of Workers", y = "Speed-up")
++ }
+> 
+> save(times, file = "RData/mlp_times.RData")
+> 
+> 
+> proc.time()
+   user  system elapsed 
+  1.816   0.135   1.942 
