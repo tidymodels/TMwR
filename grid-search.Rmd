@@ -138,16 +138,19 @@ The process for choosing the best tuning parameter combination is familiar: each
 After resampling, the use selects the most appropriate candidate parameter set. It might make sense to choose the empirically best parameter combination or bias the choice towards other aspects of the model fit, such as simplicity. 
 
 
+A classification data set is used to demonstrate model tuning in this and the next chapter. The data come from @Hill, who developed am automated microscopy laboratory tool used for cancer research. The data consists of 56 imaging measurements on 2019 human breast cancer cells. These predictors represent shape and intensity characteristics of different parts of the cells (e.g., the nucleus, the cell boundary, etc.). There is a high-degree of correlation between the predictors. For example, there are several different predictors that measure the size and shape of the nucleus and cell boundary. Also, individually, many predictors have skewed distributions.
 
-@Hill developed a high-content laboratory method for cancer research. The data consists of 58 imaging measurements on 2019 cells. These predictors represent shape and intensity characteristics of different parts of the cells (e.g., the nucleus, the cell boundary, etc.). Each cell belongs to one of two classes.
+Each cell belongs to one of two classes. Since this is part of an automated lab test, the focus was on prediction capability and not inference. 
 
-There is a high-degree of correlation between the predictors. For example, there are several different predictors that measure the size and shape of the nucleus and cell boundary. Also, individually, many predictors have skewed distributions.
-
+The data are included in the `r pkg(modeldata)` package. One column is not needed for analysis (`case`) is removed. 
 
 ```{r grid-cells}
+library(tidymodels)
 data(cells)
 cells <- cells %>% select(-case)
 ```
+
+Given the dimensions of the data, performance metrics are computed using simple 10-fold cross-validation. 
 
 ```{r grid-cells-folds}
 set.seed(33)
@@ -155,6 +158,8 @@ cell_folds <- vfold_cv(cells)
 ```
 
 Given the high degree of correlation between predictors, it may be sensible to use PCA feature extraction to decorrelate the predictors. The following recipe contains steps to transform the predictors into increase symmetry, normalize them to be on the same scale then conduct feature extraction. The number of PCA components to retain should is also tuned. While the resulting PCA components are technically on the same scale, the earlier components tend to have a wider range than the later components. For this reason, a final normalization will coerce the predictors to have the same mean and variance.
+
+As previously mentioned, many of the predictors have skewed distributions. Sine PCA is variance based, extreme values can have a detrimental effect on these calculations. To counter this, a recipe step estimates a Yeo-Johnson transformation for each predictor [@yeo2000new]. While originally intended as a transformation of the _outcome_, it can also me used to estimate transformations that encourage more symmetric distributions.  This step occurs in the recipe just prior to the initial normalization.
 
 ```{r grid-cells-objects}
 mlp_rec <-
@@ -170,7 +175,7 @@ mlp_wflow <-
   add_recipe(mlp_rec)
 ```
 
-A parameter object is also created to adjust a few of the default ranges. The number of epochs will have a smaller range (50 to 200 epochs). Also, the default range for `num_comp()`  defaults to a very narrow range (one to four components). The range is increase up to 40 components and the minimum value is set to zero. In `step_pca()`, using zero PCA components is a shortcut to _skip_ the feature extraction. In this way, the original predictors can be directly compared to the results that include PCA components. 
+A parameter object is created to adjust a few of the default ranges. The number of epochs will have a smaller range (50 to 200 epochs). Also, the default range for `num_comp()`  defaults to a very narrow range (one to four components). The range is increase up to 40 components and the minimum value is set to zero. In `step_pca()`, using zero PCA components is a shortcut to _skip_ the feature extraction. In this way, the original predictors can be directly compared to the results that include PCA components. 
 
 ```{r grid-cells-workflow}
 mlp_param <- 
@@ -184,7 +189,7 @@ mlp_param <-
 
 The `tune_grid()` function is the primary function for conducting grid search. Its functionality is very similar to `fit_resamples()` from Section \@ref(resampling-performance) although it has additional arguments related to the grid: 
 
-* grid: An integer or data frame. When an integer is used, the function creates a space filling design with `grid` candidate parameters combinations. If specific parameter combinations exist, the `grid` parameter is used to pass them to the function. 
+* `grid`: An integer or data frame. When an integer is used, the function creates a space filling design with `grid` candidate parameters combinations. If specific parameter combinations exist, the `grid` parameter is used to pass them to the function. 
 
 * `param_info`: An _optional_ argument for defining the parameter ranges. The is most useful when `grid` is an integer. 
 
@@ -259,7 +264,11 @@ As with the results from `fit_resamples()`, there is usually no value in retaini
 
 If this model were an attractive one for these data, we might wish to evaluate how well it does on the test set. However, the results of `tune_grid()` only provide the substrate to choose appropriate tuning parameter. The function does not fit a final model. 
 
-To do this, a set of parameter values must be determined. There are tow methods to do so: manually picking values that appear appropriate or to use a `select_*()` function. 
+To do this, a set of parameter values must be determined. There are two methods to do so: manually picking values that appear appropriate or to use a `select_*()` function. For example, `select_best()` will choose the parameters with the numerically best results:
+
+```{r grid-select}
+select_best(mlp_reg_tune, metric = "roc_auc")
+```
 
 Looking at the results for the regular grid plot, a model with a single hidden unit trained for 125 epochs on the original predictors with a large amount of penalization has competitive performance. It is basically penalized logistic regression. To manually specific these parameters, a tibble is created with these values and a _finalization_ function splices the values back into the workflow: 
 
@@ -287,6 +296,9 @@ final_mlp_fit <-
 
 This object is used to make future predictions. 
 
+If a workflow was not used, finalization of a model and/or recipe is done using `finalize_model()` and `finalize_recipe()`. 
+
+
 ## Tools for efficient grid search {#efficient-grids}
 
 A few different tricks and optimization are possible to make grid search more computationally efficient. This section describes several techniques. 
@@ -303,11 +315,11 @@ While not all models have exploit this feature, some do:
 
 * Regularization methods, such as the `glmnet` model, can make simultaneous predictions across the amount of regularization used to fit the model. 
 
-* Multivariate adaptive regression splines (MARS) adds a set of nonlinear features features to a linear regression models. The number of terms to retain is a tuning parameter and it is computationally fast to make predictions across many values of this parameter from a single model fit. 
+* Multivariate adaptive regression splines (MARS) adds a set of nonlinear features features to a linear regression models [@Friedman:1991p109]. The number of terms to retain is a tuning parameter and it is computationally fast to make predictions across many values of this parameter from a single model fit. 
 
 The `r pkg(tune)` package automatically applies this type of optimization whenever an applicable model is tuned. 
 
-For example, if a boosted C5.0 classification model was fit to the cell data, we can tune the number of boosting iterations can. With all other parameters set at their default values, iterations from 1 to 100 were evaluated on the same resamples as used previously:
+For example, if a boosted C5.0 classification model [@apm] was fit to the cell data, we can tune the number of boosting iterations can. With all other parameters set at their default values, iterations from 1 to 100 were evaluated on the same resamples as used previously:
 
 ```{r grid-c5, eval = FALSE}
 c5_spec <- 
@@ -326,6 +338,10 @@ c5_spec %>%
 ```
 
 Without the submodel optimization, the call to `tune_grid()` used `r round(3734.249/60, 1)` minutes to resample 100 submodels. With the optimization, the same call took 100 _seconds_ (a speedup of `r round(3734.249/100.147, 0)`-fold). The reduced time is the difference in `tune_grid()` fitting 1000 models versus 10 models. 
+
+:::rmdnote
+Even though we fit the model with and without the submodel prediction trick, this optimization is _automatically_ applied by `r pkg(parsnip)`. 
+:::
 
 ### Parallel processing
 
@@ -366,7 +382,7 @@ In machine learning, the set of techniques called _racing method_ provide a simi
 
 As an example, in the previous multilayer perceptron tuning process with a regular grid, what would the results look after the first three folds? Using techniques similar to those shown in Chapter \@ref(compare), a model is fit where the outcome is the resampled area under the ROC curve and the predictor is an indicator for the parameter combination. The model takes the resample-to-resample effect into account and produces point and interval estimates for each parameter settings. The results of the model are one-sided 95% confidence intervals that measure the loss of the ROC value relative to the currently best performing parameters: 
 
-```{r grid-mlp-racing, echo = FALSE, fig.height=4.5}
+```{r grid-mlp-racing, echo = FALSE, fig.height=4}
 roc_resamples <- 
   mlp_sfd_tune %>% 
   collect_metrics(summarize = FALSE) %>% 
@@ -408,7 +424,7 @@ roc_estimates <-
 roc_estimates %>% 
   ggplot(aes(x = -estimate, y = .config)) + 
   geom_vline(xintercept = 0, lty = 2, col = "green") +
-  geom_point(size = 3) + 
+  geom_point(size = 3.2) + 
   geom_errorbarh(aes(xmin = -estimate, xmax = -upper), height = .5) + 
   labs(x = "Drop in ROC AUC from current best candidate", y = NULL)
 ```
@@ -419,9 +435,7 @@ The process continues for each resample; after the next set of performance metri
 
 Racing methods can be more efficient that basic grid search as long as the interim analysis is fast and some parameter settings have poor performance. It also is most helpful when the model does not have the abilities to exploit submodel predictions (as previously discussed). 
 
-There are other interim analysis techniques for discarding settings. For example, @krueger15a uses traditional sequential analysis methods whereas @kuhn2014futility treats the data as a sports competition and uses the Bradley-Terry model [@bradley1952rank] to measure the winning ability of parameter settings. 
-
-
+There are other interim analysis techniques for discarding settings. For example, @krueger15a uses traditional sequential analysis methods whereas @kuhn2014futility treats the data as a sports competition and uses the Bradley-Terry model [@bradley1952rank] to measure the winning ability of parameter settings. The `r pkg(finetune)` package has model tuning functions for several racing methods.  
 
 ## Chapter summary {#grid-summary}
 
