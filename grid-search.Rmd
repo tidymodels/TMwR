@@ -451,4 +451,6 @@ cells <- cells %>% select(-case)
 
 set.seed(33)
 cell_folds <- vfold_cv(cells)
+
+roc_res <- metric_set(roc_auc)
 ```
