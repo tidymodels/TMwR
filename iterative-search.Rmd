@@ -7,6 +7,10 @@ registerDoMC(cores = parallel::detectCores(logical = TRUE))
 
 ## -----------------------------------------------------------------------------
 
+options(tune_sa_save = TRUE)
+
+## -----------------------------------------------------------------------------
+
 data(cells)
 cells <- cells %>% select(-case)
 set.seed(33)
@@ -16,6 +20,15 @@ roc_res <- metric_set(roc_auc)
 
 # Iterative search {#iterative-search}
 
+
+
+## A support vector machine model
+
+The cell data, used in the previous chapter, are also used here. We will use a support vector machine (SVM) model to demonstrate sequential tuning methods. See @apm for model information on this model. The two tuning parameters that will be optimized are the SVM cost value as well has the radial basis function kernel parameter $\sigma$. Both parameters can have a profound effect on the model complexity and performance. 
+
+Like the  multilayer perceptron model,  this model would benefit from the use of the PCA feature extraction. However, this operation is not used in this chapter so that we can visualize the search process in two dimensions. The support vector machine model uses a dot-product and, for this reason, centering and scaling is applied to the predictors. 
+
+Along with the previously used objects (shown in Section \@ref(grid-summary)), the following tidymodels objects define the model process: 
 
 ```{r iterative-svm-defs}
 svm_rec <- 
@@ -32,7 +45,18 @@ svm_wflow <-
   workflow() %>% 
   add_model(svm_spec) %>% 
   add_recipe(svm_rec)
+```
 
+The default parameter ranges for these two tuning parameters are: 
+
+```{r iterative-svm-param}
+cost()
+rbf_sigma()
+```
+
+For illustration, the parameter ranges are slightly changed (to improve the visualizations of the search): 
+
+```{r iterative-svm-param-set}
 svm_param <- 
  svm_wflow %>% 
  parameters() %>% 
@@ -42,11 +66,17 @@ svm_param <-
   )
 ```
 
+Before discussing the search procedures, it is helpful to understand what the relationship is between the tuning parameters and the area under the ROC curve. A very large regular grid, comprised of 2,500 candidate values, was constructed and evaluated using resampling. This is obviously impractical in regular data analysis and tremendously inefficient. However, it elucidates the path that the search process _should take_ and where the numerically optimal value(s) occur. 
+
+The plot below shows the results. There is a large swath of the parameter space that is relatively flat with poor performance. A ridge of best performance occurs in the upper right portion of the space. The transition from the plateau of poor results to the ridge of best performance is very sharp. The is also a sharp drop in the area under the ROC curve just to the right of the ridge. A black dot points to the numerically best results found in the grid. 
+
 ```{r iterative-roc-surface, out.width = "80%", echo = FALSE, warning = FALSE}
 # See file extras/cells_svm_large.R
 res <- file.copy("premade/roc_surface.png", "_book/premade/roc_surface.png")
 knitr::include_graphics("premade/roc_surface.png")
 ```
+
+The search procedures described below require at least one tuning parameter result before proceeding. For this purpose, the code below creates a small regular grid that resides in the flat portion of the parameter space. The `tune_grid()` function resamples these values:  
 
 ```{r iterative-svm-initial, cache = TRUE}
 set.seed(234)
@@ -65,29 +95,44 @@ svm_initial <-
 
 collect_metrics(svm_initial)
 ```
-
-
+As shown in the following sections, these results can be ingested by the iterative tuning functions to use as initial values. 
 
 ## Bayesian  optimization
 
+Bayesian optimization techniques analyze the current resampling results and create a predictive model to predict tuning parameter values that have yet to be evaluated. The tuning parameter combination estimated to be most advantageous is then resampled. These results are then used in another predictive model that predicts more candidate values for testing. The process proceeds for a set number of iterations or until no further improvements occur. 
+
+The main questions in this tuning scheme are how to create the model and how to select parameters predicted by that model. 
+
+### A Gaussian process model
+
+
+
+
+### Acquisition functions
+
+
+
+### The `tune_bayes()` function
 
 ```{r iterative-cells-bo-calcs, echo = FALSE, cache = TRUE}
 ctrl <- control_bayes(no_improve = Inf, verbose = TRUE)
 
-sa_output <- capture.output({
-  set.seed(55)
-  svm_bo <-
-    svm_wflow %>%
-    tune_bayes(
-      resamples = cell_folds,
-      metrics = roc_res,
-      initial = svm_initial,
-      param_info = svm_param,
-      iter = 25,
-      control = ctrl
-    )
-}, 
-type = "output")
+tune_bayes_sssshhh <- purrr::quietly(tune_bayes)
+
+set.seed(55)
+svm_bo_sshh <-
+  svm_wflow %>%
+  tune_bayes_sssshhh(
+    resamples = cell_folds,
+    metrics = roc_res,
+    initial = svm_initial,
+    param_info = svm_param,
+    iter = 25,
+    control = ctrl
+  )
+
+svm_bo <- svm_bo_sshh$result
+svm_bo_output <- svm_bo_sshh$messages
 ```
 
 ```{r iterative-cells-bo, eval = FALSE}
@@ -106,27 +151,26 @@ svm_bo <-
  )
 ```
 ```{r iterative-cells-bo-print-first, echo = FALSE}
-so_stop <- "Iteration 3"
-so_stop_index <- grep(so_stop, sa_output) 
+so_stop_index <- grep("Iteration 3", svm_bo_output) 
 if (length(so_stop_index) > 0) {
-  cat(sa_output[1:(so_stop_index - 2)], sep = "\n")
+  cat(svm_bo_output[1:(so_stop_index - 2)], sep = "")
 }
 ```
 
 ```{r iterative-cells-bo-print-impr, echo = FALSE}
-all_imp_index <- grep("♥", sa_output)
+all_imp_index <- grep("♥", svm_bo_output)
 so_stop_index <- all_imp_index[length(all_imp_index)]
 if (length(all_imp_index) > 0) {
-  so_start_index <- so_stop_index - 11
-  cat(sa_output[so_start_index:(so_stop_index + 1)], sep = "\n")
+  so_start_index <- so_stop_index - 10
+  cat(svm_bo_output[so_start_index:(so_stop_index + 1)], sep = "")
 }
 ```
 
 ```{r iterative-cells-bo-print-last, echo = FALSE}
 so_start <- "Iteration 25"
-so_start_index <- grep(so_start, sa_output)
+so_start_index <- grep(so_start, svm_bo_output)
 if (length(so_start_index) > 0) {
-  cat(sa_output[so_start_index:length(sa_output)], sep = "\n")
+  cat(svm_bo_output[so_start_index:length(svm_bo_output)], sep = "")
 }
 ```
 
@@ -151,6 +195,7 @@ save(initial_points, bo_bound_points, file = "~/tmp/gp_test/other.RData")
 autoplot(svm_bo, type = "performance")
 ```
 
+The animation below visualizes the results of the search. The black X values show the starting values contained in `svm_initial`. The top-left blue panel shows the _predicted_ mean value of the area under the ROC curve. The red panel on the top-right displays the _predicted_ variation in the ROC values while the bottom plot visualizes the expected improvement. In each panel, darker colors indicate less attractive values (e.g., small mean values, large variation, and small improvements).  
 
 ```{r iterative-bo-progress, out.width = "100%", echo = FALSE, warning = FALSE}
 res <- file.copy("premade/exp_improve.gif", "_book/premade/exp_improve.gif")
@@ -162,39 +207,59 @@ knitr::include_graphics("premade/exp_improve.gif")
 
 ```{r iterative-cells-sa-calcs, include = FALSE, cache = TRUE}
 ctrl_sa <- control_sim_anneal(no_improve = Inf, radius = 0.1)
-
-sa_output <- capture.output({
-  set.seed(123)
-  svm_sa <-
-    svm_wflow %>%
-    tune_sim_anneal(
-      resamples = cell_folds,
-      metrics = roc_res,
-      initial = svm_initial,
-      param_info = svm_param,
-      iter = 50,
-      control = ctrl_sa
-    )
-}, 
-type = "message")
+tune_sim_anneal_sssshhh <- purrr::quietly(tune_sim_anneal)
+set.seed(1234)
+svm_sa_sshh <-
+  svm_wflow %>%
+  tune_sim_anneal_sssshhh(
+    resamples = cell_folds,
+    metrics = roc_res,
+    initial = svm_initial,
+    param_info = svm_param,
+    iter = 50,
+    control = ctrl_sa
+  )
+svm_sa <- svm_sa_sshh$result
+svm_sa_output <- svm_sa_sshh$messages
+file.copy(
+  load(file.path(tempdir(), "sa_history.RData")),
+  "~/tmp/sa_history.RData",
+  overwrite = TRUE
+)
 ```
 ```{r iterative-cells-sa, eval = FALSE}
 ctrl_sa <- control_sim_anneal(no_improve = Inf, radius = 0.1)
 
-sa_output <- capture.output({
-  set.seed(123)
-  svm_sa <-
-    svm_wflow %>%
-    tune_sim_anneal(
-      resamples = cell_folds,
-      metrics = roc_res,
-      initial = svm_initial,
-      param_info = svm_param,
-      iter = 50,
-      control = ctrl_sa
-    )
-})
+set.seed(1234)
+svm_sa <-
+  svm_wflow %>%
+  tune_sim_anneal(
+    resamples = cell_folds,
+    metrics = roc_res,
+    initial = svm_initial,
+    param_info = svm_param,
+    iter = 50,
+    control = ctrl_sa
+  )
 ```
 
 
 
+```{r iterative-cells-sa-print-start, echo = FALSE}
+so_stop_index <- grep("^ 5", svm_sa_output)
+if (length(so_stop_index) > 0) {
+  cat(svm_sa_output[1:so_stop_index], sep = "")
+}
+```
+
+
+```{r iterative-cells-sa-print-end, echo = FALSE}
+so_start_index <- grep("^40", svm_sa_output)
+so_stop_index <- grep("^50", svm_sa_output)
+if (length(so_stop_index) > 0) {
+  cat(svm_sa_output[so_start_index:so_stop_index], sep = "")
+}
+```
+
+
+## Chapter summary {#iterative-summary}
