@@ -7,7 +7,8 @@ registerDoMC(cores = parallel::detectCores(logical = TRUE))
 
 ## -----------------------------------------------------------------------------
 
-options(tune_sa_save = TRUE)
+source("extras/sa_2d_plot.R")
+load(file.path("RData", "svm_large.RData"))
 
 ## -----------------------------------------------------------------------------
 
@@ -206,8 +207,11 @@ knitr::include_graphics("premade/exp_improve.gif")
 ## Simulated annealing 
 
 ```{r iterative-cells-sa-calcs, include = FALSE, cache = TRUE}
-ctrl_sa <- control_sim_anneal(no_improve = Inf, radius = 0.1)
+ctrl_sa <- control_sim_anneal(no_improve = Inf)
+ctrl_sa$sa_history <- TRUE
+
 tune_sim_anneal_sssshhh <- purrr::quietly(tune_sim_anneal)
+
 set.seed(1234)
 svm_sa_sshh <-
   svm_wflow %>%
@@ -219,16 +223,22 @@ svm_sa_sshh <-
     iter = 50,
     control = ctrl_sa
   )
+
 svm_sa <- svm_sa_sshh$result
 svm_sa_output <- svm_sa_sshh$messages
-file.copy(
-  load(file.path(tempdir(), "sa_history.RData")),
-  "~/tmp/sa_history.RData",
-  overwrite = TRUE
+
+# We set tune_sim_anneal() to save a file to the temp directory. If the results
+# are cached, this file won't be there:
+try(
+  file.copy(
+    file.path(tempdir(), "sa_history.RData"),
+    "RData/sa_history.RData"
+  ),
+  silent = TRUE
 )
 ```
 ```{r iterative-cells-sa, eval = FALSE}
-ctrl_sa <- control_sim_anneal(no_improve = Inf, radius = 0.1)
+ctrl_sa <- control_sim_anneal(no_improve = Inf)
 
 set.seed(1234)
 svm_sa <-
@@ -245,6 +255,74 @@ svm_sa <-
 
 
 
+```{r iterative-sa-history, include = FALSE}
+if (file.exists(file.path(tempdir(), "sa_history.RData"))) {
+  load(file.path(tempdir(), "sa_history.RData"))
+} else {
+  load("RData/sa_history.RData")
+}
+
+result_history <- get_new_best(result_history)
+result_history <- get_parent(result_history)
+
+## -----------------------------------------------------------------------------
+
+restart_iter <- result_history$.iter[result_history$results == "restart"]
+restart_num <- length(restart_iter)
+sa_iter_list <- knitr::combine_words(restart_iter)
+restart_txt <- 
+  dplyr::case_when(
+    restart_num == 0 ~ paste0("There were no restarts during the search."),
+    restart_num == 1 ~ paste0("There was a single restart at iteration ", restart_iter)[1],
+    TRUE ~ paste0("There were ", restart_num, " restarts at iterations ", sa_iter_list)[1]
+  )
+discard_num<- length(result_history$.iter[result_history$results == "discard"])
+if (discard_num > 0) {
+  restart_txt <-
+    paste0(
+      restart_txt, 
+      " and ", 
+      discard_num, 
+      " discarded ", 
+      ifelse(discard_num > 1, "candidates ", "candidate "),
+      "during the process."
+    )
+} else {
+  restart_txt <- paste0(restart_txt, ".")
+}
+
+## -----------------------------------------------------------------------------
+
+best_iters <- result_history$.iter[result_history$new_best]
+best_init <- max(result_history$mean[result_history$.iter == 0])
+best_sa_res <- max(result_history$mean[result_history$.iter > 0])
+best_sa_inds <- result_history$.iter[which.max(result_history$mean)]
+best_txt <-
+  dplyr::case_when(
+    restart_num == 1 ~ paste0("a new global optimum once at iteration ", best_iters, "."),
+    TRUE ~ paste0("new global optimums at ", length(best_iters), " iterations.")[1]
+  )
+best_txt <- best_txt[1]
+if (length(best_iters) > 1) {
+  best_txt <-
+    paste0(
+      best_txt,
+      " The earliest improvement was at iteration ",
+      min(best_iters),
+      " and the final optimum occured at iteration ",
+      max(best_iters),
+      ". The best overall results occured at iteration ", 
+      best_sa_inds, " with a mean area under the ROC curve of ",
+      round(best_sa_res, 4), " (compared to an initial best of ",
+      round(best_init, 4), ")."
+    )
+}
+```
+
+The simulated annealing process discovered `r best_txt` `r restart_txt`
+
+The `verbose` option prints details of the search process. The output for the first five iterations was: 
+
 ```{r iterative-cells-sa-print-start, echo = FALSE}
 so_stop_index <- grep("^ 5", svm_sa_output)
 if (length(so_stop_index) > 0) {
@@ -253,12 +331,34 @@ if (length(so_stop_index) > 0) {
 ```
 
 
+The last ten iterations: 
+
 ```{r iterative-cells-sa-print-end, echo = FALSE}
 so_start_index <- grep("^40", svm_sa_output)
 so_stop_index <- grep("^50", svm_sa_output)
 if (length(so_stop_index) > 0) {
   cat(svm_sa_output[so_start_index:so_stop_index], sep = "")
 }
+```
+
+As with the other `tune_*()` functions, the corresponding `autoplot()` function produces visual assessments of the results: 
+
+```{r interative-sa-performance, fig.height = 4.25}
+autoplot(svm_sa, type = "performance")
+```
+
+```{r interative-sa-parameters, fig.height = 4.25}
+autoplot(svm_sa)
+```
+
+A visualization of the search path helps understand where the search process did well and and where it went astray:  
+
+```{r iterative-sa-plot, echo = TRUE, out.width = '100%', warning = FALSE}
+sa_gif_path <- sa_2d_plot(svm_sa, result_history, svm_large)
+print(sa_gif_path)
+copy_res <- file.copy(sa_gif_path,  "_book/premade/sa_search.gif", overwrite = TRUE)
+print(copy_res)
+knitr::include_graphics("_book/premade/sa_search.gif")
 ```
 
 

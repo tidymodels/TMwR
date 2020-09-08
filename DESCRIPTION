@@ -26,6 +26,7 @@ Imports:
   dials,
   doMC,
   dplyr,
+  finetune (>= 0.0.0.9001)
   ggforce,
   ggplot2,
   gridExtra,
@@ -61,4 +62,5 @@ Remotes:
   tidymodels/tune,
   tidymodels/recipes,
   tidymodels/dials,
-  tidymodels/tidymodels
+  tidymodels/tidymodels,
+  tidymodels/finetune
