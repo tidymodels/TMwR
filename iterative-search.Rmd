@@ -2,12 +2,15 @@
 knitr::opts_chunk$set(fig.path = "figures/")
 library(tidymodels)
 library(finetune)
+library(patchwork)
+library(ragg)
 library(doMC)
 registerDoMC(cores = parallel::detectCores(logical = TRUE))
 
 ## -----------------------------------------------------------------------------
 
 source("extras/sa_2d_plot.R")
+source("extras/bo_3panel_plot.R")
 load(file.path("RData", "svm_large.RData"))
 
 ## -----------------------------------------------------------------------------
@@ -69,7 +72,7 @@ svm_param <-
 
 Before discussing the search procedures, it is helpful to understand what the relationship is between the tuning parameters and the area under the ROC curve. A very large regular grid, comprised of 2,500 candidate values, was constructed and evaluated using resampling. This is obviously impractical in regular data analysis and tremendously inefficient. However, it elucidates the path that the search process _should take_ and where the numerically optimal value(s) occur. 
 
-The plot below shows the results. There is a large swath of the parameter space that is relatively flat with poor performance. A ridge of best performance occurs in the upper right portion of the space. The transition from the plateau of poor results to the ridge of best performance is very sharp. The is also a sharp drop in the area under the ROC curve just to the right of the ridge. A black dot points to the numerically best results found in the grid. 
+The plot below shows the results. There is a large swath in the lower diagonal of the parameter space that is relatively flat with poor performance. A ridge of best performance occurs in the upper right portion of the space. The transition from the plateau of poor results to the ridge of best performance is very sharp. The is also a sharp drop in the area under the ROC curve just to the right of the ridge. A black dot points to the numerically best results found in the grid. 
 
 ```{r iterative-roc-surface, out.width = "80%", echo = FALSE, warning = FALSE}
 # See file extras/cells_svm_large.R
@@ -116,11 +119,21 @@ The main questions in this tuning scheme are how to create the model and how to 
 ### The `tune_bayes()` function
 
 ```{r iterative-cells-bo-calcs, echo = FALSE, cache = TRUE}
-ctrl <- control_bayes(no_improve = Inf, verbose = TRUE)
+# We will do the calculations here but use some non-standard options. First, 
+# purrr is used to capture the output in a vector so that we can show the 
+# results piecemeal. Also, a hidden option is used to save the grid of candidate 
+# values for each iteration of the search. These will be used to make an 
+# animation in a later chunk. 
+# 
+# This means that any changes to this chunk have to be made to the next chunk 
+# (where the code is shown and not executed).
+
+ctrl <- control_bayes(verbose = TRUE)
+ctrl$save_gp_results <- TRUE
 
 tune_bayes_sssshhh <- purrr::quietly(tune_bayes)
 
-set.seed(55)
+set.seed(1234)
 svm_bo_sshh <-
   svm_wflow %>%
   tune_bayes_sssshhh(
@@ -134,12 +147,15 @@ svm_bo_sshh <-
 
 svm_bo <- svm_bo_sshh$result
 svm_bo_output <- svm_bo_sshh$messages
+
+gp_candidates <- collect_gp_results(svm_bo)
+save(gp_candidates, file = "RData/gp_candidates.RData")
 ```
 
 ```{r iterative-cells-bo, eval = FALSE}
-ctrl <- control_bayes(no_improve = Inf, verbose = TRUE)
+ctrl <- control_bayes(verbose = TRUE)
 
-set.seed(55)
+set.seed(1234)
 svm_bo <-
  svm_wflow %>%
  tune_bayes(
@@ -168,28 +184,12 @@ if (length(all_imp_index) > 0) {
 ```
 
 ```{r iterative-cells-bo-print-last, echo = FALSE}
-so_start <- "Iteration 25"
+last_iter <- max(collect_metrics(svm_bo)$.iter)
+so_start <- paste("Iteration", last_iter)
 so_start_index <- grep(so_start, svm_bo_output)
 if (length(so_start_index) > 0) {
   cat(svm_bo_output[so_start_index:length(svm_bo_output)], sep = "")
 }
-```
-
-
-```{r echo = FALSE, eval = FALSE}
-# remotes::install_github("tidymodels/tune@testing-gp")
-initial_points <-
- svm_initial %>% 
- collect_metrics() %>% 
- filter(.metric == "roc_auc")
-
-bo_bound_points <-
- svm_bo %>%
- collect_metrics() %>%
- filter(.metric == "roc_auc" & .iter > 0) %>%
- arrange(.iter)
-
-save(initial_points, bo_bound_points, file = "~/tmp/gp_test/other.RData")
 ```
 
 ```{r iterative-bo-iter, fig.height = 4}
@@ -199,14 +199,27 @@ autoplot(svm_bo, type = "performance")
 The animation below visualizes the results of the search. The black X values show the starting values contained in `svm_initial`. The top-left blue panel shows the _predicted_ mean value of the area under the ROC curve. The red panel on the top-right displays the _predicted_ variation in the ROC values while the bottom plot visualizes the expected improvement. In each panel, darker colors indicate less attractive values (e.g., small mean values, large variation, and small improvements).  
 
 ```{r iterative-bo-progress, out.width = "100%", echo = FALSE, warning = FALSE}
-res <- file.copy("premade/exp_improve.gif", "_book/premade/exp_improve.gif")
-knitr::include_graphics("premade/exp_improve.gif")
+# If caching was turned on for the 'iterative-cells-bo-calcs' chunk, the version
+# of the GP results in tempdir will not be available so we use the last copy in 
+# the 'RData' path. 
+
+if (!exists("gp_candidates")) {
+  load("RData/gp_candidates.RData")
+}
+res <- make_bo_animation(gp_candidates, svm_bo)
+knitr::include_graphics("_book/premade/bo_search.gif")
 ```
 
 
 ## Simulated annealing 
 
 ```{r iterative-cells-sa-calcs, include = FALSE, cache = TRUE}
+# As we did above, this chunk executes the code with some extra options that
+# capture the output and save some internal objects for plotting. 
+
+# This means that any changes to this chunk have to be made to the next chunk 
+# (where the code is shown and not executed).
+
 ctrl_sa <- control_sim_anneal(no_improve = Inf)
 ctrl_sa$sa_history <- TRUE
 
@@ -300,7 +313,7 @@ best_sa_inds <- result_history$.iter[which.max(result_history$mean)]
 best_txt <-
   dplyr::case_when(
     restart_num == 1 ~ paste0("a new global optimum once at iteration ", best_iters, "."),
-    TRUE ~ paste0("new global optimums at ", length(best_iters), " iterations.")[1]
+    TRUE ~ paste0("new global optimums at ", length(best_iters), " different iterations.")[1]
   )
 best_txt <- best_txt[1]
 if (length(best_iters) > 1) {
@@ -353,11 +366,9 @@ autoplot(svm_sa)
 
 A visualization of the search path helps understand where the search process did well and and where it went astray:  
 
-```{r iterative-sa-plot, echo = TRUE, out.width = '100%', warning = FALSE}
+```{r iterative-sa-plot, echo = FALSE, out.width = '100%', warning = FALSE}
 sa_gif_path <- sa_2d_plot(svm_sa, result_history, svm_large)
-print(sa_gif_path)
 copy_res <- file.copy(sa_gif_path,  "_book/premade/sa_search.gif", overwrite = TRUE)
-print(copy_res)
 knitr::include_graphics("_book/premade/sa_search.gif")
 ```
 
