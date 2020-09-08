@@ -125,7 +125,7 @@ make_bo_animation <- function(grid, object) {
   
   for(i in 1:num_iter) {
     
-    iter_lab <- paste("Search iteration", iter_chr[i], "of", length(files))
+    iter_lab <- paste("Iteration", iter_chr[i], "of", length(files))
     
     .mean <- mean_plot(grid, object, i)
     .sd   <- sd_plot(grid, object, i)

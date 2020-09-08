@@ -69,11 +69,12 @@ sa_2d_plot <- function(sa_obj, history, large_sa, path = tempdir()) {
   out_nm <- file.path(tempdir(), "sa_search.gif")
   
   convert_cmd <- paste(nms[-(1:num_init)], collapse = " ")
-  convert_cmd <- paste("convert -delay 250 ", convert_cmd, "-loop 0", out_nm)
+  convert_cmd <- paste("convert -delay 250 -resize 75%", convert_cmd, "-loop 0", out_nm)
   convert_res <- system(convert_cmd)
   if (inherits(convert_res, "try-error")) {
     rlang::abort("SA search gif failed")
   }
+  unlink(nms[-(1:num_init)], force = TRUE)
   out_nm
 }
 
