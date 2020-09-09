@@ -243,7 +243,7 @@ To demonstrate some syntax, let's use tidyverse functions to read in data that c
 
 Our tidyverse pipeline will conduct the following tasks, in order: 
 
-1. We will use the tidyverse package `r pkg(readr)` to read the data and convert them into a tibble. To do this, the `read_delim()` function can determine the type of data by reading an initial number of rows. Alternatively, if the column names and types are already known, a column specification can be created in R and passed to `read_delim()`. 
+1. We will use the tidyverse package `r pkg(readr)` to read the data and convert them into a tibble. To do this, the `read_csv()` function can determine the type of data by reading an initial number of rows. Alternatively, if the column names and types are already known, a column specification can be created in R and passed to `read_csv()`. 
 
 1. We filter the data to eliminate a few columns that are not needed (such as the station ID) and change the column `stationname` to `station`. The function `select()` is used for this. When filtering, use either the names of the column names or a `r pkg(dplyr)` selector function. When selecting names, a new variable name can be declared using the argument format `new_name = old_name`.
 
@@ -261,7 +261,7 @@ url <- "chi.csv"
 
 all_stations <- 
   # Step 1: Read in the data.
-  read_delim(url, delim = ",") %>% 
+  read_csv(url) %>% 
   # Step 2: filter columns and rename stationname
   dplyr::select(station = stationname, date, rides) %>% 
   # Step 3: Convert the character date field to a date encoding.
