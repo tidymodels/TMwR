@@ -167,12 +167,89 @@ svm_bo <-
   control = ctrl
  )
 ```
+
+
+```{r iterative-cells-info, include = FALSE}
+bo_res <- collect_metrics(svm_bo) %>% mutate(current_best = FALSE)
+for(i in 1:nrow(bo_res)) {
+  bo_res$current_best[i] <- bo_res$mean[i] > max(bo_res$mean[1:(i-1)])
+}
+init_vals <- bo_res %>% dplyr::filter(.iter == 0)
+best_init <- max(bo_res$mean[bo_res$.iter == 0])
+best_bo <- max(bo_res$mean)
+best_bo_iter <- bo_res$.iter[which.max(bo_res$mean)]
+new_best_iter <- bo_res$.iter[which(bo_res$current_best)]
+new_best_iter <- new_best_iter[new_best_iter > 0]
+num_improve <- length(new_best_iter)
+last_iter <- max(collect_metrics(svm_bo)$.iter)
+
+iter_1_roc <- bo_res$mean[bo_res$.iter == 1]
+iter_1_imp <- iter_1_roc > best_init
+iter_1_text <- 
+  paste0(
+    ifelse(iter_1_imp, "showed an improvement, resulting in an ROC value of ",
+                        "failed to improve the outcome with an ROC value of "),
+    round(iter_1_roc, 5), "."
+  )
+
+iter_2_roc <- bo_res$mean[bo_res$.iter == 2]
+iter_2_imp <- iter_2_roc > max(bo_res$mean[bo_res$.iter < 2])
+iter_2_text <- 
+  dplyr::case_when(
+    !iter_1_imp &  !iter_2_imp ~ 
+      paste0("the second iteration also failed to yield an improvement."),
+    !iter_1_imp &   iter_2_imp ~ 
+      paste0("the second iteration did yield a better result with an area under the ROC curve of ", 
+             round(iter_2_roc, 5), "."),
+     iter_1_imp &  !iter_2_imp ~ 
+      paste0("the second iteration did not continue the trend with a sub-optimal ROC value of ",
+             round(iter_2_roc, 5), "."),
+      iter_1_imp &  !iter_2_imp ~ 
+      paste0("the second iteration further increased the outcome value (ROC = ",
+             round(iter_2_roc, 5), ").") 
+  )
+
+if (num_improve > 1) {
+  improve_text <-
+    paste0(
+      "There were a total of ",
+      num_improve,
+      " improvements in the outcome along the way at iterations ",
+      knitr::combine_words(new_best_iter),
+      "."
+    )
+} else {
+  improve_text <-
+    paste0("There was only a single improvement in the outcome at iteration ",
+           new_best_iter,
+           ".")
+}
+
+if (last_iter < 25) {
+  last_bo_text <-
+    paste0(
+      "Since the best result occurred at iteration ",
+      max(new_best_iter),
+      ", there were no more improvements and the default option is to stop if no improvements are found after ",
+      ctrl$no_improve,
+      " more steps. The last step was:"
+    )
+} else {
+    last_bo_text <- "The last step was:"
+}
+```
+
+The search process starts with an initial value of `r round(best_init, 5)` for the area under the ROC curve. A Gaussian process model uses these `r nrow(init_vals)` statistics to create a model. The large candidate set is automatically generated and scored using the expected improvement acquisition function. The first iteration `r iter_1_text` After fitting another Gaussian process model with the new outcome value, `r iter_2_text`
+
+The log of the first two iterations, produced by the `verbose` option, was: 
+
 ```{r iterative-cells-bo-print-first, echo = FALSE}
 so_stop_index <- grep("Iteration 3", svm_bo_output) 
 if (length(so_stop_index) > 0) {
   cat(svm_bo_output[1:(so_stop_index - 2)], sep = "")
 }
 ```
+The search continues. `r improve_text` The best result occurred at iteration `r max(new_best_iter)` with an area under the ROC curve of `r round(best_bo, 5)`. 
 
 ```{r iterative-cells-bo-print-impr, echo = FALSE}
 all_imp_index <- grep("♥", svm_bo_output)
@@ -182,15 +259,17 @@ if (length(all_imp_index) > 0) {
   cat(svm_bo_output[so_start_index:(so_stop_index + 1)], sep = "")
 }
 ```
+`r last_bo_text` 
 
 ```{r iterative-cells-bo-print-last, echo = FALSE}
-last_iter <- max(collect_metrics(svm_bo)$.iter)
 so_start <- paste("Iteration", last_iter)
 so_start_index <- grep(so_start, svm_bo_output)
 if (length(so_start_index) > 0) {
   cat(svm_bo_output[so_start_index:length(svm_bo_output)], sep = "")
 }
 ```
+
+The `autoplot()` function has several options for iterative search methods. One shows how the outcome changed over the search: 
 
 ```{r iterative-bo-iter, fig.height = 4}
 autoplot(svm_bo, type = "performance")
@@ -209,6 +288,16 @@ if (!exists("gp_candidates")) {
 res <- make_bo_animation(gp_candidates, svm_bo)
 knitr::include_graphics("_book/premade/bo_search.gif")
 ```
+
+The surface of the predicted mean is very inaccurate in the first few iterations of the search. Despite this, it does help guide the process to the region of good performance.  In other words, the Gaussian process model is wrong but shows itself to be very useful. Within the first ten iterations the search is sampling near the optimum location. 
+
+While the best tuning parameter combination is on the boundary of the parameter space, Bayesian optimization will often choose new points on other parts of the boundary). While we can adjust the ratio of exploration and exploitation, the search tends to sample boundary points.
+
+If the search is seeded with an initial grid, a space-filling design would probably be a better choice than a regular design.  It samples more unique values of the parameter space and would improve the predictions of the standard deviation in the early iterations. 
+
+`tune_bayes()` also has a somewhat non-standard option in its control function. In cases where the search is no exploring the space enough, it take an _uncertainty sample_ if there have been too few improvements in the outcome. This type of sample would ignore the predicted mean and choose a new candidate that has the largest uncertainty. The result is that the search might explore a location where there are no existing points. This idea comes from the field of active learning, where new training set points are chosen based on their ability to improve the model fit. To use this feature, the `uncertain` argument in `control_bayes()` specifies how many steps with no improvement must occur before taking an uncertainty sample. The default is to never take one. 
+
+Finally, if the user interrupts the `tune_bayes()` computations, the function returns the current results (instead of resulting in an error).  
 
 
 ## Simulated annealing 
