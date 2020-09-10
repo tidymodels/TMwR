@@ -103,13 +103,13 @@ As shown in the following sections, these results can be ingested by the iterati
 
 ## Bayesian  optimization
 
-Bayesian optimization techniques analyze the current resampling results and create a predictive model to predict tuning parameter values that have yet to be evaluated. The tuning parameter combination estimated to be most advantageous is then resampled. These results are then used in another predictive model that predicts more candidate values for testing. The process proceeds for a set number of iterations or until no further improvements occur. 
+Bayesian optimization techniques analyze the current resampling results and create a predictive model to predict tuning parameter values that have yet to be evaluated. The tuning parameter combination estimated to be most advantageous is then resampled. These results are then used in another predictive model that predicts more candidate values for testing. The process proceeds for a set number of iterations or until no further improvements occur. @Shahriari @frazier2018tutorial are good introductions to this procedure. 
 
 The main questions in this tuning scheme are how to create the model and how to select parameters predicted by that model. 
 
 ### A Gaussian process model
 
-
+@RaWi06 @SCHULZ20181
 
 
 ### Acquisition functions
