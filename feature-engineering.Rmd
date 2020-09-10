@@ -14,25 +14,31 @@ source("ames_snippets.R")
 
 # Feature engineering with recipes {#recipes}
 
-Feature engineering encompasses activities that reformat predictor values to make them easier for a model to use effectively. This includes transformations or encodings of the data to best represent their important characteristics. For example, two predictors might be more effectively represented when given to the model as a ratio. Take the location of a house in Ames as another example. There are a variety of ways that this data can be exposed to a model, including neighborhood (a qualitative measure), longitude/latitude, distance to the nearest school or Iowa State University, and so on. When choosing a way to encode these data in modeling we might choose a format that we believe most associated with the outcome. In other cases, the original format of the data (e.g. numeric versus categorical) could be a driving factor in feature engineering choices. 
+Feature engineering encompasses activities that reformat predictor values to make them easier for a model to use effectively. This includes transformations and encodings of the data to best represent their important characteristics. Imagine that you have two predictors in a data set that can be more effectively represented in your model of interest as a ratio; creating a new predictor from the ratio of the original two is a simple example of feature engineering. 
 
-Similarly, data _pre-processing_ can involve reformatting required by the model. Some models use distance measures and, consequently, numeric predictors should be centered and scaled so that they are all in the same units. Otherwise, the distance values would be biased by the scale of each column. There are many other examples of pre-processing: 
+Take the location of a house in Ames as a more involved example. There are a variety of ways that this spatial information can be exposed to a model, including neighborhood (a qualitative measure), longitude/latitude, distance to the nearest school or Iowa State University, and so on. When choosing how to encode these data in modeling, we might choose an option we believe most associated with the outcome. The original format of the data (e.g., numeric like distance versus categorical like neighborhood) is also a driving factor in feature engineering choices. 
+
+There are many other examples of preprocessing to build better features for modeling: 
 
  * Correlation between predictors can be reduced via feature extraction or the removal of some predictors. 
  
- * When some predictors have missing values, they can be _imputed_ using a sub-model.
+ * When some predictors have missing values, they can be imputed using a sub-model.
  
- * Models that use variance-type measures may benefit from coercing the distribution of some skewed predictors to be symmetric by _estimating a transformation_. 
- 
-Different models have different pre-processing requirements and some, such as tree-based models, require very little pre-processing. Appendix \@ref(pre-proc-table) contains a small table of recommended pre-processing techniques for different models. 
+ * Models that use variance-type measures may benefit from coercing the distribution of some skewed predictors to be symmetric by estimating a transformation. 
 
-In this chapter, we introduce the [`r pkg(recipes)`](https://recipes.tidymodels.org/) package as a means to encapsulate different feature engineering and pre-processing tasks into a single object and then to apply these transformations to different data sets. 
+Feature engineering and data preprocessing can also involve reformatting _required_ by the model. Some models use geometric distance metrics and, consequently, numeric predictors should be centered and scaled so that they are all in the same units. Otherwise, the distance values would be biased by the scale of each column. 
 
-The chapter uses the R objects created in previous chapters, summarized in Section \@ref(splitting-summary).
+:::rmdnote
+Different models have different preprocessing requirements and some, such as tree-based models, require very little preprocessing at all. Appendix \@ref(pre-proc-table) contains a small table of recommended preprocessing techniques for different models. 
+:::
+
+In this chapter, we introduce the [`r pkg(recipes)`](https://recipes.tidymodels.org/) package which you can use to combine different feature engineering and preprocessing tasks into a single object and then apply these transformations to different data sets. 
+
+This chapter uses the Ames housing data and the R objects created in the book so far, as summarized in Section \@ref(splitting-summary).
 
 ## A simple recipe for the Ames housing data 
 
-In this section, we will focus on a small subset of the predictors available in the data: 
+In this section, we will focus on a small subset of the predictors available in the Ames housing data: 
 
  * The neighborhood (qualitative, with `r length(levels(ames_train$Neighborhood))` neighborhoods in the training set)
 
@@ -48,7 +54,7 @@ Suppose that an initial ordinary linear regression model were fit to these data.
 lm(Sale_Price ~ Neighborhood + log10(Gr_Liv_Area) + Year_Built + Bldg_Type)
 ```
 
-When this function is executed, the data are converted from a data frame to a numeric _design matrix_ (also called a _model matrix_) and then the least squares method is used to estimate parameters. Recall that Section \@ref(formula) listed the multiple purposes of the R model formula; let's focus only on the data manipulation aspects for now. What the formula above does can be decomposed into a series of _steps_:
+When this function is executed, the data are converted from a data frame to a numeric _design matrix_ (also called a _model matrix_) and then the least squares method is used to estimate parameters. In Section \@ref(formula) we listed the multiple purposes of the R model formula; let's focus only on the data manipulation aspects for now. What the formula above does can be decomposed into a series of _steps_:
 
 1. Sale price is defined as the outcome while neighborhood, general living area, the year built, and building type variables are all defined as predictors. 
 
@@ -56,9 +62,9 @@ When this function is executed, the data are converted from a data frame to a nu
 
 1. The neighborhood and building type columns are converted from a non-numeric format to a numeric format (since least squares requires numeric predictors). 
 
-As mentioned in Chapter \@ref(base-r), the formula method will apply these data manipulations to any data that are passed to the `predict()` function. 
+As mentioned in Chapter \@ref(base-r), the formula method will apply these data manipulations to any data, including new data, that are passed to the `predict()` function. 
 
-A recipe is an object that also defines a series of steps for data processing. Unlike the formula method inside a modeling function, the recipe defines the steps without immediately executing them; it is only a specification of what _should_ be done. Here is a recipe equivalent to the formula above that builds on the code summary in Section \@ref(splitting-summary):
+A recipe is also an object that defines a series of steps for data processing. Unlike the formula method inside a modeling function, the recipe defines the steps without immediately executing them; it is only a specification of what _should_ be done. Here is a recipe equivalent to the formula above that builds on the code summary in Section \@ref(splitting-summary):
 
 ```{r engineering-ames-simple-recipe}
 library(tidymodels) # Includes the recipes package
@@ -71,7 +77,7 @@ simple_ames <-
 simple_ames
 ```
 
-Breaking this down: 
+Let's break this down: 
 
 1. The call to `recipe()` with a formula tells the recipe the _roles_ of the variables (e.g., predictor, outcome). It only uses the data to determine the data types for the columns. 
 
@@ -93,13 +99,11 @@ What is the advantage to using a recipe? There are a few, including:
  
  * The syntax can be very compact. For example, `all_nominal()` can be used to capture many variables for specific types of processing while a formula would require each to be explicitly listed. 
  
- * All data processing can be encapsulated in a single R object instead of in scripts that are repeated, or even spread across different files.  
+ * All data processing can be captured in a single R object instead of in scripts that are repeated, or even spread across different files.  
  
 ## Using recipes
  
-Remember that when invoking the `recipe()` function, the steps are not estimated or executed in any way. This is not unlike using `ggplot()` where the plot is not rendered until triggered by a function like `print()`. 
-
-The second phase for using a recipe is to estimate any quantities required by the steps using the `prep()` function. For example, we can use `step_normalize()` to center and scale any predictors selected in the step. When we call `prep(recipe, training)`, this function estimates the required means and standard deviations from the data in the `training` argument. The transformations specified by each step are also sequentially executed on the data set. Again using normalization as the example, the means and variances are estimated and then used to standardize the columns. 
+Remember that when invoking the `recipe()` function, the steps are not estimated or executed in any way. The second phase for using a recipe is to estimate any quantities required by the steps using the `prep()` function. For example, we can use `step_normalize()` to center and scale any predictors selected in the step. When we call `prep(recipe, training)`, this function estimates the required means and standard deviations from the data in the `training` argument. The transformations specified by each step are also sequentially executed on the data set. Again using normalization as the example, the means and variances are estimated and then used to standardize the columns. 
 
 :::rmdwarning
 When specifying a step, the data available to that step have been affected by the previous operations. There are some steps that may remove columns or change their data type, so use care when writing selectors downstream. 
@@ -114,9 +118,9 @@ simple_ames
 
 Note that, after preparing the recipe, the print statement shows the results of the selectors (e.g., `Neighborhood` and `Bldg_Type` are listed instead of `all_nominal`). 
 
-One important argument to `prep()` is `retain`. When `TRUE` (the default), the prepared version of the training set is kept within the recipe. This has been pre-processed using all of the steps listed in the recipe. Since `prep()` has to execute the recipe as it proceeds, it may be advantageous to keep this version of the training set so that, if that data set is to be used later, redundant calculations can be avoided. However, if the training set is big, it may be problematic to keep such a large amount of data in memory. Use `retain = FALSE` to avoid this. 
+One important argument to `prep()` is `retain`. When `TRUE` (the default), the prepared version of the training set is kept within the recipe. This data set has been pre-processed using all of the steps listed in the recipe. Since `prep()` has to execute the recipe as it proceeds, it may be advantageous to keep this version of the training set so that, if that data set is to be used later, redundant calculations can be avoided. However, if the training set is big, it may be problematic to keep such a large amount of data in memory. Use `retain = FALSE` to avoid this. 
 
-The third phase of recipe usage is to apply the pre-processing operations to a data set. There are two functions to do this. The `bake()` function can apply the recipe to _any_ data set. To use the test set, the syntax would be:
+The third phase of recipe usage is to apply the preprocessing operations to a data set using the `bake()` function. The `bake()` function can apply the recipe to _any_ data set. To use the test set, the syntax would be:
 
 ```{r engineering-ames-test-bake}
 test_ex <- bake(simple_ames, new_data = ames_test)
@@ -129,11 +133,10 @@ Note the dummy variable columns starting with `Neighborhood_`. The `bake()` func
 bake(simple_ames, ames_test, starts_with("Neighborhood_"))
 ```
 
-To get the processed version of the training set, we could use `bake()` but, as previously mentioned, this would repeat calculations that have already been executed. The `juice()` function is a specialized version of `bake()` that quickly returns the training set (if `retain = TRUE` was used). It accesses the data component of the prepared recipe. 
+To get the processed version of the training set, we could use `bake()` and pass in the argument `ames_train` but, as previously mentioned, this would repeat calculations that have already been executed. Instead, we can use `new_data = NULL` to quickly return the training set (if `retain = TRUE` was used). It accesses the data component of the prepared recipe. 
 
-```{r engineering-ames-juice}
-# No `new_data` argument is needed: 
-juice(simple_ames) %>% nrow()
+```{r engineering-ames-null}
+bake(simple_ames, new_data = NULL) %>% nrow()
 ames_train %>% nrow()
 ```
 
@@ -150,7 +153,7 @@ if (knitr:::is_html_output()) {
 ```
 
 :::rmdnote
-As we discuss in Chapter \@ref(workflows), there are high level functions that handle the second two phases automatically. In these cases, we do not have to manually use `prep()`, `bake()`, or `juice()` to include a recipe in the modeling process. 
+As we discuss in Chapter \@ref(workflows), there are high level functions that handle the second two phases automatically. In these cases, we do not have to manually use `prep()` and `bake()` to include a recipe in the modeling process. 
 :::
 
 ## Encoding qualitative data in a numeric format  {#dummies}
@@ -311,7 +314,7 @@ For simple transformations of the **outcome** column(s), we strongly suggest tha
 
 However, there are other circumstances where this is not an adequate solution. For example, in classification models where there is a severe class imbalance, it is common to conduct _subsampling_ of the data that are given to the modeling function. For example, suppose that there were two classes and a 10% event rate. A simple, albeit controversial, approach would be to _down-sample_ the data so that the model is provided with all of the events and a random 10% of the non-event samples. 
 
-The problem is that the same subsampling process **should not be applied** to the data being predicted. As a result, when using a recipe, we need a mechanism to ensure that some operations are only applied to the data that are given to the model. Each step function has an option called `skip` that, when set to `TRUE`, will be ignored by the `bake()` function. In this way, you can isolate the steps that affect the modeling data without causing errors when applied to new samples. However, all steps will be applied when using `juice()`. 
+The problem is that the same subsampling process **should not be applied** to the data being predicted. As a result, when using a recipe, we need a mechanism to ensure that some operations are only applied to the data that are given to the model. Each step function has an option called `skip` that, when set to `TRUE`, will be ignored by the `bake()` function used with a data set argument. In this way, you can isolate the steps that affect the modeling data without causing errors when applied to new samples. However, all steps are applied when using `bake(new_data = NULL)`. 
 
 ```{r engineering-skips, include = FALSE}
 library(recipes)
@@ -341,7 +344,7 @@ At the time of this writing, the step functions in the `r pkg(recipes)` and `r p
 
 ### Spline functions {-}
 
-When a predictor has a nonlinear relationship with the outcome, some types of predictive models can adaptively approximate this relationship during training. However, simpler is usually better and it is not uncommon to try to use a simpler model, such as a linear fit, and add in specific non-linear features for predictors that may need them. One common method for doing this is to use _spline_ functions to represent the data. Splines replace the existing numeric predictor with a set of columns that allow a model to emulate a flexible, non-linear relationship. As more spline terms are added to the data, the capacity to non-linearly represent the relationship increases. Unfortunately, it may also increase the likelihood of picking up on data trends that occur by chance (i.e., over-fitting). 
+When a predictor has a nonlinear relationship with the outcome, some types of predictive models can adaptively approximate this relationship during training. However, simpler is usually better and it is not uncommon to try to use a simple model, such as a linear fit, and add in specific non-linear features for predictors that may need them. One common method for doing this is to use _spline_ functions to represent the data. Splines replace the existing numeric predictor with a set of columns that allow a model to emulate a flexible, non-linear relationship. As more spline terms are added to the data, the capacity to non-linearly represent the relationship increases. Unfortunately, it may also increase the likelihood of picking up on data trends that occur by chance (i.e., over-fitting). 
 
 If you have ever used `geom_smooth()` within a `ggplot`, you have probably used a spline representation of the data. For example, each panel below uses a different number of smooth splines for the latitude predictor:
 
@@ -427,11 +430,11 @@ Mirroring the original `r pkg(dplyr)` operations, `step_mutate()` and `step_muta
 
 ### Natural language processing {-}
 
-Recipes can also handle data that are not in the traditional structure where the columns are features. For example, the [`r pkg(textrecipes)`](https://textrecipes.tidymodels.org/) package can apply natural language processing methods to the data. The input column is typically a string of text and different steps can be used to tokenize the data (e.g., split the text into separate words), filter out words, and create new features appropriate for modeling. 
+Recipes can also handle data that are not in the traditional structure where the columns are features. For example, the [`r pkg(textrecipes)`](https://textrecipes.tidymodels.org/) package can apply natural language processing methods to the data. The input column is typically a string of text and different steps can be used to tokenize the data (e.g., split the text into separate words), filter out tokens, and create new features appropriate for modeling. 
 
 ## How data are used by the recipe
 
-Data are given to recipes at different stages. When calling `recipe(..., data)`, the data set is used to determine the data types of each column so that selectors such as `all_numeric()` can be used. When preparing the data using `prep(recipe, training)`, the data in `training` are used for all estimation operations, from determining factor levels to computing PCA components and everything in between. It is important to realize that all pre-processing and feature engineering steps only utilize the training data. Otherwise, information leakage can negatively impact the model. 
+Data are given to recipes at different stages. When calling `recipe(..., data)`, the data set is used to determine the data types of each column so that selectors such as `all_numeric()` can be used. When preparing the data using `prep(recipe, training)`, the data in `training` are used for all estimation operations, from determining factor levels to computing PCA components and everything in between. It is important to realize that all preprocessing and feature engineering steps only utilize the training data. Otherwise, information leakage can negatively impact the model. 
 
 When using `bake(recipe, new_data)`, no quantities are re-estimated using the values in `new_data`. Take centering and scaling using `step_normalize()` as an example. Using this step, the means and standard deviations from the appropriate columns are determined from the training set; new samples are standardized using these values when `bake()` is invoked. 
 
@@ -452,11 +455,11 @@ ames_rec <-
   step_ns(Latitude, Longitude, deg_free = 20)
 ```
 
-To get the recipe ready, we prepare it, and then extract the training set using `juice()`. When calling `prep()`, if the `training` argument is not given, it uses the data that was initially given to the `recipe()` function call.
+To get the recipe ready, we prepare it, and then extract the training set using `bake()` with `new_data = NULL`. When calling `prep()`, if the `training` argument is not given, it uses the data that was initially given to the `recipe()` function call.
 
 ```{r engineering-lm-ames-prep}
 ames_rec_prepped <- prep(ames_rec)
-ames_train_prepped <- juice(ames_rec_prepped)
+ames_train_prepped <- bake(ames_rec_prepped, new_data = NULL)
 ames_test_prepped <- bake(ames_rec_prepped, ames_test)
 
 # Fit the model; Note that the column Sale_Price has already been
@@ -505,7 +508,7 @@ ames_rec <-
 ames_rec_prepped <- prep(ames_rec)
 ```
 
-Suppose you were interested in knowing what neighborhoods were retained by `step_log()` The `tidy()` method can be called again along with the `id` identifier we specified to get these results:
+The `tidy()` method can be called again along with the `id` identifier we specified to get these results:
 
 ```{r engineering-lm-tidy-log}
 tidy(ames_rec_prepped, id = "my_id")
@@ -539,7 +542,7 @@ Finally, all step functions have a `role` field that can assign roles to the res
 
 ## Chapter summary {#recipes-summary}
 
-In this chapter, you learned about using recipes for flexible feature engineering and data preprocessing, from creating dummy variables to handling class imbalance and more. Feature engineering is an important part of the modeling process where information leakage can easily occur and good practices must be adopted. Between the `r pkg(recipes)` package and other packages that extend recipes, there are over 100 available steps. All possible recipe steps are enumerated at [`tidymodels.org/find`](https://www.tidymodels.org/find/). The recipes framework provides a rich data manipulation environment for pre-processing and transforming data prior to modeling. 
+In this chapter, you learned about using recipes for flexible feature engineering and data preprocessing, from creating dummy variables to handling class imbalance and more. Feature engineering is an important part of the modeling process where information leakage can easily occur and good practices must be adopted. Between the `r pkg(recipes)` package and other packages that extend recipes, there are over 100 available steps. All possible recipe steps are enumerated at [`tidymodels.org/find`](https://www.tidymodels.org/find/). The recipes framework provides a rich data manipulation environment for preprocessing and transforming data prior to modeling. 
 Additionally, [`tidymodels.org/learn/develop/recipes/`](https://www.tidymodels.org/learn/develop/recipes/) shows how custom steps can be created.
 
 The code that we will use in later chapters is:

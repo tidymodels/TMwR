@@ -9,13 +9,13 @@ x  <- symbol$times
 cl <- symbol$circle_dotted
 ```
 
-# Recommended pre-processing {#pre-proc-table}
+# Recommended preprocessing {#pre-proc-table}
 
-It has been said previously that the type of pre-processing is dependent on the type of model being fit. For example, models that use distance functions or dot products should have all of their predictors on the same scale so that distance is measured appropriately. 
+It has been said previously that the type of preprocessing is dependent on the type of model being fit. For example, models that use distance functions or dot products should have all of their predictors on the same scale so that distance is measured appropriately. 
 
 To learn more about each of these models, and others that might be available, a linked list can be found at [`tidymodels.org/find/parsnip`](https://www.tidymodels.org/find/parsnip/). 
 
-This Appendix provides recommendations for baseline levels of pre-processing that are needed for various model functions. In the table below, the pre-processing methods are categorized as: 
+This Appendix provides recommendations for baseline levels of preprocessing that are needed for various model functions. In the table below, the preprocessing methods are categorized as: 
 
  * **dummy**: Do qualitative predictors require a numeric encoding (e.g. via dummy variables or other methods). 
  
@@ -29,7 +29,7 @@ This Appendix provides recommendations for baseline levels of pre-processing tha
  
  * **transform**: Is it helpful to transform predictors to be more symmetric? 
 
-The information in the table below is not exhaustive and somewhat depends on the implementation. For example, as noted below the table, some models may not require a particular pre-processing operation but the implementation may require it. In the table, `r tk` indicates that the method is required for the model and `r x` indicates that it is not. The `r cl` symbol means that the model _may_ be helped by the technique but it is not required.
+The information in the table below is not exhaustive and somewhat depends on the implementation. For example, as noted below the table, some models may not require a particular preprocessing operation but the implementation may require it. In the table, `r tk` indicates that the method is required for the model and `r x` indicates that it is not. The `r cl` symbol means that the model _may_ be helped by the technique but it is not required.
 
 ```{r pre-proc-table, echo = FALSE, results = "asis"}
 tkp <- paste0(symbol$tick, symbol$sup_plus)

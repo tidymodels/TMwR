@@ -25,7 +25,7 @@ This is the website for _Tidy Modeling with R_. This book is a guide to using a 
 
 This book is not intended to be a comprehensive reference on modeling techniques; we suggest other resources to learn such nuances. For general background on the most common type of model, the linear model, we suggest @fox08.  For predictive models, @apm is a good resource. Also, @fes is referenced heavily here, mostly because it is freely available online.  For machine learning methods, @Goodfellow is an excellent (but formal) source of information. In some cases, we describe models that are used in this text but in a way that is less mathematical, and hopefully more intuitive. 
 
-::rmdnote
+:::rmdnote
 Investigating and analyzing data are an important part of the model process, and an excellent resource on this topic is @wickham2016.
 :::
 
