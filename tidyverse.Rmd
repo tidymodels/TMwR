@@ -14,7 +14,7 @@ In this chapter, we briefly discuss these principles and how they apply in the c
 
 ## Principles
 
-The full set of strategies and tactics for writing R code in the tidyverse style can be found at the website [`https://design.tidyverse.org`](https://design.tidyverse.org/). The following sections describe a few ideas and their motivation. 
+The full set of strategies and tactics for writing R code in the tidyverse style can be found at the website [`https://design.tidyverse.org`](https://design.tidyverse.org/). Here we can briefly describe several of the design principles, their motivation, and how we think about modeling as an application of these principles. 
 
 ### Design for humans
 
@@ -22,26 +22,26 @@ The tidyverse focuses on designing R packages and functions that can be easily u
 
 For this reason, it is critical that R code be easy to work with to accomplish your goals. Documentation, training, accessibility, and other factors play an important part in achieving this. However, if the syntax itself is difficult for people to easily comprehend, documentation is a poor solution. The software itself must be intuitive.
 
-To contrast the tidyverse approach with more traditional R semantics, consider sorting a data frame. Using only the core language, we can sort a data frame using one or more columns by reordering the rows via R's subscripting rules in conjunction with `order()` (as opposed to a function you might be tempted to use in such a situation because of its name, `sort()`). To sort the `mtcars` data by two of its columns, the call might look like:
+To contrast the tidyverse approach with more traditional R semantics, consider sorting a data frame. Using only the core language, we can sort a data frame using one or more columns by reordering the rows via R's subscripting rules in conjunction with `order()`; you _cannot_ successfully use a function you might be tempted to try in such a situation because of its name, `sort()`. To sort the `mtcars` data by two of its columns, the call might look like:
 
 ```{r tidyverse-base-sort, eval = FALSE}
 mtcars[order(mtcars$gear, mtcars$mpg), ]
 ```
 
-While very computationally efficient, it would be difficult to argue that this is an intuitive user-interface. In `r pkg(dplyr)` by contrast, the tidyverse function `arrange()` takes a set of variable names as input arguments directly:
+While very computationally efficient, it would be difficult to argue that this is an intuitive user interface. In `r pkg(dplyr)` by contrast, the tidyverse function `arrange()` takes a set of variable names as input arguments directly:
 
 ```{r tidyverse-dplyr-sort, eval = FALSE}
 library(dplyr)
 arrange(data = mtcars, gear, mpg)
 ```
 
-```{block, type = "rmdnote"}
-Variable names above are unquoted; where many traditional R functions require a character string to specify variables, tidyverse functions take unquoted names or _selector functions_. The selectors allow for one or more readable rules that are applied to the column names. For example, `ends_with("t")` would select the `drat` and `wt` columns of the `mtcars` data frame.
-```
+:::rmdnote
+The variable names used here are "unquoted"; many traditional R functions require a character string to specify variables, but tidyverse functions take unquoted names or _selector functions_. The selectors allow for one or more readable rules that are applied to the column names. For example, `ends_with("t")` would select the `drat` and `wt` columns of the `mtcars` data frame.
+:::
 
 Additionally, naming is crucial. If you were new to R and were writing data analysis or modeling code involving linear algebra, you might be stymied when searching for a function that computes the matrix inverse. Using `apropos("inv")` yields no candidates. It turns out that the base R function for this task is `solve()`, for solving systems of linear equations. For a matrix `X`, you would use `solve(X)` to invert `X` (with no vector for the right-hand side of the equation). This is only documented in the description of one of the _arguments_ in the help file. In essence, you need to know the name of the solution to be able to find the solution. 
 
-The tidyverse approach is use function names that are explicit and descriptive over those that are short and implicit. There is a focus on verbs (e.g. `fit`, `arrange`, etc.) for general methods. Verb-noun pairs are particularly effective; consider `invert_matrix()` as a hypothetical function name. In the context of modeling, it is also important to avoid highly technical jargon in names (such as Greek letters or obscure terms). Names should be as self-documenting as possible. 
+The tidyverse approach is use function names that are descriptive and explicit over those that are short and implicit. There is a focus on verbs (e.g. `fit`, `arrange`, etc.) for general methods. Verb-noun pairs are particularly effective; consider `invert_matrix()` as a hypothetical function name. In the context of modeling, it is also important to avoid highly technical jargon in names such as Greek letters or obscure terms. Names should be as self-documenting as possible. 
 
 When there are similar functions in a package, function names are designed to be optimized for tab-completion. For example, the `r pkg(glue)` package has a collection of functions starting with a common prefix (`glue_`) that enables users to quickly find the function they are looking for. 
 
@@ -60,7 +60,7 @@ boot_samp
 class(boot_samp)
 ```
 
-With this approach, vector-based functions can be used with these columns, such as `vapply()` or `purrr::map()`^[If you've never seen `::` in R code before, it is an explicit method for calling a function. The value of the right-hand side is the _namespace_ where the function lives (usually a package name). The left-hand side is the function name. In cases where two packages use the same function name, this syntax ensures that the correct function is called.]. This `boot_samp` object has multiple classes but inherits methods for data frames (`"data.frame"`) and tibbles (`"tbl_df"`). Additionally, new columns can be added to the results without affecting the class of the data. This is much easier and more versatile for users to work with than a completely new object type that does not make its data structure obvious. 
+With this approach, vector-based functions can be used with these columns, such as `vapply()` or `purrr::map()`^[If you've never seen `::` in R code before, it is an explicit method for calling a function. The value of the left-hand side is the _namespace_ where the function lives (usually a package name). The right-hand side is the function name. In cases where two packages use the same function name, this syntax ensures that the correct function is called.]. This `boot_samp` object has multiple classes but inherits methods for data frames (`"data.frame"`) and tibbles (`"tbl_df"`). Additionally, new columns can be added to the results without affecting the class of the data. This is much easier and more versatile for users to work with than a completely new object type that does not make its data structure obvious. 
 
 One downside to relying on common data structures is the potential loss of computational performance. In some situations, data can be encoded in specialized formats that are more efficient representations of the data. For example: 
 
@@ -68,14 +68,18 @@ One downside to relying on common data structures is the potential loss of compu
 
  * Data that have a large number of values that are the same (such as zeros for binary data) can be stored in a _sparse matrix format_. This format can reduce the size of the data as well as enable more efficient computational techniques. 
 
-These formats are advantageous when the problem is well scoped and the potential data processing methods are both well defined and suited to such a format^[Not all algorithms can take advantage of sparse representations of data. In such cases, a sparse matrix must be converted to a more conventional format before proceeding.]. However, once such constraints are violated, specialized data formats are less useful. For example, if we perform a transformration of the data that converts the data into fractional numbers, the output is no longer sparse; the sparse matrix representation is helpful for one specific algorithmic step in modeling but this is often not true before or after that specific step. A specialized data structure is not flexible enough for an entire modeling workflow in the way that a common data structure is. 
+These formats are advantageous when the problem is well scoped and the potential data processing methods are both well defined and suited to such a format^[Not all algorithms can take advantage of sparse representations of data. In such cases, a sparse matrix must be converted to a more conventional format before proceeding.]. However, once such constraints are violated, specialized data formats are less useful. For example, if we perform a transformration of the data that converts the data into fractional numbers, the output is no longer sparse; the sparse matrix representation is helpful for one specific algorithmic step in modeling but this is often not true before or after that specific step. 
 
-One important feature in the tibble produced by `r pkg(rsample)` is that the `splits` column is a list. In this instance, each element of the list has the same type of object: an `rsplit` object that contains the information about which rows of `mtcars` belong in the bootstrap sample. _List columns_ can be very useful in data analysis and, as will be seen throughout this book, are important to the tidyverse. 
+:::rmdwarning
+A specialized data structure is not flexible enough for an entire modeling workflow in the way that a common data structure is. 
+:::
+
+One important feature in the tibble produced by `r pkg(rsample)` is that the `splits` column is a list. In this instance, each element of the list has the same type of object: an `rsplit` object that contains the information about which rows of `mtcars` belong in the bootstrap sample. _List columns_ can be very useful in data analysis and, as will be seen throughout this book, are important to tidymodels. 
 
 
 ### Design for the pipe and functional programming
 
-The `r pkg(magrittr)` pipe operator (`%>%`) is a tool for chaining together a sequence of R commands. To demonstrate, consider the following commands which sort a data frame and then retain the first 10 rows:
+The `r pkg(magrittr)` pipe operator (`%>%`) is a tool for chaining together a sequence of R functions. To demonstrate, consider the following commands which sort a data frame and then retain the first 10 rows:
 
 ```{r tidyverse-no-pipe, eval = FALSE}
 small_mtcars <- arrange(mtcars, gear)
@@ -105,11 +109,11 @@ ggplot(mtcars, aes(x = wt, y = mpg)) +
   geom_smooth(method = lm)
 ```
 
-While similar to the `r pkg(dplyr)` pipeline, note that the first argument to this pipeline is a data set (`mtcars`) and that each function call returns a `ggplot` object. Not all pipelines need to keep the returned values (plot objects) the same as the initial value (a data frame). Using the the pipe operator with `r pkg(dplyr)` operations has acclimated many R users to expect to return a data frame when pipelines are used; as shown with `ggplot`, this does not need to be the case. Pipelines are incredibly useful in modeling workflows but modeling pipelines can return, instead of a data frame, objects such as model components.
+While similar to the `r pkg(dplyr)` pipeline, note that the first argument to this pipeline is a data set (`mtcars`) and that each function call returns a `ggplot` object. Not all pipelines need to keep the returned values (plot objects) the same as the initial value (a data frame). Using the the pipe operator with `r pkg(dplyr)` operations has acclimated many R users to expect to return a data frame when pipelines are used; as shown with `r pkg(ggplot2)`, this does not need to be the case. Pipelines are incredibly useful in modeling workflows but modeling pipelines can return, instead of a data frame, objects such as model components.
 
 R has excellent tools for creating, changing, and operating on functions, making it a great language for _functional programming_. This approach can replace iterative loops in many situations, such as when a function returns a value without other side effects ^[Examples of function side effects could include changing global data or printing a value.]. 
 
-Let's look at an example. Suppose you are interested in the logarithm of the ratio of the feul efficiency to the car weight. To those new to R and/or coming from other programming languages, a loop might seem like a good option:
+Let's look at an example. Suppose you are interested in the logarithm of the ratio of the fuel efficiency to the car weight. To those new to R and/or coming from other programming languages, a loop might seem like a good option:
 
 ```{r tidyverse-loop}
 n <- nrow(mtcars)
@@ -174,9 +178,9 @@ map2_dbl(mtcars$mpg, mtcars$wt, ~ log(.x/.y)) %>%
 
 These examples have been trivial but, in later sections, are applied to more complex problems. 
 
-```{block, type = "rmdnote"}
+:::rmdnote
 For functional programming in tidy modeling, functions should be defined so that functions like `map()` can be used for iterative computations.
-```
+:::
 
 
 ## Examples of tidyverse syntax
@@ -203,7 +207,7 @@ df$tw
 tbbl$tw
 ```
 
-Tibbles also prevent one of the most common R errors: dropping of dimensions. If a standard data frame subsets the columns down to a single column, the object is converted to a vector. Tibbles _never_ do this:
+Tibbles also prevent one of the most common R errors: dropping dimensions. If a standard data frame subsets the columns down to a single column, the object is converted to a vector. Tibbles _never_ do this:
 
 ```{r tidyverse-drop}
 df[, "two"]
@@ -211,7 +215,7 @@ df[, "two"]
 tbbl[, "two"]
 ```
 
-There are various other advantages to using tibbles instead of data frames, such as better printing and so on.  [Chapter 10](https://r4ds.had.co.nz/tibbles.html) of @wickham2016 has more details on tibbles.
+There are various other advantages to using tibbles instead of data frames, such as better printing and more.  [Chapter 10](https://r4ds.had.co.nz/tibbles.html) of @wickham2016 has more details on tibbles.
 
 ```{r tidyverse-import-raw, include = FALSE}
 url <- "chi.csv"
@@ -239,7 +243,7 @@ To demonstrate some syntax, let's use tidyverse functions to read in data that c
 
 Our tidyverse pipeline will conduct the following tasks, in order: 
 
-1. We will use the tidyverse package `r pkg(readr)` to read the data and convert them into a tibble. To do this, the `read_delim()` function can determine the type of data by reading an initial number of rows. Alternatively, if the column names and types are already known, a column specification can be created in R and passed to `read_delim()`. 
+1. We will use the tidyverse package `r pkg(readr)` to read the data and convert them into a tibble. To do this, the `read_csv()` function can determine the type of data by reading an initial number of rows. Alternatively, if the column names and types are already known, a column specification can be created in R and passed to `read_csv()`. 
 
 1. We filter the data to eliminate a few columns that are not needed (such as the station ID) and change the column `stationname` to `station`. The function `select()` is used for this. When filtering, use either the names of the column names or a `r pkg(dplyr)` selector function. When selecting names, a new variable name can be declared using the argument format `new_name = old_name`.
 
@@ -257,20 +261,20 @@ url <- "chi.csv"
 
 all_stations <- 
   # Step 1: Read in the data.
-  read_delim(url, delim = ",") %>% 
+  read_csv(url) %>% 
   # Step 2: filter columns and rename stationname
   dplyr::select(station = stationname, date, rides) %>% 
   # Step 3: Convert the character date field to a date encoding.
   # Also, put the data in units of 1K rides
-  mutate(date = mdy(date), rides = rides/1000) %>% 
+  mutate(date = mdy(date), rides = rides / 1000) %>% 
   # Step 4: Summarize the multiple records using the maximum.
   group_by(date, station) %>% 
   summarize(rides = max(rides)) %>% 
   ungroup()
 ```
 
-This pipeline of operations illustrates why the tidyverse is popular. A series of data manipulations are used that have simple and easy to understand user-interfaces that are bundled together in a streamlined and readable way. The focus is on how the user interacts with the software. This approach enables more people to learn R and achieve their analysis goals, and adopting these same principles for modeling in R has the same benefits. 
+This pipeline of operations illustrates why the tidyverse is popular. A series of data manipulations is used that have simple and easy to understand user interfaces; the series is bundled together in a streamlined and readable way. The focus is on how the user interacts with the software. This approach enables more people to learn R and achieve their analysis goals, and adopting these same principles for modeling in R has the same benefits. 
 
 ## Chapter summary 
 
-This chapter introduced the tidyverse. The chapter described many differences in conventions between tidyverse and base R. Two important components of the system, tibbles and the pipe operator, were introduced and illustrated using a mundane but important data processing task.  
+This chapter introduced the tidyverse, with a focus on applications for modeling. We described differences in conventions between the tidyverse and base R, and introduced two important components of the tidyverse system, tibbles and the pipe operator `%>%`. Data cleaning and processing can feel mundane at times, but these tasks are important for modeling in the real world; we illustrated how to use tibbles, the pipe, and tidyverse functions in an example data import and processing exercise.  
