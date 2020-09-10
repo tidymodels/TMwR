@@ -103,9 +103,7 @@ What is the advantage to using a recipe? There are a few, including:
  
 ## Using recipes
  
-Remember that when invoking the `recipe()` function, the steps are not estimated or executed in any way. This is not unlike using `ggplot()` where the plot is not rendered until triggered by a function like `print()`. 
-
-The second phase for using a recipe is to estimate any quantities required by the steps using the `prep()` function. For example, we can use `step_normalize()` to center and scale any predictors selected in the step. When we call `prep(recipe, training)`, this function estimates the required means and standard deviations from the data in the `training` argument. The transformations specified by each step are also sequentially executed on the data set. Again using normalization as the example, the means and variances are estimated and then used to standardize the columns. 
+Remember that when invoking the `recipe()` function, the steps are not estimated or executed in any way. The second phase for using a recipe is to estimate any quantities required by the steps using the `prep()` function. For example, we can use `step_normalize()` to center and scale any predictors selected in the step. When we call `prep(recipe, training)`, this function estimates the required means and standard deviations from the data in the `training` argument. The transformations specified by each step are also sequentially executed on the data set. Again using normalization as the example, the means and variances are estimated and then used to standardize the columns. 
 
 :::rmdwarning
 When specifying a step, the data available to that step have been affected by the previous operations. There are some steps that may remove columns or change their data type, so use care when writing selectors downstream. 
