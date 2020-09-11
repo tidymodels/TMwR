@@ -22,6 +22,5 @@ __If you find a bug__, please make an issue or pull request. Since all of the da
  
  * Adhere as best as possible to the [`tidyverse` style guide](https://style.tidyverse.org/). 
  
- * Please avoid adding new pacakge dependencies. If that can't be avoided, add them to the DESCRIPTION file. 
+ * Please avoid adding new package dependencies. If that can't be avoided, add them to the DESCRIPTION file. 
  
-
