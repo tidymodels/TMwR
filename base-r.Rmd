@@ -69,7 +69,7 @@ ggplot(crickets, aes(x = temp, y = rate, col = species)) +
  
 The data exhibit fairly linear trends for each species. For a given temperature, _O. exclamationis_ appears to chirp more per minute than the other species. For an inferential model, the researchers might have specified the following null hypotheses prior to seeing the data:
 
- * Temperature has no affect on the chirp rate.
+ * Temperature has no effect on the chirp rate.
 
  * There are no differences between the species' chirp rate. 
 
