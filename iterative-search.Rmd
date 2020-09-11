@@ -302,6 +302,58 @@ Finally, if the user interrupts the `tune_bayes()` computations, the function re
 
 ## Simulated annealing 
 
+Simulated annealing (SA) is a general nonlinear search routine inspired by the process in which metal cools. It is a global search method that can effectively navigate many different types of search landscapes, including discontinuous functions. Unlike most gradient-based optimization routines, simulated annealing can reassess previous solutions. 
+
+The process starts with an initial value and creates a bias random walk thought the parameter space. Each new candidate parameter value is a small perturbation of the previous value that keeps the new point within a local neighborhood. 
+
+The candidate point is resampled to obtain its corresponding performance value. If the candidate has better results than the previous value, it is accepted as the new best and the process continues. If the results are worse than the previous value the search procedure _may_ still use its parameter to define further steps. This depends on two factors. First, the likelihood of accepting a bad result decreases with the drop in performance. In other words, a slightly worse results has a better change of acceptance than one with a large drop in performance. The other factor is the number of search iterations. Simulated annealing wants to accept fewer suboptimal values as the search proceeds. From these two factors, the _acceptance probability_  for a bad results can be formalized as
+
+where i is the iteration number, c is a user-specified constant and D is the percent different between the old and new values (where negative values implies worse results). For a bad result, we determine the acceptance probability and compare it to a ranodm uniform number. If the random number is less than the probability value, the search _discards_ the current parameters and the next iteration creates  its candidate based on the previous value. Otherwise, the next iteration forms the next set of parameters based on the current (suboptimal) values. 
+
+This feature of the algorithm allows the search to proceed in the wrong direction, at least for the short term, with the potential to find a much better region of the parameter space. 
+
+How are the acceptance probabilities influenced? This heatmap shows how the acceptance probability can change over iterations, performance, and the user-specified coefficient: 
+
+```{r iterative-acceptance, dev = "png", fig.height = 4.5}
+get_accept_probs <- function(coef, pct_diff) {
+  # pct loss to abs value
+  candidate <- .8 - (pct_diff  * .8 /100) 
+  
+  x <- finetune:::acceptance_prob(0.8, candidate, 1:50, coef = coef, maximize = TRUE)
+  tibble(
+    `Acceptance Probability` = x,
+    iteration = 1:50,
+    pct_diff = pct_diff, 
+    coefficient = coef
+  )
+}
+
+prob_settings <- crossing(pct_diff = 1:10, coefficient = c(10, 20, 30)/1000)
+prob_res <- purrr::map2_dfr(prob_settings$coefficient, prob_settings$pct_diff, get_accept_probs)
+
+ggplot(prob_res, aes(x = iteration, y = pct_diff, fill = `Acceptance Probability`)) +
+  geom_raster() +
+  facet_wrap( ~ coefficient, labeller = label_both) +
+  scale_fill_gradientn(
+    colours = scales::brewer_pal(palette = "Greens")(8),
+    limits = 0:1
+  ) +
+  labs(y = "Percent Loss", x = "Iteration")
+```
+
+The user can adjust the coefficients to find a probability profile that suits their needs. 
+
+This process continues for a set amount of iterations but can halt if no globally best results occur within a pre-determined number of iterations. However, it can be very helpful to set a restart threshold. This feature finds the last globally best parameter settings and starts anew. 
+
+The main important detail is to define how tp perturn tuning parameters from iteration-to-iteration. There are a variety of methods in the literature for this. We follow the simple method given in REF. For continuous tuning parameters, we define a small radius to define the local "neighborhood". For example, suppose there are two tuning parameters and each is bounded by zero and one. The simulated annealing process generates random values on the surrounding radius and randomly chooses one. The size of the radius controls how quickly the search explores the parameter space. 
+
+In our implementation, the neighborhood is determined by scaling the current candidate to be between zero and one based on the range of the parameter object. For this reason, radius values between 0.05 and 0.1 seem reasonable. For these values, fastest that the the seach could go from one since of the parameters space to the other is 20 and 10 iterations, respectively. 
+
+For non-numeric parameters, we assign a probability for how often the parameter value changes. 
+
+
+
+
 ```{r iterative-cells-sa-calcs, include = FALSE, cache = TRUE}
 # As we did above, this chunk executes the code with some extra options that
 # capture the output and save some internal objects for plotting. 
