@@ -21,6 +21,7 @@ Depends: R (>= 4.0.0)
 URL: https://github.com/topepo/TMwR
 SystemRequirements: ImageMagick
 Imports:
+  av,
   bookdown,
   broom,
   corrr,

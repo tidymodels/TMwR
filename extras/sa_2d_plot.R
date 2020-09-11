@@ -14,7 +14,7 @@ sa_2d_plot <- function(sa_obj, history, large_sa, path = tempdir()) {
   svm_roc <-   
     large_sa %>% 
     collect_metrics()
-  
+
   large_plot <-
     svm_roc %>% 
     ggplot(aes(x = rbf_sigma, y = cost)) + 
@@ -53,29 +53,26 @@ sa_2d_plot <- function(sa_obj, history, large_sa, path = tempdir()) {
       ttl <- paste0("Iteration ", history$.iter[i], " (", history$results[i], ")")
     }
     
-    new_plot <- 
-      base_plot + 
-      geom_path(data = params %>% slice(ind), alpha = .5, arrow = arrow(length = unit(0.15, "inches"))) + 
+    new_plot <-
+      base_plot +
+      geom_point(
+        data = params %>% slice(ind) %>% slice(n()),
+        size = 3,
+        col = "green"
+      ) +
+      geom_path(
+        data = params %>% slice(ind),
+        alpha = .5,
+        arrow = arrow(length = unit(0.15, "inches"))
+      ) +
       ggtitle(ttl)
     
     
-    file_nm <- nms[i]
-    ragg::agg_png(file_nm, height = 2 * 480, width = 2 * 480, res = 72 * 2, scaling = 1)
     print(new_plot)
-    dev.off()
     
   }
 
-  out_nm <- file.path(tempdir(), "sa_search.gif")
-  
-  convert_cmd <- paste(nms[-(1:num_init)], collapse = " ")
-  convert_cmd <- paste("convert -delay 250 -resize 75%", convert_cmd, "-loop 0", out_nm)
-  convert_res <- system(convert_cmd)
-  if (inherits(convert_res, "try-error")) {
-    rlang::abort("SA search gif failed")
-  }
-  unlink(nms[-(1:num_init)], force = TRUE)
-  out_nm
+  invisible(NULL)
 }
 
 

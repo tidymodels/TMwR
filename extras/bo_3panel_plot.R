@@ -39,6 +39,8 @@ mean_plot <- function(grid, object, iter) {
     scale_y_continuous(trans = "log2", labels = fmt_dcimals(2)) +
     geom_point(data = initial, col = "black", pch = 4, size = 5) + 
     geom_point(data = existing, col = "black") + 
+    geom_point(data =  grid %>% arrange(desc(objective)) %>% slice(1), 
+               size = 3, col = "green") + 
     scale_fill_distiller(palette = "Blues") +
     theme(legend.position = "none") +
     labs(title = "predicted ROC AUC mean") + 
@@ -64,6 +66,8 @@ sd_plot <- function(grid, object, iter) {
     scale_y_continuous(trans = "log2", labels = fmt_dcimals(2)) +
     geom_point(data = initial, col = "black", pch = 4, size = 5) + 
     geom_point(data = existing, col = "black") + 
+    geom_point(data =  grid %>% arrange(desc(objective)) %>% slice(1), 
+               size = 3, col = "green") + 
     scale_fill_distiller(palette = "Reds") +
     theme(legend.position = "none") +
     labs(title = "predicted ROC AUC std dev") + 
@@ -123,6 +127,8 @@ make_bo_animation <- function(grid, object) {
   files <- purrr::map_chr(1:num_iter, ~ tempfile(pattern = "bo_plot_"))
   iter_chr <- format(1:num_iter)
   
+  all_plots <- vector(mode = "list", length = num_iter)
+  
   for(i in 1:num_iter) {
     
     iter_lab <- paste("Iteration", iter_chr[i], "of", length(files))
@@ -131,25 +137,16 @@ make_bo_animation <- function(grid, object) {
     .sd   <- sd_plot(grid, object, i)
     .impr <- improv_plot(grid, object, i)
     
-    ragg::agg_png(files[i], height = 2 * 480, width = 2 * 480, res = 72 * 2, scaling = 1)
-    
+
     transparent_theme()
+    
     print(
       (.mean + .sd) / .impr + 
-        plot_layout(design = design) + 
-        plot_annotation(iter_lab, theme = theme(plot.title = element_text(hjust = 0.5)))
+      plot_layout(design = design) + 
+      plot_annotation(iter_lab, theme = theme(plot.title = element_text(hjust = 0.5)))
     )
     
-    dev.off()
   }
-  
-  convert_cmd <- paste(files, collapse = " ")
-  convert_cmd <- paste("convert -delay 200", convert_cmd, "-loop 0", "_book/premade/bo_search.gif")
-  convert_res <- system(convert_cmd)
-  if (inherits(convert_res, "try-error")) {
-    rlang::abort("BO search gif failed")
-  }
-  unlink(files, force = TRUE)
-  convert_res
+  invisible(NULL)
 }
 
