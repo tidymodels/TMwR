@@ -39,7 +39,7 @@ This same principle also applies to programming. Whenever possible, the software
 
 These two aspects of model development are crucial. Since tools for creating models are easily obtained and models can have such a profound impact, many more people are creating them. In terms of technical expertise and training, their backgrounds will vary. It is important that their tools be _robust_ to the experience of the user. Tools should be powerful enough to create high-performance models, but, on the other hand, should be easy to use in an appropriate way.  This book describes a suite of software for modeling which has been designed with these characteristics in mind.
 
-The software is based on the R programming language [@baseR]. R has been designed especially for data analysis and modeling. It is an implementation of the S language (with lexical scoping rules adapted from Scheme and Lisp) which was created in the 1970's to
+The software is based on the R programming language [@baseR]. R has been designed especially for data analysis and modeling. It is an implementation of the S language (with lexical scoping rules adapted from Scheme and Lisp) which was created in the 1970s to
 
 > "turn ideas into software, quickly and faithfully" [@Chambers:1998]
 
@@ -102,11 +102,11 @@ Another example of a descriptive model is the _locally estimated scatterplot smo
 
 ### Inferential models {-}
 
-The goal of an inferential model is to produce a decision for a research question or to test a specific hypothesis. The goal is to make some statement of truth regarding a predefined conjecture or idea. In many (but not all) cases, a qualitative statement is produced (e.g., that a difference was "statistically signficant").
+The goal of an inferential model is to produce a decision for a research question or to test a specific hypothesis. The goal is to make some statement of truth regarding a predefined conjecture or idea. In many (but not all) cases, a qualitative statement is produced (e.g., that a difference was "statistically significant").
 
-For example, in a clinical trial, the goal might be to provide confirmation that a new therapy does a better job in prolonging life than an alternative, like an existing therapy or no treatment. If the clinical endpoint was related to survival of a patient, the _null hypothesis_ might be that the two therapeutic groups have equal median survival times with the alternative hypothesis being that the new therapy has higher median survival.  If this trial were evaluated using the traditional null hypothesis significance testing, a p-value would be produced using some pre-defined methodology based on a set of assumptions for the data. Small values of the p-value indicate that there is evidence that the new therapy does help patients live longer. If not, the trial would conclude that there is a failure to show such an difference, which could be due to a number of reasons. 
+For example, in a clinical trial, the goal might be to provide confirmation that a new therapy does a better job in prolonging life than an alternative, like an existing therapy or no treatment. If the clinical endpoint was related to survival of a patient, the _null hypothesis_ might be that the two therapeutic groups have equal median survival times with the alternative hypothesis being that the new therapy has higher median survival.  If this trial were evaluated using the traditional null hypothesis significance testing, a p-value would be produced using some pre-defined methodology based on a set of assumptions for the data. Small values of the p-value indicate that there is evidence that the new therapy does help patients live longer. If not, the trial would conclude that there is a failure to show such a difference, which could be due to a number of reasons. 
 
-What are the important aspects of this type of analysis? Inferential techniques typically produce some type of probabilistic output, such as a p-value, confidence interval, or posterior probability. Generally, to compute such a quantity, formal probabilistic  assumptions must be made about the data and the underlying processes that generated the data. The quality of the statistical results are highly dependent on these pre-defined  assumptions as well as how much the observed data appear to agree with them. The most critical factors here are theoretical in nature: "If my data were independent and follow distribution _X_, then test statistic _Y_ can be used to produce a p-value. Otherwise, the resulting p-value might be inaccurate."
+What are the important aspects of this type of analysis? Inferential techniques typically produce some type of probabilistic output, such as a p-value, confidence interval, or posterior probability. Generally, to compute such a quantity, formal probabilistic assumptions must be made about the data and the underlying processes that generated the data. The quality of the statistical results are highly dependent on these pre-defined assumptions as well as how much the observed data appear to agree with them. The most critical factors here are theoretical in nature: "If my data were independent and follow distribution _X_, then test statistic _Y_ can be used to produce a p-value. Otherwise, the resulting p-value might be inaccurate."
 
 One aspect of inferential analyses is that there tends to be a delayed feedback loop in understanding how well the data matches the assumptions. In our clinical trial example, if statistical (and clinical) significance indicate that the new therapy should be available for patients to use, it still may be years before it is used in the field and enough data are generated for an independent assessment of whether the original statistical analysis led to the appropriate decision. 
 
@@ -146,7 +146,7 @@ There is an additional connection between the types of models. While the primary
 This can be dangerous when statistical significance is used as the _only_ measure of model quality.  It is possible that this statistically optimized model has poor model accuracy, or performs poorly on some other measure of predictive capacity. While the model might not be used for prediction, how much should inferences be trusted from a model that has significant p-values but dismal accuracy? Predictive performance tends to be related to how close the model's fitted values are to the observed data. 
 
 :::rmdwarning
-If a model has limited fidelity to the data, the inferences generated by the model should be highly suspect. In other words, statistical significance may not be sufficient proof that that a model is appropriate. 
+If a model has limited fidelity to the data, the inferences generated by the model should be highly suspect. In other words, statistical significance may not be sufficient proof that a model is appropriate. 
 :::
 
 This may seem intuitively obvious, but is often ignored in real-world data analysis.
@@ -241,7 +241,7 @@ monolog <-
     "Model Fitting", "1",
     "Let’s start with simple linear regression, K-nearest neighbors, and a boosted decision tree. ",
     "Model Tuning", "1",
-    "How many neighbors should be use?",
+    "How many neighbors should be used?",
     "Model Tuning", " ",
     "Should we run a lot of boosting iterations or just a few?",
     "Model Tuning", "2",
