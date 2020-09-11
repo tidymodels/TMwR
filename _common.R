@@ -41,3 +41,16 @@ pkg <- function(x) {
   x <- as.character(cl$x)
   paste0('<span class="pkg">', x, '</span>')
 }
+
+is_new_version <- function(x, path) {
+  cl <- match.call()
+  nm <- as.character(cl$x)
+  if (!file.exists(path)) {
+    return(TRUE)
+  }
+  load(path)
+  res <- all.equal(x, get(nm))
+  # print(res)
+  !isTRUE(res)
+}
+

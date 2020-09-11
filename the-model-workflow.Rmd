@@ -305,6 +305,8 @@ lm_fit <- fit(lm_wflow, ames_train)
 
 
 ```{r workflows-save, include = FALSE}
-save(lm_fit, file = "RData/lm_fit.RData", version = 2, compress = "xz")
+if(is_new_version(lm_fit, "RData/lm_fit.RData")) {
+  save(lm_fit, file = "RData/lm_fit.RData", version = 2, compress = "xz")
+}
 ```
 

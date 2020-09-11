@@ -416,7 +416,12 @@ lm_wflow <-
   workflow() %>% 
   add_recipe(ames_rec) %>% 
   add_model(linear_reg() %>% set_engine("lm"))
-save(rf_res, lm_wflow, rf_wflow, file = "RData/resampling.RData", version = 2, compress = "xz")
+
+if (is_new_version(rf_res,   "RData/resampling.RData") |
+    is_new_version(lm_wflow, "RData/resampling.RData") |
+    is_new_version(rf_wflow, "RData/resampling.RData")) {
+  save(rf_res, lm_wflow, rf_wflow, file = "RData/resampling.RData", version = 2, compress = "xz")
+}
 ```
 
 The return value is a tibble similar to the input resamples, along with some extra columns: 
