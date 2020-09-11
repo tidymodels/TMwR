@@ -44,14 +44,21 @@ sa_2d_plot <- function(sa_obj, history, large_sa, path = tempdir()) {
   
   nms <- purrr::map_chr(1:nrow(history), ~ tempfile())
   
+  history$results[history$new_best] <- "global best"
+  
   for (i in (num_init + 1):nrow(history)) {
     ind <- get_path(history, i)
     
-    if (history$new_best[i]) {
-      ttl <- paste0("Iteration ", history$.iter[i], " (new global best)")
-    } else {
-      ttl <- paste0("Iteration ", history$.iter[i], " (", history$results[i], ")")
-    }
+    ttl <- paste0("Iteration ", history$.iter[i])
+
+    text_just <- 
+      case_when(
+        history$results[i] == "restart" ~ 0.00,
+        history$results[i] == "discard" ~ 0.25,
+        history$results[i] == "accept"  ~ 0.50,
+        history$results[i] == "improvement" ~ 0.75,
+        history$results[i] == "global best" ~ 1.00,
+      )
     
     new_plot <-
       base_plot +
@@ -65,7 +72,8 @@ sa_2d_plot <- function(sa_obj, history, large_sa, path = tempdir()) {
         alpha = .5,
         arrow = arrow(length = unit(0.15, "inches"))
       ) +
-      ggtitle(ttl)
+      ggtitle(ttl, subtitle = history$results[i]) + 
+      theme(plot.subtitle = element_text(hjust = text_just))
     
     
     print(new_plot)
