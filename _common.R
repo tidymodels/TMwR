@@ -49,8 +49,20 @@ is_new_version <- function(x, path) {
     return(TRUE)
   }
   load(path)
-  res <- all.equal(x, get(nm))
-  # print(res)
+  prev <- get(nm)
+  
+  # parsnip model fits have an elapsed time and this will change from run-to-run.
+  # We'll remove that to check for a new version. Same for workflows. 
+  if (inherits(prev, "model_fit")) {
+       x$elapsed <- NA
+    prev$elapsed <- NA
+  }
+  if (workflows:::is_workflow(prev)) {
+       x$fit$fit$elapsed <- NA
+    prev$fit$fit$elapsed <- NA
+  }
+
+  res <- all.equal(x, prev)
   !isTRUE(res)
 }
 
