@@ -370,7 +370,7 @@ times %>%
   pack_rows("Space-Filling Design", 4 , 6)
 ```
 
-As another example, the C5.0 classification model shown in the previous section was also run in parallel with ten workers. The parallel computations took 13.3 seconds for a speed-up of `r round(100.147/13.265, 1)`-fold (both runs used the submodel optimization trick). 
+As another example, the C5.0 classification model shown in the previous section was also run in parallel with ten workers. The parallel computations took 13.3 seconds for a speed-up of `r round(100.147/13.265, 1)`-fold (both runs used the submodel optimization trick). Between the submodel optimization trick and parallel processing, there was a __total speed-up of `r round(3734.249/13.265, 0)`-fold__ over the most basic grid search code. 
 
 Note that the speed-up in computations will vary from model-to-model and is also affected by the size of the grid. A very computationally efficient model may not benefit as much from parallel processing. 
 
