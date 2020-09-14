@@ -18,7 +18,7 @@ Authors@R: c(
     )
   )
 Depends: R (>= 4.0.0)
-URL: https://github.com/topepo/TMwR
+URL: https://github.com/tidymodels/TMwR
 Imports:
   bookdown,
   broom,
