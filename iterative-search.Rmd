@@ -503,7 +503,7 @@ result_history <- get_parent(result_history)
 
 ## -----------------------------------------------------------------------------
 
-restart_iter <- result_history$.iter[result_history$results == "restart"]
+restart_iter <- result_history$.iter[result_history$results == "restart from best"]
 restart_num <- length(restart_iter)
 sa_iter_list <- knitr::combine_words(restart_iter)
 restart_txt <- 
@@ -512,7 +512,7 @@ restart_txt <-
     restart_num == 1 ~ paste0("There was a single restart at iteration ", restart_iter)[1],
     TRUE ~ paste0("There were ", restart_num, " restarts at iterations ", sa_iter_list)[1]
   )
-discard_num<- length(result_history$.iter[result_history$results == "discard"])
+discard_num<- length(result_history$.iter[result_history$results == "discard suboptimal"])
 if (discard_num > 0) {
   restart_txt <-
     paste0(

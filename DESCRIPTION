@@ -28,7 +28,7 @@ Imports:
   dials,
   doMC,
   dplyr,
-  finetune (>= 0.0.0.9001)
+  finetune (>= 0.0.0.9002)
   ggforce,
   ggplot2,
   gridExtra,

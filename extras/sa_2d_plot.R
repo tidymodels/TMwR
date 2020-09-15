@@ -14,7 +14,7 @@ sa_2d_plot <- function(sa_obj, history, large_sa, path = tempdir()) {
   svm_roc <-   
     large_sa %>% 
     collect_metrics()
-
+  
   large_plot <-
     svm_roc %>% 
     ggplot(aes(x = rbf_sigma, y = cost)) + 
@@ -44,21 +44,23 @@ sa_2d_plot <- function(sa_obj, history, large_sa, path = tempdir()) {
   
   nms <- purrr::map_chr(1:nrow(history), ~ tempfile())
   
-  history$results[history$new_best] <- "global best"
-  
   for (i in (num_init + 1):nrow(history)) {
     ind <- get_path(history, i)
     
     ttl <- paste0("Iteration ", history$.iter[i])
-
+    
     text_just <- 
       case_when(
-        history$results[i] == "restart" ~ 0.00,
-        history$results[i] == "discard" ~ 0.25,
-        history$results[i] == "accept"  ~ 0.50,
-        history$results[i] == "improvement" ~ 0.75,
-        history$results[i] == "global best" ~ 1.00,
+        history$results[i] == "restart from best"  ~0.00,
+        history$results[i] == "discard suboptimal" ~ 0.25,
+        history$results[i] == "accept suboptimal"  ~ 0.50,
+        history$results[i] == "better suboptimal"  ~ 0.75,
+        history$results[i] == "new best"           ~ 1.00
       )
+    
+    tmp <- history
+    tmp$results <- gsub(" suboptimal", "\n suboptimal",  tmp$results)
+    tmp$results <- gsub(" best", "\n best",  tmp$results)
     
     new_plot <-
       base_plot +
@@ -72,14 +74,14 @@ sa_2d_plot <- function(sa_obj, history, large_sa, path = tempdir()) {
         alpha = .5,
         arrow = arrow(length = unit(0.15, "inches"))
       ) +
-      ggtitle(ttl, subtitle = history$results[i]) + 
+      ggtitle(ttl, subtitle = tmp$results[i]) + 
       theme(plot.subtitle = element_text(hjust = text_just))
     
     
     print(new_plot)
     
   }
-
+  
   invisible(NULL)
 }
 
@@ -94,7 +96,7 @@ get_new_best <- function(x) {
   last_best <- ind_search
   x$new_best <- FALSE
   for(i in ind_search:n) {
-    if (x$results[i] == "improvement") {
+    if (x$results[i] == "better suboptimal") {
       if (x$mean[i] >= current_best) {
         x$new_best[i] <- TRUE
         current_best <- x$mean[i]
@@ -106,7 +108,7 @@ get_new_best <- function(x) {
     select(-random, -accept, -n, -std_err, -.metric, -global_best)
 }
 
-# For each new point, determine the previus point that was perturbed to
+# For each new point, determine the previous point that was perturbed to
 # make the new value. 
 get_parent <- function(x) {
   n <- nrow(x)
@@ -121,22 +123,20 @@ get_parent <- function(x) {
     } else {
       x$last_best[i] <- max(x$last_best[ind_search:(i-1)], na.rm = TRUE)
     }
-    if (x$results[i - 1] != "discard") {
+    if (x$results[i - 1] != "discard suboptimal") {
       x$last_accepted[i] <- i - 1
     } else {
       x$last_accepted[i] <- max(x$last_accepted[ind_search:(i-1)], na.rm = TRUE)
     }
   }
   for(i in (ind_search + 1):n) {
-    if (x$results[i - 1] == "discard") {
+    if (x$results[i - 1] == "discard suboptimal") {
       x$parent[i] <- max(x$last_accepted[ind_search:(i-1)], na.rm = TRUE)
-    }
-    if (x$results[i - 1] == "restart") {
+    } else if (x$results[i - 1] == "restart from best") {
       x$parent[i] <- max(x$last_best[ind_search:(i-1)], na.rm = TRUE)
-    }    
-    if (!(x$results[i - 1] %in% c("discard", "restart"))) {
+    } else {
       x$parent[i] <- i - 1
-    }      
+    }
   }
   x
 }
@@ -156,5 +156,3 @@ get_path <- function(x, i) {
   res <- c(which.max(x$mean[x$.iter == 0]), res)
   res
 }
-
-
