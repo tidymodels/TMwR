@@ -220,7 +220,7 @@ After an initial sequence of these tasks, more understanding is gained regarding
 
 As an example, @fes use data to model the daily ridership of Chicago's public train system using predictors such as the date, the previous ridership results, the weather, and other factors. An approximation of these authors' "inner monologue" when analyzing these data is, in order:
 
-```{r introduction-monolog, echo = FALSE, results = 'as-is'}
+```{r software-monolog, echo = FALSE, results = 'as-is'}
 monolog <- 
   tribble(
     ~Activity, ~`Analysis Cycle`, ~Thoughts,
