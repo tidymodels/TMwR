@@ -1,8 +1,6 @@
 # TMwR
 
-
-
-
+[![Netlify Status](https://api.netlify.com/api/v1/badges/a0db3b22-8c6f-40e8-bcef-9de2f99fd428/deploy-status)](https://app.netlify.com/sites/tidy-models-with-r/deploys)
 
 This repository contains the source for [_Tidy Modeling with R_](https://tmwr.org). The purpose of this book is to demonstrate how the [tidyverse](https://www.tidyverse.org/) and [tidymodels](https://www.tidymodels.org/) can be used to produce high quality models.
 
