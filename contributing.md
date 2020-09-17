@@ -12,7 +12,7 @@ __If you find a bug__, please make an issue or pull request. Since all of the da
 
 ## Formatting
 
- * All code chunks have labels that are concise but descriptive. They should also make good figure names. Look at each chapter's chunk names; we keep a common prefix for each chapter. Names should used `-` to space words.
+ * All code chunks have labels that are concise but descriptive. They should also make good figure names. Look at each chapter's chunk names; we keep a common prefix for each chapter. Names should use `-` to space words.
  
  * Figures should have transparent backgrounds and legends (if any) on top.
  
