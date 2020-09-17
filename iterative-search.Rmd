@@ -58,16 +58,13 @@ cost()
 rbf_sigma()
 ```
 
-For illustration, the parameter ranges are slightly changed (to improve the visualizations of the search): 
+For illustration, the kernel parameter range is slightly changed (to improve the visualizations of the search): 
 
 ```{r iterative-svm-param-set}
 svm_param <- 
  svm_wflow %>% 
  parameters() %>% 
-  update(
-    cost = cost(c(-10, 5)),
-    rbf_sigma = rbf_sigma(c(-7, -1))
-  )
+  update(rbf_sigma = rbf_sigma(c(-7, -1)))
 ```
 
 Before discussing the search procedures, it is helpful to understand what the relationship is between the tuning parameters and the area under the ROC curve. A very large regular grid, comprised of 2,500 candidate values, was constructed and evaluated using resampling. This is obviously impractical in regular data analysis and tremendously inefficient. However, it elucidates the path that the search process _should take_ and where the numerically optimal value(s) occur. 
