@@ -157,7 +157,7 @@ Before proceeding, some additional terminology related to modeling, data, and ot
 
 First, many models can be categorized as being _supervised_ or _unsupervised_. Unsupervised models are those that learn patterns, clusters, or other characteristics of the data but lack an outcome variable, i.e., a dependent variable. Principal component analysis (PCA), clustering, and autoencoders are examples of unsupervised models; they are used to understand relationships between variables or sets of variables without an explicit relationship between variables and an outcome. Supervised models are those that have an outcome variable. Linear regression, neural networks, and numerous other methodologies fall into this category. 
 
-Within supervised models, there are two main sub-categories are: 
+Within supervised models, there are two main sub-categories: 
 
  * **Regression** predicts a numeric outcome.
 
