@@ -295,11 +295,12 @@ div.rmdwarning code {
 
 /* ----- For Large Screens -----*/
 
-.book .book-header.fixed {
-  left: 500px;
-}
 
 @media (min-width: 1900px) {
+  
+  .book .book-header.fixed {
+    left: 500px;
+}
   
   /* Content width */
   .book.with-summary .book-body {
