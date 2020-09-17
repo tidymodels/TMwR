@@ -498,9 +498,6 @@ if (file.exists(file.path(tempdir(), "sa_history.RData"))) {
   load("RData/sa_history.RData")
 }
 
-result_history <- get_new_best(result_history)
-result_history <- get_parent(result_history)
-
 ## -----------------------------------------------------------------------------
 
 restart_iter <- result_history$.iter[result_history$results == "restart from best"]
@@ -517,7 +514,7 @@ if (discard_num > 0) {
   restart_txt <-
     paste0(
       restart_txt, 
-      " and ", 
+      " as well as ", 
       discard_num, 
       " discarded ", 
       ifelse(discard_num > 1, "candidates ", "candidate "),
@@ -529,7 +526,7 @@ if (discard_num > 0) {
 
 ## -----------------------------------------------------------------------------
 
-best_iters <- result_history$.iter[result_history$new_best]
+best_iters <- result_history$.iter[result_history$results == "new best"]
 best_init <- max(result_history$mean[result_history$.iter == 0])
 best_sa_res <- max(result_history$mean[result_history$.iter > 0])
 best_sa_inds <- result_history$.iter[which.max(result_history$mean)]
