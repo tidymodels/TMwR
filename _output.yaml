@@ -7,7 +7,7 @@ bookdown::gitbook:
       before: |
         <li><strong><a href="./">Tidy Modeling with R</a></strong></li>
     edit:
-      link: https://github.com/tidymodels/TMwR-temp/edit/master/%s
+      link: https://github.com/tidymodels/TMwR/edit/master/%s
       text: "Edit"
     sharing: no
 
