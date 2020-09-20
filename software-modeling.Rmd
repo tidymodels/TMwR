@@ -233,7 +233,7 @@ monolog <-
     "EDA", "1",
     "Which stations had the lowest daily ridership values?",
     "Feature Engineering", "1",
-    "Date should be at least be encoded as day-of-the-week, and year. ",
+    "Dates should at least be encoded as day-of-the-week, and year. ",
     "Feature Engineering", " ",
     "Maybe PCA could be used on the correlated predictors to make it easier for the models to use them. ",
     "Feature Engineering", " ",
