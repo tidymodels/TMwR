@@ -171,7 +171,7 @@ Different variables can have different _roles_ in an analysis. Outcomes (otherwi
 
 ## How does modeling fit into the data analysis process? {#model-phases}
 
-In what circumstances are model created? Are there steps that precede such an undertaking? Is it the first step in data analysis? 
+In what circumstances are models created? Are there steps that precede such an undertaking? Is it the first step in data analysis? 
 
 :::rmdnote
 There are always a few critical phases of data analysis that come before modeling. 
