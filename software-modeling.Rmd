@@ -194,7 +194,7 @@ if (knitr:::is_html_output()) {
 }
 ```
 
-The process of investigating the data may not be simple. @wickham2016 contains an excellent illustration of the general data analysis process, reproduced with Figure \@ref(fig:software-data-science-model). Data ingestion and cleaning/tidying are shown as the initial steps. When the analytical steps for understanding commence, they are a heuristic process; we cannot pre-determine how long they may take. The cycle of analysis, modeling, and visualization often require multiple iterations. 
+The process of investigating the data may not be simple. @wickham2016 contains an excellent illustration of the general data analysis process, reproduced with Figure \@ref(fig:software-data-science-model). Data ingestion and cleaning/tidying are shown as the initial steps. When the analytical steps for understanding commence, they are a heuristic process; we cannot pre-determine how long they may take. The cycle of analysis, modeling, and visualization often requires multiple iterations. 
 
 ```{r software-modeling-process, echo = FALSE, out.width = '100%', fig.width=8, fig.height=3, fig.cap = "A schematic for the typical modeling process.", warning = FALSE}
 if (knitr:::is_html_output()) {
@@ -233,7 +233,7 @@ monolog <-
     "EDA", "1",
     "Which stations had the lowest daily ridership values?",
     "Feature Engineering", "1",
-    "Date should be at least be encoded as day-of-the-week, and year. ",
+    "Dates should at least be encoded as day-of-the-week, and year. ",
     "Feature Engineering", " ",
     "Maybe PCA could be used on the correlated predictors to make it easier for the models to use them. ",
     "Feature Engineering", " ",
