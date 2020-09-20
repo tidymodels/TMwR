@@ -287,7 +287,7 @@ To resolve the usage issues described here, the tidymodels packages have a set o
 
 Many of these ideas are described in the tidymodels guidelines for model implementation^[`https://tidymodels.github.io/model-implementation-principles`]. In subsequent chapters, we will illustrate examples of existing issues, along with their solutions. 
 
-::rmdnote
+:::rmdnote
 There are a few existing R packages that provide a unified interface to harmonize these heterogeneous modeling APIs, such as `r pkg(caret)` and `r pkg(mlr)`. The tidymodels framework is similar to these in adopting a unification of the function interface, as well as enforcing consistency in the function names and return values. It is different in its opinionated design goals and modeling implementation.
 :::
 
