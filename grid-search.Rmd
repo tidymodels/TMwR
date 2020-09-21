@@ -307,7 +307,7 @@ A few different tricks and optimization are possible to make grid search more co
 
 There are types of models where, from a single model fit, multiple tuning parameters can be evaluated without refitting. 
 
-For example, partial least squares (PLS) is a supervised version of principal component analysis REF. It creates components that maximize the variation in the predictors (like PCA) but simultaneously tries to maximize the correlation between these predictors and the outcome. One tuning parameter is the number of PLS components to retain. Suppose that a data set with 100 predictors is fit using PLS. The number of possible components to retain can range from one to fifty. However, in many implementations, a single model fit can compute predicted values across many values of `num_comp`. As a result, a PLS model created with 100 components can also make predictions for any `num_comp <= 100`. The saves time since, instead of creating redundant model fits, a single fit can be used to evaluate many _submodels_.
+For example, partial least squares (PLS) is a supervised version of principal component analysis [@Geladi:1986]. It creates components that maximize the variation in the predictors (like PCA) but simultaneously tries to maximize the correlation between these predictors and the outcome. One tuning parameter is the number of PLS components to retain. Suppose that a data set with 100 predictors is fit using PLS. The number of possible components to retain can range from one to fifty. However, in many implementations, a single model fit can compute predicted values across many values of `num_comp`. As a result, a PLS model created with 100 components can also make predictions for any `num_comp <= 100`. The saves time since, instead of creating redundant model fits, a single fit can be used to evaluate many _submodels_.
 
 While not all models have exploit this feature, some do: 
 
@@ -382,7 +382,7 @@ In machine learning, the set of techniques called _racing method_ provide a simi
 
 As an example, in the previous multilayer perceptron tuning process with a regular grid, what would the results look after the first three folds? Using techniques similar to those shown in Chapter \@ref(compare), a model is fit where the outcome is the resampled area under the ROC curve and the predictor is an indicator for the parameter combination. The model takes the resample-to-resample effect into account and produces point and interval estimates for each parameter settings. The results of the model are one-sided 95% confidence intervals that measure the loss of the ROC value relative to the currently best performing parameters: 
 
-```{r grid-mlp-racing, echo = FALSE, fig.height=4}
+```{r grid-mlp-racing, echo = FALSE, fig.height=5}
 roc_resamples <- 
   mlp_sfd_tune %>% 
   collect_metrics(summarize = FALSE) %>% 
@@ -418,15 +418,19 @@ roc_estimates <-
   filter(.config != "(Intercept)") %>% 
   mutate(
     .config = gsub(".config", "", .config, fixed = TRUE),
-    .config = factor(.config, levels = rev(config_order))
+    .config = factor(.config, levels = rev(config_order)),
+    Results = ifelse(upper < 0, "eliminate", "retain"),
+    Results = factor(Results, levels = c("retain", "eliminate"))
   )
+race_cols <- c(retain = "black", eliminate = "darkgrey")
 
 roc_estimates %>% 
   ggplot(aes(x = -estimate, y = .config)) + 
   geom_vline(xintercept = 0, lty = 2, col = "green") +
-  geom_point(size = 3.2) + 
-  geom_errorbarh(aes(xmin = -estimate, xmax = -upper), height = .5) + 
-  labs(x = "Drop in ROC AUC from current best candidate", y = NULL)
+  geom_point(size = 3.2, aes(col = Results)) + 
+  geom_errorbarh(aes(xmin = -estimate, xmax = -upper, col = Results), height = .5, show.legend = FALSE) + 
+  labs(x = "Drop in ROC AUC from current best candidate", y = NULL) + 
+  scale_colour_manual(values = race_cols)
 ```
 
 Any parameter set whose confidence interval includes zero would lack evidence that its performance is not statistically different from the best results. We retain `r sum(roc_estimates$upper >= 0)` settings; these are resampled more. The remaining `r sum(roc_estimates$upper < 0)` submodels are no longer considered. 

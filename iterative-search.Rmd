@@ -372,7 +372,7 @@ glmn_param <- parameters(penalty(), mixture())
 pen_rng <- unlist(range_get(penalty(), original = TRUE))
 mix_rng <- 0:1
 
-iter_1 <- tibble(penalty = 0.025, mixture = .1)
+iter_1 <- tibble(penalty = 0.025, mixture = .05)
 next_neighbors <- 
   finetune:::random_neighbor(iter_1, glmn_param, r = .1, retain = 100) %>% 
   mutate(Iteration = 1)
@@ -411,7 +411,7 @@ for (i in 2:6) {
 }
 ```
 
-The process starts with initial values of `penalty = 0.025` and `mixture = 0.100`. Using a radius of 0.1, the data are appropriately scaled, random values are generated on this radius around the initial point, then one is chosen as the candidate. For illustration, we will assume that all candidate values are improvements. Using this new value, a set of new random neighbors are generated, one is chosen, and so on. This figure shows `r max(best_values$Iteration)` iterations as the search proceeds toward the upper left corner: 
+The process starts with initial values of `penalty = 0.025` and `mixture = 0.050`. Using a radius of 0.1, the data are appropriately scaled, random values are generated on this radius around the initial point, then one is chosen as the candidate. For illustration, we will assume that all candidate values are improvements. Using this new value, a set of new random neighbors are generated, one is chosen, and so on. This figure shows `r max(best_values$Iteration)` iterations as the search proceeds toward the upper left corner: 
 
 ```{r iterative-neighborhood, echo = FALSE, message = FALSE, warning = FALSE}
 ggplot(neighbors_values, aes(x = penalty, y = mixture)) + 
@@ -427,6 +427,7 @@ ggplot(neighbors_values, aes(x = penalty, y = mixture)) +
     y = paste(mixture()$label, "(mixture)")
   )
 ```
+Note that, during some iterations, the candidate sets along the radius excludes points outside of the parameter boundaries.  
 
 For non-numeric parameters, we assign a probability for how often the parameter value changes. 
 

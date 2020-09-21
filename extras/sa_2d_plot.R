@@ -60,7 +60,7 @@ sa_2d_plot <- function(sa_obj, history, large_sa, path = tempdir()) {
       )
     
     tmp <- history
-    tmp$results <- gsub(" suboptimal", "\n suboptimal",  tmp$results)
+    tmp$results <- gsub(" suboptimal", "\nsuboptimal",  tmp$results)
     tmp$results <- gsub(" best", "\nbest",  tmp$results)
     
     new_plot <-
