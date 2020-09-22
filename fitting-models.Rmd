@@ -260,7 +260,7 @@ lm_form_fit %>% pluck("fit") %>% vcov()
 ```
 
 :::rmdwarning
-Never pass the `fit` element of a `r pkg(parsnip)` model to a model prediction function; see Section \@ref(parsnip-predictions) for making predictions. If the data were preprocessed in any way, incorrect predictions will be generated (sometimes, without errors). The underlying model's prediction function has no idea if any transformations have been made to the data prior to running the model.
+Never pass the `fit` element of a `r pkg(parsnip)` model to a model prediction function, e.g., use `predict(lm_form_fit)` but **do not** use `predict(lm_form_fit$fit)`. If the data were preprocessed in any way, incorrect predictions will be generated (sometimes, without errors). The underlying model's prediction function has no idea if any transformations have been made to the data prior to running the model. See Section \@ref(parsnip-predictions) for more on making predictions. 
 :::
 
 One issue with some existing methods in base R is that the results are stored in a manner that may not be the most useful. For example, the `summary()` method for `lm` objects can be used used to print the results of the model fit, including a table with parameter values, their uncertainty estimates, and p-values. These particular results can also be saved:
