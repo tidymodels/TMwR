@@ -291,7 +291,7 @@ Many of these ideas are described in the tidymodels guidelines for model impleme
 There are a few existing R packages that provide a unified interface to harmonize these heterogeneous modeling APIs, such as `r pkg(caret)` and `r pkg(mlr)`. The tidymodels framework is similar to these in adopting a unification of the function interface, as well as enforcing consistency in the function names and return values. It is different in its opinionated design goals and modeling implementation.
 :::
 
-The `broom::tidy()` function, which we use throughout this book, is another tool for standardizing the structure of R objects. It can return many types of R objects in a more usable format. For example, suppose that predictors are being screened based on their correlation to the outcome column. Using `purr::map()`, the results from `cor.test()` can be returned in a list for each predictor: 
+The `broom::tidy()` function, which we use throughout this book, is another tool for standardizing the structure of R objects. It can return many types of R objects in a more usable format. For example, suppose that predictors are being screened based on their correlation to the outcome column. Using `purrr::map()`, the results from `cor.test()` can be returned in a list for each predictor: 
 
 ```{r base-r-corr-list}
 corr_res <- map(mtcars %>% select(-mpg), cor.test, y = mtcars$mpg)
