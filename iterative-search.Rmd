@@ -126,7 +126,7 @@ The main questions in this tuning scheme are how to create the model and how to 
 # (where the code is shown and not executed).
 
 ctrl <- control_bayes(verbose = TRUE)
-ctrl$save_gp_results <- TRUE
+ctrl$save_gp_scoring <- TRUE
 
 tune_bayes_sssshhh <- purrr::quietly(tune_bayes)
 

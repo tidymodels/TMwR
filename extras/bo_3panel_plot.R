@@ -1,15 +1,44 @@
-collect_gp_results <- function(x) {
-  iters <- max(collect_metrics(x)$.iter)
+collect_gp_results <- function(res, aqf = exp_improve(), num_vals = 100) {
+  perf_res <- collect_metrics(res)
+  iters <- max(perf_res$.iter)
+  pset <- .get_tune_parameters(res)
+  metrics <- .get_tune_metrics(res)
+  metrics_data <- metrics_info(metrics)
+  metrics_name <- metrics_data$.metric[1]
+  perf_res <- dplyr::filter(perf_res, .metric == metrics_name)
+  maximize <- metrics_data$direction[metrics_data$.metric == metrics_name] == "maximize"
+  
+  grid <- grid_regular(pset, levels = num_vals)
+  grid_scaled <- encode_set(grid, pset, as_matrix = TRUE)
+  
   nm <- recipes::names0(iters, "gp_candidates_")
   file_name <- paste0(nm, ".RData")
   files <- file.path(tempdir(), file_name)
   has_files <- file.exists(files)
   if (any(!has_files)) {
-    
+    rlang::abort("No GP files were found in `tempdir()`")
   }
+  
   tmp <- NULL
-  for(i in files) {
-    load(i)
+  for(i in 1:iters) {
+    load(files[i])
+    
+    if (maximize) {
+      current_best <- max(perf_res$mean[perf_res$.iter < i])
+    } else {
+      current_best <- min(perf_res$mean[perf_res$.iter < i])
+    }
+    gp_pred <- predict(x, grid_scaled)
+    candidates <- 
+      grid %>% 
+      bind_cols(tibble::tibble(.mean = gp_pred$Y_hat, .sd = sqrt(gp_pred$MSE)))
+    
+    candidates <- 
+      bind_cols(
+        candidates, 
+        predict(aqf, candidates, iter = i, maximize = maximize, current_best)
+      ) %>% 
+      mutate(.iter = i)
     tmp <- dplyr::bind_rows(tmp, candidates)
     rm(candidates)
   }
