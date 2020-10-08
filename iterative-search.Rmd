@@ -374,7 +374,7 @@ mix_rng <- 0:1
 
 iter_1 <- tibble(penalty = 0.025, mixture = .05)
 next_neighbors <- 
-  finetune:::random_neighbor(iter_1, glmn_param, r = .1, retain = 100) %>% 
+  finetune:::random_real_neighbor(iter_1, glmn_param, r = .1, retain = 100) %>% 
   mutate(Iteration = 1)
 
 set.seed(1)
@@ -401,7 +401,7 @@ for (i in 2:6) {
   path <- bind_rows(path, best_values %>% mutate(Iteration = i))
   
   next_neighbors <- 
-    finetune:::random_neighbor(next_value %>% select(-Iteration), glmn_param, r = .1, retain = 50) %>% 
+    finetune:::random_real_neighbor(next_value %>% select(-Iteration), glmn_param, r = .1, retain = 50) %>% 
     mutate(Iteration = i)
   neighbors_values <- 
     bind_rows(
