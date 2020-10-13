@@ -4,6 +4,8 @@ library(tidymodels)
 data(ames)
 ```
 
+# (PART\*) Basics {-} 
+
 # The Ames housing data {#ames}
 
 The Ames housing data set [@ames] is an excellent resource for learning about models that we will use throughout this book. It contains data on `r format(nrow(ames), big.mark = ",")` properties in Ames, Iowa, including columns related to 

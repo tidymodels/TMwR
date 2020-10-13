@@ -11,6 +11,8 @@ source("ames_snippets.R")
 load("RData/lm_fit.RData")
 ```
 
+# (PART\*) Tools for Creating Effective Models {-} 
+
 # Resampling for evaluating performance  {#resampling}
 
 Chapter \@ref(performance) described statistics for measuring model performance, but which data are best used to compute these statistics? Chapter \@ref(splitting) introduced the idea of data spending where the test set was recommended for obtaining an unbiased estimate of performance. However, we usually need to understand the effectiveness of the model _before using the test set_. 
