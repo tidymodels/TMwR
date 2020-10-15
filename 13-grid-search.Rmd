@@ -19,7 +19,9 @@ load("RData/mlp_times.RData")
 
 # Grid search {#grid-search}
 
-Recall from the last chapter that users can mark arguments in recipes and/or model specifications for optimization using a value of `tune()`.  Once we know _what_ to optimize, there is the question of _how_ to optimize the parameters. This chapter describes _grid search_ methods that specify the possible values of the parameters _a priori_. We'll start by describing two main approaches for assembling a grid. 
+In Chapter \@ref(tuning) we demonstrated how users can mark or tag arguments in preprocessing recipes and/or model specifications for optimization using the `tune()` function.  Once we know what to optimize, it's time to address the question of how to optimize the parameters. This chapter describes **grid search** methods that specify the possible values of the parameters _a priori_. (Chapter \@ref(tuning) will continue the discussion by describing iterative search methods.) 
+
+Let's start by describing two main approaches for assembling a grid. 
 
 ## Regular and non-regular grids {#grids}
 
