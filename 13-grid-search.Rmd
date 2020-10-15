@@ -25,19 +25,21 @@ Let's start by describing two main approaches for assembling a grid.
 
 ## Regular and non-regular grids {#grids}
 
-There are two main types of grids. The first is a _regular grid_ where each parameter has a corresponding set of possible values. A regular grid combines these factorially, i.e., by using all combinations of the sets. Alternatively, a non-regular grid is one where the parameter combinations are not formed from a small set of points. 
+There are two main types of grids. The first is a regular grid where each parameter has a corresponding set of possible values. A regular grid combines these factorially, i.e., by using all combinations of the sets. Alternatively, a non-regular grid is one where the parameter combinations are not formed from a small set of points. 
 
 Before considering each type, let's consider an example model: the  multilayer perceptron model (a.k.a. single layer artificial neural network).  The parameters marked for tuning are: 
 
-* The number of hidden units. 
+* the number of hidden units, 
 
-* The number of fitting epochs/iterations in model training.  
+* the number of fitting epochs/iterations in model training, and  
 
-* The amount of weight decay penalization. 
+* the amount of weight decay penalization. 
 
-Historically, the number of epochs was determined by early stopping; a separate validation set determined the length of training based on the error rate. It was understood that re-predicting the training set led to overfitting. In our case, the use of a weight decay penalty should prohibit overfitting. However, there is little harm in tuning the penalty and the number of epochs. 
+:::rmdnote
+Historically, the number of epochs was determined by early stopping; a separate validation set determined the length of training based on the error rate, since re-predicting the training set led to overfitting. In our case, the use of a weight decay penalty should prohibit overfitting, but there is little harm in tuning the penalty and the number of epochs. 
+:::
 
-Using `r pkg(parsnip)`, the specification for a classification model fit using the `r pkg(nnet)` package would be: 
+Using `r pkg(parsnip)`, the specification for a classification model fit using the `r pkg(nnet)` package is: 
 
 ```{r grid-mlp}
 mlp_spec <- 
@@ -46,7 +48,7 @@ mlp_spec <-
  set_mode("classification")
 ```
 
-The option for `trace` prevents extra logging of the training process. As previously show, the `parameters()` function can extract the set of arguments with unknown values and sets there `r pkg(dials)` objects: 
+The argument `trace = 0` prevents extra logging of the training process. As shown in Section \@ref(tuning-params-tidymodels), the `parameters()` function can extract the set of arguments with unknown values and sets their `r pkg(dials)` objects: 
 
 ```{r grid-mlp-param}
 mlp_param <- parameters(mlp_spec)
@@ -57,9 +59,9 @@ mlp_param %>% pull_dials_object("epochs")
 
 This output indicates that the parameter objects are complete and prints their default ranges. These values will be used to demonstrate how to create different types of parameter grids. 
 
-### Regular grids
+### Regular grids {-}
 
-As previously mentioned, regular grids are combinations of separate sets of parameter values. First, the user creates a distinct set of values for each parameter.  The number of possible values need not be the same for each parameter. For example, the `r pkg(tidyr)` function `crossing()` is one way to create a regular grid: 
+Regular grids are combinations of separate sets of parameter values. First, the user creates a distinct set of values for each parameter.  The number of possible values need not be the same for each parameter. The `r pkg(tidyr)` function `crossing()` is one way to create a regular grid: 
 
 ```{r grid-crossing}
 crossing(
@@ -83,11 +85,13 @@ mlp_param %>%
 
 There are techniques for creating regular grids that do not use all possible values of each parameter set. These _fractional factorial designs_ [@BHH] could also be used. To learn more, consult the CRAN Task View for experimental design^[[https://CRAN.R-project.org/view=ExperimentalDesign](https://CRAN.R-project.org/view=ExperimentalDesign)]. 
 
-Regular grids can be computationally expensive to use, especially when there are a medium to large number of tuning parameters. This is true for many models but not all. As discussed in Section \@ref(efficient-grids) below, there are many models who tuning time _decreases_ with a regular grid.
+:::rmdwarning
+Regular grids can be computationally expensive to use, especially when there are a medium to large number of tuning parameters. This is true for many models but not all. As discussed in Section \@ref(efficient-grids) below, there are many models whose tuning time _decreases_ with a regular grid!
+:::
 
 One advantage to using a regular grid is that the relationships and patterns between the tuning parameters and the model metrics are easily understood. The factorial nature of these designs allows for examination of each parameter separately with little confounding between parameters.   
 
-### Irregular grids
+### Irregular grids {-}
 
 There a several options for creating non-regular grids. The first is to use random sampling across the range of parameters. `grid_random()` generates independent uniform random numbers across the parameter ranges. If the parameter object has an associated transformation (such as we have for `penalty`), the random numbers are generated on the transformed scale.  For example: 
 
@@ -97,9 +101,10 @@ mlp_param %>%
   grid_random(size = 1000) %>% # 'size' is the number of combinations
   summary()
 ```
-For `penalty`, the random numbers are uniform on the log (based 10) scale but the values in the grid are in the natural units. 
 
-The issue with random grids is that, with small-to-medium grids, random values can result in overlapping parameter combinations. Also, the random grid should cover the whole parameter space but the likelihood of this occurring increases with the number of grid values. For a sample of 15 candidate points, this plot shows some overlap between points: 
+For `penalty`, the random numbers are uniform on the log (base 10) scale but the values in the grid are in the natural units. 
+
+The issue with random grids is that, with small-to-medium grids, random values can result in overlapping parameter combinations. Also, the random grid needs to cover the whole parameter space but the likelihood of good coverage increases with the number of grid values.  Even for a sample of 15 candidate points, this plot shows some overlap between points for our example multilayer perceptron: 
 
 ```{r grid-random-matrix, fig.height = 6, fig.width = 6}
 library(ggforce)
@@ -114,9 +119,9 @@ mlp_param %>%
   labs(title = "Random design with 15 candidates")
 ```
 
-A much better approach uses a set of experimental designs called _space-filling designs_. While different design methods have slightly different goals, they generally find a configuration of points that cover the parameter space with the smallest chance of overlapping or redundant values. Examples of such designs are latin hypercubes [@lhd], maximum entropy designs [@maxent], maximum projection designs [@maxproj], and others. See @santner2003design for an overview. 
+A much better approach is to use a set of experimental designs called _space-filling designs_. While different design methods have slightly different goals, they generally find a configuration of points that cover the parameter space with the smallest chance of overlapping or redundant values. Examples of such designs are Latin hypercubes [@lhd], maximum entropy designs [@maxent], maximum projection designs [@maxproj], and others. See @santner2003design for an overview. 
 
-`r pkg(dials)` contains functions for latin hypercube and maximum entropy designs. As with `grid_random()`, the primary inputs are the number of parameter combinations and a parameters object. Let's compare a random design with a latin hypercube design for 15 candidate parameter values. 
+The `r pkg(dials)` package contains functions for Latin hypercube and maximum entropy designs. As with `grid_random()`, the primary inputs are the number of parameter combinations and a parameters object. Let's compare a random design with a Latin hypercube design for 15 candidate parameter values. 
 
 ```{r grid-sfd-compare, fig.height = 6, fig.width = 6}
 set.seed(200)
@@ -131,20 +136,20 @@ mlp_param %>%
 
 While not perfect, this design spaces the points further away from one another.  
 
-Space-filling designs can be very effective at representing the parameter space. As shown below, the default design used by the `r pkg(tune)` package is the maximum entropy design. These tend to produce grids that cover the candidate space well and drastically increase the changes of finding good results. 
+Space-filling designs can be very effective at representing the parameter space. The default design used by the `r pkg(tune)` package is the maximum entropy design. These tend to produce grids that cover the candidate space well and drastically increase the chances of finding good results. 
 
 ## Evaluating the grid
 
-The process for choosing the best tuning parameter combination is familiar: each candidate set is assessed using data that were not used to train the model. Resampling methods or a simple validation set work well for this purpose. The process (and syntax) closely resamples the approach in Section \@ref(resampling-performance) that used the `fit_resamples()` function from the `r pkg(tune)` package. 
+To choose the best tuning parameter combination, each candidate set is assessed using data that were not used to train the model. Resampling methods or a simple validation set work well for this purpose. The process (and syntax) closely resembles the approach in Section \@ref(resampling-performance) that used the `fit_resamples()` function from the `r pkg(tune)` package. 
 
-After resampling, the use selects the most appropriate candidate parameter set. It might make sense to choose the empirically best parameter combination or bias the choice towards other aspects of the model fit, such as simplicity. 
+After resampling, the user selects the most appropriate candidate parameter set. It might make sense to choose the empirically best parameter combination or bias the choice towards other aspects of the model fit, such as simplicity. 
 
 
-A classification data set is used to demonstrate model tuning in this and the next chapter. The data come from @Hill, who developed am automated microscopy laboratory tool used for cancer research. The data consists of 56 imaging measurements on 2019 human breast cancer cells. These predictors represent shape and intensity characteristics of different parts of the cells (e.g., the nucleus, the cell boundary, etc.). There is a high-degree of correlation between the predictors. For example, there are several different predictors that measure the size and shape of the nucleus and cell boundary. Also, individually, many predictors have skewed distributions.
+A classification data set is used to demonstrate model tuning in this and the next chapter. The data come from @Hill, who developed am automated microscopy laboratory tool used for cancer research. The data consists of 56 imaging measurements on 2019 human breast cancer cells. These predictors represent shape and intensity characteristics of different parts of the cells (e.g., the nucleus, the cell boundary, etc.). There is a high degree of correlation between the predictors. For example, there are several different predictors that measure the size and shape of the nucleus and cell boundary. Also, individually, many predictors have skewed distributions.
 
 Each cell belongs to one of two classes. Since this is part of an automated lab test, the focus was on prediction capability and not inference. 
 
-The data are included in the `r pkg(modeldata)` package. One column is not needed for analysis (`case`) is removed. 
+The data are included in the `r pkg(modeldata)` package. One column not needed for analysis (`case`) is removed. 
 
 ```{r grid-cells}
 library(tidymodels)
@@ -159,9 +164,9 @@ set.seed(33)
 cell_folds <- vfold_cv(cells)
 ```
 
-Given the high degree of correlation between predictors, it may be sensible to use PCA feature extraction to decorrelate the predictors. The following recipe contains steps to transform the predictors into increase symmetry, normalize them to be on the same scale then conduct feature extraction. The number of PCA components to retain should is also tuned. While the resulting PCA components are technically on the same scale, the earlier components tend to have a wider range than the later components. For this reason, a final normalization will coerce the predictors to have the same mean and variance.
+Given the high degree of correlation between predictors, it may be sensible to use PCA feature extraction to decorrelate the predictors. The following recipe contains steps to transform the predictors to increase symmetry, normalize them to be on the same scale, then conduct feature extraction. The number of PCA components to retain is also tuned. While the resulting PCA components are technically on the same scale, the earlier components tend to have a wider range than the later components. For this reason, a final normalization will coerce the predictors to have the same mean and variance.
 
-As previously mentioned, many of the predictors have skewed distributions. Sine PCA is variance based, extreme values can have a detrimental effect on these calculations. To counter this, a recipe step estimates a Yeo-Johnson transformation for each predictor [@yeo2000new]. While originally intended as a transformation of the _outcome_, it can also me used to estimate transformations that encourage more symmetric distributions.  This step occurs in the recipe just prior to the initial normalization.
+As previously mentioned, many of the predictors have skewed distributions. Since PCA is variance based, extreme values can have a detrimental effect on these calculations. To counter this, a recipe step estimates a Yeo-Johnson transformation for each predictor [@yeo2000new]. While originally intended as a transformation of the _outcome_, it can also me used to estimate transformations that encourage more symmetric distributions.  This step occurs in the recipe just prior to the initial normalization.
 
 ```{r grid-cells-objects}
 mlp_rec <-
@@ -177,7 +182,12 @@ mlp_wflow <-
   add_recipe(mlp_rec)
 ```
 
-A parameter object is created to adjust a few of the default ranges. The number of epochs will have a smaller range (50 to 200 epochs). Also, the default range for `num_comp()`  defaults to a very narrow range (one to four components). The range is increase up to 40 components and the minimum value is set to zero. In `step_pca()`, using zero PCA components is a shortcut to _skip_ the feature extraction. In this way, the original predictors can be directly compared to the results that include PCA components. 
+Let's create a parameter object to adjust a few of the default ranges. The number of epochs will have a smaller range (50 to 200 epochs). Also, the default range for `num_comp()`  defaults to a very narrow range (one to four components); we can increase the range up to 40 components and set the minimum value to zero. 
+
+:::rmdnote
+In `step_pca()`, using zero PCA components is a shortcut to _skip_ the feature extraction. In this way, the original predictors can be directly compared to the results that include PCA components. 
+:::
+
 
 ```{r grid-cells-workflow}
 mlp_param <- 
@@ -189,9 +199,9 @@ mlp_param <-
   )
 ```
 
-The `tune_grid()` function is the primary function for conducting grid search. Its functionality is very similar to `fit_resamples()` from Section \@ref(resampling-performance) although it has additional arguments related to the grid: 
+The `tune_grid()` function is the primary function for conducting grid search. Its functionality is very similar to `fit_resamples()` from Section \@ref(resampling-performance), although it has additional arguments related to the grid: 
 
-* `grid`: An integer or data frame. When an integer is used, the function creates a space filling design with `grid` candidate parameters combinations. If specific parameter combinations exist, the `grid` parameter is used to pass them to the function. 
+* `grid`: An integer or data frame. When an integer is used, the function creates a space filling design with `grid` number of candidate parameters combinations. If specific parameter combinations exist, the `grid` parameter is used to pass them to the function. 
 
 * `param_info`: An _optional_ argument for defining the parameter ranges. The is most useful when `grid` is an integer. 
 
@@ -212,7 +222,7 @@ mlp_reg_tune <-
 mlp_reg_tune
 ```
 
-As before, there are high-level convenience functions to understand the results. First, the `autoplot()` method for regular grids shows the performance profiles across tuning parameters:  
+There are high-level convenience functions to understand the results. First, the `autoplot()` method for regular grids shows the performance profiles across tuning parameters:  
 
 ```{r grid-cells-reg-plot, fig.height = 6}
 autoplot(mlp_reg_tune)
@@ -226,7 +236,7 @@ show_best(mlp_reg_tune) %>% select(-.estimator)
 
 Based on these results, it would make sense to conduct another run of grid search with larger values of the weight decay penalty. 
 
-To use a space-filling design, the `grid` argument can be given an integer or one of the `grid_*()` functions can produce a data frame To evaluate the same range using a maximum entropy design with 20 candidate values: 
+To use a space-filling design, the `grid` argument can be given an integer or one of the `grid_*()` functions can produce a data frame. To evaluate the same range using a maximum entropy design with 20 candidate values: 
 
 ```{r grid-cells-sdf, cache = TRUE}
 set.seed(99)
@@ -248,9 +258,13 @@ The `autoplot()` method will also work with these designs although the format of
 autoplot(mlp_sfd_tune)
 ```
 
-This _marginal effects plot_ shows the relationship of each parameter with the performance metric. Care should be taken when examining this plot; since a regular grid is not used, the values of the other tuning parameters can affect each panel. 
+This _marginal effects plot_ shows the relationship of each parameter with the performance metric. 
 
-For example, the penalty parameter appears to have better performance with smaller amounts of weight decay. This is the opposite of the results form the regular grid. Since each point each panel is shared with the other three tuning parameters, the trends in one panel can be affected by the others. Using a regular grid, each point in each panel is equally averaged over the other parameters. For this reason, the affect of each parameter is better isolated with regular grids.  
+:::rmdwarning
+Care should be taken when examining this plot; since a regular grid is not used, the values of the other tuning parameters can affect each panel. 
+:::
+
+For example, the penalty parameter appears to have better performance with smaller amounts of weight decay. This is the opposite of the results from the regular grid. Since each point in each panel is shared with the other three tuning parameters, the trends in one panel can be affected by the others. Using a regular grid, each point in each panel is equally averaged over the other parameters. For this reason, the affect of each parameter is better isolated with regular grids.  
 
 As with the regular grid, `show_best()` can report on the numerically best results: 
 
@@ -272,7 +286,7 @@ To do this, a set of parameter values must be determined. There are two methods 
 select_best(mlp_reg_tune, metric = "roc_auc")
 ```
 
-Looking at the results for the regular grid plot, a model with a single hidden unit trained for 125 epochs on the original predictors with a large amount of penalization has competitive performance. It is basically penalized logistic regression. To manually specific these parameters, a tibble is created with these values and a _finalization_ function splices the values back into the workflow: 
+Looking at the results for the regular grid plot, a model with a single hidden unit trained for 125 epochs on the original predictors with a large amount of penalization has competitive performance. It is basically penalized logistic regression. To manually specific these parameters, we can create a tibble with these values and then use a _finalization_ function to splice the values back into the workflow: 
 
 ```{r grid-finalize-manual}
 logistic_param <- 
@@ -305,23 +319,23 @@ If a workflow was not used, finalization of a model and/or recipe is done using 
 
 A few different tricks and optimization are possible to make grid search more computationally efficient. This section describes several techniques. 
 
-### Submodel optimization
+### Submodel optimization {-}
 
 There are types of models where, from a single model fit, multiple tuning parameters can be evaluated without refitting. 
 
 For example, partial least squares (PLS) is a supervised version of principal component analysis [@Geladi:1986]. It creates components that maximize the variation in the predictors (like PCA) but simultaneously tries to maximize the correlation between these predictors and the outcome. One tuning parameter is the number of PLS components to retain. Suppose that a data set with 100 predictors is fit using PLS. The number of possible components to retain can range from one to fifty. However, in many implementations, a single model fit can compute predicted values across many values of `num_comp`. As a result, a PLS model created with 100 components can also make predictions for any `num_comp <= 100`. The saves time since, instead of creating redundant model fits, a single fit can be used to evaluate many _submodels_.
 
-While not all models have exploit this feature, some do: 
+While not all models can exploit this feature, many broadly used ones do: 
 
 * Boosting models can typically make predictions across multiple values for the number of boosting iterations. 
 
-* Regularization methods, such as the `glmnet` model, can make simultaneous predictions across the amount of regularization used to fit the model. 
+* Regularization methods, such as the `r pkg(glmnet)` model, can make simultaneous predictions across the amount of regularization used to fit the model. 
 
 * Multivariate adaptive regression splines (MARS) adds a set of nonlinear features features to a linear regression models [@Friedman:1991p109]. The number of terms to retain is a tuning parameter and it is computationally fast to make predictions across many values of this parameter from a single model fit. 
 
 The `r pkg(tune)` package automatically applies this type of optimization whenever an applicable model is tuned. 
 
-For example, if a boosted C5.0 classification model [@apm] was fit to the cell data, we can tune the number of boosting iterations can. With all other parameters set at their default values, iterations from 1 to 100 were evaluated on the same resamples as used previously:
+For example, if a boosted C5.0 classification model [@apm] was fit to the cell data, we can tune the number of boosting iterations (`trees`). With all other parameters set at their default values, we can evaluate iterations from 1 to 100 on the same resamples as used previously:
 
 ```{r grid-c5, eval = FALSE}
 c5_spec <- 
@@ -345,9 +359,9 @@ Without the submodel optimization, the call to `tune_grid()` used `r round(3734.
 Even though we fit the model with and without the submodel prediction trick, this optimization is _automatically_ applied by `r pkg(parsnip)`. 
 :::
 
-### Parallel processing
+### Parallel processing {-}
 
-As previously mentioned in Section \@ref(parallel), parallel processing is an effective method for creasing training time, especially when models are resampled. This advantage conveys to model tuning with grid search. 
+As previously mentioned in Section \@ref(parallel), parallel processing is an effective method for decreasing training time, especially when models are resampled. This advantage conveys to model tuning with grid search. 
 Currently, the `r pkg(tune)` package only parallel processes over resamples (instead of resamples and tuning parameter combinations). The rationale is that this is the optimal scenario when the preprocessing method is expensive. However, it currently limits the achievable speed-ups when the preprocessing is not expensive.  
 
 The multilayer perceptron `tune_grid()` code from Section \@ref(grids) was re-run with different numbers of parallel workers using a computer with 10 physical cores. The results show that parallel process effectively reduces the total execution time for this model: 
@@ -374,13 +388,13 @@ times %>%
 
 As another example, the C5.0 classification model shown in the previous section was also run in parallel with ten workers. The parallel computations took 13.3 seconds for a speed-up of `r round(100.147/13.265, 1)`-fold (both runs used the submodel optimization trick). Between the submodel optimization trick and parallel processing, there was a __total speed-up of `r round(3734.249/13.265, 0)`-fold__ over the most basic grid search code. 
 
-Note that the speed-up in computations will vary from model-to-model and is also affected by the size of the grid. A very computationally efficient model may not benefit as much from parallel processing. 
+Note that the speed-up in computations will vary from model to model and is also affected by the size of the grid. A very computationally efficient model may not benefit as much from parallel processing. 
 
-### Racing methods
+### Racing methods {-}
 
-On issue with grid search is that all models need to be fit across all resamples before any tuning parameters can be evaluated. It would be helpful if, at some point during tuning, an interim analysis is conducted to eliminate any truly awful parameter candidates. This would be akin to _futility analysis_ in clinical trials. If a new drug is performing excessively poorly (or well), it is potentially unethical to wait until the trial finishes to make a decision.  
+One issue with grid search is that all models need to be fit across all resamples before any tuning parameters can be evaluated. It would be helpful if, at some point during tuning, an interim analysis can be conducted to eliminate any truly awful parameter candidates. This would be akin to _futility analysis_ in clinical trials. If a new drug is performing excessively poorly (or well), it is potentially unethical to wait until the trial finishes to make a decision.  
 
-In machine learning, the set of techniques called _racing method_ provide a similar function [@maron1994hoeffding]. Here, the tuning process evaluates all models on an initial subset of resamples. Based on their current performance metrics, some parameter sets are not considered in subsequent resamples. 
+In machine learning, the set of techniques called _racing methods_ provide a similar function [@maron1994hoeffding]. Here, the tuning process evaluates all models on an initial subset of resamples. Based on their current performance metrics, some parameter sets are not considered in subsequent resamples. 
 
 As an example, in the previous multilayer perceptron tuning process with a regular grid, what would the results look after the first three folds? Using techniques similar to those shown in Chapter \@ref(compare), a model is fit where the outcome is the resampled area under the ROC curve and the predictor is an indicator for the parameter combination. The model takes the resample-to-resample effect into account and produces point and interval estimates for each parameter settings. The results of the model are one-sided 95% confidence intervals that measure the loss of the ROC value relative to the currently best performing parameters: 
 
@@ -439,13 +453,15 @@ Any parameter set whose confidence interval includes zero would lack evidence th
 
 The process continues for each resample; after the next set of performance metrics, a new model is fit to these statistics, and more  submodels are potentially discarded. See @kuhn2014futility for more details on the computational aspects of this approach. 
 
-Racing methods can be more efficient that basic grid search as long as the interim analysis is fast and some parameter settings have poor performance. It also is most helpful when the model does not have the abilities to exploit submodel predictions (as previously discussed). 
+:::rmdwarning
+Racing methods can be more efficient than basic grid search as long as the interim analysis is fast and some parameter settings have poor performance. It also is most helpful when the model does _not_ have the ability to exploit submodel predictions. 
+:::
 
-There are other interim analysis techniques for discarding settings. For example, @krueger15a uses traditional sequential analysis methods whereas @kuhn2014futility treats the data as a sports competition and uses the Bradley-Terry model [@bradley1952rank] to measure the winning ability of parameter settings. The `r pkg(finetune)` package has model tuning functions for several racing methods.  
+There are other interim analysis techniques for discarding settings. For example, @krueger15a use traditional sequential analysis methods whereas @kuhn2014futility treats the data as a sports competition and uses the Bradley-Terry model [@bradley1952rank] to measure the winning ability of parameter settings. The `r pkg(finetune)` package has model tuning functions for several racing methods.  
 
 ## Chapter summary {#grid-summary}
 
-We discussed two main classes of grid (regular and non-regular) and demonstrated how to construct them using the family of `grid_*()` functions. The `tune_grid()` function was used to evaluate the candidate sets using resampling. The chapter also showed how to update a model, recipe, or workflow to update the parameter values for the final fit. 
+This chapter discussed the two main classes of grids (regular and non-regular) that can be used for model tuning and demonstrated how to construct these grids, either manually or using the family of `grid_*()` functions. The `tune_grid()` function can evaluate these candidate sets of model parameters using resampling. The chapter also showed how to update a model, recipe, or workflow to update the parameter values for the final fit. 
 
 The data analysis code that will be reused in the next chapter is:  
 

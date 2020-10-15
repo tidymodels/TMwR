@@ -412,7 +412,7 @@ Hybrid strategies are also an option. After an initial grid search, a sequential
 
 Examples of these strategies are discussed in detail in the next two chapters. Before moving on, let's learn how to work with tuning parameter objects in tidymodels, using the `r pkg(dials)` package.
 
-## Tuning parameters in tidymodels
+## Tuning parameters in tidymodels {#tuning-params-tidymodels}
 
 We've already dealt with arguments that correspond to tuning parameters for recipe and model specifications in previous chapters. It is possible to tune:
 
