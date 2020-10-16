@@ -1,6 +1,6 @@
 # TMwR
 
-[![Netlify Status](https://api.netlify.com/api/v1/badges/a0db3b22-8c6f-40e8-bcef-9de2f99fd428/deploy-status)](https://app.netlify.com/sites/tidy-models-with-r/deploys)
+[![Build Status](https://github.com/tidymodels/TMwR/workflows/bookdown/badge.svg)](https://github.com/tidymodels/TMwR/actions)
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
