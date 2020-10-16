@@ -2,7 +2,7 @@ new_session: yes
 
 rmd_files: [
   "index.Rmd",
-  "software-modeling.Rmd",
+  "01-software-modeling.Rmd",
   "tidyverse.Rmd",
   "base-r.Rmd",
   "basics.Rmd",
