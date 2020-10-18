@@ -14,7 +14,7 @@ Authors@R: c(
       family = "Silge",
       email = "julia.silge@rstudio.com",
       comment = c(ORCID = "0000-0002-3671-836X"),
-      role = c("aut", "cre")
+      role = c("aut")
     )
   )
 Depends: R (>= 4.0.0)
