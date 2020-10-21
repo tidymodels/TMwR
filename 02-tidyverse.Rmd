@@ -32,7 +32,7 @@ While very computationally efficient, it would be difficult to argue that this i
 
 ```{r tidyverse-dplyr-sort, eval = FALSE}
 library(dplyr)
-arrange(data = mtcars, gear, mpg)
+arrange(.data = mtcars, gear, mpg)
 ```
 
 :::rmdnote
