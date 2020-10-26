@@ -10,7 +10,7 @@ source("ames_snippets.R")
 
 # Fitting models with parsnip {#models}
 
-The `r pkg(parsnip)` package provides a fluent and standardized interface for a variety of different models. In this chapter, we both give some motivation for why a common interface is beneficial and show how the use the package. 
+The `r pkg(parsnip)` package provides a fluent and standardized interface for a variety of different models. In this chapter, we both give some motivation for why a common interface is beneficial and show how to use the package. 
 
 In Chapter \@ref(recipes), we discussed recipe objects for feature engineering and data preprocessing prior to modeling. Recipes are not discussed in this chapter in order to focus on the model itself; Chapter \@ref(workflows) illustrates how to combine models and recipes together into something called a `workflow` object. 
  
