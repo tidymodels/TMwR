@@ -7,45 +7,6 @@ library(lubridate)
 library(tidymodels)
 ```
 
-```{r base-r-cricket-data, include = FALSE}
-crickets <- 
-  tibble::tribble(
-           ~species,      ~temp,  ~rate,
- "O. exclamationis",       20.8,   67.9,
- "O. exclamationis",       20.8,   65.1,
- "O. exclamationis",       24.0,   77.3,
- "O. exclamationis",       24.0,   78.7,
- "O. exclamationis",       24.0,   79.4,
- "O. exclamationis",       24.0,   80.4,
- "O. exclamationis",       26.2,   85.8,
- "O. exclamationis",       26.2,   86.6,
- "O. exclamationis",       26.2,   87.5,
- "O. exclamationis",       26.2,   89.1,
- "O. exclamationis",       28.4,   98.6,
- "O. exclamationis",       29.0,  100.8,
- "O. exclamationis",       30.4,   99.3,
- "O. exclamationis",       30.4,  101.7,
- "O. niveus",              17.2,   44.3,
- "O. niveus",              18.3,   47.2,
- "O. niveus",              18.3,   47.6,
- "O. niveus",              18.3,   49.6,
- "O. niveus",              18.9,   50.3,
- "O. niveus",              18.9,   51.8,
- "O. niveus",              20.4,   60.0,
- "O. niveus",              21.0,   58.5,
- "O. niveus",              21.0,   58.9,
- "O. niveus",              22.1,   60.7,
- "O. niveus",              23.5,   69.8,
- "O. niveus",              24.2,   70.9,
- "O. niveus",              25.9,   76.2,
- "O. niveus",              26.5,   76.1,
- "O. niveus",              26.5,   77.0,
- "O. niveus",              26.5,   77.7,
- "O. niveus",              28.6,   84.7
-  ) %>% 
-  mutate(species = factor(species))
-```
-
 This book is about creating models with R. Before describing how to apply tidy data principles, let's review how models are created, trained, and used in the core R language (often called "base R"). This chapter is a brief illustration of core language conventions. It is not exhaustive but provides readers (especially those new to R) the basic, most commonly used motifs. 
 
 The S language, on which R is based, has had a rich data analysis environment since the publication of @WhiteBook (commonly known as The White Book). This version of S introduced standard infrastructure components familiar to R users today, such as symbolic model formulae, model matrices, and data frames, as well as standard object-oriented programming methods for data analysis. These user-interfaces have not substantively changed since then.  
@@ -55,6 +16,7 @@ The S language, on which R is based, has had a rich data analysis environment si
 To demonstrate these fundamentals, let's use experimental data from @mcdonald2009, by way of @mangiafico2015, on the relationship between the ambient temperature and the rate of cricket chirps per minute. Data were collected for two species: _O. exclamationis_ and _O. niveus_. The data are contained in a data frame called `crickets` with a total of `r nrow(crickets)` data points. These data are shown here in a `r pkg(ggplot2)` graph. 
 
 ```{r base-r-cricket-plot, out.width = '70%', fig.width=6, fig.height=4, warning = FALSE}
+data(crickets, package = "modeldata")
 names(crickets)
 
 # Plot the temperature on the x-axis, the chirp rate on the y-axis. The plot
