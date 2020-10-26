@@ -3,6 +3,7 @@ knitr::opts_chunk$set(fig.path = "figures/")
 library(tidymodels)
 library(finetune)
 library(ggforce)
+library(av)
 library(lme4)
 data(cells)
 
@@ -380,66 +381,149 @@ On issue with grid search is that all models need to be fit across all resamples
 
 In machine learning, the set of techniques called _racing method_ provide a similar function [@maron1994hoeffding]. Here, the tuning process evaluates all models on an initial subset of resamples. Based on their current performance metrics, some parameter sets are not considered in subsequent resamples. 
 
+```{r grid-cells-race, cache = TRUE, include = FALSE}
+set.seed(99)
+mlp_sfd_race <-
+  mlp_wflow %>%
+  tune_race_anova(
+    cell_folds,
+    grid = 20,
+    # Pass in the parameter object to use the appropriate range: 
+    param_info = mlp_param,
+    metrics = roc_res
+  )
+remaining <-
+  mlp_sfd_race %>% 
+  collect_metrics() %>% 
+  dplyr::filter(n == 10)
+```
+
+
 As an example, in the previous multilayer perceptron tuning process with a regular grid, what would the results look after the first three folds? Using techniques similar to those shown in Chapter \@ref(compare), a model is fit where the outcome is the resampled area under the ROC curve and the predictor is an indicator for the parameter combination. The model takes the resample-to-resample effect into account and produces point and interval estimates for each parameter settings. The results of the model are one-sided 95% confidence intervals that measure the loss of the ROC value relative to the currently best performing parameters: 
 
-```{r grid-mlp-racing, echo = FALSE, fig.height=5}
-roc_resamples <- 
-  mlp_sfd_tune %>% 
-  collect_metrics(summarize = FALSE) %>% 
-  filter(id %in% paste0("Fold0", 1:3))
+```{r grid-mlp-racing, echo = FALSE, fig.height=5, warning = FALSE}
+full_att <- attributes(mlp_sfd_race)
 
-# order by best model
+race_details <- NULL
+for(iter in 1:10) {
 
-config_order <- 
-  roc_resamples %>% 
-  group_by(.config) %>% 
-  summarize(mean = mean(.estimate), .groups = "drop") %>% 
-  ungroup() %>% 
-  arrange(desc(mean)) %>% 
-  pull(.config)
+  tmp <- mlp_sfd_race %>% filter(.order <= iter)
+  tmp_att <- full_att
+  tmp_att$row.names <- attr(tmp, "row.names")
+  attributes(tmp) <- tmp_att
 
-roc_resamples$.config <- factor(roc_resamples$.config, levels = config_order)
+  race_details <-
+    bind_rows(
+      race_details,
+      finetune:::test_parameters_gls(tmp) %>% mutate(iter = iter))
+}
 
-roc_model <- lmer(.estimate ~ .config + (1|id), data = roc_resamples)
-
-point_est <- 
-  summary(roc_model) %>% 
-  pluck("coefficients") %>% 
-  as_tibble(rownames = ".config") %>% 
-  select(.config, estimate = Estimate)
-
-interval_est <- 
-  confint(roc_model, quiet = TRUE) %>% 
-  as_tibble(rownames = ".config") %>% 
-  select(.config, upper = `97.5 %`)
-
-roc_estimates <- 
-  inner_join(point_est, interval_est, by = ".config") %>% 
-  filter(.config != "(Intercept)") %>% 
+race_details <-
+  race_details %>%
   mutate(
-    .config = gsub(".config", "", .config, fixed = TRUE),
-    .config = factor(.config, levels = rev(config_order)),
-    Results = ifelse(upper < 0, "eliminate", "retain"),
-    Results = factor(Results, levels = c("retain", "eliminate"))
-  )
-race_cols <- c(retain = "black", eliminate = "darkgrey")
+    lower = ifelse(iter < 3, NA, lower),
+    upper = ifelse(iter < 3, NA, upper),
+    pass = ifelse(iter < 3, TRUE, pass),
+    decision = ifelse(pass, "retain", "discard"),
+    decision = ifelse(pass & estimate == 0, "best", decision)
+  )  %>%
+  mutate(
+    .config = factor(.config),
+    .config = reorder(.config, estimate),
+    decision = factor(decision, levels = c("best", "retain", "discard"))
+  ) 
+race_cols <- c(best = "blue", retain = "black", discard = "grey")
 
-roc_estimates %>% 
+iter_three <- race_details %>% dplyr::filter(iter == 3) 
+
+iter_three %>% 
   ggplot(aes(x = -estimate, y = .config)) + 
   geom_vline(xintercept = 0, lty = 2, col = "green") +
-  geom_point(size = 3.2, aes(col = Results)) + 
-  geom_errorbarh(aes(xmin = -estimate, xmax = -upper, col = Results), height = .5, show.legend = FALSE) + 
-  labs(x = "Drop in ROC AUC from current best candidate", y = NULL) + 
+  geom_point(size = 3, aes(col = decision)) + 
+  geom_errorbarh(aes(xmin = -estimate, xmax = -upper, col = decision), height = .3, show.legend = FALSE) + 
+  labs(x = "Loss of ROC AUC", y = NULL) + 
   scale_colour_manual(values = race_cols)
 ```
 
-Any parameter set whose confidence interval includes zero would lack evidence that its performance is not statistically different from the best results. We retain `r sum(roc_estimates$upper >= 0)` settings; these are resampled more. The remaining `r sum(roc_estimates$upper < 0)` submodels are no longer considered. 
+Any parameter set whose confidence interval includes zero would lack evidence that its performance is not statistically different from the best results. We retain `r sum(iter_three$upper < 0)` settings; these are resampled more. The remaining `r sum(iter_three$upper >= 0)` submodels are no longer considered. 
+
+```{r grid-mlp-racing-anim, include = FALSE, dev = 'png'}
+race_ci_plots <- function(x, iters = 10) {
+  
+  x_rng <- extendrange(c(-x$estimate, -x$upper))
+  
+  for (i in 1:iters) {
+    if (i < 3) {
+      ttl <- paste0("Iteration ", i, ": burn-in")
+    } else {
+      ttl <- paste0("Iteration ", i, ": testing")
+    }
+    p <-
+      x %>% 
+      dplyr::filter(iter == i) %>% 
+      ggplot(aes(x = -estimate, y = .config, col = decision)) +
+      geom_vline(xintercept = 0, col = "green", lty = 2) +
+      geom_point(size = 2) +
+      labs(title = ttl, y = "", x = "Loss of ROC AUC") +
+      scale_color_manual(values = c(best = "blue", retain = "black", discard = "grey"), 
+                         drop = FALSE) +
+      scale_y_discrete(drop = FALSE) +
+      xlim(x_rng) + 
+      theme_bw() +
+      theme(legend.position = "top")
+    
+    if (i >= 3) {
+      p <- p  + geom_errorbar(aes(xmin = -estimate, xmax = -upper), width = .3)
+    }
+    
+    print(p)
+  }
+  invisible(NULL)
+}
+av_capture_graphics(
+  race_ci_plots(race_details, 10),
+  output = "_book/premade/race_results.mp4",
+  width = 720,
+  height = 720,
+  res = 120,
+  framerate = 1/3
+)
+```
+
+<video width="720" height="720" controls>
+  <source src="_book/premade/race_results.mp4" type="video/mp4">
+</video>
 
 The process continues for each resample; after the next set of performance metrics, a new model is fit to these statistics, and more  submodels are potentially discarded. See @kuhn2014futility for more details on the computational aspects of this approach. 
 
 Racing methods can be more efficient that basic grid search as long as the interim analysis is fast and some parameter settings have poor performance. It also is most helpful when the model does not have the abilities to exploit submodel predictions (as previously discussed). 
 
-There are other interim analysis techniques for discarding settings. For example, @krueger15a uses traditional sequential analysis methods whereas @kuhn2014futility treats the data as a sports competition and uses the Bradley-Terry model [@bradley1952rank] to measure the winning ability of parameter settings. The `r pkg(finetune)` package has model tuning functions for several racing methods.  
+There are other interim analysis techniques for discarding settings. For example, @krueger15a uses traditional sequential analysis methods whereas @kuhn2014futility treats the data as a sports competition and uses the Bradley-Terry model [@bradley1952rank] to measure the winning ability of parameter settings. 
+
+The `r pkg(finetune)` package contains functions for racing. The `tune_race_anova()` function conducts an Analysis of Variance (ANOVA) model to tests for statistical significance of the different model configurations. The syntax to reproduce the filtering shown above is
+
+
+```{r grid-cells-race-code, eval = FALSE}
+library(finetune)
+
+set.seed(99)
+mlp_sfd_race <-
+  mlp_wflow %>%
+  tune_race_anova(
+    cell_folds,
+    grid = 20,
+    param_info = mlp_param,
+    metrics = roc_res
+  )
+```
+
+The arguments mirror those of `tune_grid()`. The function `control_race()` has options for the elimination procedure. 
+
+As shown in the animation above, there were `r nrow(remaining)` tuning parameter combinations under consideration once the full set of resamples were evaluated. `show_best()` returns the best models (ranked by performance) but only returns the configurations that were never eliminated: 
+
+```{r grid-race-best}
+ show_best(mlp_sfd_race, n = 10)
+```
 
 ## Chapter summary {#grid-summary}
 
