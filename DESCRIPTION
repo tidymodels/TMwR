@@ -55,6 +55,4 @@ Imports:
   yardstick
 Remotes:
   tidymodels/tune,
-  tidymodels/recipes,
-  tidymodels/dials,
-  tidymodels/tidymodels
+  tidymodels/modeldata
