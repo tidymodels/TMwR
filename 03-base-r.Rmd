@@ -5,6 +5,7 @@ knitr::opts_chunk$set(fig.path = "figures/")
 library(tidyverse)
 library(lubridate)
 library(tidymodels)
+data(crickets, package = "modeldata")
 ```
 
 This book is about creating models with R. Before describing how to apply tidy data principles, let's review how models are created, trained, and used in the core R language (often called "base R"). This chapter is a brief illustration of core language conventions. It is not exhaustive but provides readers (especially those new to R) the basic, most commonly used motifs. 
