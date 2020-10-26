@@ -29,7 +29,7 @@ The content is created using the `bookdown` package. To compile the book, use:
 bookdown::render_book("index.Rmd", "bookdown::gitbook")
 ```
 
-This will create the HTML files in a directory called `_book`. 
+This will create the HTML files in a directory called `_book`. Although we eventually plan to publish a paper version of this work, we do _not_ currently support building to a PDF version.
 
 
 # Contributing
