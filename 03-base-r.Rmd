@@ -14,9 +14,9 @@ The S language, on which R is based, has had a rich data analysis environment si
 To demonstrate these fundamentals, let's use experimental data from @mcdonald2009, by way of @mangiafico2015, on the relationship between the ambient temperature and the rate of cricket chirps per minute. Data were collected for two species: _O. exclamationis_ and _O. niveus_. The data are contained in a data frame called `crickets` with a total of `r nrow(crickets)` data points. These data are shown here in a `r pkg(ggplot2)` graph. 
 
 ```{r base-r-cricket-plot, out.width = '70%', fig.width=6, fig.height=4, warning = FALSE}
-library(tidymodels)
+library(tidyverse)
 
-data(crickets)
+data(crickets, package = "modeldata")
 names(crickets)
 
 # Plot the temperature on the x-axis, the chirp rate on the y-axis. The plot
@@ -265,6 +265,8 @@ corr_res[[1]]
 If we want to use these results in a plot, the standard format of hypothesis test results are not very useful. The `tidy()` method can return this as a tibble with standardized names: 
 
 ```{r base-r-corr-tidy}
+library(broom)
+
 tidy(corr_res[[1]])
 ```
 
@@ -305,7 +307,6 @@ model_by_species
 To collect the coefficients for each of these models, use `broom::tidy()` to convert them to a consistent data frame format so that they can be unnested:
 
 ```{r base-r-species-coefs}
-library(tidymodels) # Includes the broom package
 model_by_species %>% 
   mutate(coef = map(model, tidy)) %>% 
   select(species, coef) %>% 
