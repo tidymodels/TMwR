@@ -53,5 +53,3 @@ Imports:
   tune,
   workflows,
   yardstick
-Remotes:
-  tidymodels/tune
