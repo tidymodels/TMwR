@@ -27,6 +27,7 @@ jobs:
         run: |
           brew cask install xquartz
           brew install pkg-config cairo
+          brew install v8
 
       - name: Query dependencies
         run: |
