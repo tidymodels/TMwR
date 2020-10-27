@@ -231,8 +231,17 @@ li.appendix span, li.part span {
   margin: 0 !important; /* makes space above and below symmetrical*/
 }
 
+.sourceCode div {
+  margin: 1em 0; /* see https://github.com/rstudio/bookdown/pull/738*/
+}
+
 .sourceCode {
   margin-bottom: 1.5em; /* adds same amount of margin beneath chunk as a <p> would */
+}
+
+/* for numbers in code blocks */
+pre.numberSource code > span > a:first-child::before {
+  left: -0.2em;
 }
 
 /*------------- block quotes --------------*/

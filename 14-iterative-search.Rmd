@@ -79,7 +79,7 @@ knitr::include_graphics("premade/roc_surface.png")
 
 The search procedures described below require at least one tuning parameter result before proceeding. For this purpose, the code below creates a small regular grid that resides in the flat portion of the parameter space. The `tune_grid()` function resamples these values:  
 
-```{r iterative-svm-initial, cache = TRUE}
+```{r iterative-svm-initial}
 set.seed(234)
 start_grid <- 
  svm_param %>% 
@@ -115,7 +115,7 @@ The main questions in this tuning scheme are how to create the model and how to 
 
 ### The `tune_bayes()` function
 
-```{r iterative-cells-bo-calcs, echo = FALSE, cache = TRUE}
+```{r iterative-cells-bo-calcs, echo = FALSE}
 # We will do the calculations here but use some non-standard options. First, 
 # purrr is used to capture the output in a vector so that we can show the 
 # results piecemeal. Also, a hidden option is used to save the grid of candidate 
@@ -434,7 +434,7 @@ For non-numeric parameters, we assign a probability for how often the parameter 
 
 
 
-```{r iterative-cells-sa-calcs, include = FALSE, cache = TRUE}
+```{r iterative-cells-sa-calcs, include = FALSE}
 # As we did above, this chunk executes the code with some extra options that
 # capture the output and save some internal objects for plotting. 
 
