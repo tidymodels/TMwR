@@ -385,7 +385,24 @@ This is the optimal scenario when the preprocessing method is expensive. However
 
 * The number of parallel workers is limited by the number of resamples. For example, with 10-fold cross-validation you can only use 10 parallel workers even when the computer has more than 10 cores. 
 
-Alternatively, these two nested loops can be _flattened_ or combined into a single loop, represented in this pseudocode: 
+To illustrate how the parallel processing works, consider a situation with 10-fold cross-validation, a grid of none tuning parameter combinations (all on model parameters), and ten worker processes (i.e., cores). Using this parallel processing scheme, this visualization shows how the tasks are allocated to the worker processes: 
+
+```{r grid-logging-rs, echo = FALSE, message = FALSE}
+load("extras/parallel_times/logging_data.RData")
+times_resamples %>%
+  ggplot(aes(x = seconds, y = id, col = operation)) +
+  geom_point(pch = "|", size = 4) +
+  facet_wrap(~ pid) +
+  theme_bw() +
+  theme(legend.position = "top",
+        panel.grid.minor.x = element_blank(),
+        panel.grid.major.x = element_blank()) +
+  labs(y = NULL, x = "Elapsed Time (s)")
+```
+
+Note that each fold is assigned to its own worker process and, since only model parameters are being tuned, the preprocessing is conducted once per fold/worker. 
+
+Alternatively, the two nested loops shown above can be _flattened_ or combined into a single loop, represented in this pseudocode: 
 
 ```{r grid-everything-algo, attr.source = '.numberLines', eval = FALSE}
 all_tasks <- crossing(resamples, configurations)
@@ -400,33 +417,79 @@ for (iter in all_tasks) {
 
 In this case, parallelization now occurs at line 3. For example, if 10-fold cross-validation is used with $M$ tuning parameter values, the loop is executed over $10M$ iterations. This increases the number of potential workers that can be put to use. However, lines 4-5 (related to data processing) are _repeated_ $M-1$ additional times. If those steps are expensive, this will be more inefficient than the previous approach. 
 
-In the control functions for the `tune_*()` functions, the argument `parallel_over` controls how the process is executed. A value of `parallel_over = "resamples"` takes the first approach described above while `parallel_over = "everything"` parallelizes over the "flattened loop". 
+To illustrate the delegation of tasks to the workers in this scheme: 
 
-As a superficial benchmark, the multilayer perceptron `tune_grid()` code from Section \@ref(grids) was re-run with different numbers of parallel workers using a computer with 10 physical cores. The results show that parallel process effectively reduces the total execution time for this model: 
-
-```{r grid-parallel, echo = FALSE, results = "asis"}
-options(knitr.kable.NA = '')
-times %>% 
-  mutate(speed_up = ifelse(cores == 1, NA, speed_up)) %>% 
-  arrange(`Grid Type`, cores) %>% 
-  select(
-    `# Workers` = cores,
-    `Time (s)` = time,
-    `Time/Fit (s)` = time_per_fit,
-    `Speed-Up` = speed_up
-  ) %>%
-  kable(
-    row.names = FALSE, 
-    digits = 2
-  ) %>% 
-  kable_paper("striped", full_width = FALSE) %>%
-  pack_rows("Regular Grid", 1, 3) %>%
-  pack_rows("Space-Filling Design", 4 , 6)
+```{r grid-logging-all, echo = FALSE, message = FALSE}
+times_all  %>%
+  ggplot(aes(y = id, x = seconds, col = operation)) +
+  geom_point(pch = "|", size = 4) +
+  facet_wrap(~ pid) +
+  theme_bw() +
+  labs(y = NULL, x = "Elapsed Time (s)") +
+  theme(legend.position = "top",
+        panel.grid.minor.x = element_blank(),
+        panel.grid.major.x = element_blank())
 ```
 
-As another example, the C5.0 classification model shown in the previous section was also run in parallel with ten workers. The parallel computations took 13.3 seconds for a speed-up of `r round(100.147/13.265, 1)`-fold (both runs used the submodel optimization trick). Between the submodel optimization trick and parallel processing, there was a __total speed-up of `r round(3734.249/13.265, 0)`-fold__ over the most basic grid search code. 
+Here multiple folds are allocated within each worker and the preprocessing is repeated. 
 
-Note that the speed-up in computations will vary from model to model and is also affected by the size of the grid. A very computationally efficient model may not benefit as much from parallel processing. 
+In the control functions for the `tune_*()` functions, the argument `parallel_over` controls how the process is executed. A value of `parallel_over = "resamples"` takes the first approach described above while `parallel_over = "everything"` parallelizes over the "flattened loop". 
+
+### Benchmarking boosted trees 
+
+As an example, a boosted tree with the `xgboost` engine was tune for a data set of 4,000 samples. Five-fold cross-validation was used with 10 candidate models. There was preprocessing that was used but was implemented three different ways: 
+
+1. Prior to modeling using a `dplyr` pipeline (labeled is "none" in the plots below).
+2. The same preprocessing but using a recipe (shown as "light" preprocessing).
+3. With an additional recipe step that has a high computational cost (labeled as "expensive"). 
+
+The difference between the first and second preprocessing options is designed to measure the computational cost of the recipe. The third option is intended to exploit the problem of performing redundant computations with `parallel_over = "everything"`. 
+
+We evaluated this process using variable number of worker processes and using the two `parallel_over` options. The computer has 10 physical cores and 20 virtual cores (via hyper threading). 
+
+First, let's consider the raw execution times:
+
+```{r grid-par-times, echo = FALSE}
+load("extras/parallel_times/xgb_times.RData")
+ggplot(times, aes(x = num_cores, y = elapsed, col = parallel_over, shape = parallel_over)) + 
+      geom_point() + 
+      geom_line() +
+      facet_wrap(~ preprocessing) + 
+      labs(x = "Number of Workers", y = "Execution Time (s)") + 
+      scale_y_log10() + 
+      theme_bw() + 
+      theme(legend.position = "top")
+```
+
+Since there were only five resamples, the number of cores used when `parallel_over = "resamples"` is limited to five. 
+
+Comparing the curves in the first two panels for "none" and "light": 
+
+* There is little difference in the execution times between the panels. This indicates, for these data, there is no real computational penalty for doing the preprocessing steps in a recipe. 
+
+* There is some benefit for using `parallel_over = "everything"` with many cores. However, as shown below, the majority of the benefit of parallel processing occurs in the first five workers.
+
+When the expensive preprocessing step is added, there is a considerable difference in execution times. Using `parallel_over = "everything"` is problematic since, even using all cores, it never achieves the execution time that `parallel_over = "resamples"` attains with five cores. This is because the costly preprocessing step is unnecessarily repeated in the computational scheme. 
+
+We can also view these data in terms of speed-ups:
+
+```{r grid-par-speed-up, echo = FALSE}
+load("extras/parallel_times/xgb_times.RData")
+ggplot(times, aes(x = num_cores, y = elapsed, col = parallel_over, shape = parallel_over)) + 
+      geom_point() + 
+      geom_line() +
+      facet_wrap(~ preprocessing) + 
+      labs(x = "Number of Workers", y = "Execution Time (s)") + 
+      scale_y_log10() + 
+      theme_bw() + 
+      theme(legend.position = "top")
+```
+
+The best speed-ups, for these data, occur when `parallel_over = "resamples"` and when the computations are expensive. However, in the latter case, the previous analysis indicates that the overall model fits are slower.  
+
+What is the benefit of using the submodel optimization method _in conjunction with parallel processing_?  The C5.0 classification model shown in the previous section was also run in parallel with ten workers. The parallel computations took 13.3 seconds for a speed-up of `r round(100.147/13.265, 1)`-fold (both runs used the submodel optimization trick). Between the submodel optimization trick and parallel processing, there was a __total speed-up of `r round(3734.249/13.265, 0)`-fold__ over the most basic grid search code. 
+
+Overall, it is important to note that the increased computational savings will vary from model-to-model and is also affected by the size of the grid, the number of resamples, etc. A very computationally efficient model may not benefit as much from parallel processing. 
 
 ### Racing methods {-}
 
