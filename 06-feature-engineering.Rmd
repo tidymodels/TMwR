@@ -524,7 +524,7 @@ Each `tidy()` method returns the relevant information about that step. For examp
 
 ## Column roles
 
-When a formula is used with the initial call to `recipes()` it assigns _roles_ to each of the columns depending on which side of the tilde that they are on. Those roles are either `"predictor"` or `"outcome"`. However, other roles can be assigned as needed. 
+When a formula is used with the initial call to `recipe()` it assigns _roles_ to each of the columns depending on which side of the tilde that they are on. Those roles are either `"predictor"` or `"outcome"`. However, other roles can be assigned as needed. 
 
 For example, in our Ames data set, the original raw data contained a field for address^[Our version of these data does not contain that column.]. It may be useful to keep that column in the data so that, after predictions are made, problematic results can be investigated in detail. In other words, the column is important but isn't a predictor or outcome. 
 
@@ -566,6 +566,5 @@ ames_rec <-
   step_interact( ~ Gr_Liv_Area:starts_with("Bldg_Type_") ) %>% 
   step_ns(Latitude, Longitude, deg_free = 20)
 ```
-
 
 
