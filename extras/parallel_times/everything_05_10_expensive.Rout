@@ -121,7 +121,7 @@ This is rstanarm version 2.21.1
 +   # For creating models, it is better to have qualitative columns
 +   # encoded as factors (instead of character strings)
 +   mutate_if(is.character, as.factor) %>% 
-+   sample_n(2000)
++   sample_n(4000)
 > 
 > ## -----------------------------------------------------------------------------
 > 
@@ -360,4 +360,4 @@ This is rstanarm version 2.21.1
 + }
 > proc.time()
     user   system  elapsed 
-4959.706   10.140  566.771 
+9688.007   15.253 1120.090 

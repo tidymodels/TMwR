@@ -44,20 +44,25 @@ times <-
       speed_up = seq_time/elapsed,
       preprocessing = gsub(" preprocessing", "", preproc),
       preprocessing = ifelse(preprocessing == "no", "none", preprocessing),
-      preprocessing = factor(preprocessing, levels = c("none", "light", "expensive"))
+      preprocessing = factor(preprocessing, levels = c("none", "light", "expensive")),
+      parallel_over = par_method
    )
 
 if (interactive()) {
-   ggplot(times, aes(x = num_cores, y = elapsed, col = preproc)) + 
+
+
+   ggplot(times, aes(x = num_cores, y = elapsed, col = parallel_over, shape = parallel_over)) + 
       geom_point() + 
       geom_line() +
-      facet_wrap(~ par_method) + 
-      labs(x = "Number of Workers", y = "Time per Submodel")
-
+      facet_wrap(~ preprocessing) + 
+      labs(x = "Number of Workers", y = "Execution Time (s)") + 
+      scale_y_log10() + 
+      theme_bw() + 
+      theme(legend.position = "top")
    
    times %>% 
       filter(preprocessing == "none") %>% 
-      ggplot(aes(x = num_cores, y = speed_up, col = preprocessing)) + 
+      ggplot(aes(x = num_cores, y = speed_up, col = preprocessing, shape = preprocessing)) + 
       geom_abline(lty = 1) + 
       geom_point() + 
       geom_line() +
@@ -70,7 +75,7 @@ if (interactive()) {
    
    times %>% 
       filter(preprocessing != "expensive") %>% 
-      ggplot(aes(x = num_cores, y = speed_up, col = preprocessing)) + 
+      ggplot(aes(x = num_cores, y = speed_up, col = preprocessing, shape = preprocessing)) + 
       geom_abline(lty = 1) + 
       geom_point() + 
       geom_line() +
@@ -82,11 +87,11 @@ if (interactive()) {
       theme(legend.position = "top")
 
    
-   ggplot(times, aes(x = num_cores, y = speed_up, col = preprocessing)) + 
+   ggplot(times, aes(x = num_cores, y = speed_up, col = parallel_over, shape = parallel_over)) + 
       geom_abline(lty = 1) + 
       geom_point() + 
       geom_line() +
-      facet_wrap(~ par_method) + 
+      facet_wrap(~ preprocessing) + 
       coord_obs_pred() +
       labs(x = "Number of Workers", y = "Speed-up", 
            title = "5 resamples, 10 grid points") + 

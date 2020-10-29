@@ -106,7 +106,7 @@ The following object is masked from ‘package:dplyr’:
 +   # For creating models, it is better to have qualitative columns
 +   # encoded as factors (instead of character strings)
 +   mutate_if(is.character, as.factor) %>% 
-+   sample_n(2000)
++   sample_n(4000)
 > 
 > ## -----------------------------------------------------------------------------
 > 
@@ -204,7 +204,7 @@ The following object is masked from ‘package:dplyr’:
  collate  en_US.UTF-8                 
  ctype    en_US.UTF-8                 
  tz       America/New_York            
- date     2020-10-27                  
+ date     2020-10-28                  
 
 ─ Packages ───────────────────────────────────────────────────────────────────
  package      * version    date       lib source                             
@@ -287,5 +287,5 @@ The following object is masked from ‘package:dplyr’:
 +   q("no")
 + }
 > proc.time()
-   user  system elapsed 
-484.737   4.605 119.373 
+    user   system  elapsed 
+1200.625    4.923  270.578 

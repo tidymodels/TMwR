@@ -106,7 +106,7 @@ The following object is masked from ‘package:dplyr’:
 +   # For creating models, it is better to have qualitative columns
 +   # encoded as factors (instead of character strings)
 +   mutate_if(is.character, as.factor) %>% 
-+   sample_n(2000)
++   sample_n(4000)
 > 
 > ## -----------------------------------------------------------------------------
 > 
@@ -287,5 +287,5 @@ The following object is masked from ‘package:dplyr’:
 +   q("no")
 + }
 > proc.time()
-   user  system elapsed 
-452.037   2.152 177.699 
+    user   system  elapsed 
+1133.846    2.769  445.209 

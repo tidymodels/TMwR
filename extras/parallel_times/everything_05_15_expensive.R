@@ -38,7 +38,7 @@ flight_data <-
   # For creating models, it is better to have qualitative columns
   # encoded as factors (instead of character strings)
   mutate_if(is.character, as.factor) %>% 
-  sample_n(2000)
+  sample_n(4000)
 
 ## -----------------------------------------------------------------------------
 
