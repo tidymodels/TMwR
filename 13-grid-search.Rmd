@@ -387,11 +387,11 @@ This is the optimal scenario when the preprocessing method is expensive. However
 
 * The number of parallel workers is limited by the number of resamples. For example, with 10-fold cross-validation you can only use 10 parallel workers even when the computer has more than 10 cores. 
 
-To illustrate how the parallel processing works, consider a situation with 10-fold cross-validation, a grid of none tuning parameter combinations (all on model parameters), and ten worker processes (i.e., cores). 
+To illustrate how the parallel processing works, consider a situation with 10-fold cross-validation, a grid of eight tuning parameter combinations (all on model parameters), and ten worker processes (i.e., cores). 
 
 Using the scheme that parallelizes resamples, this visualization shows how the tasks are allocated to the worker processes: 
 
-```{r grid-logging-rs, echo = FALSE, message = FALSE, height = 9}
+```{r grid-logging-rs, echo = FALSE, message = FALSE, fig.height = 9}
 load("extras/parallel_times/logging_data.RData")
 times_resamples %>%
   ggplot(aes(x = seconds, y = id, col = operation)) +
@@ -426,7 +426,7 @@ In this case, parallelization now occurs at line 3. For example, if we use 10-fo
 
 To illustrate the delegation of tasks to the workers in this scheme, the same example is used but with 12 workers:
 
-```{r grid-logging-all, echo = FALSE, message = FALSE, height = 9}
+```{r grid-logging-all, echo = FALSE, message = FALSE, fig.height = 9}
 times_all  %>%
   ggplot(aes(y = id, x = seconds, col = operation)) +
   geom_point(pch = "|", size = 4) +
@@ -482,7 +482,7 @@ With the expensive preprocessing step, there is a considerable difference in exe
 
 We can also view these data in terms of speed-ups:
 
-```{r grid-par-speed-up, echo = FALSE}
+```{r grid-par-speed-up, echo = FALSE, fig.height=4}
 ggplot(times, aes(x = num_cores, y = speed_up, col = parallel_over, shape = parallel_over)) + 
   geom_abline(lty = 1) + 
   geom_point() + 
