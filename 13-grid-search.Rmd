@@ -391,7 +391,7 @@ To illustrate how the parallel processing works, consider a situation with 10-fo
 
 Using the scheme that parallelizes resamples, this visualization shows how the tasks are allocated to the worker processes: 
 
-```{r grid-logging-rs, echo = FALSE, message = FALSE, fig.height = 9}
+```{r grid-logging-rs, echo = FALSE, message = FALSE, fig.height = 7}
 load("extras/parallel_times/logging_data.RData")
 times_resamples %>%
   ggplot(aes(x = seconds, y = id, col = operation)) +
@@ -411,7 +411,7 @@ In the control functions for the `tune_*()` functions, the argument `parallel_ov
 
 Instead of parallel processing the resamples, an alternate scheme combines the loops over resamples and models into a single loop. The pseudocode for this approach is: 
 
-```{r grid-everything-algo, attr.source = '.numberLines', eval = FALSE}
+```{r grid-everything-algo, attr.source = '.numberLines startFrom="9"', eval = FALSE}
 all_tasks <- crossing(resamples, configurations)
 
 for (iter in all_tasks) {                           
@@ -422,11 +422,11 @@ for (iter in all_tasks) {
 }
 ```
 
-In this case, parallelization now occurs at line 3. For example, if we use 10-fold cross-validation with $M$ tuning parameter values, the loop is executed over $10\times M$ iterations. This increases the number of potential workers that can be used. However, the work in lines 4-5 (related to data processing) are _repeated_ multiple times. If those steps are expensive, this approach will be  inefficient. 
+In this case, parallelization now occurs at line 11. For example, if we use 10-fold cross-validation with $M$ tuning parameter values, the loop is executed over $10\times M$ iterations. This increases the number of potential workers that can be used. However, the work in lines 12-13 (related to data processing) is _repeated_ multiple times. If those steps are expensive, this approach will be  inefficient. 
 
 To illustrate the delegation of tasks to the workers in this scheme, the same example is used but with 12 workers:
 
-```{r grid-logging-all, echo = FALSE, message = FALSE, fig.height = 9}
+```{r grid-logging-all, echo = FALSE, message = FALSE, fig.height = 7}
 times_all  %>%
   ggplot(aes(y = id, x = seconds, col = operation)) +
   geom_point(pch = "|", size = 4) +
@@ -458,7 +458,7 @@ We evaluated this process using variable number of worker processes and using th
 
 First, let's consider the raw execution times:
 
-```{r grid-par-times, echo = FALSE}
+```{r grid-par-times, echo = FALSE, fig.height = 5}
 load("extras/parallel_times/xgb_times.RData")
 ggplot(times, aes(x = num_cores, y = elapsed, col = parallel_over, shape = parallel_over)) + 
       geom_point() + 

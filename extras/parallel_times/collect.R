@@ -24,9 +24,11 @@ get_times <- function(x) {
 ## -----------------------------------------------------------------------------
 
 rdata <-
-   list.files(path = ".",
+   list.files(path = "extras/parallel_times/",
               pattern = "\\.RData",
               full.names = TRUE)
+rdata <- rdata[!grepl("xgb_times", rdata)]
+rdata <- rdata[!grepl("logging_data", rdata)]
 
 all_times <-  map_dfr(rdata, get_times) 
 
@@ -100,7 +102,7 @@ if (interactive()) {
    
 }
 
-save(times, file = "RData/xgb_times.RData")
+save(times, file = "extras/parallel_times/xgb_times.RData")
 
 # r_files <- list.files(path = ".", pattern = "R$")
 # r_files <- r_files[r_files != "collect.R"]
