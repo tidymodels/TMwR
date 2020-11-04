@@ -10,6 +10,7 @@ registerDoMC(cores = parallel::detectCores(logical = TRUE))
 
 ## -----------------------------------------------------------------------------
 
+source("extras/verify_results.R")
 source("extras/sa_2d_plot.R")
 source("extras/bo_3panel_plot.R")
 load(file.path("RData", "svm_large.RData"))
@@ -80,7 +81,7 @@ knitr::include_graphics("premade/roc_surface.png")
 
 The search procedures described below require at least one tuning parameter result before proceeding. For this purpose, the code below creates a small regular grid that resides in the flat portion of the parameter space. The `tune_grid()` function resamples these values:  
 
-```{r iterative-svm-initial}
+```{r iterative-svm-initial, message = FALSE}
 set.seed(234)
 start_grid <- 
  svm_param %>% 
@@ -328,6 +329,7 @@ svm_bo_sshh <-
   )
 
 svm_bo <- svm_bo_sshh$result
+verify_consistent_bo(svm_bo)
 svm_bo_output <- svm_bo_sshh$messages
 
 gp_candidates <- collect_gp_results(svm_bo)
@@ -667,6 +669,7 @@ svm_sa_sshh <-
   )
 
 svm_sa <- svm_sa_sshh$result
+verify_consistent_sa(svm_sa)
 svm_sa_output <- svm_sa_sshh$messages
 
 # We set tune_sim_anneal() to save a file to the temp directory. If the results
