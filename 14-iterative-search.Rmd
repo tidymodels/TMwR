@@ -27,7 +27,7 @@ roc_res <- metric_set(roc_auc)
 
 
 
-## A support vector machine model
+## A support vector machine model {#svm}
 
 The cell data, used in the previous chapter, are also used here. We will use a support vector machine (SVM) model to demonstrate sequential tuning methods. See @apm for model information on this model. The two tuning parameters that will be optimized are the SVM cost value as well has the radial basis function kernel parameter $\sigma$. Both parameters can have a profound effect on the model complexity and performance. 
 
@@ -269,6 +269,35 @@ small_pred %>%
 
 The distribution for a parameter value of 0.40 has a larger region of values that are more likely to show improvement. As a result, its expected improvement score, `r format(small_pred$exp_imp[small_pred$value == 0.4], digits = 3, scientific = FALSE)`, is larger than the score associated with a candidate value of 0.25 (expected improvement of `r format(small_pred$exp_imp[small_pred$value == 0.25], digits = 3, scientific = FALSE)`). 
 
+When computed across the range of the tuning parameter, the best parameter value to choose is `r gp_pred$x[which.max(gp_pred$exp_imp)]`: 
+
+```{r iterative-exp-imp-profile, echo = FALSE, fig.height = 5.5, out.width="100%"}
+p1 <- 
+  gp_pred %>% 
+  ggplot(aes(x = x)) + 
+  geom_point(data = current_iter, aes(y = y)) + 
+  geom_line(aes(y = .mean)) +
+  geom_ribbon(aes(ymin = .mean -  1 * .sd, ymax = .mean + 1 * .sd), alpha = .1) + 
+  labs(y = "Performance Metric", x = NULL) + 
+  theme(
+    axis.title.x=element_blank(),
+    axis.text.x=element_blank(),
+    axis.ticks.x=element_blank(), 
+    plot.margin = unit(c(0, 0, 0, 0), "null")
+  )
+
+p2 <- 
+    gp_pred %>% 
+  ggplot(aes(x = x, y = exp_imp)) + 
+  geom_line() + 
+  labs(y = "Expected Improvement", x = "Tuning Parameter") + 
+  theme(plot.margin = unit(c(0, 0, 0, 0), "null")) +
+  geom_vline(xintercept = gp_pred$x[which.max(gp_pred$exp_imp)], lty = 2)
+
+p1/p2
+```
+
+
 Numerous acquisition functions have been discussed in the literature. For tidymodels, expected improvement is the default. 
 
 ```{r iterative-cells-bo-calcs, echo = FALSE}
@@ -305,9 +334,25 @@ gp_candidates <- collect_gp_results(svm_bo)
 save(gp_candidates, file = "RData/gp_candidates.RData")
 ```
 
-### The `tune_bayes()` function
+### The `tune_bayes()` function {#tune-bayes}
 
+To use Bayesian optimization, use the `tune_bayes()` function. It has syntax that is very similar to `tune_grid()` but with several additional arguments: 
 
+* `iter` is the maximum number of search iterations. 
+
+* `initial` can be either an integer or the results of using `tune_grid()`. For integers, an initial set of results are generated using a space-filling design. 
+
+* `objective` is an argument for which acquisition function should be used. The `r pkg(tune)` package contains functions to pass here, such as `exp_improve()` or `conf_bound()`. 
+
+The `control` argument now uses the results of `control_bayes()`. Some helpful arguments there are: 
+
+* `no_improve` is an integer that will stop the search if improved parameters are not discovered within `no_improve` iterations. 
+
+* `uncertain` is also an integer (in `Inf`) that will take an _uncertainty sample_ if there is no improvement within `uncertain` iterations. This will select the next candidate that has large variation. It has the effect of pure exploration since it does not consider the mean prediction. 
+
+* `verbose` is a logical that will print logging information as the search proceeds. 
+
+For example, we will use the initial SVM results from Section \@ref(svm) are used as the initial substrate for the Gaussian Process model. Our code is: 
 
 ```{r iterative-cells-bo, eval = FALSE}
 ctrl <- control_bayes(verbose = TRUE)
@@ -589,11 +634,12 @@ ggplot(neighbors_values, aes(x = penalty, y = mixture)) +
     y = paste(mixture()$label, "(mixture)")
   )
 ```
+
 Note that, during some iterations, the candidate sets along the radius excludes points outside of the parameter boundaries. Our implementation biases the choice of the next tuning parameter configurations _away_ from new values that are similar to previous configurations. 
 
 For non-numeric parameters, we assign a probability for how often the parameter value changes. 
 
-
+### The `tune_sim_anneal()` function {#tune-sim-anneal}
 
 
 ```{r iterative-cells-sa-calcs, include = FALSE}
