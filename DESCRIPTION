@@ -28,6 +28,7 @@ Imports:
   broom,
   corrr,
   dials (>= 0.0.9),
+  digest,
   doMC,
   dplyr,
   finetune (>= 0.0.0.9003),
