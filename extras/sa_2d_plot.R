@@ -73,7 +73,7 @@ sa_2d_plot <- function(sa_obj, history, large_sa, path = tempdir()) {
       geom_path(
         data = current_res,
         alpha = .5,
-        arrow = arrow(length = unit(0.15, "inches"))
+        arrow = arrow(length = unit(0.1, "inches"))
       ) +
       ggtitle(ttl, subtitle = tmp$results[i]) +
       theme(plot.subtitle = element_text(hjust = text_just))

@@ -531,10 +531,14 @@ race_details <- NULL
 for(iter in 1:10) {
 
   tmp <- mlp_sfd_race %>% filter(.order <= iter)
+
   tmp_att <- full_att
   tmp_att$row.names <- attr(tmp, "row.names")
   attributes(tmp) <- tmp_att
 
+  if (nrow(show_best(tmp)) == 1) {
+    break()
+  }
   race_details <-
     bind_rows(
       race_details,
@@ -571,7 +575,7 @@ iter_three %>%
 Any parameter set whose confidence interval includes zero would lack evidence that its performance is not statistically different from the best results. We retain `r sum(iter_three$upper < 0)` settings; these are resampled more. The remaining `r sum(iter_three$upper >= 0)` submodels are no longer considered. 
 
 ```{r grid-mlp-racing-anim, include = FALSE, dev = 'png'}
-race_ci_plots <- function(x, iters = 10) {
+race_ci_plots <- function(x, iters = max(x$iter)) {
   
   x_rng <- extendrange(c(-x$estimate, -x$upper))
   
@@ -604,7 +608,7 @@ race_ci_plots <- function(x, iters = 10) {
   invisible(NULL)
 }
 av_capture_graphics(
-  race_ci_plots(race_details, 10),
+  race_ci_plots(race_details),
   output = "_book/premade/race_results.mp4",
   width = 720,
   height = 720,

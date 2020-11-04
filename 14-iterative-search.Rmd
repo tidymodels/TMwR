@@ -3,6 +3,7 @@ knitr::opts_chunk$set(fig.path = "figures/")
 library(tidymodels)
 library(finetune)
 library(patchwork)
+library(kableExtra)
 library(av)
 library(doMC)
 registerDoMC(cores = parallel::detectCores(logical = TRUE))
@@ -34,7 +35,7 @@ Like the  multilayer perceptron model,  this model would benefit from the use of
 
 Along with the previously used objects (shown in Section \@ref(grid-summary)), the following tidymodels objects define the model process: 
 
-```{r iterative-svm-defs}
+```{r iterative-svm-defs, message = FALSE}
 svm_rec <- 
   recipe(class ~ ., data = cells) %>%
   step_YeoJohnson(all_predictors()) %>%
@@ -102,18 +103,173 @@ As shown in the following sections, these results can be ingested by the iterati
 
 Bayesian optimization techniques analyze the current resampling results and create a predictive model to predict tuning parameter values that have yet to be evaluated. The tuning parameter combination estimated to be most advantageous is then resampled. These results are then used in another predictive model that predicts more candidate values for testing. The process proceeds for a set number of iterations or until no further improvements occur. @Shahriari @frazier2018tutorial are good introductions to this procedure. 
 
-The main questions in this tuning scheme are how to create the model and how to select parameters predicted by that model. 
+The main questions in this tuning scheme are how to create the model and how to select parameters predicted by that model. First, let's consider the technique most commonly used for Bayesian optimization, the Gaussian Process model. 
 
 ### A Gaussian process model
 
-@RaWi06 @SCHULZ20181
+Gaussian Process (GP) [@SCHULZ20181] models are well-known statistical models that have a history in spatial statistics (under the name of _kriging methods_). They can be derived in multiple ways, including as a Bayesian model (see @RaWi06 for an excellent reference). 
 
+Mathematically, a GP is a a collection of random variables such that their joint probability distribution is a multivariate Gaussian. In the  context of our application, this collection is the performance metrics for the tuning parameter candidate values. For the initial grid of four samples shown above, the realization of these four random variables were `r knitr::combine_words(round(collect_metrics(svm_initial)$mean, 4))`. The _inputs_ that that define the independent variables/predictors for the GP model are the tuning parameter values: 
+ 
+```{r iterative-gp-data-table, echo = FALSE, results = "asis"}
+collect_metrics(svm_initial) %>% 
+  select(ROC = mean, cost, rbf_sigma) %>% 
+  as.data.frame() %>% 
+  format(digits = 4, scientific = FALSE) %>% 
+  kable() %>% 
+  kableExtra::kable_styling(full_width = FALSE) %>% 
+  kableExtra::add_header_above(c("outcome" = 1, "predictors" = 2))
+```
+
+Gaussian Process models are specified by their mean and covariance functions. The latter component has the most effect on the nature of the GP model. The covariance function is often specified in terms of the input values. As an example, a commonly used covariance function is the squared exponential^[This equation is also the same as the _radial basis function_ used in kernel methods, such as the SVM model that is currently being used. This is a coincidence; this covariance function is unrelated to the SVM tuning parameter that we are using. ] function: 
+
+$$cov(y_i, y_j) = exp\left(-\frac{1}{2}|\boldsymbol{x}_i - \boldsymbol{x}_j|^2\right) + \sigma^2_{ij}$$
+where $\sigma^2_{ij}$ is a constant error variance term that is zero when $i=j$. This equation translates to 
+
+> "As the distance of two tuning parameter combinations increases, the covariance between the peformance metrics increase exponentially." 
+
+This also means that the variation of the outcome metric is minimized at the points that have already been observed. 
+
+The nature of this covariance function allows the Gaussian Process model to represent highly nonlinear functions even when only a small amount of data exists. Fitting these models can be difficult in some cases and the model becomes more computationally expensive as the number of tuning parameter combinations increases. 
+
+Another virtue of this model is that, since a full probability model is specified, the predictions for new inputs can reflect the distribution of the outcome. In other words, the performance values can be predicted in terms of both mean and variance. Suppose that two new tuning parameters were under consideration. In the table below, candidate _A_ has a slightly better mean ROC value than candidate _B_ (the current best is `r round(max(collect_metrics(svm_initial)$mean), 4)`). However, its variance is four-fold larger than _B_. Is this good our bad? It means that it would be more risky to sample but has higher return. The increase in variance also reflects that this new value is further away form the existing data than _B_. The next section considers these aspects of GP predictions for Bayesian optimization in more detail.
+
+```{r iterative-gp-pred, echo = FALSE, result = "asis"}
+best_val <- max(collect_metrics(svm_initial)$mean)
+tmp <- tibble(candidate = LETTERS[1:2], .mean = c(.90, .89), .sd = c(0.02, 0.005))
+tmp %>% 
+  select(candidate, mean = .mean, variance = .sd) %>% 
+  mutate(variance = variance^2) %>% 
+  as.data.frame() %>% 
+  format(digits = 4, scientific = FALSE) %>% 
+  kable() %>% 
+  kableExtra::kable_styling(full_width = FALSE) %>% 
+  kableExtra::add_header_above(c(" " = 1, "GP Prediction of ROC AUC" = 2))
+```
+
+As previously mentioned, Bayesian optimization is an iterative process. Based on the existing results, the GP model is fit, and new candidates are predicted. We compute performance estimates for the new configuration, the GP is refit with the additional data point (and so on). 
 
 ### Acquisition functions
 
+Once the Gaussian Process is fit to the current data, how is it used? Our goal is to choose the next tuning parameter combination that is most likely to have "better results" than the current best. One approach to do this, to to create a large candidate set (perhaps using a space-filling design) and then make mean and variance predictions on each.  Using this information, the best tuning parameter value can be chosen. 
 
+A class of objective functions, called _acquisition functions_, are designed to facilitate the trade-off between mean and variance. Recall that the predicted variance of the GP models are mostly driven by how far away they are from the existing data. The trade-off between the predicted mean and variance for new candidates is frequently view through the lens of exploration and exploitation: 
 
-### The `tune_bayes()` function
+* _Exploration_ biases the selection towards regions where there are few (if any) observed candidate models. This tends to give more weight to candidates with higher variance. It focuses on finding new results. 
+
+* _Exploitation_ relies solely on the mean prediction to find the best (mean) value. It focuses on existing results. 
+
+```{r iterative-aq-data, include = FALSE}
+source("extras/nonlinear_function.R")
+grid <- 
+  tibble(x = seq(0, 1, length.out = 200)) %>% 
+  mutate(y = purrr::map_dbl(x, nonlin_function, error = FALSE))
+
+set.seed(121)
+current_iter <- tibble(x = c(.1, .45, .6, .7, .8)) %>% 
+  mutate(y = purrr::map_dbl(x, nonlin_function))
+
+gp <- GPfit::GP_fit(matrix(current_iter$x, ncol = 1), current_iter$y)
+
+gp_pred <- 
+  predict(gp, matrix(grid$x, ncol = 1))$complete_data %>% 
+  as_tibble() %>% 
+  setNames(c("x", ".mean", ".sd"))  %>% 
+  mutate(.sd = sqrt(.sd))
+
+gp_pred <- 
+  gp_pred %>% 
+  bind_cols(
+    exp_improve() %>% 
+      predict(gp_pred, maximize = TRUE, iter = 1, best = max(current_iter$y)) %>% 
+      setNames("exp_imp")
+  ) %>% 
+  bind_cols(
+    conf_bound(kappa = .1) %>% 
+      predict(gp_pred, maximize = TRUE, iter = 1, best = max(current_iter$y)) %>% 
+      setNames("conf_int_01")
+  ) %>% 
+  bind_cols(
+    conf_bound(kappa = 1) %>% 
+      predict(gp_pred, maximize = TRUE, iter = 1, best = max(current_iter$y)) %>% 
+      setNames("conf_int_1")
+  )
+```
+
+To demonstrate, let's look at a toy example with a single parameter that has values between [0, 1]. The true function is shown below in red along with `r nrow(current_iter)` candidate values that have existing results. 
+
+```{r iterative-aq-plot, echo = FALSE, fig.height = 4}
+ggplot(grid, aes(x = x, y = y)) + 
+  geom_line(col = "red", alpha = .5, lwd = 1.25) + 
+  labs(y = "Performance Metric", x = "Tuning Parameter") +
+  geom_point(data = current_iter)
+```
+
+For these data, the GP model tightly fits the current data using a highly nonlinear fit for the mean prediction. The shaded region indicates the mean $\pm$ 1 standard error. 
+
+```{r iterative-gp-fit, echo = FALSE, fig.height = 4}
+gp_pred %>% 
+  ggplot(aes(x = x)) + 
+  geom_point(data = current_iter, aes(y = y)) + 
+  geom_line(aes(y = .mean)) +
+  geom_vline(xintercept = c(0.25, 0.40), lty = 2, alpha = .5) + 
+  geom_ribbon(aes(ymin = .mean -  1 * .sd, ymax = .mean + 1 * .sd), alpha = .1) + 
+  labs(y = "Performance Metric", x = "Tuning Parameter")
+```
+
+The two vertical lines indicate two candidate points that are examined in more detail below. 
+
+The shaded region in the plot above demonstrates the squared exponential variance function; it becomes very large between points and converges to zero at the existing data points. 
+
+From a pure exploitation standpoint, the best choice would select the parameter value that has the best mean prediction. Here, the would be a value of `r round(gp_pred$x[which.max(gp_pred$.mean)], 3)`, just to the left of the existing best observed point at 0.45. 
+
+As a way to add some exploration, a simple (but not often used) approach is to find the tuning parameter associated with the larges confidence interval. For example, by using a single standard deviation in the bound, the next point to sample is `r round(gp_pred$x[which.max(gp_pred$conf_int_1)], 3)`. This is slightly more into the region with no observed results. Increasing the number of standard deviations used in the upper bound would push the selection further into empty regions. 
+
+One of the most commonly used acquisition functions is _expected improvement_. The notion of improvement requires a value for the current best results (unlike the confidence bound approach). Since the GP can describe a new candidate point using a distribution, we can weight the parts of the distribution that show improvement using the probability of the improvement occurring. 
+
+For example, consider two candidate parameter values of 0.25 and 0.40 (indicated by the vertical lines in the plot above). Using the fitted GP model, their predicted distributions are shown below along with a reference line for the current best results:
+
+```{r iterative-exp-imp, echo = FALSE}
+small_pred <- 
+  predict(gp, c(0.25, 0.40))$complete_data %>% 
+  as_tibble() %>% 
+  setNames(c("x", ".mean", ".sd")) %>% 
+  mutate(
+    value = c(0.25, 0.40),
+    .sd = sqrt(.sd),
+    max = .mean + 4 * .sd,
+    min = .mean - 4 * .sd
+  )
+
+small_pred <- 
+  small_pred %>% 
+  bind_cols(
+    exp_improve() %>% 
+      predict(small_pred, maximize = TRUE, iter = 1, best = max(current_iter$y)) %>% 
+      setNames("exp_imp")
+  )
+
+get_density <- function(dat) {
+  res <- tibble(x = seq(dat$min, dat$max, length.out = 200)) %>% 
+    mutate(density = dnorm(x, dat$.mean, dat$.sd),
+           `Parameter Value` = format(dat$value))
+  res
+}
+
+small_pred %>% 
+  group_by(value) %>% 
+  do(get_density(.)) %>% 
+  ungroup() %>% 
+  ggplot(aes(x = x, y = density, col = `Parameter Value`)) + 
+  geom_line() +
+  geom_vline(xintercept = max(current_iter$y), lty = 2) + 
+  labs(x = "Predicted Performance Metric Distribution") + 
+  scale_color_brewer(palette = "Set1")
+```
+
+The distribution for a parameter value of 0.40 has a larger region of values that are more likely to show improvement. As a result, its expected improvement score, `r format(small_pred$exp_imp[small_pred$value == 0.4], digits = 3, scientific = FALSE)`, is larger than the score associated with a candidate value of 0.25 (expected improvement of `r format(small_pred$exp_imp[small_pred$value == 0.25], digits = 3, scientific = FALSE)`). 
+
+Numerous acquisition functions have been discussed in the literature. For tidymodels, expected improvement is the default. 
 
 ```{r iterative-cells-bo-calcs, echo = FALSE}
 # We will do the calculations here but use some non-standard options. First, 
@@ -148,6 +304,10 @@ svm_bo_output <- svm_bo_sshh$messages
 gp_candidates <- collect_gp_results(svm_bo)
 save(gp_candidates, file = "RData/gp_candidates.RData")
 ```
+
+### The `tune_bayes()` function
+
+
 
 ```{r iterative-cells-bo, eval = FALSE}
 ctrl <- control_bayes(verbose = TRUE)
@@ -413,7 +573,7 @@ for (i in 2:6) {
 }
 ```
 
-The process starts with initial values of `penalty = 0.025` and `mixture = 0.050`. Using a radius of 0.1, the data are appropriately scaled, random values are generated on this radius around the initial point, then one is chosen as the candidate. For illustration, we will assume that all candidate values are improvements. Using this new value, a set of new random neighbors are generated, one is chosen, and so on. This figure shows `r max(best_values$Iteration)` iterations as the search proceeds toward the upper left corner: 
+The process starts with initial values of `penalty = 0.025` and `mixture = 0.050`. Using a radii that randomly fluctuate between 0.050 and 0.015, the data are appropriately scaled, random values are generated on radii around the initial point, then one is randomly chosen as the candidate. For illustration, we will assume that all candidate values are improvements. Using this new value, a set of new random neighbors are generated, one is chosen, and so on. This figure shows `r max(best_values$Iteration)` iterations as the search proceeds toward the upper left corner: 
 
 ```{r iterative-neighborhood, echo = FALSE, message = FALSE, warning = FALSE}
 ggplot(neighbors_values, aes(x = penalty, y = mixture)) + 
