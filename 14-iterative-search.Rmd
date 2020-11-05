@@ -26,7 +26,11 @@ roc_res <- metric_set(roc_auc)
 
 # Iterative search {#iterative-search}
 
+As previously mentioned, grid search takes a pre-defined set of candidate values, evaluates them, then chooses the best. Iterative search methods take a different strategy. During the search process, they predict novel candidate values to test next. When grid search is infeasible or inefficient, iterative methods can be effective methods for optimizing tuning parameters. 
 
+The chapter outlines two search methods. First, Bayesian optimization, which uses a statistical model to predict better settings, is discussed. After that, the chapter describes a global search method called simulated annealing. 
+
+We use the same data for illustration but change the model. This chapter uses support vector machine model for illustration since it provides nice two-dimensional visualizations of the search processes.  
 
 ## A support vector machine model {#svm}
 
