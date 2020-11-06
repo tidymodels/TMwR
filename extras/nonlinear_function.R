@@ -16,5 +16,10 @@ nonlin_function <- function(x, error = TRUE) {
   if (!error) {
     err <- 0
   }
-  rnorm(1, mean = p$fit, sd = err)
+  res <- rnorm(1, mean = p$fit, sd = err)
+  # convert to a R^2-like value
+  res <- (8 * res)/10
+  res <- max(res, 0)
+  res <- min(res, 1)
+  res
 }
