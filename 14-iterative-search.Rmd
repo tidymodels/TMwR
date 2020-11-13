@@ -657,13 +657,15 @@ For non-numeric parameters, we assign a probability for how often the parameter 
 
 The syntax for this function are nearly identical to `tune_bayes()`. There are no options for acquisition functions or uncertainty sampling. The `control_sim_anneal()` function has some details that define the local neighborhood and the cooling schedule:
 
+* `no_improve`, for simulated annealing, is an integer that will stop the search if no global best or improved results are not discovered within `no_improve` iterations. Accepted sub-optimal or discarded parameters count as "no improvement".
+
 * `restart` is the number of iterations with no new best results before starting from the previous best results. 
 
 * `radius` is a numeric vector on (0, 1) that defines the minimum and maximum radius that defines the local neighborhood for numeric (non-integer) values. 
 
 * `flip` is a probability value that defines the changes of changing the value of categorical or integer parameters. 
 
-* `cooling_coef` is the `c` coefficient shown above that can modulate how quickly the acceptance probability decreases over iterations. Larger values of cooling_coef` decrease the probability of accepting a sub-optimal parameter setting.
+* `cooling_coef` is the $c$ coefficient in $\exp(c\times D_i \times i)$ that modulates how quickly the acceptance probability decreases over iterations. Larger values of `cooling_coef` decrease the probability of accepting a sub-optimal parameter setting.
 
 For the cell segmentation data, the syntax is very consistent with the previously used functions: 
 
@@ -674,8 +676,7 @@ For the cell segmentation data, the syntax is very consistent with the previousl
 # This means that any changes to this chunk have to be made to the next chunk 
 # (where the code is shown and not executed).
 
-ctrl_sa <- control_sim_anneal(no_improve = 10L, verbose = TRUE)
-ctrl_sa$sa_history <- TRUE
+ctrl_sa <- control_sim_anneal(no_improve = 10L, verbose = TRUE, save_history = TRUE)
 
 tune_sim_anneal_sssshhh <- purrr::quietly(tune_sim_anneal)
 

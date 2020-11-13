@@ -12,6 +12,23 @@ registerDoMC(cores = parallel::detectCores(logical = TRUE))
 
 library(kableExtra)
 
+theme_transparent <- function(...) {
+
+  ret <- ggplot2::theme_bw(...)
+  
+  trans_rect <- ggplot2::element_rect(fill = "transparent", colour = NA)
+  ret$panel.background  <- trans_rect
+  ret$plot.background   <- trans_rect
+  ret$legend.background <- trans_rect
+  ret$legend.key        <- trans_rect
+  
+  ret$legend.position <- "top"
+  
+  ret
+}
+
+theme_set(theme_transparent)
+
 ## -----------------------------------------------------------------------------
 
 load("RData/mlp_times.RData")
@@ -108,6 +125,7 @@ For `penalty`, the random numbers are uniform on the log (base 10) scale but the
 The issue with random grids is that, with small-to-medium grids, random values can result in overlapping parameter combinations. Also, the random grid needs to cover the whole parameter space but the likelihood of good coverage increases with the number of grid values.  Even for a sample of 15 candidate points, this plot shows some overlap between points for our example multilayer perceptron: 
 
 ```{r grid-random-matrix, fig.height = 6, fig.width = 6}
+theme_set(theme_bw())
 library(ggforce)
 set.seed(200)
 mlp_param %>% 
@@ -389,23 +407,20 @@ This is the optimal scenario when the preprocessing method is expensive. However
 
 To illustrate how the parallel processing works, consider a situation with 10-fold cross-validation, a grid of eight tuning parameter combinations (all on model parameters), and ten worker processes (i.e., cores). 
 
-Using the scheme that parallelizes resamples, this visualization shows how the tasks are allocated to the worker processes: 
+Using the scheme that parallelizes resamples, we'll use a case where there are 7 model tuning parameter values, with 5-fold cross-validation. This visualization shows how the tasks are allocated to the worker processes
 
-```{r grid-logging-rs, echo = FALSE, message = FALSE, fig.height = 7}
-load("extras/parallel_times/logging_data.RData")
-times_resamples %>%
-  ggplot(aes(x = seconds, y = id, col = operation)) +
-  geom_point(pch = "|", size = 4) +
-  facet_wrap(~ pid) +
-  theme_bw() +
-  theme(legend.position = "top",
-        panel.grid.minor.x = element_blank(),
-        panel.grid.major.x = element_blank()) +
-  labs(y = NULL, x = "Elapsed Time (s)") + 
-  scale_color_brewer(palette = "Dark2")
+```{r grid-logging-rs, echo = FALSE, message = FALSE, fig.width=5, fig.height=4, out.width = "70%"}
+load("extras/parallel_times/resamples_times.RData")
+resamples_times %>%
+  dplyr::rename(operation = label) %>% 
+  ggplot(aes(y = id_alt, x = duration, fill = operation)) +
+  geom_bar(stat = "identity", col = "black") +
+  labs(y = NULL, x = "Elapsed Time") + 
+  scale_fill_brewer(palette = "Set2") +
+  theme(legend.position = "top")
 ```
 
-Note that each fold is assigned to its own worker process and, since only model parameters are being tuned, the preprocessing is conducted once per fold/worker. If fewer than 10 worker processes were used, some workers would receive multiple folds. 
+Note that each fold is assigned to its own worker process and, since only model parameters are being tuned, the preprocessing is conducted once per fold/worker. If fewer than 5 worker processes were used, some workers would receive multiple folds. 
 
 In the control functions for the `tune_*()` functions, the argument `parallel_over` controls how the process is executed. To use the approach shown above, the argument is `parallel_over = "resamples"`. 
 
@@ -422,24 +437,25 @@ for (iter in all_tasks) {
 }
 ```
 
-In this case, parallelization now occurs at line 11. For example, if we use 10-fold cross-validation with $M$ tuning parameter values, the loop is executed over $10\times M$ iterations. This increases the number of potential workers that can be used. However, the work in lines 12-13 (related to data processing) is _repeated_ multiple times. If those steps are expensive, this approach will be  inefficient. 
+In this case, parallelization now occurs at line 11. For example, if we use 5-fold cross-validation with $M$ tuning parameter values, the loop is executed over $5\times M$ iterations. This increases the number of potential workers that can be used. However, the work in lines 12-13 (related to data processing) is _repeated_ multiple times. If those steps are expensive, this approach will be  inefficient. 
 
-To illustrate the delegation of tasks to the workers in this scheme, the same example is used but with 12 workers:
+In tidymodels, validation sets are treated as a single resample. In these cases, this parallelization scheme would be best. 
+
+To illustrate the delegation of tasks to the workers in this scheme, the same example is used but with 10 workers:
 
 ```{r grid-logging-all, echo = FALSE, message = FALSE, fig.height = 7}
-times_all  %>%
-  ggplot(aes(y = id, x = seconds, col = operation)) +
-  geom_point(pch = "|", size = 4) +
-  facet_wrap(~ pid) +
-  theme_bw() +
-  labs(y = NULL, x = "Elapsed Time (s)") +
-  theme(legend.position = "top",
-        panel.grid.minor.x = element_blank(),
-        panel.grid.major.x = element_blank()) + 
-  scale_color_brewer(palette = "Dark2")
+load("extras/parallel_times/everything_times.RData")
+everything_times %>%
+  dplyr::rename(operation = label) %>% 
+  ggplot(aes(y = id, x = duration, fill = operation)) +
+  geom_bar(stat = "identity", col = "black") +
+  facet_wrap(~ pid, nrow = 2) + 
+  labs(y = NULL, x = "Elapsed Time") + 
+  scale_fill_brewer(palette = "Set2") +
+  theme(legend.position = "top")
 ```
 
-Here, each worker process handles multiple folds and the preprocessing is needlessly repeated. 
+Here, each worker process handles multiple folds and the preprocessing is needlessly repeated. For example, for the first fold, the preprocessing was computed `r everything_times %>% dplyr::filter(id == "Fold1" & event == "preproc") %>% nrow()` times instead of once. 
 
 For this scheme, the control function argument is `parallel_over = "everything"`. 
 
@@ -489,7 +505,8 @@ ggplot(times, aes(x = num_cores, y = speed_up, col = parallel_over, shape = para
   geom_line() +
   facet_wrap(~ preprocessing) + 
   coord_obs_pred() +
-  labs(x = "Number of Workers", y = "Speed-up") 
+  labs(x = "Number of Workers", y = "Speed-up")  +
+  theme(legend.position = "top")
 ```
 
 The best speed-ups, for these data, occur when `parallel_over = "resamples"` and when the computations are expensive. However, in the latter case, the previous analysis indicates that the overall model fits are slower.  
@@ -640,7 +657,8 @@ mlp_sfd_race <-
     cell_folds,
     grid = 20,
     param_info = mlp_param,
-    metrics = roc_res
+    metrics = roc_res,
+    control = control_race(verbose_elim = TRUE)
   )
 ```
 

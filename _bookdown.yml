@@ -18,7 +18,6 @@ rmd_files: [
   "12-tuning-parameters.Rmd",
   "13-grid-search.Rmd",
   "14-iterative-search.Rmd",
-  "explaining-models.Rmd",
   "appendix.Rmd",
   "pre-proc-table.Rmd",
   "references.Rmd"

@@ -31,7 +31,7 @@ Imports:
   digest,
   doMC,
   dplyr,
-  finetune (>= 0.0.0.9003),
+  finetune (>= 0.0.0.9004),
   ggforce,
   ggplot2,
   gridExtra,
