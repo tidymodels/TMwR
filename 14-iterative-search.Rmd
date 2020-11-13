@@ -106,7 +106,7 @@ As shown in the following sections, these results can be ingested by the iterati
 
 ## Bayesian  optimization
 
-Bayesian optimization techniques analyze the current resampling results and create a predictive model to predict tuning parameter values that have yet to be evaluated. The tuning parameter combination estimated to be most advantageous is then resampled. These results are then used in another predictive model that predicts more candidate values for testing. The process proceeds for a set number of iterations or until no further improvements occur. @Shahriari @frazier2018tutorial are good introductions to this procedure. 
+Bayesian optimization techniques analyze the current resampling results and create a predictive model to predict tuning parameter values that have yet to be evaluated. The tuning parameter combination estimated to be most advantageous is then resampled. These results are then used in another predictive model that predicts more candidate values for testing. The process proceeds for a set number of iterations or until no further improvements occur. @Shahriari and @frazier2018tutorial are good introductions to this procedure. 
 
 The main questions in this tuning scheme are how to create the model and how to select parameters predicted by that model. First, let's consider the technique most commonly used for Bayesian optimization, the Gaussian process model. 
 
@@ -137,7 +137,9 @@ This also means that the variation of the outcome metric is minimized at the poi
 
 The nature of this covariance function allows the Gaussian process model to represent highly nonlinear functions even when only a small amount of data exists. Fitting these models can be difficult in some cases and the model becomes more computationally expensive as the number of tuning parameter combinations increases. 
 
-Another virtue of this model is that, since a full probability model is specified, the predictions for new inputs can reflect the distribution of the outcome. In other words, the performance values can be predicted in terms of both mean and variance. Suppose that two new tuning parameters were under consideration. In the table below, candidate _A_ has a slightly better mean ROC value than candidate _B_ (the current best is `r round(max(collect_metrics(svm_initial)$mean), 4)`). However, its variance is four-fold larger than _B_. Is this good our bad? It means that it would be more risky to sample but has higher return. The increase in variance also reflects that this new value is further away form the existing data than _B_. The next section considers these aspects of GP predictions for Bayesian optimization in more detail.
+Another virtue of this model is that, since a full probability model is specified, the predictions for new inputs can reflect the distribution of the outcome. In other words, the performance values can be predicted in terms of both mean and variance. 
+
+Suppose that two new tuning parameters were under consideration. In the table below, candidate _A_ has a slightly better mean ROC value than candidate _B_ (the current best is `r round(max(collect_metrics(svm_initial)$mean), 4)`). However, its variance is four-fold larger than _B_. Is this good our bad? It means that it would be more risky to sample but has higher return. The increase in variance also reflects that this new value is further away form the existing data than _B_. The next section considers these aspects of GP predictions for Bayesian optimization in more detail.
 
 ```{r iterative-gp-pred, echo = FALSE, result = "asis"}
 best_val <- max(collect_metrics(svm_initial)$mean)
@@ -152,17 +154,17 @@ tmp %>%
   kableExtra::add_header_above(c(" " = 1, "GP Prediction of ROC AUC" = 2))
 ```
 
-As previously mentioned, Bayesian optimization is an iterative process. Based on the existing results, the GP model is fit, and new candidates are predicted. We compute performance estimates for the new configuration, the GP is refit with the additional data point (and so on). 
+As previously mentioned, Bayesian optimization is an iterative process. Based on the existing results, the GP model is fit, new candidates are predicted, and one is selected. We compute performance estimates for the new configuration, the GP is refit with the additional data point (and so on). 
 
 ### Acquisition functions
 
-Once the Gaussian process is fit to the current data, how is it used? Our goal is to choose the next tuning parameter combination that is most likely to have "better results" than the current best. One approach to do this, to to create a large candidate set (perhaps using a space-filling design) and then make mean and variance predictions on each.  Using this information, the best tuning parameter value can be chosen. 
+Once the Gaussian process is fit to the current data, how is it used? Our goal is to choose the next tuning parameter combination that is most likely to have "better results" than the current best. One approach to do this is to create a large candidate set (perhaps using a space-filling design) and then make mean and variance predictions on each.  Using this information, the best tuning parameter value can be chosen. 
 
 A class of objective functions, called _acquisition functions_, are designed to facilitate the trade-off between mean and variance. Recall that the predicted variance of the GP models are mostly driven by how far away they are from the existing data. The trade-off between the predicted mean and variance for new candidates is frequently viewed through the lens of exploration and exploitation: 
 
 * _Exploration_ biases the selection towards regions where there are fewer (if any) observed candidate models. This tends to give more weight to candidates with higher variance and focuses on finding new results. 
 
-* _Exploitation_ relies solely on the mean prediction to find the best (mean) value. It focuses on existing results. 
+* _Exploitation_ principally relies on the mean prediction to find the best (mean) value. It focuses on existing results. 
 
 ```{r iterative-aq-data, include = FALSE}
 source("extras/nonlinear_function.R")
