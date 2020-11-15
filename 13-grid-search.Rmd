@@ -12,23 +12,6 @@ registerDoMC(cores = parallel::detectCores(logical = TRUE))
 
 library(kableExtra)
 
-theme_transparent <- function(...) {
-
-  ret <- ggplot2::theme_bw(...)
-  
-  trans_rect <- ggplot2::element_rect(fill = "transparent", colour = NA)
-  ret$panel.background  <- trans_rect
-  ret$plot.background   <- trans_rect
-  ret$legend.background <- trans_rect
-  ret$legend.key        <- trans_rect
-  
-  ret$legend.position <- "top"
-  
-  ret
-}
-
-theme_set(theme_transparent)
-
 ## -----------------------------------------------------------------------------
 
 load("RData/mlp_times.RData")
@@ -244,7 +227,7 @@ mlp_reg_tune
 There are high-level convenience functions to understand the results. First, the `autoplot()` method for regular grids shows the performance profiles across tuning parameters:  
 
 ```{r grid-cells-reg-plot, fig.height = 6}
-autoplot(mlp_reg_tune)
+autoplot(mlp_reg_tune) + theme(legend.position = "top")
 ```
 
 For these data, the amount of penalization has the largest impact on the area under the ROC curve. The number of epochs doesn't appear to have a pronounced effect on performance. The change in the number of hidden units appears to matter most when the amount of regularization is low (with reduced performance). There are several parameter configurations that have roughly equivalent performance, as seen using the function `show_best()`: 
@@ -274,7 +257,7 @@ mlp_sfd_tune
 The `autoplot()` method will also work with these designs although the format of the results are different:
 
 ```{r grid-cells-sdf-plot}
-autoplot(mlp_sfd_tune)
+autoplot(mlp_sfd_tune) + theme(legend.position = "top")
 ```
 
 This _marginal effects plot_ shows the relationship of each parameter with the performance metric. 
