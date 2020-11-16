@@ -79,7 +79,6 @@ The plot below shows the results. There is a large swath in the lower diagonal o
 
 ```{r iterative-roc-surface, out.width = "80%", echo = FALSE, warning = FALSE}
 # See file extras/cells_svm_large.R
-res <- file.copy("premade/roc_surface.png", "_book/premade/roc_surface.png")
 knitr::include_graphics("premade/roc_surface.png")
 ```
 
@@ -515,7 +514,7 @@ if (!exists("gp_candidates")) {
 }
 av_capture_graphics(
   make_bo_animation(gp_candidates, svm_bo),
-  output = "_book/premade/bo_search.mp4",
+  output = "bo_search.mp4",
   width = 720,
   height = 720,
   res = 100,
@@ -525,7 +524,7 @@ av_capture_graphics(
 ```
 
 <video width="720" height="720" controls>
-  <source src="_book/premade/bo_search.mp4" type="video/mp4">
+  <source src="bo_search.mp4" type="video/mp4">
 </video>
 
 

@@ -184,26 +184,13 @@ Data cleaning can also overlap with the second phase of **understanding the data
 Finally, before starting a data analysis process, there should be clear expectations of the goal of the model and how performance (and success) will be judged. At least one _performance metric_ should be identified with realistic goals of what can be achieved. Common statistical metrics, discussed in more detail in Chapter \@ref(performance), are classification accuracy, true and false positive rates, root mean squared error, and so on. The relative benefits and drawbacks of these metrics should be weighed. It is also important that the metric be germane; alignment with the broader data analysis goals is critical. 
 
 ```{r software-data-science-model, echo = FALSE, out.width = '80%', fig.cap = "The data science process (from R for Data Science).", warning = FALSE}
-
-if (knitr:::is_html_output()) {
-  file.copy("premade/data-science-model.svg", "_book/premade/data-science-model.svg")
-  knitr::include_graphics("premade/data-science-model.svg")
-} else {
-  file.copy("premade/data-science-model.pdf", "_book/premade/data-science-model.pdf")
-  knitr::include_graphics("premade/data-science-model.pdf")
-}
+knitr::include_graphics("premade/data-science-model.svg")
 ```
 
 The process of investigating the data may not be simple. @wickham2016 contains an excellent illustration of the general data analysis process, reproduced with Figure \@ref(fig:software-data-science-model). Data ingestion and cleaning/tidying are shown as the initial steps. When the analytical steps for understanding commence, they are a heuristic process; we cannot pre-determine how long they may take. The cycle of analysis, modeling, and visualization often requires multiple iterations. 
 
 ```{r software-modeling-process, echo = FALSE, out.width = '100%', fig.width=8, fig.height=3, fig.cap = "A schematic for the typical modeling process.", warning = FALSE}
-if (knitr:::is_html_output()) {
-  file.copy("premade/modeling-process.svg", "_book/premade/modeling-process.svg")
-  knitr::include_graphics("premade/modeling-process.svg")
-} else {
-  file.copy("premade/modeling-process.pdf", "_book/premade/modeling-process.pdf")
-  knitr::include_graphics("premade/modeling-process.pdf")
-}
+knitr::include_graphics("premade/modeling-process.svg")
 ```
 
 This iterative process is especially true for modeling. Figure \@ref(fig:software-modeling-process) is meant to emulate the typical path to determining an appropriate model. The general phases are:

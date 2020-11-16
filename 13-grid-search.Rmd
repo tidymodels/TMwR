@@ -607,7 +607,7 @@ race_ci_plots <- function(x, iters = max(x$iter)) {
 }
 av_capture_graphics(
   race_ci_plots(race_details),
-  output = "_book/premade/race_results.mp4",
+  output = "race_results.mp4",
   width = 720,
   height = 720,
   res = 120,
@@ -616,7 +616,7 @@ av_capture_graphics(
 ```
 
 <video width="720" height="720" controls>
-  <source src="_book/premade/race_results.mp4" type="video/mp4">
+  <source src="race_results.mp4" type="video/mp4">
 </video>
 
 The process continues for each resample; after the next set of performance metrics, a new model is fit to these statistics, and more  submodels are potentially discarded. See @kuhn2014futility for more details on the computational aspects of this approach. 

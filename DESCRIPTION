@@ -18,7 +18,7 @@ Authors@R: c(
     )
   )
 Depends: R (>= 4.0.0)
-URL: https://github.com/topepo/TMwR
+URL: https://github.com/tidymodels/TMwR, https://www.tmwr.org/
 SystemRequirements: FFmpeg (>= 3.2); with at least libx264 and lame (mp3) 
   drivers. Debian/Ubuntu: libavfilter-dev, Fedora/CentOS: ffmpeg-devel 
   (via https://rpmfusion.org), MacOS Homebrew: ffmp
