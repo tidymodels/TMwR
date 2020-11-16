@@ -388,9 +388,7 @@ This is the optimal scenario when the preprocessing method is expensive. However
 
 * The number of parallel workers is limited by the number of resamples. For example, with 10-fold cross-validation you can only use 10 parallel workers even when the computer has more than 10 cores. 
 
-To illustrate how the parallel processing works, consider a situation with 10-fold cross-validation, a grid of eight tuning parameter combinations (all on model parameters), and ten worker processes (i.e., cores). 
-
-Using the scheme that parallelizes resamples, we'll use a case where there are 7 model tuning parameter values, with 5-fold cross-validation. This visualization shows how the tasks are allocated to the worker processes
+To illustrate how the parallel processing works, we'll use a case where there are 7 model tuning parameter values, with 5-fold cross-validation. This visualization shows how the tasks are allocated to the worker processes
 
 ```{r grid-logging-rs, echo = FALSE, message = FALSE, fig.width=5, fig.height=4, out.width = "70%"}
 load("extras/parallel_times/resamples_times.RData")
