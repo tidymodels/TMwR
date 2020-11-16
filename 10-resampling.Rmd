@@ -11,6 +11,8 @@ source("ames_snippets.R")
 load("RData/lm_fit.RData")
 ```
 
+# (PART\*) Tools for Creating Effective Models {-} 
+
 # Resampling for evaluating performance  {#resampling}
 
 Chapter \@ref(performance) described statistics for measuring model performance, but which data are best used to compute these statistics? Chapter \@ref(splitting) introduced the idea of data spending where the test set was recommended for obtaining an unbiased estimate of performance. However, we usually need to understand the effectiveness of the model _before using the test set_. 
@@ -199,7 +201,7 @@ ames_folds <- vfold_cv(ames_train, v = 10)
 ames_folds
 ```
 
-The column named `splits` contains the information on how to split the data (similar to the object used to create the initial training/test partition). While each row of `splits` has an embedded copy of the entire training set, R is smart enough not to make copies of the data in memory. The print method inside of the tibble shows the frequency of each: `[2K/220]` indicates that roughly two thousand samples are in the analysis set and 220 are in that particular assessment set. 
+The column named `splits` contains the information on how to split the data (similar to the object used to create the initial training/test partition). While each row of `splits` has an embedded copy of the entire training set, R is smart enough not to make copies of the data in memory^[To see this for yourself, try executing `lobstr::obj_size(ames_folds)` and `lobstr::obj_size(ames_train)`. The size of the resample object is much less than ten times the size of the original data.]. The print method inside of the tibble shows the frequency of each: `[2K/220]` indicates that roughly two thousand samples are in the analysis set and 220 are in that particular assessment set. 
 
 To manually retrieve the partitioned data, the `analysis()` and `assessment()` functions return the corresponding data frames: 
 

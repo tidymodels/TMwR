@@ -4,6 +4,8 @@ library(tidymodels)
 data(ames)
 ```
 
+# (PART\*) Basics {-} 
+
 # The Ames housing data {#ames}
 
 The Ames housing data set [@ames] is an excellent resource for learning about models that we will use throughout this book. It contains data on `r format(nrow(ames), big.mark = ",")` properties in Ames, Iowa, including columns related to 
@@ -117,7 +119,7 @@ res <- file.copy("premade/dot_rr.png", "_book/premade/dot_rr.png")
 knitr::include_graphics("premade/dot_rr.png")
 ```
 
-As previously described in Chapter \@ref(introduction), it is critical to conduct _exploratory data analysis_ prior to beginning any modeling. These housing data have characteristics that present interesting challenges about how the data should be processed and modeled. We describe many of these in later chapters. Some basic questions that could be examined include: 
+As previously described in Chapter \@ref(software-modeling), it is critical to conduct _exploratory data analysis_ prior to beginning any modeling. These housing data have characteristics that present interesting challenges about how the data should be processed and modeled. We describe many of these in later chapters. Some basic questions that could be examined include: 
 
  * Are there any odd or noticeable things about the distributions of the individual predictors? Is there much skewness or any pathological distributions? 
 

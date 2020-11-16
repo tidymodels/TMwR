@@ -1,6 +1,6 @@
 Package: TMwR
 Title: Tidy Modeling with R.
-Version: 0.0.1.9006
+Version: 0.0.1.9008
 Authors@R: c(
     person(
       given = "Max",
@@ -14,7 +14,7 @@ Authors@R: c(
       family = "Silge",
       email = "julia.silge@rstudio.com",
       comment = c(ORCID = "0000-0002-3671-836X"),
-      role = c("aut", "cre")
+      role = c("aut")
     )
   )
 Depends: R (>= 4.0.0)
@@ -65,6 +65,6 @@ Imports:
   yardstick
 Remotes:
   tidymodels/tune,
-  tidymodels/recipes,
   tidymodels/tidymodels,
   tidymodels/finetune
+

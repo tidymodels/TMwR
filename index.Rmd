@@ -5,7 +5,7 @@ author: ["Max Kuhn and Julia Silge"]
 date: "`r tmwr_version()`"
 site: bookdown::bookdown_site
 description: "Modeling of data is integral to science, business, politics, and many other aspects of our lives. The goals of this book are to: introduce neophytes to models and the tidyverse, demonstrate the `tidymodels` packages, and to outline good practices for the phases of the modeling process."
-github-repo: topepo/TMwR
+github-repo: tidymodels/TMwR
 twitter-handle: topepos
 documentclass: book
 classoption: 11pt
@@ -25,7 +25,7 @@ This is the website for _Tidy Modeling with R_. This book is a guide to using a 
 
 This book is not intended to be a comprehensive reference on modeling techniques; we suggest other resources to learn such nuances. For general background on the most common type of model, the linear model, we suggest @fox08.  For predictive models, @apm is a good resource. Also, @fes is referenced heavily here, mostly because it is freely available online.  For machine learning methods, @Goodfellow is an excellent (but formal) source of information. In some cases, we describe models that are used in this text but in a way that is less mathematical, and hopefully more intuitive. 
 
-::rmdnote
+:::rmdnote
 Investigating and analyzing data are an important part of the model process, and an excellent resource on this topic is @wickham2016.
 :::
 
@@ -35,11 +35,11 @@ We do not assume that readers have extensive experience in model building and st
 _Tidy Modeling with R_ is currently a work in progress. As we create it, this website is updated. Be aware that, until it is finalized, the content and/or structure of the book may change. 
 :::
 
-This openness also allows users to contribute if they wish. Most often, this comes in the form of correcting typos, grammar, and other aspects of our work that could use improvement. Instructions for making contributions can be found in the [`contributing.md`](https://github.com/topepo/TMwR/blob/master/contributing.md) file. Also, be aware that this effort has a code of conduct, which can be found at [`code_of_conduct.md`](https://github.com/topepo/TMwR/blob/master/code_of_conduct.md). 
+This openness also allows users to contribute if they wish. Most often, this comes in the form of correcting typos, grammar, and other aspects of our work that could use improvement. Instructions for making contributions can be found in the [`contributing.md`](https://github.com/tidymodels/TMwR/blob/master/contributing.md) file. Also, be aware that this effort has a code of conduct, which can be found at [`code_of_conduct.md`](https://github.com/tidymodels/TMwR/blob/master/code_of_conduct.md). 
 
 The tidymodels packages are fairly young in the software lifecycle. We will do our best to maintain backwards compatibility and, at the completion of this work, will archive and tag the specific versions of software that were used to produce it. 
 
-This book was written in [RStudio](http://www.rstudio.com/ide/) using [bookdown](http://bookdown.org/). The [website](linkhere) is hosted via [Netlify](http://netlify.com/), and automatically built after every push by [GitHub Actions](https://help.github.com/actions). The complete source is available on [GitHub](https://github.com/topepo/TMwR). We generated all plots in this book using [ggplot2](https://ggplot2.tidyverse.org/) and its black and white theme (`theme_bw()`). This version of the book was built with `r R.version.string`, [pandoc](https://pandoc.org/) version `r rmarkdown::pandoc_version()`, and the following packages:
+This book was written in [RStudio](http://www.rstudio.com/ide/) using [bookdown](http://bookdown.org/). The [`tmwr.org`](https://tmwr.org) website is hosted via [Netlify](http://netlify.com/), and automatically built after every push by [GitHub Actions](https://help.github.com/actions). The complete source is available on [GitHub](https://github.com/tidymodels/TMwR). We generated all plots in this book using [ggplot2](https://ggplot2.tidyverse.org/) and its black and white theme (`theme_bw()`). This version of the book was built with `r R.version.string`, [pandoc](https://pandoc.org/) version `r rmarkdown::pandoc_version()`, and the following packages:
 
 ```{r pkg-list, echo = FALSE, results="asis"}
 deps <- desc::desc_get_deps()

@@ -10,7 +10,7 @@ source("ames_snippets.R")
 
 # Fitting models with parsnip {#models}
 
-The `r pkg(parsnip)` package provides a fluent and standardized interface for a variety of different models. In this chapter, we both give some motivation for why a common interface is beneficial and show how the use the package. 
+The `r pkg(parsnip)` package provides a fluent and standardized interface for a variety of different models. In this chapter, we both give some motivation for why a common interface is beneficial and show how to use the package. 
 
 In Chapter \@ref(recipes), we discussed recipe objects for feature engineering and data preprocessing prior to modeling. Recipes are not discussed in this chapter in order to focus on the model itself; Chapter \@ref(workflows) illustrates how to combine models and recipes together into something called a `workflow` object. 
  
@@ -260,10 +260,10 @@ lm_form_fit %>% pluck("fit") %>% vcov()
 ```
 
 :::rmdwarning
-Never pass the `fit` element of a `r pkg(parsnip)` model to a model prediction function; see Section \@ref(parsnip-predictions) for making predictions. If the data were preprocessed in any way, incorrect predictions will be generated (sometimes, without errors). The underlying model's prediction function has no idea if any transformations have been made to the data prior to running the model.
+Never pass the `fit` element of a `r pkg(parsnip)` model to a model prediction function, e.g., use `predict(lm_form_fit)` but **do not** use `predict(lm_form_fit$fit)`. If the data were preprocessed in any way, incorrect predictions will be generated (sometimes, without errors). The underlying model's prediction function has no idea if any transformations have been made to the data prior to running the model. See Section \@ref(parsnip-predictions) for more on making predictions. 
 :::
 
-One issue with some existing methods in base R is that the results are stored in a manner that may not be the most useful. For example, the `summary()` method for `lm` objects can be used used to print the results of the model fit, including a table with parameter values, their uncertainty estimates, and p-values. These particular results can also be saved:
+One issue with some existing methods in base R is that the results are stored in a manner that may not be the most useful. For example, the `summary()` method for `lm` objects can be used to print the results of the model fit, including a table with parameter values, their uncertainty estimates, and p-values. These particular results can also be saved:
 
 ```{r models-lm-param}
 model_res <- 
@@ -372,7 +372,7 @@ This demonstrates the benefit of homogenizing the data analysis process and synt
 
 ## parsnip-adjacent packages
 
-The `r pkg(parsnip)` package itself contains interfaces to a number of models. However, for ease of package installation and maintenance, there are other tidymodels packages that have `r pkg(parsnip)` model definitions for other sets of models. The `r pkg(discrim)` package has model definitions for the set of classification techniques called _disciminant analysis_ methods (such as linear or quadratic discriminant analysis). In this way, the package dependencies required for installing `r pkg(parsnip)` are reduced. A list of _all_ of the models that can be used with `r pkg(parsnip)` (across different packages that are on CRAN) can be found at [`tidymodels.org/find`](https://www.tidymodels.org/find/).  
+The `r pkg(parsnip)` package itself contains interfaces to a number of models. However, for ease of package installation and maintenance, there are other tidymodels packages that have `r pkg(parsnip)` model definitions for other sets of models. The `r pkg(discrim)` package has model definitions for the set of classification techniques called _discriminant analysis_ methods (such as linear or quadratic discriminant analysis). In this way, the package dependencies required for installing `r pkg(parsnip)` are reduced. A list of _all_ of the models that can be used with `r pkg(parsnip)` (across different packages that are on CRAN) can be found at [`tidymodels.org/find`](https://www.tidymodels.org/find/).  
 
 ## Chapter summary {#models-summary}
 
