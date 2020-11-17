@@ -832,7 +832,7 @@ A visualization of the search path helps understand where the search process did
 ```{r iterative-sa-plot, include = FALSE}
 av_capture_graphics(
   sa_2d_plot(svm_sa, result_history, svm_large),
-  output = "_book/premade/sa_search.mp4",
+  output = "sa_search.mp4",
   width = 720,
   height = 720,
   res = 120,
@@ -842,7 +842,7 @@ av_capture_graphics(
 ```
 
 <video width="720" height="720" controls>
-  <source src="_book/premade/sa_search.mp4" type="video/mp4">
+  <source src="sa_search.mp4" type="video/mp4">
 </video>
 
 Like `tune_bayes()`, manually stopping execution will return the completed iterations. 
