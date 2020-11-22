@@ -139,7 +139,7 @@ Finally, at the beginning of this chapter, we warned about using the same data f
 
 ## Chapter summary {#splitting-summary}
  
-Data splitting is the fundamental tool for empirical validation for models. Even in the era of unrestrained data collection, a typical modeling project has a limited amount of appropriate data and wise "spending" of a project's data is necessary. In this chapter, we discussed several strategies for partitioning the data into distinct groups for modeling and evaluation. 
+Data splitting is the fundamental tool for empirical validation of models. Even in the era of unrestrained data collection, a typical modeling project has a limited amount of appropriate data and wise "spending" of a project's data is necessary. In this chapter, we discussed several strategies for partitioning the data into distinct groups for modeling and evaluation. 
 
 At this checkpoint, the important code snippets are:
 
