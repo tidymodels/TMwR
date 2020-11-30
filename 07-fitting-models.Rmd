@@ -50,7 +50,7 @@ A popular non-Bayesian approach to regularized regression is the glmnet model [@
 model <- glmnet(x = matrix, y = vector, family = "gaussian", ...)
 ```
 
-In this case, the predictor data must already be formatted into a numeric matrix; there is only and `x`/`y` method and no formula method. 
+In this case, the predictor data must already be formatted into a numeric matrix; there is only an `x`/`y` method and no formula method. 
 
 Note that these interfaces are heterogeneous in either how the data are passed to the model function or in terms of their arguments. The first issue is that, to fit models across different packages, the data must be formatted in different ways. `lm()` and `stan_glm()` only have formula interfaces while `glmnet()` does not. For other types of models, the interfaces may be even more disparate. For a person trying to do data analysis, these differences require the memorization of each package's syntax and can be very frustrating. 
 
@@ -116,7 +116,7 @@ lm_xy_fit
 ```
 
 :::rmdwarning
-The differences are between `fit()` and `fit_xy()` may not be obvious. 
+The differences between `fit()` and `fit_xy()` may not be obvious. 
 
 When `fit()` is used with a model specification, this _almost always_ means that dummy variables will be created from qualitative predictors. If the underlying function requires a matrix (like glmnet), it will make them. However, if the underlying function uses a formula, `fit()` just passes the formula to that function. We estimate that 99% of modeling functions using formulas make dummy variables. The other 1% include tree-based methods that do not require purely numeric predictors.^[See Section \@ref(workflow-encoding) for more about using formulas in tidymodels.]
 
