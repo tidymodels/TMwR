@@ -143,13 +143,7 @@ ames_train %>% nrow()
 To reiterate, using a recipe is a three phase process summarized as:
 
 ```{r engineering-recipe-process, echo = FALSE, out.width = '60%', warning = FALSE}
-if (knitr:::is_html_output()) {
-  file.copy("premade/recipes-process.svg", "_book/premade/recipes-process.svg")
-  knitr::include_graphics("premade/recipes-process.svg")
-} else {
-  file.copy("premade/recipes-process.pdf", "_book/premade/recipes-process.pdf")
-  knitr::include_graphics("premade/recipes-process.pdf")
-}
+knitr::include_graphics("premade/recipes-process.svg")
 ```
 
 :::rmdnote

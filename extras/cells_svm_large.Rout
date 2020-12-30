@@ -1,0 +1,239 @@
+
+R version 4.0.2 (2020-06-22) -- "Taking Off Again"
+Copyright (C) 2020 The R Foundation for Statistical Computing
+Platform: x86_64-apple-darwin17.0 (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> library(tidymodels)
+── Attaching packages ────────────────────────────────────── tidymodels 0.1.1 ──
+✔ broom     0.7.0          ✔ recipes   0.1.13    
+✔ dials     0.0.8.9000     ✔ rsample   0.0.7     
+✔ dplyr     1.0.2          ✔ tibble    3.0.3     
+✔ ggplot2   3.3.2          ✔ tidyr     1.1.2     
+✔ infer     0.5.2          ✔ tune      0.1.1     
+✔ modeldata 0.0.2          ✔ workflows 0.1.3     
+✔ parsnip   0.1.3          ✔ yardstick 0.0.7     
+✔ purrr     0.3.4          
+── Conflicts ───────────────────────────────────────── tidymodels_conflicts() ──
+✖ purrr::discard() masks scales::discard()
+✖ dplyr::filter()  masks stats::filter()
+✖ dplyr::lag()     masks stats::lag()
+✖ recipes::step()  masks stats::step()
+> library(rayshader)
+> library(doMC)
+Loading required package: foreach
+
+Attaching package: ‘foreach’
+
+The following objects are masked from ‘package:purrr’:
+
+    accumulate, when
+
+Loading required package: iterators
+Loading required package: parallel
+> registerDoMC(cores = parallel::detectCores(logical = TRUE))
+> 
+> ## -----------------------------------------------------------------------------
+> 
+> data(cells)
+> cells <- cells %>% select(-case)
+> set.seed(33)
+> cell_folds <- vfold_cv(cells)
+> roc_res <- metric_set(roc_auc)
+> 
+> ## -----------------------------------------------------------------------------
+> 
+> svm_rec <- 
++   recipe(class ~ ., data = cells) %>%
++   step_YeoJohnson(all_predictors()) %>%
++   step_normalize(all_predictors())
+> 
+> svm_spec <- 
++   svm_rbf(cost = tune(), rbf_sigma = tune()) %>% 
++   set_engine("kernlab") %>% 
++   set_mode("classification")
+> 
+> svm_wflow <- 
++   workflow() %>% 
++   add_model(svm_spec) %>% 
++   add_recipe(svm_rec)
+> 
+> svm_param <- 
++   svm_wflow %>% 
++   parameters() %>% 
++   update(
++     cost = cost(c(-10, 5)),
++     rbf_sigma = rbf_sigma(c(-7, -1))
++   )
+> 
+> ## -----------------------------------------------------------------------------
+> 
+> large_grid <- grid_regular(svm_param, levels = 50)
+> 
+> set.seed(2)
+> svm_large <- 
++   svm_wflow %>% 
++   tune_grid(resamples = cell_folds, grid = large_grid, metrics = roc_res)
+> 
+> ## -----------------------------------------------------------------------------
+> 
+> if (interactive()) {
++   
++   large_plot <-
++     svm_large %>% 
++     collect_metrics() %>% 
++     ggplot(aes(x = rbf_sigma, y = cost)) + 
++     geom_raster(aes(fill = mean)) + 
++     scale_x_log10() + 
++     scale_y_continuous(trans = "log2") +
++     scale_fill_distiller(palette = "Blues") +
++     theme_minimal() + 
++     theme(legend.position = "bottom") + 
++     guides(title.position = "bottom") + 
++     labs(x = "rbf_sigma\n\n\n\n", title = NULL)
++   
++   plot_gg(
++     large_plot,
++     multicore = FALSE,
++     raytrace = TRUE,
++     width = 7,
++     height = 7,
++     scale = 300,
++     windowsize = c(1400, 1400),
++     zoom = 1,
++     phi = 30,
++     theta = 30
++   )
++   
++ }
+> 
+> ## -----------------------------------------------------------------------------
+> 
+> sessioninfo::session_info()
+─ Session info ───────────────────────────────────────────────────────────────
+ setting  value                       
+ version  R version 4.0.2 (2020-06-22)
+ os       macOS Catalina 10.15.5      
+ system   x86_64, darwin17.0          
+ ui       X11                         
+ language (EN)                        
+ collate  en_US.UTF-8                 
+ ctype    en_US.UTF-8                 
+ tz       America/New_York            
+ date     2020-09-04                  
+
+─ Packages ───────────────────────────────────────────────────────────────────
+ package          * version    date       lib source                           
+ assertthat         0.2.1      2019-03-21 [1] CRAN (R 4.0.0)                   
+ backports          1.1.9      2020-08-24 [1] CRAN (R 4.0.2)                   
+ broom            * 0.7.0      2020-07-09 [1] CRAN (R 4.0.0)                   
+ class              7.3-17     2020-04-26 [1] CRAN (R 4.0.2)                   
+ cli                2.0.2      2020-02-28 [1] CRAN (R 4.0.0)                   
+ codetools          0.2-16     2018-12-24 [1] CRAN (R 4.0.2)                   
+ colorspace         1.4-1      2019-03-18 [1] CRAN (R 4.0.0)                   
+ crayon             1.3.4.9000 2020-08-18 [1] Github (r-lib/crayon@6b3f0c6)    
+ crosstalk          1.1.0.1    2020-03-13 [1] CRAN (R 4.0.0)                   
+ dials            * 0.0.8.9000 2020-09-03 [1] Github (tidymodels/dials@71ce06f)
+ DiceDesign         1.8-1      2019-07-31 [1] CRAN (R 4.0.0)                   
+ digest             0.6.25     2020-02-23 [1] CRAN (R 4.0.0)                   
+ doMC             * 1.3.6      2019-07-27 [1] CRAN (R 4.0.2)                   
+ doParallel         1.0.15     2019-08-02 [1] CRAN (R 4.0.2)                   
+ dplyr            * 1.0.2      2020-08-18 [1] CRAN (R 4.0.0)                   
+ ellipsis           0.3.1      2020-05-15 [1] CRAN (R 4.0.0)                   
+ fansi              0.4.1      2020-01-08 [1] CRAN (R 4.0.0)                   
+ fastmap            1.0.1      2019-10-08 [1] CRAN (R 4.0.0)                   
+ foreach          * 1.5.0      2020-03-30 [1] CRAN (R 4.0.2)                   
+ furrr              0.1.0      2018-05-16 [1] CRAN (R 4.0.0)                   
+ future             1.18.0     2020-07-09 [1] CRAN (R 4.0.0)                   
+ generics           0.0.2      2018-11-29 [1] CRAN (R 4.0.0)                   
+ ggplot2          * 3.3.2      2020-06-19 [1] CRAN (R 4.0.0)                   
+ globals            0.12.5     2019-12-07 [1] CRAN (R 4.0.0)                   
+ glue               1.4.2      2020-08-27 [1] CRAN (R 4.0.2)                   
+ gower              0.2.2      2020-06-23 [1] CRAN (R 4.0.0)                   
+ GPfit              1.0-8      2019-02-08 [1] CRAN (R 4.0.0)                   
+ gtable             0.3.0      2019-03-25 [1] CRAN (R 4.0.0)                   
+ hms                0.5.3      2020-01-08 [1] CRAN (R 4.0.0)                   
+ htmltools          0.5.0      2020-06-16 [1] CRAN (R 4.0.0)                   
+ htmlwidgets        1.5.1      2019-10-08 [1] CRAN (R 4.0.0)                   
+ httpuv             1.5.4      2020-06-06 [1] CRAN (R 4.0.0)                   
+ infer            * 0.5.2      2020-06-14 [1] CRAN (R 4.0.0)                   
+ ipred              0.9-9      2019-04-28 [1] CRAN (R 4.0.2)                   
+ iterators        * 1.0.12     2019-07-26 [1] CRAN (R 4.0.0)                   
+ jsonlite           1.7.0      2020-06-25 [1] CRAN (R 4.0.0)                   
+ kernlab            0.9-29     2019-11-12 [1] CRAN (R 4.0.2)                   
+ knitr              1.29       2020-06-23 [1] CRAN (R 4.0.2)                   
+ later              1.1.0.1    2020-06-05 [1] CRAN (R 4.0.0)                   
+ lattice            0.20-41    2020-04-02 [1] CRAN (R 4.0.2)                   
+ lava               1.6.7      2020-03-05 [1] CRAN (R 4.0.0)                   
+ lhs                1.0.2      2020-04-13 [1] CRAN (R 4.0.0)                   
+ lifecycle          0.2.0      2020-03-06 [1] CRAN (R 4.0.0)                   
+ listenv            0.8.0      2019-12-05 [1] CRAN (R 4.0.0)                   
+ lubridate          1.7.9      2020-06-08 [1] CRAN (R 4.0.2)                   
+ magrittr           1.5        2014-11-22 [1] CRAN (R 4.0.0)                   
+ manipulateWidget   0.10.1     2020-02-24 [1] CRAN (R 4.0.0)                   
+ MASS               7.3-51.6   2020-04-26 [1] CRAN (R 4.0.2)                   
+ Matrix             1.2-18     2019-11-27 [1] CRAN (R 4.0.2)                   
+ mime               0.9        2020-02-04 [1] CRAN (R 4.0.0)                   
+ miniUI             0.1.1.1    2018-05-18 [1] CRAN (R 4.0.0)                   
+ modeldata        * 0.0.2      2020-06-22 [1] CRAN (R 4.0.2)                   
+ munsell            0.5.0      2018-06-12 [1] CRAN (R 4.0.0)                   
+ nnet               7.3-14     2020-04-26 [1] CRAN (R 4.0.2)                   
+ parsnip          * 0.1.3      2020-08-04 [1] CRAN (R 4.0.2)                   
+ pillar             1.4.6      2020-07-10 [1] CRAN (R 4.0.0)                   
+ pkgconfig          2.0.3      2019-09-22 [1] CRAN (R 4.0.0)                   
+ plyr               1.8.6      2020-03-03 [1] CRAN (R 4.0.2)                   
+ prettyunits        1.1.1      2020-01-24 [1] CRAN (R 4.0.0)                   
+ pROC               1.16.2     2020-03-19 [1] CRAN (R 4.0.2)                   
+ prodlim            2019.11.13 2019-11-17 [1] CRAN (R 4.0.0)                   
+ progress           1.2.2      2019-05-16 [1] CRAN (R 4.0.0)                   
+ promises           1.1.1      2020-06-09 [1] CRAN (R 4.0.0)                   
+ purrr            * 0.3.4      2020-04-17 [1] CRAN (R 4.0.0)                   
+ R6                 2.4.1      2019-11-12 [1] CRAN (R 4.0.0)                   
+ rayshader        * 0.19.2     2020-08-02 [1] CRAN (R 4.0.2)                   
+ Rcpp               1.0.5      2020-07-06 [1] CRAN (R 4.0.0)                   
+ recipes          * 0.1.13     2020-06-23 [1] CRAN (R 4.0.2)                   
+ rgl                0.100.54   2020-04-14 [1] CRAN (R 4.0.0)                   
+ rlang              0.4.7      2020-07-09 [1] CRAN (R 4.0.0)                   
+ rpart              4.1-15     2019-04-12 [1] CRAN (R 4.0.2)                   
+ rsample          * 0.0.7      2020-06-04 [1] CRAN (R 4.0.2)                   
+ rstudioapi         0.11       2020-02-07 [1] CRAN (R 4.0.0)                   
+ scales           * 1.1.1      2020-05-11 [1] CRAN (R 4.0.2)                   
+ sessioninfo        1.1.1      2018-11-05 [1] CRAN (R 4.0.2)                   
+ shiny              1.5.0      2020-06-23 [1] CRAN (R 4.0.2)                   
+ survival           3.1-12     2020-04-10 [1] CRAN (R 4.0.2)                   
+ tibble           * 3.0.3      2020-07-10 [1] CRAN (R 4.0.0)                   
+ tidymodels       * 0.1.1      2020-07-14 [1] CRAN (R 4.0.0)                   
+ tidyr            * 1.1.2      2020-08-27 [1] CRAN (R 4.0.2)                   
+ tidyselect         1.1.0      2020-05-11 [1] CRAN (R 4.0.0)                   
+ timeDate           3043.102   2018-02-21 [1] CRAN (R 4.0.0)                   
+ tune             * 0.1.1      2020-07-08 [1] CRAN (R 4.0.2)                   
+ vctrs              0.3.3      2020-08-27 [1] CRAN (R 4.0.2)                   
+ webshot            0.5.2      2019-11-22 [1] CRAN (R 4.0.0)                   
+ withr              2.2.0      2020-04-20 [1] CRAN (R 4.0.0)                   
+ workflows        * 0.1.3      2020-08-10 [1] CRAN (R 4.0.2)                   
+ xfun               0.16       2020-07-24 [1] CRAN (R 4.0.2)                   
+ xtable             1.8-4      2019-04-21 [1] CRAN (R 4.0.2)                   
+ yardstick        * 0.0.7      2020-07-13 [1] CRAN (R 4.0.2)                   
+
+[1] /Library/Frameworks/R.framework/Versions/4.0/Resources/library
+> 
+> ## -----------------------------------------------------------------------------
+> 
+> save(svm_large, file = "../RData/svm_large.RData")
+> 
+> proc.time()
+     user    system   elapsed 
+28918.219   608.047  2973.439 

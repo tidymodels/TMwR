@@ -44,13 +44,7 @@ To illustrate, consider PCA signal extraction. This was previously mentioned in 
 There are two ways of thinking about the model workflow. The _incorrect_ method would be to think of the PCA preprocessing step as _not being part of the modeling process_: 
 
 ```{r workflow-bad, echo = FALSE, out.width = '80%', warning = FALSE}
-if (knitr:::is_html_output()) {
-  file.copy("premade/bad-workflow.svg", "_book/premade/bad-workflow.svg")
-  knitr::include_graphics("premade/bad-workflow.svg")
-} else {
-  file.copy("premade/bad-workflow.pdf", "_book/premade/bad-workflow.pdf")
-  knitr::include_graphics("premade/bad-workflow.pdf")
-}
+knitr::include_graphics("premade/bad-workflow.svg")
 ```
 
 The fallacy here is that, although PCA does significant computations to produce the components, its operations are assumed to have no uncertainty associated with them. The PCA components are treated as _known_ and, if not included in the model workflow, the effect of PCA could not be adequately measured. 
@@ -58,13 +52,7 @@ The fallacy here is that, although PCA does significant computations to produce 
 An _appropriate_ approach would be: 
 
 ```{r workflow-good, echo = FALSE, out.width = '80%', warning = FALSE}
-if (knitr:::is_html_output()) {
-  file.copy("premade/proper-workflow.svg", "_book/premade/proper-workflow.svg")
-  knitr::include_graphics("premade/proper-workflow.svg")
-} else {
-  file.copy("premade/proper-workflow.pdf", "_book/premade/proper-workflow.pdf")
-  knitr::include_graphics("premade/proper-workflow.pdf")
-}
+knitr::include_graphics("premade/proper-workflow.svg")
 ```
 
 In this way, the PCA preprocessing is considered part of the modeling process. 
@@ -305,6 +293,8 @@ lm_fit <- fit(lm_wflow, ames_train)
 
 
 ```{r workflows-save, include = FALSE}
-save(lm_fit, file = "RData/lm_fit.RData", version = 2, compress = "xz")
+if(is_new_version(lm_fit, "RData/lm_fit.RData")) {
+  save(lm_fit, file = "RData/lm_fit.RData", version = 2, compress = "xz")
+}
 ```
 

@@ -136,13 +136,7 @@ If the test set should not be used immediately, and re-predicting the training s
 Resampling methods are empirical simulation systems that emulate the process of using some data for modeling and different data for evaluation. Most resampling methods are iterative, meaning that this process is repeated multiple times. This diagram illustrates how resampling methods generally operate:
 
 ```{r resampling-scheme, echo = FALSE, out.width = '85%', warning = FALSE}
-if (knitr:::is_html_output()) {
-  file.copy("premade/resampling.svg", "_book/premade/resampling.svg")
-  knitr::include_graphics("premade/resampling.svg")
-} else {
-  file.copy("premade/resampling.pdf", "_book/premade/resampling.pdf")
-  knitr::include_graphics("premade/resampling.pdf")
-}
+knitr::include_graphics("premade/resampling.svg")
 ```
 
 **Resampling is only conducted on the training set**. The test set is not involved. For each iteration of resampling, the data are partitioned into two subsamples: 
@@ -162,13 +156,7 @@ The next section defines several commonly used methods and discusses their pros 
 Cross-validation is a well established resampling method. While there are a number of variations, the most common cross-validation method is _V_-fold cross-validation. The data are randomly partitioned into _V_ sets of roughly equal size (called the "folds"). For illustration, _V_ = 3 is shown below for a data set of thirty training set points with random fold allocations. The number inside the symbols is the sample number:
 
 ```{r resampling-three-cv, echo = FALSE, out.width = '50%', warning = FALSE}
-if (knitr:::is_html_output()) {
-  file.copy("premade/three-CV.svg", "_book/premade/three-CV.svg")
-  knitr::include_graphics("premade/three-CV.svg")
-} else {
-  file.copy("premade/three-CV.pdf", "_book/premade/three-CV.pdf")
-  knitr::include_graphics("premade/three-CV.pdf")
-}
+knitr::include_graphics("premade/three-CV.svg")
 ```
 
 The color of the symbols represent their randomly assigned folds. Stratified sampling is also an option for assigning folds (previously discussed in Section \@ref(splitting-methods)). 
@@ -176,13 +164,7 @@ The color of the symbols represent their randomly assigned folds. Stratified sam
 For 3-fold cross-validation, the three iterations of resampling are illustrated below. For each iteration, one fold is held out for assessment statistics and the remaining folds are substrate for the model. This process continues for each fold so that three models produce three sets of performance statistics. 
 
 ```{r resampling-three-cv-iter, echo = FALSE, out.width = '70%', warning = FALSE}
-if (knitr:::is_html_output()) {
-  file.copy("premade/three-CV-iter.svg", "_book/premade/three-CV-iter.svg")
-  knitr::include_graphics("premade/three-CV-iter.svg")
-} else {
-  file.copy("premade/three-CV-iter.pdf", "_book/premade/three-CV-iter.pdf")
-  knitr::include_graphics("premade/three-CV-iter.pdf")
-}
+knitr::include_graphics("premade/three-CV-iter.svg")
 ```
 
 When _V_ = 3, the analysis sets are 2/3 of the training set and each assessment set is a distinct 1/3. The final resampling estimate of performance averages each of the _V_ replicates. 
@@ -266,13 +248,7 @@ mc_cv(ames_train, prop = 9/10, times = 20)
 Previously mentioned in Section \@ref(what-about-a-validation-set), a validation set is a single partition that is set aside to estimate performance, before using the test set: 
 
 ```{r resampling-validation, echo = FALSE, out.width = '50%', warning = FALSE}
-if (knitr:::is_html_output()) {
-  file.copy("premade/validation.svg", "_book/premade/validation.svg")
-  knitr::include_graphics("premade/validation.svg")
-} else {
-  file.copy("premade/validation.pdf", "_book/premade/validation.pdf")
-  knitr::include_graphics("premade/validation.pdf")
-}
+knitr::include_graphics("premade/validation.svg")
 ```
 
 Validation sets are often used when the original pool of data is very large. In this case, a single large partition may be adequate to characterize model performance without having to do multiple iterations of resampling. 
@@ -281,13 +257,7 @@ With `r pkg(rsample)`, a validation set is like any other resampling object; thi
 
 
 ```{r resampling-validation-alt, echo = FALSE, out.width = '45%', warning = FALSE}
-if (knitr:::is_html_output()) {
-  file.copy("premade/validation-alt.svg", "_book/premade/validation-alt.svg")
-  knitr::include_graphics("premade/validation-alt.svg")
-} else {
-  file.copy("premade/validation-alt.pdf", "_book/premade/validation-alt.pdf")
-  knitr::include_graphics("premade/validation-alt.pdf")
-}
+knitr::include_graphics("premade/validation-alt.svg")
 ```
 
 To create a validation set object that uses 3/4 of the data for model fitting: 
@@ -309,13 +279,7 @@ A bootstrap sample of the training set is a sample that is the same size as the 
 For a training set of 30 samples, a schematic of three bootstrap samples is: 
 
 ```{r resampling-bootstraps, echo = FALSE, out.width = '80%', warning = FALSE}
-if (knitr:::is_html_output()) {
-  file.copy("premade/bootstraps.svg", "_book/premade/bootstraps.svg")
-  knitr::include_graphics("premade/bootstraps.svg")
-} else {
-  file.copy("premade/bootstraps.pdf", "_book/premade/bootstraps.pdf")
-  knitr::include_graphics("premade/bootstraps.pdf")
-}
+knitr::include_graphics("premade/bootstraps.svg")
 ```
 Note that the sizes of the assessment sets vary. 
 
@@ -338,13 +302,7 @@ Rolling forecast origin resampling [@hyndman2018forecasting] provides a method t
 To illustrate, a training set of fifteen samples was resampled with an analysis size of eight samples and an assessment set size of three. The second iteration discards the first training set sample and both data sets shift forward by one. This configuration results in five resamples: 
 
 ```{r resampling-rolling, echo = FALSE, out.width = '65%', warning = FALSE}
-if (knitr:::is_html_output()) {
-  file.copy("premade/rolling.svg", "_book/premade/rolling.svg")
-  knitr::include_graphics("premade/rolling.svg")
-} else {
-  file.copy("premade/rolling.pdf", "_book/premade/rolling.pdf")
-  knitr::include_graphics("premade/rolling.pdf")
-}
+knitr::include_graphics("premade/rolling.svg")
 ```
 
 There are a few different configurations of this method: 
@@ -418,7 +376,12 @@ lm_wflow <-
   workflow() %>% 
   add_recipe(ames_rec) %>% 
   add_model(linear_reg() %>% set_engine("lm"))
-save(rf_res, lm_wflow, rf_wflow, file = "RData/resampling.RData", version = 2, compress = "xz")
+
+if (is_new_version(rf_res,   "RData/resampling.RData") |
+    is_new_version(lm_wflow, "RData/resampling.RData") |
+    is_new_version(rf_wflow, "RData/resampling.RData")) {
+  save(rf_res, lm_wflow, rf_wflow, file = "RData/resampling.RData", version = 2, compress = "xz")
+}
 ```
 
 The return value is a tibble similar to the input resamples, along with some extra columns: 

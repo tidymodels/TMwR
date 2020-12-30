@@ -41,3 +41,28 @@ pkg <- function(x) {
   x <- as.character(cl$x)
   paste0('<span class="pkg">', x, '</span>')
 }
+
+is_new_version <- function(x, path) {
+  cl <- match.call()
+  nm <- as.character(cl$x)
+  if (!file.exists(path)) {
+    return(TRUE)
+  }
+  load(path)
+  prev <- get(nm)
+  
+  # parsnip model fits have an elapsed time and this will change from run-to-run.
+  # We'll remove that to check for a new version. Same for workflows. 
+  if (inherits(prev, "model_fit")) {
+       x$elapsed <- NA
+    prev$elapsed <- NA
+  }
+  if (workflows:::is_workflow(prev)) {
+       x$fit$fit$elapsed <- NA
+    prev$fit$fit$elapsed <- NA
+  }
+
+  res <- all.equal(x, prev)
+  !isTRUE(res)
+}
+

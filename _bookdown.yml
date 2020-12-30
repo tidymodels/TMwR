@@ -13,10 +13,9 @@ rmd_files: [
   "09-judging-model-effectiveness.Rmd",
   "10-resampling.Rmd",
   "11-comparing-models.Rmd",
-  "tuning-parameters.Rmd",
-  "grid-search.Rmd",
-  "iterative-search.Rmd",
-  "15-explaining-models.Rmd",
+  "12-tuning-parameters.Rmd",
+  "13-grid-search.Rmd",
+  "14-iterative-search.Rmd",
   "pre-proc-table.Rmd",
   "references.Rmd"
 ]

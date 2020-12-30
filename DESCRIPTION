@@ -1,6 +1,6 @@
 Package: TMwR
 Title: Tidy Modeling with R.
-Version: 0.0.1.9007
+Version: 0.0.1.9008
 Authors@R: c(
     person(
       given = "Max",
@@ -18,22 +18,32 @@ Authors@R: c(
     )
   )
 Depends: R (>= 4.0.0)
-URL: https://github.com/tidymodels/TMwR
+URL: https://github.com/tidymodels/TMwR, https://www.tmwr.org/
+SystemRequirements: FFmpeg (>= 3.2); with at least libx264 and lame (mp3) 
+  drivers. Debian/Ubuntu: libavfilter-dev, Fedora/CentOS: ffmpeg-devel 
+  (via https://rpmfusion.org), MacOS Homebrew: ffmp
 Imports:
+  av,
   bookdown,
   broom,
   corrr,
-  dials,
+  dials (>= 0.0.9),
+  digest,
   doMC,
   dplyr,
+  finetune (>= 0.0.0.9004),
+  ggforce,
   ggplot2,
   gridExtra,
-  kableExtra,
+  kableExtra (>= 1.2.1),
+  kernlab,
   kknn,
   knitr,
+  lme4,
   lubridate,
   modeldata,
   nlme,
+  nnet,
   parsnip,
   patchwork,
   purrr,
@@ -53,3 +63,8 @@ Imports:
   tune,
   workflows,
   yardstick
+Remotes:
+  tidymodels/tune,
+  tidymodels/tidymodels,
+  tidymodels/finetune
+
