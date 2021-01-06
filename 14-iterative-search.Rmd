@@ -528,8 +528,8 @@ if (!exists("gp_candidates")) {
 av_capture_graphics(
   make_bo_animation(gp_candidates, svm_bo),
   output = "bo_search.mp4",
-  width = 720,
-  height = 720,
+  width = 760,
+  height = 760,
   res = 100,
   vfilter = 'framerate=fps=10', 
   framerate = 1/3
