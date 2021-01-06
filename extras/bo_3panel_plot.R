@@ -144,11 +144,10 @@ transparent_theme <- function() {
 }
 
 make_bo_animation <- function(grid, object) {
-  design <- "
-  11##  
-  1133 
-  2233 
-  22## 
+  layout <- "
+  12
+  33
+  33
 "
   require(patchwork)
   num_iter <- max(collect_metrics(object)$.iter)
@@ -170,8 +169,8 @@ make_bo_animation <- function(grid, object) {
     transparent_theme()
     
     print(
-      (.mean + .sd) / .impr + 
-      plot_layout(design = design) + 
+      .mean + .sd  +  .impr + 
+      plot_layout(design = layout) + 
       plot_annotation(iter_lab, theme = theme(plot.title = element_text(hjust = 0.5)))
     )
     
