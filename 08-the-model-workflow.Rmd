@@ -266,7 +266,7 @@ parametric_fit
 
 Notice how, in the call printed above, the model-specific formula was used. 
 
-## Creating workflows _en masse_
+## Creating workflows _en masse_  {#workflow-sets-intro}
 
 There are some occasions where the data will require numerous attempts to find an appropriate model. For example: 
 
