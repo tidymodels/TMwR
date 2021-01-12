@@ -181,6 +181,39 @@ As a counter example, a boosted tree created with the `r pkg(xgboost)` package r
 
 This determination is made for _each model and engine combination_. 
 
+## Adding raw variables to the workflow
+
+There is a third interface for passing data to the model. The `add_variables()` function using a simple `r pkg(dplyr)` syntax. The function has two primary arguments: `outcomes` and `predictors`. These use a selection approach similar to `r pkg(tidyr)` package to capture multiple selectors using `c()`. 
+
+```{r workflows-add-variables}
+lm_wflow <- 
+  lm_wflow %>% 
+  remove_recipe() %>% 
+  add_variables(outcome = Sale_Price, predictors = c(Longitude, Latitude))
+lm_wflow
+```
+
+The predictors could also have been specified using a more general selector, such as 
+
+```{r workflows-selector, eval = FALSE}
+predictors = c(ends_with("tude"))
+```
+
+One nicety is that any outcome columns accidentally specified in the predictors argument will be quietly removed. This facilitates the use of:
+
+```{r workflows-selector-all, eval = FALSE}
+predictors = everything()
+```
+
+When the model is fit, the specification simply assembles these data, unaltered, into a data frame and passes it to the underlying function:
+
+```{r workflows-add-variables-fit}
+fit(lm_wflow, ames_train)
+```
+
+The downside to this method is that, for models like `xgboost`, any factor predictors are not converted into indicators variables. On the other hand, if you would like the underlying modeling method to do what it would normally do with the data, `add_variables()` is a helpful interface. As seen in the next section, it also facilitate more complex modeling specifications. 
+
+
 ### Special formulas and in-line functions {-}
 
 A number of multilevel models have standardized on a formula specification devised in the `r pkg(lme4)` package. For example, to fit a regression model that has random effects for subjects, we would use the following formula: 
@@ -210,7 +243,7 @@ The issue is that the special formula has to be processed by the underlying pack
 
 Even if this formula could be used with `model.matrix()`, this would still present a problem since the formula also specifies the statistical attributes of the model. 
 
-The solution in `workflows` is an optional supplementary model formula that can be passed to `add_model()`. For example, using the previously mentioned `strata()` function in the `r pkg(survival)` package, the `add_formula()` specification provides the bare column names and then the actual formula given to the model is set within `add_model()`:  
+The solution in `workflows` is an optional supplementary model formula that can be passed to `add_model()`. For example, using the previously mentioned `strata()` function in the `r pkg(survival)` package, the `add_variables()` specification provides the bare column names and then the actual formula given to the model is set within `add_model()`:  
 
 ```{r workflows-strata}
 library(survival)
@@ -221,32 +254,17 @@ parametric_model <-
 
 parametric_workflow <- 
   workflow() %>% 
-  # This formula passes the data along as-is: 
-  add_formula(futime + fustat ~ age + rx) %>% 
+  # Pass the data along as-is: 
+  add_variables(outcome = c(fustat, futime), predictors = c(age, rx)) %>% 
   add_model(parametric_model, 
             # This formula is given to the model
             formula = Surv(futime, fustat) ~ age + strata(rx))
 
-random_effects <- fit(parametric_workflow, data = ovarian)
-random_effects
+parametric_fit <- fit(parametric_workflow, data = ovarian)
+parametric_fit
 ```
 
 Notice how, in the call printed above, the model-specific formula was used. 
-
-As an alternative to using two formulas, we could use a straightforward recipe instead: 
-
-```{r workflows-strata-recipe}
-parametric_workflow <- 
-  workflow() %>% 
-  add_recipe(recipe(futime + fustat ~ age + rx, data = ovarian)) %>% 
-  add_model(parametric_model, 
-            formula = Surv(futime, fustat) ~ age + strata(rx))
-
-# No errors:
-random_effects <- fit(parametric_workflow, data = ovarian)
-```
-
-There are additional preprocessor interfaces in development that allow tidy specifications of the variables without using a formula. 
 
 ## Creating workflows _en masse_
 
