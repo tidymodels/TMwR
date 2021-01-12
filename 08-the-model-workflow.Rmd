@@ -1,6 +1,7 @@
 ```{r workflow-setup, include = FALSE}
 knitr::opts_chunk$set(fig.path = "figures/")
 library(tidymodels)
+library(workflowsets)
 library(kableExtra)
 
 source("ames_snippets.R")
@@ -247,6 +248,54 @@ random_effects <- fit(parametric_workflow, data = ovarian)
 
 There are additional preprocessor interfaces in development that allow tidy specifications of the variables without using a formula. 
 
+## Creating workflows _en masse_
+
+There are some occasions where the data will require numerous attempts to find an appropriate model. For example: 
+
+* For predictive models, it is advisable to evaluate  a variety of different model types. This will require the user to create multiple model specifications. 
+
+* Sequential testing of models typically start with an expanded set of predictors. This "full model" is compared to a sequence of the same model that removes each predictor in turn. Using basic hypothesis testing methods or empirical validation, the effect of each predictor can be isolated and assessed. 
+
+In these situations, as well as others, it might become tedious or onerous to create a lot of workflows from different sets or preprocessors and/or model specifications. To compensate for this problem, the `r pkg(workflowset)` package creates combinations of workflow ingredients. A list of preprocessors (e.g., formulas, recipes, or `r pkg(dplyr)` selectors) can be combined with a list of model specifications, resulting in a set of workflows. 
+
+As an example, let's say that we want to focus on the different ways that house location is represented in the Ames data. We can create a set of formulas that capture these predictors: 
+
+```{r workflows-location-location-location}
+location <- list(
+  longitude = Sale_Price ~ Longitude,
+  latitude = Sale_Price ~ Latitude,
+  coords = Sale_Price ~ Longitude + Latitude,
+  neighborhood = Sale_Price ~ Neighborhood
+)
+```
+
+These representations can be crossed with one or more models using the workflow_set function. We'll just use the previous linear model specification to demonstrate:  
+
+```{r workflows-set}
+library(workflowsets)
+
+location_models <-
+  workflow_set(preproc = location, models = list(lm = lm_model))
+location_models
+
+location_models$workflow[[1]]
+```
+
+Workflow sets are mostly designed to work with resampling, discussed in Chapter \@ref(resampling) and the columns `option` and `result` must be populated with specific types of objects that use resampling. This will be demonstrated in Chapter \@ref(compare).  
+
+In the meantime, let's create model fits for each formula into a new column called `fit` using basic `r pkg(dplyr)` operations: 
+
+```{r workflows-set-fit}
+location_models <- 
+  location_models %>% 
+  mutate(fit = map(workflow, fit, ames_train))
+
+location_models
+location_models$fit[[1]]
+```
+
+There's a lot more to workflow sets and their main advantages won't be illustrated until later chapters. 
+
 
 ## Future plans
 
@@ -257,7 +306,7 @@ There are also operations that might occur _after_ the model is fit. An example 
 
 ## Chapter summary {#workflows-summary}
 
-In this chapter, you learned that the modeling process encompasses more than just estimating the parameters of an algorithm that connects predictors to an outcome. This process also includes preprocessing steps, such as those outlined in Chapter \@ref(recipes), and operations taken after a model is fit. We introduced a concept called a **model workflow** that can capture the important components of the modeling process. 
+In this chapter, you learned that the modeling process encompasses more than just estimating the parameters of an algorithm that connects predictors to an outcome. This process also includes preprocessing steps, such as those outlined in Chapter \@ref(recipes), and operations taken after a model is fit. We introduced a concept called a **model workflow** that can capture the important components of the modeling process. Workflows can also be created as a group inside of a workflow set. 
 
 For the Ames data, the code used in later chapters is:
 

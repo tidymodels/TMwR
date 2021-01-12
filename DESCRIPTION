@@ -62,9 +62,11 @@ Imports:
   themis,
   tune,
   workflows,
+  workflowsets,
   yardstick
 Remotes:
   tidymodels/tune,
   tidymodels/tidymodels,
-  tidymodels/finetune
+  tidymodels/finetune,
+  tidymodels/workflowsets
 
