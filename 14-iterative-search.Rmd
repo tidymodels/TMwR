@@ -51,9 +51,9 @@ svm_rec <-
   step_normalize(all_predictors())
 
 svm_spec <- 
- svm_rbf(cost = tune(), rbf_sigma = tune()) %>% 
- set_engine("kernlab") %>% 
- set_mode("classification")
+  svm_rbf(cost = tune(), rbf_sigma = tune()) %>% 
+  set_engine("kernlab") %>% 
+  set_mode("classification")
 
 svm_wflow <- 
   workflow() %>% 
@@ -72,14 +72,14 @@ For illustration, let's slightly change the kernel parameter range, to improve t
 
 ```{r iterative-svm-param-set}
 svm_param <- 
- svm_wflow %>% 
- parameters() %>% 
+  svm_wflow %>% 
+  parameters() %>% 
   update(rbf_sigma = rbf_sigma(c(-7, -1)))
 ```
 
-Before discussing specific details about iterative search and how it works, let's understand the relationship between the two SVM tuning parameters and the area under the ROC curve for this specific data set. We constructed a very large regular grid, comprised of 2,500 candidate values, evaluated the grid using resampling. This is obviously impractical in regular data analysis and tremendously inefficient. However, it elucidates the path that the search process _should take_ and where the numerically optimal value(s) occur. 
+Before discussing specific details about iterative search and how it works, let's understand the relationship between the two SVM tuning parameters and the area under the ROC curve for this specific data set. We constructed a very large regular grid, comprised of 2,500 candidate values, and evaluated the grid using resampling. This is obviously impractical in regular data analysis and tremendously inefficient. However, it elucidates the path that the search process _should take_ and where the numerically optimal value(s) occur. 
 
-The plot below shows the results, with lighter color corresponding to higher (better) model performance. There is a large swath in the lower diagonal of the parameter space that is relatively flat with poor performance. A ridge of best performance occurs in the upper right portion of the space. The black dot indicates the best settings. The transition from the plateau of poor results to the ridge of best performance is very sharp. The is also a sharp drop in the area under the ROC curve just to the right of the ridge.
+The plot below shows the results, with lighter color corresponding to higher (better) model performance. There is a large swath in the lower diagonal of the parameter space that is relatively flat with poor performance. A ridge of best performance occurs in the upper right portion of the space. The black dot indicates the best settings. The transition from the plateau of poor results to the ridge of best performance is very sharp. There is also a sharp drop in the area under the ROC curve just to the right of the ridge.
 
 ```{r iterative-roc-surface, out.width = "80%", echo = FALSE, warning = FALSE}
 # See file extras/cells_svm_large.R
@@ -91,12 +91,12 @@ The search procedures described below require at least some resampled performanc
 ```{r iterative-svm-initial, message = FALSE}
 set.seed(234)
 start_grid <- 
- svm_param %>% 
- update(
-  cost = cost(c(-6, 1)),
-  rbf_sigma = rbf_sigma(c(-6, -4))
- ) %>% 
- grid_regular(levels = 2)
+  svm_param %>% 
+  update(
+    cost = cost(c(-6, 1)),
+    rbf_sigma = rbf_sigma(c(-6, -4))
+  ) %>% 
+  grid_regular(levels = 2)
 
 set.seed(2)
 svm_initial <- 
@@ -130,14 +130,14 @@ collect_metrics(svm_initial) %>%
   kableExtra::add_header_above(c("outcome" = 1, "predictors" = 2))
 ```
 
-Gaussian process models are specified by their mean and covariance functions, although the latter has the most effect on the nature of the GP model. The covariance function is often parameterized in terms of the input values (denoted as $x$ below). As an example, a commonly used covariance function is the squared exponential^[This equation is also the same as the _radial basis function_ used in kernel methods, such as the SVM model that is currently being used. This is a coincidence; this covariance function is unrelated to the SVM tuning parameter that we are using. ] function: 
+Gaussian process models are specified by their mean and covariance functions, although the latter has the most effect on the nature of the GP model. The covariance function is often parameterized in terms of the input values (denoted as $x_i$ below). As an example, a commonly used covariance function is the squared exponential^[This equation is also the same as the _radial basis function_ used in kernel methods, such as the SVM model that is currently being used. This is a coincidence; this covariance function is unrelated to the SVM tuning parameter that we are using. ] function: 
 
 $$cov(y_i, y_j) = exp\left(-\frac{1}{2}|\boldsymbol{x}_i - \boldsymbol{x}_j|^2\right) + \sigma^2_{ij}$$
 where $\sigma^2_{ij}$ is a constant error variance term that is zero when $i=j$. This equation translates to: 
 
 > As the distance between two tuning parameter combinations increases, the covariance between the peformance metrics increase exponentially. 
 
-The nature of the equation also implies that the variation of the outcome metric is minimized at the points that have already been observed (i.e., when $|\boldsymbol{x}_i - \boldsymbol{x}_j|^2$ is zero). 
+The nature of the equation also implies that the variation of the outcome metric (denoted by $y_i$) is minimized at the points that have already been observed (i.e., when $|\boldsymbol{x}_i - \boldsymbol{x}_j|^2$ is zero). 
 
 The nature of this covariance function allows the Gaussian process to represent highly nonlinear relationships between model performance and the tuning parameters even when only a small amount of data exists. 
 
@@ -147,7 +147,7 @@ However, fitting these models can be difficult in some cases and the model becom
 
 An important virtue of this model is that, since a full probability model is specified, the predictions for new inputs can reflect the entire _distribution_ of the outcome. In other words, new performance statistics can be predicted in terms of both mean and variance. 
 
-Suppose that two new tuning parameters were under consideration. In the table below, candidate _A_ has a slightly better mean ROC value than candidate _B_ (the current best is `r round(max(collect_metrics(svm_initial)$mean), 4)`). However, its variance is four-fold larger than _B_. Is this good or bad? Choosing option _A_ is riskier but has potentially higher return. The increase in variance also reflects that this new value is further away from the existing data than _B_. The next section considers these aspects of GP predictions for Bayesian optimization in more detail.
+Suppose that two new tuning parameters were under consideration. In the table below, candidate _A_ has a slightly better mean ROC value than candidate _B_ (the current best is `r round(max(collect_metrics(svm_initial)$mean), 4)`). However, its variance is four-fold larger than _B_. Is this good or bad? Choosing option _A_ is riskier but has a potentially higher return. The increase in variance also reflects that this new value is further away from the existing data than _B_. The next section considers these aspects of GP predictions for Bayesian optimization in more detail.
 
 ```{r iterative-gp-pred, echo = FALSE, result = "asis"}
 best_val <- max(collect_metrics(svm_initial)$mean)
@@ -286,7 +286,7 @@ small_pred %>%
   scale_color_brewer(palette = "Set1")
 ```
 
-When only considering the mean $R^2$ prediction, a parameter value of 0.10 is the better choice. The tuning parameter recommendation for 0.25 is, on average, predicted to be _worse_ than the current best. However, since it has higher variance, it has more overall probability area above the current best. As a result, it has a larger expected improvement of the two:
+When only considering the mean $R^2$ prediction, a parameter value of 0.10 is the better choice. The tuning parameter recommendation for 0.25 is, on average, predicted to be _worse_ than the current best. However, since it has higher variance, it has more overall probability mass above the current best. As a result, it has a larger expected improvement of the two:
 
 ```{r iterative-gp-data-table-2, echo = FALSE, results = "asis"}
 small_pred %>% 
@@ -391,15 +391,15 @@ ctrl <- control_bayes(verbose = TRUE)
 
 set.seed(1234)
 svm_bo <-
- svm_wflow %>%
- tune_bayes(
-  resamples = cell_folds,
-  metrics = roc_res,
-  initial = svm_initial,
-  param_info = svm_param,
-  iter = 25,
-  control = ctrl
- )
+  svm_wflow %>%
+  tune_bayes(
+    resamples = cell_folds,
+    metrics = roc_res,
+    initial = svm_initial,
+    param_info = svm_param,
+    iter = 25,
+    control = ctrl
+  )
 ```
 
 
@@ -436,7 +436,7 @@ iter_2_text <-
       paste0("the second iteration did yield a better result with an area under the ROC curve of ", 
              round(iter_2_roc, 5), "."),
      iter_1_imp &  !iter_2_imp ~ 
-      paste0("the second iteration did not continue the trend with a sub-optimal ROC value of ",
+      paste0("the second iteration did not continue the trend with a suboptimal ROC value of ",
              round(iter_2_roc, 5), "."),
       iter_1_imp &  !iter_2_imp ~ 
       paste0("the second iteration further increased the outcome value (ROC = ",
@@ -501,7 +501,7 @@ if (length(so_start_index) > 0) {
 }
 ```
 
-The functions that are used to interrogate the results are the same as those used for grid search (e.g. `collect_metrics()`, etc.). For example: 
+The functions that are used to interrogate the results are the same as those used for grid search (e.g., `collect_metrics()`, etc.). For example: 
 
 ```{r iterative-bo-best}
 show_best(svm_bo)
@@ -683,15 +683,15 @@ For non-numeric parameters, we assign a probability for how often the parameter 
 
 The syntax for this function is nearly identical to `tune_bayes()`. There are no options for acquisition functions or uncertainty sampling. The `control_sim_anneal()` function has some details that define the local neighborhood and the cooling schedule:
 
-* `no_improve`, for simulated annealing, is an integer that will stop the search if no global best or improved results are not discovered within `no_improve` iterations. Accepted sub-optimal or discarded parameters count as "no improvement".
+* `no_improve`, for simulated annealing, is an integer that will stop the search if no global best or improved results are discovered within `no_improve` iterations. Accepted suboptimal or discarded parameters count as "no improvement".
 
 * `restart` is the number of iterations with no new best results before starting from the previous best results. 
 
-* `radius` is a numeric vector on (0, 1) that defines the minimum and maximum radius that defines the local neighborhood for numeric (non-integer) values. 
+* `radius` is a numeric vector on (0, 1) that defines the minimum and maximum radius of the local neighborhood around the initial point. 
 
 * `flip` is a probability value that defines the chances of altering the value of categorical or integer parameters. 
 
-* `cooling_coef` is the $c$ coefficient in $\exp(c\times D_i \times i)$ that modulates how quickly the acceptance probability decreases over iterations. Larger values of `cooling_coef` decrease the probability of accepting a sub-optimal parameter setting.
+* `cooling_coef` is the $c$ coefficient in $\exp(c\times D_i \times i)$ that modulates how quickly the acceptance probability decreases over iterations. Larger values of `cooling_coef` decrease the probability of accepting a suboptimal parameter setting.
 
 For the cell segmentation data, the syntax is very consistent with the previously used functions: 
 
@@ -792,7 +792,7 @@ best_sa_inds <- result_history$.iter[which.max(result_history$mean)]
 best_txt <-
   dplyr::case_when(
     restart_num == 1 ~ paste0("a new global optimum once at iteration ", best_iters, "."),
-    TRUE ~ paste0("new global optimums at ", length(best_iters), " different iterations.")[1]
+    TRUE ~ paste0("new global optima at ", length(best_iters), " different iterations.")[1]
   )
 best_txt <- best_txt[1]
 if (length(best_iters) > 1) {
@@ -844,7 +844,7 @@ To show how the parameters change over iterations:
 autoplot(svm_sa, type = "parameters")
 ```
 
-A visualization of the search path helps understand where the search process did well and and where it went astray:  
+A visualization of the search path helps to understand where the search process did well and and where it went astray:  
 
 ```{r iterative-sa-plot, include = FALSE}
 av_capture_graphics(
