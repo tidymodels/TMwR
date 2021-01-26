@@ -66,5 +66,6 @@ Imports:
 Remotes:
   tidymodels/tune,
   tidymodels/tidymodels,
-  tidymodels/finetune
+  tidymodels/finetune,
+  tidymodels/recipes
 

@@ -50,7 +50,7 @@ flights_rec <-
   step_rm(date) %>% 
   step_mutate(flight = as.factor(flight)) %>% 
   step_lencode_bayes(flight, outcome = vars(arr_delay)) %>% 
-  step_dummy(all_nominal(), -all_outcomes()) %>% 
+  step_dummy(all_nominal_predictors()) %>% 
   step_zv(all_predictors()) 
 
 

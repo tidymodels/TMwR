@@ -48,7 +48,7 @@ no_spline_rec <-
   # Recall that Sale_Price is pre-logged
   step_log(Gr_Liv_Area, base = 10) %>% 
   step_other(Neighborhood, threshold = 0.01) %>% 
-  step_dummy(all_nominal()) %>% 
+  step_dummy(all_nominal_predictors()) %>% 
   step_interact( ~ Gr_Liv_Area:starts_with("Bldg_Type_") ) 
 
 lm_no_splines_res <- 

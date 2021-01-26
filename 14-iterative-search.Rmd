@@ -47,8 +47,8 @@ Along with the previously used objects (shown in Section \@ref(grid-summary)), t
 ```{r iterative-svm-defs, message = FALSE}
 svm_rec <- 
   recipe(class ~ ., data = cells) %>%
-  step_YeoJohnson(all_predictors()) %>%
-  step_normalize(all_predictors())
+  step_YeoJohnson(all_numeric_predictors()) %>%
+  step_normalize(all_numeric_predictors())
 
 svm_spec <- 
  svm_rbf(cost = tune(), rbf_sigma = tune()) %>% 
