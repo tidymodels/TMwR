@@ -108,7 +108,7 @@ For `penalty`, the random numbers are uniform on the log (base 10) scale but the
 
 The issue with random grids is that, with small-to-medium grids, random values can result in overlapping parameter combinations. Also, the random grid needs to cover the whole parameter space but the likelihood of good coverage increases with the number of grid values.  Even for a sample of 15 candidate points, this plot shows some overlap between points for our example multilayer perceptron: 
 
-```{r grid-random-matrix, echo = FALSE, fig.height = 6, fig.width = 6}
+```{r grid-random-matrix, fig.height = 6, fig.width = 6}
 library(ggforce)
 set.seed(200)
 mlp_param %>% 
@@ -215,7 +215,7 @@ Otherwise, the interface to `tune_grid()` is the same as `fit_resamples()`. The 
 
 To start, let's evaluate a regular grid with three levels across the resamples: 
 
-```{r grid-cells-regular, warning = FALSE, cache = TRUE}
+```{r grid-cells-regular, cache = TRUE}
 roc_res <- metric_set(roc_auc)
 set.seed(99)
 mlp_reg_tune <-
@@ -343,7 +343,7 @@ While not all models can exploit this feature, many broadly used ones do:
 
 * Regularization methods, such as the `r pkg(glmnet)` model, can make simultaneous predictions across the amount of regularization used to fit the model. 
 
-* Multivariate adaptive regression splines (MARS) add a set of nonlinear features features to a linear regression model [@Friedman:1991p109]. The number of terms to retain is a tuning parameter and it is computationally fast to make predictions across many values of this parameter from a single model fit. 
+* Multivariate adaptive regression splines (MARS) adds a set of nonlinear features features to a linear regression model [@Friedman:1991p109]. The number of terms to retain is a tuning parameter and it is computationally fast to make predictions across many values of this parameter from a single model fit. 
 
 The `r pkg(tune)` package automatically applies this type of optimization whenever an applicable model is tuned. 
 
@@ -365,7 +365,7 @@ c5_spec %>%
   )
 ```
 
-Without the submodel optimization, the call to `tune_grid()` took `r round(3734.249/60, 1)` minutes to resample 100 submodels. With the optimization, the same call took 100 _seconds_ (a speedup of `r round(3734.249/100.147, 0)`-fold). The reduced time is the difference in `tune_grid()` fitting 1000 models versus 10 models. 
+Without the submodel optimization, the call to `tune_grid()` used `r round(3734.249/60, 1)` minutes to resample 100 submodels. With the optimization, the same call took 100 _seconds_ (a speedup of `r round(3734.249/100.147, 0)`-fold). The reduced time is the difference in `tune_grid()` fitting 1000 models versus 10 models. 
 
 :::rmdnote
 Even though we fit the model with and without the submodel prediction trick, this optimization is _automatically_ applied by `r pkg(parsnip)`. 
@@ -381,12 +381,12 @@ When tuning models via grid search, there are two distinct loops: one over resam
 
 ```{r grid-resamples-algo, attr.source = '.numberLines', eval = FALSE}
 for (rs in resamples) {
-   # Create analysis and assessment sets
-   # Preprocess data (e.g., formula or recipe)
-   for (mod in configurations) {
-      # Fit model {mod} to the {rs} analysis set
-      # Predict the {rs} assessment set
-   }
+  # Create analysis and assessment sets
+  # Preprocess data (e.g. formula or recipe)
+  for (mod in configurations) {
+    # Fit model {mod} to the {rs} analysis set
+    # Predict the {rs} assessment set
+  }
 }
 ```
 
@@ -421,10 +421,10 @@ Instead of parallel processing the resamples, an alternate scheme combines the l
 all_tasks <- crossing(resamples, configurations)
 
 for (iter in all_tasks) {                           
-   # Create analysis and assessment sets for {iter}
-   # Preprocess data (e.g., formula or recipe)
-   # Fit model {iter} to the {iter} analysis set
-   # Predict the {iter} assessment set
+  # Create analysis and assessment sets for {iter}
+  # Preprocess data (e.g. formula or recipe)
+  # Fit model {iter} to the {iter} analysis set
+  # Predict the {iter} assessment set
 }
 ```
 
@@ -453,7 +453,7 @@ For this scheme, the control function argument is `parallel_over = "everything"`
 
 ### Benchmarking boosted trees 
 
-As an example, a boosted tree with the `r pkg(xgboost)` engine was tuned for a data set of 4,000 samples, using 5-fold cross-validation and 10 candidate models. These data required some baseline preprocessing that did not require any estimation. The preprocessing was handled in three different ways:
+As an example, a boosted tree with the `r pkg(xgboost)` engine was tuned for a data set of 4,000 samples, using 5-fold cross-validation and 10 candidate models. These data required some baseline preprocessing that did not require any estimation. The preprocessing was handled three different ways:
 
 1. Preprocess the data prior to modeling using a `r pkg(dplyr)` pipeline (labeled as "none" in the plots below).
 2. Conduct the same preprocessing via a recipe (shown as "light" preprocessing).
@@ -468,13 +468,13 @@ First, let's consider the raw execution times:
 ```{r grid-par-times, echo = FALSE, fig.height = 5}
 load("extras/parallel_times/xgb_times.RData")
 ggplot(times, aes(x = num_cores, y = elapsed, col = parallel_over, shape = parallel_over)) + 
-      geom_point() + 
-      geom_line() +
-      facet_wrap(~ preprocessing) + 
-      labs(x = "Number of Workers", y = "Execution Time (s)") + 
-      scale_y_log10() + 
-      theme_bw() + 
-      theme(legend.position = "top")
+  geom_point() + 
+  geom_line() +
+  facet_wrap(~ preprocessing) + 
+  labs(x = "Number of Workers", y = "Execution Time (s)") + 
+  scale_y_log10() + 
+  theme_bw() + 
+  theme(legend.position = "top")
 ```
 
 Since there were only five resamples, the number of cores used when `parallel_over = "resamples"` is limited to five. 
@@ -539,13 +539,13 @@ full_att <- attributes(mlp_sfd_race)
 
 race_details <- NULL
 for(iter in 1:10) {
-
+  
   tmp <- mlp_sfd_race %>% filter(.order <= iter)
-
+  
   tmp_att <- full_att
   tmp_att$row.names <- attr(tmp, "row.names")
   attributes(tmp) <- tmp_att
-
+  
   if (nrow(show_best(tmp)) == 1) {
     break()
   }
@@ -660,7 +660,7 @@ The arguments mirror those of `tune_grid()`. The function `control_race()` has o
 As shown in the animation above, there were `r nrow(remaining)` tuning parameter combinations under consideration once the full set of resamples were evaluated. `show_best()` returns the best models (ranked by performance) but only returns the configurations that were never eliminated: 
 
 ```{r grid-race-best}
- show_best(mlp_sfd_race, n = 10)
+show_best(mlp_sfd_race, n = 10)
 ```
 
 
