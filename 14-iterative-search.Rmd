@@ -119,7 +119,7 @@ When using Bayesian optimization, the primary concerns are how to create the mod
 Gaussian process (GP) [@SCHULZ20181] models are well-known statistical techniques that have a history in spatial statistics (under the name of _kriging methods_). They can be derived in multiple ways, including as a Bayesian model; see @RaWi06 for an excellent reference. 
 
 Mathematically, a GP is a a collection of random variables whose joint probability distribution is  multivariate Gaussian. In the  context of our application, this collection is the collection of performance metrics for the tuning parameter candidate values. For the initial grid of four samples shown above, the realization of these four random variables were `r knitr::combine_words(round(collect_metrics(svm_initial)$mean, 4))`. These are assumed to be distributed as multivariate Gaussian. The _inputs_ that  define the independent variables/predictors for the GP model are the corresponding tuning parameter values: 
- 
+
 ```{r iterative-gp-data-table, echo = FALSE, results = "asis"}
 collect_metrics(svm_initial) %>% 
   select(ROC = mean, cost, rbf_sigma) %>% 
@@ -130,14 +130,14 @@ collect_metrics(svm_initial) %>%
   kableExtra::add_header_above(c("outcome" = 1, "predictors" = 2))
 ```
 
-Gaussian process models are specified by their mean and covariance functions, although the latter has the most effect on the nature of the GP model. The covariance function is often parameterized in terms of the input values (denoted as $x_i$ below). As an example, a commonly used covariance function is the squared exponential^[This equation is also the same as the _radial basis function_ used in kernel methods, such as the SVM model that is currently being used. This is a coincidence; this covariance function is unrelated to the SVM tuning parameter that we are using. ] function: 
+Gaussian process models are specified by their mean and covariance functions, although the latter has the most effect on the nature of the GP model. The covariance function is often parameterized in terms of the input values (denoted as $x$ below). As an example, a commonly used covariance function is the squared exponential^[This equation is also the same as the _radial basis function_ used in kernel methods, such as the SVM model that is currently being used. This is a coincidence; this covariance function is unrelated to the SVM tuning parameter that we are using. ] function: 
 
-$$cov(y_i, y_j) = exp\left(-\frac{1}{2}|\boldsymbol{x}_i - \boldsymbol{x}_j|^2\right) + \sigma^2_{ij}$$
+$$cov(\boldsymbol{x}_i, \boldsymbol{x}_j) = exp\left(-\frac{1}{2}|\boldsymbol{x}_i - \boldsymbol{x}_j|^2\right) + \sigma^2_{ij}$$
 where $\sigma^2_{ij}$ is a constant error variance term that is zero when $i=j$. This equation translates to: 
 
-> As the distance between two tuning parameter combinations increases, the covariance between the peformance metrics increase exponentially. 
+> As the distance between two tuning parameter combinations increases, the covariance between the performance metrics increase exponentially. 
 
-The nature of the equation also implies that the variation of the outcome metric (denoted by $y_i$) is minimized at the points that have already been observed (i.e., when $|\boldsymbol{x}_i - \boldsymbol{x}_j|^2$ is zero). 
+The nature of the equation also implies that the variation of the outcome metric is minimized at the points that have already been observed (i.e., when $|\boldsymbol{x}_i - \boldsymbol{x}_j|^2$ is zero). 
 
 The nature of this covariance function allows the Gaussian process to represent highly nonlinear relationships between model performance and the tuning parameters even when only a small amount of data exists. 
 
@@ -147,7 +147,7 @@ However, fitting these models can be difficult in some cases and the model becom
 
 An important virtue of this model is that, since a full probability model is specified, the predictions for new inputs can reflect the entire _distribution_ of the outcome. In other words, new performance statistics can be predicted in terms of both mean and variance. 
 
-Suppose that two new tuning parameters were under consideration. In the table below, candidate _A_ has a slightly better mean ROC value than candidate _B_ (the current best is `r round(max(collect_metrics(svm_initial)$mean), 4)`). However, its variance is four-fold larger than _B_. Is this good or bad? Choosing option _A_ is riskier but has a potentially higher return. The increase in variance also reflects that this new value is further away from the existing data than _B_. The next section considers these aspects of GP predictions for Bayesian optimization in more detail.
+Suppose that two new tuning parameters were under consideration. In the table below, candidate _A_ has a slightly better mean ROC value than candidate _B_ (the current best is `r round(max(collect_metrics(svm_initial)$mean), 4)`). However, its variance is four-fold larger than _B_. Is this good or bad? Choosing option _A_ is riskier but has potentially higher return. The increase in variance also reflects that this new value is further away from the existing data than _B_. The next section considers these aspects of GP predictions for Bayesian optimization in more detail.
 
 ```{r iterative-gp-pred, echo = FALSE, result = "asis"}
 best_val <- max(collect_metrics(svm_initial)$mean)
@@ -286,7 +286,7 @@ small_pred %>%
   scale_color_brewer(palette = "Set1")
 ```
 
-When only considering the mean $R^2$ prediction, a parameter value of 0.10 is the better choice. The tuning parameter recommendation for 0.25 is, on average, predicted to be _worse_ than the current best. However, since it has higher variance, it has more overall probability mass above the current best. As a result, it has a larger expected improvement of the two:
+When only considering the mean $R^2$ prediction, a parameter value of 0.10 is the better choice. The tuning parameter recommendation for 0.25 is, on average, predicted to be _worse_ than the current best. However, since it has higher variance, it has more overall probability area above the current best. As a result, it has a larger expected improvement of the two:
 
 ```{r iterative-gp-data-table-2, echo = FALSE, results = "asis"}
 small_pred %>% 
@@ -422,7 +422,7 @@ iter_1_imp <- iter_1_roc > best_init
 iter_1_text <- 
   paste0(
     ifelse(iter_1_imp, "showed an improvement, resulting in an ROC value of ",
-                        "failed to improve the outcome with an ROC value of "),
+           "failed to improve the outcome with an ROC value of "),
     round(iter_1_roc, 5), "."
   )
 
@@ -435,10 +435,10 @@ iter_2_text <-
     !iter_1_imp &   iter_2_imp ~ 
       paste0("the second iteration did yield a better result with an area under the ROC curve of ", 
              round(iter_2_roc, 5), "."),
-     iter_1_imp &  !iter_2_imp ~ 
+    iter_1_imp &  !iter_2_imp ~ 
       paste0("the second iteration did not continue the trend with a suboptimal ROC value of ",
              round(iter_2_roc, 5), "."),
-      iter_1_imp &  !iter_2_imp ~ 
+    iter_1_imp &  !iter_2_imp ~ 
       paste0("the second iteration further increased the outcome value (ROC = ",
              round(iter_2_roc, 5), ").") 
   )
@@ -467,7 +467,7 @@ if (last_iter < 25) {
       "` more steps. The last step was:"
     )
 } else {
-    last_bo_text <- "The last step was:"
+  last_bo_text <- "The last step was:"
 }
 ```
 
@@ -537,7 +537,7 @@ av_capture_graphics(
 ```
 
 <video width="720" height="720" controls>
-  <source src="bo_search.mp4" type="video/mp4">
+<source src="bo_search.mp4" type="video/mp4">
 </video>
 
 
@@ -608,9 +608,9 @@ In our implementation, the neighborhood is determined by scaling the current can
 
 To illustrate, we'll use the two main `r pkg(glmnet)` tuning parameters: 
 
- * The amount of total regularization (`penalty`). The default range for this parameter is $10^{`r penalty()$range[[1]]`}$ to $10^{`r penalty()$range[[2]]`}$. It is typical to use a log (base 10) transformation for this parameter.  
+* The amount of total regularization (`penalty`). The default range for this parameter is $10^{`r penalty()$range[[1]]`}$ to $10^{`r penalty()$range[[2]]`}$. It is typical to use a log (base 10) transformation for this parameter.  
 
- * The proportion of the lasso penalty (`mixture`). This is bounded at zero and one with no transformation.
+* The proportion of the lasso penalty (`mixture`). This is bounded at zero and one with no transformation.
 
 ```{r iterative-neighborhood-calcs, echo = FALSE}
 glmn_param <- parameters(penalty(), mixture())
@@ -792,7 +792,7 @@ best_sa_inds <- result_history$.iter[which.max(result_history$mean)]
 best_txt <-
   dplyr::case_when(
     restart_num == 1 ~ paste0("a new global optimum once at iteration ", best_iters, "."),
-    TRUE ~ paste0("new global optima at ", length(best_iters), " different iterations.")[1]
+    TRUE ~ paste0("new global optimums at ", length(best_iters), " different iterations.")[1]
   )
 best_txt <- best_txt[1]
 if (length(best_iters) > 1) {
@@ -844,7 +844,7 @@ To show how the parameters change over iterations:
 autoplot(svm_sa, type = "parameters")
 ```
 
-A visualization of the search path helps to understand where the search process did well and and where it went astray:  
+A visualization of the search path helps to understand where the search process did well and where it went astray:  
 
 ```{r iterative-sa-plot, include = FALSE}
 av_capture_graphics(
