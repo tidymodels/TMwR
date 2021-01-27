@@ -125,7 +125,7 @@ A much better approach is to use a set of experimental designs called _space-fil
 
 The `r pkg(dials)` package contains functions for Latin hypercube and maximum entropy designs. As with `grid_random()`, the primary inputs are the number of parameter combinations and a parameter object. Let's compare a random design with a Latin hypercube design for 15 candidate parameter values: 
 
-```{r grid-sfd-compare, echo = FALSE, fig.height = 6, fig.width = 6}
+```{r grid-sfd-compare, fig.height = 6, fig.width = 6}
 set.seed(200)
 mlp_param %>% 
   grid_latin_hypercube(size = 15, original = FALSE) %>% 
