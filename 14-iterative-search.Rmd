@@ -32,7 +32,7 @@ Chapter \@ref(grid-search) demonstrated how grid search takes a pre-defined set 
 When grid search is infeasible or inefficient, iterative methods are a sensible approach for optimizing tuning parameters. 
 :::
 
-The chapter outlines two search methods. First, we discuss _Bayesian optimization_, which uses a statistical model to predict better parameter settings. After that, the chapter describes a global search method called _simulated annealing_. 
+This chapter outlines two search methods. First, we discuss _Bayesian optimization_, which uses a statistical model to predict better parameter settings. After that, the chapter describes a global search method called _simulated annealing_. 
 
 We use the same data on cell characteristics as the previous chapter for illustration, but change the model. This chapter uses a support vector machine model because it provides nice two-dimensional visualizations of the search processes. 
 
