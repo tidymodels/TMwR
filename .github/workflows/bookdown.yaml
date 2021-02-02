@@ -25,7 +25,7 @@ jobs:
         
       - name: Install system dependencies
         run: |
-          brew cask install xquartz
+          brew install [--cask] xquartz
           brew install pkg-config cairo
           brew install v8
 
