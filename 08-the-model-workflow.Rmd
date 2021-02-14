@@ -134,10 +134,10 @@ lm_wflow <-
 lm_wflow
 ```
 
-We described the `prep()`, `bake()`, and `juice()` functions in Section \@ref(recipes-manual) for using the recipe with a modeling function. This can be onerous, so the `fit()` method for workflow objects automates this process: 
+We described the `prep()` and `bake()` functions in Section \@ref(recipes-manual) for using the recipe with a modeling function. This can be onerous, so the `fit()` method for workflow objects automates this process: 
 
 ```{r workflows-recipe-fit}
-# Does `prep()`, `juice()`, and `fit()` in one step:
+# Does `prep()`, `bake()`, and `fit()` in one step:
 lm_fit <- fit(lm_wflow, ames_train)
 
 # Does `bake()` and `predict()` automatically:

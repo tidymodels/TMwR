@@ -269,8 +269,7 @@ all_stations <-
   mutate(date = mdy(date), rides = rides / 1000) %>% 
   # Step 4: Summarize the multiple records using the maximum.
   group_by(date, station) %>% 
-  summarize(rides = max(rides), .groups = "drop") %>% 
-  ungroup()
+  summarize(rides = max(rides), .groups = "drop")
 ```
 
 This pipeline of operations illustrates why the tidyverse is popular. A series of data manipulations is used that have simple and easy to understand user interfaces; the series is bundled together in a streamlined and readable way. The focus is on how the user interacts with the software. This approach enables more people to learn R and achieve their analysis goals, and adopting these same principles for modeling in R has the same benefits. 
