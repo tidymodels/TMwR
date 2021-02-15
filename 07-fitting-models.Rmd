@@ -60,7 +60,7 @@ For tidymodels, the approach to specifying a model is intended to be more unifie
 
 2. **Specify the _engine_ for fitting the model.** Most often this reflects the software package that should be used. 
 
-3. **When required, declare the _mode_ of the model.** The mode reflects the type of prediction outcome. For numeric outcomes, the mode is _regression_; for qualitative outcomes, it is _classification_^[Note that `r pkg(parsnip)` constrains the outcome column of a classification models to be encoded as a _factor_; using binary numeric values will result in an error.]. If a model can only create one type of model, such as linear regression, the mode is already set. 
+3. **When required, declare the _mode_ of the model.** The mode reflects the type of prediction outcome. For numeric outcomes, the mode is _regression_; for qualitative outcomes, it is _classification_^[Note that `r pkg(parsnip)` constrains the outcome column of a classification model to be encoded as a _factor_; using binary numeric values will result in an error.]. If a model can only create one type of model, such as linear regression, the mode is already set. 
 
 These specifications are built _without referencing the data_. For example, for the three cases above: 
 
@@ -215,7 +215,7 @@ arg_info %>%
 </tbody>
 </table>
 
-Admittedly, this is one more set of arguments to memorize. However, when other types of models have the same argument types, these names still apply. For example, boosted tree ensembles also create a large number of tree-based models, so `trees` is also used there, as is `num_n`, and so on. The `r pkg(parsnip)` argument names have also been standardized with similar recipe arguments. 
+Admittedly, this is one more set of arguments to memorize. However, when other types of models have the same argument types, these names still apply. For example, boosted tree ensembles also create a large number of tree-based models, so `trees` is also used there, as is `min_n`, and so on. The `r pkg(parsnip)` argument names have also been standardized with similar recipe arguments. 
 
 Some of the original argument names can be fairly jargon-y. For example, to specify the amount of regularization to use in a glmnet model, the Greek letter `lambda` is used. While this mathematical notation is commonly used in the statistics literature, it is not obvious to many people what `lambda` represents (especially those who consume the model results). Since this is the penalty used in regularization, `r pkg(parsnip)` standardizes on the argument name `penalty`. Similarly, the number of neighbors in a _K_-nearest neighbors model is called `neighbors` instead of `k`. Our rule of thumb when standardizing argument names is:
 
