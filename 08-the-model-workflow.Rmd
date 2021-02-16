@@ -266,7 +266,7 @@ parametric_fit
 
 Notice how, in the call printed above, the model-specific formula was used. 
 
-## Creating workflows _en masse_  {#workflow-sets-intro}
+## Creating multiple workflows at once {#workflow-sets-intro}
 
 There are some occasions where the data will require numerous attempts to find an appropriate model. For example: 
 
@@ -289,30 +289,27 @@ location <- list(
 
 These representations can be crossed with one or more models using the `workflow_set()` function. We'll just use the previous linear model specification to demonstrate:  
 
-```{r workflows-set}
+```{r workflows-set-location}
 library(workflowsets)
-
-location_models <-
-  workflow_set(preproc = location, models = list(lm = lm_model))
+location_models <- workflow_set(preproc = location, models = list(lm = lm_model))
 location_models
-
-location_models$workflow[[1]]
+location_models$info[[1]]
+pull_workflow(location_models, id = "coords_lm")
 ```
 
-Workflow sets are mostly designed to work with resampling, which is discussed in Chapter \@ref(resampling). In the object above, the columns `option` and `result` must be populated with specific types of objects that result from resampling. This will be demonstrated in more detail in Chapter \@ref(compare).  
+Workflow sets are mostly designed to work with resampling, which is discussed in Chapter \@ref(resampling). In the object above, the columns `option` and `result` must be populated with specific types of objects that result from resampling. This will be demonstrated in more detail in Chapters \@ref(compare) and  \@ref(workflow-sets).  
 
 In the meantime, let's create model fits for each formula and save them in a new column called `fit`. We'll use basic `r pkg(dplyr)` and `r pkg(purrr)` operations: 
 
 ```{r workflows-set-fit}
-location_models <- 
-  location_models %>% 
-  mutate(fit = map(workflow, fit, ames_train))
-
+location_models <-
+   location_models %>%
+   mutate(fit = map2(info, wflow_id, ~ fit(.x$workflow[[1]], ames_train)))
 location_models
 location_models$fit[[1]]
 ```
 
-There's a lot more to workflow sets. Their main advantages won't be illustrated until later chapters. 
+There's a lot more to workflow sets. Their nuances and advantages won't be illustrated until Chapter \@ref(workflow-sets). 
 
 
 ## Future plans

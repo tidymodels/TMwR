@@ -508,7 +508,7 @@ What is the benefit of using the submodel optimization method _in conjunction_ w
 Overall, note that the increased computational savings will vary from model-to-model and are also affected by the size of the grid, the number of resamples, etc. A very computationally efficient model may not benefit as much from parallel processing. 
 :::
 
-### Racing methods
+### Racing methods {#racing}
 
 One issue with grid search is that all models need to be fit across all resamples before any tuning parameters can be evaluated. It would be helpful if instead, at some point during tuning, an interim analysis could be conducted to eliminate any truly awful parameter candidates. This would be akin to _futility analysis_ in clinical trials. If a new drug is performing excessively poorly (or well), it is potentially unethical to wait until the trial finishes to make a decision.  
 

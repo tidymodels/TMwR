@@ -46,6 +46,7 @@ Imports:
   nnet,
   parsnip,
   patchwork,
+  prettyunits,
   purrr,
   ranger,
   recipes,
@@ -68,5 +69,6 @@ Remotes:
   tidymodels/tune,
   tidymodels/tidymodels,
   tidymodels/finetune,
-  tidymodels/workflowsets
+  tidymodels/workflowsets,
+  tidymodels/tidyposterior
 
