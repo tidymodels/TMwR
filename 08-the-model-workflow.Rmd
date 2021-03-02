@@ -91,7 +91,7 @@ lm_wflow <-
 lm_wflow
 ```
 
-Workflows have a `fit()` method that can be used to create the model. Using the objects create in Section \@ref(models-summary):
+Workflows have a `fit()` method that can be used to create the model. Using the objects created in Section \@ref(models-summary):
 
 ```{r workflows-form-fit}
 lm_fit <- fit(lm_wflow, ames_train)
