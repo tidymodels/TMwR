@@ -169,7 +169,7 @@ ames_metrics(ames_test_res, truth = Sale_Price, estimate = .pred)
 This tidy data format stacks the metrics vertically. 
 
 :::rmdwarning
-The `r pkg(yardstick)` package does _not_ contain a function for adjusted $R^2$. This commonly used modification of the coefficient of determination is needed when the same data used to fit the model are used to evaluate the model. This metric is not full supported in tidymodels because it is always a better approach to compute performance on a separate data set than the one used to fit the model.  
+The `r pkg(yardstick)` package does _not_ contain a function for adjusted $R^2$. This commonly used modification of the coefficient of determination is needed when the same data used to fit the model are used to evaluate the model. This metric is not fully supported in tidymodels because it is always a better approach to compute performance on a separate data set than the one used to fit the model.  
 :::
 
 ## Binary classification metrics 
@@ -242,7 +242,7 @@ str(hpc_cv)
 
 As before, there are factors for the observed and predicted outcomes along with four other columns of predicted probabilities for each class. These data also include a `Resample` column. These results are for out-of-sample predictions associated with 10-fold cross-validation (discussed in Chapter \@ref(resampling)). For the time being, this column will be ignored. 
 
-The functions for metrics that use the discrete class probabilities are identical: 
+The functions for metrics that use the discrete class predictions are identical: 
 
 ```{r performance-mutliclass-pred}
 accuracy(hpc_cv, obs, pred)
