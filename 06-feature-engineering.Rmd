@@ -62,8 +62,7 @@ When this function is executed, the data are converted from a data frame to a nu
 
 1. The neighborhood and building type columns are converted from a non-numeric format to a numeric format (since least squares requires numeric predictors). 
 
-As mentioned in Chapter \@ref(base-r), the formula method will apply these data manipulations to any data, 
-new data, that are passed to the `predict()` function. 
+As mentioned in Chapter \@ref(base-r), the formula method will apply these data manipulations to any data, including new data, that are passed to the `predict()` function. 
 
 A recipe is also an object that defines a series of steps for data processing. Unlike the formula method inside a modeling function, the recipe defines the steps without immediately executing them; it is only a specification of what _should_ be done. Here is a recipe equivalent to the formula above that builds on the code summary in Section \@ref(splitting-summary):
 
@@ -561,4 +560,3 @@ ames_rec <-
   step_interact( ~ Gr_Liv_Area:starts_with("Bldg_Type_") ) %>% 
   step_ns(Latitude, Longitude, deg_free = 20)
 ```
-
