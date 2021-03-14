@@ -33,7 +33,7 @@ For a comparison to this linear model, we can also fit a different type of model
 
 Random forest models are very powerful and they can emulate the underlying data patterns very closely. While this model can be computationally intensive, it is very low-maintenance; very little preprocessing is required (as documented in Appendix \@ref(pre-proc-table)).
 
-Using the same predictor set as the linear model (without the extra preprocessing steps), we can fit a random forest model to the training set using via the `r pkg(ranger)` package. This model requires no preprocessing so a simple formula can be used:
+Using the same predictor set as the linear model (without the extra preprocessing steps), we can fit a random forest model to the training set via the `r pkg(ranger)` package. This model requires no preprocessing so a simple formula can be used:
 
 ```{r resampling-rand-forest-spec}
 rf_model <- 
