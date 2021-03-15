@@ -51,7 +51,7 @@ In this section, we will focus on a small subset of the predictors available in 
 Suppose that an initial ordinary linear regression model were fit to these data. Recalling that, in Chapter \@ref(ames), the sale prices were pre-logged, a standard call to `lm()` might look like:
 
 ```{r engineering-ames-simple-formula, eval = FALSE}
-lm(Sale_Price ~ Neighborhood + log10(Gr_Liv_Area) + Year_Built + Bldg_Type)
+lm(Sale_Price ~ Neighborhood + log10(Gr_Liv_Area) + Year_Built + Bldg_Type, data = ames)
 ```
 
 When this function is executed, the data are converted from a data frame to a numeric _design matrix_ (also called a _model matrix_) and then the least squares method is used to estimate parameters. In Section \@ref(formula) we listed the multiple purposes of the R model formula; let's focus only on the data manipulation aspects for now. What the formula above does can be decomposed into a series of _steps_:
