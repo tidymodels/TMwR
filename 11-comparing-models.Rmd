@@ -83,6 +83,7 @@ What about the random forest model from the previous chapter? We can add it to t
 four_models <- 
   as_workflow_set(random_forest = rf_res) %>% 
   bind_rows(lm_models)
+four_models
 ```
 
 Another nicety is that the `autoplot()` method shows confidence intervals for each model in order of best-to-worst. In this chapter, we'll focus on the coefficient of determination (a.k.a. R<sup>2</sup>): 
