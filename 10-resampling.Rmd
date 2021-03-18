@@ -455,7 +455,7 @@ collect_metrics(val_res)
 These results are also much closer to the test set results than the resubstitution estimates of performance. 
 
 :::rmdnote
-In these analyses, the resampling results are very close to the test set results. The two types of estimates tend to be well correlated. However, this could be from random chance. A seed value of `1352` fixed the random numbers before creating the resamples. Try changing this value and re-running the analyses to investigate whether the resampled estimates match the test set results as well.
+In these analyses, the resampling results are very close to the test set results. The two types of estimates tend to be well correlated. However, this could be from random chance. A seed value of `55` fixed the random numbers before creating the resamples. Try changing this value and re-running the analyses to investigate whether the resampled estimates match the test set results as well.
 :::
 
 ## Parallel processing {#parallel}
