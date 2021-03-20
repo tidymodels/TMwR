@@ -24,6 +24,7 @@ SystemRequirements: FFmpeg (>= 3.2); with at least libx264 and lame (mp3)
   (via https://rpmfusion.org), MacOS Homebrew: ffmp
 Imports:
   av,
+  baguette,
   bookdown,
   broom,
   corrr,
@@ -55,6 +56,7 @@ Imports:
   rpart,
   rsample (>= 0.0.9),
   rstanarm,
+  rules,
   sessioninfo,
   tibble (>= 3.1.0),
   tidymodels,
