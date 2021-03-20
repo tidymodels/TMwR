@@ -68,9 +68,7 @@ normalized_rec <-
 
 poly_recipe <- 
    normalized_rec %>% 
-   step_interact(~ all_predictors():all_predictors()) %>% 
-   step_poly(cement, blast_furnace_slag, fly_ash, water, superplasticizer, 
-             coarse_aggregate, fine_aggregate, age) %>% 
+   step_poly(all_predictors()) %>% 
    step_interact(~ all_predictors():all_predictors())
 ```
 
