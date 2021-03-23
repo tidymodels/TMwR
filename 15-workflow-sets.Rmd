@@ -220,8 +220,6 @@ all_workflows <-
    # Make the workflow ID's a little more simple: 
    mutate(wflow_id = gsub("(simple_)|(normalized_)", "", wflow_id))
 all_workflows
-
-all_workflows <- dplyr::slice(all_workflows, 7:12)
 ```
 
 ## Tuning and evaluating the models
