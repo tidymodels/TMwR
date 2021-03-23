@@ -220,6 +220,8 @@ all_workflows <-
    # Make the workflow ID's a little more simple: 
    mutate(wflow_id = gsub("(simple_)|(normalized_)", "", wflow_id))
 all_workflows
+
+all_workflows <- dplyr::slice(all_workflows, 1:6)
 ```
 
 ## Tuning and evaluating the models
@@ -261,7 +263,7 @@ full_results_time <-
       grid_results <- 
          all_workflows %>% 
          workflow_map(seed = 1503, resamples = concrete_folds, grid = 25, 
-                      control = grid_ctrl)
+                      control = grid_ctrl, verbose = TRUE)
    )
 
 num_grid_models <- nrow(collect_metrics(grid_results, summarize = FALSE))
