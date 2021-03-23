@@ -248,7 +248,7 @@ grid_results <-
 
 The results show that the `option` and `result` columns have been updated:
 
-```{r workflow-sets-grid-comparison, include = FALSE, cache = caching}
+```{r workflow-sets-grid-comparison, include = TRUE, cache = caching}
 grid_ctrl <-
    control_grid(
       save_pred = TRUE,
