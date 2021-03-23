@@ -38,10 +38,6 @@ lm_with_splines_res <-
 Secondly, a less complex recipe without the splines terms is evaluated to determine if the extra 40 spline terms are worth keeping. Once added to a workflow, it is resampled:
 
 ```{r compare-no-spline-rs}
-lm_with_splines_res <-
-  lm_wflow %>%
-  fit_resamples(resamples = ames_folds, control = keep_pred)
-
 no_spline_rec <- 
   recipe(Sale_Price ~ Neighborhood + Gr_Liv_Area + Year_Built + Bldg_Type + 
            Latitude + Longitude, data = ames_train) %>%
