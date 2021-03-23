@@ -248,7 +248,7 @@ To resolve the usage issues described here, the tidymodels packages have a set o
 
 * Functions should take the **data structures that users have** as opposed to the data structure that developers want. For example, a model function's _only_ interface should not be constrained to matrices. Frequently, users will have non-numeric predictors such as factors. 
 
-Many of these ideas are described in the tidymodels guidelines for model implementation^[`https://tidymodels.github.io/model-implementation-principles`]. In subsequent chapters, we will illustrate examples of existing issues, along with their solutions. 
+Many of these ideas are described in the tidymodels guidelines for model implementation^[`[https://tidymodels.github.io/model-implementation-principles](https://tidymodels.github.io/model-implementation-principles)`]. In subsequent chapters, we will illustrate examples of existing issues, along with their solutions. 
 
 :::rmdnote
 There are a few existing R packages that provide a unified interface to harmonize these heterogeneous modeling APIs, such as `r pkg(caret)` and `r pkg(mlr)`. The tidymodels framework is similar to these in adopting a unification of the function interface, as well as enforcing consistency in the function names and return values. It is different in its opinionated design goals and modeling implementation.
