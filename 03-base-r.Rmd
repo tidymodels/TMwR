@@ -193,7 +193,7 @@ library(lattice)
 xyplot(y ~ x, data = plot_data)
 
 library(ggplot2)
-ggplot(plot_data, aes(x = y, y = y)) + geom_point()
+ggplot(plot_data, aes(x = x, y = y)) + geom_point()
 ```
 
 In these three cases, separate groups of developers devised three distinct interfaces for the same task. Each has advantages and disadvantages. 
