@@ -86,14 +86,14 @@ four_models <-
 four_models
 ```
 
-Another nicety is that the `autoplot()` method shows confidence intervals for each model in order of best-to-worst. In this chapter, we'll focus on the coefficient of determination (a.k.a. R<sup>2</sup>): 
+The `autoplot()` method shows confidence intervals for each model in order of best-to-worst. In this chapter, we'll focus on the coefficient of determination (a.k.a. R<sup>2</sup>): 
 
 
 ```{r compare-workflow-set-rsq}
 autoplot(four_models, metric = "rsq")
 ```
 
-It appears that the random forest method is doing the best job and there are minor improvements in the linear models as we add more recipe steps.
+The random forest method is doing the best job and there are minor improvements in the linear models as we add more recipe steps.
 
 Now that we have 10 resampled performance estimates for each of four models, these summary statistics can be used to make between-model comparisons.
 
@@ -184,7 +184,7 @@ rsq_indiv_estimates %>%
   kable_styling(full_width = FALSE) 
 ```
 
-The `X1`, `X2` amd `X3` columns in the table are indicators based on the values in the `model` column. The order of these was defined in the same way that R defines them (alphabetically ordered by `model`).  
+The `X1`, `X2`, and `X3` columns in the table are indicators for the values in the `model` column. Their order was defined in the same way that R would define them, alphabetically ordered by `model`.  
 
 For our model comparison, the specific ANOVA model is: 
 
@@ -204,7 +204,7 @@ From these model parameters, hypothesis tests and p-values are generated to stat
 
 Treating the resamples as random effects is theoretically appealing. Methods for fitting an ANOVA model with this type of random effect could include the linear mixed model [@faraway2016extending] or a Bayesian hierarchical model (shown in the next section). 
 
-A simple and fast method for comparing two models at a time is to use the _differences in R<sup>2</sup> values_ as the outcome data in the ANOVA model. Since the outcomes are matched by resample, the differences _do not contain the resample-to-resample effect_ and, for this reason, the standard ANOVA model is appropriate. To illustrate, this call to `lm()` tests the difference between the two of the linear regression models: 
+A simple and fast method for comparing two models at a time is to use the _differences in R<sup>2</sup> values_ as the outcome data in the ANOVA model. Since the outcomes are matched by resample, the differences _do not contain the resample-to-resample effect_ and, for this reason, the standard ANOVA model is appropriate. To illustrate, this call to `lm()` tests the difference between two of the linear regression models: 
 
 ```{r compare-t-test}
 compare_lm <- 
@@ -274,15 +274,15 @@ $$y_{ij} = (\beta_0 + b_{i}) + \beta_1x_{i1} + \beta_2x_{i2} + \beta_3x_{i3} + \
 
 This is not an unreasonable model for resampled statistics which, when plotted across models (as above), tend to have fairly parallel effects across models (i.e., little cross-over of lines). 
 
-For this model configuration, an additional assumption is made for the prior distribution of random effects. A reasonable approach is another symmetric distribution such as another bell-shaped curve. Given the effective sample size of 10 in our summary statistic data, let's use a prior that is wider than a standard normal distribution. We'll use a t-distribution with a single degree of freedom (i.e. $b_i \sim t(1)$), which has heavier tails than an analogous Gaussian distribution. 
+For this model configuration, an additional assumption is made for the prior distribution of random effects. A reasonable assumption for this distribution is another symmetric distribution, such as another bell-shaped curve. Given the effective sample size of 10 in our summary statistic data, let's use a prior that is wider than a standard normal distribution. We'll use a t-distribution with a single degree of freedom (i.e. $b_i \sim t(1)$), which has heavier tails than an analogous Gaussian distribution. 
 
-The `r pkg(tidyposterior)` package has functions to fit such Bayesian models for the purpose of comparing resampled models. The main function is called `perf_mod()` and it configured to "just work" for different types of objects:
+The `r pkg(tidyposterior)` package has functions to fit such Bayesian models for the purpose of comparing resampled models. The main function is called `perf_mod()` and it is configured to "just work" for different types of objects:
 
  * For workflow sets, it creates an ANOVA model where the groups correspond to the workflows. Our existing models did not optimize any tuning parameters (see the next three chapters). If one of the workflows in the set had data on tuning parameters, the best tuning parameters set for each workflow is used in the Bayesian analysis. In other words, despite the presence of tuning parameters, `perf_mod()` focuses on making _between-workflow comparisons_. 
  
- * For objects that contain a single model that has been tuned using resampling, `perf_mod()` makes _within-model comparisons_. In this situations, the grouping variable tested in the Bayesian ANOVA model are the submodels defined by the tuning parameters. 
+ * For objects that contain a single model that has been tuned using resampling, `perf_mod()` makes _within-model comparisons_. In this situation, the grouping variables tested in the Bayesian ANOVA model are the submodels defined by the tuning parameters. 
 
- * `perf_mod()` can also take a data frame produced by `r pkg(rsample)` that has columns of performance metrics associated with two or more model/workflow results. These could have been generated by non-standard means.
+ * The `perf_mod()` function can also take a data frame produced by `r pkg(rsample)` that has columns of performance metrics associated with two or more model/workflow results. These could have been generated by non-standard means.
 
 From any of these types of objects, the `perf_mod()` function determines an appropriate Bayesian model and fits it with the resampling statistics. For our example, it will model the four sets of R<sup>2</sup> statistics associated with the workflows. 
 
@@ -306,7 +306,7 @@ rsq_anova <-
   )
 ```
 
-The resulting object has information on the resampling process as well as the Stan object embedded within (in an element called `stan`). We are most interested in the posterior distributions of the regression parameters. `r pkg(tidyposterior)` has a `tidy()` method that extracts these posterior distributions into a tibble: 
+The resulting object has information on the resampling process as well as the Stan object embedded within (in an element called `stan`). We are most interested in the posterior distributions of the regression parameters. The `r pkg(tidyposterior)` package has a `tidy()` method that extracts these posterior distributions into a tibble: 
 
 ```{r compare-group-posteriors-tidy}
 model_post <- 
@@ -329,7 +329,9 @@ model_post %>%
   labs(x = expression(paste("Posterior for mean ", R^2)))
 ```
 
-These histograms describe the estimated probability distributions of the mean R<sup>2</sup> value for each model. There is some overlap, especially for the two linear models. There is also a basic `autoplot()` method for the model results as well as the tidied object that shows overlaid density plots. For example: 
+These histograms describe the estimated probability distributions of the mean R<sup>2</sup> value for each model. There is some overlap, especially for the two linear models. 
+
+There is also a basic `autoplot()` method for the model results as well as the tidied object that shows overlaid density plots. For example: 
 
 
 ```{r compare-autoplot-intervals}
