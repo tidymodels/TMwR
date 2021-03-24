@@ -20,8 +20,8 @@ jobs:
       - name: Setup R
         uses: r-lib/actions/setup-r@master
 
-      - name: Install pandoc and pandoc citeproc
-        uses: r-lib/actions/setup-pandoc@master
+      - name: Install pandoc
+        uses: r-lib/actions/setup-pandoc@v1
         
       - name: Install system dependencies
         run: |
@@ -29,30 +29,31 @@ jobs:
           brew install pkg-config cairo
           brew install v8
 
-      - name: Query dependencies
+      - name: Install pak and query dependencies
         run: |
-          install.packages('remotes')
-          saveRDS(remotes::dev_package_deps(dependencies = TRUE), ".github/depends.Rds", version = 2)
-          writeLines(sprintf("R-%i.%i", getRversion()$major, getRversion()$minor), ".github/R-version")
+          install.packages("pak", repos = "https://r-lib.github.io/p/pak/dev/")
+          saveRDS(pak::pkg_deps_tree("local::.", dependencies = TRUE), ".github/r-depends.rds")
         shell: Rscript {0}
 
       - name: Cache R packages
-        uses: actions/cache@v1
+        uses: actions/cache@v2
         with:
           path: ${{ env.R_LIBS_USER }}
-          key: ${{ runner.os }}-${{ hashFiles('.github/R-version') }}-2-${{ hashFiles('.github/depends.Rds') }}
-          restore-keys: ${{ runner.os }}-${{ hashFiles('.github/R-version') }}-2-
+          key: ${{ runner.os }}-${{ steps.install-r.outputs.installed-r-version }}-1-${{ hashFiles('.github/r-depends.rds') }}
+          restore-keys: ${{ runner.os }}-${{ steps.install-r.outputs.installed-r-version }}-1-
 
       - name: Cache bookdown results
-        uses: actions/cache@v1
+        uses: actions/cache@v2
         with:
           path: _bookdown_files
           key: bookdown-2-${{ hashFiles('**/*Rmd') }}
           restore-keys: bookdown-2-
 
-      - name: Install packages
+      - name: Install dependencies
         run: |
-          R -e 'remotes::install_deps(dependencies = TRUE)'
+          pak::local_install_dev_deps(upgrade = TRUE)
+          pak::pkg_install("rcmdcheck")
+        shell: Rscript {0}
 
       - name: Configure Git user
         run: |
