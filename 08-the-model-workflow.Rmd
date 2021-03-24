@@ -164,7 +164,7 @@ lm_fit %>%
 
 ## Adding raw variables to the workflow
 
-There is a third interface for passing data to the model. The `add_variables()` function using a simple `r pkg(dplyr)` syntax. The function has two primary arguments: `outcomes` and `predictors`. These use a selection approach similar to `r pkg(tidyr)` package to capture multiple selectors using `c()`. 
+There is a third interface for passing data to the model, the `add_variables()` function which uses a `r pkg(dplyr)`-like syntax for choosing variables. The function has two primary arguments: `outcomes` and `predictors`. These use a selection approach similar to the `r pkg(tidyselect)` backend of `r pkg(tidyverse)` packages to capture multiple selectors using `c()`. 
 
 ```{r workflows-add-variables}
 lm_wflow <- 
@@ -186,13 +186,13 @@ One nicety is that any outcome columns accidentally specified in the predictors 
 predictors = everything()
 ```
 
-When the model is fit, the specification simply assembles these data, unaltered, into a data frame and passes it to the underlying function:
+When the model is fit, the specification assembles these data, unaltered, into a data frame and passes it to the underlying function:
 
 ```{r workflows-add-variables-fit}
 fit(lm_wflow, ames_train)
 ```
 
-If you would like the underlying modeling method to do what it would normally do with the data, `add_variables()` is a helpful interface. As will be seen in Section \@ref(special-model-formulas), it also facilitate more complex modeling specifications. However, as is also mentioned in the next section, models such as `glmnet` and `xgboost` expect the user to make indicator variables from factor predictors. In these cases, a recipe or formula interface might be a better choice. 
+If you would like the underlying modeling method to do what it would normally do with the data, `add_variables()` can be a helpful interface. As we will discuss in Section \@ref(special-model-formulas), it also facilitates more complex modeling specifications. However, as we mention in the next section, models such as `glmnet` and `xgboost` expect the user to make indicator variables from factor predictors. In these cases, a recipe or formula interface will typically be a better choice. 
 
 ## How does a workflow use the formula? {#workflow-encoding}
 
@@ -268,13 +268,13 @@ Notice how, in the call printed above, the model-specific formula was used.
 
 ## Creating multiple workflows at once {#workflow-sets-intro}
 
-There are some occasions where the data will require numerous attempts to find an appropriate model. For example: 
+There are some situations where the data requires numerous attempts to find an appropriate model. For example: 
 
-* For predictive models, it is advisable to evaluate  a variety of different model types. This will require the user to create multiple model specifications. 
+* For predictive models, it is advisable to evaluate  a variety of different model types. This requires the user to create multiple model specifications. 
 
-* Sequential testing of models typically start with an expanded set of predictors. This "full model" is compared to a sequence of the same model that removes each predictor in turn. Using basic hypothesis testing methods or empirical validation, the effect of each predictor can be isolated and assessed. 
+* Sequential testing of models typically starts with an expanded set of predictors. This "full model" is compared to a sequence of the same model that removes each predictor in turn. Using basic hypothesis testing methods or empirical validation, the effect of each predictor can be isolated and assessed. 
 
-In these situations, as well as others, it might become tedious or onerous to create a lot of workflows from different sets of preprocessors and/or model specifications. To compensate for this problem, the `r pkg(workflowset)` package creates combinations of workflow ingredients. A list of preprocessors (e.g., formulas, recipes, or `r pkg(dplyr)` selectors) can be combined with a list of model specifications, resulting in a set of workflows. 
+In these situations, as well as others, it can become tedious or onerous to create a lot of workflows from different sets of preprocessors and/or model specifications. To address this problem, the `r pkg(workflowset)` package creates combinations of workflow components. A list of preprocessors (e.g., formulas, recipes, or `r pkg(dplyr)` selectors) can be combined with a list of model specifications, resulting in a set of workflows. 
 
 As an example, let's say that we want to focus on the different ways that house location is represented in the Ames data. We can create a set of formulas that capture these predictors: 
 
@@ -297,7 +297,7 @@ location_models$info[[1]]
 pull_workflow(location_models, id = "coords_lm")
 ```
 
-Workflow sets are mostly designed to work with resampling, which is discussed in Chapter \@ref(resampling). In the object above, the columns `option` and `result` must be populated with specific types of objects that result from resampling. This will be demonstrated in more detail in Chapters \@ref(compare) and  \@ref(workflow-sets).  
+Workflow sets are mostly designed to work with resampling, which is discussed in Chapter \@ref(resampling). In the object above, the columns `option` and `result` must be populated with specific types of objects that result from resampling. We will demonstrate this in more detail in Chapters \@ref(compare) and  \@ref(workflow-sets).  
 
 In the meantime, let's create model fits for each formula and save them in a new column called `fit`. We'll use basic `r pkg(dplyr)` and `r pkg(purrr)` operations: 
 
@@ -319,7 +319,7 @@ The two types of components in a workflow are preprocessors and a models. There 
 
 ## Chapter summary {#workflows-summary}
 
-In this chapter, you learned that the modeling process encompasses more than just estimating the parameters of an algorithm that connects predictors to an outcome. This process also includes preprocessing steps, such as those outlined in Chapter \@ref(recipes), and operations taken after a model is fit. We introduced a concept called a **model workflow** that can capture the important components of the modeling process. Workflows can also be created as a group inside of a **workflow set**. 
+In this chapter, you learned that the modeling process encompasses more than just estimating the parameters of an algorithm that connects predictors to an outcome. This process also includes preprocessing steps, such as those outlined in Chapter \@ref(recipes), and operations taken after a model is fit. We introduced a concept called a **model workflow** that can capture the important components of the modeling process. Multiple workflows can also be created inside of a **workflow set**. 
 
 For the Ames data, the code used in later chapters is:
 
