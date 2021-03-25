@@ -22,19 +22,19 @@ if (!grepl("mingw32", R.Version()$platform)) {
 
 # Screening many models  {#workflow-sets}
 
-Workflow sets have been previously discussed in Chapters \@ref(workflows) and \@ref(compare). In this chapter, we discuss them in more detail and describe a use case where they can be helpful. 
+We introduced workflow sets in Chapter \@ref(workflows) and demonstrated how to use them with resampled data sets in Chapter \@ref(compare). In this chapter, we discuss these sets of multiple modeling workflows in more detail and describe a use case where they can be helpful. 
 
-For projects where the data are novel, there may be the need to screen many combinations of models and preprocessors. There might not be any _a priori_ knowledge about which methods work best. 
+For projects with new data sets that have not yet been well understood, a data practitioner may need to screen many combinations of models and preprocessors. It is common to have little or no _a priori_ knowledge about which method will work best with a novel data set. 
 
 :::rmdnote
-A good strategy would be to try a variety of approaches, determine what deems to work best, then spend additional time tweaking/optimizing a small set of models.   
+A good strategy is to spend some initial effort trying a variety of modeling approaches, determine what works best, then invest additional time tweaking/optimizing a small set of models.   
 :::
 
-Workflow sets provide a nice user interface to create and manage this process. We'll also demonstrate how to evaluate these models efficiently using the racing methods discussed in Section \@ref(racing-example).
+Workflow sets provide a user interface to create and manage this process. We'll also demonstrate how to evaluate these models efficiently using the racing methods discussed in Section \@ref(racing-example).
 
 ## Modeling concrete strength
 
-Let's use the concrete data from _Applied Predictive Modeling_ [@apm] as an example. In Chapter 10 of that book, models predicted the compressive strength of mixtures using the ingredients as predictors. A wide variety of models were evaluated with different predictor sets and preprocessing needs.  How can workflow sets make the large scale testing of models easier? 
+Let's use the concrete data from _Applied Predictive Modeling_ [@apm] as an example. Chapter 10 of that book demonstrated models to predict the compressive strength of concrete mixtures using the ingredients as predictors. A wide variety of models were evaluated with different predictor sets and preprocessing needs.  How can workflow sets make the large scale testing of models easier? 
 
 First, let's define the data splitting and resampling schemes. The data are in the `RData` directory of the GitHub repository: 
 
@@ -46,7 +46,7 @@ glimpse(concrete_mixtures)
 
 The `compressive_strength` column is the outcome (to  maximized). Except for `age`, all of the predictors are encoded as proportions of the total. 
 
-The data are split using the default 3:1 ratio of training-to-test and the training set is resampled using five repeats of 10-fold cross-validation. 
+Let's split the data using the default 3:1 ratio of training-to-test and resample the training set using five repeats of 10-fold cross-validation. 
 
 ```{r workflow-sets-splitting}
 set.seed(1501)
@@ -59,7 +59,7 @@ concrete_folds <-
    vfold_cv(concrete_train, strata = compressive_strength, repeats = 5)
 ```
 
-Some models (notably neural networks, K-nearest neighbors, and support vector machines) require predictors that have been centered and scaled. Some workflows will require recipes with these preprocessing steps. For other models, a traditional mixture model expansion (i.e., quadratic and two-factors interactions) is a good idea. For these purposes, we create two recipes: 
+Some models (notably neural networks, K-nearest neighbors, and support vector machines) require predictors that have been centered and scaled, so some model workflows will require recipes with these preprocessing steps. For other models, a traditional mixture model expansion (i.e., quadratic and two-way interactions) is a good idea. For these purposes, we create two recipes: 
 
 ```{r workflow-sets-recipes}
 normalized_rec <- 
@@ -72,7 +72,8 @@ poly_recipe <-
    step_interact(~ all_predictors():all_predictors())
 ```
 
-For the models, we use the the `r pkg(parsnip)` add-in to create a set of model specifications: 
+For the models, we use the the `r pkg(parsnip)` addin to create a set of model specifications: 
+
 ```{r workflow-sets-models}
 library(rules)
 library(baguette)
@@ -141,17 +142,17 @@ nnet_param <-
    update(hidden_units = hidden_units(c(1, 27)))
 ```
 
-How can we match these models to their recipes, tune them, then evaluate their performance efficiently? A workflow set has one solution. 
+How can we match these models to their recipes, tune them, then evaluate their performance efficiently? A workflow set offers a solution. 
 
 ## Creating the workflow set
 
-Workflow sets take named lists of preprocessors and model specifications and combines them into an object containing a series of workflows. There are three possible preprocessors: 
+Workflow sets take named lists of preprocessors and model specifications and combine them into an object containing multiple workflows. There are three possible kinds of preprocessors: 
 
-* Standard R formulae.
-* Recipe objects (prior to estimation/prepping).
-* Selector objects that use `r pkg(dplyr)` selectors for the outcome and predictors. 
+* A standard R formula
+* A recipe object (prior to estimation/prepping)
+* A `r pkg(dplyr)`-style selector to choose the outcome and predictors
 
-As an example, let's combine the recipe that only standardizes the predictors to the nonlinear models that require that the predictors be in the same units. 
+As a first workflow set example, let's combine the recipe that only standardizes the predictors to the nonlinear models that require that the predictors be in the same units. 
 
 ```{r workflow-sets-normalized}
 library(workflowsets)
@@ -165,9 +166,9 @@ normalized <-
 normalized
 ```
 
-Since there is only a single preprocessor, the function creates a set of workflows with this value. If the preprocessor contained more than one entry, the function can create all combination of preprocessors and models. 
+Since there is only a single preprocessor, this function creates a set of workflows with this value. If the preprocessor contained more than one entry, the function would create all combinations of preprocessors and models. 
 
-The `wflow_id` column is automatically created but can be modified using a standard call to `mutate()`. The `info` column contains a tibble with some identifiers and the workflow object. The workflow can be easily extracted: 
+The `wflow_id` column is automatically created but can be modified using a call to `mutate()`. The `info` column contains a tibble with some identifiers and the workflow object. The workflow can be extracted: 
 
 ```{r workflow-sets-get-workflow}
 normalized %>% pull_workflow(id = "normalized_KNN")
@@ -182,11 +183,11 @@ normalized <-
 normalized
 ```
 
-When a function from the `r pkg(tune)` or `r pkg(finetune)` package are used to tune (or resample) the workflow, this argument will be used. 
+When a function from the `r pkg(tune)` or `r pkg(finetune)` package is used to tune (or resample) the workflow, this argument will be used. 
 
 The `result` column is a placeholder for the output of the tuning or resampling functions.  
 
-For the other nonlinear models, we create another workflow set that uses `r pkg(dplyr)` selectors for the outcome and predictors: 
+For the other nonlinear models, let's create another workflow set that uses `r pkg(dplyr)` selectors for the outcome and predictors: 
 
 ```{r workflow-sets-selectors}
 model_vars <- 
@@ -202,7 +203,7 @@ no_pre_proc <-
 no_pre_proc
 ```
 
-Finally, the combinations of feature set that uses nonlinear and interactions with the appropriate models are assembled: 
+Finally, the set that uses nonlinear terms and interactions with the appropriate models are assembled: 
 
 ```{r workflow-sets-quad}
 with_features <- 
