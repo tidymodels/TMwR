@@ -225,9 +225,9 @@ all_workflows
 
 ## Tuning and evaluating the models
 
-Almost all of these workflows contain tuning parameters. In order to evaluate their performance, we can use the standard tuning or resampling functions (e.g., `tune_grid()` and so on). The `workflow_map()` function will apply the same function to all of the workflows in the set. The default is `tune_grid()`. 
+Almost all of these workflows contain tuning parameters. In order to evaluate their performance, we can use the standard tuning or resampling functions (e.g., `tune_grid()` and so on). The `workflow_map()` function will apply the same function to all of the workflows in the set; the default is `tune_grid()`. 
 
-For this example, grid search is applied to each workflow using up to 25 different parameter candidates. There are a set of common options to use with each execution of `tune_grid()`. For example, we will use the same resampling and control objects for each workflow along with a specification of grid size of 25. The `workflow_map()` function has an additional argument called `seed` that is used to ensure that each execution of `tune_grid()` consumes the same random numbers. 
+For this example, grid search is applied to each workflow using up to 25 different parameter candidates. There are a set of common options to use with each execution of `tune_grid()`. For example, we will use the same resampling and control objects for each workflow, along with a grid size of 25. The `workflow_map()` function has an additional argument called `seed` that is used to ensure that each execution of `tune_grid()` consumes the same random numbers. 
 
 ```{r workflow-sets-grid, eval = FALSE}
 grid_ctrl <-
@@ -272,9 +272,9 @@ num_grid_models <- nrow(collect_metrics(grid_results, summarize = FALSE))
 grid_results
 ```
 
-The `option` column now contains all of the options that we used in the call used by `workflow_map()`. This makes then results reproducible. In the `result` columns, the "`tune[+]`" and "`rsmp[+]`" notations mean that the object had no issues. A value such as "`tune[x]`" occurs if all of the models failed for some reason. 
+The `option` column now contains all of the options that we used in the `workflow_map()` call. This makes our results reproducible. In the `result` columns, the "`tune[+]`" and "`rsmp[+]`" notations mean that the object had no issues. A value such as "`tune[x]`" occurs if all of the models failed for some reason. 
 
-There are a few convenience functions that help look at the results. `rank_results()` will order the model by some performance metric. By default, it uses the first metric in the metric set (RMSE in this instance). 
+There are a few convenience functions for examining the results. The `rank_results()` function will order the models by some performance metric. By default, it uses the first metric in the metric set (RMSE in this instance). 
 
 ```{r workflow-sets-rank}
 grid_results %>% 
@@ -283,9 +283,9 @@ grid_results %>%
    select(model, .config, rmse = mean, rank)
 ```
 
-Also by default, the function ranks all of the candidate sets; that's why the same model can show up multiple times in the output. An options, called `select_best`, can be used to rank the models using their best tuning parameter combination. 
+Also by default, the function ranks all of the candidate sets; that's why the same model can show up multiple times in the output. An option, called `select_best`, can be used to rank the models using their best tuning parameter combination. 
 
-The `autoplot()` method plots the rankings. It also has a `select_best` argument. In the plot below, the best results for each model are visualized. 
+The `autoplot()` method plots the rankings; it also has a `select_best` argument. In the plot below, the best results for each model are visualized. 
 
 ```{r workflow-sets-plot-rank, out.width = '100%', fig.width=8, fig.height=5.75}
 autoplot(
@@ -296,7 +296,7 @@ autoplot(
 )
 ```
 
-In case you want to see the tuning parameter results for a specific model, the `id` argument can take a single value from the `wflow_id` column as an indication of which model to plot: 
+In case you want to see the tuning parameter results for a specific model, the `id` argument can take a single value from the `wflow_id` column for which model to plot: 
 
 ```{r workflow-sets-plot-model, out.width = '100%', fig.width=8, fig.height=4.5}
 autoplot(grid_results, id = "Cubist", metric = "rmse")
@@ -308,7 +308,7 @@ This approach to model screening fits a total of `r format(num_grid_models, big.
 
 ## Efficiently screening models {#racing-example}
 
-One effective method for screening a large set of models efficiently is to use the racing approach described in Section \@ref(racing). With a workflow set, the `workflow_map()` function can be used again. Recall that the first argument is the function to apply to the workflows and, in this case, we can use a value of `"tune_race_anova"`. An appropriate control object is also passed; otherwise the options are the same as the code in the previous section. 
+One effective method for screening a large set of models efficiently is to use the racing approach described in Section \@ref(racing). With a workflow set, the `workflow_map()` function can be used again. Recall that the first argument is the _function_ to apply to the workflows and, in this case, we can use a value of `"tune_race_anova"`. We also pass an appropriate control object; otherwise the options would be the same as the code in the previous section. 
 
 
 ```{r workflow-sets-race, eval = FALSE}
@@ -353,13 +353,13 @@ race_results_time <-
 num_race_models <- sum(collect_metrics(race_results)$n)
 ```
 
-The new object looks very similar although the elements of the `result` column show a value of `"race[+]"`, indicating a different type of object: 
+The new object looks very similar, although the elements of the `result` column show a value of `"race[+]"`, indicating a different type of object: 
 
 ```{r workflow-sets-race-print}
 race_results
 ```
 
-The same helpful functions apply to the this object for interrogating the results and, in fact, the basic `autoplot()` method produces similar trends:
+The same helpful functions are available for this object to interrogate the results and, in fact, the basic `autoplot()` method produces similar trends:
 
 
 ```{r workflow-sets-plot-race-rank, out.width = '100%', fig.width=8, fig.height=5.75}
@@ -400,7 +400,7 @@ While the racing approach selected the same candidate parameters as the complete
 
 ## Finalizing a model
 
-As shown in previous chapters, choosing the final model and fitting it on the test set is straightforward. The first step is to pick a workflow to finalize. Since the boosted tree model worked well, we'll extract that from the set, update the parameters with the numerically best settings, and fit to the training set: 
+Similar to what we have shown in previous chapters, choosing the final model and fitting it on the training set is straightforward. The first step is to pick a workflow to finalize. Since the boosted tree model worked well, we'll extract that from the set, update the parameters with the numerically best settings, and fit to the training set: 
 
 ```{r workflow-sets-finalize}
 best_results <- 
@@ -432,7 +432,7 @@ boosting_test_results %>%
 
 ## Chapter summary {#workflow-sets-summary}
 
-This chapter further illustrates how to use workflow sets to investigate multiple models or feature engineering strategies. Racing was demonstrated as a way to more efficiently rank models. 
+Often a data practitioner needs to consider a large number of possible modeling approaches for a task at hand. This chapter illustrates how to use workflow sets to investigate multiple models or feature engineering strategies in such a situation. Racing methods can more efficiently rank models than fitting every candidate model being considered. 
 
 ```{r workflow-sets-save, include = FALSE}
 save(concrete_test, concrete_split, grid_results, race_results, 
