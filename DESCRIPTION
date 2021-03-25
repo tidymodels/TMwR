@@ -28,11 +28,14 @@ Imports:
   bookdown,
   broom,
   corrr,
+  Cubist,
   dials (>= 0.0.9),
   digest,
   doMC,
   dplyr,
+  earth,
   finetune (>= 0.0.1),
+  glmnet,
   ggforce,
   ggplot2,
   gridExtra,
@@ -66,6 +69,7 @@ Imports:
   tune (>= 0.1.3),
   workflows (>= 0.2.2),
   workflowsets (>= 0.0.1),
+  xgboost,
   yardstick
 Remotes:
   tidymodels/tidymodels,
