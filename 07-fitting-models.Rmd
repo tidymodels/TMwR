@@ -60,7 +60,7 @@ For tidymodels, the approach to specifying a model is intended to be more unifie
 
 2. **Specify the _engine_ for fitting the model.** Most often this reflects the software package that should be used. 
 
-3. **When required, declare the _mode_ of the model.** The mode reflects the type of prediction outcome. For numeric outcomes, the mode is _regression_; for qualitative outcomes, it is _classification_^[Note that `r pkg(parsnip)` constrains the outcome column of a classification models to be encoded as a _factor_; using binary numeric values will result in an error.]. If a model can only create one type of model, such as linear regression, the mode is already set. 
+3. **When required, declare the _mode_ of the model.** The mode reflects the type of prediction outcome. For numeric outcomes, the mode is _regression_; for qualitative outcomes, it is _classification_^[Note that `r pkg(parsnip)` constrains the outcome column of a classification model to be encoded as a _factor_; using binary numeric values will result in an error.]. If a model can only create one type of model, such as linear regression, the mode is already set. 
 
 These specifications are built _without referencing the data_. For example, for the three cases above: 
 
@@ -215,7 +215,7 @@ arg_info %>%
 </tbody>
 </table>
 
-Admittedly, this is one more set of arguments to memorize. However, when other types of models have the same argument types, these names still apply. For example, boosted tree ensembles also create a large number of tree-based models, so `trees` is also used there, as is `num_n`, and so on. The `r pkg(parsnip)` argument names have also been standardized with similar recipe arguments. 
+Admittedly, this is one more set of arguments to memorize. However, when other types of models have the same argument types, these names still apply. For example, boosted tree ensembles also create a large number of tree-based models, so `trees` is also used there, as is `min_n`, and so on. The `r pkg(parsnip)` argument names have also been standardized with similar recipe arguments. 
 
 Some of the original argument names can be fairly jargon-y. For example, to specify the amount of regularization to use in a glmnet model, the Greek letter `lambda` is used. While this mathematical notation is commonly used in the statistics literature, it is not obvious to many people what `lambda` represents (especially those who consume the model results). Since this is the penalty used in regularization, `r pkg(parsnip)` standardizes on the argument name `penalty`. Similarly, the number of neighbors in a _K_-nearest neighbors model is called `neighbors` instead of `k`. Our rule of thumb when standardizing argument names is:
 
@@ -376,7 +376,7 @@ The `r pkg(parsnip)` package itself contains interfaces to a number of models. H
 
 ## Tools for creating model specifications {#parsnip-tools}
 
-There are a few tools that can help uses create models. 
+There are a few tools that can help you create models. 
 
 First, the `r pkg(usemodels)` package can take a data frame and model formula, then write out R code for creating the model. The code also creates an appropriate recipe whose steps depend on the requested model as well as the predictor data. It also uses a _workflow_ object, described in the next chapter, to bind the recipe and model together. 
 
@@ -388,7 +388,7 @@ library(usemodels)
 use_xgboost(Sale_Price ~ Neighborhood + Gr_Liv_Area + Year_Built + Bldg_Type + 
               Latitude + Longitude, 
             data = ames_train,
-            # Don't print the model tuning code:
+            # Don't create the model tuning code:
             tune = FALSE,
             # Add comments explaining some of the code:
             verbose = TRUE)
@@ -421,9 +421,9 @@ xgboost_workflow <-
   add_model(xgboost_spec) 
 ```
 
-This code is, based on the little that `r pkg(usemodels)` understands about the data, the minimal preprocessing required. For other models, operations like `step_normalize()` are added to fulfill the basic needs of the model. 
+This code is, based on what `r pkg(usemodels)` understands about the data, the minimal preprocessing required. For other models, operations like `step_normalize()` are added to fulfill the basic needs of the model. 
 
-If there is interest in trying a large number of models, it may become tedious to write many model specifications. `r pkg(parsnip)` includes an [RStudio addin](https://rstudio.github.io/rstudioaddins/) that can help. Running the code: 
+If we are interested in trying a large number of models, it may become tedious to write many model specifications. The `r pkg(parsnip)` package includes an [RStudio addin](https://rstudio.github.io/rstudioaddins/) that can help. Either choosing this addin from the _Addins_ toolbar menu or running the code: 
 
 ```{r models-add-in, eval = FALSE}
 parsnip_addin()
@@ -449,7 +449,7 @@ data(ames)
 ames <- mutate(ames, Sale_Price = log10(Sale_Price))
 
 set.seed(123)
-ames_split <- initial_split(ames, prob = 0.80, strata = Sale_Price)
+ames_split <- initial_split(ames, prop = 0.80, strata = Sale_Price)
 ames_train <- training(ames_split)
 ames_test  <-  testing(ames_split)
 

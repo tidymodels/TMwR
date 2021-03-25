@@ -63,7 +63,7 @@ Imports:
   sessioninfo,
   tibble (>= 3.1.0),
   tidymodels,
-  tidyposterior (>= 0.0.3.9000),
+  tidyposterior (>= 0.0.3),
   tidyverse,
   themis,
   tune (>= 0.1.3),

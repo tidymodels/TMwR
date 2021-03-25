@@ -33,7 +33,7 @@ For a comparison to this linear model, we can also fit a different type of model
 
 Random forest models are very powerful and they can emulate the underlying data patterns very closely. While this model can be computationally intensive, it is very low-maintenance; very little preprocessing is required (as documented in Appendix \@ref(pre-proc-table)).
 
-Using the same predictor set as the linear model (without the extra preprocessing steps), we can fit a random forest model to the training set using via the `r pkg(ranger)` package. This model requires no preprocessing so a simple formula can be used:
+Using the same predictor set as the linear model (without the extra preprocessing steps), we can fit a random forest model to the training set via the `r pkg(ranger)` package. This model requires no preprocessing so a simple formula can be used:
 
 ```{r resampling-rand-forest-spec}
 rf_model <- 
@@ -602,7 +602,7 @@ data(ames)
 ames <- mutate(ames, Sale_Price = log10(Sale_Price))
 
 set.seed(123)
-ames_split <- initial_split(ames, prob = 0.80, strata = Sale_Price)
+ames_split <- initial_split(ames, prop = 0.80, strata = Sale_Price)
 ames_train <- training(ames_split)
 ames_test  <-  testing(ames_split)
 
@@ -639,7 +639,7 @@ rf_wflow <-
 set.seed(55)
 ames_folds <- vfold_cv(ames_train, v = 10)
 
-keep_pred <- control_resamples(save_pred = TRUE, save_workflow = TRU)
+keep_pred <- control_resamples(save_pred = TRUE, save_workflow = TRUE)
 
 set.seed(130)
 rf_res <- rf_wflow %>% fit_resamples(resamples = ames_folds, control = keep_pred)

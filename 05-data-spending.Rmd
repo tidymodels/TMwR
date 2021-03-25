@@ -35,7 +35,7 @@ Suppose we allocate 80% of the data to the training set and the remaining 20% fo
 set.seed(123)
 
 # Save the split information for an 80/20 split of the data
-ames_split <- initial_split(ames, prob = 0.80)
+ames_split <- initial_split(ames, prop = 0.80)
 ames_split
 ```
 
@@ -76,7 +76,7 @@ The distribution of the sale price outcome for the Ames housing data is shown in
 
 ```{r ames-strata-split}
 set.seed(123)
-ames_split <- initial_split(ames, prob = 0.80, strata = Sale_Price)
+ames_split <- initial_split(ames, prop = 0.80, strata = Sale_Price)
 ames_train <- training(ames_split)
 ames_test  <-  testing(ames_split)
 
@@ -149,7 +149,7 @@ data(ames)
 ames <- ames %>% mutate(Sale_Price = log10(Sale_Price))
 
 set.seed(123)
-ames_split <- initial_split(ames, prob = 0.80, strata = Sale_Price)
+ames_split <- initial_split(ames, prop = 0.80, strata = Sale_Price)
 ames_train <- training(ames_split)
 ames_test  <-  testing(ames_split)
 ``` 
