@@ -34,23 +34,23 @@ Workflow sets provide a user interface to create and manage this process. We'll 
 
 ## Modeling concrete strength
 
-Let's use the concrete data from _Applied Predictive Modeling_ [@apm] as an example. Chapter 10 of that book demonstrated models to predict the compressive strength of concrete mixtures using the ingredients as predictors. A wide variety of models were evaluated with different predictor sets and preprocessing needs.  How can workflow sets make the large scale testing of models easier? 
+Let's use the concrete data from _Applied Predictive Modeling_ [@apm] as an example. Chapter 10 of that book demonstrated models to predict the compressive strength of concrete mixtures using the ingredients as predictors. A wide variety of models were evaluated with different predictor sets and preprocessing needs. How can workflow sets make the large scale testing of models easier? 
 
-First, let's define the data splitting and resampling schemes. The data are in the `RData` directory of the GitHub repository: 
+First, let's define the data splitting and resampling schemes.
 
 ```{r workflow-sets-data}
 library(tidymodels)
-load("RData/concrete_mixtures.RData")
-glimpse(concrete_mixtures)
+data(concrete, package = "modeldata")
+glimpse(concrete)
 ```
 
-The `compressive_strength` column is the outcome (to  maximized). Except for `age`, all of the predictors are encoded as proportions of the total. 
+The `compressive_strength` column is the outcome. The `age` predictor tells us the age of the concrete sample at testing in days (concrete strengthens over time) and the rest of the predictors like `cement` and `water` are concrete components in units of kilograms per cubic meter.
 
 Let's split the data using the default 3:1 ratio of training-to-test and resample the training set using five repeats of 10-fold cross-validation. 
 
 ```{r workflow-sets-splitting}
 set.seed(1501)
-concrete_split <- initial_split(concrete_mixtures, strata = compressive_strength)
+concrete_split <- initial_split(concrete, strata = compressive_strength)
 concrete_train <- training(concrete_split)
 concrete_test  <- testing(concrete_split)
 
