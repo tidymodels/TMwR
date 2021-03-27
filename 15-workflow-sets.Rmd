@@ -46,6 +46,22 @@ glimpse(concrete)
 
 The `compressive_strength` column is the outcome. The `age` predictor tells us the age of the concrete sample at testing in days (concrete strengthens over time) and the rest of the predictors like `cement` and `water` are concrete components in units of kilograms per cubic meter.
 
+:::rmdwarning
+There are some cases where the same concrete formula was tested multiple times. We'd rather not include these replicates as individual data points since they might be disbursed across the training and test set. Doing so might might add an artificial optimism to the performance estimates.  
+::
+
+As a remedy, the mean compressive strength per concrete recipe is used for modeling. 
+
+```{r workflow-sets-means}
+concrete <- 
+   concrete %>% 
+   group_by(cement, blast_furnace_slag, fly_ash, water, superplasticizer, 
+            coarse_aggregate, fine_aggregate, age) %>% 
+   summarize(compressive_strength = mean(compressive_strength),
+             .groups = "drop")
+nrow(concrete)
+```
+
 Let's split the data using the default 3:1 ratio of training-to-test and resample the training set using five repeats of 10-fold cross-validation. 
 
 ```{r workflow-sets-splitting}
@@ -59,7 +75,7 @@ concrete_folds <-
    vfold_cv(concrete_train, strata = compressive_strength, repeats = 5)
 ```
 
-Some models (notably neural networks, K-nearest neighbors, and support vector machines) require predictors that have been centered and scaled, so some model workflows will require recipes with these preprocessing steps. For other models, a traditional mixture model expansion (i.e., quadratic and two-way interactions) is a good idea. For these purposes, we create two recipes: 
+Some models (notably neural networks, K-nearest neighbors, and support vector machines) require predictors that have been centered and scaled, so some model workflows will require recipes with these preprocessing steps. For other models, a traditional response surface design model expansion (i.e., quadratic and two-way interactions) is a good idea. For these purposes, we create two recipes: 
 
 ```{r workflow-sets-recipes}
 normalized_rec <- 
