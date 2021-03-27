@@ -48,7 +48,7 @@ The `compressive_strength` column is the outcome. The `age` predictor tells us t
 
 :::rmdwarning
 There are some cases where the same concrete formula was tested multiple times. We'd rather not include these replicates as individual data points since they might be disbursed across the training and test set. Doing so might might add an artificial optimism to the performance estimates.  
-::
+:::
 
 As a remedy, the mean compressive strength per concrete recipe is used for modeling. 
 
