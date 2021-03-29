@@ -302,7 +302,7 @@ Rolling forecast origin resampling [@hyndman2018forecasting] provides a method t
 To illustrate, a training set of fifteen samples was resampled with an analysis size of eight samples and an assessment set size of three. The second iteration discards the first training set sample and both data sets shift forward by one. This configuration results in five resamples: 
 
 ```{r resampling-rolling, echo = FALSE, out.width = '65%', warning = FALSE}
-knitr::include_graphics("premade/rolling.svg")
+knitr::include_graphics("premade/rolling.svg") # This figure
 ```
 
 There are a few different configurations of this method: 
