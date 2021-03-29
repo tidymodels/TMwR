@@ -28,6 +28,7 @@ jobs:
           brew install --cask xquartz
           brew install pkg-config cairo
           brew install v8
+          brew install libgit2
 
       - name: Install pak and query dependencies
         run: |
