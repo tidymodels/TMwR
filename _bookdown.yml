@@ -16,6 +16,7 @@ rmd_files: [
   "12-tuning-parameters.Rmd",
   "13-grid-search.Rmd",
   "14-iterative-search.Rmd",
+  "15-workflow-sets.Rmd",
   "pre-proc-table.Rmd",
   "references.Rmd"
 ]

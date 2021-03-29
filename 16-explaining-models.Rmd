@@ -1,0 +1,9 @@
+```{r explaining-setup, include = FALSE}
+knitr::opts_chunk$set(fig.path = "figures/")
+library(tidymodels)
+```
+
+# Explaining models and predictions
+
+variable importance, prediction contributions, and other tools. 
+
