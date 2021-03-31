@@ -2,6 +2,6 @@
 library(tidymodels)
 ```
 
-\# (PART\\\*) Other Topics {-}
+# (PART\*) Other Topics {-} 
 
 # Encoding categorical data  {#categorical}
