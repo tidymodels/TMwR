@@ -21,11 +21,12 @@ rmd_files: [
   "14-iterative-search.Rmd",
   "15-workflow-sets.Rmd",
   
-  "16-explaining-models-and-predictions.Rmd",
-  "17-when-sould-you-trust-predictions.Rmd",
-  "18-ensemble-models-via-stacking.Rmd",
-  "19-dimension-reduction.Rmd",
-  "20-inferential-analyses.Rmd"
+  "16-encoding-categorical-data.Rmd",
+  "17-dimension-reduction.Rmd",
+  "18-explaining-models-and-predictions.Rmd",
+  "19-when-sould-you-trust-predictions.Rmd",
+  "20-ensemble-models-via-stacking.Rmd",
+  "21-inferential-analyses.Rmd"
   
   "pre-proc-table.Rmd",
   "references.Rmd"
