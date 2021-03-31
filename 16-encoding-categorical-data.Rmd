@@ -1,0 +1,5 @@
+```{r categorical-setup, include = FALSE}
+library(tidymodels)
+```
+
+# Encoding categorical data  {#categorical}
