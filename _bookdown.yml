@@ -26,7 +26,7 @@ rmd_files: [
   "18-explaining-models-and-predictions.Rmd",
   "19-when-should-you-trust-predictions.Rmd",
   "20-ensemble-models.Rmd",
-  "21-inferential-analyses.Rmd"
+  "21-inferential-analysis.Rmd",
   
   "pre-proc-table.Rmd",
   "references.Rmd"
