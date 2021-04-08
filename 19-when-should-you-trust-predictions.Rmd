@@ -1,0 +1,7 @@
+```{r trust-setup, include = FALSE}
+library(tidymodels)
+library(probably)
+library(applicable)
+```
+
+# When should you trust predictions? {#trust}

@@ -23,6 +23,7 @@ SystemRequirements: FFmpeg (>= 3.2); with at least libx264 and lame (mp3)
   drivers. Debian/Ubuntu: libavfilter-dev, Fedora/CentOS: ffmpeg-devel 
   (via https://rpmfusion.org), MacOS Homebrew: ffmp
 Imports:
+  applicable,
   av,
   baguette,
   bookdown,
@@ -51,6 +52,7 @@ Imports:
   parsnip,
   patchwork,
   prettyunits,
+  probably,
   purrr,
   ranger,
   recipes,
@@ -61,6 +63,7 @@ Imports:
   rstanarm,
   rules,
   sessioninfo,
+  stacks,
   tibble (>= 3.1.0),
   tidymodels,
   tidyposterior (>= 0.0.3),
