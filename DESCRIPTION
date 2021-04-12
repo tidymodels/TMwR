@@ -76,5 +76,6 @@ Imports:
   yardstick
 Remotes:
   tidymodels/tidymodels,
-  tidymodels/tidyposterior
+  tidymodels/tidyposterior,
+  tidymodels/finetune
 
