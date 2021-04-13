@@ -43,7 +43,7 @@ To fit an ordinary linear model in R, the `lm()` function is commonly used. The 
 ```r
 rate ~ temp
 ```
-specifies that the chirp rate is the outcome (since it is on the left-hand side of the tilde `~`) and that the temperature values are the predictor^[Most model functions implicitly add an intercept column.]. Suppose the data contained the time of day in which the measurements were obtained in a column called `time`. The formula:
+specifies that the chirp rate is the outcome (since it is on the left-hand side of the tilde `~`) and that the temperature value is the predictor^[Most model functions implicitly add an intercept column.]. Suppose the data contained the time of day in which the measurements were obtained in a column called `time`. The formula:
 
 ```r
 rate ~ temp + time
