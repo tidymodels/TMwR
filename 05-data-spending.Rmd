@@ -35,7 +35,7 @@ Suppose we allocate 80% of the data to the training set and the remaining 20% fo
 set.seed(123)
 
 # Save the split information for an 80/20 split of the data
-ames_split <- initial_split(ames, prob = 0.80)
+ames_split <- initial_split(ames, prop = 0.80)
 ames_split
 ```
 
@@ -76,7 +76,7 @@ The distribution of the sale price outcome for the Ames housing data is shown in
 
 ```{r ames-strata-split}
 set.seed(123)
-ames_split <- initial_split(ames, prob = 0.80, strata = Sale_Price)
+ames_split <- initial_split(ames, prop = 0.80, strata = Sale_Price)
 ames_train <- training(ames_split)
 ames_test  <-  testing(ames_split)
 
@@ -130,7 +130,7 @@ Throughout this book, notice which data are exposed to the model at any given ti
 The problem of _information leakage_ occurs when data outside of the training set are used in the modeling process. 
 :::
 
-For example, in a machine learning competition, the test set data might be provided without the true outcome values so that the model can be scored and ranked. One potential method for improving the score might be to fit the model using the training set points that are most similar to the test set values. While the test set isn't directly used to fit the model, it still has a heavy influence. In general, this technique is highly problematic since it reduces the _generalization error_ of the model to optimize performance on a specific data set. There are more subtle ways that the test set data can be utilized during training. Keeping the training data in a separate data frame from the test set is a one small check to make sure that information leakage does not occur by accident. 
+For example, in a machine learning competition, the test set data might be provided without the true outcome values so that the model can be scored and ranked. One potential method for improving the score might be to fit the model using the training set points that are most similar to the test set values. While the test set isn't directly used to fit the model, it still has a heavy influence. In general, this technique is highly problematic since it reduces the _generalization error_ of the model to optimize performance on a specific data set. There are more subtle ways that the test set data can be utilized during training. Keeping the training data in a separate data frame from the test set is one small check to make sure that information leakage does not occur by accident. 
 
 In later chapters we discuss techniques to subsample the training set to mitigate specific issues (e.g., class imbalances). This is a valid and common technique that deliberately results in the training set data diverging from the population from which the data were drawn. It is critical that the test set continue to mirror what the model would encounter _in the wild_. In other words, the test set should always resemble new data that will be given to the model. 
  
@@ -149,7 +149,7 @@ data(ames)
 ames <- ames %>% mutate(Sale_Price = log10(Sale_Price))
 
 set.seed(123)
-ames_split <- initial_split(ames, prob = 0.80, strata = Sale_Price)
+ames_split <- initial_split(ames, prop = 0.80, strata = Sale_Price)
 ames_train <- training(ames_split)
 ames_test  <-  testing(ames_split)
 ``` 

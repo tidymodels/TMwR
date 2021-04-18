@@ -43,7 +43,7 @@ To fit an ordinary linear model in R, the `lm()` function is commonly used. The 
 ```r
 rate ~ temp
 ```
-specifies that the chirp rate is the outcome (since it is on the left-hand side of the tilde `~`) and that the temperature values are the predictor^[Most model functions implicitly add an intercept column.]. Suppose the data contained the time of day in which the measurements were obtained in a column called `time`. The formula:
+specifies that the chirp rate is the outcome (since it is on the left-hand side of the tilde `~`) and that the temperature value is the predictor^[Most model functions implicitly add an intercept column.]. Suppose the data contained the time of day in which the measurements were obtained in a column called `time`. The formula:
 
 ```r
 rate ~ temp + time
@@ -193,7 +193,7 @@ library(lattice)
 xyplot(y ~ x, data = plot_data)
 
 library(ggplot2)
-ggplot(plot_data, aes(x = y, y = y)) + geom_point()
+ggplot(plot_data, aes(x = x, y = y)) + geom_point()
 ```
 
 In these three cases, separate groups of developers devised three distinct interfaces for the same task. Each has advantages and disadvantages. 
@@ -248,7 +248,7 @@ To resolve the usage issues described here, the tidymodels packages have a set o
 
 * Functions should take the **data structures that users have** as opposed to the data structure that developers want. For example, a model function's _only_ interface should not be constrained to matrices. Frequently, users will have non-numeric predictors such as factors. 
 
-Many of these ideas are described in the tidymodels guidelines for model implementation^[`https://tidymodels.github.io/model-implementation-principles`]. In subsequent chapters, we will illustrate examples of existing issues, along with their solutions. 
+Many of these ideas are described in the tidymodels guidelines for model implementation^[https://tidymodels.github.io/model-implementation-principles]. In subsequent chapters, we will illustrate examples of existing issues, along with their solutions. 
 
 :::rmdnote
 There are a few existing R packages that provide a unified interface to harmonize these heterogeneous modeling APIs, such as `r pkg(caret)` and `r pkg(mlr)`. The tidymodels framework is similar to these in adopting a unification of the function interface, as well as enforcing consistency in the function names and return values. It is different in its opinionated design goals and modeling implementation.

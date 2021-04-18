@@ -1,0 +1,5 @@
+```{r dimensionality-setup, include = FALSE}
+library(tidymodels)
+```
+
+# Dimensionality reduction  {#dimensionality}

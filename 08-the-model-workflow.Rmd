@@ -1,6 +1,7 @@
 ```{r workflow-setup, include = FALSE}
 knitr::opts_chunk$set(fig.path = "figures/")
 library(tidymodels)
+library(workflowsets)
 library(kableExtra)
 
 source("ames_snippets.R")
@@ -91,7 +92,7 @@ lm_wflow <-
 lm_wflow
 ```
 
-Workflows have a `fit()` method that can be used to create the model. Using the objects create in Section \@ref(models-summary):
+Workflows have a `fit()` method that can be used to create the model. Using the objects created in Section \@ref(models-summary):
 
 ```{r workflows-form-fit}
 lm_fit <- fit(lm_wflow, ames_train)
@@ -133,10 +134,10 @@ lm_wflow <-
 lm_wflow
 ```
 
-We described the `prep()`, `bake()`, and `juice()` functions in Section \@ref(recipes-manual) for using the recipe with a modeling function. This can be onerous, so the `fit()` method for workflow objects automates this process: 
+We described the `prep()` and `bake()` functions in Section \@ref(recipes-manual) for using the recipe with a modeling function. This can be onerous, so the `fit()` method for workflow objects automates this process: 
 
 ```{r workflows-recipe-fit}
-# Does `prep()`, `juice()`, and `fit()` in one step:
+# Does `prep()`, `bake()`, and `fit()` in one step:
 lm_fit <- fit(lm_wflow, ames_train)
 
 # Does `bake()` and `predict()` automatically:
@@ -160,6 +161,39 @@ lm_fit %>%
   slice(1:5)
 ```
 
+
+## Adding raw variables to the workflow
+
+There is a third interface for passing data to the model, the `add_variables()` function which uses a `r pkg(dplyr)`-like syntax for choosing variables. The function has two primary arguments: `outcomes` and `predictors`. These use a selection approach similar to the `r pkg(tidyselect)` backend of `r pkg(tidyverse)` packages to capture multiple selectors using `c()`. 
+
+```{r workflows-add-variables}
+lm_wflow <- 
+  lm_wflow %>% 
+  remove_recipe() %>% 
+  add_variables(outcome = Sale_Price, predictors = c(Longitude, Latitude))
+lm_wflow
+```
+
+The predictors could also have been specified using a more general selector, such as 
+
+```{r workflows-selector, eval = FALSE}
+predictors = c(ends_with("tude"))
+```
+
+One nicety is that any outcome columns accidentally specified in the predictors argument will be quietly removed. This facilitates the use of:
+
+```{r workflows-selector-all, eval = FALSE}
+predictors = everything()
+```
+
+When the model is fit, the specification assembles these data, unaltered, into a data frame and passes it to the underlying function:
+
+```{r workflows-add-variables-fit}
+fit(lm_wflow, ames_train)
+```
+
+If you would like the underlying modeling method to do what it would normally do with the data, `add_variables()` can be a helpful interface. As we will discuss in Section \@ref(special-model-formulas), it also facilitates more complex modeling specifications. However, as we mention in the next section, models such as `glmnet` and `xgboost` expect the user to make indicator variables from factor predictors. In these cases, a recipe or formula interface will typically be a better choice. 
+
 ## How does a workflow use the formula? {#workflow-encoding}
 
 Recall from Sections \@ref(formula) and \@ref(a-simple-recipe-for-the-ames-housing-data) that the formula method has multiple purposes. One of these is to properly encode the original data into an analysis ready format. This can involve executing in-line transformations (e.g., `log(x)`), creating dummy variable columns, creating interactions or other column expansions, and so on. However, there are many statistical methods that require different types of encodings: 
@@ -180,7 +214,7 @@ As a counter example, a boosted tree created with the `r pkg(xgboost)` package r
 
 This determination is made for _each model and engine combination_. 
 
-### Special formulas and in-line functions {-}
+### Special formulas and in-line functions {#special-model-formulas}
 
 A number of multilevel models have standardized on a formula specification devised in the `r pkg(lme4)` package. For example, to fit a regression model that has random effects for subjects, we would use the following formula: 
 
@@ -209,7 +243,7 @@ The issue is that the special formula has to be processed by the underlying pack
 
 Even if this formula could be used with `model.matrix()`, this would still present a problem since the formula also specifies the statistical attributes of the model. 
 
-The solution in `workflows` is an optional supplementary model formula that can be passed to `add_model()`. For example, using the previously mentioned `strata()` function in the `r pkg(survival)` package, the `add_formula()` specification provides the bare column names and then the actual formula given to the model is set within `add_model()`:  
+The solution in `workflows` is an optional supplementary model formula that can be passed to `add_model()`. For example, using the previously mentioned `strata()` function in the `r pkg(survival)` package, the `add_variables()` specification provides the bare column names and then the actual formula given to the model is set within `add_model()`:  
 
 ```{r workflows-strata}
 library(survival)
@@ -220,44 +254,72 @@ parametric_model <-
 
 parametric_workflow <- 
   workflow() %>% 
-  # This formula passes the data along as-is: 
-  add_formula(futime + fustat ~ age + rx) %>% 
+  # Pass the data along as-is: 
+  add_variables(outcome = c(fustat, futime), predictors = c(age, rx)) %>% 
   add_model(parametric_model, 
             # This formula is given to the model
             formula = Surv(futime, fustat) ~ age + strata(rx))
 
-random_effects <- fit(parametric_workflow, data = ovarian)
-random_effects
+parametric_fit <- fit(parametric_workflow, data = ovarian)
+parametric_fit
 ```
 
 Notice how, in the call printed above, the model-specific formula was used. 
 
-As an alternative to using two formulas, we could use a straightforward recipe instead: 
+## Creating multiple workflows at once {#workflow-sets-intro}
 
-```{r workflows-strata-recipe}
-parametric_workflow <- 
-  workflow() %>% 
-  add_recipe(recipe(futime + fustat ~ age + rx, data = ovarian)) %>% 
-  add_model(parametric_model, 
-            formula = Surv(futime, fustat) ~ age + strata(rx))
+There are some situations where the data requires numerous attempts to find an appropriate model. For example: 
 
-# No errors:
-random_effects <- fit(parametric_workflow, data = ovarian)
+* For predictive models, it is advisable to evaluate  a variety of different model types. This requires the user to create multiple model specifications. 
+
+* Sequential testing of models typically starts with an expanded set of predictors. This "full model" is compared to a sequence of the same model that removes each predictor in turn. Using basic hypothesis testing methods or empirical validation, the effect of each predictor can be isolated and assessed. 
+
+In these situations, as well as others, it can become tedious or onerous to create a lot of workflows from different sets of preprocessors and/or model specifications. To address this problem, the `r pkg(workflowset)` package creates combinations of workflow components. A list of preprocessors (e.g., formulas, recipes, or `r pkg(dplyr)` selectors) can be combined with a list of model specifications, resulting in a set of workflows. 
+
+As an example, let's say that we want to focus on the different ways that house location is represented in the Ames data. We can create a set of formulas that capture these predictors: 
+
+```{r workflows-location-location-location}
+location <- list(
+  longitude = Sale_Price ~ Longitude,
+  latitude = Sale_Price ~ Latitude,
+  coords = Sale_Price ~ Longitude + Latitude,
+  neighborhood = Sale_Price ~ Neighborhood
+)
 ```
 
-There are additional preprocessor interfaces in development that allow tidy specifications of the variables without using a formula. 
+These representations can be crossed with one or more models using the `workflow_set()` function. We'll just use the previous linear model specification to demonstrate:  
+
+```{r workflows-set-location}
+library(workflowsets)
+location_models <- workflow_set(preproc = location, models = list(lm = lm_model))
+location_models
+location_models$info[[1]]
+pull_workflow(location_models, id = "coords_lm")
+```
+
+Workflow sets are mostly designed to work with resampling, which is discussed in Chapter \@ref(resampling). In the object above, the columns `option` and `result` must be populated with specific types of objects that result from resampling. We will demonstrate this in more detail in Chapters \@ref(compare) and  \@ref(workflow-sets).  
+
+In the meantime, let's create model fits for each formula and save them in a new column called `fit`. We'll use basic `r pkg(dplyr)` and `r pkg(purrr)` operations: 
+
+```{r workflows-set-fit}
+location_models <-
+   location_models %>%
+   mutate(fit = map2(info, wflow_id, ~ fit(.x$workflow[[1]], ames_train)))
+location_models
+location_models$fit[[1]]
+```
+
+There's a lot more to workflow sets. Their nuances and advantages won't be illustrated until Chapter \@ref(workflow-sets). 
 
 
 ## Future plans
 
-Currently, a workflow can accept two types of preprocessors: a model formula or a recipe. While recipes are very flexible, they do not encompass everything that a modeling practitioner might want to do to the data prior to modeling. For example, a _supervised feature filter_ might be of interest. Such a filter would screen predictors against the outcome using the training set and use the results to remove the least relevant predictors. In the future, a specification for this type of pre-model operation will be passed to a workflow to include it in the modeling process. This is a critical step that can have a profound effect on model performance. As discussed in the next chapter, a common pitfall in modeling is to exclude this step from the model evaluation process. 
-
-There are also operations that might occur _after_ the model is fit. An example of such a _post-processor_ would be cutoff selection for two-class problems. Previously in this chapter, we discussed the idea of modifying the cutoff for a two-class problem. In the future, workflows will be able to attach a custom cutoff that is applied to probabilities after the model fit. Other approaches, such as probability calibration, could also be added as post-processors. 
+The two types of components in a workflow are preprocessors and a models. There are also operations that might occur _after_ the model is fit. An example of such a _post-processor_ would be cutoff selection for two-class problems. Previously in this chapter, we discussed the idea of modifying the cutoff for a two-class problem. In the future, workflows will be able to attach a custom cutoff that is applied to probabilities after the model fit. Other approaches, such as probability calibration, could also be added as post-processors. 
   
 
 ## Chapter summary {#workflows-summary}
 
-In this chapter, you learned that the modeling process encompasses more than just estimating the parameters of an algorithm that connects predictors to an outcome. This process also includes preprocessing steps, such as those outlined in Chapter \@ref(recipes), and operations taken after a model is fit. We introduced a concept called a **model workflow** that can capture the important components of the modeling process. 
+In this chapter, you learned that the modeling process encompasses more than just estimating the parameters of an algorithm that connects predictors to an outcome. This process also includes preprocessing steps, such as those outlined in Chapter \@ref(recipes), and operations taken after a model is fit. We introduced a concept called a **model workflow** that can capture the important components of the modeling process. Multiple workflows can also be created inside of a **workflow set**. 
 
 For the Ames data, the code used in later chapters is:
 
@@ -268,7 +330,7 @@ data(ames)
 ames <- mutate(ames, Sale_Price = log10(Sale_Price))
 
 set.seed(123)
-ames_split <- initial_split(ames, prob = 0.80, strata = Sale_Price)
+ames_split <- initial_split(ames, prop = 0.80, strata = Sale_Price)
 ames_train <- training(ames_split)
 ames_test  <-  testing(ames_split)
 

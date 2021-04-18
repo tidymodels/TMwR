@@ -16,7 +16,7 @@ source("ames_snippets.R")
 
 Feature engineering encompasses activities that reformat predictor values to make them easier for a model to use effectively. This includes transformations and encodings of the data to best represent their important characteristics. Imagine that you have two predictors in a data set that can be more effectively represented in your model of interest as a ratio; creating a new predictor from the ratio of the original two is a simple example of feature engineering. 
 
-Take the location of a house in Ames as a more involved example. There are a variety of ways that this spatial information can be exposed to a model, including neighborhood (a qualitative measure), longitude/latitude, distance to the nearest school or Iowa State University, and so on. When choosing how to encode these data in modeling, we might choose an option we believe most associated with the outcome. The original format of the data, for example numeric (e.g., distance) versus categorical (e.g., neighborhood), is also a driving factor in feature engineering choices. 
+Take the location of a house in Ames as a more involved example. There are a variety of ways that this spatial information can be exposed to a model, including neighborhood (a qualitative measure), longitude/latitude, distance to the nearest school or Iowa State University, and so on. When choosing how to encode these data in modeling, we might choose an option we believe is most associated with the outcome. The original format of the data, for example numeric (e.g., distance) versus categorical (e.g., neighborhood), is also a driving factor in feature engineering choices. 
 
 There are many other examples of preprocessing to build better features for modeling: 
 
@@ -51,7 +51,7 @@ In this section, we will focus on a small subset of the predictors available in 
 Suppose that an initial ordinary linear regression model were fit to these data. Recalling that, in Chapter \@ref(ames), the sale prices were pre-logged, a standard call to `lm()` might look like:
 
 ```{r engineering-ames-simple-formula, eval = FALSE}
-lm(Sale_Price ~ Neighborhood + log10(Gr_Liv_Area) + Year_Built + Bldg_Type)
+lm(Sale_Price ~ Neighborhood + log10(Gr_Liv_Area) + Year_Built + Bldg_Type, data = ames)
 ```
 
 When this function is executed, the data are converted from a data frame to a numeric _design matrix_ (also called a _model matrix_) and then the least squares method is used to estimate parameters. In Section \@ref(formula) we listed the multiple purposes of the R model formula; let's focus only on the data manipulation aspects for now. What the formula above does can be decomposed into a series of _steps_:
@@ -106,7 +106,7 @@ What is the advantage to using a recipe? There are a few, including:
 Remember that when invoking the `recipe()` function, the steps are not estimated or executed in any way. The second phase for using a recipe is to estimate any quantities required by the steps using the `prep()` function. For example, we can use `step_normalize()` to center and scale any predictors selected in the step. When we call `prep(recipe, training)`, this function estimates the required means and standard deviations from the data in the `training` argument. The transformations specified by each step are also sequentially executed on the data set. Again using normalization as the example, the means and variances are estimated and then used to standardize the columns. 
 
 :::rmdwarning
-When specifying a step, the data available to that step have been affected by the previous operations. There are some steps that may remove columns or change their data type, so use care when writing selectors downstream. 
+When specifying a step, the data available to that step have been affected by the previous operations. There are some steps that may remove columns or change their data type, so exercise care when writing selectors downstream. 
 :::
 
 For our example recipe, we can now `prep()`: 
@@ -118,7 +118,7 @@ simple_ames
 
 Note that, after preparing the recipe, the print statement shows the results of the selectors (e.g., `Neighborhood` and `Bldg_Type` are listed instead of `all_nominal`). 
 
-One important argument to `prep()` is `retain`. When `TRUE` (the default), the prepared version of the training set is kept within the recipe. This data set has been pre-processed using all of the steps listed in the recipe. Since `prep()` has to execute the recipe as it proceeds, it may be advantageous to keep this version of the training set so that, if that data set is to be used later, redundant calculations can be avoided. However, if the training set is big, it may be problematic to keep such a large amount of data in memory. Use `retain = FALSE` to avoid this. 
+One important argument to `prep()` is `retain`. When `retain = TRUE` (the default), the prepared version of the training set is kept within the recipe. This data set has been pre-processed using all of the steps listed in the recipe. Since `prep()` has to execute the recipe as it proceeds, it may be advantageous to keep this version of the training set so that, if that data set is to be used later, redundant calculations can be avoided. However, if the training set is big, it may be problematic to keep such a large amount of data in memory. Use `retain = FALSE` to avoid this. 
 
 The third phase of recipe usage is to apply the preprocessing operations to a data set using the `bake()` function. The `bake()` function can apply the recipe to _any_ data set. To use the test set, the syntax would be:
 
@@ -547,7 +547,7 @@ data(ames)
 ames <- mutate(ames, Sale_Price = log10(Sale_Price))
 
 set.seed(123)
-ames_split <- initial_split(ames, prob = 0.80, strata = Sale_Price)
+ames_split <- initial_split(ames, prop = 0.80, strata = Sale_Price)
 ames_train <- training(ames_split)
 ames_test  <-  testing(ames_split)
 
@@ -560,4 +560,3 @@ ames_rec <-
   step_interact( ~ Gr_Liv_Area:starts_with("Bldg_Type_") ) %>% 
   step_ns(Latitude, Longitude, deg_free = 20)
 ```
-

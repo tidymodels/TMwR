@@ -1,0 +1,7 @@
+```{r categorical-setup, include = FALSE}
+library(tidymodels)
+```
+
+# (PART\*) Other Topics {-} 
+
+# Encoding categorical data  {#categorical}

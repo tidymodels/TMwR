@@ -21,51 +21,85 @@ keep_pred <- control_resamples(save_pred = TRUE)
 
 Once we create two or more models, the next step is to compare them. In some cases, comparisons might be _within-model_, where the same model might be evaluated with different features or preprocessing methods. Alternatively, _between-model_ comparisons, such as when we compared linear regression and random forest models in Chapter \@ref(resampling), are the more common scenario.
 
-In either case, the result is a collection of resampled summary statistics (e.g. RMSE, accuracy, etc.) for each model. The first section of this chapter discusses important aspects of these statistics. Two additional sections follow describing how to formally compare models.
+In either case, the result is a collection of resampled summary statistics (e.g. RMSE, accuracy, etc.) for each model. The first section of this chapter demonstrates how workflow sets can be used to fit multiple models. The second section discusses important aspects of resampling statistics. Two additional sections follow describing how to formally compare models.
 
-## Resampled performance statistics {#resampled-stats}
+## Creating multiple models {#workflow-set}
 
-In Chapter \@ref(resampling), a random forest model for the Ames data was resampled with 10-fold cross-validation. These results were saved in the object `rf_res`. See Section \@ref(resampling-summary) for a summary of the code used so far. 
+Previously, Section \@ref(workflow-sets-intro) describes the idea of a workflow set where different preprocessors and/or models can be combinatorially generated. In the last chapter, we used a recipe for the Ames data that included an interaction term as well as spline functions for longitude and latitude. To demonstrate more with workflow sets, let's create different linear models that add these preprocessing steps incrementally. We'll create three recipes then combine them into a workflow set: 
 
-We'll estimate two additional models with the same resamples. First, the previous linear regression model, using the preprocessing defined in the `ames_rec` recipe, is resampled:
+```{r compare-workflow-set}
+library(workflowsets)
 
-```{r compare-with-spline-rs}
-lm_with_splines_res <-
-  lm_wflow %>%
-  fit_resamples(resamples = ames_folds, control = keep_pred)
-```
-
-Secondly, a less complex recipe without the splines terms is evaluated to determine if the extra 40 spline terms are worth keeping. Once added to a workflow, it is resampled:
-
-```{r compare-no-spline-rs}
-lm_with_splines_res <-
-  lm_wflow %>%
-  fit_resamples(resamples = ames_folds, control = keep_pred)
-
-no_spline_rec <- 
+basic_rec <- 
   recipe(Sale_Price ~ Neighborhood + Gr_Liv_Area + Year_Built + Bldg_Type + 
            Latitude + Longitude, data = ames_train) %>%
-  # Recall that Sale_Price is pre-logged
   step_log(Gr_Liv_Area, base = 10) %>% 
   step_other(Neighborhood, threshold = 0.01) %>% 
   step_dummy(all_nominal_predictors()) %>% 
+
+interaction_rec <- 
+  basic_rec %>% 
   step_interact( ~ Gr_Liv_Area:starts_with("Bldg_Type_") ) 
 
-lm_no_splines_res <- 
-  lm_wflow %>%
-  remove_recipe() %>% 
-  add_recipe(no_spline_rec) %>% 
-  fit_resamples(resamples = ames_folds, control = keep_pred)
+spline_rec <- 
+  interaction_rec %>% 
+  step_ns(Latitude, Longitude, deg_free = 50)
+
+preproc <- 
+  list(basic = basic_rec, 
+       interact = interaction_rec, 
+       splines = spline_rec
+  )
+
+lm_models <- workflow_set(preproc, list(lm = lm_model), cross = FALSE)
+lm_models
 ```
 
-The difference in performance appears relatively minor: 
+We'd like to resample each of these models in turn. To do so, a `r pkg(purrr)`-like function called `workflow_map()` is used. This function takes an initial argument of the function to apply to the workflows, followed by an options to that function. We also set a `verbose` argument that will print the progress as well as a `seed` argument that makes sure that each model uses the same random number stream as the others. 
 
-```{r compare-lm-metrics}
-collect_metrics(lm_no_splines_res)
-collect_metrics(lm_with_splines_res)
+```{r compare-workflow-set-resample}
+lm_models <- 
+  lm_models %>% 
+  workflow_map("fit_resamples", 
+               # Options to `workflow_map()`: 
+               seed = 1101, verbose = TRUE,
+               # Options to `fit_resamples()`: 
+               resamples = ames_folds, control = keep_pred)
+lm_models
 ```
 
-Considering these results, it appears that the additional terms do not profoundly improve the _mean_ RMSE or R<sup>2</sup> statistics. The difference is small, but it might be larger than the experimental noise in the system, i.e., considered statistically significant. We can formally **test the hypothesis that the additional terms increase R<sup>2</sup>**. 
+Notice that the `option` and `result` columns are now populated. The former includes the options to `fit_resamples()` that were given (for reproducibility) and the latter column contains the results produced by `fit_resamples()`.  
+
+There are few convenience functions for workflow sets, including one to collate the performance statistics: 
+
+```{r compare-workflow-set-collect}
+collect_metrics(lm_models) %>% 
+  filter(.metric == "rmse")
+```
+
+What about the random forest model from the previous chapter? We can add it to the set by first converting it to its own workflow set then binding rows. This requires that, when the model was resampled, the `save_workflow = TRUE` option was set in the control function.
+
+```{r compare-workflow-set-four-models}
+four_models <- 
+  as_workflow_set(random_forest = rf_res) %>% 
+  bind_rows(lm_models)
+four_models
+```
+
+The `autoplot()` method shows confidence intervals for each model in order of best-to-worst. In this chapter, we'll focus on the coefficient of determination (a.k.a. R<sup>2</sup>): 
+
+
+```{r compare-workflow-set-rsq}
+autoplot(four_models, metric = "rsq")
+```
+
+The random forest method is doing the best job and there are minor improvements in the linear models as we add more recipe steps.
+
+Now that we have 10 resampled performance estimates for each of four models, these summary statistics can be used to make between-model comparisons.
+
+## Resampled performance statistics {#resampled-stats}
+
+Considering these results, it appears that the additional terms do not profoundly improve the _mean_ RMSE or R<sup>2</sup> statistics for the linear models. The difference is small, but it might be larger than the experimental noise in the system, i.e., considered statistically significant. We can formally **test the hypothesis that the additional terms increase R<sup>2</sup>**. 
 
 :::rmdnote
 Before comparing models, it is important to discuss the within-resample correlation for resampling statistics. Each model was measured with the same cross-validation folds, and _results for the same resample tend to be similar_. 
@@ -73,39 +107,27 @@ Before comparing models, it is important to discuss the within-resample correlat
 
 In other words, there are some resamples where performance across models tends to be low and others where it tends to be high. In statistics, this is called a resample-to-resample component of variation. 
 
-To illustrate, let's gather the individual resampling statistics for the two linear models and the random forest. We will focus on the R<sup>2</sup> statistic for each model, which measures correlation. 
+To illustrate, let's gather the individual resampling statistics for the linear models and the random forest. We will focus on the R<sup>2</sup> statistic for each model, which measures correlation between the observed and predicted sale prices for each house.  
 
 ```{r compare-collect}
-no_splines_rsq <- 
-  collect_metrics(lm_no_splines_res, summarize = FALSE) %>% 
-  filter(.metric == "rsq") %>% 
-  select(id, `no splines` = .estimate)
+rsq_indiv_estimates <- 
+  collect_metrics(four_models, summarize = FALSE) %>% 
+  filter(.metric == "rsq") 
 
-splines_rsq <- 
-  collect_metrics(lm_with_splines_res, summarize = FALSE) %>% 
-  filter(.metric == "rsq") %>% 
-  select(id, `with splines` = .estimate)
+rsq_wider <- 
+  rsq_indiv_estimates %>% 
+  select(wflow_id, .estimate, id) %>% 
+  pivot_wider(id_cols = "id", names_from = "wflow_id", values_from = ".estimate")
 
-rf_rsq <- 
-  collect_metrics(rf_res, summarize = FALSE) %>% 
-  filter(.metric == "rsq") %>% 
-  select(id, `random forest` = .estimate)  
-
-rsq_estimates <- 
-  inner_join(no_splines_rsq, splines_rsq, by = "id") %>% 
-  inner_join(rf_rsq, by = "id") 
-
-corrr::correlate(rsq_estimates %>% select(-id))
+corrr::correlate(rsq_wider %>% select(-id), quiet = TRUE)
 ```
-
 
 These high correlations indicate that, across models, there are large within-resample correlations. To see this visually, the R<sup>2</sup> statistics are shown for each model with lines connecting the resamples: 
 
 ```{r compare-rsq-plot, fig.height=4}
-rsq_estimates %>% 
-  pivot_longer(cols = c(-id), names_to = "model", values_to = "rsq") %>% 
-  mutate(model = reorder(model, rsq)) %>% 
-  ggplot(aes(x = model, y = rsq, group = id, col = id)) + 
+rsq_indiv_estimates %>% 
+  mutate(wflow_id = reorder(wflow_id, .estimate)) %>% 
+  ggplot(aes(x = wflow_id, y = .estimate, group = id, col = id)) + 
   geom_line(alpha = .5, lwd = 1.25) + 
   theme(legend.position = "none") + 
   labs(x = NULL, y = expression(paste(R^2, "statistics")))
@@ -114,8 +136,8 @@ rsq_estimates %>%
 If the resample-to-resample effect was not real, there would not be any parallel lines. A statistical test for the correlations evaluates whether the magnitudes of these correlations are not simply noise. For the linear models: 
 
 ```{r compare-resample-cor}
-rsq_estimates %>% 
-  with( cor.test(`no splines`, `random forest`) ) %>% 
+rsq_wider %>% 
+  with( cor.test(basic_lm, splines_lm) ) %>% 
   tidy() %>% 
   select(estimate, starts_with("conf"))
 ```
@@ -147,58 +169,63 @@ This versatile model is used to create regression models as well as being the ba
 In our specific situation, the ANOVA can also make model comparisons. Suppose the individual resampled R<sup>2</sup> statistics serve as the _the outcome data_ (i.e., the $y_{ij}$) and the models as the _predictors_ in the ANOVA model. A sampling of this data structure would be: 
 
 ```{r compare-data-config, echo = FALSE, results = "asis"}
-rsq_estimates %>% 
-  pivot_longer(cols = c(-id), names_to = "model", values_to = "rsq") %>% 
+rsq_indiv_estimates %>% 
+  select(id, rsq = .estimate, model = wflow_id) %>% 
+  # pivot_longer(cols = c(-id), names_to = "model", values_to = "rsq") %>% 
+  arrange(id, model) %>% 
   mutate(
-    X1 = ifelse(model == "with splines", 1, 0),
-    X2 = ifelse(model == "random forest", 1, 0)
+    X1 = ifelse(model == "interact_lm", 1, 0),
+    X2 = ifelse(model == "random_forest", 1, 0),
+    X3 = ifelse(model == "splines_lm", 1, 0)
     ) %>% 
-  select(`Y = rsq` = rsq, model, X1, X2, id) %>% 
+  select(`Y = rsq` = rsq, model, X1, X2, X3, id) %>% 
   slice(1:6) %>% 
   kable(escape = FALSE) %>% 
   kable_styling(full_width = FALSE) 
 ```
 
-The `X1` and `X2` columns in the table are indicators based on the values in the `model` column. 
+The `X1`, `X2`, and `X3` columns in the table are indicators for the values in the `model` column. Their order was defined in the same way that R would define them, alphabetically ordered by `model`.  
 
 For our model comparison, the specific ANOVA model is: 
 
-$$y_{ij} = \beta_0 + \beta_1x_{i1} + \beta_2x_{i2} + \epsilon_{ij}$$
+$$y_{ij} = \beta_0 + \beta_1x_{i1} + \beta_2x_{i2} + \beta_3x_{i3} + \epsilon_{ij}$$
 
 where
 
- * $\beta_0$ is the estimate of the mean R<sup>2</sup> statistic for linear models without splines,
+ * $\beta_0$ is the estimate of the mean R<sup>2</sup> statistic for the basic linear models (i.e., without splines or interactions),
  
- * $\beta_1$ is the _change_ in mean R<sup>2</sup> when splines are added to the linear model, and
+ * $\beta_1$ is the _change_ in mean R<sup>2</sup> when interactions are added to the basic linear model,
  
- * $\beta_2$ is the _change_ in mean R<sup>2</sup> between a linear model without splines and the random forest model. 
+ * $\beta_2$ is the _change_ in mean R<sup>2</sup> between the basic linear model and the random forest model. 
+
+ * $\beta_3$ is the _change_ in mean R<sup>2</sup> between the basic linear model and one with interactions and splines. 
 
 From these model parameters, hypothesis tests and p-values are generated to statistically compare models, but we must contend with how to handle the resample-to-resample effect. Historically, the resample groups would be considered a _block effect_ and an appropriate term was added to the model. Alternatively, the resample effect could be considered a _random effect_ where these particular resamples were drawn at random from a larger population of possible resamples. However, we aren't really interested in these effects; we only want to adjust for them in the model so that the variances of the interesting differences are properly estimated. 
 
 Treating the resamples as random effects is theoretically appealing. Methods for fitting an ANOVA model with this type of random effect could include the linear mixed model [@faraway2016extending] or a Bayesian hierarchical model (shown in the next section). 
 
-A simple and fast method for comparing two models at a time is to use the _differences in R<sup>2</sup> values_ as the outcome data in the ANOVA model. Since the outcomes are matched by resample, the differences _do not contain the resample-to-resample effect_ and, for this reason, the standard ANOVA model is appropriate. To illustrate, this call to `lm()` tests the difference between the two linear regression models: 
+A simple and fast method for comparing two models at a time is to use the _differences in R<sup>2</sup> values_ as the outcome data in the ANOVA model. Since the outcomes are matched by resample, the differences _do not contain the resample-to-resample effect_ and, for this reason, the standard ANOVA model is appropriate. To illustrate, this call to `lm()` tests the difference between two of the linear regression models: 
 
 ```{r compare-t-test}
 compare_lm <- 
-  rsq_estimates %>% 
-  mutate(difference = `with splines` - `no splines`)
+  rsq_wider %>% 
+  mutate(difference = splines_lm - basic_lm)
 
 lm(difference ~ 1, data = compare_lm) %>% 
   tidy(conf.int = TRUE) %>% 
   select(estimate, p.value, starts_with("conf"))
 
 # Alternatively, a paired t-test could also be used: 
-rsq_estimates %>% 
-  with( t.test(`with splines`, `no splines`, paired = TRUE) ) %>%
+rsq_wider %>% 
+  with( t.test(splines_lm, basic_lm, paired = TRUE) ) %>%
   tidy() %>% 
   select(estimate, p.value, starts_with("conf"))
 ```
 ```{r compare-hidden-t, include = FALSE}
 lm_t <- 
   t.test(
-    rsq_estimates$`with splines`, 
-    rsq_estimates$`no splines`, 
+    rsq_wider$splines_lm, 
+    rsq_wider$basic_lm, 
     paired = TRUE
   ) %>%
   tidy()
@@ -220,7 +247,7 @@ The next section takes a more general approach to making formal comparisons betw
 
 The previous ANOVA model for these data had the form: 
 
-$$y_{ij} = \beta_0 + \beta_1x_{i1} + \beta_2x_{i2} + \epsilon_{ij}$$
+$$y_{ij} = \beta_0 + \beta_1x_{i1} + \beta_2x_{i2} + \beta_3x_{i3} + \epsilon_{ij}$$
 
 where the residuals $\epsilon_{ij}$ are assumed to be independent and follow a Gaussian distribution with zero mean and constant standard deviation of $\sigma$. From this assumption, statistical theory shows that the estimated regression parameters follow a multivariate Gaussian distribution and, from this, p-values and confidence intervals are derived.  
 
@@ -243,22 +270,21 @@ Given the observed data and the prior distribution specifications, the model par
 
 To adapt our Bayesian ANOVA model so that the resamples are adequately modeled, we consider a _random intercept model_. Here, we assume that the resamples impact the model only by changing the intercept. Note that this constrains the resamples from having a differential impact on the regression parameters $\beta_j$; these are assumed to have the same relationship across resamples. This model equation is: 
 
-$$y_{ij} = (\beta_0 + b_{i}) + \beta_1x_{i1} + \beta_2x_{i2} + \epsilon_{ij}$$
+$$y_{ij} = (\beta_0 + b_{i}) + \beta_1x_{i1} + \beta_2x_{i2} + \beta_3x_{i3} + \epsilon_{ij}$$
 
 This is not an unreasonable model for resampled statistics which, when plotted across models (as above), tend to have fairly parallel effects across models (i.e., little cross-over of lines). 
 
-For this model configuration, an additional assumption is made for the prior distribution of random effects. A reasonable approach is another symmetric distribution such as another bell-shaped curve. Given the effective sample size of 10 in our data, let's use a prior that is wider than a standard normal distribution. We'll use a t-distribution with a single degree of freedom (i.e. $b_i \sim t(1)$), which has heavier tails than an analogous Gaussian distribution. 
+For this model configuration, an additional assumption is made for the prior distribution of random effects. A reasonable assumption for this distribution is another symmetric distribution, such as another bell-shaped curve. Given the effective sample size of 10 in our summary statistic data, let's use a prior that is wider than a standard normal distribution. We'll use a t-distribution with a single degree of freedom (i.e. $b_i \sim t(1)$), which has heavier tails than an analogous Gaussian distribution. 
 
-The `r pkg(tidyposterior)` package has functions to fit such Bayesian models for the purpose of comparing resampled models. For an object created using the `r pkg(rsample)` package (such as our `ames_folds` tibble), the corresponding resampling estimates of performance are in columns of the data frame. From this object, the `perf_mod()` function determines an appropriate Bayesian model and fits using the resampling statistics. For example, let's fit a model to the three sets of model R<sup>2</sup> statistics: 
+The `r pkg(tidyposterior)` package has functions to fit such Bayesian models for the purpose of comparing resampled models. The main function is called `perf_mod()` and it is configured to "just work" for different types of objects:
 
-```{r compare-collect-data}
-# Bring the R^2 values into the original rsample object:
-ames_two_models <- 
-  ames_folds %>% 
-  bind_cols(rsq_estimates %>% arrange(id) %>% select(-id))
+ * For workflow sets, it creates an ANOVA model where the groups correspond to the workflows. Our existing models did not optimize any tuning parameters (see the next three chapters). If one of the workflows in the set had data on tuning parameters, the best tuning parameters set for each workflow is used in the Bayesian analysis. In other words, despite the presence of tuning parameters, `perf_mod()` focuses on making _between-workflow comparisons_. 
+ 
+ * For objects that contain a single model that has been tuned using resampling, `perf_mod()` makes _within-model comparisons_. In this situation, the grouping variables tested in the Bayesian ANOVA model are the submodels defined by the tuning parameters. 
 
-ames_two_models %>% slice(1:4)
-```
+ * The `perf_mod()` function can also take a data frame produced by `r pkg(rsample)` that has columns of performance metrics associated with two or more model/workflow results. These could have been generated by non-standard means.
+
+From any of these types of objects, the `perf_mod()` function determines an appropriate Bayesian model and fits it with the resampling statistics. For our example, it will model the four sets of R<sup>2</sup> statistics associated with the workflows. 
 
 The `r pkg(tidyposterior)` package uses the Stan software for specifying and fitting the models via the `r pkg(rstanarm)` package. The functions within that package have default priors (see `?priors` for more details). The model below uses the default priors for all parameters except for the random intercepts (which follow a  _t_-distribution). The estimation process uses random numbers so the seed is set within the function call. The estimation process is iterative and is replicated several times in collections called _chains_. The `iter` parameter tells the function how long to run the estimation process in each chain. When several chains are used, their results are combined (assume that this is validated by diagnostic assessments).  
 
@@ -267,35 +293,36 @@ library(tidyposterior)
 library(rstanarm)
 
 # The rstanarm package creates copious amounts of output; those results
-# are not shown here but are worth inspecting for potential issues. 
+# are not shown here but are worth inspecting for potential issues. The
+# option `refresh = 0` can be used to eliminate the logging. 
 rsq_anova <-
   perf_mod(
-    ames_two_models,
-    prior_intercept = student_t(df = 1),
+    four_models,
+    metric = "rsq",
+    prior_intercept = rstanarm::student_t(df = 1),
     chains = 4,
     iter = 5000,
-    seed = 2
+    seed = 1102
   )
 ```
 
-The resulting object has information on the resampling process as well as the Stan object embedded within (in an element called `stan`). We are most interested in the posterior distributions of the regression parameters. The package has a `tidy()` method that extracts these posterior distributions into a tibble: 
+The resulting object has information on the resampling process as well as the Stan object embedded within (in an element called `stan`). We are most interested in the posterior distributions of the regression parameters. The `r pkg(tidyposterior)` package has a `tidy()` method that extracts these posterior distributions into a tibble: 
 
 ```{r compare-group-posteriors-tidy}
 model_post <- 
   rsq_anova %>% 
   # Take a random sample from the posterior distribution
   # so set the seed again to be reproducible. 
-  tidy(seed = 35) %>% 
-  as_tibble() 
+  tidy(seed = 1103) 
 
 glimpse(model_post)
 ```
 
-The three posterior distributions are: 
+The four posterior distributions are: 
 
 ```{r compare-group-posteriors-res}
 model_post %>% 
-  mutate(model = fct_inorder(model)) %>%
+  mutate(model = forcats::fct_inorder(model)) %>%
   ggplot(aes(x = posterior)) + 
   geom_histogram(bins = 50, col = "white", fill = "blue", alpha = 0.4) + 
   facet_wrap(~ model, ncol = 1) + 
@@ -304,16 +331,23 @@ model_post %>%
 
 These histograms describe the estimated probability distributions of the mean R<sup>2</sup> value for each model. There is some overlap, especially for the two linear models. 
 
+There is also a basic `autoplot()` method for the model results as well as the tidied object that shows overlaid density plots. For example: 
+
+
+```{r compare-autoplot-intervals}
+autoplot(rsq_anova)
+```
+
 One wonderful aspect of using resampling with Bayesian models is that, once we have the posteriors for the parameters, it is trivial to get the posterior distributions for combinations of the parameters. For example, to compare the two linear regression models, we are interested in the difference in means. The posterior of this difference is computed by sampling from the individual posteriors and taking the differences. The `contrast_models()` function can do this. To specify the comparisons to make, the `list_1` and `list_2` parameters take character vectors and compute the differences between the models in those lists (parameterized as `list_1 - list_2`). 
 
-To compare the linear models: 
+To compare two of the linear models: 
 
 ```{r compare-lm-difference-posterior, fig.height = 3}
 rqs_diff <-
   contrast_models(rsq_anova,
-                  list_1 = "with splines",
-                  list_2 = "no splines",
-                  seed = 36)
+                  list_1 = "splines_lm",
+                  list_2 = "basic_lm",
+                  seed = 1103)
 
 rqs_diff %>% 
   as_tibble() %>% 
@@ -321,7 +355,7 @@ rqs_diff %>%
   geom_vline(xintercept = 0, lty = 2) + 
   geom_histogram(bins = 50, col = "white", fill = "red", alpha = 0.4) + 
   labs(x = expression(paste("Posterior for mean difference in ", R^2, 
-                            " (splines - no splines)")))
+                            " (splines + interaction - basic)")))
 ```
 
 The posterior shows that the center of the distribution is greater than zero (indicating that the model with splines had larger values) but does overlap with zero to a degree. The `summary()` method for this object computes the mean of the distribution as well as _credible intervals_. 
@@ -331,7 +365,7 @@ summary(rqs_diff) %>%
   select(-starts_with("pract"))
 ```
 
-The `probability` column reflects the proportion of the posterior that is greater than zero. This is the probability that the positive difference is real. The value is large, providing a strong case for _statistical significance_. 
+The `probability` column reflects the proportion of the posterior that is greater than zero. This is the probability that the positive difference is real. The value is not close to zero, providing a strong case for _statistical significance_. 
 
 However, the estimate of the mean difference is fairly close to zero. Recall that the practical effect size we suggested previously is 2%. With a posterior distribution, the _probability of being practically significant_ is also computed. In Bayesian analysis, this is a "ROPE estimate" (for Region Of Practical Equivalence, @kruschke2018bayesian). To estimate this, the `size` option to the summary function is used: 
 
@@ -342,7 +376,15 @@ summary(rqs_diff, size = 0.02) %>%
 
 The `pract_equiv` column is the proportion of the posterior that is within `[-size, size]`. This large value indicates that, for our effect size, there is an overwhelming probability that the two models are practically the same. 
 
-The same process can be followed to compare the random forest model to one or both of the linear regressions that were resampled. 
+The same process could be used to compare the random forest model to one or both of the linear regressions that were resampled. In fact, when `perf_mod()` is used with a workflow set, the `autoplot()` method can show the `pract_equiv`  results that compare each workflow to the current best (the random forest model, in this case). 
+
+```{r compare-rope-plot}
+autoplot(rsq_anova, type = "ROPE", size = 0.02)
+```
+
+None of the linear models come close to the random forest model when a 2% practical effect size is used. 
+
+### The effect of the amount of resampling {-}
 
 How does the number of resamples affect this analysis? More resamples increases the precision of the overall resampling estimate; that precision propagates to this type of analysis. For illustration, additional resamples were added using repeated cross-validation. How did the posterior distribution change? The figure below shows the 90% credible intervals with up to 100 resamples (generated from 10 repeats of 10-fold cross-validation): 
 
