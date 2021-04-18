@@ -1,6 +1,6 @@
 Package: TMwR
 Title: Tidy Modeling with R.
-Version: 0.0.1.9008
+Version: 0.0.1.9009
 Authors@R: c(
     person(
       given = "Max",
@@ -48,7 +48,7 @@ Imports:
   patchwork,
   purrr,
   ranger,
-  recipes,
+  recipes (>= 0.1.16),
   rlang,
   rmarkdown,
   rpart,
