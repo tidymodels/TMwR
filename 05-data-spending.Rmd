@@ -1,6 +1,7 @@
 ```{r spending-setup, include = FALSE}
 knitr::opts_chunk$set(fig.path = "figures/")
 library(tidymodels)
+tidymodels_prefer()
 
 source("ames_snippets.R")
 ```
@@ -30,6 +31,9 @@ How should we conduct this split of the data? This depends on the context.
 Suppose we allocate 80% of the data to the training set and the remaining 20% for testing.  The most common method is to use simple random sampling. The [`r pkg(rsample)`](https://rsample.tidymodels.org/) package has tools for making data splits such as this; the function `intial_split()` was created for this purpose. It takes the data frame as an argument as well as the proportion to be placed into training. Using the previous data frame produced by the code snippet from the summary in Section \@ref(ames-summary): 
 
 ```{r ames-split, message = FALSE, warning = FALSE}
+library(tidymodels)
+tidymodels_prefer()
+
 # Set the random number stream using `set.seed()` so that the results can be 
 # reproduced later. 
 set.seed(123)

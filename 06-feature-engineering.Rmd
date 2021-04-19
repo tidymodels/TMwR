@@ -3,6 +3,8 @@ knitr::opts_chunk$set(fig.path = "figures/")
 library(tidymodels)
 library(kableExtra)
 
+tidymodels_prefer()
+
 val_list <- function(x) {
   x <- format(table(x), big.mark = ",")
   x <- paste0("`", names(x), "` ($n = ", unname(x), "$)")
@@ -68,6 +70,7 @@ A recipe is also an object that defines a series of steps for data processing. U
 
 ```{r engineering-ames-simple-recipe}
 library(tidymodels) # Includes the recipes package
+tidymodels_prefer()
 
 simple_ames <- 
   recipe(Sale_Price ~ Neighborhood + Gr_Liv_Area + Year_Built + Bldg_Type,

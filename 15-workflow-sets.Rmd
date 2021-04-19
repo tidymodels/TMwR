@@ -6,7 +6,7 @@ library(workflowsets)
 library(baguette)
 library(rules)
 library(finetune)
-
+tidymodels_prefer()
 caching <- FALSE
 
 cores <- parallel::detectCores()
@@ -40,6 +40,7 @@ First, let's define the data splitting and resampling schemes.
 
 ```{r workflow-sets-data}
 library(tidymodels)
+tidymodels_prefer()
 data(concrete, package = "modeldata")
 glimpse(concrete)
 ```
@@ -171,8 +172,6 @@ Workflow sets take named lists of preprocessors and model specifications and com
 As a first workflow set example, let's combine the recipe that only standardizes the predictors to the nonlinear models that require that the predictors be in the same units. 
 
 ```{r workflow-sets-normalized}
-library(workflowsets)
-
 normalized <- 
    workflow_set(
       preproc = list(normalized = normalized_rec), 

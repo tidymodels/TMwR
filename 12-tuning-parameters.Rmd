@@ -6,6 +6,8 @@ library(ggforce)
 library(doMC)
 registerDoMC(cores = parallel::detectCores())
 
+tidymodels_prefer()
+
 ## -----------------------------------------------------------------------------
 
 source("ames_snippets.R")
@@ -125,6 +127,9 @@ Each of these models result in linear class boundaries. Which one should be we u
 For a data frame `training_set`, let's create a function to compute the different models and extract the likelihood statistics for the training set (using `broom::glance()`): 
 
 ```{r tuning-likelihood}
+library(tidymodels)
+tidymodels_prefer()
+
 llhood <- function(...) {
   logistic_reg() %>% 
     set_engine("glm", ...) %>% 

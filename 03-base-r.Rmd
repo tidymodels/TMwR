@@ -318,6 +318,40 @@ model_by_species %>%
 List columns can be very powerful in modeling projects. List columns provide containers for any type of R objects, from a fitted model itself to the important data frame structure. 
 :::
 
+## The tidymodels package
+
+The design philosophy of the tidyverse is to create modular R packages, each with a fairly narrow scope. The tidymodels package follow a similar design. For example, `r pkg(rsample)` package focus on data splitting and resampling. Although resampling methods are critical to other activities of modeling (e.g., measuring performance), they reside in a one package and performance metrics are contained in the `r pkg(yardstick)` package.  The downside to this philosophy is that there are a lot of packages in the tidymodels organization.  
+
+```{r base-r-detach, warning = FALSE, message = FALSE, echo = FALSE}
+pkgs <- paste0("package:", c("tidymodels", tidymodels:::core))
+for (i in pkgs) {
+  try(detach(i, unload = TRUE, character.only = TRUE, force = TRUE), silent = TRUE)
+}
+```
+
+To compensate for this, the tidymodels _package_ loads a core set of tidymodels and tidyverse packages. Loading the package shows which package are attached and if there are function naming conflicts with previously loaded packages:
+
+```{r base-r-tidymodels-package}
+library(tidymodels)
+```
+
+As an example of a naming conflict, before loading `r pkg(tidymodels)`, invoking the `filter()` function will execute the function in the `r pkg(stats)` package. After loading tidymodels, it will execute the `r pkg(dplyr)` function. 
+
+There are a few ways to handle naming conflicts. As previously mentioned, the function can be called with its namespace (e.g., `stats::filter()`). This is not bad advice but it does make the code less readable. 
+
+Another option is to use the `r pkg(conflicted)` package. A rule can be set that remains in effect until the end of the R session that ensures that one specific function will always run if no namespace is given in the code. As an example, if we prefer the `r pkg(dplyr)` version of the function:
+
+```{r base-r-conflicted, eval = FALSE}
+library(conflicted)
+conflict_prefer("filter", winner = "dplyr")
+```
+
+As another convenience, `r pkg(tidymodels)` contains a function that captures most of the common naming conflicts that we might encounter:
+
+```{r base-r-clonflicts}
+tidymodels_prefer(quiet = FALSE)
+```
+
 ## Chapter summary
 
 This chapter reviewed core R language conventions for creating and using models that are an important foundation for the rest of this book. The formula operator is an expressive and important aspect of fitting models in R and often serves multiple purposes in non-tidymodels functions. Traditional R approaches to modeling have some limitations, especially when it comes to fluently handling and visualizing model output. 

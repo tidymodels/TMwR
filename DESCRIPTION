@@ -65,7 +65,7 @@ Imports:
   sessioninfo,
   stacks,
   tibble (>= 3.1.0),
-  tidymodels,
+  tidymodels (>= 0.1.3),
   tidyposterior (>= 0.0.3),
   tidyverse,
   themis,
@@ -75,7 +75,5 @@ Imports:
   xgboost,
   yardstick
 Remotes:
-  tidymodels/tidymodels,
-  tidymodels/tidyposterior,
   tidymodels/finetune
 
