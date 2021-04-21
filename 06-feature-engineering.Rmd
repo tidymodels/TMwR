@@ -73,7 +73,7 @@ simple_ames <-
   recipe(Sale_Price ~ Neighborhood + Gr_Liv_Area + Year_Built + Bldg_Type,
          data = ames_train) %>%
   step_log(Gr_Liv_Area, base = 10) %>% 
-  step_dummy(all_nominal())
+  step_dummy(all_nominal_predictors())
 simple_ames
 ```
 
@@ -85,10 +85,10 @@ Let's break this down:
 
 1. `step_dummy()` is used to specify which variables should be converted from a qualitative format to a quantitative format, in this case, using dummy or indicator variables. An indicator or dummy variable is a binary numeric variable (a column of ones and zeroes) that encodes qualitative information; we will dig deeper into these kinds of variables in Section \@ref(dummies). 
 
-The function `all_nominal()` captures the names of any columns that are currently factor or character (i.e., nominal) in nature. This is a `r pkg(dplyr)` selector function similar to `starts_with()` or `matches()` but can only be used inside of a recipe. 
+The function `all_nominal_predictors()` captures the names of any predictor columns that are currently factor or character (i.e., nominal) in nature. This is a `r pkg(dplyr)` selector function similar to `starts_with()` or `matches()` but can only be used inside of a recipe. 
 
 :::rmdnote
-Other selectors specific to the `r pkg(recipes)` package are: `all_numeric()`, `all_predictors()`, and `all_outcomes()`. As with `r pkg(dplyr)`, one or more unquoted expressions, separated by commas, can be used to select which columns are affected by each step.
+Other selectors specific to the `r pkg(recipes)` package are: `all_numeric_predictors()`, `all_numeric()`, `all_predictors()`, and `all_outcomes()`. As with `r pkg(dplyr)`, one or more unquoted expressions, separated by commas, can be used to select which columns are affected by each step.
 :::
 
 What is the advantage to using a recipe? There are a few, including:
@@ -172,7 +172,7 @@ simple_ames <-
          data = ames_train) %>%
   step_log(Gr_Liv_Area, base = 10) %>% 
   step_other(Neighborhood, threshold = 0.01) %>% 
-  step_dummy(all_nominal())
+  step_dummy(all_nominal_predictors())
 ```
 
 :::rmdnote
@@ -266,7 +266,7 @@ simple_ames <-
          data = ames_train) %>%
   step_log(Gr_Liv_Area, base = 10) %>% 
   step_other(Neighborhood, threshold = 0.01) %>% 
-  step_dummy(all_nominal()) %>% 
+  step_dummy(all_nominal_predictors()) %>% 
   # Gr_Liv_Area is on the log scale from a previous step
   step_interact( ~ Gr_Liv_Area:starts_with("Bldg_Type_") )
 ```
@@ -373,7 +373,7 @@ recipe(Sale_Price ~ Neighborhood + Gr_Liv_Area + Year_Built + Bldg_Type + Latitu
          data = ames_train) %>%
   step_log(Gr_Liv_Area, base = 10) %>% 
   step_other(Neighborhood, threshold = 0.01) %>% 
-  step_dummy(all_nominal()) %>% 
+  step_dummy(all_nominal_predictors()) %>% 
   step_interact( ~ Gr_Liv_Area:starts_with("Bldg_Type_") ) %>% 
   step_ns(Latitude, deg_free = 20)
 ```
@@ -444,7 +444,7 @@ ames_rec <-
            Latitude + Longitude, data = ames_train) %>%
   step_log(Gr_Liv_Area, base = 10) %>% 
   step_other(Neighborhood, threshold = 0.01) %>% 
-  step_dummy(all_nominal()) %>% 
+  step_dummy(all_nominal_predictors()) %>% 
   step_interact( ~ Gr_Liv_Area:starts_with("Bldg_Type_") ) %>% 
   step_ns(Latitude, Longitude, deg_free = 20)
 ```
@@ -495,7 +495,7 @@ ames_rec <-
            Latitude + Longitude, data = ames_train) %>%
   step_log(Gr_Liv_Area, base = 10, id = "my_id") %>% 
   step_other(Neighborhood, threshold = 0.01) %>% 
-  step_dummy(all_nominal()) %>% 
+  step_dummy(all_nominal_predictors()) %>% 
   step_interact( ~ Gr_Liv_Area:starts_with("Bldg_Type_") ) %>% 
   step_ns(Latitude, Longitude, deg_free = 20)
 
@@ -556,7 +556,7 @@ ames_rec <-
            Latitude + Longitude, data = ames_train) %>%
   step_log(Gr_Liv_Area, base = 10) %>% 
   step_other(Neighborhood, threshold = 0.01) %>% 
-  step_dummy(all_nominal()) %>% 
+  step_dummy(all_nominal_predictors()) %>% 
   step_interact( ~ Gr_Liv_Area:starts_with("Bldg_Type_") ) %>% 
   step_ns(Latitude, Longitude, deg_free = 20)
 ```

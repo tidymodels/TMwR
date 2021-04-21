@@ -269,7 +269,7 @@ Chapters \@ref(splitting) and \@ref(resampling) demonstrated that simply repredi
 ```{r tuning-two-class-comps, include = FALSE, cache = TRUE}
 two_class_rec <-
  recipe(Class ~ ., data = two_class_dat) %>% 
- step_normalize(all_predictors()) 
+ step_normalize(all_numeric_predictors()) 
 
 mlp_mod <- 
  mlp(hidden_units = tune(), epochs = 1000) %>% 
@@ -471,7 +471,7 @@ ames_rec <-
            Latitude + Longitude, data = ames_train)  %>%
   step_log(Gr_Liv_Area, base = 10) %>% 
   step_other(Neighborhood, threshold = tune()) %>% 
-  step_dummy(all_nominal()) %>% 
+  step_dummy(all_nominal_predictors()) %>% 
   step_interact( ~ Gr_Liv_Area:starts_with("Bldg_Type_") ) %>% 
   step_ns(Longitude, deg_free = tune("longitude df")) %>% 
   step_ns(Latitude,  deg_free = tune("latitude df"))
