@@ -324,7 +324,7 @@ This approach to model screening fits a total of `r format(num_grid_models, big.
 
 ## Efficiently screening models {#racing-example}
 
-One effective method for screening a large set of models efficiently is to use the racing approach described in Section \@ref(racing). With a workflow set, the `workflow_map()` function can be used again. Recall that the first argument is the _function_ to apply to the workflows and, in this case, we can use a value of `"tune_race_anova"`. We also pass an appropriate control object; otherwise the options would be the same as the code in the previous section. 
+One effective method for screening a large set of models efficiently is to use the racing approach described in Section \@ref(racing). With a workflow set, we can use the `workflow_map()` function for this racing approach. Recall that after we pipe in our workflow set, the argument we use is the _function_ to apply to the workflows; in this case, we can use a value of `"tune_race_anova"`. We also pass an appropriate control object; otherwise the options would be the same as the code in the previous section. 
 
 
 ```{r workflow-sets-race, eval = FALSE}
@@ -455,4 +455,3 @@ save(concrete_test, concrete_split, grid_results, race_results,
      boosting_test_results,
      file = "RData/concrete_results.RData", version = 2, compress = "xz")
 ```
-
