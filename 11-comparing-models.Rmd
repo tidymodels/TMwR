@@ -10,6 +10,8 @@ library(tidyr)
 library(forcats)
 registerDoMC(cores = parallel::detectCores())
 
+tidymodels_prefer()
+
 source("ames_snippets.R")
 load("RData/resampling.RData")
 load("RData/post_intervals.RData")
@@ -28,7 +30,8 @@ In either case, the result is a collection of resampled summary statistics (e.g.
 Previously, Section \@ref(workflow-sets-intro) describes the idea of a workflow set where different preprocessors and/or models can be combinatorially generated. In the last chapter, we used a recipe for the Ames data that included an interaction term as well as spline functions for longitude and latitude. To demonstrate more with workflow sets, let's create different linear models that add these preprocessing steps incrementally. We'll create three recipes then combine them into a workflow set: 
 
 ```{r compare-workflow-set}
-library(workflowsets)
+library(tidymodels)
+tidymodels_prefer()
 
 basic_rec <- 
   recipe(Sale_Price ~ Neighborhood + Gr_Liv_Area + Year_Built + Bldg_Type + 

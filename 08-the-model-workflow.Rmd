@@ -3,7 +3,7 @@ knitr::opts_chunk$set(fig.path = "figures/")
 library(tidymodels)
 library(workflowsets)
 library(kableExtra)
-
+tidymodels_prefer()
 source("ames_snippets.R")
 ```
 
@@ -64,6 +64,7 @@ The `r pkg(workflows)` package allows the user to bind modeling and preprocessin
 
 ```{r workflows-simple}
 library(tidymodels)  # Includes the workflows package
+tidymodels_prefer()
 
 lm_model <- 
   linear_reg() %>% 

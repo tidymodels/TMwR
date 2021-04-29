@@ -1,6 +1,7 @@
 ```{r ensemble-setup, include = FALSE}
 library(tidymodels)
 library(stacks)
+tidymodels_prefer()
 ```
 
 # Ensemble Models {#ensemble}

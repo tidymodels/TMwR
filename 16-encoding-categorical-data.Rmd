@@ -1,5 +1,6 @@
 ```{r categorical-setup, include = FALSE}
 library(tidymodels)
+tidymodels_prefer()
 ```
 
 # (PART\*) Other Topics {-} 

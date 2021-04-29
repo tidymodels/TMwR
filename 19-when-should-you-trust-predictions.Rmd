@@ -2,6 +2,7 @@
 library(tidymodels)
 library(probably)
 library(applicable)
+tidymodels_prefer()
 ```
 
 # When should you trust predictions? {#trust}

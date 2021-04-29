@@ -5,6 +5,8 @@ library(kknn)
 library(kableExtra)
 library(tidyr)
 
+tidymodels_prefer()
+
 source("ames_snippets.R")
 ```
 
@@ -65,6 +67,9 @@ For tidymodels, the approach to specifying a model is intended to be more unifie
 These specifications are built _without referencing the data_. For example, for the three cases above: 
 
 ```{r models-lin-reg-spec}
+library(tidymodels)
+tidymodels_prefer()
+
 linear_reg() %>% set_engine("lm")
 
 linear_reg() %>% set_engine("glmnet") 
