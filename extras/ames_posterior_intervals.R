@@ -23,8 +23,6 @@ registerDoMC(cores = crs)
 set.seed(55)
 ames_folds <- vfold_cv(ames_train, v = 10, repeats = 10)
 
-# ------------------------------------------------------------------------------
-
 lm_model <- linear_reg() %>% set_engine("lm")
 
 rf_model <-
@@ -39,7 +37,7 @@ basic_rec <-
            Latitude + Longitude, data = ames_train) %>%
   step_log(Gr_Liv_Area, base = 10) %>% 
   step_other(Neighborhood, threshold = 0.01) %>% 
-  step_dummy(all_nominal())
+  step_dummy(all_nominal_predictors())
 
 interaction_rec <- 
   basic_rec %>% 

@@ -46,7 +46,7 @@ flights_rec <-
   step_date(date, features = c("dow", "month")) %>% 
   step_holiday(date, holidays = timeDate::listHolidays("US")) %>% 
   step_rm(date) %>% 
-  step_dummy(all_nominal(), -all_outcomes()) %>% 
+  step_dummy(all_nominal_predictors()) %>% 
   step_zv(all_predictors())
 
 preproc_data <- 

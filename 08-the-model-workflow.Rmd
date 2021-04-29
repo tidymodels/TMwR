@@ -305,7 +305,7 @@ In the meantime, let's create model fits for each formula and save them in a new
 ```{r workflows-set-fit}
 location_models <-
    location_models %>%
-   mutate(fit = map2(info, wflow_id, ~ fit(.x$workflow[[1]], ames_train)))
+   mutate(fit = map(info, ~ fit(.x$workflow[[1]], ames_train)))
 location_models
 location_models$fit[[1]]
 ```
@@ -340,7 +340,7 @@ ames_rec <-
            Latitude + Longitude, data = ames_train) %>%
   step_log(Gr_Liv_Area, base = 10) %>% 
   step_other(Neighborhood, threshold = 0.01) %>% 
-  step_dummy(all_nominal()) %>% 
+  step_dummy(all_nominal_predictors()) %>% 
   step_interact( ~ Gr_Liv_Area:starts_with("Bldg_Type_") ) %>% 
   step_ns(Latitude, Longitude, deg_free = 20)
 

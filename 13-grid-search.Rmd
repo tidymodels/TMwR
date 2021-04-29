@@ -182,10 +182,10 @@ Many of the predictors have skewed distributions. Since PCA is variance based, e
 ```{r grid-cells-objects}
 mlp_rec <-
   recipe(class ~ ., data = cells) %>%
-  step_YeoJohnson(all_predictors()) %>% 
-  step_normalize(all_predictors()) %>% 
-  step_pca(all_predictors(), num_comp = tune()) %>% 
-  step_normalize(all_predictors())
+  step_YeoJohnson(all_numeric_predictors()) %>% 
+  step_normalize(all_numeric_predictors()) %>% 
+  step_pca(all_numeric_predictors(), num_comp = tune()) %>% 
+  step_normalize(all_numeric_predictors())
 
 mlp_wflow <- 
   workflow() %>% 

@@ -38,7 +38,7 @@ basic_rec <-
            Latitude + Longitude, data = ames_train) %>%
   step_log(Gr_Liv_Area, base = 10) %>% 
   step_other(Neighborhood, threshold = 0.01) %>% 
-  step_dummy(all_nominal())
+  step_dummy(all_nominal_predictors())
 
 interaction_rec <- 
   basic_rec %>% 

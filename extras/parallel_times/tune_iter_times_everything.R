@@ -16,8 +16,8 @@ folds <- vfold_cv(cells, v = 5)
 
 cell_rec <-
   recipe(class ~ ., data = cells) %>%
-  step_normalize(all_predictors()) %>%
-  step_ica(all_predictors(), num_comp = 30)
+  step_normalize(all_numeric_predictors()) %>%
+  step_ica(all_numeric_predictors(), num_comp = 30)
 
 rf_mod <-
   rand_forest(mtry = tune(), min_n = tune(), trees = 50) %>%
