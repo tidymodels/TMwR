@@ -74,7 +74,7 @@ rate ~ (temp + species)^2
 
 # Another shortcut to expand factors to include all possible
 # interactions (equivalent for this example):
-rate ~ (temp * species)^2
+rate ~ temp * species
 ```
 
 In addition to the convenience of automatically creating indicator variables, the formula offers a few other niceties: 
