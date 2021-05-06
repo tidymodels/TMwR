@@ -29,6 +29,7 @@ jobs:
           brew install pkg-config cairo
           brew install v8
           brew install libgit2
+          brew install ffmpeg
 
       - name: Install pak and query dependencies
         run: |
