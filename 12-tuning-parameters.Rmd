@@ -6,6 +6,8 @@ library(ggforce)
 library(doMC)
 registerDoMC(cores = parallel::detectCores())
 
+tidymodels_prefer()
+
 ## -----------------------------------------------------------------------------
 
 source("ames_snippets.R")
@@ -125,6 +127,9 @@ Each of these models result in linear class boundaries. Which one should be we u
 For a data frame `training_set`, let's create a function to compute the different models and extract the likelihood statistics for the training set (using `broom::glance()`): 
 
 ```{r tuning-likelihood}
+library(tidymodels)
+tidymodels_prefer()
+
 llhood <- function(...) {
   logistic_reg() %>% 
     set_engine("glm", ...) %>% 
@@ -269,7 +274,7 @@ Chapters \@ref(splitting) and \@ref(resampling) demonstrated that simply repredi
 ```{r tuning-two-class-comps, include = FALSE, cache = TRUE}
 two_class_rec <-
  recipe(Class ~ ., data = two_class_dat) %>% 
- step_normalize(all_predictors()) 
+ step_normalize(all_numeric_predictors()) 
 
 mlp_mod <- 
  mlp(hidden_units = tune(), epochs = 1000) %>% 
@@ -471,7 +476,7 @@ ames_rec <-
            Latitude + Longitude, data = ames_train)  %>%
   step_log(Gr_Liv_Area, base = 10) %>% 
   step_other(Neighborhood, threshold = tune()) %>% 
-  step_dummy(all_nominal()) %>% 
+  step_dummy(all_nominal_predictors()) %>% 
   step_interact( ~ Gr_Liv_Area:starts_with("Bldg_Type_") ) %>% 
   step_ns(Longitude, deg_free = tune("longitude df")) %>% 
   step_ns(Latitude,  deg_free = tune("latitude df"))

@@ -15,8 +15,8 @@ roc_res <- metric_set(roc_auc)
 
 svm_rec <- 
   recipe(class ~ ., data = cells) %>%
-  step_YeoJohnson(all_predictors()) %>%
-  step_normalize(all_predictors())
+  step_YeoJohnson(all_numeric_predictors()) %>%
+  step_normalize(all_numeric_predictors())
 
 svm_spec <- 
   svm_rbf(cost = tune(), rbf_sigma = tune()) %>% 

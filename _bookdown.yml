@@ -2,22 +2,32 @@ new_session: yes
 
 rmd_files: [
   "index.Rmd",
+  
   "01-software-modeling.Rmd",
   "02-tidyverse.Rmd",
   "03-base-r.Rmd",
+  
   "04-ames.Rmd",
   "05-data-spending.Rmd",
   "06-feature-engineering.Rmd",
   "07-fitting-models.Rmd",
   "08-the-model-workflow.Rmd",
   "09-judging-model-effectiveness.Rmd",
+  
   "10-resampling.Rmd",
   "11-comparing-models.Rmd",
   "12-tuning-parameters.Rmd",
   "13-grid-search.Rmd",
   "14-iterative-search.Rmd",
-  # "15-explaining-models.Rmd",
-  "16-trusting-predictions.Rmd",
+  "15-workflow-sets.Rmd",
+  
+  "16-encoding-categorical-data.Rmd",
+  "17-dimensionality-reduction.Rmd",
+  "18-explaining-models-and-predictions.Rmd",
+  "19-when-should-you-trust-predictions.Rmd",
+  "20-ensemble-models.Rmd",
+  "21-inferential-analysis.Rmd",
+  
   "pre-proc-table.Rmd",
   "references.Rmd"
 ]

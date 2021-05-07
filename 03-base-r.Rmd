@@ -43,7 +43,7 @@ To fit an ordinary linear model in R, the `lm()` function is commonly used. The 
 ```r
 rate ~ temp
 ```
-specifies that the chirp rate is the outcome (since it is on the left-hand side of the tilde `~`) and that the temperature values are the predictor^[Most model functions implicitly add an intercept column.]. Suppose the data contained the time of day in which the measurements were obtained in a column called `time`. The formula:
+specifies that the chirp rate is the outcome (since it is on the left-hand side of the tilde `~`) and that the temperature value is the predictor^[Most model functions implicitly add an intercept column.]. Suppose the data contained the time of day in which the measurements were obtained in a column called `time`. The formula:
 
 ```r
 rate ~ temp + time
@@ -74,7 +74,7 @@ rate ~ (temp + species)^2
 
 # Another shortcut to expand factors to include all possible
 # interactions (equivalent for this example):
-rate ~ (temp * species)^2
+rate ~ temp * species
 ```
 
 In addition to the convenience of automatically creating indicator variables, the formula offers a few other niceties: 
@@ -193,7 +193,7 @@ library(lattice)
 xyplot(y ~ x, data = plot_data)
 
 library(ggplot2)
-ggplot(plot_data, aes(x = y, y = y)) + geom_point()
+ggplot(plot_data, aes(x = x, y = y)) + geom_point()
 ```
 
 In these three cases, separate groups of developers devised three distinct interfaces for the same task. Each has advantages and disadvantages. 
@@ -248,7 +248,7 @@ To resolve the usage issues described here, the tidymodels packages have a set o
 
 * Functions should take the **data structures that users have** as opposed to the data structure that developers want. For example, a model function's _only_ interface should not be constrained to matrices. Frequently, users will have non-numeric predictors such as factors. 
 
-Many of these ideas are described in the tidymodels guidelines for model implementation^[`https://tidymodels.github.io/model-implementation-principles`]. In subsequent chapters, we will illustrate examples of existing issues, along with their solutions. 
+Many of these ideas are described in the tidymodels guidelines for model implementation^[https://tidymodels.github.io/model-implementation-principles]. In subsequent chapters, we will illustrate examples of existing issues, along with their solutions. 
 
 :::rmdnote
 There are a few existing R packages that provide a unified interface to harmonize these heterogeneous modeling APIs, such as `r pkg(caret)` and `r pkg(mlr)`. The tidymodels framework is similar to these in adopting a unification of the function interface, as well as enforcing consistency in the function names and return values. It is different in its opinionated design goals and modeling implementation.
@@ -318,6 +318,44 @@ model_by_species %>%
 List columns can be very powerful in modeling projects. List columns provide containers for any type of R objects, from a fitted model itself to the important data frame structure. 
 :::
 
+## The tidymodels metapackage
+
+The tidyverse (Chapter \@ref(tidyverse)) is designed as a set of modular R packages, each with a fairly narrow scope. The tidymodels framework follows a similar design. For example, the `r pkg(rsample)` package focuses on data splitting and resampling. Although resampling methods are critical to other activities of modeling (e.g., measuring performance), they reside in a single package and performance metrics are contained in a different, separate package, `r pkg(yardstick)`. There are many benefits to adopting this philosophy of modular packages, from less bloated model deployment to smoother package maintenance.
+
+```{r base-r-detach, warning = FALSE, message = FALSE, echo = FALSE}
+pkgs <- paste0("package:", c("tidymodels", tidymodels:::core))
+for (i in pkgs) {
+  try(detach(i, unload = TRUE, character.only = TRUE, force = TRUE), silent = TRUE)
+}
+```
+
+The downside to this philosophy is that there are a lot of packages in the tidymodels organization. To compensate for this, the tidymodels _package_ (which you can think of as a "metapackage" like the tidyverse package) loads a core set of tidymodels and tidyverse packages. Loading the package shows which packages are attached and if there are function naming conflicts with previously loaded packages:
+
+```{r base-r-tidymodels-package}
+library(tidymodels)
+```
+
+As an example of a naming conflict, before loading `r pkg(tidymodels)`, invoking the `filter()` function will execute the function in the `r pkg(stats)` package. After loading tidymodels, it will execute the `r pkg(dplyr)` function of the same name. 
+
+There are a few ways to handle naming conflicts. The function can be called with its namespace (e.g., `stats::filter()`). This is not bad practice but it does make the code less readable. 
+
+Another option is to use the `r pkg(conflicted)` package. We can set a rule that remains in effect until the end of the R session to ensure that one specific function will always run if no namespace is given in the code. As an example, if we prefer the `r pkg(dplyr)` version of the above function:
+
+```{r base-r-conflicted, eval = FALSE}
+library(conflicted)
+conflict_prefer("filter", winner = "dplyr")
+```
+
+For convenience, `r pkg(tidymodels)` contains a function that captures most of the common naming conflicts that we might encounter:
+
+```{r base-r-clonflicts}
+tidymodels_prefer(quiet = FALSE)
+```
+
+:::rmdwarning
+Be aware that using this function opts you in to using `conflicted::conflict_prefer()` for _all_ namespace conflicts, making every conflict an error and forcing you to choose which function to use. The function `tidymodels::tidymodels_prefer()` handles the most common conflicts from tidymodels functions, but you will need to handle other conflicts in your R session yourself. 
+:::
+
 ## Chapter summary
 
-This chapter reviewed core R language conventions for creating and using models that are an important foundation for the rest of this book. The formula operator is an expressive and important aspect of fitting models in R and often serves multiple purposes in non-tidymodels functions. Traditional R approaches to modeling have some limitations, especially when it comes to fluently handling and visualizing model output. 
+This chapter reviewed core R language conventions for creating and using models that are an important foundation for the rest of this book. The formula operator is an expressive and important aspect of fitting models in R and often serves multiple purposes in non-tidymodels functions. Traditional R approaches to modeling have some limitations, especially when it comes to fluently handling and visualizing model output. The `r pkg(tidymodels)` metapackage applies tidyverse design philosophy to modeling packages.

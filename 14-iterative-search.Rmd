@@ -7,6 +7,7 @@ library(kableExtra)
 library(av)
 library(doMC)
 registerDoMC(cores = parallel::detectCores(logical = TRUE))
+tidymodels_prefer()
 
 ## -----------------------------------------------------------------------------
 
@@ -32,7 +33,7 @@ Chapter \@ref(grid-search) demonstrated how grid search takes a pre-defined set 
 When grid search is infeasible or inefficient, iterative methods are a sensible approach for optimizing tuning parameters. 
 :::
 
-The chapter outlines two search methods. First, we discuss _Bayesian optimization_, which uses a statistical model to predict better parameter settings. After that, the chapter describes a global search method called _simulated annealing_. 
+This chapter outlines two search methods. First, we discuss _Bayesian optimization_, which uses a statistical model to predict better parameter settings. After that, the chapter describes a global search method called _simulated annealing_. 
 
 We use the same data on cell characteristics as the previous chapter for illustration, but change the model. This chapter uses a support vector machine model because it provides nice two-dimensional visualizations of the search processes. 
 
@@ -45,15 +46,18 @@ The SVM model uses a dot-product and, for this reason, it is necessary to center
 Along with the previously used objects (shown in Section \@ref(grid-summary)), the following tidymodels objects define the model process: 
 
 ```{r iterative-svm-defs, message = FALSE}
+library(tidymodels)
+tidymodels_prefer()
+
 svm_rec <- 
   recipe(class ~ ., data = cells) %>%
-  step_YeoJohnson(all_predictors()) %>%
-  step_normalize(all_predictors())
+  step_YeoJohnson(all_numeric_predictors()) %>%
+  step_normalize(all_numeric_predictors())
 
 svm_spec <- 
- svm_rbf(cost = tune(), rbf_sigma = tune()) %>% 
- set_engine("kernlab") %>% 
- set_mode("classification")
+  svm_rbf(cost = tune(), rbf_sigma = tune()) %>% 
+  set_engine("kernlab") %>% 
+  set_mode("classification")
 
 svm_wflow <- 
   workflow() %>% 
@@ -72,14 +76,14 @@ For illustration, let's slightly change the kernel parameter range, to improve t
 
 ```{r iterative-svm-param-set}
 svm_param <- 
- svm_wflow %>% 
- parameters() %>% 
+  svm_wflow %>% 
+  parameters() %>% 
   update(rbf_sigma = rbf_sigma(c(-7, -1)))
 ```
 
-Before discussing specific details about iterative search and how it works, let's understand the relationship between the two SVM tuning parameters and the area under the ROC curve for this specific data set. We constructed a very large regular grid, comprised of 2,500 candidate values, evaluated the grid using resampling. This is obviously impractical in regular data analysis and tremendously inefficient. However, it elucidates the path that the search process _should take_ and where the numerically optimal value(s) occur. 
+Before discussing specific details about iterative search and how it works, let's understand the relationship between the two SVM tuning parameters and the area under the ROC curve for this specific data set. We constructed a very large regular grid, comprised of 2,500 candidate values, and evaluated the grid using resampling. This is obviously impractical in regular data analysis and tremendously inefficient. However, it elucidates the path that the search process _should take_ and where the numerically optimal value(s) occur. 
 
-The plot below shows the results, with lighter color corresponding to higher (better) model performance. There is a large swath in the lower diagonal of the parameter space that is relatively flat with poor performance. A ridge of best performance occurs in the upper right portion of the space. The black dot indicates the best settings. The transition from the plateau of poor results to the ridge of best performance is very sharp. The is also a sharp drop in the area under the ROC curve just to the right of the ridge.
+The plot below shows the results, with lighter color corresponding to higher (better) model performance. There is a large swath in the lower diagonal of the parameter space that is relatively flat with poor performance. A ridge of best performance occurs in the upper right portion of the space. The black dot indicates the best settings. The transition from the plateau of poor results to the ridge of best performance is very sharp. There is also a sharp drop in the area under the ROC curve just to the right of the ridge.
 
 ```{r iterative-roc-surface, out.width = "80%", echo = FALSE, warning = FALSE}
 # See file extras/cells_svm_large.R
@@ -91,12 +95,12 @@ The search procedures described below require at least some resampled performanc
 ```{r iterative-svm-initial, message = FALSE}
 set.seed(234)
 start_grid <- 
- svm_param %>% 
- update(
-  cost = cost(c(-6, 1)),
-  rbf_sigma = rbf_sigma(c(-6, -4))
- ) %>% 
- grid_regular(levels = 2)
+  svm_param %>% 
+  update(
+    cost = cost(c(-6, 1)),
+    rbf_sigma = rbf_sigma(c(-6, -4))
+  ) %>% 
+  grid_regular(levels = 2)
 
 set.seed(2)
 svm_initial <- 
@@ -119,7 +123,7 @@ When using Bayesian optimization, the primary concerns are how to create the mod
 Gaussian process (GP) [@SCHULZ20181] models are well-known statistical techniques that have a history in spatial statistics (under the name of _kriging methods_). They can be derived in multiple ways, including as a Bayesian model; see @RaWi06 for an excellent reference. 
 
 Mathematically, a GP is a a collection of random variables whose joint probability distribution is  multivariate Gaussian. In the  context of our application, this collection is the collection of performance metrics for the tuning parameter candidate values. For the initial grid of four samples shown above, the realization of these four random variables were `r knitr::combine_words(round(collect_metrics(svm_initial)$mean, 4))`. These are assumed to be distributed as multivariate Gaussian. The _inputs_ that  define the independent variables/predictors for the GP model are the corresponding tuning parameter values: 
- 
+
 ```{r iterative-gp-data-table, echo = FALSE, results = "asis"}
 collect_metrics(svm_initial) %>% 
   select(ROC = mean, cost, rbf_sigma) %>% 
@@ -132,10 +136,10 @@ collect_metrics(svm_initial) %>%
 
 Gaussian process models are specified by their mean and covariance functions, although the latter has the most effect on the nature of the GP model. The covariance function is often parameterized in terms of the input values (denoted as $x$ below). As an example, a commonly used covariance function is the squared exponential^[This equation is also the same as the _radial basis function_ used in kernel methods, such as the SVM model that is currently being used. This is a coincidence; this covariance function is unrelated to the SVM tuning parameter that we are using. ] function: 
 
-$$cov(y_i, y_j) = exp\left(-\frac{1}{2}|\boldsymbol{x}_i - \boldsymbol{x}_j|^2\right) + \sigma^2_{ij}$$
+$$cov(\boldsymbol{x}_i, \boldsymbol{x}_j) = exp\left(-\frac{1}{2}|\boldsymbol{x}_i - \boldsymbol{x}_j|^2\right) + \sigma^2_{ij}$$
 where $\sigma^2_{ij}$ is a constant error variance term that is zero when $i=j$. This equation translates to: 
 
-> As the distance between two tuning parameter combinations increases, the covariance between the peformance metrics increase exponentially. 
+> As the distance between two tuning parameter combinations increases, the covariance between the performance metrics increase exponentially. 
 
 The nature of the equation also implies that the variation of the outcome metric is minimized at the points that have already been observed (i.e., when $|\boldsymbol{x}_i - \boldsymbol{x}_j|^2$ is zero). 
 
@@ -290,7 +294,7 @@ When only considering the mean $R^2$ prediction, a parameter value of 0.10 is th
 
 ```{r iterative-gp-data-table-2, echo = FALSE, results = "asis"}
 small_pred %>% 
-  select(`Paraemter Value` = x, Mean = .mean, `Std Dev` = .sd, `Expected Improvment` = exp_imp) %>% 
+  select(`Parameter Value` = x, Mean = .mean, `Std Dev` = .sd, `Expected Improvment` = exp_imp) %>% 
   as.data.frame() %>% 
   format(digits = 4, scientific = FALSE) %>% 
   kable() %>% 
@@ -391,15 +395,15 @@ ctrl <- control_bayes(verbose = TRUE)
 
 set.seed(1234)
 svm_bo <-
- svm_wflow %>%
- tune_bayes(
-  resamples = cell_folds,
-  metrics = roc_res,
-  initial = svm_initial,
-  param_info = svm_param,
-  iter = 25,
-  control = ctrl
- )
+  svm_wflow %>%
+  tune_bayes(
+    resamples = cell_folds,
+    metrics = roc_res,
+    initial = svm_initial,
+    param_info = svm_param,
+    iter = 25,
+    control = ctrl
+  )
 ```
 
 
@@ -422,7 +426,7 @@ iter_1_imp <- iter_1_roc > best_init
 iter_1_text <- 
   paste0(
     ifelse(iter_1_imp, "showed an improvement, resulting in an ROC value of ",
-                        "failed to improve the outcome with an ROC value of "),
+           "failed to improve the outcome with an ROC value of "),
     round(iter_1_roc, 5), "."
   )
 
@@ -435,10 +439,10 @@ iter_2_text <-
     !iter_1_imp &   iter_2_imp ~ 
       paste0("the second iteration did yield a better result with an area under the ROC curve of ", 
              round(iter_2_roc, 5), "."),
-     iter_1_imp &  !iter_2_imp ~ 
-      paste0("the second iteration did not continue the trend with a sub-optimal ROC value of ",
+    iter_1_imp &  !iter_2_imp ~ 
+      paste0("the second iteration did not continue the trend with a suboptimal ROC value of ",
              round(iter_2_roc, 5), "."),
-      iter_1_imp &  !iter_2_imp ~ 
+    iter_1_imp &  !iter_2_imp ~ 
       paste0("the second iteration further increased the outcome value (ROC = ",
              round(iter_2_roc, 5), ").") 
   )
@@ -467,7 +471,7 @@ if (last_iter < 25) {
       "` more steps. The last step was:"
     )
 } else {
-    last_bo_text <- "The last step was:"
+  last_bo_text <- "The last step was:"
 }
 ```
 
@@ -501,7 +505,7 @@ if (length(so_start_index) > 0) {
 }
 ```
 
-The functions that are used to interrogate the results are the same as those used for grid search (e.g. `collect_metrics()`, etc.). For example: 
+The functions that are used to interrogate the results are the same as those used for grid search (e.g., `collect_metrics()`, etc.). For example: 
 
 ```{r iterative-bo-best}
 show_best(svm_bo)
@@ -537,7 +541,7 @@ av_capture_graphics(
 ```
 
 <video width="720" height="720" controls>
-  <source src="bo_search.mp4" type="video/mp4">
+<source src="bo_search.mp4" type="video/mp4">
 </video>
 
 
@@ -608,9 +612,9 @@ In our implementation, the neighborhood is determined by scaling the current can
 
 To illustrate, we'll use the two main `r pkg(glmnet)` tuning parameters: 
 
- * The amount of total regularization (`penalty`). The default range for this parameter is $10^{`r penalty()$range[[1]]`}$ to $10^{`r penalty()$range[[2]]`}$. It is typical to use a log (base 10) transformation for this parameter.  
+* The amount of total regularization (`penalty`). The default range for this parameter is $10^{`r penalty()$range[[1]]`}$ to $10^{`r penalty()$range[[2]]`}$. It is typical to use a log (base 10) transformation for this parameter.  
 
- * The proportion of the lasso penalty (`mixture`). This is bounded at zero and one with no transformation.
+* The proportion of the lasso penalty (`mixture`). This is bounded at zero and one with no transformation.
 
 ```{r iterative-neighborhood-calcs, echo = FALSE}
 glmn_param <- parameters(penalty(), mixture())
@@ -683,15 +687,15 @@ For non-numeric parameters, we assign a probability for how often the parameter 
 
 The syntax for this function is nearly identical to `tune_bayes()`. There are no options for acquisition functions or uncertainty sampling. The `control_sim_anneal()` function has some details that define the local neighborhood and the cooling schedule:
 
-* `no_improve`, for simulated annealing, is an integer that will stop the search if no global best or improved results are not discovered within `no_improve` iterations. Accepted sub-optimal or discarded parameters count as "no improvement".
+* `no_improve`, for simulated annealing, is an integer that will stop the search if no global best or improved results are discovered within `no_improve` iterations. Accepted suboptimal or discarded parameters count as "no improvement".
 
 * `restart` is the number of iterations with no new best results before starting from the previous best results. 
 
-* `radius` is a numeric vector on (0, 1) that defines the minimum and maximum radius that defines the local neighborhood for numeric (non-integer) values. 
+* `radius` is a numeric vector on (0, 1) that defines the minimum and maximum radius of the local neighborhood around the initial point. 
 
 * `flip` is a probability value that defines the chances of altering the value of categorical or integer parameters. 
 
-* `cooling_coef` is the $c$ coefficient in $\exp(c\times D_i \times i)$ that modulates how quickly the acceptance probability decreases over iterations. Larger values of `cooling_coef` decrease the probability of accepting a sub-optimal parameter setting.
+* `cooling_coef` is the $c$ coefficient in $\exp(c\times D_i \times i)$ that modulates how quickly the acceptance probability decreases over iterations. Larger values of `cooling_coef` decrease the probability of accepting a suboptimal parameter setting.
 
 For the cell segmentation data, the syntax is very consistent with the previously used functions: 
 
@@ -844,7 +848,7 @@ To show how the parameters change over iterations:
 autoplot(svm_sa, type = "parameters")
 ```
 
-A visualization of the search path helps understand where the search process did well and and where it went astray:  
+A visualization of the search path helps to understand where the search process did well and where it went astray:  
 
 ```{r iterative-sa-plot, include = FALSE}
 av_capture_graphics(

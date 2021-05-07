@@ -1,0 +1,6 @@
+```{r explain-setup, include = FALSE}
+library(tidymodels)
+tidymodels_prefer()
+```
+
+# Explaining models and predictions {#explain}

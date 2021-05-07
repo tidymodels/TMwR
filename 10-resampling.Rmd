@@ -4,7 +4,7 @@ library(tidymodels)
 library(doMC)
 library(kableExtra)
 library(tidyr)
-
+tidymodels_prefer()
 registerDoMC(cores = parallel::detectCores())
 
 source("ames_snippets.R")
@@ -33,7 +33,7 @@ For a comparison to this linear model, we can also fit a different type of model
 
 Random forest models are very powerful and they can emulate the underlying data patterns very closely. While this model can be computationally intensive, it is very low-maintenance; very little preprocessing is required (as documented in Appendix \@ref(pre-proc-table)).
 
-Using the same predictor set as the linear model (without the extra preprocessing steps), we can fit a random forest model to the training set using via the `r pkg(ranger)` package. This model requires no preprocessing so a simple formula can be used:
+Using the same predictor set as the linear model (without the extra preprocessing steps), we can fit a random forest model to the training set via the `r pkg(ranger)` package. This model requires no preprocessing so a simple formula can be used:
 
 ```{r resampling-rand-forest-spec}
 rf_model <- 
@@ -363,7 +363,7 @@ The control arguments include:
 For our example, let's save the predictions in order to visualize the model fit and residuals: 
 
 ```{r resampling-cv-ames}
-keep_pred <- control_resamples(save_pred = TRUE)
+keep_pred <- control_resamples(save_pred = TRUE, save_workflow = TRUE)
 
 set.seed(130)
 rf_res <- 
@@ -455,7 +455,7 @@ collect_metrics(val_res)
 These results are also much closer to the test set results than the resubstitution estimates of performance. 
 
 :::rmdnote
-In these analyses, the resampling results are very close to the test set results. The two types of estimates tend to be well correlated. However, this could be from random chance. A seed value of `1352` fixed the random numbers before creating the resamples. Try changing this value and re-running the analyses to investigate whether the resampled estimates match the test set results as well.
+In these analyses, the resampling results are very close to the test set results. The two types of estimates tend to be well correlated. However, this could be from random chance. A seed value of `55` fixed the random numbers before creating the resamples. Try changing this value and re-running the analyses to investigate whether the resampled estimates match the test set results as well.
 :::
 
 ## Parallel processing {#parallel}
@@ -532,7 +532,7 @@ ames_rec <-
   recipe(Sale_Price ~ Neighborhood + Gr_Liv_Area + Year_Built + Bldg_Type + 
            Latitude + Longitude, data = ames_train) %>%
   step_other(Neighborhood, threshold = 0.01) %>% 
-  step_dummy(all_nominal()) %>% 
+  step_dummy(all_nominal_predictors()) %>% 
   step_interact( ~ Gr_Liv_Area:starts_with("Bldg_Type_") ) %>% 
   step_ns(Latitude, Longitude, deg_free = 20)
 
@@ -602,7 +602,7 @@ data(ames)
 ames <- mutate(ames, Sale_Price = log10(Sale_Price))
 
 set.seed(123)
-ames_split <- initial_split(ames, prob = 0.80, strata = Sale_Price)
+ames_split <- initial_split(ames, prop = 0.80, strata = Sale_Price)
 ames_train <- training(ames_split)
 ames_test  <-  testing(ames_split)
 
@@ -611,7 +611,7 @@ ames_rec <-
            Latitude + Longitude, data = ames_train) %>%
   step_log(Gr_Liv_Area, base = 10) %>% 
   step_other(Neighborhood, threshold = 0.01) %>% 
-  step_dummy(all_nominal()) %>% 
+  step_dummy(all_nominal_predictors()) %>% 
   step_interact( ~ Gr_Liv_Area:starts_with("Bldg_Type_") ) %>% 
   step_ns(Latitude, Longitude, deg_free = 20)
 
@@ -639,7 +639,7 @@ rf_wflow <-
 set.seed(55)
 ames_folds <- vfold_cv(ames_train, v = 10)
 
-keep_pred <- control_resamples(save_pred = TRUE)
+keep_pred <- control_resamples(save_pred = TRUE, save_workflow = TRUE)
 
 set.seed(130)
 rf_res <- rf_wflow %>% fit_resamples(resamples = ames_folds, control = keep_pred)

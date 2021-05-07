@@ -2,6 +2,7 @@
 knitr::opts_chunk$set(fig.path = "figures/")
 library(tidymodels)
 data(ames)
+tidymodels_prefer()
 ```
 
 # (PART\*) Basics {-} 
@@ -45,6 +46,9 @@ dim(ames)
 It makes sense to start with the outcome we want to predict: the last sale price of the house (in USD): 
 
 ```{r ames-sale_price, out.width = '100%', fig.width=8, fig.height=3}
+library(tidymodels)
+tidymodels_prefer()
+
 ggplot(ames, aes(x = Sale_Price)) + 
   geom_histogram(bins = 50)
 ```

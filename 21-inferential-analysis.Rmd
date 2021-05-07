@@ -1,0 +1,6 @@
+```{r inferential-setup, include = FALSE}
+library(tidymodels)
+tidymodels_prefer()
+```
+
+# Inferential analysis {#inferential}
