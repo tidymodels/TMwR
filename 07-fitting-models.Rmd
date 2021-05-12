@@ -83,11 +83,11 @@ Once the details of the model have been specified, the model estimation can be d
 The `translate()` function can provide details on how `r pkg(parsnip)` converts the user's code to the package's syntax: 
 
 ```{r models-lin-reg-trans}
-linear_reg() %>% set_engine("lm") %>% translate()
+linear_reg(penalty = 1) %>% set_engine("lm") %>% translate()
 
-linear_reg() %>% set_engine("glmnet") %>% translate()
+linear_reg(penalty = 1) %>% set_engine("glmnet") %>% translate()
 
-linear_reg() %>% set_engine("stan") %>% translate()
+linear_reg(penalty = 1) %>% set_engine("stan") %>% translate()
 ```
 
 Note that `missing_arg()` is just a placeholder for the data that has yet to be provided. 
