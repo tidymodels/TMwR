@@ -75,4 +75,5 @@ Imports:
   xgboost,
   yardstick
 Remotes:
-  tidymodels/finetune
+  tidymodels/finetune,
+  tidymodels/stacks
