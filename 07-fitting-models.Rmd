@@ -85,7 +85,7 @@ The `translate()` function can provide details on how `r pkg(parsnip)` converts 
 ```{r models-lin-reg-trans}
 linear_reg() %>% set_engine("lm") %>% translate()
 
-linear_reg() %>% set_engine("glmnet") %>% translate()
+linear_reg(penalty = 1) %>% set_engine("glmnet") %>% translate()
 
 linear_reg() %>% set_engine("stan") %>% translate()
 ```
@@ -93,7 +93,7 @@ linear_reg() %>% set_engine("stan") %>% translate()
 Note that `missing_arg()` is just a placeholder for the data that has yet to be provided. 
 
 :::rmdnote
-Note that, for the Stan and glmnet engines, the `family` argument was automatically added as a default. As will be shown below, this option can be changed.  
+Note that we supplied a required `penalty` argument for the glmnet engine. Also, for the Stan and glmnet engines, the `family` argument was automatically added as a default. As will be shown below, this option can be changed.  
 :::
 
 Let's walk through how to predict the sale price of houses in the Ames data as a function of only longitude and latitude. This code builds on the current analysis shown in Section \@ref(recipes-summary):
