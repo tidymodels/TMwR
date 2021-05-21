@@ -44,7 +44,7 @@ In this section, we will focus on a small subset of the predictors available in 
 
  * The neighborhood (qualitative, with `r length(levels(ames_train$Neighborhood))` neighborhoods in the training set)
 
- * The general living area (continuous, named `Gr_Liv_Area`)
+ * The gross above-grade living area (continuous, named `Gr_Liv_Area`)
 
  * The year built (`Year_Built`)
 
@@ -58,9 +58,9 @@ lm(Sale_Price ~ Neighborhood + log10(Gr_Liv_Area) + Year_Built + Bldg_Type, data
 
 When this function is executed, the data are converted from a data frame to a numeric _design matrix_ (also called a _model matrix_) and then the least squares method is used to estimate parameters. In Section \@ref(formula) we listed the multiple purposes of the R model formula; let's focus only on the data manipulation aspects for now. What the formula above does can be decomposed into a series of _steps_:
 
-1. Sale price is defined as the outcome while neighborhood, general living area, the year built, and building type variables are all defined as predictors. 
+1. Sale price is defined as the outcome while neighborhood, gross living area, the year built, and building type variables are all defined as predictors. 
 
-1. A log transformation is applied to the general living area predictor. 
+1. A log transformation is applied to the gross living area predictor. 
 
 1. The neighborhood and building type columns are converted from a non-numeric format to a numeric format (since least squares requires numeric predictors). 
 
@@ -239,7 +239,7 @@ Different recipe steps can have different effects on columns of the data. For ex
 
 Interaction effects involve two or more predictors. Such an effect occurs when one predictor has an effect on the outcome that is contingent on one or more other predictors. For example, if you were trying to predict your morning commute time, two potential predictors could be the amount of traffic and the time of day. However, the relationship between commute time and the amount of traffic is different for different times of day. In this case, you could add an interaction term between the two predictors to the model along with the original two predictors (which are called the "main effects"). Numerically, an interaction term between predictors is encoded as their product. Interactions are only defined in terms of their effect on the outcome and can be combinations of different types of data (e.g., numeric, categorical, etc). [Chapter 7](https://bookdown.org/max/FES/detecting-interaction-effects.html) of @fes discusses interactions and how to detect them in greater detail. 
 
-After exploring the Ames training set, we might find that the regression slopes for the general living area differ for different building types: 
+After exploring the Ames training set, we might find that the regression slopes for the gross living area differ for different building types: 
 
 ```{r engineering-ames-feature-plots}
 ggplot(ames_train, aes(x = Gr_Liv_Area, y = 10^Sale_Price)) + 
@@ -248,7 +248,7 @@ ggplot(ames_train, aes(x = Gr_Liv_Area, y = 10^Sale_Price)) +
   geom_smooth(method = lm, formula = y ~ x, se = FALSE, col = "red") + 
   scale_x_log10() + 
   scale_y_log10() + 
-  labs(x = "General Living Area", y = "Sale Price (USD)")
+  labs(x = "Gross Living Area", y = "Sale Price (USD)")
 ```
 
 How are interactions specified in a recipe? A base R formula would take an interaction using a `:`, so we would use:
@@ -292,7 +292,7 @@ As with naming dummy variables, `r pkg(recipes)` provides more coherent names fo
 
 
 :::rmdnote
-_Order matters_.  The general living area is log transformed prior to the interaction term. Subsequent interactions with this variable will also use the log scale. 
+_Order matters_.  The gross living area is log transformed prior to the interaction term. Subsequent interactions with this variable will also use the log scale. 
 :::
 
 ## Skipping steps for new data {#skip-equals-true}
@@ -387,7 +387,7 @@ The user would need to determine if both neighborhood and latitude should be in 
 
 Another common method for representing multiple features at once is called _feature extraction_. Most of these techniques create new features from the predictors that capture the information in the broader set as a whole. For example, principal component analysis (PCA) tries to extract as much of the original information in the predictor set as possible using a smaller number of features. PCA is a linear extraction method, meaning that each new feature is a linear combination of the original predictors. One nice aspect of PCA is that each of the new features, called the principal components or PCA scores, are uncorrelated with one another. Because of this, PCA can be very effective at reducing the correlation between predictors. Note that PCA is only aware of the _predictors_; the new PCA features might not be associated with the outcome. 
 
-In the Ames data, there are several predictors that measure size of the property, such as the total basement size (`Total_Bsmt_SF`), size of the first floor (`First_Flr_SF`), the general living area (`Gr_Liv_Area`), and so on. PCA might be an option to represent these potentially redundant variables as a smaller feature set. Apart from the general living area, these predictors have the suffix `SF` in their names (for square feet) so a recipe step for PCA might look like:
+In the Ames data, there are several predictors that measure size of the property, such as the total basement size (`Total_Bsmt_SF`), size of the first floor (`First_Flr_SF`), the gross living area (`Gr_Liv_Area`), and so on. PCA might be an option to represent these potentially redundant variables as a smaller feature set. Apart from the gross living area, these predictors have the suffix `SF` in their names (for square feet) so a recipe step for PCA might look like:
 
 ```r
   # Use a regular expression to capture house size predictors: 
