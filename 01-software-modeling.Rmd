@@ -167,7 +167,7 @@ These are imperfect definitions and do not account for all possible types of mod
 
 In terms of data, the two main species are quantitative and qualitative. Examples of quantitative data are real numbers like `3.14159` and integers like `42`. Qualitative values, also known as categorical data, are those that represent some sort of discrete state that cannot be naturally placed on a numeric scale, like ordered/ordinal categories (e.g., "small", "medium", and "large") and unordered/nominal categories (e.g., "math", "science", and "history"). 
 
-Different variables can have different _roles_ in an analysis. Outcomes (otherwise known as the labels, endpoints, or dependent variables) are the value being predicted in supervised models. The independent variables, which are the substrate for making predictions of the outcome, are also referred to as predictors, features, or covariates (depending on the context). The terms _outcomes_ and _predictors_ are used most frequently in this book. 
+Different variables can have different _roles_ in an analysis. Outcomes (otherwise known as the labels, endpoints, or dependent variables) are the value being predicted in supervised models. Predictors (otherwise known as features, covariates, or independent variables) are the substrate for making predictions of the outcome. The terms _outcomes_ and _predictors_ are used most frequently in this book. 
 
 ## How does modeling fit into the data analysis process? {#model-phases}
 
