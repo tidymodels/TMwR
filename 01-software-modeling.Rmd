@@ -159,13 +159,11 @@ First, many models can be categorized as being _supervised_ or _unsupervised_. U
 
 Within supervised models, there are two main sub-categories: 
 
- * **Regression** predicts a numeric outcome.
+ * **Regression** predicts quantitative variables, such as real numbers like `3.14159` and integers like `42`.
 
- * **Classification** predicts an outcome that is an ordered or unordered set of qualitative values.  
+ * **Classification** predicts qualitative variables, such as ordered category sets like "small", "medium", or "large" and unordered category sets like "math", "science", or "history".
 
 These are imperfect definitions and do not account for all possible types of models. In Chapter \@ref(models), we refer to this characteristic of supervised techniques as the _model mode_. 
-
-In terms of data, the two main species are quantitative and qualitative. Examples of quantitative data are real numbers like `3.14159` and integers like `42`. Qualitative values, also known as categorical data, are those that represent some sort of discrete state that cannot be naturally placed on a numeric scale, like ordered/ordinal categories (e.g., "small", "medium", and "large") and unordered/nominal categories (e.g., "math", "science", and "history"). 
 
 Different variables can have different _roles_ in an analysis. Outcomes (otherwise known as the labels, endpoints, or dependent variables) are the value being predicted in supervised models. Predictors (otherwise known as features, covariates, or independent variables) are the substrate for making predictions of the outcome. The terms _outcomes_ and _predictors_ are used most frequently in this book. 
 
