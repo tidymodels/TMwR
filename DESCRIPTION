@@ -45,6 +45,7 @@ Imports:
   kernlab,
   kknn,
   knitr,
+  lime,
   lme4,
   lubridate,
   modeldata,
