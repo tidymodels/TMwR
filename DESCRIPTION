@@ -30,6 +30,7 @@ Imports:
   broom,
   corrr,
   Cubist,
+  DALEXtra,
   dials (>= 0.0.9),
   digest,
   doMC,
