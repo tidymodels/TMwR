@@ -224,7 +224,7 @@ full_vip %>%
   geom_boxplot(alpha = 0.2) +
   facet_wrap(~label, ncol = 1) +
   theme(legend.position = "none") +
-  labs(x = "RMSE loss after permutations", y = NULL, fill = NULL, color = NULL)
+  labs(x = "RMSE after permutations (higher indicates more important)", y = NULL, fill = NULL, color = NULL)
 ```
 
 The dashed line in each panel shows the RMSE for the full model, either the linear model or the random forest model. Features further to the right are more important, because permuting them results in higher RMSE. There is quite a lot of interesting information to learn from this plot; for example, neighborhood is quite important in the linear model with interactions/splines but the second least important feature for the random forest model.
@@ -257,10 +257,10 @@ as_tibble(pdp_age$agr_profiles) %>%
 ```
 
 
-Partial dependence profiles can be computed for any other feature in the model, and also for groups in the data, such as `Bldg_Type`.
+Partial dependence profiles can be computed for any other feature in the model, and also for groups in the data, such as `Bldg_Type`. Let's use `1e3` observations for these profiles.
 
 ```{r}
-pdp_liv <- model_profile(explainer_rf, N = 500, 
+pdp_liv <- model_profile(explainer_rf, N = 1e3, 
                          variables = "Gr_Liv_Area", 
                          groups = "Bldg_Type")
 ```
@@ -271,7 +271,7 @@ as_tibble(pdp_liv$agr_profiles) %>%
   ggplot(aes(`_x_`, `_yhat_`, color = `_label_`)) +
   geom_line(data = as_tibble(pdp_liv$cp_profiles),
             aes(x = Gr_Liv_Area, group = `_ids_`),
-            size = 0.5, alpha = 0.1, color = "gray50") +
+            size = 0.5, alpha = 0.05, color = "gray50") +
   geom_line(size = 1.2, alpha = 0.8) +
   scale_x_log10() +
   scale_color_brewer(palette = "Dark2") +
@@ -279,6 +279,25 @@ as_tibble(pdp_liv$agr_profiles) %>%
        y = "Sale Price (log)", 
        color = NULL)
 ```
+
+We have the option of using `plot(pdp_liv)`, but since we are making plots with the underlying data here, we can even facet by one of the features to visualize how the predictions change differently, highlighting the model's behavior for subgroups.
+
+```{r echo=FALSE}
+as_tibble(pdp_liv$agr_profiles) %>%
+  mutate(Bldg_Type = stringr::str_remove(`_label_`, "random forest_")) %>%
+  ggplot(aes(`_x_`, `_yhat_`, color = Bldg_Type)) +
+  geom_line(data = as_tibble(pdp_liv$cp_profiles),
+            aes(x = Gr_Liv_Area, group = `_ids_`),
+            size = 0.5, alpha = 0.1, color = "gray50") +
+  geom_line(size = 1.2, alpha = 0.8, show.legend = FALSE) +
+  scale_x_log10() +
+  facet_wrap(~Bldg_Type) +
+  scale_color_brewer(palette = "Dark2") +
+  labs(x = "Gross living area", 
+       y = "Sale Price (log)", 
+       color = NULL)
+```
+
 
 There is not one right approach for building model explanations and the options outlined in this chapter are not exhaustive. We point you to @Biecek2021 and @Molnar2021 for further reading, but highlight in this chapter good options for explanations at both the individual and global level, and how to bridge from one to the other.
 
