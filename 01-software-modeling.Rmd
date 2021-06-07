@@ -241,7 +241,7 @@ monolog <-
     "Model Evaluation", "2",
     "Variable importance scores indicate that the weather information is not predictive. We’ll drop them from the next set of models. ",
     "Model Evaluation", " ",
-    "It seems like we should focus on a lot boosting iterations for that model.",
+    "It seems like we should focus on a lot of boosting iterations for that model.",
     "Feature Engineering", "2", 
     "We need to encode holiday features to improve predictions on (and around) those dates.",
     "Model Evaluation", "2",
