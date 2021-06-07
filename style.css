@@ -15,3 +15,10 @@
   background-image: url("images/warning.png");
 }
 
+.book.color-theme-2 .rmdnote {
+  color: #b7c3d4;
+}
+
+.book.color-theme-2 .rmdwarning {
+  color: #bcb7cc;
+}
