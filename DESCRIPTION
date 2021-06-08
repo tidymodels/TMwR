@@ -81,5 +81,5 @@ Imports:
   yardstick
 Remotes:
   tidymodels/finetune,
-  tidymodels/embed,
+  tidymodels/embed@umap-parameters,
   tidymodels/learntidymodels
