@@ -1,6 +1,6 @@
 Package: TMwR
 Title: Tidy Modeling with R.
-Version: 0.0.1.9009
+Version: 0.0.1.9010
 Authors@R: c(
     person(
       given = "Max",
@@ -26,8 +26,10 @@ Imports:
   applicable,
   av,
   baguette,
+  bestNormalize,
   bookdown,
   broom,
+  corrplot,
   corrr,
   Cubist,
   dials (>= 0.0.9),
@@ -35,6 +37,7 @@ Imports:
   doMC,
   dplyr,
   earth,
+  embed (>= 0.1.4.9000),
   finetune (>= 0.0.1),
   glmnet,
   ggforce,
@@ -46,6 +49,7 @@ Imports:
   knitr,
   lme4,
   lubridate,
+  mixOmics,
   modeldata,
   nlme,
   nnet,
@@ -70,9 +74,12 @@ Imports:
   tidyverse,
   themis,
   tune (>= 0.1.3),
+  uwot,
   workflows (>= 0.2.2),
   workflowsets (>= 0.0.1),
   xgboost,
   yardstick
 Remotes:
-  tidymodels/finetune
+  tidymodels/finetune,
+  tidymodels/embed,
+  tidymodels/learntidymodels
