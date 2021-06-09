@@ -47,6 +47,7 @@ Imports:
   kernlab,
   kknn,
   knitr,
+  learntidymodels,
   lme4,
   lubridate,
   mixOmics,
