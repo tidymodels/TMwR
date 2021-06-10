@@ -53,7 +53,7 @@ For example, there are numerous methods to quantify aspects of shapes of objects
 As an example, here are different shapes and their corresponding eccentricity:
 
 ```{r dimensionality-eccentricity, echo = FALSE, out.width="95%"}
-knitr::include_graphics("figures/morphology.svg")
+knitr::include_graphics("premade/morphology.svg")
 ```
 
 Note that shapes such as circles and squares have low eccentricity while oblong shapes have high values. Also, the metric is unaffected by the rotation of the object. 
