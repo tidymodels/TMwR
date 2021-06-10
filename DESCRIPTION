@@ -33,6 +33,7 @@ Imports:
   corrr,
   Cubist,
   dials (>= 0.0.9),
+  discrim,
   digest,
   doMC,
   dplyr,
@@ -45,6 +46,7 @@ Imports:
   gridExtra,
   kableExtra (>= 1.2.1),
   kernlab,
+  klaR,
   kknn,
   knitr,
   learntidymodels,
@@ -80,6 +82,7 @@ Imports:
   workflowsets (>= 0.0.1),
   xgboost,
   yardstick
+biocViews: mixOmics
 Remotes:
   tidymodels/finetune,
   tidymodels/embed@umap-parameters,
