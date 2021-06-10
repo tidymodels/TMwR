@@ -87,5 +87,5 @@ Imports:
 biocViews: mixOmics
 Remotes:
   tidymodels/finetune,
-  tidymodels/embed@umap-parameters,
+  tidymodels/embed,
   tidymodels/learntidymodels
