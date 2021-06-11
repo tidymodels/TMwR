@@ -306,3 +306,50 @@ bean_res <-
     metrics = metric_set(roc_auc)
   )
 ```
+
+The models are ranked by their validation set estimates of the area under the ROC curve: 
+
+```{r dimensionality-rankings}
+rankings <- 
+  rank_results(bean_res, select_best = TRUE) %>% 
+  mutate(method = map_chr(wflow_id, ~ str_split(.x, "_", simplify = TRUE)[1])) 
+
+tidymodels_prefer()
+filter(rankings, rank <= 5) %>% dplyr::select(rank, mean, model, method)
+
+rankings %>% 
+  ggplot(aes(x = rank, y = mean, pch = method, col = model)) + 
+  geom_point(cex = 3) + 
+  theme(legend.position = "right") +
+  labs(y = "ROC AUC")
+```
+
+It is clear from these results that most models give very good performance; there are few bad choices here. For demonstration, the RDA model with PLS features is used as the final model. We'll finalize the workflow with the numerically best parameters, fit it to the training set, then evaluate the test set:
+
+```{r dimensionality-final}
+rda_res <- 
+  bean_res %>% 
+  pull_workflow("pls_rda") %>% 
+  finalize_workflow(
+    bean_res %>% 
+      pull_workflow_set_result("pls_rda") %>% 
+      select_best(metric = "roc_auc")
+  ) %>% 
+  last_fit(split = bean_split, metrics = metric_set(roc_auc))
+
+rda_wflow_fit <- rda_res$.workflow[[1]]
+```
+
+```{r dimensionality-test}
+collect_metrics(rda_res)
+```
+
+Pretty good! We'll use this model in the next chapter to demonstrate variable importance methods. 
+
+```{r dimensionality-save, include = FALSE}
+save(rda_wflow_fit, bean_train, file = "RData/rda_fit.RData", version = 2, compress = "xz")
+```
+
+## Chapter summary {#dimensionality-summary}
+
+Dimensionality reduction can be a helpful tool for exploratory data analysis as well as modeling. The `r pkg(recipes)` and `r pkg(embed)` packages contain steps for a variety of different methods and `r pkg(workflowsets)` facilitates choosing an appropriate method for a data set. 

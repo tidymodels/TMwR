@@ -54,6 +54,7 @@ Imports:
   learntidymodels,
   lme4,
   lubridate,
+  mda,
   mixOmics,
   modeldata,
   nlme,
