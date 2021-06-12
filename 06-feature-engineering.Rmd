@@ -88,7 +88,7 @@ Let's break this down:
 
 1. `step_dummy()` is used to specify which variables should be converted from a qualitative format to a quantitative format, in this case, using dummy or indicator variables. An indicator or dummy variable is a binary numeric variable (a column of ones and zeroes) that encodes qualitative information; we will dig deeper into these kinds of variables in Section \@ref(dummies). 
 
-The function `all_nominal_predictors()` captures the names of any predictor columns that are currently factor or character (i.e., nominal) in nature. This is a `r pkg(dplyr)` selector function similar to `starts_with()` or `matches()` but can only be used inside of a recipe. 
+The function `all_nominal_predictors()` captures the names of any predictor columns that are currently factor or character (i.e., nominal) in nature. This is a `r pkg(dplyr)`-like selector function similar to `starts_with()` or `matches()` but can only be used inside of a recipe. 
 
 :::rmdnote
 Other selectors specific to the `r pkg(recipes)` package are: `all_numeric_predictors()`, `all_numeric()`, `all_predictors()`, and `all_outcomes()`. As with `r pkg(dplyr)`, one or more unquoted expressions, separated by commas, can be used to select which columns are affected by each step.

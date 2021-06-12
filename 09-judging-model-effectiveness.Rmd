@@ -157,7 +157,7 @@ Let's compute the root mean squared error for this model using the `rmse()` func
 rmse(ames_test_res, truth = Sale_Price, estimate = .pred)
 ```
 
-The output above shows the standard format of the output of `r pkg(yardstick)` functions. Metrics for numeric outcomes usually have a value of "standard" for the `.estimator` column. Examples with different values for this column are shown below.
+The output above shows the standard format of the output of `r pkg(yardstick)` functions. Metrics for numeric outcomes usually have a value of "standard" for the `.estimator` column. Examples with different values for this column are shown in the next sections.
 
 To compute multiple metrics at once, we can create a _metric set_. Let's add $R^2$ and the mean absolute error: 
 
@@ -250,7 +250,7 @@ accuracy(hpc_cv, obs, pred)
 mcc(hpc_cv, obs, pred)
 ```
 
-Note that, in these results, a "multiclass" `.estimator` is listed. Like "binary", this indicates that the formulas for outcomes with three or more class levels was used. The  Matthews correlation coefficient was originally designed for two classes but has been extended to cases with more class levels. 
+Note that, in these results, a "multiclass" `.estimator` is listed. Like "binary", this indicates that the formula for outcomes with three or more class levels was used. The Matthews correlation coefficient was originally designed for two classes but has been extended to cases with more class levels. 
 
 There are methods for using metrics that are specific to outcomes with two classes for data sets with more than two classes. For example, a metric such as sensitivity measures the true positive rate which, by definition, is specific to two classes (i.e., "event" and "non-event"). How can this metric be used in our example data? 
 

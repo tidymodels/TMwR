@@ -269,7 +269,7 @@ Notice how, in the call printed above, the model-specific formula was used.
 
 ## Creating multiple workflows at once {#workflow-sets-intro}
 
-There are some situations where the data requires numerous attempts to find an appropriate model. For example: 
+There are some situations where the data require numerous attempts to find an appropriate model. For example: 
 
 * For predictive models, it is advisable to evaluate  a variety of different model types. This requires the user to create multiple model specifications. 
 
@@ -315,7 +315,7 @@ There's a lot more to workflow sets. Their nuances and advantages won't be illus
 
 ## Future plans
 
-The two types of components in a workflow are preprocessors and a models. There are also operations that might occur _after_ the model is fit. An example of such a _post-processor_ would be cutoff selection for two-class problems. Previously in this chapter, we discussed the idea of modifying the cutoff for a two-class problem. In the future, workflows will be able to attach a custom cutoff that is applied to probabilities after the model fit. Other approaches, such as probability calibration, could also be added as post-processors. 
+The two types of components in a workflow are preprocessors and models. There are also operations that might occur _after_ the model is fit. An example of such a _post-processor_ would be cutoff selection for two-class problems. Previously in this chapter, we discussed the idea of modifying the cutoff for a two-class problem. In the future, workflows will be able to attach a custom cutoff that is applied to probabilities after the model fit. Other approaches, such as probability calibration, could also be added as post-processors. 
   
 
 ## Chapter summary {#workflows-summary}
