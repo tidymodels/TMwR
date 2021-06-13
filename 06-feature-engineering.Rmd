@@ -254,7 +254,8 @@ ggplot(ames_train, aes(x = Gr_Liv_Area, y = 10^Sale_Price)) +
 How are interactions specified in a recipe? A base R formula would take an interaction using a `:`, so we would use:
 
 ```r
-Sale_Price ~ Neighborhood + log10(Gr_Liv_Area) + Bldg_Type + log10(Gr_Liv_Area):Bldg_Type
+Sale_Price ~ Neighborhood + log10(Gr_Liv_Area) + Bldg_Type + 
+  log10(Gr_Liv_Area):Bldg_Type
 # or
 Sale_Price ~ Neighborhood + log10(Gr_Liv_Area) * Bldg_Type 
 ```
