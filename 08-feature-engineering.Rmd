@@ -132,14 +132,13 @@ lm_wflow <-
 lm_wflow
 ```
 
-***TODO*** fit does estimation for the recipe and model
+Let's estimate both the recipe and model using a simple call to `fit()`: 
 
 ```{r workflows-recipe-fit}
 lm_fit <- fit(lm_wflow, ames_train)
 ```
 
-***TODO*** what predict does
-
+The `predict()` method applies the same preprocessing that was used on the training set to the new data before passing them along to the model's `predict()` method: 
 
 ```{r workflows-recipe-pred}
 predict(lm_fit, ames_test %>% slice(1:3))
@@ -454,11 +453,7 @@ Recipes can also handle data that are not in the traditional structure where the
 
 ## Tidy a recipe
 
-***TODO*** use extended recipe here for first time.
-
-***TODO*** only use with pull
-
-In Section \@ref(tidiness-modeling), we introduced the `tidy()` verb for statistical objects and in Section \@ref(recipes-manual), we showed how to `tidy()` a model. There is also a `tidy()` method for recipes, discussed below. Before proceeding, let's create an extended recipe for the Ames data using some of the new steps show in the previous section: 
+In Section \@ref(tidiness-modeling), we introduced the `tidy()` verb for statistical objects. There is also a `tidy()` method for recipes, discussed below. Before proceeding, let's create an extended recipe for the Ames data using some of the new steps show in the previous section: 
 
 ```{r engineering-lm-extended-recipe}
 ames_rec <- 
@@ -546,7 +541,7 @@ Finally, all step functions have a `role` field that can assign roles to the res
 In this chapter, you learned about using recipes for flexible feature engineering and data preprocessing, from creating dummy variables to handling class imbalance and more. Feature engineering is an important part of the modeling process where information leakage can easily occur and good practices must be adopted. Between the `r pkg(recipes)` package and other packages that extend recipes, there are over 100 available steps. All possible recipe steps are enumerated at [`tidymodels.org/find`](https://www.tidymodels.org/find/). The recipes framework provides a rich data manipulation environment for preprocessing and transforming data prior to modeling. 
 Additionally, [`tidymodels.org/learn/develop/recipes/`](https://www.tidymodels.org/learn/develop/recipes/) shows how custom steps can be created.
 
-***TODO*** note about extended use a recipes (outside of a workflow)
+Our work here has used recipes solely inside of a workflow object. For modeling, that is the recommended use. However, for visualization and other activities, a workflow may not be appropriate; more recipe-specific functions may be required. Chapter @dimensionality discusses lower-level APIs for fitting and using recipes. 
 
 The code that we will use in later chapters is:
 
