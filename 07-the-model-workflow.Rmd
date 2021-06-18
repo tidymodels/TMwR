@@ -9,7 +9,7 @@ source("ames_snippets.R")
 
 # A model workflow {#workflows}
 
-In the previous two chapters, we discussed the `r pkg(recipes)` and `r pkg(parsnip)` packages. These packages can be used to prepare the data for analysis and fitting the model. This chapter introduces a new object called a _model workflow_. The purpose of this object is to encapsulate the major pieces of the modeling _process_ (previously discussed in Section \@ref(model-phases)). The workflow is important in two ways. First, using a workflow object encourages good methodology since it is a single point of entry to the estimation components of a data analysis. Second, it enables the user to better organize their projects. These two points are discussed in the following sections.  
+In the previous chapter, we discussed the `r pkg(parsnip)` package, which can be used to define and fit the model. This chapter introduces a new object called a _model workflow_. The purpose of this object is to encapsulate the major pieces of the modeling _process_ (previously discussed in Section \@ref(model-phases)). The workflow is important in two ways. First, using a workflow object encourages good methodology since it is a single point of entry to the estimation components of a data analysis. Second, it enables the user to better organize their projects. These two points are discussed in the following sections.  
 
 
 ## Where does the model begin and end? {#begin-model-end}
@@ -116,61 +116,15 @@ lm_fit %>% update_formula(Sale_Price ~ Longitude)
 
 Note that, in this new object, the output shows that the previous _fitted_ model was removed since the new formula is inconsistent with the previous model fit. 
 
-## Workflows and recipes
-
-Instead of using model formulas, recipe objects can also be used to preprocess data for modeling. Section \@ref(models-summary) summarized a recipe that specified several preprocessing and feature engineering steps. These are encapsulated inside the object `ames_rec` and are attached to the workflow:
-
-```{r workflows-fail, error = TRUE}
-lm_wflow %>% 
-  add_recipe(ames_rec)
-```
-
-That did not work! We can only have one preprocessing method at a time, so we need to remove the formula before adding the recipe. 
-
-```{r workflows-add-recipe}
-lm_wflow <- 
-  lm_wflow %>% 
-  remove_formula() %>% 
-  add_recipe(ames_rec)
-lm_wflow
-```
-
-We described the `prep()` and `bake()` functions in Section \@ref(recipes-manual) for using the recipe with a modeling function. This can be onerous, so the `fit()` method for workflow objects automates this process: 
-
-```{r workflows-recipe-fit}
-# Does `prep()`, `bake()`, and `fit()` in one step:
-lm_fit <- fit(lm_wflow, ames_train)
-
-# Does `bake()` and `predict()` automatically:
-predict(lm_fit, ames_test %>% slice(1:3))
-```
-
-If we need the bare model object or recipe, there are `pull_*` functions that can retrieve them: 
-
-```{r workflows-pull}
-# Get the recipe and run `tidy()` method: 
-lm_fit %>% 
-  pull_workflow_prepped_recipe() %>% 
-  tidy()
-
-# To tidy the model fit: 
-lm_fit %>% 
-  # This returns the parsnip object:
-  pull_workflow_fit() %>% 
-  # Now tidy the linear model object:
-  tidy() %>% 
-  slice(1:5)
-```
-
 
 ## Adding raw variables to the workflow
 
-There is a third interface for passing data to the model, the `add_variables()` function which uses a `r pkg(dplyr)`-like syntax for choosing variables. The function has two primary arguments: `outcomes` and `predictors`. These use a selection approach similar to the `r pkg(tidyselect)` backend of `r pkg(tidyverse)` packages to capture multiple selectors using `c()`. 
+There is another interface for passing data to the model, the `add_variables()` function which uses a `r pkg(dplyr)`-like syntax for choosing variables. The function has two primary arguments: `outcomes` and `predictors`. These use a selection approach similar to the `r pkg(tidyselect)` back-end of `r pkg(tidyverse)` packages to capture multiple selectors using `c()`. 
 
 ```{r workflows-add-variables}
 lm_wflow <- 
   lm_wflow %>% 
-  remove_recipe() %>% 
+  remove_formula() %>% 
   add_variables(outcome = Sale_Price, predictors = c(Longitude, Latitude))
 lm_wflow
 ```
@@ -195,9 +149,11 @@ fit(lm_wflow, ames_train)
 
 If you would like the underlying modeling method to do what it would normally do with the data, `add_variables()` can be a helpful interface. As we will discuss in Section \@ref(special-model-formulas), it also facilitates more complex modeling specifications. However, as we mention in the next section, models such as `glmnet` and `xgboost` expect the user to make indicator variables from factor predictors. In these cases, a recipe or formula interface will typically be a better choice. 
 
+As seen in the next chapter, a more powerful preprocessor (called a _recipe_) can also be added to a workflow. 
+
 ## How does a workflow use the formula? {#workflow-encoding}
 
-Recall from Sections \@ref(formula) and \@ref(a-simple-recipe-for-the-ames-housing-data) that the formula method has multiple purposes. One of these is to properly encode the original data into an analysis ready format. This can involve executing in-line transformations (e.g., `log(x)`), creating dummy variable columns, creating interactions or other column expansions, and so on. However, there are many statistical methods that require different types of encodings: 
+Recall from Section \@ref(formula) that the formula method has multiple purposes (this is discussed again in the next chapter). One of these is to properly encode the original data into an analysis ready format. This can involve executing in-line transformations (e.g., `log(x)`), creating dummy variable columns, creating interactions or other column expansions, and so on. However, there are many statistical methods that require different types of encodings: 
 
  * Most packages for tree-based models use the formula interface but **do not** encode the categorical predictors as dummy variables. 
  
@@ -275,7 +231,7 @@ There are some situations where the data require numerous attempts to find an ap
 
 * Sequential testing of models typically starts with an expanded set of predictors. This "full model" is compared to a sequence of the same model that removes each predictor in turn. Using basic hypothesis testing methods or empirical validation, the effect of each predictor can be isolated and assessed. 
 
-In these situations, as well as others, it can become tedious or onerous to create a lot of workflows from different sets of preprocessors and/or model specifications. To address this problem, the `r pkg(workflowset)` package creates combinations of workflow components. A list of preprocessors (e.g., formulas, recipes, or `r pkg(dplyr)` selectors) can be combined with a list of model specifications, resulting in a set of workflows. 
+In these situations, as well as others, it can become tedious or onerous to create a lot of workflows from different sets of preprocessors and/or model specifications. To address this problem, the `r pkg(workflowset)` package creates combinations of workflow components. A list of preprocessors (e.g., formulas, `r pkg(dplyr)` selectors, or recipe objects discussed in the next chapter) can be combined with a list of model specifications, resulting in a set of workflows. 
 
 As an example, let's say that we want to focus on the different ways that house location is represented in the Ames data. We can create a set of formulas that capture these predictors: 
 
@@ -320,7 +276,7 @@ The two types of components in a workflow are preprocessors and models. There ar
 
 ## Chapter summary {#workflows-summary}
 
-In this chapter, you learned that the modeling process encompasses more than just estimating the parameters of an algorithm that connects predictors to an outcome. This process also includes preprocessing steps, such as those outlined in Chapter \@ref(recipes), and operations taken after a model is fit. We introduced a concept called a **model workflow** that can capture the important components of the modeling process. Multiple workflows can also be created inside of a **workflow set**. 
+In this chapter, you learned that the modeling process encompasses more than just estimating the parameters of an algorithm that connects predictors to an outcome. This process also includes preprocessing step and operations taken after a model is fit. We introduced a concept called a **model workflow** that can capture the important components of the modeling process. Multiple workflows can also be created inside of a **workflow set**. 
 
 For the Ames data, the code used in later chapters is:
 
@@ -335,21 +291,12 @@ ames_split <- initial_split(ames, prop = 0.80, strata = Sale_Price)
 ames_train <- training(ames_split)
 ames_test  <-  testing(ames_split)
 
-ames_rec <- 
-  recipe(Sale_Price ~ Neighborhood + Gr_Liv_Area + Year_Built + Bldg_Type + 
-           Latitude + Longitude, data = ames_train) %>%
-  step_log(Gr_Liv_Area, base = 10) %>% 
-  step_other(Neighborhood, threshold = 0.01) %>% 
-  step_dummy(all_nominal_predictors()) %>% 
-  step_interact( ~ Gr_Liv_Area:starts_with("Bldg_Type_") ) %>% 
-  step_ns(Latitude, Longitude, deg_free = 20)
-
 lm_model <- linear_reg() %>% set_engine("lm")
 
 lm_wflow <- 
-  workflow() %>% 
-  add_model(lm_model) %>% 
-  add_recipe(ames_rec)
+  lm_wflow %>% 
+  remove_formula() %>% 
+  add_variables(outcome = Sale_Price, predictors = c(Longitude, Latitude))
 
 lm_fit <- fit(lm_wflow, ames_train)
 ```
