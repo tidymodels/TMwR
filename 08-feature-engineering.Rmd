@@ -333,7 +333,7 @@ For simple transformations of the **outcome** column(s), we strongly suggest tha
 
 However, there are other circumstances where this is not an adequate solution. For example, in classification models where there is a severe class imbalance, it is common to conduct _subsampling_ of the data that are given to the modeling function. For example, suppose that there were two classes and a 10% event rate. A simple, albeit controversial, approach would be to _down-sample_ the data so that the model is provided with all of the events and a random 10% of the non-event samples. 
 
-The problem is that the same subsampling process **should not be applied** to the data being predicted. As a result, when using a recipe, we need a mechanism to ensure that some operations are only applied to the data that are given to the model. Each step function has an option called `skip` that, when set to `TRUE`, will be ignored by the `bake()` function used with a data set argument. In this way, you can isolate the steps that affect the modeling data without causing errors when applied to new samples. However, all steps are applied when using `bake(new_data = NULL)`. 
+The problem is that the same subsampling process **should not be applied** to the data being predicted. As a result, when using a recipe, we need a mechanism to ensure that some operations are only applied to the data that are given to the model. Each step function has an option called `skip` that, when set to `TRUE`, will be ignored by the `predict()` function. In this way, you can isolate the steps that affect the modeling data without causing errors when applied to new samples. However, all steps are applied when using `fit()`. 
 
 ```{r engineering-skips, include = FALSE}
 library(recipes)
@@ -541,7 +541,7 @@ Finally, all step functions have a `role` field that can assign roles to the res
 In this chapter, you learned about using recipes for flexible feature engineering and data preprocessing, from creating dummy variables to handling class imbalance and more. Feature engineering is an important part of the modeling process where information leakage can easily occur and good practices must be adopted. Between the `r pkg(recipes)` package and other packages that extend recipes, there are over 100 available steps. All possible recipe steps are enumerated at [`tidymodels.org/find`](https://www.tidymodels.org/find/). The recipes framework provides a rich data manipulation environment for preprocessing and transforming data prior to modeling. 
 Additionally, [`tidymodels.org/learn/develop/recipes/`](https://www.tidymodels.org/learn/develop/recipes/) shows how custom steps can be created.
 
-Our work here has used recipes solely inside of a workflow object. For modeling, that is the recommended use. However, for visualization and other activities, a workflow may not be appropriate; more recipe-specific functions may be required. Chapter @dimensionality discusses lower-level APIs for fitting and using recipes. 
+Our work here has used recipes solely inside of a workflow object. For modeling, that is the recommended use. However, for visualization and other activities, a workflow may not be appropriate; more recipe-specific functions may be required. Chapter \@ref(dimensionality) discusses lower-level APIs for fitting and using recipes. 
 
 The code that we will use in later chapters is:
 
@@ -570,4 +570,11 @@ lm_wflow <-
   add_recipe(ames_rec)
 
 lm_fit <- fit(lm_wflow, ames_train)
+```
+
+
+```{r engineering-save, include = FALSE}
+if(is_new_version(lm_fit, "RData/lm_fit.RData")) {
+  save(lm_fit, file = "RData/lm_fit.RData", version = 2, compress = "xz")
+}
 ```
