@@ -127,7 +127,7 @@ Remember that when invoking the `recipe()` function, the steps are not estimated
 
 This recipe will be supplemented with additional steps for the dimensionality reduction analyses. Before doing so, let's go over how a recipe can be used _outside_ of a workflow. 
 
-## Recipes in the wild
+## Recipes in the wild {#recipe-functions}
 
 As mentioned in Section \@ref(using-recipes), a workflow containing a recipe uses `fit()` to estimate the recipe and model, then `predict()` to process the data and make model predictions. There are analogous functions in the `r pkg(recipes)` package that can be used for the same purpose: 
 
