@@ -160,6 +160,10 @@ lm_fit %>%
   slice(1:5)
 ```
 
+:::rmdnote
+There are tools for using (and debugging) recipes outside of workflow objects. These are described in Section \@ref(recipe-functions). 
+:::
+
 ## How data are used by the recipe
 
 Data are given to recipes at different stages. 
