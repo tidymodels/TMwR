@@ -14,7 +14,7 @@ source("ames_snippets.R")
 
 The `r pkg(parsnip)` package provides a fluent and standardized interface for a variety of different models. In this chapter, we both give some motivation for why a common interface is beneficial and show how to use the package. 
 
-In this chapter, the `fit()` and `predict()` methods are used with a `r pkg(parsnip)` object. However, the next chapter illustrates a better approach to these tasks by combining models and preprocessors together into something called a `workflow` object. 
+In this chapter, we focus on how to `fit()` and `predict()` directly with a `r pkg(parsnip)` object. This may be a good fit for some straightforward modeling problems, but the next chapter illustrates a better approach to these tasks by combining models and preprocessors together into something called a `workflow` object. 
 
  
 ## Create a model
