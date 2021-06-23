@@ -380,6 +380,23 @@ This demonstrates the benefit of homogenizing the data analysis process and synt
 
 The `r pkg(parsnip)` package itself contains interfaces to a number of models. However, for ease of package installation and maintenance, there are other tidymodels packages that have `r pkg(parsnip)` model definitions for other sets of models. The `r pkg(discrim)` package has model definitions for the set of classification techniques called _discriminant analysis_ methods (such as linear or quadratic discriminant analysis). In this way, the package dependencies required for installing `r pkg(parsnip)` are reduced. A list of _all_ of the models that can be used with `r pkg(parsnip)` (across different packages that are on CRAN) can be found at [`tidymodels.org/find`](https://www.tidymodels.org/find/).  
 
+## Creating model specifications {#parsnip-addin}
+
+It may become tedious to write many model specifications, or to remember how to write the code to generate them. The `r pkg(parsnip)` package includes an [RStudio addin](https://rstudio.github.io/rstudioaddins/) that can help. Either choosing this addin from the _Addins_ toolbar menu or running the code: 
+
+```{r models-add-in, eval = FALSE}
+parsnip_addin()
+```
+
+will open a window in the Viewer panel of the RStudio IDE with a list of possible models for each model mode. These can be written to the source code panel: 
+
+```{r models-add-in-gif, echo = FALSE, out.width = '100%'}
+knitr::include_graphics("premade/addin.gif")
+```
+
+The model list includes models from `r pkg(parsnip)` and `r pkg(parsnip)`-adjacent packages that are on CRAN. 
+
+
 ## Chapter summary {#models-summary}
 
 This chapter introduced the `r pkg(parsnip)` package, which provides a common interface for models across R packages using a standard syntax. The interface and resulting objects have a predictable structure. 
