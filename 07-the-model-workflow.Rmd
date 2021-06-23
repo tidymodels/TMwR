@@ -153,7 +153,7 @@ As seen in the next chapter, a more powerful preprocessor (called a _recipe_) ca
 
 ## How does a workflow use the formula? {#workflow-encoding}
 
-Recall from Section \@ref(formula) that the formula method has multiple purposes (this is discussed again in the next chapter). One of these is to properly encode the original data into an analysis ready format. This can involve executing in-line transformations (e.g., `log(x)`), creating dummy variable columns, creating interactions or other column expansions, and so on. However, there are many statistical methods that require different types of encodings: 
+Recall from Section \@ref(formula) that the formula method in R has multiple purposes (we will discuss this further in Chapter \@ref(recipes)). One of these is to properly encode the original data into an analysis ready format. This can involve executing in-line transformations (e.g., `log(x)`), creating dummy variable columns, creating interactions or other column expansions, and so on. However, there are many statistical methods that require different types of encodings: 
 
  * Most packages for tree-based models use the formula interface but **do not** encode the categorical predictors as dummy variables. 
  
@@ -231,7 +231,7 @@ There are some situations where the data require numerous attempts to find an ap
 
 * Sequential testing of models typically starts with an expanded set of predictors. This "full model" is compared to a sequence of the same model that removes each predictor in turn. Using basic hypothesis testing methods or empirical validation, the effect of each predictor can be isolated and assessed. 
 
-In these situations, as well as others, it can become tedious or onerous to create a lot of workflows from different sets of preprocessors and/or model specifications. To address this problem, the `r pkg(workflowset)` package creates combinations of workflow components. A list of preprocessors (e.g., formulas, `r pkg(dplyr)` selectors, or recipe objects discussed in the next chapter) can be combined with a list of model specifications, resulting in a set of workflows. 
+In these situations, as well as others, it can become tedious or onerous to create a lot of workflows from different sets of preprocessors and/or model specifications. To address this problem, the `r pkg(workflowset)` package creates combinations of workflow components. A list of preprocessors (e.g., formulas, `r pkg(dplyr)` selectors, or feature engineering recipe objects discussed in the next chapter) can be combined with a list of model specifications, resulting in a set of workflows. 
 
 As an example, let's say that we want to focus on the different ways that house location is represented in the Ames data. We can create a set of formulas that capture these predictors: 
 
@@ -276,7 +276,7 @@ The two types of components in a workflow are preprocessors and models. There ar
 
 ## Chapter summary {#workflows-summary}
 
-In this chapter, you learned that the modeling process encompasses more than just estimating the parameters of an algorithm that connects predictors to an outcome. This process also includes preprocessing step and operations taken after a model is fit. We introduced a concept called a **model workflow** that can capture the important components of the modeling process. Multiple workflows can also be created inside of a **workflow set**. 
+In this chapter, you learned that the modeling process encompasses more than just estimating the parameters of an algorithm that connects predictors to an outcome. This process also includes preprocessing steps and operations taken after a model is fit. We introduced a concept called a **model workflow** that can capture the important components of the modeling process. Multiple workflows can also be created inside of a **workflow set**. 
 
 For the Ames data, the code used in later chapters is:
 
