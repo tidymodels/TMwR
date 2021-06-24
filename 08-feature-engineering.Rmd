@@ -12,6 +12,11 @@ val_list <- function(x) {
 }
 
 source("ames_snippets.R")
+
+lm_wflow <- 
+  lm_wflow %>% 
+  remove_formula() %>% 
+  add_variables(outcome = Sale_Price, predictors = c(Longitude, Latitude))
 ```
 
 # Feature engineering with recipes {#recipes}
@@ -36,7 +41,7 @@ Different models have different preprocessing requirements and some, such as tre
 
 In this chapter, we introduce the [`r pkg(recipes)`](https://recipes.tidymodels.org/) package which you can use to combine different feature engineering and preprocessing tasks into a single object and then apply these transformations to different data sets. 
 
-This chapter uses the Ames housing data and the R objects created in the book so far, as summarized in Section \@ref(splitting-summary).
+This chapter uses the Ames housing data and the R objects created in the book so far, as summarized in Section \@ref(workflows-summary).
 
 ## A simple recipe for the Ames housing data 
 
@@ -82,7 +87,7 @@ simple_ames
 
 Let's break this down: 
 
-1. The call to `recipe()` with a formula tells the recipe the _roles_ of the variables (e.g., predictor, outcome). It only uses the data to determine the data types for the columns. 
+1. The call to `recipe()` with a formula tells the recipe the _roles_ of the variables (e.g., predictor, outcome). It only uses the data `ames_train` to determine the data types for the columns. 
 
 1. `step_log()` declares that `Gr_Liv_Area` should be log transformed. 
 
@@ -100,60 +105,80 @@ What is the advantage to using a recipe? There are a few, including:
  
  * A recipe enables a broader set of data processing choices than formulas can offer. 
  
- * The syntax can be very compact. For example, `all_nominal()` can be used to capture many variables for specific types of processing while a formula would require each to be explicitly listed. 
+ * The syntax can be very compact. For example, `all_nominal_predictors()` can be used to capture many variables for specific types of processing while a formula would require each to be explicitly listed. 
  
  * All data processing can be captured in a single R object instead of in scripts that are repeated, or even spread across different files.  
  
-## Using recipes
  
-Remember that when invoking the `recipe()` function, the steps are not estimated or executed in any way. The second phase for using a recipe is to estimate any quantities required by the steps using the `prep()` function. For example, we can use `step_normalize()` to center and scale any predictors selected in the step. When we call `prep(recipe, training)`, this function estimates the required means and standard deviations from the data in the `training` argument. The transformations specified by each step are also sequentially executed on the data set. Again using normalization as the example, the means and variances are estimated and then used to standardize the columns. 
 
-:::rmdwarning
-When specifying a step, the data available to that step have been affected by the previous operations. There are some steps that may remove columns or change their data type, so exercise care when writing selectors downstream. 
-:::
+## Using recipes
 
-For our example recipe, we can now `prep()`: 
+As we discussed in Chapter \@ref(workflows), preprocessing choices and feature engineering should typically be considered part of a modeling workflow, not as a separate task. The `r pkg(workflows)` package contains high level functions to handle different types of preprocessors. Our previous workflow (`lm_wflow`) used a simple set of `r pkg(dplyr)` selectors. Instead of that approach, let's use the `simple_ames` recipe to preprocess data for modeling.
 
-```{r engineering-ames-simple-prep}
-simple_ames <- prep(simple_ames, training = ames_train)
-simple_ames
-``` 
+This object can be attached to the workflow:
 
-Note that, after preparing the recipe, the print statement shows the results of the selectors (e.g., `Neighborhood` and `Bldg_Type` are listed instead of `all_nominal`). 
-
-One important argument to `prep()` is `retain`. When `retain = TRUE` (the default), the prepared version of the training set is kept within the recipe. This data set has been pre-processed using all of the steps listed in the recipe. Since `prep()` has to execute the recipe as it proceeds, it may be advantageous to keep this version of the training set so that, if that data set is to be used later, redundant calculations can be avoided. However, if the training set is big, it may be problematic to keep such a large amount of data in memory. Use `retain = FALSE` to avoid this. 
-
-The third phase of recipe usage is to apply the preprocessing operations to a data set using the `bake()` function. The `bake()` function can apply the recipe to _any_ data set. To use the test set, the syntax would be:
-
-```{r engineering-ames-test-bake}
-test_ex <- bake(simple_ames, new_data = ames_test)
-names(test_ex) %>% head()
+```{r workflows-fail, error = TRUE}
+lm_wflow %>% 
+  add_recipe(simple_ames)
 ```
 
-Note the dummy variable columns starting with `Neighborhood_`. The `bake()` function can also take selectors so that, if we only wanted the neighborhood results, we could use:
+That did not work! We can only have one preprocessing method at a time, so we need to remove the existing preprocessor before adding the recipe. 
 
-```{r engineering-ames-test-bake-nhood, eval = FALSE}
-bake(simple_ames, ames_test, starts_with("Neighborhood_"))
+```{r workflows-add-recipe}
+lm_wflow <- 
+  lm_wflow %>% 
+  remove_variables() %>% 
+  add_recipe(simple_ames)
+lm_wflow
 ```
 
-To get the processed version of the training set, we could use `bake()` and pass in the argument `ames_train` but, as previously mentioned, this would repeat calculations that have already been executed. Instead, we can use `new_data = NULL` to quickly return the training set (if `retain = TRUE` was used). It accesses the data component of the prepared recipe. 
+Let's estimate both the recipe and model using a simple call to `fit()`: 
 
-```{r engineering-ames-null}
-bake(simple_ames, new_data = NULL) %>% nrow()
-ames_train %>% nrow()
+```{r workflows-recipe-fit}
+lm_fit <- fit(lm_wflow, ames_train)
 ```
 
-To reiterate, using a recipe is a three phase process summarized as:
+The `predict()` method applies the same preprocessing that was used on the training set to the new data before passing them along to the model's `predict()` method: 
 
-```{r engineering-recipe-process, echo = FALSE, out.width = '60%', warning = FALSE}
-knitr::include_graphics("premade/recipes-process.svg")
+```{r workflows-recipe-pred}
+predict(lm_fit, ames_test %>% slice(1:3))
+```
+
+If we need the bare model object or recipe, there are `pull_*` functions that can retrieve them: 
+
+```{r workflows-pull}
+# Get the recipe after it has been estimated:
+lm_fit %>% 
+  pull_workflow_prepped_recipe() 
+
+# To tidy the model fit: 
+lm_fit %>% 
+  # This returns the parsnip object:
+  pull_workflow_fit() %>% 
+  # Now tidy the linear model object:
+  tidy() %>% 
+  slice(1:5)
 ```
 
 :::rmdnote
-As we discuss in Chapter \@ref(workflows), there are high level functions that handle the second two phases automatically. In these cases, we do not have to manually use `prep()` and `bake()` to include a recipe in the modeling process. 
+There are tools for using (and debugging) recipes outside of workflow objects. These are described in Section \@ref(recipe-functions). 
 :::
 
-## Encoding qualitative data in a numeric format  {#dummies}
+## How data are used by the recipe
+
+Data are passed to recipes at different stages. 
+
+First, when calling `recipe(..., data)`, the data set is used to determine the data types of each column so that selectors such as `all_numeric()` or `all_numeric_predictors()` can be used. 
+
+Second, when preparing the data using `fit(workflow, data)`, the training data are used for all estimation operations, from determining factor levels to computing PCA components and everything in between. It is important to realize that all preprocessing and feature engineering steps *only* utilize the training data. Otherwise, information leakage can negatively impact the model's performance when used with new data. 
+
+Finally, when using `predict(workflow, new_data)`, no model or preprocessor parameters are re-estimated using the values in `new_data`. Take centering and scaling using `step_normalize()` as an example. Using this step, the means and standard deviations from the appropriate columns are determined from the training set; new samples at prediction time are standardized using these values from training when `predict()` is invoked. 
+
+Before proceeding, let's take an extended tour of the capabilities of recipes. 
+
+## Examples of recipe steps {#example-steps}
+
+### Encoding qualitative data in a numeric format  {#dummies}
 
 One of the most common feature engineering tasks is transforming nominal or qualitative data (factors or characters) so that they can be encoded or represented numerically. Sometimes we can alter the factor levels of a qualitative column in helpful ways _prior_ to such a transformation. For example, `step_unknown()` can be used to change missing values to a dedicated factor level. Similarly, if we anticipate that a new factor level may be encountered in future data, `step_novel()` can allot a new level for this purpose. 
 
@@ -235,7 +260,7 @@ While this is not unreasonable, it is not an approach that people tend to find u
 Different recipe steps can have different effects on columns of the data. For example, `step_log()` modifies a column in-place without changing the name. Other steps, such as `step_dummy()` eliminate the original data column and replace it with one or more columns with different names. This behavior depends on the type of operation being done. 
 :::
 
-## Interaction terms
+### Interaction terms
 
 Interaction effects involve two or more predictors. Such an effect occurs when one predictor has an effect on the outcome that is contingent on one or more other predictors. For example, if you were trying to predict your morning commute time, two potential predictors could be the amount of traffic and the time of day. However, the relationship between commute time and the amount of traffic is different for different times of day. In this case, you could add an interaction term between the two predictors to the model along with the original two predictors (which are called the "main effects"). Numerically, an interaction term between predictors is encoded as their product. Interactions are only defined in terms of their effect on the outcome and can be combinations of different types of data (e.g., numeric, categorical, etc). [Chapter 7](https://bookdown.org/max/FES/detecting-interaction-effects.html) of @fes discusses interactions and how to detect them in greater detail. 
 
@@ -296,51 +321,8 @@ As with naming dummy variables, `r pkg(recipes)` provides more coherent names fo
 _Order matters_.  The gross living area is log transformed prior to the interaction term. Subsequent interactions with this variable will also use the log scale. 
 :::
 
-## Skipping steps for new data {#skip-equals-true}
 
-The sale price data are already log transformed in the `ames` data frame. Why not use:
-
-```r
- step_log(Sale_Price, base = 10)
-```
-
-This will cause a failure when the recipe is applied to new properties when the sale price is not known. Since price is what we are trying to predict, there probably won't be a column in the data for this variable. In fact, to avoid _information leakage_, many tidymodels packages isolate the data being used when making any predictions. This means that the training set and any outcome columns are not available for use at prediction time. 
-
-:::rmdnote
-For simple transformations of the **outcome** column(s), we strongly suggest that those operations be _conducted outside of the recipe_.
-:::
-
-However, there are other circumstances where this is not an adequate solution. For example, in classification models where there is a severe class imbalance, it is common to conduct _subsampling_ of the data that are given to the modeling function. For example, suppose that there were two classes and a 10% event rate. A simple, albeit controversial, approach would be to _down-sample_ the data so that the model is provided with all of the events and a random 10% of the non-event samples. 
-
-The problem is that the same subsampling process **should not be applied** to the data being predicted. As a result, when using a recipe, we need a mechanism to ensure that some operations are only applied to the data that are given to the model. Each step function has an option called `skip` that, when set to `TRUE`, will be ignored by the `bake()` function used with a data set argument. In this way, you can isolate the steps that affect the modeling data without causing errors when applied to new samples. However, all steps are applied when using `bake(new_data = NULL)`. 
-
-```{r engineering-skips, include = FALSE}
-library(recipes)
-library(themis)
-
-preps <- as.character(methods("prep"))
-steps <- gsub("prep\\.", "", preps)
-steps <- grep("^step", steps, value = TRUE)
-
-skip <- rep(rlang::na_lgl, length(steps))
-for (i in seq_along(skip)) {
-  x_code <- try(getFromNamespace(steps[i], "recipes"), silent = TRUE)
-  if (inherits(x_code, "try-error")) {
-    x_code <- try(getFromNamespace(steps[i], "themis"), silent = TRUE)
-  }
-  if (!inherits(x_code, "try-error")) {
-    skip[i] <- formals(x_code)$skip
-  }
-}
-
-skip_list <- paste0("`", steps[skip], "()`")
-```
-
-At the time of this writing, the step functions in the `r pkg(recipes)` and `r pkg(themis)` packages that are only applied to the modeling data are: `r knitr::combine_words(skip_list)`.
-
-## Other examples of recipe steps {#other-steps}
-
-### Spline functions {-}
+### Spline functions
 
 When a predictor has a nonlinear relationship with the outcome, some types of predictive models can adaptively approximate this relationship during training. However, simpler is usually better and it is not uncommon to try to use a simple model, such as a linear fit, and add in specific non-linear features for predictors that may need them. One common method for doing this is to use _spline_ functions to represent the data. Splines replace the existing numeric predictor with a set of columns that allow a model to emulate a flexible, non-linear relationship. As more spline terms are added to the data, the capacity to non-linearly represent the relationship increases. Unfortunately, it may also increase the likelihood of picking up on data trends that occur by chance (i.e., over-fitting). 
 
@@ -384,7 +366,7 @@ recipe(Sale_Price ~ Neighborhood + Gr_Liv_Area + Year_Built + Bldg_Type + Latitu
 
 The user would need to determine if both neighborhood and latitude should be in the model since they both represent the same underlying data in different ways.
 
-### Feature extraction {-}
+### Feature extraction
 
 Another common method for representing multiple features at once is called _feature extraction_. Most of these techniques create new features from the predictors that capture the information in the broader set as a whole. For example, principal component analysis (PCA) tries to extract as much of the original information in the predictor set as possible using a smaller number of features. PCA is a linear extraction method, meaning that each new feature is a linear combination of the original predictors. One nice aspect of PCA is that each of the new features, called the principal components or PCA scores, are uncorrelated with one another. Because of this, PCA can be very effective at reducing the correlation between predictors. Note that PCA is only aware of the _predictors_; the new PCA features might not be associated with the outcome. 
 
@@ -399,9 +381,9 @@ Note that all of these columns are measured in square feet. PCA assumes that all
 
 There are existing recipe steps for other extraction methods, such as: independent component analysis (ICA), non-negative matrix factorization (NNMF), multidimensional scaling (MDS), uniform manifold approximation and projection (UMAP), and others. 
 
-### Row sampling steps {-}
+### Row sampling steps
 
-Recipe steps can affect the rows of a data set as well. For example, the previously mentioned _subsampling_ technique for class imbalances will change the data being given to the model. There are several possible approaches to try:
+Recipe steps can affect the rows of a data set as well. For example, _subsampling_ techniques for class imbalances will change the data being given to the model. There are several possible approaches to try:
 
  * _Downsampling_ the data keeps the minority class and takes a random sample of the majority class so that class frequencies are balanced. 
 
@@ -421,28 +403,64 @@ Only the training set should be affected by these techniques. The test set or ot
 
 There are other step functions that are row-based as well: `step_filter()`, `step_sample()`, `step_slice()`, and `step_arrange()`. In almost all uses of these steps, the `skip` argument should be set to `TRUE`. 
 
-### General transformations {-}
+### General transformations
 
 Mirroring the original `r pkg(dplyr)` operations, `step_mutate()` and `step_mutate_at()` can be used to conduct a variety of basic operations to the data. 
 
 
-### Natural language processing {-}
+### Natural language processing
 
 Recipes can also handle data that are not in the traditional structure where the columns are features. For example, the [`r pkg(textrecipes)`](https://textrecipes.tidymodels.org/) package can apply natural language processing methods to the data. The input column is typically a string of text and different steps can be used to tokenize the data (e.g., split the text into separate words), filter out tokens, and create new features appropriate for modeling. 
 
-## How data are used by the recipe
 
-Data are given to recipes at different stages. When calling `recipe(..., data)`, the data set is used to determine the data types of each column so that selectors such as `all_numeric()` can be used. When preparing the data using `prep(recipe, training)`, the data in `training` are used for all estimation operations, from determining factor levels to computing PCA components and everything in between. It is important to realize that all preprocessing and feature engineering steps only utilize the training data. Otherwise, information leakage can negatively impact the model. 
+## Skipping steps for new data {#skip-equals-true}
 
-When using `bake(recipe, new_data)`, no quantities are re-estimated using the values in `new_data`. Take centering and scaling using `step_normalize()` as an example. Using this step, the means and standard deviations from the appropriate columns are determined from the training set; new samples are standardized using these values when `bake()` is invoked. 
+The sale price data are already log transformed in the `ames` data frame. Why not use:
 
-## Using a recipe with traditional modeling functions {#recipes-manual}
+```r
+ step_log(Sale_Price, base = 10)
+```
 
-In Chapters \@ref(workflows) and \@ref(tuning), we introduce high-level interfaces that take a recipe as an input argument and automatically handle the `prep()`/`bake()` process of preparing data for modeling. However, recipes can be used with traditional R modeling functions as well; this section shows how to use a recipe outside those high-level interfaces.
+This will cause a failure when the recipe is applied to new properties with an unknown sale price. Since price is what we are trying to predict, there probably won't be a column in the data for this variable. In fact, to avoid _information leakage_, many tidymodels packages isolate the data being used when making any predictions. This means that the training set and any outcome columns are not available for use at prediction time. 
 
-Let's use a slightly augmented version of the last recipe, now including longitude:
+:::rmdnote
+For simple transformations of the **outcome** column(s), we strongly suggest that those operations be _conducted outside of the recipe_.
+:::
 
-```{r engineering-lm-recipe}
+However, there are other circumstances where this is not an adequate solution. For example, in classification models where there is a severe class imbalance, it is common to conduct _subsampling_ of the data that are given to the modeling function, as previously mentioned. For example, suppose that there were two classes and a 10% event rate. A simple, albeit controversial, approach would be to _down-sample_ the data so that the model is provided with all of the events and a random 10% of the non-event samples. 
+
+The problem is that the same subsampling process **should not be applied** to the data being predicted. As a result, when using a recipe, we need a mechanism to ensure that some operations are only applied to the data that are given to the model. Each step function has an option called `skip` that, when set to `TRUE`, will be ignored by the `predict()` function. In this way, you can isolate the steps that affect the modeling data without causing errors when applied to new samples. However, all steps are applied when using `fit()`. 
+
+```{r engineering-skips, include = FALSE}
+library(recipes)
+library(themis)
+
+preps <- as.character(methods("prep"))
+steps <- gsub("prep\\.", "", preps)
+steps <- grep("^step", steps, value = TRUE)
+
+skip <- rep(rlang::na_lgl, length(steps))
+for (i in seq_along(skip)) {
+  x_code <- try(getFromNamespace(steps[i], "recipes"), silent = TRUE)
+  if (inherits(x_code, "try-error")) {
+    x_code <- try(getFromNamespace(steps[i], "themis"), silent = TRUE)
+  }
+  if (!inherits(x_code, "try-error")) {
+    skip[i] <- formals(x_code)$skip
+  }
+}
+
+skip_list <- paste0("`", steps[skip], "()`")
+```
+
+At the time of this writing, the step functions in the `r pkg(recipes)` and `r pkg(themis)` packages that are only applied to the modeling data are: `r knitr::combine_words(skip_list)`.
+
+
+## Tidy a recipe
+
+In Section \@ref(tidiness-modeling), we introduced the `tidy()` verb for statistical objects. There is also a `tidy()` method for recipes, as well as individual recipe steps. Before proceeding, let's create an extended recipe for the Ames data using some of the new steps we've discussed in this chapter: 
+
+```{r engineering-lm-extended-recipe}
 ames_rec <- 
   recipe(Sale_Price ~ Neighborhood + Gr_Liv_Area + Year_Built + Bldg_Type + 
            Latitude + Longitude, data = ames_train) %>%
@@ -453,69 +471,54 @@ ames_rec <-
   step_ns(Latitude, Longitude, deg_free = 20)
 ```
 
-To get the recipe ready, we prepare it, and then extract the training set using `bake()` with `new_data = NULL`. When calling `prep()`, if the `training` argument is not given, it uses the data that was initially given to the `recipe()` function call.
-
-```{r engineering-lm-ames-prep}
-ames_rec_prepped <- prep(ames_rec)
-ames_train_prepped <- bake(ames_rec_prepped, new_data = NULL)
-ames_test_prepped <- bake(ames_rec_prepped, ames_test)
-
-# Fit the model; Note that the column Sale_Price has already been
-# log transformed.
-lm_fit <- lm(Sale_Price ~ ., data = ames_train_prepped)
-```
-
-The `r pkg(broom)` package has methods that make it easier to work with model objects. First, `broom::glance()` shows a succinct summary of the model in a handy tibble format:
-
-```{r engineering-lm-ames-glance}
-glance(lm_fit)
-```
-
-The model coefficients can be extracted using the `tidy()` method:
-
-```{r engineering-lm-ames-tidy}
-tidy(lm_fit)
-```
-
-To make predictions on the test set, we use the standard syntax:
-
-```{r engineering-lm-ames-pred}
-predict(lm_fit, ames_test_prepped %>% head())
-```
-
-## Tidy a recipe
-
-In Section \@ref(tidiness-modeling), we introduced the `tidy()` verb for statistical objects and in Section \@ref(recipes-manual), we showed how to `tidy()` a model. There is also a `tidy()` method for recipes. Calling it with no other arguments gives a summary of the recipe steps:
+The `tidy()` method, when called with the recipe object, gives a summary of the recipe steps:
 
 ```{r engineering-ames-tidy-rec}
-tidy(ames_rec_prepped)
+tidy(ames_rec)
 ```
 
-We can specify the `id` field in a step function call but otherwise it is generated using a random suffix. This field can be helpful if the same type of step is added to the recipe more than once. Let's specify the `id` ahead of time for `step_log()`, since we want to `tidy()` it:
+This can be helpful for executing the `tidy()` method on individual steps.  
+
+We can specify the `id` field in any step function call but otherwise it is generated using a random suffix. This field can be helpful if the same type of step is added to the recipe more than once. Let's specify the `id` ahead of time for `step_other()`, since we'll want to `tidy()` it:
 
 ```{r engineering-lm-recipe-id}
 ames_rec <- 
   recipe(Sale_Price ~ Neighborhood + Gr_Liv_Area + Year_Built + Bldg_Type + 
            Latitude + Longitude, data = ames_train) %>%
-  step_log(Gr_Liv_Area, base = 10, id = "my_id") %>% 
-  step_other(Neighborhood, threshold = 0.01) %>% 
+  step_log(Gr_Liv_Area, base = 10) %>% 
+  step_other(Neighborhood, threshold = 0.01, id = "my_id") %>% 
   step_dummy(all_nominal_predictors()) %>% 
   step_interact( ~ Gr_Liv_Area:starts_with("Bldg_Type_") ) %>% 
   step_ns(Latitude, Longitude, deg_free = 20)
+```
 
-ames_rec_prepped <- prep(ames_rec)
+We'll re-fit the workflow with this new recipe:
+
+```{r engineering-lm-extended-recipe-fit}
+lm_wflow <- 
+  workflow() %>% 
+  add_model(lm_model) %>% 
+  add_recipe(ames_rec)
+
+lm_fit <- fit(lm_wflow, ames_train)
 ```
 
 The `tidy()` method can be called again along with the `id` identifier we specified to get these results:
 
-```{r engineering-lm-tidy-log}
-tidy(ames_rec_prepped, id = "my_id")
+```{r engineering-lm-tidy-other}
+estimated_recipe <- 
+  lm_fit %>% 
+  pull_workflow_prepped_recipe()
+
+tidy(estimated_recipe, id = "my_id")
 ```
+
+The `tidy()` method for `step_other()` shows which factor levels were not added to an "other" category. 
 
 The `tidy()` method can be called with the `number` identifier as well, if we know which step in the recipe we need:
 
 ```{r engineering-ames-tidy-other}
-tidy(ames_rec_prepped, number = 2)
+tidy(estimated_recipe, number = 2)
 ```
 
 Each `tidy()` method returns the relevant information about that step. For example, the `tidy()` method for `step_dummy()` returns a column with the variables that were converted to dummy variables and another column with all of the known levels for each column. 
@@ -543,6 +546,8 @@ Finally, all step functions have a `role` field that can assign roles to the res
 In this chapter, you learned about using recipes for flexible feature engineering and data preprocessing, from creating dummy variables to handling class imbalance and more. Feature engineering is an important part of the modeling process where information leakage can easily occur and good practices must be adopted. Between the `r pkg(recipes)` package and other packages that extend recipes, there are over 100 available steps. All possible recipe steps are enumerated at [`tidymodels.org/find`](https://www.tidymodels.org/find/). The recipes framework provides a rich data manipulation environment for preprocessing and transforming data prior to modeling. 
 Additionally, [`tidymodels.org/learn/develop/recipes/`](https://www.tidymodels.org/learn/develop/recipes/) shows how custom steps can be created.
 
+Our work here has used recipes solely inside of a workflow object. For modeling, that is the recommended use because feature engineering should be estimated together with a model. However, for visualization and other activities, a workflow may not be appropriate; more recipe-specific functions may be required. Chapter \@ref(dimensionality) discusses lower-level APIs for fitting, using, and troubleshooting recipes. 
+
 The code that we will use in later chapters is:
 
 ```{r engineering-summary, eval = FALSE}
@@ -563,4 +568,18 @@ ames_rec <-
   step_dummy(all_nominal_predictors()) %>% 
   step_interact( ~ Gr_Liv_Area:starts_with("Bldg_Type_") ) %>% 
   step_ns(Latitude, Longitude, deg_free = 20)
+
+lm_wflow <- 
+  workflow() %>% 
+  add_model(lm_model) %>% 
+  add_recipe(ames_rec)
+
+lm_fit <- fit(lm_wflow, ames_train)
+```
+
+
+```{r engineering-save, include = FALSE}
+if(is_new_version(lm_fit, "RData/lm_fit.RData")) {
+  save(lm_fit, file = "RData/lm_fit.RData", version = 2, compress = "xz")
+}
 ```

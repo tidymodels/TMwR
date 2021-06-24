@@ -332,6 +332,63 @@ This object can now be used to make future predictions on new data.
 If you did not use a workflow, finalization of a model and/or recipe is done using `finalize_model()` and `finalize_recipe()`. 
 
 
+## Tools for creating tuning specifications {#tuning-usemodels}
+
+The `r pkg(usemodels)` package can take a data frame and model formula, then write out R code for tuning the model. The code also creates an appropriate recipe whose steps depend on the requested model as well as the predictor data.
+
+For example, for the Ames data, `xgboost` modeling code could be created with: 
+
+```{r models-use-models-code, eval = FALSE}
+library(usemodels)
+
+use_xgboost(Sale_Price ~ Neighborhood + Gr_Liv_Area + Year_Built + Bldg_Type + 
+              Latitude + Longitude, 
+            data = ames_train,
+            # Add comments explaining some of the code:
+            verbose = TRUE)
+```
+
+The results are this code: 
+
+```{r models-use-models-res, eval = FALSE}
+xgboost_recipe <- 
+  recipe(formula = Sale_Price ~ Neighborhood + Gr_Liv_Area + Year_Built + Bldg_Type + 
+    Latitude + Longitude, data = ames_train) %>% 
+  step_novel(all_nominal_predictors()) %>% 
+  ## This model requires the predictors to be numeric. The most common 
+  ## method to convert qualitative predictors to numeric is to create 
+  ## binary indicator variables (aka dummy variables) from these 
+  ## predictors. However, for this model, binary indicator variables can be 
+  ## made for each of the levels of the factors (known as 'one-hot 
+  ## encoding'). 
+  step_dummy(all_nominal_predictors(), one_hot = TRUE) %>% 
+  step_zv(all_predictors()) 
+
+xgboost_spec <- 
+  boost_tree(trees = tune(), min_n = tune(), tree_depth = tune(), learn_rate = tune(), 
+    loss_reduction = tune(), sample_size = tune()) %>% 
+  set_mode("regression") %>% 
+  set_engine("xgboost") 
+
+xgboost_workflow <- 
+  workflow() %>% 
+  add_recipe(xgboost_recipe) %>% 
+  add_model(xgboost_spec) 
+
+set.seed(69305)
+xgboost_tune <-
+  tune_grid(xgboost_workflow, 
+            resamples = stop("add your rsample object"), 
+            grid = stop("add number of candidate points"))
+```
+
+This code is, based on what `r pkg(usemodels)` understands about the data, the minimal preprocessing required. For other models, operations like `step_normalize()` are added to fulfill the basic needs of the model. Notice that it is our responsibility, as the modeling practitioner, to choose what `resamples` to use for tuning, as well as what kind of `grid`.
+
+:::rmdnote
+The `r pkg(usemodels)` package can also be used to create model fitting code with no tuning by setting the argument `tune = FALSE`.
+:::
+
+
 ## Tools for efficient grid search {#efficient-grids}
 
 A few different tricks and optimizations are possible to make grid search more computationally efficient. This section describes several techniques. 
