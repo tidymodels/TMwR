@@ -97,7 +97,7 @@ Note that `missing_arg()` is just a placeholder for the data that has yet to be 
 Note that we supplied a required `penalty` argument for the glmnet engine. Also, for the Stan and glmnet engines, the `family` argument was automatically added as a default. As will be shown below, this option can be changed.  
 :::
 
-Let's walk through how to predict the sale price of houses in the Ames data as a function of only longitude and latitude.:
+Let's walk through how to predict the sale price of houses in the Ames data as a function of only longitude and latitude:
 
 
 ```{r models-ames-geocodes}
