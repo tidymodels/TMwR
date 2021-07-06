@@ -14,13 +14,14 @@ source("ames_snippets.R")
 
 The `r pkg(parsnip)` package provides a fluent and standardized interface for a variety of different models. In this chapter, we both give some motivation for why a common interface is beneficial and show how to use the package. 
 
-In Chapter \@ref(recipes), we discussed recipe objects for feature engineering and data preprocessing prior to modeling. Recipes are not discussed in this chapter in order to focus on the model itself; Chapter \@ref(workflows) illustrates how to combine models and recipes together into something called a `workflow` object. 
+In this chapter, we focus on how to `fit()` and `predict()` directly with a `r pkg(parsnip)` object. This may be a good fit for some straightforward modeling problems, but the next chapter illustrates a better approach to these tasks by combining models and preprocessors together into something called a `workflow` object. 
+
  
 ## Create a model
 
 Once the data have been encoded in a format ready for a modeling algorithm, such as a numeric matrix, they can be used in the model building process.  
 
-Suppose that a linear regression model was our initial choice for the model. This is equivalent to specifying that the outcome data is numeric and that the predictors are related to the model in terms of simple slopes and intercepts: 
+Suppose that a linear regression model was our initial choice for the model. This is equivalent to specifying that the outcome data is numeric and that the predictors are related to the outcome in terms of simple slopes and intercepts: 
 
 $$y_i = \beta_0 + \beta_1 x_{1i} + \ldots + \beta_p x_{pi}$$
 
@@ -96,7 +97,7 @@ Note that `missing_arg()` is just a placeholder for the data that has yet to be 
 Note that we supplied a required `penalty` argument for the glmnet engine. Also, for the Stan and glmnet engines, the `family` argument was automatically added as a default. As will be shown below, this option can be changed.  
 :::
 
-Let's walk through how to predict the sale price of houses in the Ames data as a function of only longitude and latitude. This code builds on the current analysis shown in Section \@ref(recipes-summary):
+Let's walk through how to predict the sale price of houses in the Ames data as a function of only longitude and latitude:
 
 
 ```{r models-ames-geocodes}
@@ -220,7 +221,7 @@ arg_info %>%
 </tbody>
 </table>
 
-Admittedly, this is one more set of arguments to memorize. However, when other types of models have the same argument types, these names still apply. For example, boosted tree ensembles also create a large number of tree-based models, so `trees` is also used there, as is `min_n`, and so on. The `r pkg(parsnip)` argument names have also been standardized with similar recipe arguments. 
+Admittedly, this is one more set of arguments to memorize. However, when other types of models have the same argument types, these names still apply. For example, boosted tree ensembles also create a large number of tree-based models, so `trees` is also used there, as is `min_n`, and so on. 
 
 Some of the original argument names can be fairly jargon-y. For example, to specify the amount of regularization to use in a glmnet model, the Greek letter `lambda` is used. While this mathematical notation is commonly used in the statistics literature, it is not obvious to many people what `lambda` represents (especially those who consume the model results). Since this is the penalty used in regularization, `r pkg(parsnip)` standardizes on the argument name `penalty`. Similarly, the number of neighbors in a _K_-nearest neighbors model is called `neighbors` instead of `k`. Our rule of thumb when standardizing argument names is:
 
@@ -284,7 +285,7 @@ param_est
 
 There are a few things to notice about this result. First, the object is a numeric matrix. This data structure was mostly likely chosen since all of the calculated results are numeric and a matrix object is stored more efficiently than a data frame. This choice was probably made in the late 1970's when computational efficiency was extremely critical. Second, the non-numeric data (the labels for the coefficients) are contained in the row names. Keeping the parameter labels as row names is very consistent with the conventions in the original S language. 
 
-A reasonable next step might be to create a visualization of the parameters values. To do this, it would be sensible to convert the parameter matrix to a data frame. We could add the row names as a column so that they can be used in a plot. However, notice that several of the existing matrix column names would not be valid R column names for ordinary data frames (e.g. `"Pr(>|t|)"`.  Another complication is the consistency of the column names. For `lm` objects, the column for the test statistic is `"Pr(>|t|)"`, but for other models, a different test might be used and, as a result, the column name would be different (e.g., `"Pr(>|z|)"`) and the type of test would be _encoded in the column name_.  
+A reasonable next step might be to create a visualization of the parameters values. To do this, it would be sensible to convert the parameter matrix to a data frame. We could add the row names as a column so that they can be used in a plot. However, notice that several of the existing matrix column names would not be valid R column names for ordinary data frames (e.g. `"Pr(>|t|)"`).  Another complication is the consistency of the column names. For `lm` objects, the column for the test statistic is `"Pr(>|t|)"`, but for other models, a different test might be used and, as a result, the column name would be different (e.g., `"Pr(>|z|)"`) and the type of test would be _encoded in the column name_.  
  
 While these additional data formatting steps are not impossible to overcome, they are a hindrance, especially since they might be different for different types of models. The matrix is not a highly reusable data structure mostly because it constrains the data to be of a single type (e.g. numeric). Additionally, keeping some data in the dimension names is also problematic since those data must be extracted to be of general use.
 
@@ -316,7 +317,7 @@ predict(lm_form_fit, new_data = ames_test_small)
 The row order of the predictions are always the same as the original data. 
 
 :::rmdnote
-Why are there leading dot in some of the column names? Some tidyverse and tidymodels arguments and return values contain periods. This is to protect against merging data with duplicate names. There are some data sets that contain predictors names `pred`! 
+Why are there leading dot in some of the column names? Some tidyverse and tidymodels arguments and return values contain periods. This is to protect against merging data with duplicate names. There are some data sets that contain predictors named `pred`! 
 :::
 
 These three rules make it easier to merge predictions with the original data: 
@@ -379,56 +380,9 @@ This demonstrates the benefit of homogenizing the data analysis process and synt
 
 The `r pkg(parsnip)` package itself contains interfaces to a number of models. However, for ease of package installation and maintenance, there are other tidymodels packages that have `r pkg(parsnip)` model definitions for other sets of models. The `r pkg(discrim)` package has model definitions for the set of classification techniques called _discriminant analysis_ methods (such as linear or quadratic discriminant analysis). In this way, the package dependencies required for installing `r pkg(parsnip)` are reduced. A list of _all_ of the models that can be used with `r pkg(parsnip)` (across different packages that are on CRAN) can be found at [`tidymodels.org/find`](https://www.tidymodels.org/find/).  
 
-## Tools for creating model specifications {#parsnip-tools}
+## Creating model specifications {#parsnip-addin}
 
-There are a few tools that can help you create models. 
-
-First, the `r pkg(usemodels)` package can take a data frame and model formula, then write out R code for creating the model. The code also creates an appropriate recipe whose steps depend on the requested model as well as the predictor data. It also uses a _workflow_ object, described in the next chapter, to bind the recipe and model together. 
-
-For example, for the Ames data, `xgboost` modeling code could be created with: 
-
-```{r models-use-models-code, eval = FALSE}
-library(usemodels)
-
-use_xgboost(Sale_Price ~ Neighborhood + Gr_Liv_Area + Year_Built + Bldg_Type + 
-              Latitude + Longitude, 
-            data = ames_train,
-            # Don't create the model tuning code:
-            tune = FALSE,
-            # Add comments explaining some of the code:
-            verbose = TRUE)
-```
-
-The results are this code: 
-
-```{r models-use-models-res, eval = FALSE}
-xgboost_recipe <- 
-  recipe(formula = Sale_Price ~ Neighborhood + Gr_Liv_Area + Year_Built + Bldg_Type + 
-    Latitude + Longitude, data = ames_train) %>% 
-  step_novel(all_nominal(), -all_outcomes()) %>% 
-  ## This model requires the predictors to be numeric. The most common 
-  ## method to convert qualitative predictors to numeric is to create 
-  ## binary indicator variables (aka dummy variables) from these 
-  ## predictors. However, for this model, binary indicator variables can be 
-  ## made for each of the levels of the factors (known as 'one-hot 
-  ## encoding'). 
-  step_dummy(all_nominal(), -all_outcomes(), one_hot = TRUE) %>% 
-  step_zv(all_predictors()) 
-
-xgboost_spec <- 
-  boost_tree() %>% 
-  set_mode("regression") %>% 
-  set_engine("xgboost") 
-
-xgboost_workflow <- 
-  workflow() %>% 
-  add_recipe(xgboost_recipe) %>% 
-  add_model(xgboost_spec) 
-```
-
-This code is, based on what `r pkg(usemodels)` understands about the data, the minimal preprocessing required. For other models, operations like `step_normalize()` are added to fulfill the basic needs of the model. 
-
-If we are interested in trying a large number of models, it may become tedious to write many model specifications. The `r pkg(parsnip)` package includes an [RStudio addin](https://rstudio.github.io/rstudioaddins/) that can help. Either choosing this addin from the _Addins_ toolbar menu or running the code: 
+It may become tedious to write many model specifications, or to remember how to write the code to generate them. The `r pkg(parsnip)` package includes an [RStudio addin](https://rstudio.github.io/rstudioaddins/) that can help. Either choosing this addin from the _Addins_ toolbar menu or running the code: 
 
 ```{r models-add-in, eval = FALSE}
 parsnip_addin()
@@ -441,6 +395,7 @@ knitr::include_graphics("premade/addin.gif")
 ```
 
 The model list includes models from `r pkg(parsnip)` and `r pkg(parsnip)`-adjacent packages that are on CRAN. 
+
 
 ## Chapter summary {#models-summary}
 
@@ -457,15 +412,6 @@ set.seed(123)
 ames_split <- initial_split(ames, prop = 0.80, strata = Sale_Price)
 ames_train <- training(ames_split)
 ames_test  <-  testing(ames_split)
-
-ames_rec <- 
-  recipe(Sale_Price ~ Neighborhood + Gr_Liv_Area + Year_Built + Bldg_Type + 
-           Latitude + Longitude, data = ames_train) %>%
-  step_log(Gr_Liv_Area, base = 10) %>% 
-  step_other(Neighborhood, threshold = 0.01) %>% 
-  step_dummy(all_nominal_predictors()) %>% 
-  step_interact( ~ Gr_Liv_Area:starts_with("Bldg_Type_") ) %>% 
-  step_ns(Latitude, Longitude, deg_free = 20)
 
 lm_model <- linear_reg() %>% set_engine("lm")
 ```
