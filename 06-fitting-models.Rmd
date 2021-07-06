@@ -296,7 +296,7 @@ As a solution, the `r pkg(broom)` package has methods to convert many types of m
 tidy(lm_form_fit)
 ```
  
-The column names are standardized across models and do not contain any additional data (such as the type of statistical test). The data previously contained in the row names are now in a column called `terms` and so on. One important principle in the tidymodels ecosystem is that a function should return values that are _predictable, consistent, and unsurprising_. 
+The column names are standardized across models and do not contain any additional data (such as the type of statistical test). The data previously contained in the row names are now in a column called `term` and so on. One important principle in the tidymodels ecosystem is that a function should return values that are _predictable, consistent, and unsurprising_. 
 
 
 ## Make predictions {#parsnip-predictions}
