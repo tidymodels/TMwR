@@ -138,6 +138,7 @@ shap_duplex <-
 We could use the default plot method from `r pkg(DALEX)` by calling `plot(shap_duplex)`, or we can access the underlying data and create a custom plot. The box plots display the distribution of contributions across all the orderings we tried, and the bars display the average attribution for each feature.
 
 ```{r}
+library(forcats)
 shap_duplex %>%
   group_by(variable) %>%
   mutate(mean_val = mean(contribution)) %>%
@@ -189,13 +190,13 @@ Unlike the duplex, the size and age of this house contribute to its price being 
 
 ## Global explanations
 
-Global model explanations, also called global feature importance or variable importance, help us understand which features are most important in driving the predictions of these two models overall, aggregated over the whole training set. While the previous section addressed what variables or features are most important in predicting sale price for an individual home, global feature importance addresses what variables are most important for a model overall.
+Global model explanations, also called global feature importance or variable importance, help us understand which features are most important in driving the predictions of these two models overall, aggregated over the whole training set. While the previous section addressed what variables or features are most important in predicting sale price for an individual home, global feature importance addresses what variables are most important for a model in aggregate.
 
 :::rmdnote
 One way to compute variable importance is to _permute_ the features [@breiman2001random]. We can permute or shuffle the values of a feature, predict from the model, and then measure how much worse the model fits the data compared to before shuffling.
 :::
 
-If shuffling a feature causes a large degradation in model performance, it is an important feature; if shuffling a feature's values doesn't make much difference to how the model performs, it must not be an important feature. This approach can be applied to any kind of model (it is _model-agnostic_) and the results are straightforward to understand.
+If shuffling a column causes a large degradation in model performance, it is important; if shuffling a column's values doesn't make much difference to how the model performs, it must not be an important variable. This approach can be applied to any kind of model (it is _model-agnostic_) and the results are straightforward to understand.
 
 Using `r pkg(DALEX)`, we compute this kind of variable importance via the `model_parts()` function.
 
@@ -217,14 +218,17 @@ full_rmse <- full_vip %>%
 
 full_vip %>%
   filter(variable != "_full_model_") %>% 
-  mutate(variable = forcats::fct_reorder(variable, dropout_loss)) %>%
+  mutate(variable = fct_reorder(variable, dropout_loss)) %>%
   ggplot(aes(dropout_loss, variable, color = label, fill = label)) +
   geom_vline(data = full_rmse, aes(xintercept = dropout_loss, color = label),
              size = 1.4, lty = 2, alpha = 0.7) +
   geom_boxplot(alpha = 0.2) +
   facet_wrap(~label, ncol = 1) +
   theme(legend.position = "none") +
-  labs(x = "RMSE after permutations (higher indicates more important)", y = NULL, fill = NULL, color = NULL)
+  labs(x = "RMSE after permutations (higher indicates more important)", 
+       y = NULL, 
+       fill = NULL, 
+       color = NULL)
 ```
 
 The dashed line in each panel shows the RMSE for the full model, either the linear model or the random forest model. Features further to the right are more important, because permuting them results in higher RMSE. There is quite a lot of interesting information to learn from this plot; for example, neighborhood is quite important in the linear model with interactions/splines but the second least important feature for the random forest model.
@@ -257,10 +261,10 @@ as_tibble(pdp_age$agr_profiles) %>%
 ```
 
 
-Partial dependence profiles can be computed for any other feature in the model, and also for groups in the data, such as `Bldg_Type`. Let's use `1e3` observations for these profiles.
+Partial dependence profiles can be computed for any other feature in the model, and also for groups in the data, such as `Bldg_Type`. Let's use 1,000 observations for these profiles.
 
 ```{r}
-pdp_liv <- model_profile(explainer_rf, N = 1e3, 
+pdp_liv <- model_profile(explainer_rf, N = 1000, 
                          variables = "Gr_Liv_Area", 
                          groups = "Bldg_Type")
 ```
