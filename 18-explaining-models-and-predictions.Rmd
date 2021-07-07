@@ -98,12 +98,14 @@ duplex <- vip_train[121,]
 duplex
 ```
 
-There are multiple possible approaches to understanding why a model predicts a given price for this duplex. One is called a "break-down" explanation, and computes how contributions attributed to individual features change the mean model's prediction for a particular observation, like our duplex. For the linear model, the duplex status, size, longitude, and age all contribute the most to the price being driven down from the intercept.
+There are multiple possible approaches to understanding why a model predicts a given price for this duplex. One is called a "break-down" explanation, and computes how contributions attributed to individual features change the mean model's prediction for a particular observation, like our duplex. For the linear model, the duplex status (`Bldg_Type = 3`)[^dalexlevels], size, longitude, and age all contribute the most to the price being driven down from the intercept.
 
 ```{r}
 lm_breakdown <- predict_parts(explainer = explainer_lm, new_observation = duplex)
 lm_breakdown
 ```
+
+[^dalexlevels]: Notice that this package for model explanations focuses the **level** of categorical predictors in this type of output, like `Bldg_Type = 3` for duplex and `Neighborhood = 1` for North Ames.
 
 The most important features are slightly different for the random forest model, with the size, age, and duplex status being most important.
 
