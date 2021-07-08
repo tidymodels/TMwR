@@ -498,17 +498,93 @@ To illustrate the delegation of tasks to the workers in this scheme, the same ex
 
 ```{r grid-logging-all, echo = FALSE, message = FALSE, fig.height = 7}
 load("extras/parallel_times/everything_times.RData")
-everything_times %>%
-  dplyr::rename(operation = label) %>% 
-  ggplot(aes(y = id, x = duration, fill = operation)) +
-  geom_bar(stat = "identity", col = "black") +
-  facet_wrap(~ pid, nrow = 2) + 
-  labs(y = NULL, x = "Elapsed Time") + 
-  scale_fill_brewer(palette = "Set2") +
-  theme(legend.position = "top")
+
+repeats <- 
+  everything_times %>% 
+  dplyr::filter(id == "Fold1" & event == "preproc") %>% 
+  nrow()
+
+everything_times <- 
+ everything_times %>%
+ dplyr::rename(operation = label) %>% 
+ mutate(operation = as.character(operation)) %>% 
+ arrange(pid, id, operation) %>% 
+ select(pid, id, operation, duration)
+
+start_stop <- 
+ everything_times %>%
+ pivot_wider(
+  id_cols = c(pid, id),
+  names_from = "operation",
+  values_from = "duration"
+ ) %>% 
+ group_by(pid) %>% 
+ mutate(
+  total = model + preprocess,
+  .stop_mod = cumsum(total),
+  prev = dplyr::lag(total, 1),
+  prev = ifelse(is.na(prev), 0, prev),
+  .start_pre = cumsum(prev),
+  .stop_pre = .start_pre + preprocess,
+  .start_mod = .stop_pre
+ ) %>% 
+ ungroup()  %>% 
+ select(pid, id, .start_pre, .stop_pre, .start_mod, .stop_mod) 
+
+starts <- 
+ start_stop %>% 
+ select(pid, id, contains("start")) %>% 
+ pivot_longer(
+  cols = c(.start_pre, .start_mod),
+  values_to = ".start"
+ ) %>% 
+ mutate(
+  operation = ifelse(grepl("mod$", name), "model", "preprocess")
+ ) %>% 
+ select(-name)
+
+stops <- 
+ start_stop %>% 
+ select(pid, id, contains("stop")) %>% 
+ pivot_longer(
+  cols = c(.stop_pre, .stop_mod),
+  values_to = ".stop"
+ ) %>% 
+ mutate(
+  operation = ifelse(grepl("mod$", name), "model", "preprocess")
+ ) %>% 
+ select(-name)
+
+id_offset <- 0.4
+start_stop_dat <- 
+ full_join(starts, stops, by = c("pid", "id", "operation")) %>% 
+ mutate(
+  id_num = as.numeric(factor(id)),
+  id_start = id_num - id_offset,
+  id_stop  = id_num + id_offset
+  )
+
+start_stop_dat %>% 
+ ggplot(aes(y = id_num, x = .start)) +
+ geom_rect(
+  aes(
+   xmin = .start,
+   xmax = .stop,
+   ymin = id_start,
+   ymax = id_stop,
+   fill = operation
+  ),
+  col = "black"
+ ) +
+ facet_wrap(~ pid, nrow = 2) +
+ labs(y = NULL, x = "Elapsed Time") + 
+ scale_fill_brewer(palette = "Set2") + 
+ scale_y_continuous(breaks = 1:5, labels = paste("Fold", 1:5)) +
+ theme_bw() +
+ theme(legend.position = "top", panel.grid.minor = element_blank())
 ```
 
-Here, each worker process handles multiple folds and the preprocessing is needlessly repeated. For example, for the first fold, the preprocessing was computed `r everything_times %>% dplyr::filter(id == "Fold1" & event == "preproc") %>% nrow()` times instead of once. 
+Here, each worker process handles multiple folds and the preprocessing is needlessly repeated. For example, for the first fold, the preprocessing was computed `r repeats` times instead of once. 
 
 For this scheme, the control function argument is `parallel_over = "everything"`. 
 
