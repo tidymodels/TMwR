@@ -9,10 +9,10 @@ library(discrim)
 library(uwot)
 library(doMC)
 library(patchwork)
+library(beans)
 
 registerDoMC(cores = parallel::detectCores())
 tidymodels_prefer()
-load("RData/dry_beans.RData")
 ```
 
 # Dimensionality reduction {#dimensionality}
@@ -69,21 +69,21 @@ Note that shapes such as circles and squares have low eccentricity while oblong 
 
 Many of these image features have high correlations; objects with large areas are more likely to have very low eccentricity. As noted above, there are often multiple methods to quantify the same underlying characteristics (e.g. size). Many of these image features have high correlation; objects with large areas are more likely to have very low eccentricity. As noted above, there are often multiple methods to quantify the same underlying characteristics (e.g. size).
 
-In the bean data, `r ncol(dry_beans) - 1` morphology features were computed: `r knitr::combine_words(gsub("_", " ", names(dry_beans)[-ncol(dry_beans)]))`. The latter four are described in @symons1988211. While the dimensionality of these data is not large, it does provide a nice working example to demonstrate how to reduce the number of features.
+In the bean data, `r ncol(beans) - 1` morphology features were computed: `r knitr::combine_words(gsub("_", " ", names(beans)[-ncol(beans)]))`. The latter four are described in @symons1988211. While the dimensionality of these data is not large, it does provide a nice working example to demonstrate how to reduce the number of features.
 
 The data are loaded using
 
 ```{r dimensionality-import}
 library(tidymodels)
 tidymodels_prefer()
-load("RData/dry_beans.RData")
+library(beans)
 ```
 
 It is important to maintain good data discipline when evaluating dimensionality reduction techniques (especially for their use within a model). For our analyses, a test set is created. The remaining data are split into training and validation sets:
 
 ```{r dimensionality-split}
 set.seed(1701)
-bean_split <- initial_split(dry_beans, strata = class, prop = 3/4)
+bean_split <- initial_split(beans, strata = class, prop = 3/4)
 
 bean_train <- training(bean_split)
 bean_test  <- testing(bean_split)
