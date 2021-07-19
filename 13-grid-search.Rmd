@@ -12,10 +12,14 @@ theme_set(theme_bw())
 library(doMC)
 registerDoMC(cores = parallel::detectCores(logical = TRUE))
 
-#tune_grid takes 10 threads ... make sure that any multithreaded BLAS replacements are not stepping on top of each other (context switching is bad)
-library(RhpcBLASctl)
-omp_set_num_threads(floor(get_num_cores() / 10) %>% max(1))
-blas_set_num_threads(floor(get_num_cores() / 10) %>% max(1))
+if(grepl("(MKL|OpenBLAS|GotoBLAS|ACML)",
+         paste(sessionInfo()$BLAS,sessionInfo()$LAPACK),
+         ignore.case = TRUE)) {
+  #tune_grid takes 10 threads ... make sure that any multithreaded BLAS replacements are not stepping on top of each other (context switching is bad)
+  library(RhpcBLASctl)
+  omp_set_num_threads(floor(get_num_cores() / 10) %>% max(1))
+  blas_set_num_threads(floor(get_num_cores() / 10) %>% max(1))
+}
 
 library(kableExtra)
 
