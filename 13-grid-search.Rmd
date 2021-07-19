@@ -5,11 +5,16 @@ library(finetune)
 library(ggforce)
 library(av)
 library(lme4)
+
 data(cells)
 theme_set(theme_bw())
 
 library(doMC)
 registerDoMC(cores = parallel::detectCores(logical = TRUE))
+
+#tune_grid takes 10 threads ... make sure that any multithreaded BLAS replacements are not stepping on top of each other (context switching is bad)
+library(RhpcBLASctl)
+omp_set_num_threads(floor(get_num_cores() / 10) %>% max(1))
 
 library(kableExtra)
 
