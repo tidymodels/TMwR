@@ -46,7 +46,7 @@ The tidymodels framework does not itself contain software for model explanations
 
 In Chapters \@ref(resampling) and \@ref(compare), we trained and compared several models to predict the price of homes in Ames, IA, including a linear model with interactions and a random forest model.
 
-```{r include=FALSE}
+```{r explain-obs-pred, include=FALSE}
 bind_rows(
   augment(lm_fit, ames_train) %>% mutate(model = "lm + interactions"),
   augment(rf_fit, ames_train) %>% mutate(model = "random forest")
@@ -59,7 +59,7 @@ bind_rows(
 
 Let's build model-agnostic explainers for both of these models to why they make the predictions they do. We can use the `r pkg(DALEXtra)` add-on package for `r pkg(DALEX)`, which provides support for tidymodels. @Biecek2021 provide a thorough exploration of how to use `r pkg(DALEX)` for model explanations; this chapter only summarizes some important approaches, specific to tidymodels. To compute any kind of model explanation, global or local, using `r pkg(DALEX)`, we first create an _explainer_ for each model.
 
-```{r message=FALSE}
+```{r explain-explainers, message=FALSE}
 library(DALEXtra)
 vip_features <- c("Neighborhood", "Gr_Liv_Area", "Year_Built", 
                   "Bldg_Type", "Latitude", "Longitude")
@@ -93,21 +93,21 @@ A linear model is typically straightforward to interpret and explain; you may no
 
 Local model explanations provide information about a prediction for a single observation. For example, let's consider an older duplex in the North Ames neighborhood (Section \@ref(model-types)).
 
-```{r}
+```{r explain-duplex}
 duplex <- vip_train[121,]
 duplex
 ```
 
 There are multiple possible approaches to understanding why a model predicts a given price for this duplex. One is called a "break-down" explanation, and computes how contributions attributed to individual features change the mean model's prediction for a particular observation, like our duplex. For the linear model, the duplex status, size, longitude, and age all contribute the most to the price being driven down from the intercept.
 
-```{r}
+```{r explain-duplex-lm-breakdown}
 lm_breakdown <- predict_parts(explainer = explainer_lm, new_observation = duplex)
 lm_breakdown
 ```
 
 The most important features are slightly different for the random forest model, with the size, age, and duplex status being most important.
 
-```{r}
+```{r explain-duplex-rf-breakdown}
 rf_breakdown <- predict_parts(explainer = explainer_rf, new_observation = duplex)
 rf_breakdown
 ```
@@ -118,7 +118,7 @@ Model break-down explanations like these depend on the _order_ of the features.
 
 If we choose the order for the random forest model explanation to be the same as the default for the linear model (chosen via a heuristic), we can change the relative importance of the features.
 
-```{r}
+```{r explain-duplex-rf-breakdown-reorder}
 predict_parts(explainer = explainer_rf, new_observation = duplex,
               order = lm_breakdown$variable_name)
 ```
@@ -127,7 +127,7 @@ predict_parts(explainer = explainer_rf, new_observation = duplex,
 We can use the fact that these break-down explanations change based on order to compute the most important features over all (or many) possible orderings. This is the idea behind Shapley Additive Explanations [@Lundberg2017], where the average contributions of features are computed under different combinations or "coalitions" of feature orderings. Let's compute SHAP attributions for our duplex, using `B = 20` random orderings.
 
 
-```{r}
+```{r explain-duplex-rf-shap-calc}
 shap_duplex <- 
   predict_parts(explainer = explainer_rf, 
                 new_observation = duplex, 
@@ -137,7 +137,7 @@ shap_duplex <-
 
 We could use the default plot method from `r pkg(DALEX)` by calling `plot(shap_duplex)`, or we can access the underlying data and create a custom plot. The box plots display the distribution of contributions across all the orderings we tried, and the bars display the average attribution for each feature.
 
-```{r}
+```{r explain-duplex-rf-shap}
 library(forcats)
 shap_duplex %>%
   group_by(variable) %>%
@@ -155,14 +155,14 @@ shap_duplex %>%
 
 What about a different observation in our data set? Let's look at a larger, newer one-family home in the Gilbert neighborhood.
 
-```{r}
+```{r explain-gilbert}
 big_house <- vip_train[1177,]
 big_house
 ```
 
 We compute SHAP average attributions in the same way.
 
-```{r}
+```{r explain-gilbert-shap-calc}
 shap_house <- 
   predict_parts(explainer = explainer_rf, 
                 new_observation = big_house, 
@@ -170,7 +170,7 @@ shap_house <-
                 B = 20)
 ```
 
-```{r echo=FALSE}
+```{r explain-gilbert-shap, echo=FALSE}
 shap_house %>%
   group_by(variable) %>%
   mutate(mean_val = mean(contribution)) %>%
@@ -200,35 +200,47 @@ If shuffling a column causes a large degradation in model performance, it is imp
 
 Using `r pkg(DALEX)`, we compute this kind of variable importance via the `model_parts()` function.
 
-```{r}
+```{r explain-global-calcs}
 vip_lm <- model_parts(explainer_lm, loss_function = loss_root_mean_square) 
 vip_rf <- model_parts(explainer_rf, loss_function = loss_root_mean_square)
 ```
 
-Again, we could use the default plot method from `r pkg(DALEX)` by calling `plot(vip_lm, vip_rf)` but the underlying data is available for exploration, analysis, and plotting.
+Again, we could use the default plot method from `r pkg(DALEX)` by calling `plot(vip_lm, vip_rf)` but the underlying data is available for exploration, analysis, and plotting. Let's create a function:
 
-```{r}
-full_vip <- bind_rows(vip_lm, vip_rf) %>%
-  filter(variable != "_baseline_")
+```{r explain-global-func}
+ggplot_imp <- function(...) {
+  obj <- list(...)
+  metric_name <- attr(obj[[1]], "loss_name")
+  metric_lab <- paste(metric_name, 
+                      "after permutations\n(higher indicates more important)")
+  
+  full_vip <- bind_rows(obj) %>%
+    filter(variable != "_baseline_")
+  
+  perm_vals <- full_vip %>% 
+    filter(variable == "_full_model_") %>% 
+    group_by(label) %>% 
+    summarise(dropout_loss = mean(dropout_loss))
+  
+  p <- full_vip %>%
+    filter(variable != "_full_model_") %>% 
+    mutate(variable = fct_reorder(variable, dropout_loss)) %>%
+    ggplot(aes(dropout_loss, variable, color = label, fill = label)) +
+    geom_vline(data = perm_vals, aes(xintercept = dropout_loss, color = label),
+               size = 1.4, lty = 2, alpha = 0.7) +
+    geom_boxplot(alpha = 0.2) +
+    theme(legend.position = "none") +
+    labs(x = metric_lab, 
+         y = NULL,  fill = NULL,  color = NULL)
+  if(length(obj) > 1) {
+    p <- p + facet_wrap(~label)
+  }
+  p
+}
+```
 
-full_rmse <- full_vip %>% 
-  filter(variable == "_full_model_") %>% 
-  group_by(label) %>% 
-  summarise(dropout_loss = mean(dropout_loss))
-
-full_vip %>%
-  filter(variable != "_full_model_") %>% 
-  mutate(variable = fct_reorder(variable, dropout_loss)) %>%
-  ggplot(aes(dropout_loss, variable, color = label, fill = label)) +
-  geom_vline(data = full_rmse, aes(xintercept = dropout_loss, color = label),
-             size = 1.4, lty = 2, alpha = 0.7) +
-  geom_boxplot(alpha = 0.2) +
-  facet_wrap(~label, ncol = 1) +
-  theme(legend.position = "none") +
-  labs(x = "RMSE after permutations (higher indicates more important)", 
-       y = NULL, 
-       fill = NULL, 
-       color = NULL)
+```{r explain-global}
+ggplot_imp(vip_lm, vip_rf)
 ```
 
 The dashed line in each panel shows the RMSE for the full model, either the linear model or the random forest model. Features further to the right are more important, because permuting them results in higher RMSE. There is quite a lot of interesting information to learn from this plot; for example, neighborhood is quite important in the linear model with interactions/splines but the second least important feature for the random forest model.
@@ -244,11 +256,11 @@ Partial dependence profiles show how the expected value of a model prediction, l
 
 One way to build such a profile is by aggregating or averaging profiles for individual observations. A profile showing how an individual observation's prediction changes as a function of a given feature is called an ICE (individual conditional expectation) profile or a CP (*ceteris paribus*) profile. We can compute such individual profiles (for 500 of the observations in our training set) and then aggregate them using the `r pkg(DALEX)` function `model_profile()`.
 
-```{r}
+```{r explain-year-built-pdp-calc}
 pdp_age <- model_profile(explainer_rf, N = 500, variables = "Year_Built")
 ```
 
-```{r echo=FALSE}
+```{r explain- echo=FALSE}
 as_tibble(pdp_age$agr_profiles) %>%
   ggplot(aes(`_x_`, `_yhat_`)) +
   geom_line(data = as_tibble(pdp_age$cp_profiles),
@@ -263,13 +275,13 @@ as_tibble(pdp_age$agr_profiles) %>%
 
 Partial dependence profiles can be computed for any other feature in the model, and also for groups in the data, such as `Bldg_Type`. Let's use 1,000 observations for these profiles.
 
-```{r}
+```{r explain-build-type-pdp}
 pdp_liv <- model_profile(explainer_rf, N = 1000, 
                          variables = "Gr_Liv_Area", 
                          groups = "Bldg_Type")
 ```
 
-```{r echo=FALSE}
+```{r explain-build-type, echo=FALSE}
 as_tibble(pdp_liv$agr_profiles) %>%
   mutate(`_label_` = stringr::str_remove(`_label_`, "random forest_")) %>%
   ggplot(aes(`_x_`, `_yhat_`, color = `_label_`)) +
@@ -286,7 +298,7 @@ as_tibble(pdp_liv$agr_profiles) %>%
 
 We have the option of using `plot(pdp_liv)`, but since we are making plots with the underlying data here, we can even facet by one of the features to visualize how the predictions change differently, highlighting the model's behavior for subgroups.
 
-```{r echo=FALSE}
+```{r explain-build-type-facet, echo=FALSE}
 as_tibble(pdp_liv$agr_profiles) %>%
   mutate(Bldg_Type = stringr::str_remove(`_label_`, "random forest_")) %>%
   ggplot(aes(`_x_`, `_yhat_`, color = Bldg_Type)) +
@@ -308,6 +320,32 @@ There is not one right approach for building model explanations and the options 
 ## Beans beans beans
 
 Model explanation for beans example from dimensionality reduction chapter
+
+
+```{r explain-bean-data, include=FALSE}
+library(beans)
+set.seed(1701)
+bean_split <- initial_split(beans, strata = class, prop = 3/4)
+bean_train <- training(bean_split)
+bean_test  <- testing(bean_split)
+
+load("RData/rda_fit.RData")
+```
+
+
+```{r explain-bea-vip}
+vip_beans <- 
+  explain_tidymodels(
+    rda_wflow_fit, 
+    data = bean_train %>% select(-class), 
+    y = bean_train$class,
+    label = "RDA",
+    verbose = FALSE
+  ) %>% 
+  model_parts() 
+
+ggplot_imp(vip_beans)
+```
 
 ## Chapter summary {#explain-summary}
 
