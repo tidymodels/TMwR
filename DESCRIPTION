@@ -1,6 +1,6 @@
 Package: TMwR
 Title: Tidy Modeling with R.
-Version: 0.0.1.9009
+Version: 0.0.1.9010
 Authors@R: c(
     person(
       given = "Max",
@@ -74,4 +74,3 @@ Imports:
   workflowsets (>= 0.0.1),
   xgboost,
   yardstick
-

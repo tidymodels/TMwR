@@ -9,6 +9,7 @@ bookdown::gitbook:
     edit:
       link: https://github.com/tidymodels/TMwR/edit/master/%s
       text: "Edit"
+    fontsettings: null  
     sharing: no
 
 bookdown::pdf_book:
