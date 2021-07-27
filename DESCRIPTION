@@ -76,5 +76,4 @@ Imports:
   workflowsets (>= 0.0.1),
   xgboost,
   yardstick
-Remotes:
-  tidymodels/finetune
+
