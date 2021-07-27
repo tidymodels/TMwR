@@ -63,7 +63,7 @@ Imports:
   rstanarm,
   rules,
   sessioninfo,
-  stacks,
+  stacks (>= 	0.2.1),
   tibble (>= 3.1.0),
   tidymodels (>= 0.1.3),
   tidyposterior (>= 0.0.3),
@@ -71,9 +71,7 @@ Imports:
   themis,
   tune (>= 0.1.3),
   workflows (>= 0.2.2),
-  workflowsets (>= 0.0.1),
+  workflowsets (>= 0.1.0),
   xgboost,
   yardstick
-Remotes:
-  tidymodels/finetune,
-  tidymodels/stacks
+
