@@ -1,6 +1,353 @@
 ```{r inferential-setup, include = FALSE}
 library(tidymodels)
+library(poissonreg)
+library(infer)
 tidymodels_prefer()
+theme_set(theme_bw())
+
+data("bioChemists", package = "pscl")
 ```
 
 # Inferential analysis {#inferential}
+
+We have concerned ourselves in previous chapters with creating models whose main output is an accuracy predicted value. In contrast, inferential models are usually created to make inferences or judgements about some component of the model, such as a coefficient value or other parameter. These results are often used to use data to answer some (hopefully) pre-defined question or hypothesis. In predictive models, predictions on hold-out data where used to validate or characterize the quality of the model. For inferential methods, previously introduced in Section \@ref(model-types), there is a focus on validating the probabilistic or structural assumptions that are made prior to fitting the model.
+
+For example, in ordinary linear regression, the common assumption is that the residual values are independent and follow a Gaussian distribution with a constant variance. While there may be scientific or domain knowledge of the situation that lends credence to this assumption, the residuals from the fitted model are usually examined to determine if the assumption was a good idea. As a result, the methods for determining if the model's assumptions have been met are not as simple as looking at holdout predictions (although that can be very useful).
+
+P-values will be used in subsequent sections. However, tidymodels tends to factor confidence intervals over p-values as a method for quantifying the validity of a null hypothesis. As previously shown in Section \@ref(tidyposterior), Bayesian methods are often superior to both in terms of ease of interpretation (but can be more computationally expensive).
+
+::: {.rmdwarning}
+There has been a push in recent years to move away from p-values in favor of other methods [@pvalue]. For more information on this issue, see the Volume 73 of [*The American Statistician*](https://www.tandfonline.com/toc/utas20/73/) for more information and discussion.
+:::
+
+In this chapter, we describe how to use tidymodels for fitting and assessing inferential models. In some cases, the tidymodels framework can help users work with the objects produced by their models. In others, it can help make assessments of the quality of a given model.
+
+## An example: Inference regarding counts
+
+We'll use the biochemistry publication data from the `r pkg(pscl)` package. These data consist of information on 915 Ph.D. biochemistry graduates and tries to explain factors that impact their academic productivity (measured via number of articles published within three years). The predictors include the sex of the graduate, their marital status, the number of children that are at least five years old, the prestige of their department, and the number of articles produced by their mentor in the same time period.
+
+A plot of the data shows that many graduates did not publish any articles in this time and that the outcome follows a right-skewed distribution.
+
+```{r inferential-count-dist}
+library(tidymodels)
+tidymodels_prefer()
+
+data("bioChemists", package = "pscl")
+
+ggplot(bioChemists, aes(x = art)) + 
+  geom_histogram(binwidth = 1, col = "white") + 
+  labs(x = "Number of articles within 3y of graduation")
+```
+
+Since the outcome data are counts, the most common distribution assumption to make is that the outcome has a Poisson distribution. This chapter will use these data for several types of analyses.
+
+## Simple comparisons
+
+The author's original goal was to determine if there is a different in publications between men and women [@Long1992]. The data from the study show:
+
+```{r inferential-counts}
+bioChemists %>% 
+  group_by(fem) %>% 
+  summarize(counts = sum(art), n = length(art))
+```
+
+There were many more publications by men, although there were more men in the data. The simplest approach to analyzing these data would be to do a two-sample comparison using the `poisson.test()` function in the `r pkg(stats)` package. It requires the counts for one or two groups. A basic application of the test is:
+
+```{r inferential-test-basic}
+poisson.test(c(930, 619), T = 3)
+```
+
+The function reports a p-value as well as a confidence interval for the ratio of the publication rates. The results indicate that the observed different is greater than the experiential noise.
+
+One issue with using this function is that the results come back as an `htest` object. While this type of object has a well defined structure, it can be difficult to consume for subsequent operations such as reporting or visualizations. The most impactful tool that tidymodels has to offer for inferential models is the `tidy()` functions in the `r pkg(broom)` package. As previously seen, this function makes a well formed, predictably named tibble from the object. Using this function:
+
+```{r inferential-test-tidy}
+poisson.test(c(930, 619)) %>% 
+  tidy()
+```
+
+::: {.rmdnote}
+Between the `r pkg(broom)` and `r pkg(broom.mixed)` packages, there are `tidy()` methods for more than 150 models.
+:::
+
+While the Poisson distribution is reasonable, we might also want to make an assessment using fewer assumptions. Two methods that might be helpful are the bootstrap and permutation tests [@davison1997bootstrap].
+
+The `r pkg(infer)` package is a very powerful and intuitive tool for hypothesis testing [@ModernDive]. Its syntax is concise and designed for non-statisticians.
+
+First, we `specify()` to use the difference in the mean number of articles between the sexes and the `calculate()` the statistic from the data. Recall that the maximum likelihood estimator for the Poisson mean is the usual sample mean.
+
+With `r pkg(infer)`, we specify the outcome and covariate, then state the statistic of interest:
+
+```{r inferential-mean-diff-obs}
+library(infer)
+
+observed <- 
+  bioChemists %>%
+  specify(art ~ fem) %>%
+  calculate(stat = "diff in means", order = c("Men", "Women"))
+observed
+```
+
+From here, we compute a confidence interval for this mean by creating the bootstrap distribution via `generate()`; the same statistic is computed for each resampled version of the data.
+
+```{r inferential-mean-diff-boot-gen}
+set.seed(2101)
+bootstrapped <- 
+  bioChemists %>%
+  specify(art ~ fem)  %>%
+  generate(reps = 2000, type = "bootstrap") %>%
+  calculate(stat = "diff in means", order = c("Men", "Women"))
+bootstrapped
+```
+
+A percentile interval is calculated using:
+
+```{r inferential-mean-diff-boot-ci}
+percentile_ci <- get_ci(bootstrapped)
+percentile_ci
+```
+
+`r pkg(infer)` has a very high-level API for showing the results for the analysis:
+
+```{r inferential-mean-diff-boot}
+visualize(bootstrapped) +
+    shade_confidence_interval(endpoints = percentile_ci)
+```
+
+Since the interval does not include zero, there is the indication that men have published more articles than women.
+
+If we require a p-value, `r pkg(infer)` can compute one via a permutation test. The syntax is very similar to the bootstrapping code above. We add a `hypothesize()` verb to state the type of assumption to test and the `generate()` call contains an option to shuffle the data.
+
+```{r inferential-mean-diff-perm-gen}
+set.seed(2102)
+permuted <- 
+  bioChemists %>%
+  specify(art ~ fem)  %>%
+  hypothesize(null = "independence") %>%
+  generate(reps = 2000, type = "permute") %>%
+  calculate(stat = "diff in means", order = c("Men", "Women"))
+permuted
+```
+
+The visualization code is also very similar. A red line signifies the observed value:
+
+```{r inferential-mean-diff-perm}
+visualize(permuted) +
+    shade_p_value(obs_stat = observed, direction = "two-sided")
+
+# Actual p-value is:
+permuted %>%
+  get_p_value(obs_stat = observed, direction = "two-sided")
+```
+
+Since the line is far away from the permutation distribution (which represents the null hypothesis), the likelihood of the null being true is exceedingly small.
+
+The two-sample tests shown above are probably sub-optimal since they do not take into account other factors. Let's move on to a more complex model that can use covariates.
+
+## Log-linear models
+
+The focus of the rest of this chapter will be on a generalized linear model [@Dobson99] where we assume the counts follow a Poisson distribution. For this model, the covariates/predictors enter the model in a log-linear fashion.
+
+$$
+\log(\lambda) = \beta_0 + \beta_1x_1 + \ldots + \beta_px_p
+$$ 
+
+where $\lambda$ is the expected value of the counts.
+
+Let's fit a simple model that contains all of the predictor columns. The `r pkg(poissonreg)` package will create this model specification:
+
+```{r inferential-glm}
+library(poissonreg)
+
+# default engine is 'glm'
+log_lin_spec <- poisson_reg()
+
+log_lin_fit <- 
+  log_lin_spec %>% 
+  fit(art ~ ., data = bioChemists)
+log_lin_fit
+```
+
+The `tidy()` method succinctly summarizes the coefficients for the model (along with 90% confidence intervals).
+
+```{r inferential-glm-tidy}
+tidy(log_lin_fit, conf.int = TRUE, conf.level = 0.90)
+```
+
+Looking at these results, `phd` (the prestige of their department) may not have any relationship with the outcome.
+
+While the Poisson distribution is the routine assumption for data like these, it may be beneficial to conduct a rough check the model assumptions but fitting the models without using the Poisson likelihood to calculate the confidence intervals. The `r pkg(rsample)` package has a convenience function to compute bootstrap confidence intervals for `lm()` and `glm()` models. We can use this function, while explicitly declaring `family = poisson`, to compute a large number of model fits. By default, we compute a 90% confidence bootstrap-t interval but percentile and BCa intervals are also available:
+
+```{r inferential-glm-ci}
+set.seed(2103)
+glm_boot <- 
+  reg_intervals(art ~ ., data = bioChemists, model_fn = "glm", family = poisson)
+glm_boot
+```
+
+When we compare these results to the purely parametric results from `glm()`, the bootstrap intervals are somewhat wider. If the data were truly Poisson, these intervals would have more similar widths.
+
+```{r inferential-glm-intervals, echo = FALSE}
+glm_boot %>% 
+  select(term, method = .method, .estimate, .lower, .upper) %>% 
+  bind_rows(
+    tidy(log_lin_fit, conf.int = TRUE, conf.level = 0.90) %>% 
+      filter(term != "(Intercept)") %>% 
+      mutate(method = "parametric") %>% 
+      select(term, method, .estimate = estimate, .lower = conf.low, .upper = conf.high)
+  )%>%
+  ggplot(aes(x = .estimate, y = term, col = method)) +
+  geom_vline(xintercept = 0, lty = 3) +
+  geom_point(position = position_dodge(width = 1 / 2), cex = .9) +
+  geom_errorbar(aes(xmin = .lower, xmax = .upper),
+                width = 1 / 4,
+                position = position_dodge(width = 1 / 2)) +
+  labs(x = "GLM coefficients", y = NULL)
+```
+
+Determining which predictors to include in the model is a difficult problem. One approach to do conduct likelihood ratio tests [@McCullaghNelder89] between nested models. Based on the confidence intervals, there is evidence that a simpler model without `phd` may be sufficient. Let's fit a smaller model, the conduct a statistical test, and tidy the results:
+
+```{r inferential-reduced}
+log_lin_reduced <- 
+  log_lin_spec %>% 
+  fit(art ~ ment + kid5 + fem + mar, data = bioChemists)
+
+anova(
+  extract_fit_engine(log_lin_reduced),
+  extract_fit_engine(log_lin_fit),
+  test = "LRT"
+) %>%
+  tidy()
+```
+
+We'll exclude `phd` from further analyses.
+
+## A more complex model
+
+For count data, there are occasions where the number of zero counts is larger than a simple Poisson distribution would prescribe. A more complex model is the zero-inflated Poisson (ZIP) model; see @Mullahy, @Lambert1992, and @JSSv027i08. Here, there are two sets of covariates: one for the non-zero count data and others that affect the probability of zeros (denotes as $\pi$). The mean function is
+
+$$\lambda = 0 \pi + (1 - \pi) \lambda_{nz}$$
+
+where
+
+$$
+\begin{align}
+\log(\lambda_{nz}) &= \beta_0 + \beta_1x_1 + \ldots + \beta_px_p \notag \\
+& and \notag \\
+log\left(\frac{\pi}{1-\pi}\right) &= \gamma_0 + \gamma_1z_1 + \ldots + \gamma_qz_q \notag 
+\end{align}
+$$
+
+where the $x$ covariates affect the non-zero count values and the $z$ columns influence the probability of a zero counts. The two sets of predictors do not need to be mutually exclusive.
+
+We'll fit a model with a full set of $z$ covariates:
+
+```{r inference-zip-model}
+zero_inflated_spec <- poisson_reg() %>% set_engine("zeroinfl")
+
+zero_inflated_fit <- 
+  zero_inflated_spec %>% 
+  fit(art ~ fem + mar + kid5 + ment | fem + mar + kid5 + phd + ment,
+      data = bioChemists)
+
+zero_inflated_fit
+```
+
+Since the coefficients for this model are also estimated using maximum likelihood, let's try to use another likelihood ratio test to understand if the new model terms are helpful.
+
+```{r inference-zip-anova, error = TRUE}
+anova(
+  extract_fit_engine(zero_inflated_fit),
+  extract_fit_engine(log_lin_reduced),
+  test = "LRT"
+) %>%
+  tidy()
+```
+
+An `anova()` method isn't implemented for `zeroinfl` objects. An alternative would be to use an *information criterion statistic*, such as the Akaike information criterion (AIC) [@claeskens2016statistical]. This computes the log-likelihood (from the training set) and penalizes that value based on the training set size and the number of model parameters. In R's parameterization, smaller AIC values are better.
+
+The results indicate that the ZIP model is preferable:
+
+```{r inference-zip-aic}
+zero_inflated_fit %>% extract_fit_engine() %>% AIC()
+log_lin_reduced   %>% extract_fit_engine() %>% AIC()
+```
+
+However, it's hard to contextualize these values and assess *how* different they actually are. To solve this problem, we'll resample a large number of each of these two models. From these, we can compute the AIC values for each and determine how often the results favor the ZIP model.
+
+We'll also compute more bootstrap confidence intervals in a bit so we specify the `apparent = TRUE` option when creating the bootstrap samples. This is required for some types of intervals.
+
+First, we create the 4,000 model fits:
+
+```{r inference-zip-comp}
+zip_form <- art ~ fem + mar + kid5 + ment | fem + mar + kid5 + phd + ment
+glm_form <- art ~ fem + mar + kid5 + ment
+
+set.seed(2104)
+bootstrap_models <-
+  bootstraps(bioChemists, times = 2000, apparent = TRUE) %>%
+  mutate(
+    glm = map(splits, ~ fit(log_lin_spec,       glm_form, data = analysis(.x))),
+    zip = map(splits, ~ fit(zero_inflated_spec, zip_form, data = analysis(.x)))
+  )
+bootstrap_models
+```
+
+::: {.rmdnote}
+The `r pkg(furrr)` package is a parallel implementation of many `r pkg(purrr)` functions. For example, instead of using `map()`, the `future_map()` function does the same calculations in parallel (using the `r pkg(future)` package under the hood).
+:::
+
+Now we can extract the model fits and their corresponding AIC values:
+
+```{r inference-zip-aic-resampled}
+bootstrap_models <-
+  bootstrap_models %>%
+  mutate(
+    glm_aic = map_dbl(glm, ~ extract_fit_engine(.x) %>% AIC()),
+    zip_aic = map_dbl(zip, ~ extract_fit_engine(.x) %>% AIC()),
+  )
+mean(bootstrap_models$zip_aic < bootstrap_models$glm_aic)
+```
+
+It seems definitive that accounting for the excessive number of zero counts is a good idea.
+
+::: {.rmdnote}
+We might have used `fit_resamples()` or a workflow set to conduct these computations. Here, we used `mutate()` and `map()` to compute the models to demonstrate how one might use tidymodels tools for models that not enabled by one of the `r pkg(parsnip)` packages.
+:::
+
+Since we have computed the resampled model fits, let's create bootstrap intervals for the zero probability model coefficients (i.e., the $\gamma_j$). We can extract these with the `tidy()` method and use the `type = "zero"` option to obtain these estimates:
+
+```{r inference-zip-coefs}
+bootstrap_models <-
+  bootstrap_models %>%
+  mutate(zero_coefs  = map(zip, ~ tidy(.x, type = "zero")))
+
+# One example:
+bootstrap_models$zero_coefs[[1]]
+```
+
+It's is a good idea to visualize the bootstrap distributions of the coefficients:
+
+```{r inference-zip-bootstrap}
+bootstrap_models %>% 
+  unnest(zero_coefs) %>% 
+  ggplot(aes(x = estimate)) +
+  geom_histogram(bins = 25, col = "white") + 
+  facet_wrap(~ term, scales = "free_x") + 
+  geom_vline(xintercept = 0, col = "green")
+```
+
+From visual inspection, one of the covariates (`ment`) appears to be important and has a very skewed distribution. The extra space in some of the facets indicates that there are some outilers in the estimates. This *might* occur when models that did not converge; those results should probably be excluded from the resamples. For the results above, the outliers are only due to extreme parameter estimates; all of the models converged.
+
+`r pkg(rsample)` contains a set of functions named `int_*()` that compute different types of bootstrap intervals. Since the `tidy()` method contains standard error estimates, the bootstrap-t intervals can be computed. We'll also compute the standard percentile intervals too. By default, 90% confidence intervals are computed.
+
+```{r inference-zip-intervals}
+bootstrap_models %>% int_pctl(zero_coefs)
+bootstrap_models %>% int_t(zero_coefs)
+```
+
+From these results, we can get a good idea of which predictor(s) to include in the zero count probability model. It may be sensible to refit a smaller model to assess if the bootstrap distribution for `ment` is still skewed.
+
+## Other tidy tools for inference
+
+The methods described in this chapter are a sample of what is available in tidymodels and has focused on resampling and Frequentist methods. Arguably, Bayesian analysis is a very effective (if not superior) approach for inference. A variety of Bayesian models are available via `r pkg(parsnip)`. Additionally, the `r pkg(multilevelmod)` package (currently on GitHub) enables users to fit hierarchical Bayesian and non-Bayesian models (e.g., mixed models). The `r pkg(broom.mixed)` and `r pkg(tidybayes)` packages are excellent tools for extracting data for plots and summaries. Finally, for data sets with a single hierarchy, such as simple longitudinal or repeated measures data, `r pkg(rsample)`'s `group_vfold_cv()` function facilitates straightforward out-of-sample characterizations of model performance.
