@@ -96,7 +96,7 @@ A linear model is typically straightforward to interpret and explain; you may no
 Dealing with significant feature engineering transformations during model explainability highlights some options we have (or sometimes, ambiguity in such analyses). We can quantify global or local model explanations either in terms of:
 
 - **original, basic predictors** as they existed without significant feature engineering transformations, or
-- **derived features**, such as those created via dimensionality reduction (Chapter \@ref(dimensionality)) or spline terms, as in this example.
+- **derived features**, such as those created via dimensionality reduction (Chapter \@ref(dimensionality)) or interactions and spline terms, as in this example.
 
 
 ## Local explanations
@@ -239,21 +239,28 @@ ggplot_imp <- function(...) {
   p <- full_vip %>%
     filter(variable != "_full_model_") %>% 
     mutate(variable = fct_reorder(variable, dropout_loss)) %>%
-    ggplot(aes(dropout_loss, variable, color = label, fill = label)) +
-    geom_vline(data = perm_vals, aes(xintercept = dropout_loss, color = label),
-               size = 1.4, lty = 2, alpha = 0.7) +
-    geom_boxplot(alpha = 0.2) +
+    ggplot(aes(dropout_loss, variable)) 
+  if(length(obj) > 1) {
+    p <- p + 
+      facet_wrap(vars(label)) +
+      geom_vline(data = perm_vals, aes(xintercept = dropout_loss, color = label),
+                 size = 1.4, lty = 2, alpha = 0.7) +
+      geom_boxplot(aes(color = label, fill = label), alpha = 0.2)
+  } else {
+    p <- p + 
+      geom_vline(data = perm_vals, aes(xintercept = dropout_loss),
+                 size = 1.4, lty = 2, alpha = 0.7) +
+      geom_boxplot(fill = "#91CBD765", alpha = 0.4)
+    
+  }
+  p +
     theme(legend.position = "none") +
     labs(x = metric_lab, 
          y = NULL,  fill = NULL,  color = NULL)
-  if(length(obj) > 1) {
-    p <- p + facet_wrap(vars(label))
-  }
-  p
 }
 ```
 
-```{r explain-global}
+```{r explain-global, fig.width=8, fig.height=4.5}
 ggplot_imp(vip_lm, vip_rf)
 ```
 

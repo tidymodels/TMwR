@@ -85,6 +85,7 @@ Imports:
     sessioninfo,
     stacks,
     stringr,
+    svglite,
     themis,
     tibble (>= 3.1.0),
     tidymodels (>= 0.1.3),
