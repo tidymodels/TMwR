@@ -30,7 +30,7 @@ lm_fit <- lm_wflow %>% fit(data = ames_train)
 
 In Section \@ref(model-types), we outlined a taxonomy of models and suggested that models typically are built as one or more of descriptive, inferential, or predictive. We suggested that model performance, as measured by appropriate metrics (like RMSE for regression or area under the ROC curve for classification), can be important for all applications of modeling. Similarly, model explanations, answering _why_ a model makes the predictions it does, can be important whether the purpose of your model is largely descriptive, to test a hypothesis, or to make a prediction. Answering the question "why?" allows modeling practitioners to understand which features were important in predictions and even how model predictions would change under different values for the features.
 
-For some models, like linear regression, it is clear how to explain why the model makes the predictions it does. The structure of a linear model contains coefficients for each predictor that are typically straightforward to interpret. For other models, like random forests or other models that capture non-linear behavior by design, it is less transparent how to explain the model's predictions from only the structure of the model itself. Instead, we can apply model explainer algorithms to generate understanding of predictions.
+For some models, like linear regression, it is usually clear how to explain why the model makes the predictions it does. The structure of a linear model contains coefficients for each predictor that are typically straightforward to interpret. For other models, like random forests that can capture non-linear behavior by design, it is less transparent how to explain the model's predictions from only the structure of the model itself. Instead, we can apply model explainer algorithms to generate understanding of predictions.
 
 :::rmdnote
 There are two types of model explanations, **global** and **local**. Global model explanations provide an overall understanding aggregated over a whole set of observations; local model explanations provide information about a prediction for a single observation.
@@ -54,44 +54,54 @@ bind_rows(
   ggplot(aes(Sale_Price, .pred, color = model)) +
   geom_abline(col = "gray50", lty = 2) + 
   geom_point(alpha = 0.5, show.legend = FALSE) +
-  facet_wrap(vars(model))
+  facet_wrap(vars(model)) +
+  labs(x = "true price", y = "predicted price")
 ```
 
-Let's build model-agnostic explainers for both of these models to why they make the predictions they do. We can use the `r pkg(DALEXtra)` add-on package for `r pkg(DALEX)`, which provides support for tidymodels. @Biecek2021 provide a thorough exploration of how to use `r pkg(DALEX)` for model explanations; this chapter only summarizes some important approaches, specific to tidymodels. To compute any kind of model explanation, global or local, using `r pkg(DALEX)`, we first create an _explainer_ for each model.
+Let's build model-agnostic explainers for both of these models to find out why they make the predictions they do. We can use the `r pkg(DALEXtra)` add-on package for `r pkg(DALEX)`, which provides support for tidymodels. @Biecek2021 provide a thorough exploration of how to use `r pkg(DALEX)` for model explanations; this chapter only summarizes some important approaches, specific to tidymodels. To compute any kind of model explanation, global or local, using `r pkg(DALEX)`, we first create an _explainer_ for each model.
 
 ```{r explain-explainers, message=FALSE}
 library(DALEXtra)
 vip_features <- c("Neighborhood", "Gr_Liv_Area", "Year_Built", 
                   "Bldg_Type", "Latitude", "Longitude")
 
-vip_train <- ames_train %>% 
+vip_train <- 
+  ames_train %>% 
   select(all_of(vip_features))
 
-explainer_lm <- explain_tidymodels(
-  lm_fit, 
-  data = vip_train, 
-  y = ames_train$Sale_Price,
-  label = "lm + interactions",
-  verbose = FALSE
-)
+explainer_lm <- 
+  explain_tidymodels(
+    lm_fit, 
+    data = vip_train, 
+    y = ames_train$Sale_Price,
+    label = "lm + interactions",
+    verbose = FALSE
+  )
 
-explainer_rf <- explain_tidymodels(
-  rf_fit, 
-  data = vip_train, 
-  y = ames_train$Sale_Price,
-  label = "random forest",
-  verbose = FALSE
-)
+explainer_rf <- 
+  explain_tidymodels(
+    rf_fit, 
+    data = vip_train, 
+    y = ames_train$Sale_Price,
+    label = "random forest",
+    verbose = FALSE
+  )
 ```
 
 
 :::rmdwarning
-A linear model is typically straightforward to interpret and explain; you may not often find yourself computing separate model explanations for a linear model. However, it can sometimes be difficult to understand or explain the predictions of even a linear model once it has splines and interaction terms!
+A linear model is typically straightforward to interpret and explain; you may not often find yourself using separate model explanation algorithms for a linear model. However, it can sometimes be difficult to understand or explain the predictions of even a linear model once it has splines and interaction terms!
 :::
+
+Dealing with significant feature engineering transformations during model explainability highlights some options we have (or sometimes, ambiguity in such analyses). We can quantify global or local model explanations either in terms of:
+
+- **original, basic predictors** as they existed without significant feature engineering transformations, or
+- **derived features**, such as those created via dimensionality reduction (Chapter \@ref(dimensionality)) or spline terms, as in this example.
+
 
 ## Local explanations
 
-Local model explanations provide information about a prediction for a single observation. For example, let's consider an older duplex in the North Ames neighborhood (Section \@ref(model-types)).
+Local model explanations provide information about a prediction for a single observation. For example, let's consider an older duplex in the North Ames neighborhood (Section \@ref(exploring-important-features)).
 
 ```{r explain-duplex}
 duplex <- vip_train[121,]
@@ -105,7 +115,9 @@ lm_breakdown <- predict_parts(explainer = explainer_lm, new_observation = duplex
 lm_breakdown
 ```
 
-[^dalexlevels]: Notice that this package for model explanations focuses the **level** of categorical predictors in this type of output, like `Bldg_Type = 3` for duplex and `Neighborhood = 1` for North Ames.
+[^dalexlevels]: Notice that this package for model explanations focuses on the **level** of categorical predictors in this type of output, like `Bldg_Type = 3` for duplex and `Neighborhood = 1` for North Ames.
+
+Since this linear model was trained using spline terms for latitude and longitude, the contribution to price for `Longitude` shown here combines the effects of all of its individual spline terms. The contribution here is in terms of the original `Longitude` feature, not the derived spline features.
 
 The most important features are slightly different for the random forest model, with the size, age, and duplex status being most important.
 
@@ -235,7 +247,7 @@ ggplot_imp <- function(...) {
     labs(x = metric_lab, 
          y = NULL,  fill = NULL,  color = NULL)
   if(length(obj) > 1) {
-    p <- p + facet_wrap(~label)
+    p <- p + facet_wrap(vars(label))
   }
   p
 }
@@ -262,13 +274,35 @@ One way to build such a profile is by aggregating or averaging profiles for indi
 pdp_age <- model_profile(explainer_rf, N = 500, variables = "Year_Built")
 ```
 
-```{r explain- echo=FALSE}
-as_tibble(pdp_age$agr_profiles) %>%
-  ggplot(aes(`_x_`, `_yhat_`)) +
-  geom_line(data = as_tibble(pdp_age$cp_profiles),
-            aes(x = Year_Built, group = `_ids_`),
-            size = 0.5, alpha = 0.1, color = "gray50") +
-  geom_line(size = 1.2, alpha = 0.8, color = "midnightblue") +
+Let's create another function for plotting the underlying data in this object:
+
+```{r explain-pdp-func}
+ggplot_pdp <- function(obj, x) {
+  
+  p <- 
+    as_tibble(obj$agr_profiles) %>%
+    mutate(`_label_` = stringr::str_remove(`_label_`, "^[^_]*_")) %>%
+    ggplot(aes(`_x_`, `_yhat_`)) +
+    geom_line(data = as_tibble(obj$cp_profiles),
+              aes(x = {{ x }}, group = `_ids_`),
+              size = 0.5, alpha = 0.05, color = "gray50")
+  
+  num_colors <- n_distinct(obj$agr_profiles$`_label_`)
+  
+  if (num_colors > 1) {
+    p <- p + geom_line(aes(color = `_label_`), size = 1.2, alpha = 0.8)
+  } else {
+    p <- p + geom_line(color = "midnightblue", size = 1.2, alpha = 0.8)
+  }
+  
+  p
+}
+```
+
+
+
+```{r explain-year-built}
+ggplot_pdp(pdp_age, Year_Built)  +
   labs(x = "Year built", 
        y = "Sale Price (log)", 
        color = NULL)
@@ -283,14 +317,8 @@ pdp_liv <- model_profile(explainer_rf, N = 1000,
                          groups = "Bldg_Type")
 ```
 
-```{r explain-build-type, echo=FALSE}
-as_tibble(pdp_liv$agr_profiles) %>%
-  mutate(`_label_` = stringr::str_remove(`_label_`, "random forest_")) %>%
-  ggplot(aes(`_x_`, `_yhat_`, color = `_label_`)) +
-  geom_line(data = as_tibble(pdp_liv$cp_profiles),
-            aes(x = Gr_Liv_Area, group = `_ids_`),
-            size = 0.5, alpha = 0.05, color = "gray50") +
-  geom_line(size = 1.2, alpha = 0.8) +
+```{r explain-build-type}
+ggplot_pdp(pdp_liv, Gr_Liv_Area) +
   scale_x_log10() +
   scale_color_brewer(palette = "Dark2") +
   labs(x = "Gross living area", 
@@ -298,9 +326,9 @@ as_tibble(pdp_liv$agr_profiles) %>%
        color = NULL)
 ```
 
-We have the option of using `plot(pdp_liv)`, but since we are making plots with the underlying data here, we can even facet by one of the features to visualize how the predictions change differently, highlighting the model's behavior for subgroups.
+We have the option of using `plot(pdp_liv)` for default `r pkg(DALEX)` plots, but since we are making plots with the underlying data here, we can even facet by one of the features to visualize how the predictions change differently, highlighting the model's behavior for subgroups.
 
-```{r explain-build-type-facet, echo=FALSE}
+```{r explain-build-type-facet}
 as_tibble(pdp_liv$agr_profiles) %>%
   mutate(Bldg_Type = stringr::str_remove(`_label_`, "random forest_")) %>%
   ggplot(aes(`_x_`, `_yhat_`, color = Bldg_Type)) +
@@ -321,8 +349,7 @@ There is not one right approach for building model explanations and the options 
 
 ## Beans beans beans
 
-Model explanation for beans example from dimensionality reduction chapter
-
+In Chapter \@ref(dimensionality), we discussed how to use dimensionality reduction as a feature engineering or preprocessing step when modeling high dimensional data. For our example data set of dry bean morphology measures predicting bean type, we saw great results from partial least squares (PLS) dimensionality reduction combined with a regularized discriminant analysis model. Which of those morphological characteristics were _most_ important in the bean type predictions? We can use the same approach outlined throughout this chapter to create a model-agnostic explainer and compute, say, global model explanations.
 
 ```{r explain-bean-data, include=FALSE}
 library(beans)
@@ -349,9 +376,17 @@ vip_beans <-
 ggplot_imp(vip_beans)
 ```
 
+
+:::rmdwarning
+The measures of global feature importance that we see here incorporate the effects of all of the PLS components, but in terms of the original variables. 
+:::
+
+Shape factors are among the most important features for predicting bean type, as are minor axis length and roundness.
+
 ## Chapter summary {#explain-summary}
 
 For some types of models, the answer to "why" a model made a certain prediction is straightforward, but for other types of models, we must use separate explainer algorithms to understand what features are relatively most important for predictions. There are two main kinds of model explanations that you can generate from a trained model. Global explanations provide information aggregated over an entire data set, while local explanations provide understanding about a model's predictions for a single observation. 
+
 Packages such as `r pkg(DALEX)` and its supporting package `r pkg(DALEXtra)`, `r pkg(vip)`, and `r pkg(lime)` can be integrated into a tidymodels analysis to provide these types of model explainers. Model explanations are just one piece of understanding whether your model is appropriate and effective, along with estimates of model performance; Chapter \@ref(trust) further explores the quality of predictions and how trustworthy they are.
 
 
