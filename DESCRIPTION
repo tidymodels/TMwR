@@ -1,6 +1,6 @@
 Package: TMwR
 Title: Tidy Modeling with R.
-Version: 0.0.1.9009
+Version: 0.0.1.9010
 Authors@R: 
     c(person(given = "Max",
              family = "Kuhn",
@@ -19,16 +19,33 @@ Imports:
     applicable,
     av,
     baguette,
+    beans,
+    bestNormalize,
+    bookdown,
     bookdown,
     broom,
+    broom,
+    corrplot,
     corrr,
+    corrr,
+    Cubist,
     Cubist,
     DALEXtra,
     dials (>= 0.0.9),
+    dials (>= 0.0.9),
     digest,
+    digest,
+    dimRed,
+    discrim,
+    doMC,
     doMC,
     dplyr,
+    dplyr,
     earth,
+    earth,
+    embed (>= 0.1.4.9000),
+    fastICA,
+    finetune (>= 0.0.1),
     finetune (>= 0.0.1),
     forcats,
     ggforce,
@@ -38,10 +55,17 @@ Imports:
     kableExtra (>= 1.2.1),
     kernlab,
     kknn,
+    klaR,
     knitr,
+    knitr,
+    learntidymodels,
     lime,
     lme4,
+    lme4,
     lubridate,
+    lubridate,
+    mda,
+    mixOmics,
     modeldata,
     nlme,
     nnet,
@@ -67,10 +91,16 @@ Imports:
     tidyposterior (>= 0.0.3),
     tidyverse,
     tune (>= 0.1.3),
+    uwot,
     workflows (>= 0.2.2),
     workflowsets (>= 0.0.1),
     xgboost,
     yardstick
+Remotes:
+    tidymodels/embed,
+    tidymodels/finetune,
+    tidymodels/learntidymodels
+biocViews: mixOmics
 Encoding: UTF-8
 SystemRequirements: FFmpeg (>= 3.2); with at least libx264 and lame (mp3)
     drivers. Debian/Ubuntu: libavfilter-dev, Fedora/CentOS: ffmpeg-devel

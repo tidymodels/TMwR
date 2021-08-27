@@ -179,7 +179,7 @@ For the most part, practitioners' conception of what the formula does is dominat
 Our focus, when seeing this, is that there are two predictors and the model should contain their main effects and the two-way interactions.  However, this formula also implies that, since `species` is a factor, it should also create indicator variable columns for this predictor (see Section \@ref(dummies)) and multiply those columns by the `temp` column to create the interactions. This transformation represents the second bullet point above; the formula also defines _how each column is encoded_ and can create additional columns that are not in the original data. 
 
 :::rmdwarning
-This is an important point which will come up multiple times in this text. There are some limitations of the formula and our approaches to overcoming them contend with all three aspects of the formula listed above. 
+This is an important point which will come up multiple times in this text, especially when we discuss more complex feature engineering in Chapter \@ref(recipes) and beyond. The formula in R has some limitations and our approaches to overcoming them contend with all three aspects listed above. 
 :::
 
 ## Why tidiness is important for modeling {#tidiness-modeling}

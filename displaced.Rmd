@@ -1,0 +1,122 @@
+
+## Displaced from fitting models
+
+The `r pkg(parsnip)` argument names have also been standardized with similar recipe arguments. 
+
+<hr>
+
+
+# from recipes chapter
+
+
+## Formerly "Using recipes"
+ 
+Remember that when invoking the `recipe()` function, the steps are not estimated or executed in any way. The second phase for using a recipe is to estimate any quantities required by the steps using the `prep()` function. For example, we can use `step_normalize()` to center and scale any predictors selected in the step. When we call `prep(recipe, training)`, this function estimates the required means and standard deviations from the data in the `training` argument. The transformations specified by each step are also sequentially executed on the data set. Again using normalization as the example, the means and variances are estimated and then used to standardize the columns. 
+
+:::rmdwarning
+When specifying a step, the data available to that step have been affected by the previous operations. There are some steps that may remove columns or change their data type, so exercise care when writing selectors downstream. 
+:::
+
+For our example recipe, we can now `prep()`: 
+
+```{r engineering-ames-simple-prep}
+simple_ames <- prep(simple_ames, training = ames_train)
+simple_ames
+``` 
+
+Note that, after preparing the recipe, the print statement shows the results of the selectors (e.g., `Neighborhood` and `Bldg_Type` are listed instead of `all_nominal`). 
+
+One important argument to `prep()` is `retain`. When `retain = TRUE` (the default), the prepared version of the training set is kept within the recipe. This data set has been pre-processed using all of the steps listed in the recipe. Since `prep()` has to execute the recipe as it proceeds, it may be advantageous to keep this version of the training set so that, if that data set is to be used later, redundant calculations can be avoided. However, if the training set is big, it may be problematic to keep such a large amount of data in memory. Use `retain = FALSE` to avoid this. 
+
+The third phase of recipe usage is to apply the preprocessing operations to a data set using the `bake()` function. The `bake()` function can apply the recipe to _any_ data set. To use the test set, the syntax would be:
+
+```{r engineering-ames-test-bake}
+test_ex <- bake(simple_ames, new_data = ames_test)
+names(test_ex) %>% head()
+```
+
+Note the dummy variable columns starting with `Neighborhood_`. The `bake()` function can also take selectors so that, if we only wanted the neighborhood results, we could use:
+
+```{r engineering-ames-test-bake-nhood, eval = FALSE}
+bake(simple_ames, ames_test, starts_with("Neighborhood_"))
+```
+
+To get the processed version of the training set, we could use `bake()` and pass in the argument `ames_train` but, as previously mentioned, this would repeat calculations that have already been executed. Instead, we can use `new_data = NULL` to quickly return the training set (if `retain = TRUE` was used). It accesses the data component of the prepared recipe. 
+
+```{r engineering-ames-null}
+bake(simple_ames, new_data = NULL) %>% nrow()
+ames_train %>% nrow()
+```
+
+To reiterate, using a recipe is a three phase process summarized as:
+
+```{r engineering-recipe-process, echo = FALSE, out.width = '60%', warning = FALSE}
+knitr::include_graphics("premade/recipes-process.svg")
+```
+
+
+<br>
+
+
+## Using a recipe with traditional modeling functions {#recipes-manual}
+
+**remove**
+
+In Chapters \@ref(workflows) and \@ref(tuning), we introduce high-level interfaces that take a recipe as an input argument and automatically handle the `prep()`/`bake()` process of preparing data for modeling. However, recipes can be used with traditional R modeling functions as well; this section shows how to use a recipe outside those high-level interfaces.
+
+Let's use a slightly augmented version of the last recipe, now including longitude:
+
+```{r engineering-lm-recipe-manual}
+ames_rec <- 
+  recipe(Sale_Price ~ Neighborhood + Gr_Liv_Area + Year_Built + Bldg_Type + 
+           Latitude + Longitude, data = ames_train) %>%
+  step_log(Gr_Liv_Area, base = 10) %>% 
+  step_other(Neighborhood, threshold = 0.01) %>% 
+  step_dummy(all_nominal_predictors()) %>% 
+  step_interact( ~ Gr_Liv_Area:starts_with("Bldg_Type_") ) %>% 
+  step_ns(Latitude, Longitude, deg_free = 20)
+```
+
+To get the recipe ready, we prepare it, and then extract the training set using `bake()` with `new_data = NULL`. When calling `prep()`, if the `training` argument is not given, it uses the data that was initially given to the `recipe()` function call.
+
+```{r engineering-lm-ames-prep}
+ames_rec_prepped <- prep(ames_rec)
+ames_train_prepped <- bake(ames_rec_prepped, new_data = NULL)
+ames_test_prepped <- bake(ames_rec_prepped, ames_test)
+
+# Fit the model; Note that the column Sale_Price has already been
+# log transformed.
+lm_fit <- lm(Sale_Price ~ ., data = ames_train_prepped)
+```
+
+The `r pkg(broom)` package has methods that make it easier to work with model objects. First, `broom::glance()` shows a succinct summary of the model in a handy tibble format:
+
+```{r engineering-lm-ames-glance}
+glance(lm_fit)
+```
+
+The model coefficients can be extracted using the `tidy()` method:
+
+```{r engineering-lm-ames-tidy}
+tidy(lm_fit)
+```
+
+To make predictions on the test set, we use the standard syntax:
+
+```{r engineering-lm-ames-pred}
+predict(lm_fit, ames_test_prepped %>% head())
+```
+
+
+
+
+
+# From bookdown.yml
+
+
+  
+
+
+
+
+

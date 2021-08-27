@@ -122,7 +122,7 @@ When using Bayesian optimization, the primary concerns are how to create the mod
 
 Gaussian process (GP) [@SCHULZ20181] models are well-known statistical techniques that have a history in spatial statistics (under the name of _kriging methods_). They can be derived in multiple ways, including as a Bayesian model; see @RaWi06 for an excellent reference. 
 
-Mathematically, a GP is a a collection of random variables whose joint probability distribution is  multivariate Gaussian. In the  context of our application, this collection is the collection of performance metrics for the tuning parameter candidate values. For the initial grid of four samples shown above, the realization of these four random variables were `r knitr::combine_words(round(collect_metrics(svm_initial)$mean, 4))`. These are assumed to be distributed as multivariate Gaussian. The _inputs_ that  define the independent variables/predictors for the GP model are the corresponding tuning parameter values: 
+Mathematically, a GP is a collection of random variables whose joint probability distribution is  multivariate Gaussian. In the  context of our application, this collection is the collection of performance metrics for the tuning parameter candidate values. For the initial grid of four samples shown above, the realization of these four random variables were `r knitr::combine_words(round(collect_metrics(svm_initial)$mean, 4))`. These are assumed to be distributed as multivariate Gaussian. The _inputs_ that  define the independent variables/predictors for the GP model are the corresponding tuning parameter values: 
 
 ```{r iterative-gp-data-table, echo = FALSE, results = "asis"}
 collect_metrics(svm_initial) %>% 
