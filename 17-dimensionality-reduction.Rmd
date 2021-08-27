@@ -34,12 +34,12 @@ This chapter has two goals:
 
  * Demonstrate how to use recipes to create a small set of features that capture the main aspects of the original predictor set.
  
- * Describe how recipes can be used on their own (as opposed to being used in a workflow object, as in Chapter\@ref(using-recipes)). 
+ * Describe how recipes can be used on their own (as opposed to being used in a workflow object, as in Section \@ref(using-recipes)). 
 :::
  
 The latter is helpful when testing or debugging a recipe. However, as described in Section \@ref(using-recipes), the best way to use a recipe for modeling is from within a workflow object. 
 
-In addition to the `r pkg(tidymodels)` package, this chapter uses the following packages: `r pkg(baguette)`, `r pkg(bestNormalize)`, `r pkg(corrplot)`, `r pkg(discrim)`, `r pkg(embed)`, `r pkg(ggforce)`, `r pkg(klaR)`, `r pkg(learntidymodels)`, `r pkg(mixOmics)`, and `r pkg(uwot)`. `r pkg(learntidymodels)` can be found at its [GitHub site](https://github.com/tidymodels/learntidymodels).
+In addition to the `r pkg(tidymodels)` package, this chapter uses the following packages: `r pkg(baguette)`, `r pkg(bestNormalize)`, `r pkg(corrplot)`, `r pkg(discrim)`, `r pkg(embed)`, `r pkg(ggforce)`, `r pkg(klaR)`, `r pkg(learntidymodels)`, `r pkg(mixOmics)`, and `r pkg(uwot)`. The `r pkg(learntidymodels)` package can be found at its [GitHub site](https://github.com/tidymodels/learntidymodels).
 
 
 ## A picture is worth a thousand... beans {#beans}
@@ -449,7 +449,7 @@ rankings %>%
   labs(y = "ROC AUC")
 ```
 
-It is clear from these results that most models give very good performance; there are few bad choices here. For demonstration, the RDA model with PLS features is used as the final model. We'll finalize the workflow with the numerically best parameters, fit it to the training set, then evaluate the test set:
+It is clear from these results that most models give very good performance; there are few bad choices here. For demonstration, we'll use the RDA model with PLS features as the final model. We will finalize the workflow with the numerically best parameters, fit it to the training set, then evaluate with the test set:
 
 ```{r dimensionality-final}
 rda_res <- 
