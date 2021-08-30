@@ -388,7 +388,11 @@ ggplot_imp(vip_beans)
 The measures of global feature importance that we see here incorporate the effects of all of the PLS components, but in terms of the original variables. 
 :::
 
-Shape factors are among the most important features for predicting bean type, as are minor axis length and roundness.
+Shape factors are among the most important features for predicting bean type, especially shape factor 4, a measure of solidity which takes into account both the area $A$, major axis $L$, and minor axis $l$:
+
+$$\text{SF4} = \frac{A}{\pi(L/2)(l/2)}$$
+
+Shape factor 1 (the ratio of the major axis to the area), the minor axis length, and roundness are the next most important bean characteristics for predicting bean variety.
 
 ## Chapter summary {#explain-summary}
 

@@ -4,7 +4,7 @@ title: "Tidy Modeling with R"
 author: ["Max Kuhn and Julia Silge"]
 date: "`r tmwr_version()`"
 site: bookdown::bookdown_site
-description: "Modeling of data is integral to science, business, politics, and many other aspects of our lives. The goals of this book are to: introduce neophytes to models and the tidyverse, demonstrate the `tidymodels` packages, and to outline good practices for the phases of the modeling process."
+description: "The tidymodels framework is a collection of R packages for modeling and machine learning using tidyverse principles. This book provides a thorough introduction to how to use tidymodels, and an outline of good methodology and statistical practice for phases of the modeling process."
 github-repo: tidymodels/TMwR
 twitter-handle: topepos
 documentclass: book
