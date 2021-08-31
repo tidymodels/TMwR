@@ -1,8 +1,495 @@
-```{r trust-setup, include = FALSE}
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(fig.path = "figures/")
 library(tidymodels)
-library(probably)
 library(applicable)
-tidymodels_prefer()
+library(patchwork)
+library(probably)
+load("RData/Chicago_2020.RData")
 ```
 
-# When should you trust predictions? {#trust}
+# When should you trust your predictions? {#trust}
+
+A predictive model can almost always produce a prediction, given input data. However, there are plenty of situations where it is **inappropriate** to do so. When a new data point is well outside of the range of data used to create the model, making a prediction may be an inappropriate _extrapolation_. A more qualitative example of an inappropriate prediction occurs when the model is used in a completely different context. The cell segmentation data used in Chapter \@ref(iterative-search) flags when human breast cancer cells can or cannot be accurately isolated inside an image. A model built from these data could be inappropriately applied to stomach cells for the same purpose. We can produce a prediction but it is unlikely to be **applicable** to the different cell type.
+
+This chapter discusses two methods for quantifying the potential quality of a prediction. 
+
+- The first uses the predicted values to alert the user that the results may be suspect. 
+- The second approach uses the predictors to measure the amount of extrapolation (if any) for new samples. 
+
+## Equivocal results {#equivocal-zones}
+
+:::rmdwarning
+In some cases, the amount of uncertainty associated with a prediction is too high to be trusted. 
+:::
+
+If you had a model result indicating that you had a 51% chance of having contracted COVID, it would be natural to view the diagnosis with some skepticism. In fact, regulatory bodies often require many medical diagnostics to have an _equivocal zone_. This is a range of results indicating that the prediction should not be reported to patients. See @Danowski524 and @Kerleguer1783 for examples. The same notion can be applied to models created outside of medical diagnostics. 
+
+Let's use a function that can simulate classification data with two classes and two predictors (`x` and `y`). The true model is a logistic regression model with the equation: 
+
+$$
+logit\left(\frac{p}{1-p}\right) = -1 - 2x - \frac{x^2}{5} + 2y^2 
+$$
+
+The two predictors follow a bivariate normal distribution with a correlation of 0.70. We'll create a training set of 200 samples and a test set of 50: 
+
+```{r trust-simulation}
+simulate_two_classes <- 
+  function (n, error = 0.1, eqn = quote(-1 - 2 * x - 0.2 * x^2 + 2 * y^2))  {
+    # Slightly correlated predictors
+    sigma <- matrix(c(1, 0.7, 0.7, 1), nrow = 2, ncol = 2)
+    dat <- MASS::mvrnorm(n = n, mu = c(0, 0), Sigma = sigma)
+    colnames(dat) <- c("x", "y")
+    cls <- paste0("class_", 1:2)
+    dat <- 
+      tibble::as_tibble(dat) %>% 
+      dplyr::mutate(
+        linear_pred = !!eqn,
+        # Add some misclassification noise
+        linear_pred = linear_pred + rnorm(n, sd = error),
+        prob = binomial()$linkinv(linear_pred),
+        class = ifelse(prob > runif(n), cls[1], cls[2]),
+        class = factor(class, levels = cls)
+      )
+    dplyr::select(dat, x, y, class)
+  }
+
+set.seed(1901)
+training_set <- simulate_two_classes(200)
+testing_set  <- simulate_two_classes(50)
+```
+
+We estimate a logistic regression model using Bayesian methods (using the default Gaussian prior distributions for the parameters): 
+
+```{r trust-bayes-glm}
+library(tidymodels)
+tidymodels_prefer()
+
+two_class_mod <- 
+   logistic_reg() %>% 
+   set_engine("stan", seed = 1902) %>% 
+   fit(class ~ . + I(x^2)+ I(y^2), data = training_set)
+print(two_class_mod, digits = 3)
+```
+
+The fitted class boundary is overlaid onto the test set: 
+
+```{r trust-glm-grid, echo = FALSE, fig.width=5, fig.height=5, out.width="70%", fig.align="center", cache = TRUE}
+data_grid <-
+  crossing(
+    x = seq(-4.5, 4.5, length = 100),
+    y = seq(-4.5, 4.5, length = 100)
+  )
+grid_pred <- 
+   predict(two_class_mod, data_grid, type = "prob") %>% 
+   bind_cols(
+      predict(two_class_mod, data_grid, type = "pred_int", std_error = TRUE),
+      data_grid
+   )
+
+grid_pred %>% 
+    mutate(`Probability of Class 1` = .pred_class_1) %>% 
+    ggplot(aes(x = x, y = y)) + 
+    geom_raster(aes(fill = `Probability of Class 1`)) +
+    geom_point(data = testing_set, aes(shape = class, col = class), alpha = .75, size = 2) + 
+    geom_contour(aes(z = .pred_class_1), breaks = .5, col = "black", lty = 2) + 
+    coord_equal() + 
+    labs(x = "Predictor x", y = "Predictor y") + 
+    scale_fill_gradient2(low = "#FDB863", mid = "white", high = "#B2ABD2", midpoint = .5) + 
+    scale_color_manual(values = c("#2D004B", "darkorange"))
+```
+
+The data points closest to the class boundary are the most uncertain. If their values changed slightly, their predicted class might change. One simple method for disqualifying some results is to call them "equivocal" if the values are within some range around 50% (or whatever the appropriate probability cutoff might be). Depending on the problem that the model is being applied to, this might indicate that another measurement should be collected or that we require more information before a trustworthy prediction is possible.  
+
+We could base the width of the band around the cutoff on how performance improves when the uncertain results are removed. However, we should also estimate the reportable rate (the expected proportion of usable results). For example, it would be not be useful in real-world situations to have perfect performance but only release predictions on 2% of the samples passed to the model. 
+
+Let's use the test set to determine the balance between improving performance and having enough reportable results. The predictions are created using:  
+
+```{r trust-bayes-glm-pred}
+test_pred <- augment(two_class_mod, testing_set)
+test_pred %>% head()
+```
+
+With tidymodels, the `r pkg(probably)` package contains functions for equivocal zones. For cases with two classes, the `make_two_class_pred()` function creates a _factor-like_ column that has the predicted classes with an equivocal zone: 
+
+```{r trust-make-eq}
+library(probably)
+
+lvls <- levels(training_set$class)
+
+test_pred <- 
+  test_pred %>% 
+  mutate(.pred_with_eqz = make_two_class_pred(.pred_class_1, lvls, buffer = 0.15))
+
+test_pred %>% count(.pred_with_eqz)
+```
+
+Rows that are within $0.50\pm0.15$ are given a value of `[EQ]`. 
+
+:::rmdnote
+It is important to realize that this is not a factor level, but an attribute of that column. 
+:::
+
+Since the factor levels are the same as the original data, confusion matrices and other statistics can be computed without error. When using standard `r pkg(yardstick)` functions, the equivocal results are converted to `NA` and are not used in the calculations that use the hard class predictions. 
+
+```{r trust-conf-mat}
+# All data
+test_pred %>% conf_mat(class, .pred_class)
+
+# Reportable results only: 
+test_pred %>% conf_mat(class, .pred_with_eqz)
+```
+
+There is also an `is_equivocal()` function for filtering these rows from the data. 
+
+Does the equivocal zone help improve accuracy? Let's look over different buffer sizes:
+
+```{r trust-eq-calcs, out.width="80%"}
+# A function to change the buffer then compute performance.
+eq_zone_results <- function(buffer) {
+  test_pred <- 
+    test_pred %>% 
+    mutate(.pred_with_eqz = make_two_class_pred(.pred_class_1, lvls, buffer = buffer))
+  acc <- test_pred %>% accuracy(class, .pred_with_eqz)
+  rep_rate <- reportable_rate(test_pred$.pred_with_eqz)
+  tibble(accuracy = acc$.estimate, reportable = rep_rate, buffer = buffer)
+}
+
+# Evaluate a seqeunce of buffers and plot the results. 
+map_dfr(seq(0, .1, length.out = 40), eq_zone_results) %>% 
+  pivot_longer(c(-buffer), names_to = "statistic", values_to = "value") %>% 
+  ggplot(aes(x = buffer, y = value, col = statistic)) + 
+  geom_step(size = 1.2, alpha = 0.8) + 
+  labs(y = NULL)
+```
+
+Accuracy improves by a few percentage points but at the cost of nearly 10% of predictions being unusable! The value of such a compromise depends on how the model predictions will be used. 
+
+This analysis focused on using the predicted class probability to disqualify points, since this is a fundamental measure of uncertainty in classification models. A slightly better approach would be to use the standard error of the class probability. Since we used a Bayesian model, the probability estimates shown above are actually the mean of the posterior predictive distribution. In other words, the Bayesian model gives us a distribution for the class probability.  Measuring the standard deviation of this distribution gives us a _standard error of prediction_ of the probability. In most cases, this value is directly related to the mean class probability. You might recall that, for a Bernoulli random variable with probability $p$, the variance is $p(1-p)$. Because of this relationship, the standard error is largest when the probability is 50%. Instead of assigning an equivocal result using the class probability, we could instead use a cutoff on the standard error of prediction. 
+
+One important aspect of the standard error of prediction is that it takes into account more than just the class probability. In cases where there is significant extrapolation or aberrant predictor values, the standard error might increase. The benefit of using the standard error of prediction is that it might also flag predictions that are problematic (as opposed to simply uncertain). One reason that we used the Bayesian model is that it naturally estimates the standard error of prediction; not many models can calculate this. For our test set, using `type = "pred_int"` will produce upper and lower limits and the `std_error` adds a column for that quantity. For 80% intervals: 
+
+```{r trust-pred-int}
+test_pred <- 
+   test_pred %>% 
+   bind_cols(
+      predict(two_class_mod, testing_set, type = "pred_int", std_error = TRUE)
+   )
+```
+
+For our example, where the model and data are well-behaved, this figure shows the standard error of prediction across the space: 
+
+```{r trust-glm-grid-std-err, echo = FALSE, fig.width=5, fig.height=5, out.width="70%", fig.align="center"}
+grid_pred %>% 
+    mutate(`Std Error` = .std_error) %>% 
+    ggplot(aes(x = x, y = y)) + 
+    geom_raster(aes(fill = `Std Error`)) + 
+    scale_fill_gradientn(colours = c("#F7FBFF", "#DEEBF7", "#C6DBEF", "#9ECAE1", "#6BAED6")) + 
+    geom_point(data = testing_set, aes(shape = class), alpha = .5, size = 2) + 
+    coord_equal() + 
+    labs(x = "Predictor x", y = "Predictor y")
+```
+
+Using the standard error as a measure to preclude samples from being predicted can also be applied to models with numeric outcomes. However, as shown in the next section, this may not always work.  
+
+## Determining model applicability {#applicability-domains}
+
+Equivocal zones try to measure the reliability of a prediction based on the model outputs. It may be that model statistics, such as the standard error of prediction, cannot measure the impact of extrapolation. Let's take the Chicago train data used extensively in [Kuhn and Johnson (2019)](https://bookdown.org/max/FES/chicago-intro.html) and first shown in Section \@ref(examples-of-tidyverse-syntax). The goal is to predict the number of customers entering the Clark and Lake train station each day. 
+
+The data set in the `modeldata` package has daily values between `r format(min(Chicago$date), "%B %d %Y")` and `r format(max(Chicago$date), "%B %d %Y")`. Let's create a small test set using the last two weeks of the data: 
+
+```{r trust-chicago-data}
+data(Chicago)
+
+Chicago <- Chicago %>% select(ridership, date, one_of(stations))
+
+n <- nrow(Chicago)
+
+Chicago_train <- Chicago %>% slice(1:(n - 14))
+Chicago_test  <- Chicago %>% slice((n - 13):n)
+```
+
+The main predictors are lagged ridership data at different train stations, including Clark and Lake, as well as the date. The ridership predictors are highly correlated with one another. In the recipe below, the date column is expanded into several new features and the ridership predictors are represented using partial least squares (PLS) components. PLS [@Geladi:1986], as we discussed in Section \@ref(partial-least-squares), is a supervised version of principal component analysis where the new features have been decorrelated but are predictive of the outcome data. 
+
+Using the preprocessed data, we fit a standard linear model:
+
+```{r trust-chicago-model}
+base_recipe <-
+   recipe(ridership ~ ., data = Chicago_train) %>%
+   # Create date features
+   step_date(date) %>%
+   step_holiday(date) %>%
+   # Change date to be an id column instead of a predictor
+   update_role(date, new_role = "id") %>%
+   # Create dummy variables from factor columns
+   step_dummy(all_nominal()) %>%
+   # Remove any columns with a single unique value
+   step_zv(all_predictors()) %>%
+   step_normalize(!!!stations)%>%
+   step_pls(!!!stations, num_comp = 10, outcome = vars(ridership))
+
+lm_spec <-
+   linear_reg() %>%
+   set_engine("lm") 
+
+lm_wflow <-
+   workflow() %>%
+   add_recipe(base_recipe) %>%
+   add_model(lm_spec)
+
+set.seed(1903)
+lm_fit <- fit(lm_wflow, data = Chicago_train)
+```
+
+How well do the data fit on the test set? 
+
+```{r trust-chicago-test-res}
+res_test <-
+   predict(lm_fit, Chicago_test) %>%
+   bind_cols(
+      predict(lm_fit, Chicago_test, type = "pred_int"),
+      Chicago_test
+   )
+
+res_test %>% select(date, ridership, starts_with(".pred"))
+res_test %>% rmse(ridership, .pred)
+```
+
+These are fairly good results. Let's also create a function that adds a day-of-the-week column, then visualize the predictions along with 95% prediction intervals: 
+
+```{r trust-chicago-test-pred, echo = FALSE, fig.height=4, out.width="80%", fig.align="center"}
+add_day <- function(x) {
+   day <- lubridate::wday(x$date, label = TRUE)
+   factor(as.character(day), ordered = FALSE, levels = levels(day))
+}
+
+res_test %>%
+   mutate(day = add_day(.)) %>%
+   ggplot(aes(x = date)) +
+   geom_point(aes(y = ridership, col = day), size = 2) +
+   geom_line(aes(y = .pred), alpha = .75) +
+   geom_ribbon(aes(ymin = .pred_lower, ymax = .pred_upper), fill = "blue", alpha = .1)  +
+   scale_color_brewer(palette = "Set2") +
+   scale_x_date(labels = date_format("%B %d, %Y")) +
+   labs(x = NULL, y = "Daily Ridership (x1000)", color = NULL)
+```
+
+Given the scale of the ridership numbers, these results look particularly good for such a simple model. If this model were deployed, how well would it have done a few years later in June of 2020? The model successfully makes a prediction, as a predictive model will when given input data:
+
+```{r trust-chicago-2020-res}
+res_2020 <-
+   predict(lm_fit, Chicago_2020) %>%
+   bind_cols(
+      predict(lm_fit, Chicago_2020, type = "pred_int"),
+      Chicago_2020
+   ) 
+
+res_2020 %>% select(date, contains(".pred"))
+```
+
+The prediction intervals are about the same width, even though these data are well beyond the time period of the original training set. However, given the global pandemic in 2020, the performance on these data are abysmal: 
+
+```{r trust-chicago-2020-stats}
+res_2020 %>% select(date, ridership, starts_with(".pred"))
+res_2020 %>% rmse(ridership, .pred)
+```
+
+Look at this terrible model performance visually: 
+
+```{r trust-chicago-2020-pred, echo = FALSE, fig.height=4, out.width="80%", fig.align="center"}
+res_2020 %>%
+   mutate(day = add_day(.)) %>%
+   ggplot(aes(x = date)) +
+   geom_point(aes(y = ridership, col = day), size = 2) +
+   geom_line(aes(y = .pred), alpha = .75) +
+   geom_ribbon(aes(ymin = .pred_lower, ymax = .pred_upper), fill = "blue", alpha = .1) +
+   scale_color_brewer(palette = "Set2") +
+   scale_x_date(labels = date_format("%B %d, %Y")) +
+   labs(x = NULL, y = "Daily Ridership (x1000)", color = NULL) 
+```
+
+Confidence and prediction intervals for linear regression expand as the data become more and more removed from the center of the training set. However, that effect is not dramatic enough to flag these predictions as being poor.
+
+:::rmdwarning
+Sometimes the statistics produced by models don't measure the quality of predictions very well. 
+:::
+
+This situation can be avoided by having a secondary methodology that can quantify how **applicable the model is for any new prediction** (a.k.a the model's _applicability domain_). There are a variety of methods to compute an applicability domain model, such as @Jaworska or @Netzeva. The approach used in this chapter is a fairly simple unsupervised method that attempts to measure how much (if any) a new data point is beyond the training data. 
+
+:::rmdnote
+The idea is to accompany a prediction with a score that measures how similar the new point is to the training set.
+:::
+
+One method that works well uses principal component analysis (PCA) on the numeric predictor values. We'll illustrate the process by using only two of the predictors that correspond to ridership at different stations (California and Austin stations). The training set are shown in panel (a) below. The ridership data for these stations are highly correlated and the two distributions shown in the scatter plot correspond to ridership on the weekends and week days. 
+
+The first step is to conduct PCA on the training data. The PCA scores for the training set are shown in panel (b). Next, using these results, we measure the distance of each training set point to the center of the PCA data (panel (c)). We can then use this _reference distribution_ (panel (d)) to estimate how far away a data point is from the mainstream of the training data.  
+
+```{r trust-pca-two-class-train, echo = FALSE, out.width = "100%"}
+pca_rec <- recipe(~ ., data = Chicago_train) %>% 
+  step_normalize(California, Austin) %>% 
+  step_pca(California, Austin, num_comp = 2) %>% 
+  prep()
+
+training_pca <- bake(pca_rec, new_data = NULL)
+pca_center <- 
+  training_pca %>% 
+  select(PC1, PC2) %>% 
+  summarize(PC1_mean = mean(PC1), PC2_mean = mean(PC2))
+
+training_pca <- 
+  cbind(pca_center, training_pca) %>% 
+  mutate(
+    distance = (PC1 - PC1_mean)^2 + (PC2 - PC2_mean)^2,
+    distance = sqrt(distance)
+  )
+
+testing_pca <- 
+  bake(pca_rec, Chicago_test %>% slice(1)) %>% 
+  cbind(pca_center) %>% 
+  mutate(
+    distance = (PC1 - PC1_mean)^2 + (PC2 - PC2_mean)^2,
+    distance = sqrt(distance)
+  )
+testing_pctl <- round(mean(training_pca$distance <= testing_pca$distance) * 100, 1)
+
+new_pca <- 
+  bake(pca_rec, Chicago_2020 %>% slice(6)) %>% 
+  cbind(pca_center) %>% 
+  mutate(
+    distance = (PC1 - PC1_mean)^2 + (PC2 - PC2_mean)^2,
+    distance = sqrt(distance)
+  )
+new_pctl <- round(mean(training_pca$distance <= new_pca$distance) * 100, 1)
+
+tr_plot <- 
+  Chicago_train %>% 
+  ggplot(aes(x = California, y = Austin)) + 
+  geom_point(alpha = .25, size = .3) + 
+  # coord_equal() + 
+  labs(title = "(a) Training Set") + 
+  theme(plot.title = element_text(size=9))
+
+pca_plot <- training_pca %>% 
+  ggplot(aes(x = PC1, y = PC2)) + 
+  geom_point(alpha = .25, size = .3) + 
+  coord_obs_pred() + 
+  labs(x = "Component 1", y = "Component 2", title = "(b) Training Set PCA Scores") +
+  theme(plot.title = element_text(size = 9))
+
+pca_dist <- 
+  training_pca %>% 
+  ggplot() + 
+  geom_segment(aes(x = PC1_mean, y = PC2_mean,
+                   xend = PC1, yend = PC2), alpha = .1)  + 
+  coord_obs_pred() + 
+  labs(x = "Component 1", y = "Component 2", title = "(c) Distances to Center") +
+  theme(plot.title = element_text(size = 9))
+
+dist_hist <-
+  training_pca %>%
+  ggplot(aes(x = distance)) +
+  geom_histogram(bins = 30, col = "white") +
+  labs(x = "Distance to Training Set Center", title = "(d) Reference Distribution") +
+  theme(plot.title = element_text(size = 9))
+
+library(patchwork)
+tr_plot + pca_plot + pca_dist + dist_hist
+```
+
+For a new sample, the PCA scores are computed along with the distance to the center of the _training set_. 
+
+However, what does it mean when a new sample has a distance of _X_? Since the PCA components can have different ranges from data set to data set, there is no obvious limit to say that a distance is too large.
+
+One approach is to treat the distances from the training set data as "normal". For new samples, we can determine how the new distance compares to the range in the reference distribution (from the training set). A _percentile_ can be computed for new samples that reflect how much of the training set is less extreme than the new samples. 
+
+:::rmdnote
+A percentile of 90% means that most of of the training set data are closer to the data center than the new sample. 
+:::
+
+
+The plot below overlays a testing set sample (in blue) and a 2020 sample (in red) with the PCA distances from the training set. 
+
+```{r trust-pca-two-class-test, echo = FALSE, fig.width=9, fig.height=4}
+test_pca_dist <- 
+  training_pca %>% 
+  ggplot() + 
+  geom_segment(
+    aes(x = PC1_mean, y = PC2_mean, xend = PC1, yend = PC2), 
+    alpha = .05
+  )  + 
+  geom_segment(
+    data = testing_pca,
+    aes(x = PC1_mean, y = PC2_mean, xend = PC1, yend = PC2), 
+    col = "cyan"
+  )  + 
+  geom_segment(
+    data = new_pca,
+    aes(x = PC1_mean, y = PC2_mean, xend = PC1, yend = PC2), 
+    col = "red"
+  )  + 
+  geom_point(data = testing_pca, aes(x = PC1, y = PC2), col = "cyan")   + 
+  geom_point(data = new_pca, aes(x = PC1, y = PC2), col = "red") +
+  coord_obs_pred() + 
+  labs(x = "Component 1", y = "Component 2", title = "Distances to Training Set Center") + 
+  theme_bw() + 
+  theme(legend.position = "top")
+
+test_dist_hist <- 
+  training_pca %>% 
+  ggplot(aes(x = distance)) + 
+  geom_histogram(bins = 30, col = "white", alpha = .5) + 
+  geom_vline(xintercept = testing_pca$distance, col = "cyan")  + 
+  geom_vline(xintercept = new_pca$distance, col = "red") +
+  xlab("Distance to Training Set Center")
+
+test_pca_dist + test_dist_hist
+```
+
+The test set point has a distance of `r round(testing_pca$distance, 2)`. It is in the `r testing_pctl`% percentile of the training set distribution, indicating that it is snugly within the mainstream of the training set. 
+
+The 2020 sample is further away from the center than any of the training set samples (with a percentile of `r new_pctl`%). This indicates that the sample is very extreme and that its corresponding prediction would be a severe extrapolation (and probably should not be reported). 
+
+The `r pkg(applicable)` package can develop an applicability domain model using PCA. We'll use the 20 lagged station ridership predictors as inputs into the PCA analysis. There is an additional argument called `threshold`  that determines how many components are used in the distance calculation. For our example, we'll use a large value that indicates that we should use enough components to account for 99% of the variation in the ridership predictors: 
+
+```{r trust-apd-pca}
+library(applicable)
+pca_stat <- apd_pca(~ ., data = Chicago_train %>% select(one_of(stations)), 
+                    threshold = 0.99)
+pca_stat
+```
+
+The `autoplot()` method plots the reference distribution. It has an optional argument for which data to plot. We'll add a value of `distance` to only plot the training set distance distribution: 
+
+```{r trust-ref-dist, out.width="80%"}
+autoplot(pca_stat, distance) + xlab("Distance")
+```
+
+The x-axis shows the values of the distance and the y-axis displays the distribution's percentiles. For example, half of the training set samples had distances less than `r round(approx(pca_stat$pctls$percentile, pca_stat$pctls$distance, xout = 50)$y, 1)`. 
+
+To compute the percentiles for new data, the `score()` function works in the same way as `predict()`: 
+
+
+```{r trust-apd-test-scores}
+score(pca_stat, Chicago_test) %>% select(starts_with("distance"))
+```
+
+These seem fairly reasonable. For the 2020 data: 
+
+
+```{r trust-apd-2020-scores}
+score(pca_stat, Chicago_2020) %>% select(starts_with("distance"))
+```
+
+The 2020 distance values indicate that these predictor values are outside of the vast majority of data seen by the model at training time. These should be flagged so that the predictions are either not reported at all or taken with skepticism.  
+
+:::rmdnote
+One important aspect of this analysis concerns which predictors are used to develop the applicability domain model. In the analysis above, we used the raw predictor columns. However, in building the model, PLS score features were used in their place. Which of these should `apd_pca()` use? The  `apd_pca()` function can also take a recipe as the input (instead of a formula) so that the distances reflect the PLS scores instead of the individual predictor columns. Users can evaluate both methods to understand which one gives more relevant results. 
+:::
+
+## Chapter summary {#trust-summary}
+
+This chapter shows two methods for evaluating whether predictions should be reported to the consumers of models. Equivocal zones deal with outcomes/predictions and can be helpful when the amount of uncertainty in a prediction is too large. 
+
+Applicability domain models deal with features/predictors and quantify the amount of extrapolation (if any) that occurs when making a prediction. This chapter showed a basic method using principal component analysis, although there are many other ways to measure applicability.  The `r pkg(applicable)` package also contains specialized methods for data sets where all of the predictors are binary. This method computes similarity scores between training set data points to define the reference distribution. @Bartley shows yet another method and applies it to ecological studies. 
+
+
