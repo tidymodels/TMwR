@@ -1,6 +1,5 @@
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(fig.path = "figures/")
 library(tidymodels)
 library(applicable)
 library(patchwork)
@@ -74,7 +73,7 @@ print(two_class_mod, digits = 3)
 
 The fitted class boundary is overlaid onto the test set: 
 
-```{r trust-glm-grid, echo = FALSE, fig.width=5, fig.height=5, out.width="70%", fig.align="center", cache = TRUE}
+```{r trust-glm-grid, echo = FALSE, fig.width=5, fig.height=5, out.width="70%", fig.align="center"}
 data_grid <-
   crossing(
     x = seq(-4.5, 4.5, length = 100),
