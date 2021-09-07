@@ -135,7 +135,7 @@ We can use the `summary()` method to inspect the coefficients, standard errors, 
 summary(main_effect_fit)
 ```
 
-The chirp rate for each species increases by `r round(coef(main_effect_fit)[2], 2)` chirps as the temperature increases by a single degree. This term shows strong statistical significance as evidenced by the p-value.  The species term has a value of `r round(coef(main_effect_fit)[3], 2)`. This indicates that, across all temperature values, _O. niveus_ has a chirp rate that is about `r floor(abs(coef(main_effect_fit)[3]))` fewer chirps per minute that _O. exclamationis_. Similar to the temperature term, the species effect is associated with a very small p-value.  
+The chirp rate for each species increases by `r round(coef(main_effect_fit)[2], 2)` chirps as the temperature increases by a single degree. This term shows strong statistical significance as evidenced by the p-value.  The species term has a value of `r round(coef(main_effect_fit)[3], 2)`. This indicates that, across all temperature values, _O. niveus_ has a chirp rate that is about `r floor(abs(coef(main_effect_fit)[3]))` fewer chirps per minute than _O. exclamationis_. Similar to the temperature term, the species effect is associated with a very small p-value.  
 
 The only issue in this analysis is the intercept value. It indicates that at 0 C, there are negative chirps per minute for both species. While this doesn't make sense, the data only go as low as `r min(crickets$temp)` C and interpreting the model at 0 C would be an _extrapolation_. This would be a bad idea. That being said, the model fit is good within the _applicable range_ of the temperature values; the conclusions should be limited to the observed temperature range. 
 
@@ -179,7 +179,7 @@ For the most part, practitioners' conception of what the formula does is dominat
 Our focus, when seeing this, is that there are two predictors and the model should contain their main effects and the two-way interactions.  However, this formula also implies that, since `species` is a factor, it should also create indicator variable columns for this predictor (see Section \@ref(dummies)) and multiply those columns by the `temp` column to create the interactions. This transformation represents the second bullet point above; the formula also defines _how each column is encoded_ and can create additional columns that are not in the original data. 
 
 :::rmdwarning
-This is an important point which will come up multiple times in this text. There are some limitations of the formula and our approaches to overcoming them contend with all three aspects of the formula listed above. 
+This is an important point which will come up multiple times in this text, especially when we discuss more complex feature engineering in Chapter \@ref(recipes) and beyond. The formula in R has some limitations and our approaches to overcoming them contend with all three aspects listed above. 
 :::
 
 ## Why tidiness is important for modeling {#tidiness-modeling}

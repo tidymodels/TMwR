@@ -9,9 +9,9 @@ rmd_files: [
   
   "04-ames.Rmd",
   "05-data-spending.Rmd",
-  "06-feature-engineering.Rmd",
-  "07-fitting-models.Rmd",
-  "08-the-model-workflow.Rmd",
+  "06-fitting-models.Rmd",
+  "07-the-model-workflow.Rmd",
+  "08-feature-engineering.Rmd",
   "09-judging-model-effectiveness.Rmd",
   
   "10-resampling.Rmd",

@@ -47,7 +47,7 @@ R is open-source and free of charge. It is a powerful programming language that 
 
 One collection of packages is called the ***tidyverse*** [@tidyverse]. The tidyverse is an opinionated collection of R packages designed for data science. All packages share an underlying design philosophy, grammar, and data structures. Several of these design philosophies are directly informed by the aspects of software described in this section. If you've never used the tidyverse packages, Chapter \@ref(tidyverse) contains a review of its basic concepts. Within the tidyverse, the subset of packages specifically focused on modeling are referred to as the ***tidymodels*** packages. This book is an extended software manual for conducting modeling using the tidyverse and tidymodels. It shows how to use a set of packages, each with its own specific purpose, together to create high-quality models.  
 
-## Types of models
+## Types of models {#model-types}
 
 Before proceeding, let's describe a taxonomy for types of models, grouped by purpose. While not exhaustive,  most models fall into _at least_ one of these categories: 
 
@@ -153,9 +153,9 @@ This may seem intuitively obvious, but is often ignored in real-world data analy
 
 ## Some terminology {#model-terminology}
 
-Before proceeding, some additional terminology related to modeling, data, and other quantities should be outlined. These descriptions are intended to be helpful as you read this book but not exhaustive. 
+Before proceeding, we outline here some additional terminology related to modeling and data. These descriptions are intended to be helpful as you read this book but not exhaustive. 
 
-First, many models can be categorized as being _supervised_ or _unsupervised_. Unsupervised models are those that learn patterns, clusters, or other characteristics of the data but lack an outcome variable, i.e., a dependent variable. Principal component analysis (PCA), clustering, and autoencoders are examples of unsupervised models; they are used to understand relationships between variables or sets of variables without an explicit relationship between variables and an outcome. Supervised models are those that have an outcome variable. Linear regression, neural networks, and numerous other methodologies fall into this category. 
+First, many models can be categorized as being _supervised_ or _unsupervised_. Unsupervised models are those that learn patterns, clusters, or other characteristics of the data but lack an outcome, i.e., a dependent variable. Principal component analysis (PCA), clustering, and autoencoders are examples of unsupervised models; they are used to understand relationships between variables or sets of variables without an explicit relationship between predictors and an outcome. Supervised models are those that have an outcome variable. Linear regression, neural networks, and numerous other methodologies fall into this category. 
 
 Within supervised models, there are two main sub-categories: 
 
@@ -165,9 +165,10 @@ Within supervised models, there are two main sub-categories:
 
 These are imperfect definitions and do not account for all possible types of models. In Chapter \@ref(models), we refer to this characteristic of supervised techniques as the _model mode_. 
 
-In terms of data, the two main species are quantitative and qualitative. Examples of the former are real numbers like `3.14159` and integers like `42`. Qualitative values, also known as nominal data, are those that represent some sort of discrete state that cannot be naturally placed on a numeric scale, like "red", "green", and "blue". 
+Different variables can have different _roles_, especially in a supervised modeling analysis. Outcomes (otherwise known as the labels, endpoints, or dependent variables) are the value being predicted in supervised models. The independent variables, which are the substrate for making predictions of the outcome, are also referred to as predictors, features, or covariates (depending on the context). The terms _outcomes_ and _predictors_ are used most frequently in this book. 
 
-Different variables can have different _roles_ in an analysis. Outcomes (otherwise known as the labels, endpoints, or dependent variables) are the value being predicted in supervised models. The independent variables, which are the substrate for making predictions of the outcome, are also referred to as predictors, features, or covariates (depending on the context). The terms _outcomes_ and _predictors_ are used most frequently in this book. 
+In terms of the data or variables themselves, whether used for supervised or unsupervised models, as predictors or outcomes, the two main categories are quantitative and qualitative. Examples of the former are real numbers like `3.14159` and integers like `42`. Qualitative values, also known as nominal data, are those that represent some sort of discrete state that cannot be naturally placed on a numeric scale, like "red", "green", and "blue". 
+
 
 ## How does modeling fit into the data analysis process? {#model-phases}
 
@@ -177,7 +178,7 @@ In what circumstances are models created? Are there steps that precede such an u
 There are always a few critical phases of data analysis that come before modeling. 
 :::
 
-First, there is the chronically underestimated process of **cleaning the data**. No matter the circumstances, you should investigate the data to make sure that they are applicable to the project goals, accurate, and appropriate. These steps can easily take more time than the rest of the data analysis process (depending on the circumstances). 
+First, there is the chronically underestimated process of **cleaning the data**. No matter the circumstances, you should investigate the data to make sure that they are applicable to your project goals, accurate, and appropriate. These steps can easily take more time than the rest of the data analysis process (depending on the circumstances). 
 
 Data cleaning can also overlap with the second phase of **understanding the data**, often referred to as exploratory data analysis (EDA). EDA brings to light how the different variables are related to one another, their distributions, typical ranges, and other attributes. A good question to ask at this phase is, "How did I come by _these_ data?" This question can help you understand how the data at hand have been sampled or filtered and if these operations were appropriate. For example, when merging database tables, a join may go awry that could accidentally eliminate one or more sub-populations. Another good idea is to ask if the data are _relevant_. For example, to predict whether patients have Alzheimer's disease or not, it would be unwise to have a data set containing subjects with the disease and a random sample of healthy adults from the general population. Given the progressive nature of the disease, the model may simply predict who are the _oldest patients_. 
 
@@ -240,7 +241,7 @@ monolog <-
     "Model Evaluation", "2",
     "Variable importance scores indicate that the weather information is not predictive. We’ll drop them from the next set of models. ",
     "Model Evaluation", " ",
-    "It seems like we should focus on a lot boosting iterations for that model.",
+    "It seems like we should focus on a lot of boosting iterations for that model.",
     "Feature Engineering", "2", 
     "We need to encode holiday features to improve predictions on (and around) those dates.",
     "Model Evaluation", "2",
