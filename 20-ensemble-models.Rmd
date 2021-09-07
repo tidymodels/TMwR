@@ -1,7 +1,295 @@
-```{r ensemble-setup, include = FALSE}
+```{r ensembles-setup, include = FALSE}
+library(tidymodels)
+library(rules)
+library(baguette)
+library(stacks)
+library(patchwork)
+library(kableExtra)
+
+load("RData/concrete_results.RData")
+```
+
+# Ensembles of models {#ensembles}
+
+
+A model ensemble, where the predictions of multiple single learners are aggregated together to make one prediction, can produce a high-performance final model. The most popular methods for creating ensemble models are bagging [@breiman1996bagging], random forest [@ho1995random; @breiman2001random], and boosting [@freund1997decision]. Each of these methods combines the predictions from multiple versions of the _same type_ of model (e.g., classifications trees). However, one of the earliest methods for creating ensembles is **model stacking** [@wolpert1992stacked; @breiman1996stacked]. 
+
+:::rmdnote
+Model stacking combines the predictions for multiple models of _any type_. For example, a logistic regression, classification tree, and support vector machine can be included in a stacking ensemble. 
+:::
+
+
+This chapter shows how to stack predictive models using the `r pkg(stacks)` package. We'll re-use the results from Chapter \@ref(workflow-sets) where multiple models were evaluated to predict the compressive strength of concrete mixtures.
+
+The process of building a stacked ensemble is:
+
+1.  Assemble the training set of hold-out predictions (produced via resampling).
+2.  Create a model to blend these predictions.
+3.  For each member of the ensemble, fit the model on the original training set.
+
+In subsequent sections, we'll describe this process. However, before proceeding, there is some nomenclature to clarify around the different variations of what we can mean by "the model". This can quickly become an overloaded term when we are working on a complex modeling analysis! Let's consider the multilayer perceptron model (MLP, a.k.a. neural network) created in Chapter \@ref(workflow-sets).
+
+In general, we'll talk about a "multilayer perceptron model" as the **type** of model. Linear regression and support vector machines are other model types.
+
+One important aspect of a model are its tuning parameters. Back in Chapter \@ref(workflow-sets), the MLP model was tuned over 25 tuning parameter values. In the previous chapters, we've called these **candidate tuning parameter** values or **model configurations**. In the ensemble literature these have also been called the "base models". 
+
+:::rmdnote
+We'll use the term "candidate members" to describe the possible model configurations (of all model types) that might be included in the stacking ensemble.
+:::
+
+This means that a stacking model can include different types of models (e.g., trees and neural networks) as well as different configurations of the same model (e.g., trees with different depths). 
+
+
+## Creating the training set for stacking {#data-stack}
+
+Stacking relies on the assessment set predictions from a resampling scheme with multiple splits. For each data point in the training set, stacking requires an out-of-sample prediction of some sort. For regression models, this is the predicted outcome. For classification models, the predicted classes or probabilities are available for use, although the latter contains more information than the hard class predictions. For a set of models, a data set is assembled where rows are the training set samples and columns are the out-of-sample predictions from the set of multiple models.
+
+Back in Chapter \@ref(workflow-sets), we used five repeats of 10-fold cross-validation to resample the data. This resampling scheme generates five assessment set predictions for each training set sample. Multiple out-of-sample predictions can occur in several other resampling techniques (e.g. bootstrapping). For the purpose of stacking, any replicate predictions for a data point in the training set are averaged so that there is a single prediction per training set sample per candidate member.
+
+:::rmdnote
+Simple validation sets can also be used with stacking since tidymodels considers this to be a single resample. 
+:::
+
+For the concrete example, the training set used for model stacking has columns for all of the candidate tuning parameter results. Here are the first six rows and selected columns:
+
+```{r ensembles-data-example, echo = FALSE, results = "asis", warning = FALSE, message = FALSE, cache = TRUE}
+stacks() %>% 
+  add_candidates(grid_results) %>% 
+  as_tibble() %>% 
+  mutate(
+    sample_num = row_number(),
+    buffer_1 = "",
+    buffer_2 = "") %>% 
+  slice_head(n = 6) %>% 
+  select(sample_num, CART_bagged_1_1, starts_with("MARS"), Cubist_1_01,
+         buffer_1, Cubist_1_18, buffer_2) %>% 
+  knitr::kable(
+    digits = 2,
+    align = rep("c", 8),
+    col.names = c("Sample #", "Bagged Tree", "MARS 1", "MARS 2", "Cubist 1", 
+                  "...", "Cubist 25", "...")
+    ) %>% 
+  kable_styling("striped", full_width = TRUE) %>% 
+  add_header_above(c(" ", "Ensemble Candidate Predictions" = 7)) %>% 
+  row_spec(0, align = "c")
+```
+
+There is a single column for the bagged tree model since it has no tuning parameters. Also, recall that MARS was tuned over a single parameter (the product degree) with two possible configurations, so this model is represented by two columns. Most of the other models have 25 corresponding columns, as shown for Cubist. 
+
+:::rmdwarning
+For classification models, the candidate prediction columns would be predicted class probabilities. Since these columns add to one for each model, the probabilities for one of the classes can be left out. 
+:::
+
+In summary, the first step to stacking is to assemble the assessment set predictions for the training set from each candidate model. 
+
+To start ensembling with the `r pkg(stacks)` package, create an empty data stack using the `stacks()` function and then add candidate models. Recall that we used workflow sets to fit a wide variety of models to these data. We'll use the _racing results_:
+
+```{r ensembles-race}
+race_results
+```
+
+In this case, our syntax is:
+
+```{r ensembles-data-stack}
 library(tidymodels)
 library(stacks)
 tidymodels_prefer()
+
+concrete_stack <- 
+ stacks() %>% 
+ add_candidates(race_results)
+
+concrete_stack
 ```
 
-# Ensemble Models {#ensemble}
+Recall that racing methods (Section \@ref(racing)) are more efficient since they might not evaluate all configurations on all resamples. Stacking requires that all candidate members have the complete set of resamples. `add_candidates()` only includes the model configurations that have complete results. 
+
+:::rmdnote
+Why use the racing results instead of the full set of candidate models contained in `grid_results`? Either can be used. We found better performance for these data using the racing results. This might be due to the racing method pre-selecting the best model(s) from the larger grid. 
+:::
+
+If we had not used the `r pkg(workflowsets)` package, objects from the `r pkg(tune)` and `r pkg(finetune)` could also be passed to `add_candidates()`. This can include both grid and iterative search objects. 
+
+## Blend the predictions {#blend-predictions}
+
+The training set predictions and the corresponding observed outcome data are used create a **meta-learning model** where the assessment set predictions are the predictors of the observed outcome data. Meta-learning can be accomplished using any model. The most commonly used model is a regularized generalized linear model, which encompasses linear, logistic, and multinomial models. Regularization via the lasso penalty has several advantages: 
+
+- Using the lasso penalty can remove candidates (and sometimes whole model types) from the ensemble. 
+- The correlation between ensemble candidates tends to be very high and regularization helps alleviate this issue. 
+
+@breiman1996stacked also suggested that, when a linear model is used to blend the predictions, it might be helpful to constrain the blending coefficients to be non-negative. We have generally found this to be good advice and is the default for the `r pkg(stacks)` package (but can be changed via an optional argument). 
+
+Since our outcome is numeric, linear regression is used for the meta-model. Fitting the meta-model is as straightforward as using: 
+
+```{r ensembles-initial-blend, cache = TRUE}
+set.seed(2001)
+ens <- blend_predictions(concrete_stack)
+```
+
+This evaluates the meta-learning model over a pre-defined grid of lasso penalty values and uses an internal resampling method to determine the best value. The `autoplot()` method helps us understand if the default penalization method was sufficient: 
+
+```{r ensembles-initial-blend-plot}
+autoplot(ens)
+```
+
+The top panel shows the average number of candidate ensemble members retained by the meta-learning model. We can see that the number of members is fairly constant and, as it drops, the RMSE also drops. 
+
+The default range may not have served us well here. To evaluate the  meta-learning model with larger penalties, let's pass an additional option:
+
+
+```{r ensembles-second-blend, cache = TRUE}
+set.seed(2001)
+ens <- blend_predictions(concrete_stack, penalty = 10^seq(-2, -0.5, length = 20))
+autoplot(ens)
+```
+
+Now we see a range where the ensemble model becomes worse (but not by much). The R<sup>2</sup> values increase with larger penalties. This is somewhat counter-intuitive, but the y-axis range of each panel reminds us that these changes are minuscule. 
+
+The penalty value associated with the smallest RMSE was `r round(ens$penalty$penalty, 2)`. Printing the object shows the details of the meta-learning model: 
+
+
+```{r ensembles-second-blend-print}
+ens
+```
+```{r ensembles-details, include = FALSE}
+res <- stacks:::top_coefs(ens)
+num_coefs <- xfun::numbers_to_words(nrow(res))
+num_types <- length(unique(res$type))
+```
+
+The regularized linear regression meta-learning model contained `r num_coefs` blending coefficients across `r num_coefs` of models. The `autoplot()` method can be used again to show the contributions of each model type: 
+
+```{r ensembles-blending-weights}
+autoplot(ens, "weights")
+```
+
+The boosted tree and bagged tree have the largest contributions to the ensemble. For this ensemble, the outcome is predicted with the equation:
+
+```{r ensembles-equation, echo = FALSE, results = "asis", message = FALSE, warning = FALSE}
+all_members <- 
+  tibble(
+    member = unname(unlist(ens$cols_map)), 
+    obj = rep(names(ens$cols_map), map_int(ens$cols_map, length))
+  ) %>% 
+  inner_join(res, by = "member") %>% 
+  arrange(type, member)
+
+glmn_int <- 
+  tidy(ens$coefs) %>% 
+  filter(term == "(Intercept)") %>% 
+  mutate(estimate = format(estimate, digits = 2))
+
+config_label <- function(x) {
+  x <- dplyr::arrange(x, member)
+  x$type <- gsub("_", " ", x$type)
+  if (length(unique(x$member)) == 1) {
+    x$config <- paste(x$type, "prediction")
+  } else {
+    congif_chr <- paste0("prediction (config ", 1:nrow(x), ")")
+    x$config <- paste(x$type, congif_chr)
+  }
+  x$weight <- format(x$weight, digits = 2, scientific = FALSE)
+  x$term <- paste0(x$weight, " \\times \\text{", x$config, "} \\notag")
+  select(x, term)
+}
+tmp <- 
+  all_members %>% 
+  group_nest(obj, keep = TRUE) %>% 
+  mutate(data = map(data, ~ config_label(.x))) %>% 
+  unnest(cols = "data")
+
+eqn <- paste(c(glmn_int$estimate, tmp$term), collapse = " \\\\\n\t+&")
+eqn <- paste0("$$\n\\begin{align}\n \\text{ensemble prediction} &=", eqn, "\n\\end{align}\n$$")
+
+cat(eqn)
+```
+
+where the "predictors" in the equation are the predicted compressive strength values from those models. 
+
+## Fit the member models {#fit-members}
+
+The ensemble contains `r num_coefs` candidate members and we now know how their predictions can be blended into a final prediction for the ensemble. However, these individual models fits have not yet been created. To be able to use the stacking model, `r num_coefs` additional model fits are required. These use the entire training set with the original predictors. 
+
+The `r num_coefs`  models to be fit are:
+
+```{r ensembles-show-members, echo = FALSE, results = "asis"}
+param_filter <- function(object, config, stack_obj) {
+  res <- 
+    collect_parameters(stack_obj, candidates = object) %>% 
+    dplyr::filter(member == config) %>% 
+    dplyr::select(-coef)
+  
+  params <- res %>% dplyr::select(-member)
+  param_labs <- map_chr(names(params), name_to_label)
+  names(params) <- param_labs
+  fmt <- format(as.data.frame(params), digits = 3)
+  fmt <- as.matrix(fmt)[1,]
+  chr_param <- paste0(names(fmt), " = ", unname(fmt))
+  chr_param <- knitr::combine_words(chr_param)
+  items <- paste0("- ", gsub("_", " ", object), ": ", chr_param)
+  items
+}
+name_to_label <- function(x) {
+  if (x %in% c("committees")) {
+    ns <- "rules"
+  } else {
+    ns <- "dials"
+  }
+  .fn <- rlang::call2(x, .ns = ns)
+  object <- rlang::eval_tidy(.fn)
+  res <- unname(object$label)
+  res <- gsub("^# ", "number of ", tolower(res))
+  res
+}
+config_text <- function(x) {
+  if (nrow(x) == 1) {
+    res <- "\n\n"
+  } else {
+    res <- paste0(" (config ", 1:nrow(x), ")\n\n")
+  }
+  res
+}
+get_configs <- function(x) {
+  dplyr::group_nest(x, type) %>% 
+    dplyr::mutate(confg = purrr::map(data, config_text)) %>% 
+    dplyr::select(confg) %>% 
+    tidyr::unnest(cols = c(confg)) %>% 
+    purrr::pluck("confg")
+}
+
+param <- map2_chr(all_members$obj, all_members$member, param_filter, ens)
+param <- paste0(param, get_configs(all_members))
+cat(param)
+
+ens_rmse <- dplyr::filter(ens$metrics, penalty == ens$penalty$penalty & .metric == "rmse")$mean
+boost_rmse <- collect_metrics(boosting_test_results) %>% dplyr::filter(.metric == "rmse")
+```
+
+The `r pkg(stacks)` package has a function, `fit_members()`, that trains and returns these models: 
+
+```{r ensembles-fit-members}
+ens <- fit_members(ens)
+```
+
+This updates the stacking object with the fitted workflow objects for each member. At this point, the stacking model can be used for prediction. 
+
+## Test set results
+
+Since the blending process used resampling, we can estimate that the ensemble with `r num_coefs` members had an estimated RMSE of `r round(ens_rmse, 2)`. Recall from Chapter \@ref(workflow-sets) that the best boosted tree had a test set RMSE of `r round(boost_rmse$.estimate, 2)`. How will the ensemble model compare on the test set? 
+
+```{r ensembles-test-set}
+reg_metrics <- metric_set(rmse, rsq)
+ens_test_pred <- 
+ predict(ens, concrete_test) %>% 
+ bind_cols(concrete_test)
+
+ens_test_pred %>% 
+  reg_metrics(compressive_strength, .pred)
+```
+
+This is moderately better than our best single model. It is fairly common for stacking to produce incremental benefits when compared to the best single model. 
+
+
+## Chapter summary {#ensembles-summary}
+
+This chapter demonstrates how to combine different models into an ensemble for better predictive performance. The process of creating the ensemble can automatically eliminate candidate models to find a small subset that improves performance. The `r pkg(stacks)` package has a fluent interface for combining resampling and tuning results into a meta-model. 
