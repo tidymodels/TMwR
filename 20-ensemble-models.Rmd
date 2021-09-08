@@ -68,7 +68,7 @@ stacks() %>%
     align = rep("c", 8),
     col.names = c("Sample #", "Bagged Tree", "MARS 1", "MARS 2", "Cubist 1", 
                   "...", "Cubist 25", "...")
-    ) %>% 
+  ) %>% 
   kable_styling("striped", full_width = TRUE) %>% 
   add_header_above(c(" ", "Ensemble Candidate Predictions" = 7)) %>% 
   row_spec(0, align = "c")
@@ -96,8 +96,8 @@ library(stacks)
 tidymodels_prefer()
 
 concrete_stack <- 
- stacks() %>% 
- add_candidates(race_results)
+  stacks() %>% 
+  add_candidates(race_results)
 
 concrete_stack
 ```
@@ -132,7 +132,7 @@ This evaluates the meta-learning model over a pre-defined grid of lasso penalty 
 autoplot(ens)
 ```
 
-The top panel shows the average number of candidate ensemble members retained by the meta-learning model. We can see that the number of members is fairly constant and, as it drops, the RMSE also drops. 
+The top panel shows the average number of candidate ensemble members retained by the meta-learning model. We can see that the number of members is fairly constant and, as it increases, the RMSE also increases. 
 
 The default range may not have served us well here. To evaluate the  meta-learning model with larger penalties, let's pass an additional option:
 
@@ -143,7 +143,7 @@ ens <- blend_predictions(concrete_stack, penalty = 10^seq(-2, -0.5, length = 20)
 autoplot(ens)
 ```
 
-Now we see a range where the ensemble model becomes worse (but not by much). The R<sup>2</sup> values increase with larger penalties. This is somewhat counter-intuitive, but the y-axis range of each panel reminds us that these changes are minuscule. 
+Now we see a range where the ensemble model becomes worse than with our first blend (but not by much). The R<sup>2</sup> values increase with larger penalties. This is somewhat counter-intuitive, but the y-axis range of each panel reminds us that these changes are minuscule. 
 
 The penalty value associated with the smallest RMSE was `r round(ens$penalty$penalty, 2)`. Printing the object shows the details of the meta-learning model: 
 
@@ -154,16 +154,16 @@ ens
 ```{r ensembles-details, include = FALSE}
 res <- stacks:::top_coefs(ens)
 num_coefs <- xfun::numbers_to_words(nrow(res))
-num_types <- length(unique(res$type))
+num_types <- xfun::numbers_to_words(length(unique(res$type)))
 ```
 
-The regularized linear regression meta-learning model contained `r num_coefs` blending coefficients across `r num_coefs` of models. The `autoplot()` method can be used again to show the contributions of each model type: 
+The regularized linear regression meta-learning model contained `r num_coefs` blending coefficients across `r num_types` types of models. The `autoplot()` method can be used again to show the contributions of each model type: 
 
 ```{r ensembles-blending-weights}
 autoplot(ens, "weights")
 ```
 
-The boosted tree and bagged tree have the largest contributions to the ensemble. For this ensemble, the outcome is predicted with the equation:
+The boosted tree and Cubist models have the largest contributions to the ensemble. For this ensemble, the outcome is predicted with the equation:
 
 ```{r ensembles-equation, echo = FALSE, results = "asis", message = FALSE, warning = FALSE}
 all_members <- 
@@ -221,12 +221,16 @@ param_filter <- function(object, config, stack_obj) {
   
   params <- res %>% dplyr::select(-member)
   param_labs <- map_chr(names(params), name_to_label)
-  names(params) <- param_labs
-  fmt <- format(as.data.frame(params), digits = 3)
-  fmt <- as.matrix(fmt)[1,]
-  chr_param <- paste0(names(fmt), " = ", unname(fmt))
-  chr_param <- knitr::combine_words(chr_param)
-  items <- paste0("- ", gsub("_", " ", object), ": ", chr_param)
+  if (length(param_labs) > 0) {
+    names(params) <- param_labs
+    fmt <- format(as.data.frame(params), digits = 3)
+    fmt <- as.matrix(fmt)[1,]
+    chr_param <- paste0(names(fmt), " = ", unname(fmt))
+    chr_param <- knitr::combine_words(chr_param)
+    items <- paste0("- ", gsub("_", " ", object), ": ", chr_param)
+  } else {
+    items <- paste0("- ", gsub("_", " ", object))
+  }
   items
 }
 name_to_label <- function(x) {
@@ -280,8 +284,8 @@ Since the blending process used resampling, we can estimate that the ensemble wi
 ```{r ensembles-test-set}
 reg_metrics <- metric_set(rmse, rsq)
 ens_test_pred <- 
- predict(ens, concrete_test) %>% 
- bind_cols(concrete_test)
+  predict(ens, concrete_test) %>% 
+  bind_cols(concrete_test)
 
 ens_test_pred %>% 
   reg_metrics(compressive_strength, .pred)
