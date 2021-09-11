@@ -224,8 +224,8 @@ param_filter <- function(object, config, stack_obj) {
   if (length(param_labs) > 0) {
     names(params) <- param_labs
     fmt <- format(as.data.frame(params), digits = 3)
-    fmt <- as.matrix(fmt)[1,]
-    chr_param <- paste0(names(fmt), " = ", unname(fmt))
+    fmt <- as.matrix(fmt)[1,,drop = FALSE]
+    chr_param <- paste0(colnames(fmt), " = ", unname(fmt))
     chr_param <- knitr::combine_words(chr_param)
     items <- paste0("- ", gsub("_", " ", object), ": ", chr_param)
   } else {
@@ -263,7 +263,7 @@ get_configs <- function(x) {
 
 param <- map2_chr(all_members$obj, all_members$member, param_filter, ens)
 param <- paste0(param, get_configs(all_members))
-cat(param)
+cat(param, sep = "")
 
 ens_rmse <- dplyr::filter(ens$metrics, penalty == ens$penalty$penalty & .metric == "rmse")$mean
 boost_rmse <- collect_metrics(boosting_test_results) %>% dplyr::filter(.metric == "rmse")
