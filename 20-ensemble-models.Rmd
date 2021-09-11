@@ -134,12 +134,12 @@ autoplot(ens)
 
 The top panel shows the average number of candidate ensemble members retained by the meta-learning model. We can see that the number of members is fairly constant and, as it increases, the RMSE also increases. 
 
-The default range may not have served us well here. To evaluate the  meta-learning model with larger penalties, let's pass an additional option:
+The default range may not have served us well here. To evaluate the  meta-learning model with smaller penalties, let's pass an additional option:
 
 
 ```{r ensembles-second-blend, cache = TRUE}
 set.seed(2001)
-ens <- blend_predictions(concrete_stack, penalty = 10^seq(-2, -0.5, length = 20))
+ens <- blend_predictions(concrete_stack, penalty = 10^seq(-4, -0.5, length = 30))
 autoplot(ens)
 ```
 
