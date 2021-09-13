@@ -544,14 +544,14 @@ lm_wflow <-
 lm_fit <- lm_wflow %>% fit(data = ames_train)
 
 # Select the recipe: 
-pull_workflow_prepped_recipe(lm_fit)
+extract_recipe(lm_fit, estimated = TRUE)
 ```
 
 We can save the linear model coefficients for a fitted model object from a workflow: 
 
 ```{r resampling-extract-func}
 get_model <- function(x) {
-  pull_workflow_fit(x) %>% tidy()
+  extract_fit_parsnip(x) %>% tidy()
 }
 
 # Test it using: 

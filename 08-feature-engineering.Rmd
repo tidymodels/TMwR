@@ -144,17 +144,17 @@ The `predict()` method applies the same preprocessing that was used on the train
 predict(lm_fit, ames_test %>% slice(1:3))
 ```
 
-If we need the bare model object or recipe, there are `pull_*` functions that can retrieve them: 
+If we need the bare model object or recipe, there are `extract_*` functions that can retrieve them: 
 
 ```{r workflows-pull}
 # Get the recipe after it has been estimated:
 lm_fit %>% 
-  pull_workflow_prepped_recipe() 
+  extract_recipe(estimated = TRUE)
 
 # To tidy the model fit: 
 lm_fit %>% 
   # This returns the parsnip object:
-  pull_workflow_fit() %>% 
+  extract_fit_parsnip() %>% 
   # Now tidy the linear model object:
   tidy() %>% 
   slice(1:5)
@@ -508,7 +508,7 @@ The `tidy()` method can be called again along with the `id` identifier we specif
 ```{r engineering-lm-tidy-other}
 estimated_recipe <- 
   lm_fit %>% 
-  pull_workflow_prepped_recipe()
+  extract_recipe(estimated = TRUE)
 
 tidy(estimated_recipe, id = "my_id")
 ```
