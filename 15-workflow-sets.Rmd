@@ -70,7 +70,7 @@ nrow(concrete)
 
 ```{r conc-save-2, include = FALSE}
 concrete_summary <- concrete
-save(concrete_raw, concrete_split, file = "concrete_check.RData")
+save(concrete_raw, concrete_summary, file = "concrete_check.RData")
 ```
 
 Let's split the data using the default 3:1 ratio of training-to-test and resample the training set using five repeats of 10-fold cross-validation. 
