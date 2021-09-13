@@ -53,7 +53,7 @@ full_model_fit <-
   ad_mod %>% 
   fit(Class ~ (Genotype + male + age)^3, , data = ad_data)
 
-full_model_fit %>% pluck("fit") 
+full_model_fit %>% extract_fit_engine() 
 
 two_way_fit <-
   ad_mod %>% 
@@ -61,8 +61,8 @@ two_way_fit <-
 
 three_factor_test <- 
   anova(
-    full_model_fit %>% pluck("fit"), 
-    two_way_fit %>% pluck("fit"),
+    full_model_fit %>% extract_fit_engine(), 
+    two_way_fit %>% extract_fit_engine(),
     test = "LRT"
   )
 
@@ -72,8 +72,8 @@ main_effects_fit <-
 
 two_factor_test <- 
   anova(
-    two_way_fit %>% pluck("fit"), 
-    main_effects_fit %>% pluck("fit"),
+    two_way_fit %>% extract_fit_engine(), 
+    main_effects_fit %>% extract_fit_engine(),
     test = "LRT"
   )
 
