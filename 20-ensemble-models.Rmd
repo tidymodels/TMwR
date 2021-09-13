@@ -293,6 +293,9 @@ ens_test_pred %>%
 
 This is moderately better than our best single model. It is fairly common for stacking to produce incremental benefits when compared to the best single model. 
 
+```{r artifacts, include = FALSE}
+save.image(file = "ensembles.RData", version = 2, compress = TRUE)
+```
 
 ## Chapter summary {#ensembles-summary}
 
