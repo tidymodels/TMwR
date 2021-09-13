@@ -206,7 +206,7 @@ The solution in `workflows` is an optional supplementary model formula that can 
 library(survival)
 
 parametric_model <- 
-  survival_reg() %>% 
+  surv_reg() %>% 
   set_engine("survival")
 
 parametric_workflow <- 
