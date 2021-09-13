@@ -80,10 +80,11 @@ jobs:
       - name: Build site
         run: Rscript -e 'bookdown::render_book("index.Rmd", quiet = TRUE)'
 
+      - name: artifact for debugging
       - uses: actions/upload-artifact@v2
         with:
-          name: ensemble-image
-          path: ensembles.RData
+          name: concete-image
+          path: concrete_check.RData
 
       - name: Install npm
         uses: actions/setup-node@v1
