@@ -154,7 +154,7 @@ eq_zone_results <- function(buffer) {
   tibble(accuracy = acc$.estimate, reportable = rep_rate, buffer = buffer)
 }
 
-# Evaluate a seqeunce of buffers and plot the results. 
+# Evaluate a sequence of buffers and plot the results. 
 map_dfr(seq(0, .1, length.out = 40), eq_zone_results) %>% 
   pivot_longer(c(-buffer), names_to = "statistic", values_to = "value") %>% 
   ggplot(aes(x = buffer, y = value, col = statistic)) + 
