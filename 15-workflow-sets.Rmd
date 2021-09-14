@@ -45,10 +45,6 @@ data(concrete, package = "modeldata")
 glimpse(concrete)
 ```
 
-```{r conc-save-1, include = FALSE}
-concrete_raw <- concrete
-```
-
 The `compressive_strength` column is the outcome. The `age` predictor tells us the age of the concrete sample at testing in days (concrete strengthens over time) and the rest of the predictors like `cement` and `water` are concrete components in units of kilograms per cubic meter.
 
 :::rmdwarning
@@ -65,12 +61,6 @@ concrete <-
    summarize(compressive_strength = mean(compressive_strength),
              .groups = "drop")
 nrow(concrete)
-```
-
-
-```{r conc-save-2, include = FALSE}
-concrete_summary <- concrete
-save(concrete_raw, concrete_summary, file = "concrete_check.RData")
 ```
 
 Let's split the data using the default 3:1 ratio of training-to-test and resample the training set using five repeats of 10-fold cross-validation. 
@@ -463,4 +453,10 @@ Often a data practitioner needs to consider a large number of possible modeling 
 save(concrete_test, concrete_split, grid_results, race_results, 
      boosting_test_results,
      file = "RData/concrete_results.RData", version = 2, compress = "xz")
+```
+
+
+
+```{r conc-save-2, include = FALSE}
+save.image(file = "concrete_check.RData", version = 2, compress = "xz")
 ```
