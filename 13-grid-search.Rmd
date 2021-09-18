@@ -214,7 +214,7 @@ The `tune_grid()` function is the primary function for conducting grid search. I
 
 * `grid`: An integer or data frame. When an integer is used, the function creates a space-filling design with `grid` number of candidate parameter combinations. If specific parameter combinations exist, the `grid` parameter is used to pass them to the function. 
 
-* `param_info`: An _optional_ argument for defining the parameter ranges. The is most useful when `grid` is an integer. 
+* `param_info`: An _optional_ argument for defining the parameter ranges. The argument is most useful when `grid` is an integer. 
 
 Otherwise, the interface to `tune_grid()` is the same as `fit_resamples()`. The first argument is either a model specification or workflow. When a model is given, the second argument can be either a recipe or formula. The other required argument is an `r pkg(rsample)` resampling object (such as `cell_folds`). The call below also passes a metric set so that the area under the ROC curve is measured during resampling. 
 
