@@ -112,7 +112,7 @@ If we had not used the `r pkg(workflowsets)` package, objects from the `r pkg(tu
 
 ## Blend the predictions {#blend-predictions}
 
-The training set predictions and the corresponding observed outcome data are used create a **meta-learning model** where the assessment set predictions are the predictors of the observed outcome data. Meta-learning can be accomplished using any model. The most commonly used model is a regularized generalized linear model, which encompasses linear, logistic, and multinomial models. Regularization via the lasso penalty has several advantages: 
+The training set predictions and the corresponding observed outcome data are used to create a **meta-learning model** where the assessment set predictions are the predictors of the observed outcome data. Meta-learning can be accomplished using any model. The most commonly used model is a regularized generalized linear model, which encompasses linear, logistic, and multinomial models. Regularization via the lasso penalty has several advantages: 
 
 - Using the lasso penalty can remove candidates (and sometimes whole model types) from the ensemble. 
 - The correlation between ensemble candidates tends to be very high and regularization helps alleviate this issue. 
