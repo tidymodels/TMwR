@@ -253,16 +253,16 @@ rand_forest(trees = 1000, min_n = 5) %>%
 
 ## Use the model results
 
-Once the model is created and fit, we can use the results in a variety of ways; we might want to plot, print, or otherwise examine the model output. Several quantities are stored in a `r pkg(parsnip)` model object, including the fitted model. This can be found in an element called `fit`, which can be returned using the `purrr::pluck()` function:
+Once the model is created and fit, we can use the results in a variety of ways; we might want to plot, print, or otherwise examine the model output. Several quantities are stored in a `r pkg(parsnip)` model object, including the fitted model. This can be found in an element called `fit`, which can be returned using the `extract_fit_engine()` function:
 
 ```{r models-pluck}
-lm_form_fit %>% pluck("fit")
+lm_form_fit %>% extract_fit_engine()
 ```
 
 Normal methods can be applied to this object, such as printing, plotting, and so on: 
 
 ```{r models-pluck-coef}
-lm_form_fit %>% pluck("fit") %>% vcov()
+lm_form_fit %>% extract_fit_engine() %>% vcov()
 ```
 
 :::rmdwarning
@@ -274,7 +274,7 @@ One issue with some existing methods in base R is that the results are stored in
 ```{r models-lm-param}
 model_res <- 
   lm_form_fit %>% 
-  pluck("fit") %>% 
+  extract_fit_engine() %>% 
   summary()
 
 # The model coefficient table is accessible via the `coef` method.

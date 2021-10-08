@@ -53,7 +53,7 @@ full_model_fit <-
   ad_mod %>% 
   fit(Class ~ (Genotype + male + age)^3, , data = ad_data)
 
-full_model_fit %>% pluck("fit") 
+full_model_fit %>% extract_fit_engine() 
 
 two_way_fit <-
   ad_mod %>% 
@@ -61,8 +61,8 @@ two_way_fit <-
 
 three_factor_test <- 
   anova(
-    full_model_fit %>% pluck("fit"), 
-    two_way_fit %>% pluck("fit"),
+    full_model_fit %>% extract_fit_engine(), 
+    two_way_fit %>% extract_fit_engine(),
     test = "LRT"
   )
 
@@ -72,8 +72,8 @@ main_effects_fit <-
 
 two_factor_test <- 
   anova(
-    two_way_fit %>% pluck("fit"), 
-    main_effects_fit %>% pluck("fit"),
+    two_way_fit %>% extract_fit_engine(), 
+    main_effects_fit %>% extract_fit_engine(),
     test = "LRT"
   )
 
@@ -120,7 +120,7 @@ function(data, truth, ...)
 where `data` is a data frame or tibble and `truth` is the column with the observed outcome values. The ellipses or other arguments are used to specify the column(s) containing the predictions. 
 
 
-To illustrate, let's take the model from Section \@ref(workflows-summary). The `lm_wflow_fit` object was a linear regression model whose predictor set was supplemented with an interaction and spline functions for longitude and latitude. It was created from a training set (named `ames_train`). Although we do not advise using the test set at this juncture of the modeling process, it will be used to illustrate functionality and syntax. The data frame `ames_test` consists of `r nrow(ames_test)` properties. To start, let's produce predictions: 
+To illustrate, let's take the model from Section \@ref(recipes-summary). The `lm_wflow_fit` object was a linear regression model whose predictor set was supplemented with an interaction and spline functions for longitude and latitude. It was created from a training set (named `ames_train`). Although we do not advise using the test set at this juncture of the modeling process, it will be used to illustrate functionality and syntax. The data frame `ames_test` consists of `r nrow(ames_test)` properties. To start, let's produce predictions: 
 
 
 ```{r performance-predict-ames}
