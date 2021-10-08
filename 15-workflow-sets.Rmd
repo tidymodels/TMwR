@@ -186,7 +186,7 @@ Since there is only a single preprocessor, this function creates a set of workfl
 The `wflow_id` column is automatically created but can be modified using a call to `mutate()`. The `info` column contains a tibble with some identifiers and the workflow object. The workflow can be extracted: 
 
 ```{r workflow-sets-get-workflow}
-normalized %>% pull_workflow(id = "normalized_KNN")
+normalized %>% extract_workflow(id = "normalized_KNN")
 ```
 
 The `option` column is a placeholder for any arguments to use when we evaluate the workflow. For example, to add the neural network parameter object:  
@@ -420,13 +420,13 @@ Similar to what we have shown in previous chapters, choosing the final model and
 ```{r workflow-sets-finalize}
 best_results <- 
    race_results %>% 
-   pull_workflow_set_result("boosting") %>% 
+   extract_workflow_set_result("boosting") %>% 
    select_best(metric = "rmse")
 best_results
 
 boosting_test_results <- 
    race_results %>% 
-   pull_workflow("boosting") %>% 
+   extract_workflow("boosting") %>% 
    finalize_workflow(best_results) %>% 
    last_fit(split = concrete_split)
 ```

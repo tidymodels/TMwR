@@ -27,7 +27,7 @@ To motivate this chapter, the next section demonstrates how naive performance es
 
 ## The resubstitution approach {#resampling-resubstition}
 
-Let's again use the Ames data to demonstrate the concepts in this chapter. Section \@ref(workflows-summary) summarizes the current state of our Ames analysis. It includes a recipe object named `ames_rec`, a linear model, and a workflow using that recipe and model called `lm_wflow`. This workflow was fit on the training set, resulting in `lm_fit`. 
+Let's again use the Ames data to demonstrate the concepts in this chapter. Section \@ref(recipes-summary) summarizes the current state of our Ames analysis. It includes a recipe object named `ames_rec`, a linear model, and a workflow using that recipe and model called `lm_wflow`. This workflow was fit on the training set, resulting in `lm_fit`. 
 
 For a comparison to this linear model, we can also fit a different type of model. _Random forests_ are a tree ensemble method that operate by creating a large number of decision trees from slightly different versions of the training set [@breiman2001random]. This collection of trees makes up the ensemble. When predicting a new sample, each ensemble member makes a separate prediction. These are averaged to create the final ensemble prediction for the new data point. 
 
@@ -544,14 +544,14 @@ lm_wflow <-
 lm_fit <- lm_wflow %>% fit(data = ames_train)
 
 # Select the recipe: 
-pull_workflow_prepped_recipe(lm_fit)
+extract_recipe(lm_fit, estimated = TRUE)
 ```
 
 We can save the linear model coefficients for a fitted model object from a workflow: 
 
 ```{r resampling-extract-func}
 get_model <- function(x) {
-  pull_workflow_fit(x) %>% tidy()
+  extract_fit_parsnip(x) %>% tidy()
 }
 
 # Test it using: 

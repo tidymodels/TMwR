@@ -251,7 +251,7 @@ library(workflowsets)
 location_models <- workflow_set(preproc = location, models = list(lm = lm_model))
 location_models
 location_models$info[[1]]
-pull_workflow(location_models, id = "coords_lm")
+extract_workflow(location_models, id = "coords_lm")
 ```
 
 Workflow sets are mostly designed to work with resampling, which is discussed in Chapter \@ref(resampling). In the object above, the columns `option` and `result` must be populated with specific types of objects that result from resampling. We will demonstrate this in more detail in Chapters \@ref(compare) and  \@ref(workflow-sets).  
