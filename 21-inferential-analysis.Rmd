@@ -24,7 +24,11 @@ In this chapter, we describe how to use tidymodels for fitting and assessing inf
 
 ## An example: Inference regarding counts
 
-We'll use the biochemistry publication data from the `r pkg(pscl)` package. These data consist of information on 915 Ph.D. biochemistry graduates and tries to explain factors that impact their academic productivity (measured via number of articles published within three years). The predictors include the sex of the graduate, their marital status, the number of children that are at least five years old, the prestige of their department, and the number of articles produced by their mentor in the same time period.
+We'll use the biochemistry publication data from the `r pkg(pscl)` package. These data consist of information on 915 Ph.D. biochemistry graduates and tries to explain factors that impact their academic productivity (measured via number of articles published within three years). The predictors include the sex of the graduate, their marital status, the number of children that are at least five years old, the prestige of their department, and the number of articles produced by their mentor in the same time period. The data reflect biochemistry doctorates who finished their education between 1956 and 1963. The data a somewhat biased sample of all of the biochemistry doctorates give during this period (based on completeness of information).
+
+::: {.rmdnote}
+Recall that in Chapter \@ref(trust} we asked the question "Is our model applicable for predicting a specific data point?". It is very important to define what populations do an inferential analysis apply to? For these data, the results would likely apply to biochemistry doctorates given around the time frame the data were collected. Does it also apply to other chemistry doctorate types (e.g., medicinal chemistry, etc). These are important questions to address (and document) when conducting inferential analyses. 
+:::
 
 A plot of the data shows that many graduates did not publish any articles in this time and that the outcome follows a right-skewed distribution.
 
@@ -51,13 +55,25 @@ bioChemists %>%
   summarize(counts = sum(art), n = length(art))
 ```
 
-There were many more publications by men, although there were more men in the data. The simplest approach to analyzing these data would be to do a two-sample comparison using the `poisson.test()` function in the `r pkg(stats)` package. It requires the counts for one or two groups. A basic application of the test is:
+There were many more publications by men, although there were more men in the data. The simplest approach to analyzing these data would be to do a two-sample comparison using the `poisson.test()` function in the `r pkg(stats)` package. It requires the counts for one or two groups. 
+
+For our application, the hypotheses to compare the two sexes are:
+
+$$
+\begin{align}
+H_0&: \lambda_m = \lambda_f \notag \\
+H_a&: \lambda_m \ne \lambda_f \notag
+\end{align}
+$$
+where the $\lambda$ values are the rates of publications (over the same time period). 
+
+A basic application of the test is:
 
 ```{r inferential-test-basic}
 poisson.test(c(930, 619), T = 3)
 ```
 
-The function reports a p-value as well as a confidence interval for the ratio of the publication rates. The results indicate that the observed difference is greater than the experiential noise.
+The function reports a p-value as well as a confidence interval for the ratio of the publication rates. The results indicate that the observed difference is greater than the experiential noise and favors $H_a$. 
 
 One issue with using this function is that the results come back as an `htest` object. While this type of object has a well defined structure, it can be difficult to consume for subsequent operations such as reporting or visualizations. The most impactful tool that tidymodels has to offer for inferential models is the `tidy()` functions in the `r pkg(broom)` package. As previously seen, this function makes a well formed, predictably named tibble from the object. Using this function:
 
@@ -74,7 +90,7 @@ While the Poisson distribution is reasonable, we might also want to make an asse
 
 The `r pkg(infer)` package is a very powerful and intuitive tool for hypothesis testing [@ModernDive]. Its syntax is concise and designed for non-statisticians.
 
-First, we `specify()` to use the difference in the mean number of articles between the sexes and the `calculate()` the statistic from the data. Recall that the maximum likelihood estimator for the Poisson mean is the sample mean.
+First, we `specify()` to use the difference in the mean number of articles between the sexes and the `calculate()` the statistic from the data. Recall that the maximum likelihood estimator for the Poisson mean is the sample mean. The hypothesis tested below is the same as the previous test (but is conducted using a different testing procedure).  
 
 With `r pkg(infer)`, we specify the outcome and covariate, then state the statistic of interest:
 
@@ -174,7 +190,16 @@ The `tidy()` method succinctly summarizes the coefficients for the model (along 
 tidy(log_lin_fit, conf.int = TRUE, conf.level = 0.90)
 ```
 
-Looking at these results, `phd` (the prestige of their department) may not have any relationship with the outcome.
+The p-values for this output tests 
+
+$$
+\begin{align}
+H_0&: \beta_j = 0 \notag \\
+H_a&: \beta_j \ne 0 \notag
+\end{align}
+$$
+
+for each of the model parameters. Looking at these results, `phd` (the prestige of their department) may not have any relationship with the outcome.
 
 While the Poisson distribution is the routine assumption for data like these, it may be beneficial to conduct a rough check the model assumptions but fitting the models without using the Poisson likelihood to calculate the confidence intervals. The `r pkg(rsample)` package has a convenience function to compute bootstrap confidence intervals for `lm()` and `glm()` models. We can use this function, while explicitly declaring `family = poisson`, to compute a large number of model fits. By default, we compute a 90% confidence bootstrap-t interval but percentile and BCa intervals are also available:
 
@@ -205,9 +230,17 @@ glm_boot %>%
   labs(x = "GLM coefficients", y = NULL)
 ```
 
-Determining which predictors to include in the model is a difficult problem. One approach is to conduct likelihood ratio tests [@McCullaghNelder89] between nested models. Based on the confidence intervals, there is evidence that a simpler model without `phd` may be sufficient. Let's fit a smaller model, then conduct a statistical test, and then tidy the results:
+Determining which predictors to include in the model is a difficult problem. One approach is to conduct likelihood ratio tests (LRT) [@McCullaghNelder89] between nested models. Based on the confidence intervals, there is evidence that a simpler model without `phd` may be sufficient. Let's fit a smaller model then conduct a statistical test: 
 
-```{r inferential-reduced}
+$$
+\begin{align}
+H_0&: \beta_{phd} = 0 \notag \\
+H_a&: \beta_{phd} \ne 0 \notag
+\end{align}
+$$
+This hypothesis was previously tested when the tidied results for `log_lin_fit` were shown. That particular approach used results from a single model fit via a Wald statistic (i.e. the parameter divided by its standard error). For that approach, the p-value was `r tidy(log_lin_fit) %>% filter(term == "phd") %>% pluck("p.value") %>% format.pval()`. We can tidy the results for the LRT to get the p-value: 
+
+```{r inferential-reduced, warning = FALSE}
 log_lin_reduced <- 
   log_lin_spec %>% 
   fit(art ~ ment + kid5 + fem + mar, data = bioChemists)
@@ -220,7 +253,7 @@ anova(
   tidy()
 ```
 
-We'll exclude `phd` from further analyses.
+The results are the same and, based on these and the confidence interval for this parameter, we'll exclude `phd` from further analyses since it does not appear to influence the outcome. 
 
 ## A more complex model
 
@@ -253,7 +286,15 @@ zero_inflated_fit <-
 zero_inflated_fit
 ```
 
-Since the coefficients for this model are also estimated using maximum likelihood, let's try to use another likelihood ratio test to understand if the new model terms are helpful.
+Since the coefficients for this model are also estimated using maximum likelihood, let's try to use another likelihood ratio test to understand if the new model terms are helpful. We will _simultaneously_ test that
+
+$$
+\begin{align}
+H_0&: \gamma_1 = 0, \gamma_2 = 0, \cdots, \gamma_5 = 0 \notag \\
+H_a&: \text{at least one} \ne 0  \notag
+\end{align}
+$$
+
 
 ```{r inference-zip-anova, error = TRUE}
 anova(
@@ -264,7 +305,10 @@ anova(
   tidy()
 ```
 
-An `anova()` method isn't implemented for `zeroinfl` objects. An alternative would be to use an *information criterion statistic*, such as the Akaike information criterion (AIC) [@claeskens2016statistical]. This computes the log-likelihood (from the training set) and penalizes that value based on the training set size and the number of model parameters. In R's parameterization, smaller AIC values are better.
+An `anova()` method isn't implemented for `zeroinfl` objects. 
+
+
+An alternative would be to use an *information criterion statistic*, such as the Akaike information criterion (AIC) [@claeskens2016statistical]. This computes the log-likelihood (from the training set) and penalizes that value based on the training set size and the number of model parameters. In R's parameterization, smaller AIC values are better. In this case, we are not conducting a formal statistical test but _estimating_ the ability of the data to fit the data. 
 
 The results indicate that the ZIP model is preferable:
 
@@ -273,9 +317,9 @@ zero_inflated_fit %>% extract_fit_engine() %>% AIC()
 log_lin_reduced   %>% extract_fit_engine() %>% AIC()
 ```
 
-However, it's hard to contextualize these values and assess *how* different they actually are. To solve this problem, we'll resample a large number of each of these two models. From these, we can compute the AIC values for each and determine how often the results favor the ZIP model.
+However, it's hard to contextualize these values and assess *how* different they actually are. To solve this problem, we'll resample a large number of each of these two models. From these, we can compute the AIC values for each and determine how often the results favor the ZIP model. Basically, we will be characterizing the uncertainty of the AIC statistics to gauge their difference relative to the noise in the data. 
 
-We'll also compute more bootstrap confidence intervals in a bit so we specify the `apparent = TRUE` option when creating the bootstrap samples. This is required for some types of intervals.
+We'll also compute more bootstrap confidence intervals for the parameters in a bit so we specify the `apparent = TRUE` option when creating the bootstrap samples. This is required for some types of intervals.
 
 First, we create the 4,000 model fits:
 
@@ -337,7 +381,7 @@ bootstrap_models %>%
   geom_vline(xintercept = 0, col = "green")
 ```
 
-From visual inspection, one of the covariates (`ment`) appears to be important and has a very skewed distribution. The extra space in some of the facets indicates that there are some outilers in the estimates. This *might* occur when models that did not converge; those results should probably be excluded from the resamples. For the results above, the outliers are only due to extreme parameter estimates; all of the models converged.
+From visual inspection, one of the covariates (`ment`) appears to be important and has a very skewed distribution. The extra space in some of the facets indicates that there are some outilers in the estimates. This *might* occur when models did not converge; those results should probably be excluded from the resamples. For the results above, the outliers are only due to extreme parameter estimates; all of the models converged.
 
 `r pkg(rsample)` contains a set of functions named `int_*()` that compute different types of bootstrap intervals. Since the `tidy()` method contains standard error estimates, the bootstrap-t intervals can be computed. We'll also compute the standard percentile intervals too. By default, 90% confidence intervals are computed.
 
