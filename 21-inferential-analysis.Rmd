@@ -27,7 +27,7 @@ In this chapter, we describe how to use tidymodels for fitting and assessing inf
 We'll use the biochemistry publication data from the `r pkg(pscl)` package. These data consist of information on 915 Ph.D. biochemistry graduates and tries to explain factors that impact their academic productivity (measured via number of articles published within three years). The predictors include the sex of the graduate, their marital status, the number of children that are at least five years old, the prestige of their department, and the number of articles produced by their mentor in the same time period. The data reflect biochemistry doctorates who finished their education between 1956 and 1963. The data a somewhat biased sample of all of the biochemistry doctorates give during this period (based on completeness of information).
 
 ::: {.rmdnote}
-Recall that in Chapter \@ref(trust} we asked the question "Is our model applicable for predicting a specific data point?". It is very important to define what populations do an inferential analysis apply to? For these data, the results would likely apply to biochemistry doctorates given around the time frame the data were collected. Does it also apply to other chemistry doctorate types (e.g., medicinal chemistry, etc). These are important questions to address (and document) when conducting inferential analyses. 
+Recall that in Chapter \@ref(trust) we asked the question "Is our model applicable for predicting a specific data point?". It is very important to define what populations an inferential analysis apply to. For these data, the results would likely apply to biochemistry doctorates given around the time frame that the data were collected. Does it also apply to other chemistry doctorate types (e.g., medicinal chemistry, etc)? These are important questions to address (and document) when conducting inferential analyses. 
 :::
 
 A plot of the data shows that many graduates did not publish any articles in this time and that the outcome follows a right-skewed distribution.
@@ -190,7 +190,7 @@ The `tidy()` method succinctly summarizes the coefficients for the model (along 
 tidy(log_lin_fit, conf.int = TRUE, conf.level = 0.90)
 ```
 
-The p-values for this output tests 
+The p-values for this output test hypothesis for each parameter separately: 
 
 $$
 \begin{align}
