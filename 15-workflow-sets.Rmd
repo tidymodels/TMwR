@@ -56,8 +56,7 @@ To address this, we will use the mean compressive strength per concrete mixture 
 ```{r workflow-sets-means}
 concrete <- 
    concrete %>% 
-   group_by(cement, blast_furnace_slag, fly_ash, water, superplasticizer, 
-            coarse_aggregate, fine_aggregate, age) %>% 
+   group_by(across(-compressive_strength)) %>% 
    summarize(compressive_strength = mean(compressive_strength),
              .groups = "drop")
 nrow(concrete)
@@ -194,7 +193,7 @@ The `option` column is a placeholder for any arguments to use when we evaluate t
 ```{r workflow-sets-info-update}
 normalized <- 
    normalized %>% 
-   option_add(param = nnet_param, id = "normalized_neural_network")
+   option_add(param_info = nnet_param, id = "normalized_neural_network")
 normalized
 ```
 
