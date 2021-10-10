@@ -190,7 +190,7 @@ The `tidy()` method succinctly summarizes the coefficients for the model (along 
 tidy(log_lin_fit, conf.int = TRUE, conf.level = 0.90)
 ```
 
-The p-values for this output test hypothesis for each parameter separately: 
+In this output, the p-values correspond to separate hypothesis tests for each parameter: 
 
 $$
 \begin{align}
