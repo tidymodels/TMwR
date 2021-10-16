@@ -431,7 +431,8 @@ bean_res <-
     seed = 1703,
     resamples = bean_val,
     grid = 10,
-    metrics = metric_set(roc_auc)
+    metrics = metric_set(roc_auc),
+    control = ctrl
   )
 ```
 
