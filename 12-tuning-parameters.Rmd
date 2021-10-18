@@ -168,7 +168,7 @@ lloss <- function(...) {
 
 resampled_res <- 
   bind_rows(
-    lloss()                                    %>% mutate(model = "logitistic"),
+    lloss()                                    %>% mutate(model = "logistic"),
     lloss(family = binomial(link = "probit"))  %>% mutate(model = "probit"),
     lloss(family = binomial(link = "cloglog")) %>% mutate(model = "c-log-log")     
   ) %>%
