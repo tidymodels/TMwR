@@ -41,8 +41,8 @@ simulate_two_classes <-
     colnames(dat) <- c("x", "y")
     cls <- paste0("class_", 1:2)
     dat <- 
-      as_tibble(dat) %>% 
-      mutate(
+      tibble::as_tibble(dat) %>% 
+      dplyr::mutate(
         linear_pred = !!eqn,
         # Add some misclassification noise
         linear_pred = linear_pred + rnorm(n, sd = error),
@@ -50,7 +50,7 @@ simulate_two_classes <-
         class = ifelse(prob > runif(n), cls[1], cls[2]),
         class = factor(class, levels = cls)
       )
-    select(dat, x, y, class)
+    dplyr::select(dat, x, y, class)
   }
 
 set.seed(1901)
