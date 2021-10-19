@@ -33,6 +33,9 @@ $$
 The two predictors follow a bivariate normal distribution with a correlation of 0.70. We'll create a training set of 200 samples and a test set of 50: 
 
 ```{r trust-simulation}
+library(tidymodels)
+tidymodels_prefer()
+
 simulate_two_classes <- 
   function (n, error = 0.1, eqn = quote(-1 - 2 * x - 0.2 * x^2 + 2 * y^2))  {
     # Slightly correlated predictors
@@ -41,8 +44,8 @@ simulate_two_classes <-
     colnames(dat) <- c("x", "y")
     cls <- paste0("class_", 1:2)
     dat <- 
-      tibble::as_tibble(dat) %>% 
-      dplyr::mutate(
+      as_tibble(dat) %>% 
+      mutate(
         linear_pred = !!eqn,
         # Add some misclassification noise
         linear_pred = linear_pred + rnorm(n, sd = error),
@@ -61,9 +64,6 @@ testing_set  <- simulate_two_classes(50)
 We estimate a logistic regression model using Bayesian methods (using the default Gaussian prior distributions for the parameters): 
 
 ```{r trust-bayes-glm}
-library(tidymodels)
-tidymodels_prefer()
-
 two_class_mod <- 
    logistic_reg() %>% 
    set_engine("stan", seed = 1902) %>% 
