@@ -28,7 +28,7 @@ In this chapter, we describe how to use `r pkg(tidymodels)` for fitting and asse
 
 ## An example: Inference regarding counts
 
-We'll use biochemistry publication data from the `r pkg(pscl)` package. These data consist of information on 915 Ph.D. biochemistry graduates and tries to explain factors that impact their academic productivity (measured via number of articles published within three years). The predictors include the gender of the graduate, their marital status, the number of children that are at least five years old, the prestige of their department, and the number of articles produced by their mentor in the same time period. The data reflect biochemistry doctorates who finished their education between 1956 and 1963. The data are a somewhat biased sample of all of the biochemistry doctorates give during this period (based on completeness of information).
+We'll use biochemistry publication data from the `r pkg(pscl)` package. These data consist of information on 915 Ph.D. biochemistry graduates and tries to explain factors that impact their academic productivity (measured via number of articles published within three years). The predictors include the gender of the graduate, their marital status, the number of children that are at least five years old, the prestige of their department, and the number of articles produced by their mentor in the same time period. The data reflect biochemistry doctorates who finished their education between 1956 and 1963. The data are a somewhat biased sample of all of the biochemistry doctorates given during this period (based on completeness of information).
 
 :::rmdnote
 Recall that in Chapter \@ref(trust) we asked the question "Is our model applicable for predicting a specific data point?". It is very important to define what populations an inferential analysis apply to. For these data, the results would likely apply to biochemistry doctorates given around the time frame that the data were collected. Does it also apply to other chemistry doctorate types (e.g., medicinal chemistry, etc)? These are important questions to address (and document) when conducting inferential analyses. 
@@ -94,7 +94,7 @@ While the Poisson distribution is reasonable, we might also want to make an asse
 
 The `r pkg(infer)` package is a very powerful and intuitive tool for hypothesis testing [@ModernDive]. Its syntax is concise and designed for non-statisticians.
 
-First, we `specify()` that we will use the difference in the mean number of articles between the sexes and then `calculate()` the statistic from the data. Recall that the maximum likelihood estimator for the Poisson mean is the sample mean. The hypothesis tested below is the same as the previous test (but is conducted using a different testing procedure).  
+First, we `specify()` that we will use the difference in the mean number of articles between the sexes and then `calculate()` the statistic from the data. Recall that the maximum likelihood estimator for the Poisson mean is the sample mean. The hypotheses tested below are the same as the previous test (but is conducted using a different testing procedure).  
 
 With `r pkg(infer)`, we specify the outcome and covariate, then state the statistic of interest:
 
@@ -260,7 +260,7 @@ anova(
   tidy()
 ```
 
-The results are the same and, based on these and the confidence interval for this parameter, we'll exclude `phd` from further analyses since it does not appear to influence the outcome. 
+The results are the same and, based on these and the confidence interval for this parameter, we'll exclude `phd` from further analyses since it does not appear to be associated with the outcome. 
 
 ## A more complex model
 
@@ -298,7 +298,7 @@ Since the coefficients for this model are also estimated using maximum likelihoo
 $$
 \begin{align}
 H_0&: \gamma_1 = 0, \gamma_2 = 0, \cdots, \gamma_5 = 0 \notag \\
-H_a&: \text{at least one} \ne 0  \notag
+H_a&: \text{at least one} \gamma \ne 0  \notag
 \end{align}
 $$
 
