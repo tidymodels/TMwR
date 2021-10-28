@@ -36,4 +36,4 @@ This will create the HTML files in a directory called `_book`. Although we event
 
 This project is released with a [Contributor Code of Conduct](https://contributor-covenant.org/version/2/0/CODE_OF_CONDUCT.html). By contributing to this project, you agree to abide by its terms.
 
-_Tidy Modeling with R_ is currently a work in progress. As we create it, the code here is updated. This openness also allows users to contribute if they wish. Most often, this comes in the form of correcting typos, grammar, and other aspects of our work that could use improvement. Instructions for making contributions can be found in the [`contributing.md`](https://github.com/tidymodels/TMwR/blob/master/contributing.md) file.
+_Tidy Modeling with R_ is currently a work in progress. As we create it, the code here is updated. This openness also allows users to contribute if they wish. Most often, this comes in the form of correcting typos, grammar, and other aspects of our work that could use improvement. Instructions for making contributions can be found in the [`contributing.md`](https://github.com/tidymodels/TMwR/blob/main/contributing.md) file.
