@@ -102,7 +102,7 @@ How should we evaluate models when we optimize tuning parameters?  It depends on
 
 For cases where the statistical properties of the tuning parameter are tractable, common statistical properties can be used as the objective function. For example, in the case of binary logistic regression, the link function can be chosen by maximizing the likelihood or information criteria. However, these statistical properties may not align with the results achieved using accuracy-oriented properties. As an example,  @FriedmanGFA optimized the number of trees in a boosted tree ensemble and found different results when maximizing the likelihood and accuracy:
 
-> degrading the likelihood by overfitting actually improves misclassification error rate. Although perhaps counterintuitive, this is not a contradiction; likelihood and error rate measure different aspects of fit quality.
+> Degrading the likelihood by overfitting actually improves misclassification error rate. Although perhaps counterintuitive, this is not a contradiction; likelihood and error rate measure different aspects of fit quality.
 
 To demonstrate, consider the classification data shown below with two predictors, two classes, and a training set of `r nrow(training_set)` data points:  
 
