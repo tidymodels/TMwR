@@ -333,7 +333,7 @@ library(patchwork)
 library(splines)
 
 plot_smoother <- function(deg_free) {
-  ggplot(ames_train, aes(x = Latitude, y = Sale_Price)) + 
+  ggplot(ames_train, aes(x = Latitude, y = 10^Sale_Price)) + 
     geom_point(alpha = .2) + 
     scale_y_log10() +
     geom_smooth(
@@ -342,7 +342,8 @@ plot_smoother <- function(deg_free) {
       col = "red",
       se = FALSE
     ) +
-    ggtitle(paste(deg_free, "Spline Terms"))
+    labs(title = paste(deg_free, "Spline Terms"),
+         y = "Sale Price (USD)")
 }
 
 ( plot_smoother(2) + plot_smoother(5) ) / ( plot_smoother(20) + plot_smoother(100) )
