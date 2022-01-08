@@ -58,7 +58,9 @@ These objects are data frames with the same _columns_ as the original data but o
 
 Simple random sampling is appropriate in many cases but there are exceptions. When there is a dramatic _class imbalance_ in classification problems, one class occurs much less frequently than another. Using a simple random sample may haphazardly allocate these infrequent samples disproportionately into the training or test set. To avoid this, _stratified sampling_ can be used. The training/test split is conducted separately within each class and then these subsamples are combined into the overall training and test set. For regression problems, the outcome data can be artificially binned into _quartiles_ and then stratified sampling conducted four separate times. This is an effective method for keeping the distributions of the outcome similar between the training and test set. 
 
-```{r ames-sale-price, echo = FALSE, fig.cap = "The distribution of the sale price (in log units) for the Ames housing data. The vertical lines indicate the quartiles of the data."}
+```{r ames-sale-price, echo = FALSE}
+#| fig.cap = "The distribution of the sale price (in log units) for the Ames housing data. The vertical lines indicate the quartiles of the data.",
+#| fig.alt = "The distribution of the sale price (in log units) for the Ames housing data. The vertical lines indicate the quartiles of the data."
 sale_dens <- 
   density(ames$Sale_Price, n = 2^10) %>% 
   tidy() 
@@ -72,7 +74,7 @@ quart_plot <-
   geom_segment(data = quartiles,
                aes(x = value, xend = value, y = 0, yend = y),
                lty = 2) +
-  xlab("Sale Price (log-10 USD)")
+  labs("x = Sale Price (log-10 USD)", y = NULL)
 quart_plot
 ```
 

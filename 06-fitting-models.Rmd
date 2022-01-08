@@ -388,11 +388,7 @@ It may become tedious to write many model specifications, or to remember how to 
 parsnip_addin()
 ```
 
-will open a window in the Viewer panel of the RStudio IDE with a list of possible models for each model mode. These can be written to the source code panel: 
-
-```{r models-add-in-gif, echo = FALSE, out.width = '100%'}
-knitr::include_graphics("premade/addin.gif")
-```
+will open a window in the Viewer panel of the RStudio IDE with a list of possible models for each model mode. These can be written to the source code panel.
 
 The model list includes models from `r pkg(parsnip)` and `r pkg(parsnip)`-adjacent packages that are on CRAN. 
 

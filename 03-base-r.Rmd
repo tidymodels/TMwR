@@ -12,9 +12,9 @@ The S language, on which R is based, has had a rich data analysis environment si
 
 ## An example
 
-To demonstrate these fundamentals, let's use experimental data from @mcdonald2009, by way of @mangiafico2015, on the relationship between the ambient temperature and the rate of cricket chirps per minute. Data were collected for two species: _O. exclamationis_ and _O. niveus_. The data are contained in a data frame called `crickets` with a total of `r nrow(crickets)` data points. These data are shown here in a `r pkg(ggplot2)` graph. 
+To demonstrate these fundamentals, let's use experimental data from @mcdonald2009, by way of @mangiafico2015, on the relationship between the ambient temperature and the rate of cricket chirps per minute. Data were collected for two species: _O. exclamationis_ and _O. niveus_. The data are contained in a data frame called `crickets` with a total of `r nrow(crickets)` data points. These data are shown in Figure \@ref(fig:cricket-plot) using the following `r pkg(ggplot2)` code. 
 
-```{r base-r-cricket-plot, out.width = '70%', fig.width=6, fig.height=4, warning = FALSE}
+```{r base-r-cricket-plot, eval = FALSE}
 library(tidyverse)
 
 data(crickets, package = "modeldata")
@@ -22,19 +22,33 @@ names(crickets)
 
 # Plot the temperature on the x-axis, the chirp rate on the y-axis. The plot
 # elements will be colored differently for each species:
-ggplot(crickets, aes(x = temp, y = rate, col = species)) + 
+ggplot(crickets, aes(x = temp, y = rate, col = species, pch = species)) + 
   # Plot points for each data point and color by species
   geom_point() + 
   # Show a simple linear model fit created separately for each species:
-  geom_smooth(method = lm, se = FALSE) + 
-  labs(x = "Temperature (C)", y = "Chirp Rate (per minute)")
+  geom_smooth(method = lm, se = FALSE, alpha = 1/2) + 
+  labs(x = "Temperature (C)", y = "Chirp Rate (per minute)") +
+  scale_color_brewer(palette = "Paired")
 ```
- 
+
 The data exhibit fairly linear trends for each species. For a given temperature, _O. exclamationis_ appears to chirp more per minute than the other species. For an inferential model, the researchers might have specified the following null hypotheses prior to seeing the data:
 
  * Temperature has no effect on the chirp rate.
 
  * There are no differences between the species' chirp rate. 
+
+
+```{r cricket-plot, ref.label = "base-r-cricket-plot"}
+#| out.width = '70%',
+#| fig.width = 6, 
+#| fig.height = 4, 
+#| warning = FALSE,
+#| message = FALSE,
+#| echo = FALSE,
+#| fig.cap = "The relationship between chirp rate and temperature for two different species of cricket.",
+#| fig.alt = "A scatter plot of the chirp rate and temperature for two different species of cricket with linear trend lines per species. The trends are linearly increasing with a separation between the two species."
+```
+ 
 
 There may be some scientific or practical value in predicting the chirp rate but in this example we will focus on inference.
 
@@ -96,9 +110,9 @@ interaction_fit
 
 This output is a little hard to read. For the species indicator variables, R mashes the variable name (`species`) together with the factor level (`O. niveus`) with no delimiter. 
 
-Before going into any inferential results for this model, the fit should be assessed using diagnostic plots. We can use the `plot()` method for `lm` objects. This method produces a set of four plots for the object, each showing different aspects of the fit. Two plots are shown here:
+Before going into any inferential results for this model, the fit should be assessed using diagnostic plots. We can use the `plot()` method for `lm` objects. This method produces a set of four plots for the object, each showing different aspects of the fit. The code below produces the two plots are shown in Figure \@ref(fig:interaction-plots).
 
-```{r interaction-plots, out.width = '100%', fig.width=8, fig.height=4.5, warning = FALSE}
+```{r base-r-interaction-plots, eval = FALSE}
 # Place two plots next to one another:
 par(mfrow = c(1, 2))
 
@@ -107,6 +121,17 @@ plot(interaction_fit, which = 1)
 
 # A normal quantile plot on the residuals:
 plot(interaction_fit, which = 2)
+```
+
+
+```{r interaction-plots, ref.label= "base-r-interaction-plots"}
+#| out.width = '100%',
+#| fig.width = 8,
+#| fig.height = 4.5,
+#| warning = FALSE,
+#| echo = FALSE,
+#| fig.cap = "Residual diagnostic plots for the linear model containing interactions.",
+#| fig.alt = "On the left is a scatter plot of the model residuals versus predicted values. There are no strong trends in the data. The right-hand panel shows a normal quantile-quantile plot where the points indicate that normality if probably a good assumption."
 ```
 
 These appear reasonable enough to conduct inferential analysis. 
@@ -271,9 +296,9 @@ library(broom)
 tidy(corr_res[[1]])
 ```
 
-These results can be "stacked" and added to a `ggplot()`: 
+These results can be "stacked" and added to a `ggplot()`, as shown in Figure \@ref(fig:corr-plot).
 
-```{r base-r-corr-plot}
+```{r base-r-corr-plot, eval = FALSE}
 corr_res %>% 
   # Convert each to a tidy format; `map_dfr()` stacks the data frames 
   map_dfr(tidy, .id = "predictor") %>% 
@@ -281,6 +306,12 @@ corr_res %>%
   geom_point(aes(y = estimate)) + 
   geom_errorbar(aes(ymin = conf.low, ymax = conf.high), width = .1) +
   labs(x = NULL, y = "Correlation with mpg")
+```
+
+```{r corr-plot, ref.label = "base-r-corr-plot"}
+#| echo = FALSE,
+#| fig.cap = "A plot of the correlations (and 95% confidence intervals) between predictors and the outcome in the `mtcars` data set.",
+#| fig.alt = "A plot of the correlations (and 95% confidence intervals) between predictors and the outcome in the `mtcars` data set. None of the intervals overlap with zero. The car weight had the largest negative correlation and the rear axle ratio has the highest positive correlation."
 ```
 
 Creating such a plot is possible using core R language functions, but automatically reformatting the results makes for more concise code with less potential for errors. 
