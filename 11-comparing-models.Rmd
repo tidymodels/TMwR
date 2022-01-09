@@ -89,11 +89,16 @@ four_models <-
 four_models
 ```
 
-The `autoplot()` method shows confidence intervals for each model in order of best-to-worst. In this chapter, we'll focus on the coefficient of determination (a.k.a. R<sup>2</sup>): 
+The `autoplot()` method shows confidence intervals for each model in order of best-to-worst. In this chapter, we'll focus on the coefficient of determination (a.k.a. R<sup>2</sup>). The following code generates Figure \@ref(fig:workflow-set-r-squared):
 
-
-```{r compare-workflow-set-rsq}
+```{r compare-workflow-set-rsq, eval = FALSE}
 autoplot(four_models, metric = "rsq")
+```
+
+```{r workflow-set-r-squared, ref.label = "compare-workflow-set-rsq"}
+#| echo = FALSE,
+#| fig.cap = "Confidence intervals for the coefficient of determination for four different models.",
+#| fig.alt = "Confidence intervals for the coefficient of determination for four different models. The random forest model has the best results and its intervals do not overlap with the intervals of the other models. "
 ```
 
 The random forest method is doing the best job and there are minor improvements in the linear models as we add more recipe steps.
@@ -127,13 +132,20 @@ corrr::correlate(rsq_wider %>% select(-id), quiet = TRUE)
 
 These high correlations indicate that, across models, there are large within-resample correlations. To see this visually, the R<sup>2</sup> statistics are shown for each model with lines connecting the resamples: 
 
-```{r compare-rsq-plot, fig.height=4}
+```{r compare-rsq-plot, eval = FALSE}
 rsq_indiv_estimates %>% 
   mutate(wflow_id = reorder(wflow_id, .estimate)) %>% 
   ggplot(aes(x = wflow_id, y = .estimate, group = id, col = id)) + 
   geom_line(alpha = .5, lwd = 1.25) + 
   theme(legend.position = "none") + 
   labs(x = NULL, y = expression(paste(R^2, "statistics")))
+```
+
+```{r rsquared-resamples, ref.label = "compare-rsq-plot"}
+#| fig.height=4,
+#| echo = FALSE,
+#| fig.cap = "A plot connecting the resample statistics across models.",
+#| fig.alt = "A plot connecting the resample statistics across models. The plot connects the results for each model with the same line. The performance metrics tend to be relatively similar across all model results. "
 ```
 
 If the resample-to-resample effect was not real, there would not be any parallel lines. A statistical test for the correlations evaluates whether the magnitudes of these correlations are not simply noise. For the linear models: 
@@ -323,7 +335,7 @@ glimpse(model_post)
 
 The four posterior distributions are: 
 
-```{r compare-group-posteriors-res}
+```{r compare-group-posteriors-res, eval = FALSE}
 model_post %>% 
   mutate(model = forcats::fct_inorder(model)) %>%
   ggplot(aes(x = posterior)) + 
@@ -332,20 +344,37 @@ model_post %>%
   labs(x = expression(paste("Posterior for mean ", R^2)))
 ```
 
+```{r four-posteriors, ref.label = "compare-group-posteriors-res"}
+#| echo = FALSE,
+#| fig.cap = "Posterior distributions for the coefficient of determination for four different models.",
+#| fig.alt = "Posterior distributions for the coefficient of determination for four different models. The distribution corresponding to random forest is largest and has little overlap with the other model's posteriors."
+```
+
 These histograms describe the estimated probability distributions of the mean R<sup>2</sup> value for each model. There is some overlap, especially for the two linear models. 
 
 There is also a basic `autoplot()` method for the model results as well as the tidied object that shows overlaid density plots. For example: 
 
 
-```{r compare-autoplot-intervals}
+Figure \@ref(fig:credible-intervals)
+Figure \@ref(fig:rsquared-resamples)
+
+```{r compare-autoplot-intervals, eval = FALSE}
 autoplot(rsq_anova)
+```
+
+```{r credible-intervals, ref.label = "compare-autoplot-intervals"}
+#| echo = FALSE,
+#| fig.cap = "Credible intervals derived from the model posterior distributions.",
+#| fig.alt = "Credible intervals derived from the model posterior distributions. Random forest shows the best results with no overlap with the other credible intervals. "
 ```
 
 One wonderful aspect of using resampling with Bayesian models is that, once we have the posteriors for the parameters, it is trivial to get the posterior distributions for combinations of the parameters. For example, to compare the two linear regression models, we are interested in the difference in means. The posterior of this difference is computed by sampling from the individual posteriors and taking the differences. The `contrast_models()` function can do this. To specify the comparisons to make, the `list_1` and `list_2` parameters take character vectors and compute the differences between the models in those lists (parameterized as `list_1 - list_2`). 
 
+
+
 To compare two of the linear models: 
 
-```{r compare-lm-difference-posterior, fig.height = 3}
+```{r compare-lm-difference-posterior, eval = FALSE}
 rqs_diff <-
   contrast_models(rsq_anova,
                   list_1 = "splines_lm",
@@ -359,6 +388,12 @@ rqs_diff %>%
   geom_histogram(bins = 50, col = "white", fill = "red", alpha = 0.4) + 
   labs(x = expression(paste("Posterior for mean difference in ", R^2, 
                             " (splines + interaction - basic)")))
+```
+
+```{r posterior-difference, ref.label = "compare-lm-difference-posterior"}
+#| fig.height = 3,
+#| fig.cap = "The posterior distribution for the difference in the coefficient of determination.",
+#| fig.alt = "The posterior distribution for the difference in the coefficient of determination. The distribution has almost no overlap with zero. "
 ```
 
 The posterior shows that the center of the distribution is greater than zero (indicating that the model with splines had larger values) but does overlap with zero to a degree. The `summary()` method for this object computes the mean of the distribution as well as _credible intervals_. 
@@ -381,8 +416,15 @@ The `pract_equiv` column is the proportion of the posterior that is within `[-si
 
 The same process could be used to compare the random forest model to one or both of the linear regressions that were resampled. In fact, when `perf_mod()` is used with a workflow set, the `autoplot()` method can show the `pract_equiv`  results that compare each workflow to the current best (the random forest model, in this case). 
 
-```{r compare-rope-plot}
+
+```{r compare-rope-plot, eval = FALSE}
 autoplot(rsq_anova, type = "ROPE", size = 0.02)
+```
+
+```{r credible-intervals, ref.label = "compare-rope-plot"}
+#| echo = FALSE,
+#| fig.cap = "Credible intervals derived from the model posterior distributions.",
+#| fig.alt = "Credible intervals derived from the model posterior distributions. Random forest shows the best results with no overlap with the other credible intervals. "
 ```
 
 None of the linear models come close to the random forest model when a 2% practical effect size is used. 
@@ -391,7 +433,7 @@ None of the linear models come close to the random forest model when a 2% practi
 
 How does the number of resamples affect this analysis? More resamples increases the precision of the overall resampling estimate; that precision propagates to this type of analysis. For illustration, additional resamples were added using repeated cross-validation. How did the posterior distribution change? The figure below shows the 90% credible intervals with up to 100 resamples (generated from 10 repeats of 10-fold cross-validation): 
 
-```{r compare-cred-int, fig.height = 3, echo = FALSE}
+```{r compare-cred-int, eval = FALSE}
 # calculations in extras/ames_posterior_intervals.R
 ggplot(intervals,
        aes(x = resamples, y = mean)) +
@@ -399,6 +441,13 @@ ggplot(intervals,
   geom_ribbon(aes(ymin = lower, ymax = upper), fill = "red", alpha = .1) +
   labs(y = expression(paste("Mean difference in ", R^2)),
        x = "Number of Resamples (repeated 10-fold cross-validation)")
+```
+
+```{r intervals-over-replicates}
+#| fig.height = 3, 
+#| echo = FALSE,
+#| fig.cap = "The probability of practical equivalence to the random forest model.",
+#| fig.alt = "The probability of practical equivalence to the random forest model."
 ```
 
 The width of the intervals decreases as more resamples are added. Clearly, going from ten resamples to thirty has a larger impact than going from eighty to 100. There are diminishing returns for using a "large" number of resamples ("large" will be different for different data sets). 

@@ -139,7 +139,7 @@ ames_test_res
 
 Note that both the predicted and observed outcomes are in log10 units. It is best practice to analyze the predictions on the transformed scale (if one were used) even if the predictions are reported using the original units. 
 
-Let's plot the data before computing metrics using this code (results in Figure \@ref(fig:)):
+Let's plot the data before computing metrics using this code (results in Figure \@ref(fig:ames-performance-plot)):
 
 ```{r performance-ames-plot, eval = FALSE}
 ggplot(ames_test_res, aes(x = Sale_Price, y = .pred)) + 

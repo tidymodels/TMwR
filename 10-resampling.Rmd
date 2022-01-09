@@ -133,9 +133,14 @@ If the test set should not be used immediately, and re-predicting the training s
 
 ## Resampling methods
 
-Resampling methods are empirical simulation systems that emulate the process of using some data for modeling and different data for evaluation. Most resampling methods are iterative, meaning that this process is repeated multiple times. This diagram illustrates how resampling methods generally operate:
+Resampling methods are empirical simulation systems that emulate the process of using some data for modeling and different data for evaluation. Most resampling methods are iterative, meaning that this process is repeated multiple times. The diagram in Figure \@ref(fig:resampling-scheme) illustrates how resampling methods generally operate.
 
-```{r resampling-scheme, echo = FALSE, out.width = '85%', warning = FALSE}
+```{r resampling-scheme}
+#| echo = FALSE,
+#| out.width = '85%',
+#| warning = FALSE,
+#| fig.cap = "A diagram of the data splitting scheme from the initial data split to resampling. ",
+#| fig.alt = "A diagram of the data splitting scheme from the initial data split to resampling. The first level is the training/testing set partition. The second level of splitting takes the training set and splits it into multiple 'analysis' and 'assessment' sets (which are analogous to training and test)."
 knitr::include_graphics("premade/resampling.svg")
 ```
 
@@ -153,17 +158,27 @@ The next section defines several commonly used methods and discusses their pros 
 
 ### Cross-validation {#cv}
 
-Cross-validation is a well established resampling method. While there are a number of variations, the most common cross-validation method is _V_-fold cross-validation. The data are randomly partitioned into _V_ sets of roughly equal size (called the "folds"). For illustration, _V_ = 3 is shown below for a data set of thirty training set points with random fold allocations. The number inside the symbols is the sample number:
+Cross-validation is a well established resampling method. While there are a number of variations, the most common cross-validation method is _V_-fold cross-validation. The data are randomly partitioned into _V_ sets of roughly equal size (called the "folds"). For illustration, _V_ = 3 is in Figure \@ref(fig:cross-validation-allocation) for a data set of thirty training set points with random fold allocations. The number inside the symbols is the sample number.
 
-```{r resampling-three-cv, echo = FALSE, out.width = '50%', warning = FALSE}
+```{r cross-validation-allocation}
+#| echo = FALSE, 
+#| out.width = '50%', 
+#| warning = FALSE,
+#| fig.cap = "A diagram of how V-fold cross-validation randomly assigns data to folds (where V equals three). ",
+#| fig.alt = "A diagram of how V-fold cross-validation randomly assigns data to folds (where V equals three). A set of thirty data points are assigned to three groups of roughly the same size."
 knitr::include_graphics("premade/three-CV.svg")
 ```
 
 The color of the symbols represent their randomly assigned folds. Stratified sampling is also an option for assigning folds (previously discussed in Section \@ref(splitting-methods)). 
 
-For 3-fold cross-validation, the three iterations of resampling are illustrated below. For each iteration, one fold is held out for assessment statistics and the remaining folds are substrate for the model. This process continues for each fold so that three models produce three sets of performance statistics. 
+For 3-fold cross-validation, the three iterations of resampling are illustrated in Figure \@ref(fig:cross-validation). For each iteration, one fold is held out for assessment statistics and the remaining folds are substrate for the model. This process continues for each fold so that three models produce three sets of performance statistics. 
 
-```{r resampling-three-cv-iter, echo = FALSE, out.width = '70%', warning = FALSE}
+```{r cross-validation}
+#| echo = FALSE, 
+#| out.width = '70%', 
+#| warning = FALSE,
+#| fig.cap = "A diagram of V-fold cross-validation data usage (where V equals three).",
+#| fig.alt = "A diagram of V-fold cross-validation data usage (where V equals three). For each of the three groups, the data for the fold are held out for performance while the other two are used for modeling."
 knitr::include_graphics("premade/three-CV-iter.svg")
 ```
 
@@ -203,9 +218,13 @@ There are a variety of variations on cross-validation. The most important is _re
 
 To create _R_ repeats of _V_-fold cross-validation, the same fold generation process is done _R_ times to generate _R_ collections of _V_ partitions. Now, instead of averaging _V_ statistics, $V \times R$ statistics produce the final resampling estimate. Due to the Central Limit Theorem, the summary statistics from each model tend toward a normal distribution. 
 
-Consider the Ames data. On average, 10-fold cross-validation uses assessment sets that contain roughly `r floor(nrow(ames_train) * .1)` properties. If RMSE is the statistic of choice, we can denote that estimate's standard deviation as $\sigma$. With simple 10-fold cross-validation, the standard error of the mean RMSE is $\sigma/\sqrt{10}$. If this is too noisy, repeats reduce the standard error to $\sigma/\sqrt{10R}$. For 10-fold cross-validation with $R$ replicates, the plot below shows how quickly the standard error^[These are _approximate_ standard errors. As will be discussed in the next chapter, there is a within-replicate correlation that is typical of resampled results. By ignoring this extra component of variation, the simple calculations shown in this plot are overestimates of the reduction in noise in the standard errors.] decreases with replicates: 
+Consider the Ames data. On average, 10-fold cross-validation uses assessment sets that contain roughly `r floor(nrow(ames_train) * .1)` properties. If RMSE is the statistic of choice, we can denote that estimate's standard deviation as $\sigma$. With simple 10-fold cross-validation, the standard error of the mean RMSE is $\sigma/\sqrt{10}$. If this is too noisy, repeats reduce the standard error to $\sigma/\sqrt{10R}$. For 10-fold cross-validation with $R$ replicates, the plot in Figure \@ref(fig:variance-reduction) shows how quickly the standard error^[These are _approximate_ standard errors. As will be discussed in the next chapter, there is a within-replicate correlation that is typical of resampled results. By ignoring this extra component of variation, the simple calculations shown in this plot are overestimates of the reduction in noise in the standard errors.] decreases with replicates. 
 
-```{r resampling-cv-reduction, echo = FALSE, fig.height= 4}
+```{r variance-reduction}
+#| echo = FALSE, 
+#| fig.height = 4,
+#| fig.cap = "The relationship between the relative variance in performance estimates versus the number of cross-validation repeats.",
+#| fig.alt = "The relationship between the relative variance in performance estimates versus the number of cross-validation repeats. As the repeats increase, the variance is reduced in a harmonically decreasing pattern with diminishing returns for large number of replicates."
 cv_info <- 
   tibble(replicates = rep(1:10, 2), V = 10) %>% 
   mutate(B = V * replicates, reduction = 1/B, V = format(V))
@@ -245,18 +264,27 @@ mc_cv(ames_train, prop = 9/10, times = 20)
 
 ### Validation sets {#validation}
 
-Previously mentioned in Section \@ref(what-about-a-validation-set), a validation set is a single partition that is set aside to estimate performance, before using the test set: 
+Previously mentioned in Section \@ref(what-about-a-validation-set), a validation set is a single partition that is set aside to estimate performance, before using the test set (see Figure \@ref(fig:three-way-split)). 
 
-```{r resampling-validation, echo = FALSE, out.width = '50%', warning = FALSE}
+```{r three-way-split}
+#| echo = FALSE,
+#| out.width = '50%',
+#| warning = FALSE,
+#| fig.cap = "A three-way initial split into training, testing, and validation sets.",
+#| fig.alt = "A three-way initial split into training, testing, and validation sets."
 knitr::include_graphics("premade/validation.svg")
 ```
 
 Validation sets are often used when the original pool of data is very large. In this case, a single large partition may be adequate to characterize model performance without having to do multiple iterations of resampling. 
 
-With `r pkg(rsample)`, a validation set is like any other resampling object; this type is different only in that it has a single iteration^[In essence, a validation set can be considered a single iteration of Monte Carlo cross-validation.]: 
+With `r pkg(rsample)`, a validation set is like any other resampling object; this type is different only in that it has a single iteration^[In essence, a validation set can be considered a single iteration of Monte Carlo cross-validation.]. Figure \@ref(fig:validation-split) shows this scheme. 
 
-
-```{r resampling-validation-alt, echo = FALSE, out.width = '45%', warning = FALSE}
+```{r validation-split}
+#| echo = FALSE,
+#| out.width = '45%',
+#| warning = FALSE,
+#| fig.cap = "A two-way initial split into training and testing with an additional validation set split on the training set.",
+#| fig.alt = "A two-way initial split into training and testing with an additional validation set split on the training set."
 knitr::include_graphics("premade/validation-alt.svg")
 ```
 
@@ -276,9 +304,14 @@ Bootstrap resampling was originally invented as a method for approximating the s
 
 A bootstrap sample of the training set is a sample that is the same size as the training set but is drawn _with replacement_. This means that some training set data points are selected multiple times for the analysis set. Each data point has a `r round((1-exp(-1)) * 100, 1)`% chance of inclusion in the training set _at least once_. The assessment set contains all of the training set samples that were not selected for the analysis set (on average, with `r round((exp(-1)) * 100, 1)`% of the training set). When bootstrapping, the assessment set is often called the "out-of-bag" sample. 
 
-For a training set of 30 samples, a schematic of three bootstrap samples is: 
+For a training set of 30 samples, a schematic of three bootstrap samples is shown in Figure\@ref(fig:bootstrapping).
 
-```{r resampling-bootstraps, echo = FALSE, out.width = '80%', warning = FALSE}
+```{r bootstrapping}
+#| echo = FALSE,
+#| out.width = '80%',
+#| warning = FALSE,
+#| fig.cap = "A diagram of bootstrapping data usage.",
+#| fig.alt = "A diagram of bootstrapping data usage. For each bootstrap resample, the analysis set is the same size as the training set (due to sampling with replacement) and the assessment set consists of samples not in the analysis set."
 knitr::include_graphics("premade/bootstraps.svg")
 ```
 Note that the sizes of the assessment sets vary. 
@@ -299,9 +332,14 @@ When the data have a strong time component, a resampling method should support m
 
 Rolling forecast origin resampling [@hyndman2018forecasting] provides a method that emulates how time series data is often partitioned in practice, estimating the model with historical data and evaluating it with the most recent data. For this type of resampling, the size of the initial analysis and assessment sets are specified. The first iteration of resampling uses these sizes, starting from the beginning of the series. The second iteration uses the same data sizes but shifts over by a set number of  samples. 
 
-To illustrate, a training set of fifteen samples was resampled with an analysis size of eight samples and an assessment set size of three. The second iteration discards the first training set sample and both data sets shift forward by one. This configuration results in five resamples: 
+To illustrate, a training set of fifteen samples was resampled with an analysis size of eight samples and an assessment set size of three. The second iteration discards the first training set sample and both data sets shift forward by one. This configuration results in five resamples is shown in Figure\@ref(fig:rolling).
 
-```{r resampling-rolling, echo = FALSE, out.width = '65%', warning = FALSE}
+```{r rolling}
+#| echo = FALSE,
+#| out.width = '65%',
+#| warning = FALSE,
+#| fig.cap = "The data usage for rolling forecasting origin resampling.",
+#| fig.alt = "The data usage for rolling forecasting origin resampling. For each split, earlier data are used for modeling and a few subsequent instances are used to measure performance."
 knitr::include_graphics("premade/rolling.svg")
 ```
 
@@ -415,9 +453,9 @@ The prediction column names follow the conventions discussed for `r pkg(parsnip)
 For some resampling methods, such as the bootstrap or repeated cross-validation, there will be multiple predictions per row of the original training set. To obtain summarized values (averages of the replicate predictions) use `collect_predictions(object, summarize = TRUE)`. 
 :::
 
-Since this analysis used 10-fold cross-validation, there is one unique prediction for each training set sample. These data can generate helpful plots of the model to understand where it potentially failed. For example, let's compare the observed and predicted values: 
+Since this analysis used 10-fold cross-validation, there is one unique prediction for each training set sample. These data can generate helpful plots of the model to understand where it potentially failed. For example, Figure \@ref(fig:ames-resampled-performance) compares the observed and held-out predicted values (analogous to Figure \@ref(fig:ames-performance-plot)) using the code:
 
-```{r resampling-cv-pred-plot, fig.height=5, fig.width=5}
+```{r resampling-cv-pred-plot, eval = FALSE}
 assess_res %>% 
   ggplot(aes(x = Sale_Price, y = .pred)) + 
   geom_point(alpha = .15) +
@@ -426,7 +464,16 @@ assess_res %>%
   ylab("Predicted")
 ```
 
-There was one house in the training set with a low observed sale price that is significantly overpredicted by the model. Which house was that? 
+```{r ames-resampled-performance, ref.label = "resampling-cv-pred-plot"}
+#| fig.height = 5, 
+#| fig.width=5,
+#| echo = FALSE,
+#| fig.cap = "Scatter plots of out-of-sample observed versus predicted values for an Ames regression model. Both axes using log-10 units.",
+#| fig.alt = "Scatter plots of out-of-sample observed versus predicted values for an Ames regression model. Both axes using log-10 units. The model shows good concordance with two outlying data points that are significantly over-predicted."
+```
+
+
+There was one house in the training set with a low observed sale price that is significantly over-predicted by the model. Which house was that? 
 
 ```{r resampling-investigate}
 over_predicted <- 
