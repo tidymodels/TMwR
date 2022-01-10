@@ -412,7 +412,7 @@ The use of pre-defined sets is commonly called **grid search**. The main choices
 
 For sequential or **iterative search** methods, almost any nonlinear optimization method is appropriate, although some are more efficient than others. In some cases, an initial set of results for one or more parameter combinations is required to start the optimization process. Iterative search is discussed more in Chapter \@ref(iterative-search).
 
-The plot below shows two panels to demonstrate these two approaches for a situation with two tuning parameters that range between zero and one. In each, a set of blue contours show the true (simulated) relationship between the parameters and the outcome. The optimal results are in the upper right-hand corner. 
+The plot below shows two panels to demonstrate these two approaches for a situation with two tuning parameters that range between zero and one. In each, a set of contours show the true (simulated) relationship between the parameters and the outcome. The optimal results are in the upper right-hand corner. 
 
 ```{r tuning-strategies}
 #| echo = FALSE,

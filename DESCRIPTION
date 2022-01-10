@@ -40,6 +40,7 @@ Imports:
     forcats,
     ggforce,
     ggplot2,
+    ggrepel,
     glmnet,
     gridExtra,
     infer,

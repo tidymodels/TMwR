@@ -6,8 +6,9 @@ library(workflowsets)
 library(baguette)
 library(rules)
 library(finetune)
+library(ggrepel)
 tidymodels_prefer()
-caching <- FALSE
+caching <- TRUE
 
 cores <- parallel::detectCores()
 if (!grepl("mingw32", R.Version()$platform)) {
@@ -299,22 +300,47 @@ grid_results %>%
 
 Also by default, the function ranks all of the candidate sets; that's why the same model can show up multiple times in the output. An option, called `select_best`, can be used to rank the models using their best tuning parameter combination. 
 
-The `autoplot()` method plots the rankings; it also has a `select_best` argument. In the plot below, the best results for each model are visualized. 
+The `autoplot()` method plots the rankings; it also has a `select_best` argument. The plot in Figure \@ref(fig:workflow-set-ranks) visualizes the best results for each model and is generated with: 
 
-```{r workflow-sets-plot-rank, out.width = '100%', fig.width=8, fig.height=5.75}
+```{r workflow-sets-plot-rank, eval = FALSE}
 autoplot(
    grid_results,
    rank_metric = "rmse",  # <- how to order models
    metric = "rmse",       # <- which metric to visualize
    select_best = TRUE     # <- one point per workflow
-)
+) +
+   # Added to help with back and white images:
+   geom_text(aes(y = mean - 1/2, label = wflow_id), angle = 90, hjust = 1) +
+   lims(y = c(3.5, 9.5)) +
+   theme(legend.position = "none")
+```
+
+```{r workflow-set-ranks, ref.label = "workflow-sets-plot-rank"}
+#| echo = FALSE,
+#| out.width = '100%', 
+#| fig.width=8, 
+#| fig.height=5.75,
+#| fig.cap = "Estimated RMSE (and approximate confidence intervals) for the best model configuration in each workflow.",
+#| fig.alt = "Estimated RMSE (and approximate confidence intervals) for the best model configuration in each workflow. The y axis is the estimated RMSE and the x axis is the model rank based on RMSE. Cubist rules and boosted trees show the smallest RMSE values. "
 ```
 
 In case you want to see the tuning parameter results for a specific model, the `id` argument can take a single value from the `wflow_id` column for which model to plot: 
 
-```{r workflow-sets-plot-model, out.width = '100%', fig.width=8, fig.height=4.5}
+```{r workflow-sets-plot-model, eval = FALSE}
 autoplot(grid_results, id = "Cubist", metric = "rmse")
 ```
+
+This produces Figure \@ref(fig:workflow-sets-autoplot). 
+
+```{r workflow-sets-autoplot, ref.label = "workflow-sets-plot-model"}
+#| echo = FALSE,
+#| out.width = '100%', 
+#| fig.width = 8, 
+#| fig.height = 4.5,
+#| fig.cap = "The `autoplot()` results for the Cubist model contained in the workflow set.",
+#| fig.alt = "The `autoplot()` results for the Cubist model contained in the workflow set. The visalization has a panel for each tuning pameter and shows performance versus the parameter values."
+```
+
 
 There are also methods for `collect_predictions()` and `collect_metrics()`. 
 
@@ -373,24 +399,36 @@ The new object looks very similar, although the elements of the `result` column 
 race_results
 ```
 
-The same helpful functions are available for this object to interrogate the results and, in fact, the basic `autoplot()` method produces similar trends:
+The same helpful functions are available for this object to interrogate the results and, in fact, the basic `autoplot()` method shown in Figure \@ref(fig:workflow-set-racing-ranks) produces similar trends to Figure \@ref(fig:workflow-sets-autoplot). This is produced by:
 
-
-```{r workflow-sets-plot-race-rank, out.width = '100%', fig.width=8, fig.height=5.75}
+```{r workflow-sets-plot-race-rank, eval = FALSE}
 autoplot(
    race_results,
    rank_metric = "rmse",  
    metric = "rmse",       
    select_best = TRUE    
-)
+) +
+   # Added to help with back and white images:
+   geom_text(aes(y = mean - 1/2, label = wflow_id), angle = 90, hjust = 1) +
+   lims(y = c(3.0, 9.5)) +
+   theme(legend.position = "none")
 ```
 
+
+```{r workflow-set-racing-ranks, ref.label = "workflow-sets-plot-race-rank"}
+#| echo = FALSE,
+#| out.width = '100%', 
+#| fig.width = 8, 
+#| fig.height = 5.75,
+#| fig.cap = "Estimated RMSE (and approximate confidence intervals) for the best model configuration in each workflow in the racing results.",
+#| fig.alt = "Estimated RMSE (and approximate confidence intervals) for the best model configuration in each workflow in the racing results. The y axis is the estimated RMSE and the x axis is the model rank based on RMSE. Cubist rules and boosted trees show the smallest RMSE values. "
+```
 
 Overall, the racing approach estimated a total of `r format(num_race_models, big.mark = ",")` models, `r round(num_race_models/num_grid_models*100, 2)`% of the full set of `r format(num_grid_models, big.mark = ",")` models in the full grid. As a result, the racing approach was `r round(full_results_time[3]/race_results_time[3], 2)`-fold faster. 
 
 Did we get similar results? For both objects, we rank the results, merge them together, and plot them against one another: 
 
-```{r workflow-sets-racing-concordance, out.width="100%"}
+```{r workflow-sets-racing-concordance, eval = FALSE}
 matched_results <- 
    rank_results(race_results, select_best = TRUE) %>% 
    select(wflow_id, .metric, race = mean, config_race = .config) %>% 
@@ -402,12 +440,25 @@ matched_results <-
    ) %>%  
    filter(.metric == "rmse")
 
+library(ggrepel)
+
 matched_results %>% 
    ggplot(aes(x = complete, y = race)) + 
    geom_abline(lty = 3) + 
-   geom_point(aes(col = model)) + 
+   geom_point() + 
    coord_obs_pred() + 
-   labs(x = "Complete Grid RMSE", y = "Racing RMSE")
+   labs(x = "Complete Grid RMSE", y = "Racing RMSE") +
+   # Added to black and white images:
+   geom_text_repel(aes(label = model))
+```
+
+The results are shown in Figure \@ref(fig:racing-concordance).
+
+```{r racing-concordance, ref.label = "workflow-sets-racing-concordance"}
+#| echo = FALSE,
+#| out.width = '100%', 
+#| fig.cap = "Estimated RMSE for the full grid and racing results.",
+#| fig.alt = "Estimated RMSE for the full grid and racing results. The results show that many models have the same RMSE result and the others are very similar."
 ```
 
 While the racing approach selected the same candidate parameters as the complete grid for only `r round(mean(matched_results$config_race == matched_results$config_complete) * 100, 2)`% of the models, the performance metrics of the models selected by racing were nearly equal. The  correlation of RMSE values was `r signif(cor(matched_results$race, matched_results$complete), 3)` and the rank correlation was `r signif(cor(matched_results$race, matched_results$complete, method = "spearman"), 3)`. This indicates that, within a model, there were multiple tuning parameter combinations that had nearly identical results. 
@@ -430,9 +481,9 @@ boosting_test_results <-
    last_fit(split = concrete_split)
 ```
 
-The test set results show:
+The test set results are produced using:
 
-```{r workflow-sets-test-results}
+```{r workflow-sets-test-results, eval = FALSE}
 collect_metrics(boosting_test_results)
 
 boosting_test_results %>% 
@@ -442,6 +493,15 @@ boosting_test_results %>%
    geom_point(alpha = 0.5) + 
    coord_obs_pred() + 
    labs(x = "observed", y = "predicted")
+```
+
+The results are in Figure \@ref(fig:concrete-test-results):
+
+```{r concrete-test-results, ref.label = "workflow-sets-test-results"}
+#| echo = FALSE,
+#| out.width = '100%', 
+#| fig.cap = "Observed versus predicted values for the test set.",
+#| fig.alt = "Observed versus predicted values for the test set. The values fall closely along the 45 degree line of identity."
 ```
 
 ## Chapter summary {#workflow-sets-summary}

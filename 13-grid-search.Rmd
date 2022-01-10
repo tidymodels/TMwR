@@ -111,9 +111,9 @@ mlp_param %>%
 
 For `penalty`, the random numbers are uniform on the log (base 10) scale but the values in the grid are in the natural units. 
 
-The issue with random grids is that, with small-to-medium grids, random values can result in overlapping parameter combinations. Also, the random grid needs to cover the whole parameter space but the likelihood of good coverage increases with the number of grid values.  Even for a sample of 15 candidate points, this plot shows some overlap between points for our example multilayer perceptron: 
+The issue with random grids is that, with small-to-medium grids, random values can result in overlapping parameter combinations. Also, the random grid needs to cover the whole parameter space but the likelihood of good coverage increases with the number of grid values.  Even for a sample of 15 candidate points, this code generates the plot in Figure \@ref(fig:random-grid) showing some overlap between points for our example multilayer perceptron. 
 
-```{r grid-random-matrix, fig.height = 6, fig.width = 6}
+```{r grid-random-matrix, eval = FALSE}
 library(ggforce)
 set.seed(200)
 mlp_param %>% 
@@ -126,11 +126,19 @@ mlp_param %>%
   labs(title = "Random design with 15 candidates")
 ```
 
+```{r random-grid, ref.label = "grid-random-matrix"}
+#| fig.height = 6, 
+#| fig.width = 6,
+#| echo = FALSE,
+#| fig.cap = "A scatter plot matrix for three tuning parameters with 15 points generated at random.",
+#| fig.alt = "A scatter plot matrix for three tuning parameters with 15 points generated at random. There are significant gaps in the parameter space."
+```
+
 A much better approach is to use a set of experimental designs called _space-filling designs_. While different design methods have slightly different goals, they generally find a configuration of points that cover the parameter space with the smallest chance of overlapping or redundant values. Examples of such designs are Latin hypercubes [@lhd], maximum entropy designs [@maxent], maximum projection designs [@maxproj], and others. See @santner2003design for an overview. 
 
-The `r pkg(dials)` package contains functions for Latin hypercube and maximum entropy designs. As with `grid_random()`, the primary inputs are the number of parameter combinations and a parameter object. Let's compare a random design with a Latin hypercube design for 15 candidate parameter values: 
+The `r pkg(dials)` package contains functions for Latin hypercube and maximum entropy designs. As with `grid_random()`, the primary inputs are the number of parameter combinations and a parameter object. Let's compare a random design with a Latin hypercube design for 15 candidate parameter values (in Figure \@ref(fig:space-filling-design)) via this code:
 
-```{r grid-sfd-compare, fig.height = 6, fig.width = 6}
+```{r grid-sfd-compare, eval = FALSE}
 set.seed(200)
 mlp_param %>% 
   grid_latin_hypercube(size = 15, original = FALSE) %>% 
@@ -139,6 +147,14 @@ mlp_param %>%
   geom_blank() +
   facet_matrix(vars(hidden_units, penalty, epochs), layer.diag = 2) + 
   labs(title = "Latin Hypercube design with 15 candidates")
+```
+
+```{r space-filling-design, ref.label = "grid-sfd-compare"}
+#| fig.height = 6, 
+#| fig.width = 6,
+#| echo = FALSE,
+#| fig.cap = "A scatter plot matrix for three tuning parameters with 15 points generated using a space-filling design.",
+#| fig.alt = "A scatter plot matrix for three tuning parameters with 15 points generated using a space-filling design. There are fewer gaps in the parameter space when compared to the random grid."
 ```
 
 While not perfect, this design spaces the points further away from one another.  
@@ -233,10 +249,19 @@ mlp_reg_tune <-
 mlp_reg_tune
 ```
 
-There are high-level convenience functions to understand the results. First, the `autoplot()` method for regular grids shows the performance profiles across tuning parameters:  
+There are high-level convenience functions to understand the results. First, the `autoplot()` method, for regular grids shows the performance profiles across tuning parameters in Figure \@ref(fig:regular-grid-plot):  
 
-```{r grid-cells-reg-plot, fig.height = 7}
-autoplot(mlp_reg_tune) + theme(legend.position = "top")
+```{r grid-cells-reg-plot, eval = FALSE}
+autoplot(mlp_reg_tune) + 
+  scale_color_viridis_d() + 
+  theme(legend.position = "top")
+```
+
+```{r regular-grid-plot, ref.label = "grid-cells-reg-plot"}
+#| fig.height = 7,
+#| echo = FALSE,
+#| fig.cap = "A line plot of the regular grid results.",
+#| fig.alt = "A line plot of the regular grid results. The x axis shows the number of hidden units and the y axis is the resampled ROC AUC. There are separate lines for the amount of regularization. There are nine panels for three values for the number of PCA components and the number of epochs. On average, the amount of regularization is important where more is better. Also, on average, the increasing the number of hidden units decreases model effectiveness."
 ```
 
 For these data, the amount of penalization has the largest impact on the area under the ROC curve. The number of epochs doesn't appear to have a pronounced effect on performance. The change in the number of hidden units appears to matter most when the amount of regularization is low (and harms performance). There are several parameter configurations that have roughly equivalent performance, as seen using the function `show_best()`: 
@@ -263,9 +288,12 @@ mlp_sfd_tune <-
 mlp_sfd_tune
 ```
 
-The `autoplot()` method will also work with these designs, although the format of the results will be different:
+The `autoplot()` method will also work with these designs, although the format of the results will be different. Figure \@ref(fig:sfd-plot) was produced using `autoplot(mlp_sfd_tune)`.
 
-```{r grid-cells-sdf-plot}
+```{r sfd-plot}
+#| echo = FALSE,
+#| fig.cap = "The `autoplot()` method results when used with a space-filling design.",
+#| fig.alt = "The `autoplot()` method results when used with a space-filling design. The trends show decreasing performance with the number of PCA components as well as the number of hidden units."
 autoplot(mlp_sfd_tune)
 ```
 
@@ -460,16 +488,24 @@ This is the optimal scenario when the preprocessing method is expensive. However
 
 * The number of parallel workers is limited by the number of resamples. For example, with 10-fold cross-validation you can only use 10 parallel workers even when the computer has more than 10 cores. 
 
-To illustrate how the parallel processing works, we'll use a case where there are 7 model tuning parameter values, with 5-fold cross-validation. This visualization shows how the tasks are allocated to the worker processes:
+To illustrate how the parallel processing works, we'll use a case where there are 7 model tuning parameter values, with 5-fold cross-validation. Figure \@ref(fig:one-resample-per-worker) shows how the tasks are allocated to the worker processes.
 
-```{r grid-logging-rs, echo = FALSE, message = FALSE, fig.width=5, fig.height=4, out.width = "70%"}
+```{r one-resample-per-worker}
+#| echo = FALSE, 
+#| message = FALSE, 
+#| fig.width = 5, 
+#| fig.height = 4, 
+#| out.width = "50%",
+#| fig.cap = "A diagram of the worker processes when parallel processing matches resamples to a specific worker process.",
+#| fig.alt = "A diagram of the worker processes when parallel processing matches resamples to a specific worker process. After the preprocess operations are finished, each model fit is executed on the same worker process."
+
 load("extras/parallel_times/resamples_times.RData")
 resamples_times %>%
   dplyr::rename(operation = label) %>% 
   ggplot(aes(y = id_alt, x = duration, fill = operation)) +
   geom_bar(stat = "identity", col = "black") +
   labs(y = NULL, x = "Elapsed Time") + 
-  scale_fill_brewer(palette = "Set2") +
+  scale_fill_brewer(palette = "Paired") +
   theme(legend.position = "top")
 ```
 
@@ -494,9 +530,16 @@ In this case, parallelization now occurs at line 11. For example, if we use 5-fo
 
 In tidymodels, validation sets are treated as a single resample. In these cases, this parallelization scheme would be best. 
 
-To illustrate the delegation of tasks to the workers in this scheme, the same example is used but with 10 workers:
+Figure \@ref(fig:distributed-tasks) illustrates the delegation of tasks to the workers in this scheme, the same example is used but with 10 workers.
 
-```{r grid-logging-all, echo = FALSE, message = FALSE, fig.height = 7}
+```{r distributed-tasks, echo = FALSE, message = FALSE, fig.height = 7}
+#| echo = FALSE, 
+#| message = FALSE, 
+#| fig.height = 7, 
+#| out.width = "70%",
+#| fig.cap = "A diagram of the worker processes when preprocessing and modeling tasks are distributed to many workers.",
+#| fig.alt = "A diagram of the worker processes when preprocessing and modeling tasks are distributed to many workers. In this instance, more comprehensive parallelization is used but some preprocessing tasks are repeated across worker processes."
+
 load("extras/parallel_times/everything_times.RData")
 
 repeats <- 
@@ -578,7 +621,7 @@ start_stop_dat %>%
  ) +
  facet_wrap(~ pid, nrow = 2) +
  labs(y = NULL, x = "Elapsed Time") + 
- scale_fill_brewer(palette = "Set2") + 
+ scale_fill_brewer(palette = "Paired") + 
  scale_y_continuous(breaks = 1:5, labels = paste("Fold", 1:5)) +
  theme_bw() +
  theme(legend.position = "top", panel.grid.minor = element_blank())
@@ -601,9 +644,16 @@ The first and second preprocessing options are designed for comparison, to measu
 
 We evaluated this process using variable numbers of worker processes and using the two `parallel_over` options, on a computer with 10 physical cores and 20 virtual cores (via hyper-threading). 
 
-First, let's consider the raw execution times:
+First, let's consider the raw execution times in figure \@ref(fig:parallel-times). 
 
-```{r grid-par-times, echo = FALSE, fig.height = 5}
+```{r parallel-times}
+#| echo = FALSE, 
+#| message = FALSE, 
+#| fig.height =4, 
+#| out.width = "70%",
+#| fig.cap = "Execution times for model tuning versus the number of workers using different delegation schemes. The diagonal black line indicates a linear speedup where the addition of a new worker process has maximal effect.",
+#| fig.alt = "Execution times for model tuning versus the number of workers using different delegation schemes. The diagonal black line indicates a linear speedup where the addition of a new worker process has maximal effect. The 'everything' scheme shows that the benefits decrease after three or four workers, especially when there is expensive preprocessing. The 'resamples' scheme has almost linear speedups across all tasks."
+
 load("extras/parallel_times/xgb_times.RData")
 ggplot(times, aes(x = num_cores, y = elapsed, col = parallel_over, shape = parallel_over)) + 
   geom_point() + 
@@ -611,6 +661,7 @@ ggplot(times, aes(x = num_cores, y = elapsed, col = parallel_over, shape = paral
   facet_wrap(~ preprocessing) + 
   labs(x = "Number of Workers", y = "Execution Time (s)") + 
   scale_y_log10() + 
+  scale_color_manual(values = c("#7FC97F", "#386CB0")) +
   theme_bw() + 
   theme(legend.position = "top")
 ```
@@ -625,15 +676,22 @@ Comparing the curves in the first two panels for "none" and "light":
 
 With the expensive preprocessing step, there is a considerable difference in execution times. Using `parallel_over = "everything"` is problematic since, even using all cores, it never achieves the execution time that `parallel_over = "resamples"` attains with just five cores. This is because the costly preprocessing step is unnecessarily repeated in the computational scheme. 
 
-We can also view these data in terms of speed-ups:
+We can also view these data in terms of speed-ups in Figure \@ref(fig:parallel-speedups).
 
-```{r grid-par-speed-up, echo = FALSE, fig.height=4}
+```{r parallel-speedups}
+#| echo = FALSE, 
+#| message = FALSE, 
+#| fig.height = 4, 
+#| out.width = "70%",
+#| fig.cap = "Speed-ups for model tuning versus the number of workers using different delegation schemes.",
+#| fig.alt = "Speed-ups for model tuning versus the number of workers using different delegation schemes."
 ggplot(times, aes(x = num_cores, y = speed_up, col = parallel_over, shape = parallel_over)) + 
   geom_abline(lty = 1) + 
   geom_point() + 
   geom_line() +
   facet_wrap(~ preprocessing) + 
-  coord_obs_pred() +
+  coord_obs_pred() + 
+  scale_color_manual(values = c("#7FC97F", "#386CB0")) +
   labs(x = "Number of Workers", y = "Speed-up")  +
   theme(legend.position = "top")
 ```
@@ -672,7 +730,14 @@ remaining <-
 
 As an example, in the multilayer perceptron tuning process with a regular grid explored in this chapter, what would the results look like after only the first three folds? Using techniques similar to those shown in Chapter \@ref(compare), we can fit a model where the outcome is the resampled area under the ROC curve and the predictor is an indicator for the parameter combination. The model takes the resample-to-resample effect into account and produces point and interval estimates for each parameter setting. The results of the model are one-sided 95% confidence intervals that measure the loss of the ROC value relative to the currently best performing parameters. 
 
-```{r grid-mlp-racing, echo = FALSE, fig.height=5, warning = FALSE}
+```{r racing-process}
+#| echo = FALSE, 
+#| message = FALSE, 
+#| warning = FALSE,
+#| fig.height = 5, 
+#| out.width = "80%",
+#| fig.cap = "An illustration of the racing process for 20 tuning parameters and 10 resamples..",
+#| fig.alt = "An illustration of the racing process for 20 tuning parameters and 10 resamples. The analysis is conducted at the first, third, and last resample. As the number of resamples increases, the confidence intervals show some model configurations that do not have confidence intervals that overlap with zero. These are excluded from subsequent resamples."
 full_att <- attributes(mlp_sfd_race)
 
 race_details <- NULL
@@ -719,67 +784,20 @@ race_details %>%
   mutate(iter = paste("resamples:", format(iter))) %>% 
   ggplot(aes(x = -estimate, y = .config)) + 
   geom_vline(xintercept = 0, lty = 2, col = "green") +
-  geom_point(size = 3, aes(col = decision)) + 
+  geom_point(size = 2, aes(col = decision)) + 
   geom_errorbarh(aes(xmin = -estimate, xmax = -upper, col = decision), height = .3, show.legend = FALSE) + 
   labs(x = "Loss of ROC AUC", y = NULL) + 
   scale_colour_manual(values = race_cols) + 
   facet_wrap(~iter)
 ```
 
-Figure \@ref(f:racing-progress) shows the results at several iterations in the process. The points shown in the panel with the first iteration show single ROC AUC values. As iterations progress, the points are averages of the resampled ROC statistics.
+Figure \@ref(f:racing-process) shows the results at several iterations in the process. The points shown in the panel with the first iteration show single ROC AUC values. As iterations progress, the points are averages of the resampled ROC statistics.
 
 On the third iteration, the leading model configuration has changed and the algorithm computes one-sided confidence intervals. Any parameter set whose confidence interval includes zero would lack evidence that its performance is not statistically different from the best results. We retain `r sum(iter_three$upper < 0)` settings; these are resampled more. The remaining `r sum(iter_three$upper >= 0)` submodels are no longer considered. 
 
 The process continues to resample configurations that remain and the statistical analysis repeats with the current results. More submodels may be removed from consideration. Prior to the final resample, almost all submodels are eliminated and, after the last iteration, only one remains. 
 
-```{r grid-mlp-racing-anim, include = FALSE, dev = 'png'}
-race_ci_plots <- function(x, iters = max(x$iter)) {
-  
-  x_rng <- extendrange(c(-x$estimate, -x$upper))
-  
-  for (i in 1:iters) {
-    if (i < 3) {
-      ttl <- paste0("Iteration ", i, ": burn-in")
-    } else {
-      ttl <- paste0("Iteration ", i, ": testing")
-    }
-    p <-
-      x %>% 
-      dplyr::filter(iter == i) %>% 
-      ggplot(aes(x = -estimate, y = .config, col = decision)) +
-      geom_vline(xintercept = 0, col = "green", lty = 2) +
-      geom_point(size = 2) +
-      labs(title = ttl, y = "", x = "Loss of ROC AUC") +
-      scale_color_manual(values = c(best = "blue", retain = "black", discard = "grey"), 
-                         drop = FALSE) +
-      scale_y_discrete(drop = FALSE) +
-      xlim(x_rng) + 
-      theme_bw() +
-      theme(legend.position = "top")
-    
-    if (i >= 3) {
-      p <- p  + geom_errorbar(aes(xmin = -estimate, xmax = -upper), width = .3)
-    }
-    
-    print(p)
-  }
-  invisible(NULL)
-}
-av_capture_graphics(
-  race_ci_plots(race_details),
-  output = "race_results.mp4",
-  width = 720,
-  height = 720,
-  res = 120,
-  framerate = 1/3
-)
-```
-
-<video width="720" height="720" controls>
-  <source src="race_results.mp4" type="video/mp4">
-</video>
-
- See @kuhn2014futility for more details on the computational aspects of this approach. 
+See @kuhn2014futility for more details on the computational aspects of this approach. 
 
 :::rmdwarning
 Racing methods can be more efficient than basic grid search as long as the interim analysis is fast and some parameter settings have poor performance. It also is most helpful when the model does _not_ have the ability to exploit submodel predictions. 
