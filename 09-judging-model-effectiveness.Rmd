@@ -232,7 +232,7 @@ two_class_curve
 roc_auc(two_class_example, truth, Class1)
 ```
 
-The `two_class_curve` object can be used in a `ggplot` call to visualize the curve. There is an `autoplot()` method that will take care of the details. This code produces the plot in Figure \@ref(fig:):
+The `two_class_curve` object can be used in a `ggplot` call to visualize the curve. There is an `autoplot()` method that will take care of the details. This code produces the plot in Figure \@ref(fig:example-roc-curve):
 
 ```{r performance-2class-roc-curve, eval = FALSE}
 autoplot(two_class_curve)
