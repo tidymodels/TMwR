@@ -46,18 +46,6 @@ The tidymodels framework does not itself contain software for model explanations
 
 In Chapters \@ref(resampling) and \@ref(compare), we trained and compared several models to predict the price of homes in Ames, IA, including a linear model with interactions and a random forest model.
 
-```{r explain-obs-pred, include=FALSE}
-bind_rows(
-  augment(lm_fit, ames_train) %>% mutate(model = "lm + interactions"),
-  augment(rf_fit, ames_train) %>% mutate(model = "random forest")
-) %>%
-  ggplot(aes(Sale_Price, .pred, color = model)) +
-  geom_abline(col = "gray50", lty = 2) + 
-  geom_point(alpha = 0.5, show.legend = FALSE) +
-  facet_wrap(vars(model)) +
-  labs(x = "true price", y = "predicted price")
-```
-
 Let's build model-agnostic explainers for both of these models to find out why they make the predictions they do. We can use the `r pkg(DALEXtra)` add-on package for `r pkg(DALEX)`, which provides support for tidymodels. @Biecek2021 provide a thorough exploration of how to use `r pkg(DALEX)` for model explanations; this chapter only summarizes some important approaches, specific to tidymodels. To compute any kind of model explanation, global or local, using `r pkg(DALEX)`, we first create an _explainer_ for each model.
 
 ```{r explain-explainers, message=FALSE}
@@ -149,9 +137,9 @@ shap_duplex <-
                 B = 20)
 ```
 
-We could use the default plot method from `r pkg(DALEX)` by calling `plot(shap_duplex)`, or we can access the underlying data and create a custom plot. The box plots display the distribution of contributions across all the orderings we tried, and the bars display the average attribution for each feature.
+We could use the default plot method from `r pkg(DALEX)` by calling `plot(shap_duplex)`, or we can access the underlying data and create a custom plot. The box plots in Figure \@ref(fig:duplex-rf-shap) display the distribution of contributions across all the orderings we tried, and the bars display the average attribution for each feature.
 
-```{r explain-duplex-rf-shap}
+```{r explain-duplex-rf-shap, eval = FALSE}
 library(forcats)
 shap_duplex %>%
   group_by(variable) %>%
@@ -164,7 +152,15 @@ shap_duplex %>%
            alpha = 0.5) +
   geom_boxplot(width = 0.5) +
   theme(legend.position = "none") +
+  scale_fill_viridis_d() +
   labs(y = NULL)
+```
+
+
+```{r duplex-rf-shap, ref.label = "explain-duplex-rf-shap"}
+#| echo = FALSE,
+#| fig.cap = "Shapley additive explanations for the random forest model for a duplex property.",
+#| fig.alt = "Shapley additive explanations for the random forest model for a duplex property. Gross living area and year built have the largest contributions."
 ```
 
 What about a different observation in our data set? Let's look at a larger, newer one-family home in the Gilbert neighborhood.
@@ -184,7 +180,12 @@ shap_house <-
                 B = 20)
 ```
 
-```{r explain-gilbert-shap, echo=FALSE}
+The results are shown in Figure \@ref(fig:gilbert-shap). 
+
+```{r gilbert-shap}
+#| echo = FALSE,
+#| fig.cap = "Shapley additive explanations for the random forest model for a one-family home in Gilbert.",
+#| fig.alt = "Shapley additive explanations for the random forest model for a one-family home in Gilbert. Gross living area and year built have the largest contributions but in the opposite direction as the previous explainer."
 shap_house %>%
   group_by(variable) %>%
   mutate(mean_val = mean(contribution)) %>%
@@ -195,6 +196,7 @@ shap_house %>%
            aes(mean_val, variable), 
            alpha = 0.5) +
   geom_boxplot(width = 0.5) +
+  scale_fill_viridis_d() +
   theme(legend.position = "none") +
   labs(y = NULL)
 ```
@@ -260,7 +262,14 @@ ggplot_imp <- function(...) {
 }
 ```
 
-```{r explain-global, fig.width=8, fig.height=4.5}
+Using `ggplot_imp(vip_lm, vip_rf)` produces Figure \@ref(fig:global-rf). 
+
+```{r global-rf}
+#| echo = FALSE,
+#| fig.width = 8,
+#| fig.height = 4.5,
+#| fig.cap = "Global explainer for the random forest and linear regression models.",
+#| fig.alt = "Global explainer for the random forest and linear regression models. For both models, gross living area and year built have the large contributions although the linear model uses the neighborhood predictor to a large degree."
 ggplot_imp(vip_lm, vip_rf)
 ```
 
@@ -306,25 +315,29 @@ ggplot_pdp <- function(obj, x) {
 }
 ```
 
+Using this function generates Figure \@ref(fig:year-built).
 
-
-```{r explain-year-built}
+```{r explain-year-built, eval = FALSE}
 ggplot_pdp(pdp_age, Year_Built)  +
   labs(x = "Year built", 
        y = "Sale Price (log)", 
        color = NULL)
 ```
 
+```{r year-built, ref.label = "explain-year-built"}
+#| echo = FALSE,
+#| fig.cap = "Partial dependence profiles for the random forest model focusing on the year built predictor.",
+#| fig.alt = "Partial dependence profiles for the random forest model focusing on the year built predictor. The profiles are relavely constant and then increase linearly around 1950."
+```
+
 
 Partial dependence profiles can be computed for any other feature in the model, and also for groups in the data, such as `Bldg_Type`. Let's use 1,000 observations for these profiles.
 
-```{r explain-build-type-pdp}
+```{r explain-build-type-pdp, eval = FALSE}
 pdp_liv <- model_profile(explainer_rf, N = 1000, 
                          variables = "Gr_Liv_Area", 
                          groups = "Bldg_Type")
-```
 
-```{r explain-build-type}
 ggplot_pdp(pdp_liv, Gr_Liv_Area) +
   scale_x_log10() +
   scale_color_brewer(palette = "Dark2") +
@@ -333,24 +346,37 @@ ggplot_pdp(pdp_liv, Gr_Liv_Area) +
        color = NULL)
 ```
 
-We have the option of using `plot(pdp_liv)` for default `r pkg(DALEX)` plots, but since we are making plots with the underlying data here, we can even facet by one of the features to visualize how the predictions change differently, highlighting the model's behavior for subgroups.
+to produce Figure \@ref(fig:building-type-profiles).
 
-```{r explain-build-type-facet}
+```{r building-type-profiles, ref.label = "explain-build-type-pdp"}
+#| echo = FALSE,
+#| fig.cap = "Partial dependence profiles for the random forest model focusing on building types and gross living area.",
+#| fig.alt = "Partial dependence profiles for the random forest model focusing on building types and gross living area. The building type profiles are, for the most part, parallel over gross living area."
+```
+
+
+We have the option of using `plot(pdp_liv)` for default `r pkg(DALEX)` plots, but since we are making plots with the underlying data here, we can even facet by one of the features to visualize how the predictions change differently, highlighting the model's behavior for subgroups (as shown in Figure \@ref(fig:building-type-facets)).
+
+```{r explain-build-type-facet, eval = FALSE}
 as_tibble(pdp_liv$agr_profiles) %>%
   mutate(Bldg_Type = stringr::str_remove(`_label_`, "random forest_")) %>%
-  ggplot(aes(`_x_`, `_yhat_`, color = Bldg_Type)) +
+  ggplot(aes(`_x_`, `_yhat_`)) +
   geom_line(data = as_tibble(pdp_liv$cp_profiles),
             aes(x = Gr_Liv_Area, group = `_ids_`),
             size = 0.5, alpha = 0.1, color = "gray50") +
-  geom_line(size = 1.2, alpha = 0.8, show.legend = FALSE) +
+  geom_line(size = 1.2, show.legend = FALSE) +
   scale_x_log10() +
   facet_wrap(~Bldg_Type) +
-  scale_color_brewer(palette = "Dark2") +
   labs(x = "Gross living area", 
        y = "Sale Price (log)", 
        color = NULL)
 ```
 
+```{r building-type-facets, ref.label = "explain-build-type-facet"}
+#| echo = FALSE,
+#| fig.cap = "Partial dependence profiles for the random forest model focusing on building types and gross living area using facets.",
+#| fig.alt = "Partial dependence profiles for the random forest model focusing on building types and gross living area using facets. The building type profiles are, for the most part, parallel over gross living area."
+```
 
 There is not one right approach for building model explanations and the options outlined in this chapter are not exhaustive. We point you to @Biecek2021 and @Molnar2021 for further reading, but highlight in this chapter good options for explanations at both the individual and global level, and how to bridge from one to the other.
 
@@ -368,8 +394,9 @@ bean_test  <- testing(bean_split)
 load("RData/rda_fit.RData")
 ```
 
+The previously defined `ggplot_imp()` function produces Figure \@ref(fig:bean-explainer).
 
-```{r explain-bea-vip}
+```{r explain-bea-vip, cache = TRUE, results = 'hide'}
 vip_beans <- 
   explain_tidymodels(
     rda_wflow_fit, 
@@ -379,10 +406,20 @@ vip_beans <-
     verbose = FALSE
   ) %>% 
   model_parts() 
-
+```
+```{r explain-bea-vip-plot, eval = FALSE}
 ggplot_imp(vip_beans)
 ```
 
+
+```{r bean-explainer}
+#| echo = FALSE,
+#| fig.width = 8,
+#| fig.height = 4.5,
+#| fig.cap = "Global explainer for the regularized discriminant analysis model on the beans data.",
+#| fig.alt = "Global explainer for the regularized discriminant analysis model on the beans data. Almost all predictors have a significant contribution with shape factors one and four contributing the most. "
+ggplot_imp(vip_beans)
+```
 
 :::rmdwarning
 The measures of global feature importance that we see here incorporate the effects of all of the PLS components, but in terms of the original variables. 

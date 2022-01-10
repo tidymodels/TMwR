@@ -41,9 +41,9 @@ The latter is helpful when testing or debugging a recipe. However, as described 
 
 In addition to the `r pkg(tidymodels)` package, this chapter uses the following packages: `r pkg(baguette)`, `r pkg(beans)`, `r pkg(bestNormalize)`, `r pkg(corrplot)`, `r pkg(discrim)`, `r pkg(embed)`, `r pkg(ggforce)`, `r pkg(klaR)`, `r pkg(learntidymodels)`[^learnnote], `r pkg(mixOmics)`[^mixnote], and `r pkg(uwot)`. .
 
-[^learnnote]: The `r pkg(learntidymodels)` package can be found at its [GitHub site](https://github.com/tidymodels/learntidymodels)
+[^learnnote]: The `r pkg(learntidymodels)` package can be found at its [GitHub site](https://github.com/tidymodels/learntidymodels) (`https://github.com/tidymodels/learntidymodels`)
 
-[^mixnote]: The `r pkg(mixOmics)` package is not available on CRAN, but instead [on Bioconductor](https://doi.org/doi:10.18129/B9.bioc.mixOmics).
+[^mixnote]: The `r pkg(mixOmics)` package is not available on CRAN, but instead [on Bioconductor](https://doi.org/doi:10.18129/B9.bioc.mixOmics) (`https://doi.org/doi:10.18129/B9.bioc.mixOmics`).
 
 ## A picture is worth a thousand... beans {#beans}
 
@@ -65,9 +65,13 @@ There are numerous methods to quantify shapes of objects [@Mingqiang08]. Many ar
 
 -   There are also different measures of how oblong or **elongated** an object is. For example, the **eccentricity** statistic is the ratio of the major and minor axes. There are also related estimates for roundness and convexity.
 
-Notice the eccentricity for these different shapes:
+Notice the eccentricity for the different shapes in figure \@ref(fig:eccentricity).
 
-```{r dimensionality-eccentricity, echo = FALSE, out.width="95%"}
+```{r eccentricity}
+#| echo = FALSE, 
+#| out.width="95%",
+#| fig.cap = "Example shapes and their eccentricity statistics.",
+#| fig.alt = "Example shapes and their eccentricity statistics. Circles and squares have the smallest eccentricity values while X values and lightening bolts have the largest. The eccentricity is also the same when shapes are rotated."
 knitr::include_graphics("premade/morphology.svg")
 ```
 
@@ -105,17 +109,24 @@ bean_val$splits[[1]]
 
 To visually assess how well different methods perform, we can estimate the methods on the training set (n = `r analysis(bean_val$splits[[1]]) %>% nrow()` beans) and display the results using the validation set (n = `r assessment(bean_val$splits[[1]]) %>% nrow()`).
 
-Before beginning, we can spend some time investigating our data. Since we know that many of these shape features are probably measuring similar concepts, let's take a look at the correlation structure of the data:
+Before beginning, we can spend some time investigating our data. Since we know that many of these shape features are probably measuring similar concepts, let's take a look at the correlation structure of the data in Figure \@ref(fig:corr-plot) using this code:
 
-```{r dimensionality-corr-plot, fig.height=6, fig.width=6, out.width="70%"}
+```{r dimensionality-corr-plot, eval = FALSE}
 library(corrplot)
-tmwr_cols <- colorRampPalette(c("#91CBD765", "#CA225E"))
+tmwr_cols <- colorRampPalette(c("#91CBD765", "white", "#CA225E"))
 bean_train %>% 
   select(-class) %>% 
   cor() %>% 
-  corrplot(col = tmwr_cols(200), tl.col = "black")
+  corrplot(col = tmwr_cols(200), tl.col = "black", method = "ellipse")
 ```
-
+```{r corr-plot, ref.label = "dimensionality-corr-plot"}
+#| echo = FALSE,
+#| fig.height=6, 
+#| fig.width=6, 
+#| out.width="70%",
+#| fig.cap = "A correlation matrix of the predictors with variables ordered via clustering.",
+#| fig.alt = "A correlation matrix of the predictors with variables ordered via clustering. There are two to three clusters that have high within cluster correlations."
+```
 While we don't take the time to do it here, it is also important to see if this correlation structure significantly changes across the outcome categories. This can help create better models.
 
 ## A starter recipe
@@ -145,13 +156,18 @@ As mentioned in Section \@ref(using-recipes), a workflow containing a recipe use
 * `prep(recipe, training)` fits the recipe to the training set. 
 * `bake(recipe, new_data)` applies the recipe operations to `new_data`. 
 
-In summary:
+Figure \@ref(fig:recipe-process) summarizes. Let's look at each of these functions in more detail. 
 
-```{r dimensionality-recipe-process, echo = FALSE, out.width = '80%', warning = FALSE}
+
+```{r recipe-process}
+#| echo = FALSE, 
+#| out.width = '80%', 
+#| warning = FALSE,
+#| fig.cap = "A summary of the recipe-related functions.",
+#| fig.alt = "A summary of the recipe-related functions."
 knitr::include_graphics("premade/recipes-process.svg")
 ```
 
-Let's look at each of these functions in more detail. 
 
 ### Preparing a recipe {#prep}
 
@@ -204,9 +220,9 @@ bean_validation <- bean_val$splits %>% pluck(1) %>% assessment()
 bean_val_processed <- bake(bean_rec_trained, new_data = bean_validation)
 ```
 
-Here are histograms of the `area` predictor before and after the recipe was prepared: 
+Figure \@ref(fig:bean-area)  shows histograms of the `area` predictor before and after the recipe was prepared.
 
-```{r dimensionality-bake-off, echo = FALSE, fig.height=4}
+```{r dimensionality-bake-off, eval = FALSE}
 library(patchwork)
 p1 <- 
   bean_validation %>% 
@@ -221,6 +237,12 @@ p2 <-
   ggtitle("Processed validation set data")
 
 p1 + p2
+```
+```{r bean-area, ref.label = "dimensionality-bake-off"}
+#| echo = FALSE, 
+#| fig.height=4,
+#| fig.cap = "The `area` predictor before and after preprocessing.",
+#| fig.alt = "The `area` predictor before and after preprocessing. The below panel shows a right-skewed, slightly bimodal distribution. The after panel has a distribution that is fairly bell shaped."
 ```
 
 There are two important aspects of `bake()` that are worth noting here. 
@@ -243,20 +265,30 @@ If the training set is not pathologically large, using this value of `retain` ca
 Since recipes are the primary option in tidymodels for dimensionality reduction, let's write a function that will estimate the transformation and plot the resulting data in a scatter plot matrix via the `r pkg(ggforce)` package:
 
 ```{r dimensionality-function}
-library(ggforce)
 plot_validation_results <- function(recipe, dat = assessment(bean_val$splits[[1]])) {
-  recipe %>%
+  set.seed(1)
+  plot_data <- 
+    recipe %>%
     # Estimate any additional steps
     prep() %>%
     # Process the data (the validation set by default)
-    bake(new_data = dat) %>%
-    # Create the scatterplot matrix
-    ggplot(aes(x = .panel_x, y = .panel_y, col = class, fill = class)) +
-    geom_point(alpha = 0.4, size = 0.5) +
-    geom_autodensity(alpha = .3) +
-    facet_matrix(vars(-class), layer.diag = 2) + 
-    scale_color_brewer(palette = "Dark2") + 
-    scale_fill_brewer(palette = "Dark2")
+    bake(new_data = dat, all_predictors(), all_outcomes()) %>%
+    # Sample the data down to be more readable
+    sample_n(250)
+  
+  # Convert feature names to symbols to use with quasiquotation
+  nms <- names(plot_data)
+  x_name <- sym(nms[1])
+  y_name <- sym(nms[2])
+  
+  plot_data %>% 
+    ggplot(aes(x = !!x_name, y = !!y_name, col = class, 
+               fill = class, pch = class)) +
+    geom_point(alpha = 0.8) +
+    scale_shape_manual(values = 1:7) +
+    # Make equally sized axes
+    coord_obs_pred() +
+    theme_bw()
 }
 ```
 
@@ -266,20 +298,29 @@ A series of several feature extraction methodologies are explored here. An overv
 
 ### Principal component analysis
 
-As previously mentioned, PCA is an unsupervised method that uses linear combinations of the predictors to define new features. These features attempt to account for as much variation as possible in the original data. We add `step_pca()` to the original recipe and use our function to visualize the results on the validation set:
+As previously mentioned, PCA is an unsupervised method that uses linear combinations of the predictors to define new features. These features attempt to account for as much variation as possible in the original data. We add `step_pca()` to the original recipe and use our function to visualize the results on the validation set in Figure \@ref(fig:bean-pca) using:
 
-```{r dimensionality-pca, dev = "png", fig.height=7}
+```{r dimensionality-pca, eval = FALSE}
 bean_rec_trained %>%
   step_pca(all_numeric_predictors(), num_comp = 4) %>%
   plot_validation_results() + 
   ggtitle("Principal Component Analysis")
 ```
 
+```{r bean-pca, ref.label = "dimensionality-pca"}
+#| dev = "png", 
+#| out.width = "60%",
+#| fig.height = 5,
+#| fig.width = 5.1,
+#| fig.cap = "The first few principal component scores for the bean validation set, colored by class.",
+#| fig.alt = "The first few principal component scores for the bean validation set, colored by class. The classes separate when the first to components are plotted against one another."
+```
+
 We see that the first two components, especially when used together, do an effective job separating the classes. This may lead us to expect that the overall problem of classifying these beans will not be especially difficult.
 
 Recall that PCA is unsupervised. For these data, it turns out that the PCA components that explain the most variation in the predictors also happen to be predictive of the classes. What features are driving performance? The `r pkg(learntidymodels)` package, found on GitHub, has functions that can help visualize the top features for each component. We'll need the prepared recipe; the PCA step is added below along with a call to `prep()`:
 
-```{r dimensionality-pca-loadings}
+```{r dimensionality-pca-loadings, eval = FALSE}
 library(learntidymodels)
 bean_rec_trained %>%
   step_pca(all_numeric_predictors(), num_comp = 4) %>% 
@@ -288,41 +329,73 @@ bean_rec_trained %>%
   ggtitle("Principal Component Analysis")
 ```
 
+This produces Figure \@ref(fig:pca-loadings).
+
+```{r pca-loadings, ref.label = "dimensionality-pca-loadings"}
+#| echo = FALSE,
+#| fig.cap = "Predictor loadings for the PCA transformation.",
+#| fig.alt = "Predictor loadings for the PCA transformation. For the first component, the major axis length, second shape factor, convex area, and area have the larges effect. "
+```
+
 The top loadings are mostly related to the cluster of correlated predictors shown in the top left portion of the previous correlation plot: perimeter, area, major axis length, and convex area. These are all related to bean size. Shape factor 2, from @symons1988211, is the area over the cube of the major axis length and is therefore also related to bean size. Measures of elongation appear to dominate the second PCA component.
 
 ### Partial least squares
 
-PLS is a supervised version of PCA. It tries to find components that simultaneously maximize the variation in the predictors while also maximizing the relationship between those components and the outcome.
+PLS is a supervised version of PCA. It tries to find components that simultaneously maximize the variation in the predictors while also maximizing the relationship between those components and the outcome. Figure \@ref(fig:bean-pls) shows the results of a slightly modified version of the PCA code:
 
-```{r dimensionality-pls, dev = "png", fig.height=7}
+```{r dimensionality-pls, eval = FALSE}
 bean_rec_trained %>%
   step_pls(all_numeric_predictors(), outcome = "class", num_comp = 4) %>%
   plot_validation_results() + 
   ggtitle("Partial Least Squares")
 ```
 
-The first two PLS components are nearly identical to the first two PCA components! We find this result because those PCA components are so effective at separating the varieties of beans. The remaining components are different.
 
-```{r }
-library(learntidymodels)
+```{r bean-pls, ref.label = "dimensionality-pls"}
+#| dev = "png", 
+#| out.width = "60%",
+#| fig.height = 5,
+#| fig.width = 5.1,
+#| fig.cap = "The first few PLS component scores for the bean validation set, colored by class.",
+#| fig.alt = "The first few PLS component scores for the bean validation set, colored by class. The first two PLS components are nearly identical to the first two PCA components."
+```
+
+The first two PLS components are nearly identical to the first two PCA components! We find this result because those PCA components are so effective at separating the varieties of beans. The remaining components are different. Figure \@ref(fig:pls-loadings) is produces using:
+
+```{r dimensionality-pls-loadings, eval = FALSE}
 bean_rec_trained %>%
   step_pls(all_numeric_predictors(), outcome = "class", num_comp = 4) %>%
   prep() %>% 
   plot_top_loadings(component_number <= 4, n = 5, type = "pls") + 
   ggtitle("Partial Least Squares")
 ```
+```{r pls-loadings, ref.label = "dimensionality-pls-loadings"}
+#| echo = FALSE,
+#| fig.cap = "Predictor loadings for the PLS transformation.",
+#| fig.alt = "Predictor loadings for the PLS transformation. For the first component, the major axis length, second shape factor, the equivalent diameter, convex area, and area have the larges effect. "
+```
+
 
 Solidity (i.e., the density of the bean) drives the third PLS component, along with roundness. Solidity may be capturing bean features related to "bumpiness" of the bean surface since it can measure irregularity of the bean boundaries. Extent is the largest effect in the fourth component; it is an image texture measure similar to solidity.
 
 ### Independent component analysis
 
-ICA is slightly different than PCA in that it finds components that are as statistically independent from one another as possible (as opposed to being uncorrelated). It can be thought of as maximizing the "non-Gaussianity" of the ICA components.
+ICA is slightly different than PCA in that it finds components that are as statistically independent from one another as possible (as opposed to being uncorrelated). It can be thought of as maximizing the "non-Gaussianity" of the ICA components. `step_ica()` is used to produce Figure \@ref(fig:bean-ica):
 
-```{r dimensionality-ica, dev = "png", fig.height=7}
+```{r dimensionality-ica, eval = FALSE}
 bean_rec_trained %>%
   step_ica(all_numeric_predictors(), num_comp = 4) %>%
   plot_validation_results() + 
   ggtitle("Independent Component Analysis")
+```
+
+```{r bean-ica, ref.label = "dimensionality-ica"}
+#| dev = "png", 
+#| out.width = "60%",
+#| fig.height = 5,
+#| fig.width = 5.1,
+#| fig.cap = "The first few ICA component scores for the bean validation set, colored by class.",
+#| fig.alt = "The first few ICA component scores for the bean validation set, colored by class. There is significant overlap in the first two ICA components."
 ```
 
 Inspecting this plot, there does not appear to be much separation between the classes in the first few components when using ICA.
@@ -335,26 +408,52 @@ From there, UMAP translates points in the graph to the reduced dimensional space
 
 To create the mapping, the `r pkg(embed)` package contains a step function for this method:
 
-```{r dimensionality-umap, dev = "png", fig.height=7}
+```{r dimensionality-umap, eval = FALSE}
 library(embed)
 bean_rec_trained %>%
   step_umap(all_numeric_predictors(), num_comp = 4) %>%
   plot_validation_results() +
-  ggtitle("Uniform Manifold Approximation and Projection")
+  ggtitle("UMAP")
 ```
 
-While the between-cluster space is pronounced, the clusters can contain a heterogeneous mixture of classes.
+The resulting plot is shown on the left-hand side of Figure \@ref(fig:bean-umap). While the between-cluster space is pronounced, the clusters can contain a heterogeneous mixture of classes.
 
 There is also a supervised version of UMAP:
 
-```{r dimensionality-umap-supervised, dev = "png", fig.height=7}
+```{r dimensionality-umap-supervised, eval = FALSE}
 bean_rec_trained %>%
   step_umap(all_numeric_predictors(), outcome = "class", num_comp = 4) %>%
   plot_validation_results() +
-  ggtitle("Uniform Manifold Approximation and Projection (supervised)")
+  ggtitle("UMAP (supervised)")
 ```
 
-The supervised method looks promising for modeling the data.
+The supervised method, shown on the right side of Figure \@ref(fig:bean-umap), looks promising for modeling the data.
+
+```{r bean-umap, echo = FALSE}
+#| dev = "png",
+#| fig.height = 5,
+#| fig.width = 10.1,
+#| fig.cap = "The first few UMAP component scores for the bean validation set, colored by class. Results are show for supervised and unsupervised versions.",
+#| fig.alt = "The first few UMAP component scores for the bean validation set, colored by class. Results are show for supervised and unsupervised versions. There are clusters that are extremely separated form one another but each contains a mixture of the classes. The supervised version shows more separation between classes."
+
+umap_1 <- 
+  bean_rec_trained %>%
+  step_umap(all_numeric_predictors(), num_comp = 4) %>%
+  plot_validation_results() +
+  ggtitle("UMAP")
+
+umap_2 <- 
+  bean_rec_trained %>%
+  step_umap(all_numeric_predictors(), outcome = "class", num_comp = 4) %>%
+  plot_validation_results() +
+  ggtitle("UMAP (supervised)") +
+  theme(legend.position = "none") +
+  labs(y = NULL)
+
+
+umap_1 + umap_2
+
+```
 
 UMAP is a powerful method to reduce the feature space. However, it can be very sensitive to tuning parameters (e.g. the number of neighbors and so on). For this reason, it would help to experiment with a few of the parameters to assess how robust the results are for these data.
 
@@ -417,7 +516,7 @@ umap_rec <-
 
 Once again, `r pkg(workflowsets)` take the preprocessors and models and crosses them. The `control` option `parallel_over` is set so that the parallel processing can work simultaneously across tuning parameter combinations. The `workflow_map()` function applies grid search to optimize the model/preprocessing parameters (if any) across 10 parameter combinations. The multiclass area under the ROC curve is estimated on the validation set.
 
-```{r dimensionality-workflows}
+```{r dimensionality-workflows, cache = TRUE, message = FALSE, warning = FALSE}
 ctrl <- control_grid(parallel_over = "everything")
 bean_res <- 
   workflow_set(
@@ -427,7 +526,6 @@ bean_res <-
                   mlp = mlp_spec)
   ) %>% 
   workflow_map(
-    verbose = TRUE,
     seed = 1703,
     resamples = bean_val,
     grid = 10,
@@ -450,7 +548,9 @@ rankings %>%
   ggplot(aes(x = rank, y = mean, pch = method, col = model)) + 
   geom_point(cex = 3) + 
   theme(legend.position = "right") +
-  labs(y = "ROC AUC")
+  labs(y = "ROC AUC") +
+  # Added to help with back and white images:
+   geom_text(aes(y = mean - 0.01, label = wflow_id), angle = 90, hjust = 1)
 ```
 
 It is clear from these results that most models give very good performance; there are few bad choices here. For demonstration, we'll use the RDA model with PLS features as the final model. We will finalize the workflow with the numerically best parameters, fit it to the training set, then evaluate with the test set:
