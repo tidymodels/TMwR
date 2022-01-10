@@ -791,7 +791,7 @@ race_details %>%
   facet_wrap(~iter)
 ```
 
-Figure \@ref(f:racing-process) shows the results at several iterations in the process. The points shown in the panel with the first iteration show single ROC AUC values. As iterations progress, the points are averages of the resampled ROC statistics.
+Figure \@ref(fig:racing-process) shows the results at several iterations in the process. The points shown in the panel with the first iteration show single ROC AUC values. As iterations progress, the points are averages of the resampled ROC statistics.
 
 On the third iteration, the leading model configuration has changed and the algorithm computes one-sided confidence intervals. Any parameter set whose confidence interval includes zero would lack evidence that its performance is not statistically different from the best results. We retain `r sum(iter_three$upper < 0)` settings; these are resampled more. The remaining `r sum(iter_three$upper >= 0)` submodels are no longer considered. 
 
