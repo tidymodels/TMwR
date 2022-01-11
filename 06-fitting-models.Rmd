@@ -129,9 +129,9 @@ When `fit()` is used with a model specification, this _almost always_ means that
 The `fit_xy()` function always passes the data as-is to the underlying model function. It will not create dummy variables before doing so.
 :::
 
-Not only does `r pkg(parsnip)` enable a consistent model interface for different packages, it also provides consistency in the _model arguments_. It is common for different functions which fit the same model to have different argument names. Random forest model functions are a good example. Three commonly used arguments are the number of trees in the ensemble, the number of predictors to randomly sample with each split within a tree, and the number of data points required to make a split. For three different R packages implementing this algorithm, those arguments are:
+Not only does `r pkg(parsnip)` enable a consistent model interface for different packages, it also provides consistency in the _model arguments_. It is common for different functions which fit the same model to have different argument names. Random forest model functions are a good example. Three commonly used arguments are the number of trees in the ensemble, the number of predictors to randomly sample with each split within a tree, and the number of data points required to make a split. For three different R packages implementing this algorithm, those arguments are shown in Table \@ref(tab:rand-forest-args).
 
-```{r, models-rf-arg-names, echo = FALSE, results = "asis", eval = FALSE}
+```{r models-rf-arg-names, echo = FALSE, results = "asis"}
 arg_info <- 
   tribble(
     ~ `Argument Type`, ~parsnip,
@@ -154,72 +154,29 @@ arg_info %>%
     values_from = c(original),
     names_from = c(package)
   ) %>% 
-  kable(escape = FALSE) %>% 
+  kable(
+    caption = "Example argument names for different random forest functions.",
+    label = "rand-forest-args",
+    escape = FALSE
+  ) %>% 
   kable_styling()
 ```
-<table class="table" style="margin-left: auto; margin-right: auto;">
- <thead>
-  <tr>
-   <th style="text-align:left;"> Argument Type </th>
-   <th style="text-align:left;"> <span class="pkg">ranger </span></th>
-   <th style="text-align:left;"> <span class="pkg">randomForest </span></th>
-   <th style="text-align:left;"> <span class="pkg">sparklyr </span></th>
-  </tr>
- </thead>
-<tbody>
-  <tr>
-   <td style="text-align:left;"> # sampled predictors </td>
-   <td style="text-align:left;"> <tt>mtry</tt> </td>
-   <td style="text-align:left;"> <tt>mtry</tt> </td>
-   <td style="text-align:left;"> <tt>feature_subset_strategy</tt> </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> # trees </td>
-   <td style="text-align:left;"> <tt>num.trees</tt> </td>
-   <td style="text-align:left;"> <tt>ntree</tt> </td>
-   <td style="text-align:left;"> <tt>num_trees</tt> </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> # data points to split </td>
-   <td style="text-align:left;"> <tt>min.node.size</tt> </td>
-   <td style="text-align:left;"> <tt>nodesize</tt> </td>
-   <td style="text-align:left;"> <tt>min_instances_per_node</tt> </td>
-  </tr>
-</tbody>
-</table>
 
-In an effort to make argument specification less painful, `r pkg(parsnip)` uses common argument names within and between packages. For random forests, `r pkg(parsnip)` models use: 
 
-```{r, models-parsnip-names, echo = FALSE, results = "asis", eval = FALSE}
+In an effort to make argument specification less painful, `r pkg(parsnip)` uses common argument names within and between packages. Table \@ref(tab:parsnip-args) shows, for random forests, `r pkg(parsnip)` models use.
+
+```{r, models-parsnip-names, echo = FALSE, results = "asis"}
 arg_info %>%
   select(`Argument Type`, parsnip) %>%
   distinct() %>% 
   # mutate(parsnip = paste0("<tt>", parsnip, "</tt>")) %>% 
-  kable(escape = FALSE) %>% 
+  kable(
+    caption = "Random forest argument names used by parsnip.",
+    label = "parsnip-args",
+    escape = FALSE
+    ) %>% 
   kable_styling(full_width = FALSE)
 ```
-<table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
- <thead>
-  <tr>
-   <th style="text-align:left;"> Argument Type </th>
-   <th style="text-align:left;"> <span class="pkg">parsnip</span> </th>
-  </tr>
- </thead>
-<tbody>
-  <tr>
-   <td style="text-align:left;"> # sampled predictors </td>
-   <td style="text-align:left;"> <tt>mtry</tt> </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> # trees </td>
-   <td style="text-align:left;"> <tt>trees</tt> </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> # data points to split </td>
-   <td style="text-align:left;"> <tt>min_n</tt> </td>
-  </tr>
-</tbody>
-</table>
 
 Admittedly, this is one more set of arguments to memorize. However, when other types of models have the same argument types, these names still apply. For example, boosted tree ensembles also create a large number of tree-based models, so `trees` is also used there, as is `min_n`, and so on. 
 
@@ -330,18 +287,26 @@ ames_test_small %>%
   bind_cols(predict(lm_form_fit, ames_test_small, type = "pred_int")) 
 ```
 
-The motivation for the first rule comes from some R packages producing dissimilar data types from prediction functions. For example, the `r pkg(ranger)` package is an excellent tool for computing random forest models. However, instead of returning a data frame or vector as output, a specialized object is returned that has multiple values embedded within it (including the predicted values). This is just one more step for the data analyst to work around in their scripts. As another example, the `r pkg(glmnet)` package can return at least four different output types for predictions, depending on the model and characteristics of the data: 
+The motivation for the first rule comes from some R packages producing dissimilar data types from prediction functions. For example, the `r pkg(ranger)` package is an excellent tool for computing random forest models. However, instead of returning a data frame or vector as output, a specialized object is returned that has multiple values embedded within it (including the predicted values). This is just one more step for the data analyst to work around in their scripts. As another example, the `r pkg(glmnet)` package can return at least four different output types for predictions, depending on the model and characteristics of the data. These are shown in Table \@ref(tab:predict-types).
 
-| Type of Prediction       | Returns a:                      |
-|--------------------------|---------------------------------|
-| numeric                  | numeric matrix                  |
-| class                    | _character_ matrix              |
-| probability (2 classes)  | numeric matrix (2nd level only) |
-| probability (3+ classes) | 3D numeric array (all levels)   |
+```{r model-pred-types, echo = FALSE, results = "asis"}
+  tribble(
+    ~ `Type of Prediction`, ~ `Returns a:`,
+    "numeric",                 "numeric matrix",
+    "class",                   "_character_ matrix",
+    "probability (2 classes)", "numeric matrix (2nd level only)",
+    "probability (3+ classes)", "3D numeric array (all levels)", 
+  ) %>% 
+  kable(
+    caption = "The different return values for glmnet prediction types.",
+    label = "predict-types"
+  ) %>% 
+  kable_styling(full_width = FALSE)
+```
 
 Additionally, the column names of the results contain coded values that map to a vector called `lambda` within the glmnet model object. This excellent statistical method can be discouraging to use in practice because of all of the special cases an analyst might encounter that require additional code to be useful.
 
-For the second tidymodels prediction rule, the predictable column names for different types of predictions are: 
+For the second tidymodels prediction rule, the predictable column names for different types of predictions are shown in Table \@ref(tab:predictable-column-names).
 
 ```{r model-pred-info, echo = FALSE, results = "asis"}
   tribble(
@@ -352,7 +317,10 @@ For the second tidymodels prediction rule, the predictable column names for diff
     "`conf_int`", "`.pred_lower`, `.pred_upper`",
     "`pred_int`", "`.pred_lower`, `.pred_upper`"
   ) %>% 
-  kable() %>% 
+  kable(
+    caption = "The tidymodels mapping of prediction types and column names.",
+    label = "predictable-column-names",
+  ) %>% 
   kable_styling(full_width = FALSE)
 ```
 

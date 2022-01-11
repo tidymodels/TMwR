@@ -112,12 +112,16 @@ In this context, _bias_ is the difference between the true data pattern and the 
 
 For a low-bias model, the high degree of predictive capacity can sometimes result in the model nearly memorizing the training set data. As an obvious example, consider a 1-nearest neighbor model. It will always provide perfect predictions for the training set no matter how well it truly works for other data sets. Random forest models are similar; re-predicting the training set will always result in an artificially optimistic estimate of performance.  
 
-For both models, this table summarizes the RMSE estimate for the training and test sets: 
+For both models, Table \@ref(tab:rmse-results) summarizes the RMSE estimate for the training and test sets: 
 
 ```{r resampling-rmse-table, echo = FALSE, results = "asis"}
 all_res %>% 
   mutate(object = paste0("<tt>", object, "</tt>")) %>% 
-  kable(escape = FALSE) %>% 
+  kable(
+    caption = "Training and test sets performance statstics.",
+    label = "rmse-results",
+    escape = FALSE
+  ) %>% 
   kable_styling(full_width = FALSE) %>% 
   add_header_above(c(" ", "RMSE Estimates" = 2))
 ```

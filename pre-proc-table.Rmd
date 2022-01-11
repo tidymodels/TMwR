@@ -31,7 +31,7 @@ This Appendix provides recommendations for baseline levels of preprocessing that
  
  * **transform**: Is it helpful to transform predictors to be more symmetric? 
 
-The information in the table below is not exhaustive and somewhat depends on the implementation. For example, as noted below the table, some models may not require a particular preprocessing operation but the implementation may require it. In the table, `r tk` indicates that the method is required for the model and `r x` indicates that it is not. The `r cl` symbol means that the model _may_ be helped by the technique but it is not required.
+The information in Table \@ref(tab:preprocessing) is not exhaustive and somewhat depends on the implementation. For example, as noted below the table, some models may not require a particular preprocessing operation but the implementation may require it. In the table, `r tk` indicates that the method is required for the model and `r x` indicates that it is not. The `r cl` symbol means that the model _may_ be helped by the technique but it is not required.
 
 ```{r pre-proc-table, echo = FALSE, results = "asis"}
 tkp <- paste0(symbol$tick, symbol$sup_plus)
@@ -67,7 +67,12 @@ tab <-
 tab %>% 
   arrange(model) %>% 
   mutate(model = paste0("<tt>", model, "</tt>")) %>% 
-  kable(escape = FALSE, align = c("l", rep("c", ncol(tab) - 1))) %>% 
+  kable(
+    caption = "Preprocessing methods for different models.",
+    label = "preprocessing",
+    escape = FALSE,
+    align = c("l", rep("c", ncol(tab) - 1))
+  ) %>% 
   kable_styling(full_width = FALSE)
 ```
 

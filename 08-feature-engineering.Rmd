@@ -209,7 +209,7 @@ simple_ames <-
 Many, but not all, underlying model calculations require predictor values to be encoded as numbers. Notable exceptions include tree-based models, rule-based models, and naive Bayes models. 
 :::
 
-There are a few strategies for converting a factor predictor to a numeric format. The most common method is to create "dummy" or indicator variables. Let's take the predictor in the Ames data for the building type, which is a factor variable with five levels. For dummy variables, the single `Bldg_Type` column would be replaced with four numeric columns whose values are either zero or one. These binary variables represent specific factor level values. In R, the convention is to _exclude_ a column for the first factor level (`OneFam`, in this case). The `Bldg_Type` column would be replaced with a column called `TwoFmCon` that is one when the row has that value and zero otherwise. Three other columns are similarly created: 
+There are a few strategies for converting a factor predictor to a numeric format. The most common method is to create "dummy" or indicator variables. Let's take the predictor in the Ames data for the building type, which is a factor variable with five levels (see Table \@ref(tab:dummy-vars). For dummy variables, the single `Bldg_Type` column would be replaced with four numeric columns whose values are either zero or one. These binary variables represent specific factor level values. In R, the convention is to _exclude_ a column for the first factor level (`OneFam`, in this case). The `Bldg_Type` column would be replaced with a column called `TwoFmCon` that is one when the row has that value and zero otherwise. Three other columns are similarly created.
 
 ```{r engineering-all-dummies, echo = FALSE, results = 'asis'}
 show_rows <- 
@@ -225,7 +225,10 @@ recipe(~Bldg_Type, data = ames_train) %>%
   bake(ames_train) %>% 
   slice(show_rows) %>% 
   arrange(`Raw Data`) %>% 
-  kable() %>% 
+  kable(
+    caption = "An illustration of binary encodings (i.e., 'dummy variables') for a qualitative predictor.",
+    label = "dummy-vars"
+  ) %>% 
   kable_styling(full_width = FALSE)
 ```
 
@@ -240,7 +243,7 @@ Traditional dummy variables require that all of the possible categories be known
 
 Another method that is useful when there are a large number of categories is called _effect_ or _likelihood encodings_. This method replaces the original data with a single numeric column that measures the _effect_ of those data. For example, for the neighborhood predictor, the mean sale price is computed for each neighborhood and these means are substituted for the original data values. This can be effective but should be used with care. In effect, a mini-model is being added to the actual model and this can lead to over-fitting. To be cautious, this type of encoding should be rigorously resampled (see Chapter \@ref(resampling)). Within a recipe, the [`r pkg(embed)`](https://embed.tidymodels.org/) package has several step functions, such as `step_lencode_mixed()`, for effect encodings. Both feature hashing and effect encoding methods can also seamlessly handle situations where a novel factor level is encountered in the data. 
 
-Sometimes qualitative columns can be _ordered_, such as "low", "medium", "high". In base R, the default encoding strategy is to make new numeric columns that are polynomial expansions of the data. For columns that have five ordinal values, the factor column would be replaced with columns for linear, quadratic, cubic, and quartic terms: 
+Sometimes qualitative columns can be _ordered_, such as "low", "medium", "high". In base R, the default encoding strategy is to make new numeric columns that are polynomial expansions of the data. For columns that have five ordinal values, shown in Table \@ref(tab:ordered-factors), the factor column would be replaced with columns for linear, quadratic, cubic, and quartic terms. 
 
 ```{r engineering-ordered-table, echo = FALSE, results = 'asis'}
 ord_vals <- c("none", "a little", "some", "a bunch", "copious amounts")
@@ -252,7 +255,10 @@ ord_contrasts <-
   dplyr::select(-`(Intercept)`) %>% 
   setNames(c("Linear", "Quadratic", "Cubic", "Quartic"))
 bind_cols(ord_data, ord_contrasts) %>% 
-  kable() %>% 
+  kable(
+    caption = "An illustration of polynomial encodings for an ordered qualitative predictor.",
+    label = "ordered-factors"
+  ) %>% 
   kable_styling(full_width = FALSE)
 ```
 
