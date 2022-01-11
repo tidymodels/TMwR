@@ -300,7 +300,7 @@ We fit neural network classification models to the same two-class data from the 
 
 Chapters \@ref(splitting) and \@ref(resampling) demonstrated that simply repredicting the training set is a poor approach to model evaluation. Here, the neural networks very quickly begin to overinterpret patterns that it sees in the training set. Compare these three example class boundaries (developed with the training set) overlaid on training and test sets in Figure \@ref(fig:two-class-boundaries).
 
-```{r tuning-two-class-comps, include = FALSE, cache = TRUE}
+```{r tuning-two-class-comps, include = FALSE}
 two_class_rec <-
  recipe(Class ~ ., data = two_class_dat) %>% 
  step_normalize(all_numeric_predictors()) 

@@ -396,7 +396,7 @@ load("RData/rda_fit.RData")
 
 The previously defined `ggplot_imp()` function produces Figure \@ref(fig:bean-explainer).
 
-```{r explain-bea-vip, cache = TRUE, results = 'hide'}
+```{r explain-bea-vip, results = 'hide'}
 vip_beans <- 
   explain_tidymodels(
     rda_wflow_fit, 

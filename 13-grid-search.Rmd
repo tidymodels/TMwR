@@ -236,7 +236,7 @@ Otherwise, the interface to `tune_grid()` is the same as `fit_resamples()`. The 
 
 To start, let's evaluate a regular grid with three levels across the resamples: 
 
-```{r grid-cells-regular, cache = TRUE}
+```{r grid-cells-regular}
 roc_res <- metric_set(roc_auc)
 set.seed(99)
 mlp_reg_tune <-
@@ -274,7 +274,7 @@ Based on these results, it would make sense to conduct another run of grid searc
 
 To use a space-filling design, either the `grid` argument can be given an integer or one of the `grid_*()` functions can produce a data frame. To evaluate the same range using a maximum entropy design with 20 candidate values: 
 
-```{r grid-cells-sdf, cache = TRUE}
+```{r grid-cells-sdf}
 set.seed(99)
 mlp_sfd_tune <-
   mlp_wflow %>%
@@ -710,7 +710,7 @@ One issue with grid search is that all models need to be fit across all resample
 
 In machine learning, the set of techniques called _racing methods_ provide a similar function [@maron1994hoeffding]. Here, the tuning process evaluates all models on an initial subset of resamples. Based on their current performance metrics, some parameter sets are not considered in subsequent resamples. 
 
-```{r grid-cells-race, cache = TRUE, include = FALSE}
+```{r grid-cells-race, include = FALSE}
 set.seed(99)
 mlp_sfd_race <-
   mlp_wflow %>%

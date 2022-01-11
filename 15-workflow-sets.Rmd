@@ -8,7 +8,7 @@ library(rules)
 library(finetune)
 library(ggrepel)
 tidymodels_prefer()
-caching <- TRUE
+caching <- FALSE
 
 cores <- parallel::detectCores()
 if (!grepl("mingw32", R.Version()$platform)) {

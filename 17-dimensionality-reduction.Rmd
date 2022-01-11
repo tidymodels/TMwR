@@ -516,7 +516,7 @@ umap_rec <-
 
 Once again, `r pkg(workflowsets)` take the preprocessors and models and crosses them. The `control` option `parallel_over` is set so that the parallel processing can work simultaneously across tuning parameter combinations. The `workflow_map()` function applies grid search to optimize the model/preprocessing parameters (if any) across 10 parameter combinations. The multiclass area under the ROC curve is estimated on the validation set.
 
-```{r dimensionality-workflows, cache = TRUE, message = FALSE, warning = FALSE}
+```{r dimensionality-workflows, message = FALSE, warning = FALSE}
 ctrl <- control_grid(parallel_over = "everything")
 bean_res <- 
   workflow_set(

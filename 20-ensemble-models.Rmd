@@ -52,7 +52,7 @@ Simple validation sets can also be used with stacking since tidymodels considers
 
 For the concrete example, the training set used for model stacking has columns for all of the candidate tuning parameter results. Here are the first six rows and selected columns:
 
-```{r ensembles-data-example, echo = FALSE, results = "asis", warning = FALSE, message = FALSE, cache = TRUE}
+```{r ensembles-data-example, echo = FALSE, results = "asis", warning = FALSE, message = FALSE}
 stacks() %>% 
   add_candidates(grid_results) %>% 
   as_tibble() %>% 
@@ -121,7 +121,7 @@ The training set predictions and the corresponding observed outcome data are use
 
 Since our outcome is numeric, linear regression is used for the meta-model. Fitting the meta-model is as straightforward as using: 
 
-```{r ensembles-initial-blend, cache = TRUE}
+```{r ensembles-initial-blend}
 set.seed(2001)
 ens <- blend_predictions(concrete_stack)
 ```
@@ -144,7 +144,7 @@ The top panel of Figure \@ref(fig:stacking-autoplot) shows the average number of
 The default range may not have served us well here. To evaluate the  meta-learning model with larger penalties, let's pass an additional option:
 
 
-```{r ensembles-second-blend, cache = TRUE}
+```{r ensembles-second-blend}
 set.seed(2001)
 ens <- blend_predictions(concrete_stack, penalty = 10^seq(-2, -0.5, length = 20))
 ```

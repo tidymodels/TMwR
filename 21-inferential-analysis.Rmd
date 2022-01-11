@@ -360,7 +360,7 @@ We'll also compute more bootstrap confidence intervals for the parameters in a b
 
 First, we create the 4,000 model fits:
 
-```{r inference-zip-comp, cache = TRUE}
+```{r inference-zip-comp}
 zip_form <- art ~ fem + mar + kid5 + ment | fem + mar + kid5 + phd + ment
 glm_form <- art ~ fem + mar + kid5 + ment
 
