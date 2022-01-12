@@ -312,8 +312,8 @@ bean_rec_trained %>%
 #| out.width = "60%",
 #| fig.height = 5,
 #| fig.width = 5.1,
-#| fig.cap = "The first few principal component scores for the bean validation set, colored by class.",
-#| fig.alt = "The first few principal component scores for the bean validation set, colored by class. The classes separate when the first to components are plotted against one another."
+#| fig.cap = "The first two principal component scores for the bean validation set, colored by class.",
+#| fig.alt = "The first two principal component scores for the bean validation set, colored by class. The classes separate when the first two components are plotted against one another."
 ```
 
 We see that the first two components, especially when used together, do an effective job separating the classes. This may lead us to expect that the overall problem of classifying these beans will not be especially difficult.
@@ -356,8 +356,8 @@ bean_rec_trained %>%
 #| out.width = "60%",
 #| fig.height = 5,
 #| fig.width = 5.1,
-#| fig.cap = "The first few PLS component scores for the bean validation set, colored by class.",
-#| fig.alt = "The first few PLS component scores for the bean validation set, colored by class. The first two PLS components are nearly identical to the first two PCA components."
+#| fig.cap = "The first two PLS component scores for the bean validation set, colored by class.",
+#| fig.alt = "The first two PLS component scores for the bean validation set, colored by class. The first two PLS components are nearly identical to the first two PCA components."
 ```
 
 The first two PLS components are nearly identical to the first two PCA components! We find this result because those PCA components are so effective at separating the varieties of beans. The remaining components are different. Figure \@ref(fig:pls-loadings) is produces using:
@@ -394,8 +394,8 @@ bean_rec_trained %>%
 #| out.width = "60%",
 #| fig.height = 5,
 #| fig.width = 5.1,
-#| fig.cap = "The first few ICA component scores for the bean validation set, colored by class.",
-#| fig.alt = "The first few ICA component scores for the bean validation set, colored by class. There is significant overlap in the first two ICA components."
+#| fig.cap = "The first two ICA component scores for the bean validation set, colored by class.",
+#| fig.alt = "The first two ICA component scores for the bean validation set, colored by class. There is significant overlap in the first two ICA components."
 ```
 
 Inspecting this plot, there does not appear to be much separation between the classes in the first few components when using ICA.
@@ -433,8 +433,8 @@ The supervised method, shown on the right side of Figure \@ref(fig:bean-umap), l
 #| dev = "png",
 #| fig.height = 5,
 #| fig.width = 10.1,
-#| fig.cap = "The first few UMAP component scores for the bean validation set, colored by class. Results are show for supervised and unsupervised versions.",
-#| fig.alt = "The first few UMAP component scores for the bean validation set, colored by class. Results are show for supervised and unsupervised versions. There are clusters that are extremely separated form one another but each contains a mixture of the classes. The supervised version shows more separation between classes."
+#| fig.cap = "The first two UMAP component scores for the bean validation set, colored by class. Results are show for supervised and unsupervised versions.",
+#| fig.alt = "The first two UMAP component scores for the bean validation set, colored by class. Results are show for supervised and unsupervised versions. There are clusters that are extremely separated form one another but each contains a mixture of the classes. The supervised version shows more separation between classes."
 
 umap_1 <- 
   bean_rec_trained %>%
