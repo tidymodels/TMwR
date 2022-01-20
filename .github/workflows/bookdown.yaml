@@ -13,21 +13,37 @@ env:
 
 jobs:
   build:
-    runs-on: macOS-latest
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+    runs-on: macOS-latest
     steps:
       - name: Checkout repo
         uses: actions/checkout@v2
 
       - name: Setup R
-        uses: r-lib/actions/setup-r@v2
         id: install-r
-        with:
-          r-version: release
+        uses: r-lib/actions/setup-r@v1
 
-      - name: Install pandoc
-        uses: r-lib/actions/setup-pandoc@v2
+      - name: Setup pandoc
+        uses: r-lib/actions/setup-pandoc@v1
+
+      - name: Install pak and query dependencies
+        run: |
+          install.packages("pak", repos = "https://r-lib.github.io/p/pak/dev/")
+          saveRDS(pak::local_dev_deps_tree(), ".github/r-depends.rds")
+        shell: Rscript {0}
+
+      - name: Cache R packages
+        uses: actions/cache@v2
+        with:
+          path: ${{ env.R_LIBS_USER }}
+          key: ${{ runner.os }}-${{ steps.install-r.outputs.installed-r-version }}-1-${{ hashFiles('.github/r-depends.rds') }}
+          restore-keys: ${{ runner.os }}-${{ steps.install-r.outputs.installed-r-version }}-1-
+
+      - name: Install dependencies
+        run: |
+          pak::local_install_dev_deps(upgrade = TRUE)
+        shell: Rscript {0}
         
       - name: Install system dependencies
         run: |
@@ -37,16 +53,12 @@ jobs:
           brew install libgit2
           brew install ffmpeg
 
-      - uses: r-lib/actions/setup-r-dependencies@v2
-        with:
-          extra-packages: rcmdcheck
-
       - name: Install Miniconda
         run: |
           reticulate::install_miniconda()
         shell: Rscript {0}
  
-      - name: Find Miniconda on macOS
+      - name: Find Miniconda 
         run: echo "options(reticulate.conda_binary = reticulate:::miniconda_conda())" >> .Rprofile
 
       - name: Install TensorFlow
@@ -55,13 +67,6 @@ jobs:
           tensorflow::install_tensorflow(version='2.6.0')
         shell: Rscript {0}
           
-      - name: Cache bookdown results
-        uses: actions/cache@v2
-        with:
-          path: _bookdown_files
-          key: bookdown-2-${{ hashFiles('**/*Rmd') }}
-          restore-keys: bookdown-2-
-
       - name: Configure Git user
         run: |
           git config --local user.name "$GITHUB_ACTOR"
