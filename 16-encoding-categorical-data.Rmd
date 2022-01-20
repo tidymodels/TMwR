@@ -1,6 +1,7 @@
 ```{r categorical-setup, include = FALSE}
 library(tidymodels)
 library(embed)
+library(textrecipes)
 library(kableExtra)
 tidymodels_prefer()
 source("ames_snippets.R")
@@ -52,12 +53,12 @@ We advise starting with untransformed categorical variables when a model allows 
 
 ## Using the outcome for encoding predictors
 
-There are multiple options for encodings more complex than dummy or indicator variables. One method called _effect_ or _likelihood encodings_ replaces the original categorical variables with a single numeric column that measures the _effect_ of those data. For example, for the neighborhood predictor in the Ames housing data, we can compute the median or mean sale price for each neighborhood and substitute these means for the original data values. 
+There are multiple options for encodings more complex than dummy or indicator variables. One method called _effect_ or _likelihood encodings_ replaces the original categorical variables with a single numeric column that measures the effect of those data. For example, for the neighborhood predictor in the Ames housing data, we can compute the mean or median sale price for each neighborhood and substitute these means for the original data values. 
 
 ```{r}
 ggplot(ames_train, 
-       aes(y = fct_reorder(Neighborhood, Sale_Price), x = Sale_Price)) + 
-  geom_bar(stat = "summary", fun = "median") + 
+       aes(y = reorder(Neighborhood, Sale_Price), x = Sale_Price)) + 
+  geom_bar(stat = "summary", fun = "mean") + 
   labs(y = NULL)
 ```
 
@@ -177,7 +178,88 @@ Notice that most estimates for neighborhood effects are about the same when we c
 
 ## Feature hashing
 
-Traditional dummy variables require that all of the possible categories be known to create a full set of numeric features. There are other methods for doing this transformation to a numeric format. _Feature hashing_ methods only consider the value of the category to assign it to a predefined pool of dummy variables. This can be a good strategy when there are a large number of possible categories, but the statistical properties may not be optimal. For example, it may unnecessarily _alias_ categories together (by assigning them to the same dummy variable). This reduces the specificity of the encoding and, if that dummy variable were important, it would be difficult to determine which of the categories is driving the effect. 
+Traditional dummy variables as described in Section \@ref(dummies) require that all of the possible categories be known to create a full set of numeric features. _Feature hashing_ methods also create dummy variables, but only consider the value of the category to assign it to a predefined pool of dummy variables. Let's look at the `Neighborhood` values in Ames again and use the `rlang::hash()` function to understand more.
+
+```{r}
+library(rlang)
+
+ames_hashed <-
+  ames_train %>%
+  mutate(Hash = map_chr(Neighborhood, hash))
+
+ames_hashed %>%
+  select(Neighborhood, Hash)
+```
+
+If we input Briardale to this hashing function, we will always get the same output. The neighborhoods in this case are called the "keys", while the outputs are the "hashes".
+
+:::rmdnote
+A hashing function takes an input of variable size and maps it to an output of fixed size. Hashing functions are commonly used in cryptography and databases.
+:::
+
+The `rlang::hash()` function generates a 128-bit hash, which means there are `r 2^128` possible hash values. This is great for some applications but doesn't help with feature hashing of **high cardinality** variables (variables with many levels). In feature hashing, the number of possible hashes is a hyperparameter and is set by the model developer through computing the modulo of the integer hashes.
+
+```{r}
+ames_hashed %>%
+         ## first make a smaller hash for integers that R can handle
+  mutate(Hash = strtoi(substr(Hash, 26, 32), base = 16L),  
+         ## now take the modulo
+         Hash = Hash %% 16) %>%
+  select(Neighborhood, Hash)
+```
+
+Now instead of the `r n_distinct(ames_train$Neighborhood)` neighborhoods in our original data or an incredibly huge number of the original hashes, we have sixteen hash values. This method is very fast and memory efficient, and it can be a good strategy when there are a large number of possible categories.
+
+We can implement feature hashing using a recipe step from the `r pkg(textrecipes)` package.
+
+:::rmdnote
+Feature hashing is useful for text data as well as high cardinality categorical data. See Section 6.7 of @Hvitfeldt2021 for a case study demonstration with text predictors.
+:::
+
+```{r}
+library(textrecipes)
+ames_hash <- 
+  recipe(Sale_Price ~ Neighborhood + Gr_Liv_Area + Year_Built + Bldg_Type + 
+           Latitude + Longitude, data = ames_train) %>%
+  step_log(Gr_Liv_Area, base = 10) %>% 
+  step_dummy_hash(Neighborhood, signed = FALSE, num_terms = 16L) %>%
+  step_dummy(all_nominal_predictors()) %>% 
+  step_interact( ~ Gr_Liv_Area:starts_with("Bldg_Type_") ) %>% 
+  step_ns(Latitude, Longitude, deg_free = 20)
+
+ames_hash
+```
+
+Feature hashing is fast and efficient but has a few downsides. For example, different category values often map to the same hash value. This is called a _collision_ or _aliasing_. How often did this happen with our neighborhoods in Ames?
+
+```{r echo=FALSE}
+hash_table <-
+  prep(ames_hash) %>% 
+  bake(new_data = NULL, starts_with("Neighborhood_")) %>%
+  bind_cols(ames_train %>% select(Neighborhood)) %>%
+  distinct() %>%
+  select(-Neighborhood) %>%
+  map_dbl(sum) %>%
+  enframe() 
+
+hash_table %>%
+  kable(col.names = c("Hash", "Number of neighborhoods")) %>%
+  kable_styling(full_width = FALSE)
+```
+
+The number of neighborhoods mapped to each hash value varies between `r min(hash_table$value)` and `r max(hash_table$value)`. All of the hash values greater than one are examples of hash collisions.
+
+- Feature hashing is not directly interpretable because hash functions cannot be reversed. We can't determine what the input category levels were from the output or if a collision occurred.
+
+- The number of hash values is a _tuning parameter_ of this preprocessing technique, and you should try several values to determine what is best for your particular modeling approach. A lower number of hash values results in more collisions, but a high number may not be an improvement over your original high cardinality variable.
+
+- Feature hashing can handle new category levels at prediction time, since it does not rely on pre-determined dummy variables.
+
+- You can reduce hash collisions with a _signed_ hash by using `signed = TRUE`.
+
+:::rmdwarn
+It is likely that some hash columns will contain all zeros, as we see in this example. We recommend a zero-variance filter via `step_zv()` to filter such columns out.
+:::
 
 
 ## Chapter summary {#categorical-summary}
