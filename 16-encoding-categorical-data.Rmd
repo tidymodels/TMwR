@@ -201,7 +201,7 @@ The `rlang::hash()` function generates a 128-bit hash, which means there are `r 
 
 ```{r}
 ames_hashed %>%
-         ## first make a smaller hash for integers that R can handle
+  ## first make a smaller hash for integers that R can handle
   mutate(Hash = strtoi(substr(Hash, 26, 32), base = 16L),  
          ## now take the modulo
          Hash = Hash %% 16) %>%
@@ -261,11 +261,96 @@ The number of neighborhoods mapped to each hash value varies between `r min(hash
 It is likely that some hash columns will contain all zeros, as we see in this example. We recommend a zero-variance filter via `step_zv()` to filter such columns out.
 :::
 
+## Entity embeddings
+
+Effect encodings replace category levels via a generalized linear model and feature hashing uses only a hashing function to replace category levels, but we can alternatively build a full set of entity embeddings to transform a categorical variable with many levels to a set of lower-dimensional vectors.
+
+:::rmdnote
+The idea of entity embeddings comes from the methods used to create word embeddings from text data. See Chapter 5 of @Hvitfeldt2021 for more on word embeddings.
+:::
+
+Embeddings for a categorical variable can be learned via a TensorFlow neural network with the `step_embed()` function in `r pkg(embed)`. We can use the outcome alone or optionally the outcome plus a set of additional predictors. Let's create a set of embeddings for neighborhood, based on the outcome (price) and several of the other predictors we have focused on. Since these predictors will be used by a neural network, let's preprocess them to perform better with this kind of model.
+
+```{r}
+ames_embed <- 
+  recipe(Sale_Price ~ Neighborhood + Gr_Liv_Area + Year_Built + Bldg_Type + 
+           Latitude + Longitude, data = ames_train) %>%
+  # preprocessing for neural network
+  step_YeoJohnson(Gr_Liv_Area, Year_Built, Latitude, Longitude)  %>%
+  step_range(Gr_Liv_Area, Year_Built, Latitude, Longitude)  %>%
+  # create embeddings via neural network
+  step_embed(
+    Neighborhood, 
+    outcome = vars(Sale_Price),
+    predictors = vars(Gr_Liv_Area, Year_Built, Latitude, Longitude),
+    num_terms = 5, 
+    hidden_units = 10, 
+    options = embed_control(epochs = 30, validation_split = 0.2)
+  ) 
+
+ames_embed
+```
+
+Like in feature hashing, the number of new encoding columns to create (`num_terms = 5`) is a hyperparameter of the feature engineering. We also have to make decisions about the neural network structure (the number of hidden units) and how to fit the neural network (how many epochs to train, how much of the data to use for validation in measuring metrics).
+
+:::rmdwarn
+Like much modeling with neural networks, finding embeddings in this way involves many parameters and decisions that can effect your results.
+:::
+
+How did training these embeddings go?
+
+```{r}
+embeddings <- prep(ames_embed)
+
+embeddings$steps[[3]]$history %>%
+  ggplot(aes(x = epochs, y = loss, col = type)) + 
+  geom_line() + 
+  scale_y_log10()
+```
+
+We can find the embeddings themselves by tidying the prepped recipe.
+
+```{r}
+library(stringr)
+
+embeddings %>%
+  tidy(number = 3) %>%
+  rename_at(vars(contains("emb")), 
+            list(~ str_remove(., "Neighborhood_"))) %>%
+  select(-terms, -id)
+```
+
+In creating these embeddings, we have used the complex relationships between our categorical variable `Neighborhood`, the outcome, and the other predictors we included to find a lower dimensional space (five dimensions instead of the `r n_distinct(ames_train$Neighborhood)` different neighborhoods) to represent neighborhood. Let's visualize the new embeddings, together with original, untransformed characteristics of these neighborhoods.
+
+```{r}
+embeddings %>%
+  tidy(number = 3) %>%
+  rename(Neighborhood = level) %>%
+  inner_join(
+    ames_train %>%
+      group_by(Neighborhood) %>%
+      summarise(
+        mean = mean(Sale_Price),
+        n = n()
+      )
+  ) %>%
+  pivot_longer(contains("embed")) %>%
+  mutate(name = str_remove(name, "Neighborhood_")) %>%
+  ggplot(aes(value, mean, size = sqrt(n))) +
+  geom_point(alpha = 0.7) +
+  facet_wrap(vars(name), scales = "free_x") +
+  labs(x = "Embedding", y = "Price (mean, log scale)")
+  
+```
+
+:::rmdwarn
+Again, the possibility of overfitting with this type of encoding for categorical variables highlights why feature engineering _must_ be estimated together with model parameters inside resampling. Keep in mind that creating these embeddings is like a mini-model layered inside whatever model these embeddings are the features for. Use care in estimating the embeddings as well as choosing the hyperparameters such as number of new embeddings columns and neural network structure.
+:::
 
 ## Chapter summary {#categorical-summary}
 
-In this chapter, you learned about using preprocessing recipes for encoding categorical predictors. The most straightforward option for transforming a categorical variable to a numeric representation is to create dummy variables from the levels, but this option does not work well when you have a variable with high cardinality (too many levels) or when you may see novel values at prediction time (new levels). One option in such a situation is to create _effect encodings_, a supervised encoding method that uses the outcome. Effect encodings can be learned with or without pooling the categories together. Another option uses a _hashing_ function to map category levels to a new, smaller set of dummy variables. Feature hashing is fast and has a low-memory footprint, but is not interpretable in a straightforward way.
+In this chapter, you learned about using preprocessing recipes for encoding categorical predictors. The most straightforward option for transforming a categorical variable to a numeric representation is to create dummy variables from the levels, but this option does not work well when you have a variable with high cardinality (too many levels) or when you may see novel values at prediction time (new levels). One option in such a situation is to create _effect encodings_, a supervised encoding method that uses the outcome. Effect encodings can be learned with or without pooling the categories together. Another option uses a _hashing_ function to map category levels to a new, smaller set of dummy variables. Feature hashing is fast and has a low-memory footprint. _Entity embeddings_ use a neural network to learn a new, lower-dimensional space to represent category levels. This approach can take advantage of complex relationships in your data to encode category levels.
 
-Most model algorithms require this type of transformation or encoding of categorical variables. A minority of models, including those based on trees and rules, can handle categorical variables natively and do not require such encodings.
+Most model algorithms require some kind of transformation or encoding of this type for categorical variables. A minority of models, including those based on trees and rules, can handle categorical variables natively and do not require such encodings.
 
 
