@@ -13,9 +13,9 @@ neighborhood_counts <- count(ames_train, Neighborhood)
 
 # Encoding categorical data  {#categorical}
 
-In Section \@ref(dummies) we introduced feature engineering approaches to encode or transform qualitative or nominal data into a representation better suited for most model algorithms. We discussed how to transform a categorical variable, such as the `Bldg_Type` in our Ames housing data (with levels `r knitr::combine_words(glue::backtick(levels(ames_train$Bldg_Type)))`), to a set of dummy or indicator variables.
+In Section \@ref(dummies) we introduced feature engineering approaches to encode or transform qualitative or nominal data into a representation better suited for most model algorithms. We discussed how to transform a categorical variable, such as the `Bldg_Type` in our Ames housing data (with levels `r knitr::combine_words(glue::backtick(levels(ames_train$Bldg_Type)))`), to a set of dummy or indicator variables like those shown in Table \@ref(tab:encoding-dummies).
 
-```{r engineering-all-dummies, echo = FALSE, results = 'asis'}
+```{r encoding-dummies, echo = FALSE, results = 'asis'}
 show_rows <- 
   ames_train %>% 
   mutate(.row = row_number()) %>% 
@@ -29,7 +29,8 @@ recipe(~Bldg_Type, data = ames_train) %>%
   bake(ames_train) %>% 
   slice(show_rows) %>% 
   arrange(`Raw Data`) %>% 
-  kable() %>% 
+  kable(caption = "Dummy or indicator variable encodings for the building type predictor in the Ames training set.",
+        label = "encoding-dummies") %>% 
   kable_styling(full_width = FALSE)
 ```
 
@@ -53,9 +54,11 @@ We advise starting with untransformed categorical variables when a model allows 
 
 ## Using the outcome for encoding predictors
 
-There are multiple options for encodings more complex than dummy or indicator variables. One method called _effect_ or _likelihood encodings_ replaces the original categorical variables with a single numeric column that measures the effect of those data. For example, for the neighborhood predictor in the Ames housing data, we can compute the mean or median sale price for each neighborhood and substitute these means for the original data values. 
+There are multiple options for encodings more complex than dummy or indicator variables. One method called _effect_ or _likelihood encodings_ replaces the original categorical variables with a single numeric column that measures the effect of those data. For example, for the neighborhood predictor in the Ames housing data, we can compute the mean or median sale price for each neighborhood (as shown in Figure \@ref(fig:encoding-mean-price)) and substitute these means for the original data values. 
 
-```{r}
+```{r encoding-mean-price}
+#| fig.cap = "A bar chart of the mean home price for neighborhoods in the Ames training set.",
+#| fig.alt = "A bar chart of the mean home price for neighborhoods in the Ames training set. The most expensive neighborhoods are Northridge and Stone Brook, while the least expensive are Iowa DOT and Railroad and Meadow Village."
 ggplot(ames_train, 
        aes(y = reorder(Neighborhood, Sale_Price), x = Sale_Price)) + 
   geom_bar(stat = "summary", fun = "mean") + 
@@ -157,6 +160,8 @@ You can use a fully Bayesian hierarchical model for the effects in the same way 
 Let's visually compare the effects using pooling vs. no pooling.
 
 ```{r}
+#| fig.cap = "Comparing the effect encodings for neighborhood estimated without pooling to those with pooling.",
+#| fig.alt = "A scatter chart comparing the effect encodings for neighborhood estimated without pooling to those with pooling. Almost all neighborhoods are very close to the slope = 1 line, but the neighborhoods with the fewest homes are further away."
 glm_estimates %>%
   rename(`no pooling` = value) %>%
   left_join(
@@ -230,9 +235,9 @@ ames_hash <-
 ames_hash
 ```
 
-Feature hashing is fast and efficient but has a few downsides. For example, different category values often map to the same hash value. This is called a _collision_ or _aliasing_. How often did this happen with our neighborhoods in Ames?
+Feature hashing is fast and efficient but has a few downsides. For example, different category values often map to the same hash value. This is called a _collision_ or _aliasing_. How often did this happen with our neighborhoods in Ames? Table \@ref(tab:encoding-hash) presents the number of neighborhoods per hash value.
 
-```{r echo=FALSE}
+```{r encoding-hash, echo=FALSE}
 hash_table <-
   prep(ames_hash) %>% 
   bake(new_data = NULL, starts_with("Neighborhood_")) %>%
@@ -243,7 +248,9 @@ hash_table <-
   enframe() 
 
 hash_table %>%
-  kable(col.names = c("Hash", "Number of neighborhoods")) %>%
+  kable(col.names = c("Hash", "Number of neighborhoods"),
+        caption = "The number of neighborhoods per each feature hash value.",
+        label = "encoding-hash") %>%
   kable_styling(full_width = FALSE)
 ```
 
@@ -299,7 +306,9 @@ Like much modeling with neural networks, finding embeddings in this way involves
 
 How did training these embeddings go?
 
-```{r}
+```{r encoding-history}
+#| fig.cap = "Training history for entity embeddings.",
+#| fig.alt = "A line chart of the training loss and validation loss as the entity embeddings were trained. Both loss values started high and decreased as more epochs were trained, and there is not evidence of much overfitting."
 embeddings <- prep(ames_embed)
 
 embeddings$steps[[3]]$history %>%
@@ -308,7 +317,7 @@ embeddings$steps[[3]]$history %>%
   scale_y_log10()
 ```
 
-We can find the embeddings themselves by tidying the prepped recipe.
+Figure \@ref(fig:encoding-history) visualizes model performance as more epochs were trained. We can find the embeddings themselves by tidying the prepped recipe.
 
 ```{r}
 library(stringr)
@@ -320,9 +329,11 @@ embeddings %>%
   select(-terms, -id)
 ```
 
-In creating these embeddings, we have used the complex relationships between our categorical variable `Neighborhood`, the outcome, and the other predictors we included to find a lower dimensional space (five dimensions instead of the `r n_distinct(ames_train$Neighborhood)` different neighborhoods) to represent neighborhood. Let's visualize the new embeddings, together with original, untransformed characteristics of these neighborhoods.
+In creating these embeddings, we have used the complex relationships between our categorical variable `Neighborhood`, the outcome, and the other predictors we included to find a lower dimensional space (five dimensions instead of the `r n_distinct(ames_train$Neighborhood)` different neighborhoods) to represent neighborhood. Let's visualize the new embeddings, together with original, untransformed characteristics of these neighborhoods in Figure \@ref(fig:encoding-results).
 
-```{r}
+```{r encoding-results}
+#| fig.cap = "Embedding values and mean price per neighborhood.",
+#| fig.alt = "A bubble chart for Ames neighborhoods with embedding value on the x-axis, mean price on the y-axis, and root of the number of homes mapped to bubble size. Some embeddings have some correlation with price, but most look uncorrelated."
 embeddings %>%
   tidy(number = 3) %>%
   rename(Neighborhood = level) %>%
