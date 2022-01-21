@@ -1,6 +1,6 @@
 bookdown::gitbook:
   css: [style.css, TMwR.css]
-  dev: svglite
+  dev: png
   config:
     toc:
       collapse: section
@@ -13,10 +13,13 @@ bookdown::gitbook:
     sharing: no
 
 bookdown::pdf_book:
+  dev: png
   latex_engine: pdflatex
   citation_package: natbib
   includes:
     in_header: latex_extras/preamble.tex
   keep_tex: yes
   highlight: tango
+  documentclass: book
+  fontsize: 10pt
 

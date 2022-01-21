@@ -28,8 +28,7 @@ rmd_files: [
   "20-ensemble-models.Rmd",
   "21-inferential-analysis.Rmd",
   
-  "pre-proc-table.Rmd",
-  "references.Rmd"
+  "pre-proc-table.Rmd"
 ]
 
 before_chapter_script: "_common.R"
