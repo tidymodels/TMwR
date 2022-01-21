@@ -390,7 +390,7 @@ parsnip_addin()
 
 will open a window in the Viewer panel of the RStudio IDE with a list of possible models for each model mode. These can be written to the source code panel: 
 
-```{r models-add-in-gif, echo = FALSE, out.width = '100%'}
+```{r models-add-in-gif, echo = FALSE, out.width = '100%', eval = FALSE}
 knitr::include_graphics("premade/addin.gif")
 ```
 
