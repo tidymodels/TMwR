@@ -119,7 +119,8 @@ $$ \log\left(\frac{\pi}{1 - \pi}\right) = \beta_0 + \beta_1x_1 + \ldots + \beta_
 In the context of generalized linear models, the logit function is the _link function_ between the outcome ($\pi$) and the predictors. There are other link functions that include the _probit_ model: 
 
 $$\Phi^{-1}(\pi) = \beta_0 + \beta_1x_1 + \ldots + \beta_px_p$$
-were $\Phi$ is the cumulative standard normal function, as well as the _complementary log-log_ model:
+
+where $\Phi$ is the cumulative standard normal function, as well as the _complementary log-log_ model:
 
 $$\log(−\log(1−\pi)) = \beta_0 + \beta_1x_1 + \ldots + \beta_px_p$$
 Each of these models result in linear class boundaries. Which one should be we use? Since, for these data, the number of model parameters does not vary, the statistical approach is to compute the (log) likelihood for each model and determine the model with the largest value. Traditionally, the likelihood is computed using the same data that were used to estimate the parameters, not using approaches like data splitting or resampling from Chapters \@ref(splitting) and \@ref(resampling).
