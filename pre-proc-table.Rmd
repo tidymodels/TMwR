@@ -4,9 +4,9 @@ library(tidymodels)
 library(cli)
 library(kableExtra)
 
-tk <- symbol$tick
-x  <- symbol$times
-cl <- symbol$circle_dotted
+tk <- "$+$"
+x  <- "$\\times$"
+cl <- "$\\circ$"
 ```
 
 # (APPENDIX) Appendix {-} 
@@ -34,9 +34,9 @@ This Appendix provides recommendations for baseline levels of preprocessing that
 The information in the table below is not exhaustive and somewhat depends on the implementation. For example, as noted below the table, some models may not require a particular preprocessing operation but the implementation may require it. In the table, `r tk` indicates that the method is required for the model and `r x` indicates that it is not. The `r cl` symbol means that the model _may_ be helped by the technique but it is not required.
 
 ```{r pre-proc-table, echo = FALSE, results = "asis"}
-tkp <- paste0(symbol$tick, symbol$sup_plus)
-cl1 <- paste0(symbol$circle_dotted, symbol$sup_1)
-xp  <- paste0(symbol$times, symbol$sup_plus)
+tkp <- paste0("$\\times$", "$+$")
+cl1 <- paste0("$\\circ$", "$^1$")
+xp  <- paste0("$\\times$", "$+$")
 
 tab <- 
   tribble(
@@ -66,7 +66,9 @@ tab <-
 
 tab %>% 
   arrange(model) %>% 
-  mutate(model = paste0("<tt>", model, "</tt>")) %>% 
+  mutate(
+    model = paste0("\\verb|", model, "|")
+    ) %>% 
   kable(escape = FALSE, align = c("l", rep("c", ncol(tab) - 1))) %>% 
   kable_styling(full_width = FALSE)
 ```
@@ -75,7 +77,7 @@ Footnotes:
 
 1. Decorrelating predictors may not help improve performance. However, fewer correlated predictors can improve the estimation of variance importance scores (see [Fig. 11.4](https://bookdown.org/max/FES/recursive-feature-elimination.html#fig:greedy-rf-imp) of @fes). Essentially, the selection of highly correlated predictors is almost random. 
 
-The notation of `r symbol$sup_plus` means that the answer depends on the implementation. Specifically: 
+The notation of $^+$ means that the answer depends on the implementation. Specifically: 
 
  * _Theoretically_, any tree-based model does not require imputation. However, many tree ensemble implementations require imputation. 
  
