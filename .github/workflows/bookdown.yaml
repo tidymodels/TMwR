@@ -64,7 +64,8 @@ jobs:
       - name: Install TensorFlow
         run: |
           reticulate::conda_create('r-reticulate', packages = c('python==3.6.9'))
-          tensorflow::install_tensorflow(version='2.6.0')
+          keras::install_keras()
+          tensorflow::tf_config()
         shell: Rscript {0}
           
       - name: Configure Git user
