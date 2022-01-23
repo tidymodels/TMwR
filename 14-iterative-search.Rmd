@@ -1032,10 +1032,6 @@ initial <-
   params %>%
   filter(.iter == 0)
 
-
-x_rng <- 10^extendrange(log10(params$rbf_sigma))
-y_rng <- 2^extendrange(log2(params$cost))
-
 sa_path <- function(branch = 1, y_axis = TRUE) {
   
   # ------------------------------------------------------------------------------
@@ -1045,19 +1041,13 @@ sa_path <- function(branch = 1, y_axis = TRUE) {
     params %>%
     ggplot(aes(x = rbf_sigma, y = cost))  +
     scale_x_log10(labels = fmt_dcimals(2), limits = x_rng) + 
-    scale_y_continuous(trans = "log2", labels = fmt_dcimals(2), limits = y_rng) +
+    scale_y_continuous(trans = "log2", labels = fmt_dcimals(2), limits = y_rng) + 
     coord_fixed(ratio = .5)
   
   sa_plot <- 
     base_plot +
     geom_point(data = initial, col = "black", pch = 1) +
-    theme_bw() +
-    theme(
-      panel.grid.minor.x = element_blank(),
-      panel.grid.minor.y = element_blank(),
-      axis.text.y = element_text(size = 8),
-      axis.text.x = element_text(size = 8)
-    )
+    theme_bw()
   
   # ----------------------------------------------------------------------------
   # Setup data for the requested path. Determine which rows should be used 
@@ -1072,6 +1062,7 @@ sa_path <- function(branch = 1, y_axis = TRUE) {
     mutate(
       best = NA_integer_,
       branch_ind = NA_integer_,
+      next_row = dplyr::lead(.row),  # TODO maybe don't use these
       next_cost = dplyr::lead(cost), 
       next_rbf_sigma = dplyr::lead(rbf_sigma)
     )
@@ -1110,29 +1101,25 @@ sa_path <- function(branch = 1, y_axis = TRUE) {
   last_accepted <- which.max(initial$mean)
   last_best <- last_accepted
   
+  
   for (i in 5:nrow(sa_data)) {
+    dat_start <- 
+      sa_data %>% 
+      slice(last_accepted) %>% 
+      select(cost, rbf_sigma)
     
     if (sa_data$results[i] == "new best")  {
-      dat_start <- 
-        sa_data %>% 
-        slice(last_accepted) %>% 
-        select(cost, rbf_sigma)
-      
       # The current row is accepted and is globally optimal
       plot_col <- "black"
       last_accepted <- i
       last_best <- i
       
     } else if (sa_data$results[i] %in% c("accept suboptimal", "better suboptimal")) {
-      dat_start <- 
-        sa_data %>% 
-        slice(last_accepted) %>% 
-        select(cost, rbf_sigma)
-      
       # The current row is accepted. Color blue since it is eliminated with restart
       plot_col <- "blue"
       last_accepted <- i
     } else if (sa_data$results[i] %in% c("discard suboptimal")) {
+      
       plot_col <- rgb(0, 0, 0, .2)
     } else if (sa_data$results[i] %in% c("restart from best")) {
       plot_col <- rgb(0, 0, 0, .2)
@@ -1159,7 +1146,11 @@ sa_path <- function(branch = 1, y_axis = TRUE) {
   sa_plot <- 
     sa_plot + 
     geom_point(data = sa_data %>% filter(results == "new best"), 
-               cex = 1)
+               cex = 1) + 
+  theme(
+    panel.grid.minor.x = element_blank(),
+    panel.grid.minor.y = element_blank()
+  )
   
   if(!y_axis) {
     sa_plot <-
