@@ -179,7 +179,8 @@ rsq_indiv_estimates %>%
   mutate(
     X1 = ifelse(model == "interact_lm", 1, 0),
     X2 = ifelse(model == "random_forest", 1, 0),
-    X3 = ifelse(model == "splines_lm", 1, 0)
+    X3 = ifelse(model == "splines_lm", 1, 0),
+    model = paste0("\\verb|", model, "|")
     ) %>% 
   select(`Y = rsq` = rsq, model, X1, X2, X3, id) %>% 
   slice(1:6) %>% 
@@ -256,14 +257,11 @@ where the residuals $\epsilon_{ij}$ are assumed to be independent and follow a G
 
 A Bayesian linear model makes additional assumptions. In addition to specifying a distribution for the residuals, we require _prior distribution_ specifications for the model parameters ( $\beta_j$ and $\sigma$ ). These are distributions for the parameters that the model assumes before being exposed to the observed data. For example, a simple set of prior distributions for our model might be:
 
-
-$$
 \begin{align}
 \epsilon_{ij} &\sim N(0, \sigma) \notag \\
 \beta_j &\sim N(0, 10) \notag \\
 \sigma &\sim \text{exponential}(1) \notag
 \end{align}
-$$
 
 These priors set the possible/probable ranges of the model parameters and have no unknown parameters. For example, the prior on $\sigma$ indicates that values must be larger than zero, are very right-skewed, and have values that are usually less than 3 or 4. 
 

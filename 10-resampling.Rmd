@@ -58,6 +58,7 @@ estimate_perf <- function(model, dat) {
   # Capture the names of the objects used
   cl <- match.call()
   obj_name <- as.character(cl$model)
+  obj_name <- gsub("_fit", "", obj_name)
   data_name <- as.character(cl$dat)
   data_name <- gsub("ames_", "", data_name)
   
@@ -87,7 +88,8 @@ all_res <-
     estimate_perf(rf_fit, ames_train),
     estimate_perf(lm_fit, ames_test),
     estimate_perf(rf_fit, ames_test)
-  ) %>% filter(.metric == "rmse") %>% 
+  ) %>% 
+  filter(.metric == "rmse") %>% 
   select(-.metric) %>% 
   pivot_wider(id_cols = object,
               values_from = ".estimate",
