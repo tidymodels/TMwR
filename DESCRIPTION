@@ -88,8 +88,7 @@ Imports:
     xgboost,
     yardstick
 Remotes:
-    tidymodels/embed,
-    tidymodels/finetune,
+    tidymodels/dials,
     tidymodels/learntidymodels
 biocViews: mixOmics
 Encoding: UTF-8
