@@ -137,7 +137,7 @@ Not only does `r pkg(parsnip)` enable a consistent model interface for different
 \toprule
 Argument Type                  & ranger        & randomForest & sparklyr                  \\ \midrule
 number of sampled predictors   & {\tt mtry}          & {\tt mtry}         & {\tt feature\_subset\_strategy} \\
-number of trees                & {\tt num.trees}     & {\tt ntree}        & {\tt num_trees}                 \\
+number of trees                & {\tt num.trees}     & {\tt ntree}        & {\tt num\_trees}                 \\
 number of data points to split & {\tt min.node.size} & {\tt nodesize}     & {\tt min\_instances\_per\_node} \\ \bottomrule
 \end{tabular}
 \end{table}
