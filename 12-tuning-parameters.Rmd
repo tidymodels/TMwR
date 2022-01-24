@@ -260,7 +260,7 @@ Metric optimization is thoroughly discussed by @thomas2020problem who explore se
 
 ## The consequences of poor parameter estimates {#overfitting-bad}
 
-Many tuning parameters modulate the amount of model complexity. More complexity often implies more malleability in the patterns that a model can emulate. For example, as shown in Section \@ref(other-steps), adding degrees of freedom in a spline function increases the intricacy of the prediction equation. While this is an advantage when the underlying motifs in the data are complex, it can also lead to over-interpretation of chance patterns that would not reproduce in new data. _Overfitting_ is the situation where a model adapts too much to the training data; it performs well on the data used to build the model but poorly for new data. 
+Many tuning parameters modulate the amount of model complexity. More complexity often implies more malleability in the patterns that a model can emulate. For example, as shown in Section \@ref(spline-functions), adding degrees of freedom in a spline function increases the intricacy of the prediction equation. While this is an advantage when the underlying motifs in the data are complex, it can also lead to over-interpretation of chance patterns that would not reproduce in new data. _Overfitting_ is the situation where a model adapts too much to the training data; it performs well on the data used to build the model but poorly for new data. 
 
 :::rmdwarning
 Since tuning model parameters can increase model complexity, poor choices can lead to overfitting. 
@@ -426,7 +426,7 @@ We've already dealt with quite a number of arguments that correspond to tuning p
 
 * the threshold for combining neighborhoods into an "other" category (with argument name `threshold`) in Section \@ref(dummies), 
 
-* the number of degrees of freedom in a natural spline (`deg_free`, Section \@ref(other-steps)), 
+* the number of degrees of freedom in a natural spline (`deg_free`, Section \@ref(spline-functions)), 
 
 * the number of data points required to execute a split in a tree-based model (`min_n`, Section \@ref(create-a-model)), and 
 
