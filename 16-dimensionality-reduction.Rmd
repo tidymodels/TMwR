@@ -15,6 +15,8 @@ registerDoMC(cores = parallel::detectCores())
 tidymodels_prefer()
 ```
 
+# (PART\*) Other Topics {-} 
+
 # Dimensionality reduction {#dimensionality}
 
 Dimensionality reduction can be a good choice when you suspect there are "too many" variables. An excess of variables, usually predictors, can be a problem because it is difficult to understand or visualize data in higher dimensions. For example, in high dimensional biology experiments, one of the first tasks is to determine if there are any unwanted trends in the data (e.g., effects not related to the question of interest, such as lab-to-lab differences). Debugging the data is difficult when there are hundreds of thousands of dimensions, and dimensionality reduction can be an aid for exploratory data analysis.

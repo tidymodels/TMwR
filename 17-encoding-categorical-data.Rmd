@@ -9,8 +9,6 @@ source("ames_snippets.R")
 neighborhood_counts <- count(ames_train, Neighborhood)
 ```
 
-# (PART\*) Other Topics {-} 
-
 # Encoding categorical data  {#categorical}
 
 In Section \@ref(dummies) we introduced feature engineering approaches to encode or transform qualitative or nominal data into a representation better suited for most model algorithms. We discussed how to transform a categorical variable, such as the `Bldg_Type` in our Ames housing data (with levels `r knitr::combine_words(glue::backtick(levels(ames_train$Bldg_Type)))`), to a set of dummy or indicator variables like those shown in Table \@ref(tab:encoding-dummies).
