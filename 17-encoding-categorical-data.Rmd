@@ -22,6 +22,7 @@ show_rows <-
   group_by(Bldg_Type) %>% dplyr::select(Bldg_Type, .row) %>% 
   slice(1) %>% 
   pull(.row)
+
 recipe(~Bldg_Type, data = ames_train) %>% 
   step_mutate(`Raw Data` = Bldg_Type) %>% 
   step_dummy(Bldg_Type, naming = function(var, lvl, ordinal = FALSE, sep = "_") lvl) %>% 
@@ -57,12 +58,16 @@ We advise starting with untransformed categorical variables when a model allows 
 There are multiple options for encodings more complex than dummy or indicator variables. One method called _effect_ or _likelihood encodings_ replaces the original categorical variables with a single numeric column that measures the effect of those data [@MicciBarreca2001; @Zumel2019]. For example, for the neighborhood predictor in the Ames housing data, we can compute the mean or median sale price for each neighborhood (as shown in Figure \@ref(fig:encoding-mean-price)) and substitute these means for the original data values. 
 
 ```{r encoding-mean-price}
-#| fig.cap = "A bar chart of the mean home price for neighborhoods in the Ames training set.",
-#| fig.alt = "A bar chart of the mean home price for neighborhoods in the Ames training set. The most expensive neighborhoods are Northridge and Stone Brook, while the least expensive are Iowa DOT and Railroad and Meadow Village."
-ggplot(ames_train, 
-       aes(y = reorder(Neighborhood, Sale_Price), x = Sale_Price)) + 
-  geom_bar(stat = "summary", fun = "mean") + 
-  labs(y = NULL)
+#| fig.cap = "Mean home price for neighborhoods in the Ames training set.",
+#| fig.alt = "A chart with points and error bars for the mean home price for neighborhoods in the Ames training set. The most expensive neighborhoods are Northridge and Stone Brook, while the least expensive are Iowa DOT and Railroad and Meadow Village."
+ames_train %>%
+  group_by(Neighborhood) %>%
+  summarize(mean = mean(Sale_Price),
+            std_err = sd(Sale_Price) / sqrt(length(Sale_Price))) %>% 
+  ggplot(aes(y = reorder(Neighborhood, mean), x = mean)) + 
+  geom_point() +
+  geom_errorbar(aes(xmin = mean - 1.64 * std_err, xmax = mean + 1.64 * std_err)) +
+  labs(y = NULL, x = "Price (mean, log scale)")
 ```
 
 This kind of effect encoding works well when your categorical variable has many levels. In tidymodels, the `r pkg(embed)` package includes several recipe step functions for different kinds of effect encodings, such as `step_lencode_glm()`, `step_lencode_mixed()`, and `step_lencode_bayes()`. These steps use a generalized linear model to estimate the effect of each level in a categorical predictor on the outcome.
