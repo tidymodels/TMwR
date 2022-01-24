@@ -705,13 +705,13 @@ surf_impr <-
 
 The figure below shows the surfaces of the mean, variance, and expected improvement surfaces estimated by the GP after 11 iterations. 
 
-```{r bo-surfaces, echo = FALSE, dev = "pdf"}
+```{r bo-surfaces, echo = FALSE, dev = "pdf", out.width="100%", fig.width=9, fig.height=4}
 surf_mean + surf_sd + surf_impr
 ```
 
 This figure shows the search process at three different points in the optimization:
 
-```{r bo-search, echo = FALSE, warning = FALSE, dev = "pdf"}
+```{r bo-search, echo = FALSE, warning = FALSE, dev = "pdf", out.width="100%", fig.width=9, fig.height=4}
 first_5 + first_11 + all_bo
 ```
 
@@ -1019,7 +1019,7 @@ autoplot(svm_sa, type = "parameters")
 
 A visualization of the search path helps to understand where the search process did well and where it went astray:  **TODO**
 
-```{r iterative-sa-plot, echo = FALSE, warning = FALSE, dev = "pdf", out.width="100%"}
+```{r iterative-sa-plot, echo = FALSE, warning = FALSE, dev = "pdf", out.width="100%", fig.width=10, fig.height=3.5}
 history <- result_history %>% add_rowindex()
 
 params <-
@@ -1168,9 +1168,9 @@ sa_path <- function(branch = 1, y_axis = TRUE) {
 sa_1 <- sa_path(1) + ggtitle("Phase 1")
 sa_2 <- sa_path(2, FALSE) + ggtitle("Phase 2")
 sa_3 <- sa_path(3, FALSE) + ggtitle("Phase 3")
-sa_4 <- sa_path(4) + ggtitle("Phase 4")
+sa_4 <- sa_path(4, FALSE) + ggtitle("Phase 4")
 sa_5 <- sa_path(5, FALSE) + ggtitle("Phase 5")
-sa_1 + sa_2 + sa_3 + sa_4 + sa_5
+sa_1 + sa_2 + sa_3 + sa_4 + sa_5 +  plot_layout(ncol = 5)
 ```
 
 
