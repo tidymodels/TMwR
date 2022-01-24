@@ -11,7 +11,9 @@ neighborhood_counts <- count(ames_train, Neighborhood)
 
 # Encoding categorical data  {#categorical}
 
-In Section \@ref(dummies) we introduced feature engineering approaches to encode or transform qualitative or nominal data into a representation better suited for most model algorithms. We discussed how to transform a categorical variable, such as the `Bldg_Type` in our Ames housing data (with levels `r knitr::combine_words(glue::backtick(levels(ames_train$Bldg_Type)))`), to a set of dummy or indicator variables like those shown in Table \@ref(tab:encoding-dummies).
+For statistical modeling in R, the preferred representation for categorical or nominal data is a factor, a variable which can take on a limited number of different values; internally, factors are stored as a vector of integer values together with a set of text labels.[^python] In Section \@ref(dummies) we introduced feature engineering approaches to encode or transform qualitative or nominal data into a representation better suited for most model algorithms. We discussed how to transform a categorical variable, such as the `Bldg_Type` in our Ames housing data (with levels `r knitr::combine_words(glue::backtick(levels(ames_train$Bldg_Type)))`), to a set of dummy or indicator variables like those shown in Table \@ref(tab:encoding-dummies).
+
+[^python]: This is in contrast to statistical modeling in Python, where categorical variables are often directly represented by integers alone, such as `1, 2, 3` representing red, blue, and green.
 
 ```{r encoding-dummies, echo = FALSE, results = 'asis'}
 show_rows <- 
@@ -38,7 +40,7 @@ Many model implementations require such a transformation to a numeric representa
 Appendix \@ref(pre-proc-table) presents a table of recommended preprocessing techniques for different models; notice how many of the models in the table require a numeric encoding for all predictors.
 :::
 
-However, for many realistic data sets, straightforward dummy variables are not a good fit. This often happens because there are **too many** categories or there are **new** categories at prediction time. In this chapter, we discuss more sophisticated options for encoding categorical predictors that address these issues. These options are available as recipe steps in the [`r pkg(embed)`](https://embed.tidymodels.org/) package.
+However, for some realistic data sets, straightforward dummy variables are not a good fit. This often happens because there are **too many** categories or there are **new** categories at prediction time. In this chapter, we discuss more sophisticated options for encoding categorical predictors that address these issues. These options are available as recipe steps in the [`r pkg(embed)`](https://embed.tidymodels.org/) and [`r pkg(textrecipes)`](https://textrecipes.tidymodels.org/) packages.
 
 ## Is an encoding necessary?
 
@@ -52,7 +54,7 @@ We advise starting with untransformed categorical variables when a model allows 
 
 ## Using the outcome for encoding predictors
 
-There are multiple options for encodings more complex than dummy or indicator variables. One method called _effect_ or _likelihood encodings_ replaces the original categorical variables with a single numeric column that measures the effect of those data. For example, for the neighborhood predictor in the Ames housing data, we can compute the mean or median sale price for each neighborhood (as shown in Figure \@ref(fig:encoding-mean-price)) and substitute these means for the original data values. 
+There are multiple options for encodings more complex than dummy or indicator variables. One method called _effect_ or _likelihood encodings_ replaces the original categorical variables with a single numeric column that measures the effect of those data [@MicciBarreca2001; @Zumel2019]. For example, for the neighborhood predictor in the Ames housing data, we can compute the mean or median sale price for each neighborhood (as shown in Figure \@ref(fig:encoding-mean-price)) and substitute these means for the original data values. 
 
 ```{r encoding-mean-price}
 #| fig.cap = "A bar chart of the mean home price for neighborhoods in the Ames training set.",
