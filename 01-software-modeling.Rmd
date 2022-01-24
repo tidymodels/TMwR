@@ -208,62 +208,42 @@ After an initial sequence of these tasks, more understanding is gained regarding
 
 As an example, @fes use data to model the daily ridership of Chicago's public train system using predictors such as the date, the previous ridership results, the weather, and other factors. An approximation of these authors' "inner monologue" when analyzing these data is, in order:
 
-```{r software-monolog, echo = FALSE, results = 'as-is'}
-monolog <- 
-  tribble(
-    ~Activity, ~`Analysis Cycle`, ~Thoughts,
-    "EDA", "1",
-    "The daily ridership values between stations are extremely correlated.",
-    "EDA", " ",
-    "Weekday and weekend ridership look very different.",
-    "EDA", " ",
-    "One day in the summer of 2010 has an abnormally large number of riders.",
-    "EDA", "1",
-    "Which stations had the lowest daily ridership values?",
-    "Feature Engineering", "1",
-    "Dates should at least be encoded as day-of-the-week, and year. ",
-    "Feature Engineering", " ",
-    "Maybe PCA could be used on the correlated predictors to make it easier for the models to use them. ",
-    "Feature Engineering", " ",
-    "Hourly weather records should probably be summarized into daily measurements. ",
-    "Model Fitting", "1",
-    "Let’s start with simple linear regression, K-nearest neighbors, and a boosted decision tree. ",
-    "Model Tuning", "1",
-    "How many neighbors should be used?",
-    "Model Tuning", " ",
-    "Should we run a lot of boosting iterations or just a few?",
-    "Model Tuning", "2",
-    "How many neighbors seemed to be optimal for these data? ",
-    "Model Evaluation", "2",
-    "Which models have the lowest root mean squared errors? ",
-    "EDA", "2",
-    "Which days were poorly predicted? ",
-    "Model Evaluation", "2",
-    "Variable importance scores indicate that the weather information is not predictive. We’ll drop them from the next set of models. ",
-    "Model Evaluation", " ",
-    "It seems like we should focus on a lot of boosting iterations for that model.",
-    "Feature Engineering", "2", 
-    "We need to encode holiday features to improve predictions on (and around) those dates.",
-    "Model Evaluation", "2",
-    "Let’s drop K-NN from the model list. "
-  )
-if (knitr::is_html_output()) {
-  tab <- 
-    monolog %>% 
-    dplyr::select(Thoughts, Activity) %>% 
-    kable() %>%
-    kable_styling() %>% 
-    column_spec(2, width = "25%") %>%
-    column_spec(1, width = "75%", italic = TRUE)
-} else {
-  tab <- 
-    monolog %>% 
-    dplyr::select(Thoughts, Activity) %>% 
-    kable() %>%
-    kable_styling()
-}
-tab
-```
+\begin{quote}
+(EDA) The daily ridership values between stations are extremely correlated.
+
+(EDA) Weekday and weekend ridership look very different.
+
+(EDA) One day in the summer of 2010 has an abnormally large number of riders.
+
+(EDA) Which stations had the lowest daily ridership values?
+
+(Feature Engineering) Dates should at least be encoded as day-of-the-week, and year. 
+
+(Feature Engineering) Maybe PCA could be used on the correlated predictors to make it easier for the models to use them. 
+
+(Feature Engineering) Hourly weather records should probably be summarized into daily measurements. 
+
+(Model Fitting) Let's start with simple linear regression, K-nearest neighbors, and a boosted decision tree. 
+
+(Model Tuning) How many neighbors should be used?
+
+(Model Tuning) Should we run a lot of boosting iterations or just a few?
+
+(Model Tuning) How many neighbors seemed to be optimal for these data? 
+
+(Model Evaluation) Which models have the lowest root mean squared errors? 
+
+(EDA) Which days were poorly predicted? 
+
+(Model Evaluation) Variable importance scores indicate that the weather information is not predictive. We'll drop them from the next set of models. 
+
+(Model Evaluation) It seems like we should focus on a lot of boosting iterations for that model.
+
+(Feature Engineering) We need to encode holiday features to improve predictions on (and around) those dates.
+
+(Model Evaluation) Let's drop K-NN from the model list. 
+\end{quote}
+
 
 and so on. Eventually, a model is selected that is able to achieve sufficient performance.
 
