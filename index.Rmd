@@ -39,16 +39,12 @@ This openness also allows users to contribute if they wish. Most often, this com
 
 The tidymodels packages are fairly young in the software lifecycle. We will do our best to maintain backwards compatibility and, at the completion of this work, will archive and tag the specific versions of software that were used to produce it. 
 
-This book was written in [RStudio](http://www.rstudio.com/ide/) using [bookdown](http://bookdown.org/). The [`tmwr.org`](https://tmwr.org) website is hosted via [Netlify](http://netlify.com/), and automatically built after every push by [GitHub Actions](https://help.github.com/actions). The complete source is available on [GitHub](https://github.com/tidymodels/TMwR). We generated all plots in this book using [ggplot2](https://ggplot2.tidyverse.org/) and its black and white theme (`theme_bw()`). This version of the book was built with `r R.version.string`, [pandoc](https://pandoc.org/) version `r rmarkdown::pandoc_version()`, and the following packages:
+This book was written in [RStudio](http://www.rstudio.com/ide/) using [bookdown](http://bookdown.org/). The [`tmwr.org`](https://tmwr.org) website is hosted via [Netlify](http://netlify.com/), and automatically built after every push by [GitHub Actions](https://help.github.com/actions). The complete source is available on [GitHub](https://github.com/tidymodels/TMwR). We generated all plots in this book using [ggplot2](https://ggplot2.tidyverse.org/) and its black and white theme (`theme_bw()`). This version of the book was built with `r R.version.string`, [pandoc](https://pandoc.org/) version `r rmarkdown::pandoc_version()`.
 
-```{r pkg-list, echo = FALSE, cache = FALSE, results = "asis"}
-deps <- desc::desc_get_deps()
-pkgs <- sort(deps$package[deps$type == "Imports"])
-pkgs <- sessioninfo::package_info(pkgs, dependencies = FALSE)
-df <- tibble::tibble(
-  package = pkgs$package,
-  version = pkgs$ondiskversion,
-  source = gsub("@", "\\\\@", pkgs$source)
-)
-knitr::kable(df, booktabs = TRUE)
-```
+## A note to reviewers
+
+Thanks for taking the time to review this work. The book will be published with O’Reilly and will be rendered using their [Atlas system](https://atlas.oreilly.com/). It will take some time to get the TMwR files into their format. 
+
+In the meantime, we wanted to get reviewer eyes on the book to get more feedback. Since we use bookdown, we can make a pdf using its LaTeX capabilities. That takes a fair amount optimization that we have not done here. For example, the final book version will have formal figures and tables that will be references in the text. Also, we will have to convert the figures to work well in monochrome. 
+
+Since this was to be a quick rendering of the book, please excuse the sub-optimal typesetting of this document. We'd love to get feedback on the content and hopefully the medium will not get in the way. 
