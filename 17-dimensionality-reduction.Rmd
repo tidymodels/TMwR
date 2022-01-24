@@ -1,4 +1,5 @@
 ```{r dimensionality-setup, include = FALSE}
+knitr::opts_chunk$set(fig.path = "figures/")
 library(tidymodels)
 library(ggforce)
 library(embed)
@@ -68,7 +69,7 @@ There are numerous methods to quantify shapes of objects [@Mingqiang08]. Many ar
 Notice the eccentricity for these different shapes:
 
 ```{r dimensionality-eccentricity, echo = FALSE, out.width="95%"}
-knitr::include_graphics("premade/morphology.svg")
+knitr::include_graphics("premade/morphology.pdf")
 ```
 
 Shapes such as circles and squares have low eccentricity while oblong shapes have high values. Also, the metric is unaffected by the rotation of the object.
@@ -417,7 +418,7 @@ umap_rec <-
 
 Once again, `r pkg(workflowsets)` take the preprocessors and models and crosses them. The `control` option `parallel_over` is set so that the parallel processing can work simultaneously across tuning parameter combinations. The `workflow_map()` function applies grid search to optimize the model/preprocessing parameters (if any) across 10 parameter combinations. The multiclass area under the ROC curve is estimated on the validation set.
 
-```{r dimensionality-workflows}
+```{r dimensionality-workflows, cache = TRUE}
 ctrl <- control_grid(parallel_over = "everything")
 bean_res <- 
   workflow_set(
