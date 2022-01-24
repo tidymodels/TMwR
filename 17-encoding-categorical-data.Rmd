@@ -199,7 +199,7 @@ If we input Briardale to this hashing function, we will always get the same outp
 A hashing function takes an input of variable size and maps it to an output of fixed size. Hashing functions are commonly used in cryptography and databases.
 :::
 
-The `rlang::hash()` function generates a 128-bit hash, which means there are `r 2^128` possible hash values. This is great for some applications but doesn't help with feature hashing of **high cardinality** variables (variables with many levels). In feature hashing, the number of possible hashes is a hyperparameter and is set by the model developer through computing the modulo of the integer hashes.
+The `rlang::hash()` function generates a 128-bit hash, which means there are `2^128` possible hash values. This is great for some applications but doesn't help with feature hashing of **high cardinality** variables (variables with many levels). In feature hashing, the number of possible hashes is a hyperparameter and is set by the model developer through computing the modulo of the integer hashes.
 
 ```{r}
 ames_hashed %>%
@@ -232,7 +232,7 @@ ames_hash <-
 ames_hash
 ```
 
-Feature hashing is fast and efficient but has a few downsides. For example, different category values often map to the same hash value. This is called a _collision_ or _aliasing_. How often did this happen with our neighborhoods in Ames? Table \@ref(tab:encoding-hash) presents the number of neighborhoods per hash value.
+Feature hashing is fast and efficient but has a few downsides. For example, different category values often map to the same hash value. This is called a _collision_ or _aliasing_. How often did this happen with our neighborhoods in Ames? Table \@ref(tab:encoding-hash) presents the distribution of number of neighborhoods per hash value.
 
 ```{r encoding-hash, echo=FALSE}
 hash_table <-
@@ -242,24 +242,26 @@ hash_table <-
   distinct() %>%
   select(-Neighborhood) %>%
   map_dbl(sum) %>%
-  enframe() 
+  enframe() %>%
+  count(value)
 
 hash_table %>%
-  kable(col.names = c("Hash", "Number of neighborhoods"),
-        caption = "The number of neighborhoods per each feature hash value.",
+  kable(col.names = c("Number of neighborhoods within a hash feature", 
+                      "Number of occurrences"),
+        caption = "The number of hash features at each number of neighborhoods.",
         label = "encoding-hash") %>%
   kable_styling(full_width = FALSE)
 ```
 
 The number of neighborhoods mapped to each hash value varies between `r min(hash_table$value)` and `r max(hash_table$value)`. All of the hash values greater than one are examples of hash collisions.
 
-- Feature hashing is not directly interpretable because hash functions cannot be reversed. We can't determine what the input category levels were from the output or if a collision occurred.
+- Feature hashing is not directly interpretable because hash functions cannot be reversed. We can't determine what the input category levels were from the hash value, or if a collision occurred.
 
 - The number of hash values is a _tuning parameter_ of this preprocessing technique, and you should try several values to determine what is best for your particular modeling approach. A lower number of hash values results in more collisions, but a high number may not be an improvement over your original high cardinality variable.
 
 - Feature hashing can handle new category levels at prediction time, since it does not rely on pre-determined dummy variables.
 
-- You can reduce hash collisions with a _signed_ hash by using `signed = TRUE`.
+- You can reduce hash collisions with a _signed_ hash by using `signed = TRUE`. This expands the values from only 1 to either +1 or -1, depending on the sign of the hash.
 
 :::rmdwarn
 It is likely that some hash columns will contain all zeros, as we see in this example. We recommend a zero-variance filter via `step_zv()` to filter such columns out.
