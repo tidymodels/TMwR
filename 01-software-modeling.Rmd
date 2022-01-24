@@ -209,39 +209,39 @@ After an initial sequence of these tasks, more understanding is gained regarding
 As an example, @fes use data to model the daily ridership of Chicago's public train system using predictors such as the date, the previous ridership results, the weather, and other factors. An approximation of these authors' "inner monologue" when analyzing these data is, in order:
 
 \begin{quote}
-(EDA) The daily ridership values between stations are extremely correlated.
+(EDA) _The daily ridership values between stations are extremely correlated_.
 
-(EDA) Weekday and weekend ridership look very different.
+(EDA) _Weekday and weekend ridership look very different_.
 
-(EDA) One day in the summer of 2010 has an abnormally large number of riders.
+(EDA) _One day in the summer of 2010 has an abnormally large number of riders_.
 
-(EDA) Which stations had the lowest daily ridership values?
+(EDA) _Which stations had the lowest daily ridership values_?
 
-(Feature Engineering) Dates should at least be encoded as day-of-the-week, and year. 
+(Feature Engineering) _Dates should at least be encoded as day-of-the-week, and year_. 
 
-(Feature Engineering) Maybe PCA could be used on the correlated predictors to make it easier for the models to use them. 
+(Feature Engineering) _Maybe PCA could be used on the correlated predictors to make it easier for the models to use them_. 
 
-(Feature Engineering) Hourly weather records should probably be summarized into daily measurements. 
+(Feature Engineering) _Hourly weather records should probably be summarized into daily measurements_. 
 
-(Model Fitting) Let's start with simple linear regression, K-nearest neighbors, and a boosted decision tree. 
+(Model Fitting) _Let's start with simple linear regression, K-nearest neighbors, and a boosted decision tree_. 
 
-(Model Tuning) How many neighbors should be used?
+(Model Tuning) _How many neighbors should be used_?
 
-(Model Tuning) Should we run a lot of boosting iterations or just a few?
+(Model Tuning) _Should we run a lot of boosting iterations or just a few_?
 
-(Model Tuning) How many neighbors seemed to be optimal for these data? 
+(Model Tuning) _How many neighbors seemed to be optimal for these data_? 
 
-(Model Evaluation) Which models have the lowest root mean squared errors? 
+(Model Evaluation) _Which models have the lowest root mean squared errors_? 
 
-(EDA) Which days were poorly predicted? 
+(EDA) _Which days were poorly predicted_? 
 
-(Model Evaluation) Variable importance scores indicate that the weather information is not predictive. We'll drop them from the next set of models. 
+(Model Evaluation) _Variable importance scores indicate that the weather information is not predictive_. We'll drop them from the next set of models_. 
 
-(Model Evaluation) It seems like we should focus on a lot of boosting iterations for that model.
+(Model Evaluation) _It seems like we should focus on a lot of boosting iterations for that model_.
 
-(Feature Engineering) We need to encode holiday features to improve predictions on (and around) those dates.
+(Feature Engineering) _We need to encode holiday features to improve predictions on (and around) those dates_.
 
-(Model Evaluation) Let's drop K-NN from the model list. 
+(Model Evaluation) _Let's drop K-NN from the model list_. 
 \end{quote}
 
 
