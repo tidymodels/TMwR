@@ -519,7 +519,7 @@ The `dials` package also has a convenience function for extracting a particular 
 
 ```{r tuning-extract}
 # identify the parameter using the id value:
-wflow_param %>% pull_dials_object("threshold")
+wflow_param %>% extract_parameter_dials("threshold")
 ```
 
 Inside the parameter set, the range of the parameters can also be updated in-place: 
@@ -571,10 +571,10 @@ updated_param <-
   parameters() %>% 
   finalize(ames_train)
 updated_param
-updated_param %>% pull_dials_object("mtry")
+updated_param %>% extract_parameter_dials("mtry")
 ```
 
-When the recipe is prepared, the `finalize()` function learns to set the upper range of `mtry` to  `r updated_param %>% pull_dials_object("mtry") %>% range_get() %>% pluck("upper")` predictors. 
+When the recipe is prepared, the `finalize()` function learns to set the upper range of `mtry` to  `r updated_param %>% extract_parameter_dials("mtry") %>% range_get() %>% pluck("upper")` predictors. 
 
 Additionally, the results of `parameters()` will include engine-specific parameters (if any) . They are discovered in the same way as the main arguments and included in the parameter set. The `r pkg(dials)` package contains parameter functions for all potentially tunable engine-specific parameters: 
 
