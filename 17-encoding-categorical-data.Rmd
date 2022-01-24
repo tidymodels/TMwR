@@ -109,14 +109,11 @@ glm_estimates %>%
 This is the predicted price from the GLM when we don't have any specific neighborhood information.
 
 :::rmdwarn
-Effect encodings can be powerful but should be used with care.
+Effect encodings can be powerful but should be used with care. The effects should be computed from the training set, after data splitting. This type of supervised preprocessing should be rigorously resampled to avoid overfitting (see Chapter \@ref(resampling)).
 :::
 
-When you create an effect encoding for your categorical variable, you are effectively layering a mini-model inside your actual model; this can easily lead to overfitting. To be cautious, this type of encoding should be rigorously resampled (see Chapter \@ref(resampling)). 
+When you create an effect encoding for your categorical variable, you are effectively layering a mini-model inside your actual model. The possibility of overfitting with effect encodings is a representative example for why feature engineering _must_ be considered part of the model process, as described in Chapter \@ref(workflows), and why feature engineering must be estimated together with model parameters inside resampling.
 
-:::rmdwarn
-The possibility of overfitting with effect encodings is a representative example for why feature engineering _must_ be considered part of the model process, as described in Chapter \@ref(workflows), and why feature engineering must be estimated together with model parameters inside resampling.
-:::
 
 ### Effect encodings with partial pooling
 
