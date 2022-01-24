@@ -13,7 +13,7 @@ bookdown::gitbook:
     sharing: no
 
 bookdown::pdf_book:
-  dev: png
+  dev: "cairo_pdf"
   latex_engine: pdflatex
   citation_package: natbib
   includes:
@@ -22,4 +22,5 @@ bookdown::pdf_book:
   highlight: tango
   documentclass: book
   fontsize: 10pt
-
+  monofont: "Source Code Pro"
+  monofontoptions: "Scale=0.5"
