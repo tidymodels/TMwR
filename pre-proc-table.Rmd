@@ -69,8 +69,8 @@ tab %>%
   mutate(
     model = paste0("\\verb|", model, "|")
     ) %>% 
-  kable(escape = FALSE, align = c("l", rep("c", ncol(tab) - 1))) %>% 
-  kable_styling(full_width = FALSE)
+  kable(escape = FALSE, booktabs = TRUE, align = c("l", rep("c", ncol(tab) - 1))) %>% 
+  kable_styling(full_width = FALSE, latex_options = "HOLD_position")
 ```
 
 Footnotes: 

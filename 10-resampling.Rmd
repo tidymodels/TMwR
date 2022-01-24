@@ -118,9 +118,9 @@ For both models, this table summarizes the RMSE estimate for the training and te
 
 ```{r resampling-rmse-table, echo = FALSE, results = "asis"}
 all_res %>% 
-  mutate(object = paste0("<tt>", object, "</tt>")) %>% 
-  kable(escape = FALSE) %>% 
-  kable_styling(full_width = FALSE) %>% 
+  # mutate(object = paste0("<tt>", object, "</tt>")) %>% 
+  kable(escape = FALSE, booktabs = TRUE) %>% 
+  kable_styling(full_width = FALSE, latex_options = "HOLD_position") %>% 
   add_header_above(c(" ", "RMSE Estimates" = 2))
 ```
 

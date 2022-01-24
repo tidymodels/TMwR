@@ -223,8 +223,8 @@ recipe(~Bldg_Type, data = ames_train) %>%
   bake(ames_train) %>% 
   slice(show_rows) %>% 
   arrange(`Raw Data`) %>% 
-  kable() %>% 
-  kable_styling(full_width = FALSE)
+  kable(booktabs = TRUE) %>% 
+  kable_styling(full_width = FALSE, latex_options = "HOLD_position")
 ```
 
 
@@ -250,8 +250,8 @@ ord_contrasts <-
   dplyr::select(-`(Intercept)`) %>% 
   setNames(c("Linear", "Quadratic", "Cubic", "Quartic"))
 bind_cols(ord_data, ord_contrasts) %>% 
-  kable() %>% 
-  kable_styling(full_width = FALSE)
+  kable(booktabs = TRUE) %>% 
+  kable_styling(full_width = FALSE, latex_options = "HOLD_position")
 ```
 
 While this is not unreasonable, it is not an approach that people tend to find useful. For example, a 11-degree polynomial is probably not the most effective way of encoding an ordinal factor for months.  Instead, consider trying recipe steps related to ordered factors, such as `step_unorder()`, to convert to regular factors, and `step_ordinalscore()` which maps specific numeric values to each factor level. 

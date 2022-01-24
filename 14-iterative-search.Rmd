@@ -137,8 +137,8 @@ collect_metrics(svm_initial) %>%
   select(ROC = mean, cost, rbf_sigma) %>% 
   as.data.frame() %>% 
   format(digits = 4, scientific = FALSE) %>% 
-  kable() %>% 
-  kableExtra::kable_styling(full_width = FALSE) %>% 
+  kable(booktabs = TRUE) %>% 
+  kableExtra::kable_styling(full_width = FALSE, latex_options = "HOLD_position") %>% 
   kableExtra::add_header_above(c("outcome" = 1, "predictors" = 2))
 ```
 
@@ -169,8 +169,8 @@ tmp %>%
   mutate(variance = variance^2) %>% 
   as.data.frame() %>% 
   format(digits = 4, scientific = FALSE) %>% 
-  kable() %>% 
-  kableExtra::kable_styling(full_width = FALSE) %>% 
+  kable(booktabs = TRUE) %>% 
+  kableExtra::kable_styling(full_width = FALSE, latex_options = "HOLD_position") %>% 
   kableExtra::add_header_above(c(" " = 1, "GP Prediction of ROC AUC" = 2))
 ```
 
@@ -305,8 +305,8 @@ small_pred %>%
   select(`Parameter Value` = x, Mean = .mean, `Std Dev` = .sd, `Expected Improvment` = exp_imp) %>% 
   as.data.frame() %>% 
   format(digits = 4, scientific = FALSE) %>% 
-  kable() %>% 
-  kableExtra::kable_styling(full_width = FALSE) %>% 
+  kable(booktabs = TRUE) %>% 
+  kableExtra::kable_styling(full_width = FALSE, latex_options = "HOLD_position") %>% 
   kableExtra::add_header_above(c(" " = 1, "Predictions" = 3))
 ```
 
@@ -527,7 +527,7 @@ autoplot(svm_bo, type = "performance")
 
 An additional type of plot uses `type = "parameters"`  which shows the parameter values over iterations.
 
-```{r iterative-bo-calcs}
+```{r iterative-bo-calcs, include = FALSE}
 bo_path <- 
   svm_bo %>% 
   collect_metrics() %>% 
@@ -705,13 +705,13 @@ surf_impr <-
 
 The figure below shows the surfaces of the mean, variance, and expected improvement surfaces estimated by the GP after 11 iterations. 
 
-```{r bo-surfaces, echo = FALSE}
+```{r bo-surfaces, echo = FALSE, dev = "pdf"}
 surf_mean + surf_sd + surf_impr
 ```
 
 This figure shows the search process at three different points in the optimization:
 
-```{r bo-search, echo = FALSE, warning = FALSE}
+```{r bo-search, echo = FALSE, warning = FALSE, dev = "pdf"}
 first_5 + first_11 + all_bo
 ```
 
@@ -744,7 +744,7 @@ The acceptance probabilities of simulated annealing allows the search to proceed
 
 How are the acceptance probabilities influenced? This heatmap shows how the acceptance probability can change over iterations, performance, and the user-specified coefficient: 
 
-```{r iterative-acceptance, echo = FALSE, dev = "png", fig.height = 4.5}
+```{r iterative-acceptance, echo = FALSE, fig.height = 4.5}
 get_accept_probs <- function(coef, pct_diff) {
   # pct loss to abs value
   candidate <- .8 - (pct_diff  * .8 /100) 
@@ -1019,7 +1019,7 @@ autoplot(svm_sa, type = "parameters")
 
 A visualization of the search path helps to understand where the search process did well and where it went astray:  **TODO**
 
-```{r iterative-sa-plot, echo = FALSE}
+```{r iterative-sa-plot, echo = FALSE, warning = FALSE, dev = "pdf", out.width="100%"}
 history <- result_history %>% add_rowindex()
 
 params <-

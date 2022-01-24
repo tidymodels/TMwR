@@ -184,8 +184,8 @@ rsq_indiv_estimates %>%
     ) %>% 
   select(`Y = rsq` = rsq, model, X1, X2, X3, id) %>% 
   slice(1:6) %>% 
-  kable(escape = FALSE) %>% 
-  kable_styling(full_width = FALSE) 
+  kable(escape = FALSE, booktabs = TRUE) %>% 
+  kable_styling(full_width = FALSE, latex_options = "HOLD_position") 
 ```
 
 The `X1`, `X2`, and `X3` columns in the table are indicators for the values in the `model` column. Their order was defined in the same way that R would define them, alphabetically ordered by `model`.  

@@ -50,5 +50,5 @@ df <- tibble::tibble(
   version = pkgs$ondiskversion,
   source = gsub("@", "\\\\@", pkgs$source)
 )
-knitr::kable(df, format = "markdown")
+knitr::kable(df, booktabs = TRUE)
 ```
