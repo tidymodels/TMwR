@@ -53,21 +53,6 @@ jobs:
           brew install libgit2
           brew install ffmpeg
 
-      - name: Install Miniconda
-        run: |
-          reticulate::install_miniconda()
-        shell: Rscript {0}
- 
-      - name: Find Miniconda 
-        run: echo "options(reticulate.conda_binary = reticulate:::miniconda_conda())" >> .Rprofile
-
-      - name: Install TensorFlow
-        run: |
-          reticulate::conda_create('r-reticulate', packages = c('python==3.6.9'))
-          keras::install_keras()
-          tensorflow::tf_config()
-        shell: Rscript {0}
-          
       - name: Configure Git user
         run: |
           git config --local user.name "$GITHUB_ACTOR"
