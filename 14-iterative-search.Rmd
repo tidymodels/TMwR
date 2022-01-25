@@ -703,7 +703,7 @@ surf_impr <-
 ```
 
 
-The figure below shows the surfaces of the mean, variance, and expected improvement surfaces estimated by the GP after 11 iterations. 
+The figure below shows the surfaces of the mean, variance, and expected improvement surfaces estimated by the GP after 11 iterations. The right-hand panel shows a ridge of best estimated improvement along the right side of the candidate space.
 
 ```{r bo-surfaces, echo = FALSE, dev = "pdf", out.width="100%", fig.width=9, fig.height=4}
 surf_mean + surf_sd + surf_impr
@@ -715,6 +715,7 @@ This figure shows the search process at three different points in the optimizati
 first_5 + first_11 + all_bo
 ```
 
+The first five iterations initially move in a poor direction but quickly move closer to better results.  The middle panel shows the process investigating the region of true optimal results with a short foray to the bottom right boundary of the candidate space. The remaining iterations switch between the region of best results and the far borders of the search space. 
 
 While the best tuning parameter combination is on the boundary of the parameter space, Bayesian optimization will often choose new points on other sides of the boundary. While we can adjust the ratio of exploration and exploitation, the search tends to sample boundary points early on.
 
@@ -1017,7 +1018,7 @@ To show how the parameters change over iterations:
 autoplot(svm_sa, type = "parameters")
 ```
 
-A visualization of the search path helps to understand where the search process did well and where it went astray:  **TODO**
+A visualization of the search path helps to understand where the search process did well and where it went astray. The plot below illustrated several "phases" of the optimization; these are separated by a restart of the process at the last best results. 
 
 ```{r iterative-sa-plot, echo = FALSE, warning = FALSE, dev = "pdf", out.width="100%", fig.width=10, fig.height=3.5}
 history <- result_history %>% add_rowindex()
@@ -1173,7 +1174,7 @@ sa_5 <- sa_path(5, FALSE) + ggtitle("Phase 5")
 sa_1 + sa_2 + sa_3 + sa_4 + sa_5 +  plot_layout(ncol = 5)
 ```
 
-
+In the first phase, the search initially finds two new global optima (shown with the solid points). From these, there are several settings that are immediately discarded (light gray lines) while others are suboptimal but acceptable. After a set number of failures, it restarts at the last solid point. The other phases show a slow improvement in global optima with many discarded settings along the way. The process eventually finds its way to the region of optimal results as it exhausts the total number of allowed iterations.
 
 Like `tune_bayes()`, manually stopping execution will return the completed iterations. 
 
