@@ -236,24 +236,6 @@ One helpful feature of `step_dummy()` is that there is more control over how the
 
 Traditional dummy variables require that all of the possible categories be known to create a full set of numeric features. There are other methods for doing this transformation to a numeric format. _Feature hashing_ methods only consider the value of the category to assign it to a predefined pool of dummy variables. _Effect_ or _likelihood encodings_ replace the original data with a single numeric column that measures the _effect_ of those data. Both feature hashing and effect encoding methods can seamlessly handle situations where a novel factor level is encountered in the data. Chapter \@ref(categorical) explores these and other methods for encoding categorical data, beyond straightforward dummy or indicator variables.
 
-Sometimes qualitative columns can be _ordered_, such as "low", "medium", "high". In base R, the default encoding strategy is to make new numeric columns that are polynomial expansions of the data. For columns that have five ordinal values, the factor column would be replaced with columns for linear, quadratic, cubic, and quartic terms: 
-
-```{r engineering-ordered-table, echo = FALSE, results = 'asis'}
-ord_vals <- c("none", "a little", "some", "a bunch", "copious amounts")
-ord_data <- tibble::tibble(`Raw Data` = ordered(ord_vals, levels = ord_vals))
-ord_contrasts <- 
-  model.matrix(~., data = ord_data) %>% 
-  round(2) %>% 
-  as.data.frame() %>% 
-  dplyr::select(-`(Intercept)`) %>% 
-  setNames(c("Linear", "Quadratic", "Cubic", "Quartic"))
-bind_cols(ord_data, ord_contrasts) %>% 
-  kable() %>% 
-  kable_styling(full_width = FALSE)
-```
-
-While this is not unreasonable, it is not an approach that people tend to find useful. For example, a 11-degree polynomial is probably not the most effective way of encoding an ordinal factor for months.  Instead, consider trying recipe steps related to ordered factors, such as `step_unorder()`, to convert to regular factors, and `step_ordinalscore()` which maps specific numeric values to each factor level. 
-
 :::rmdnote
 Different recipe steps can have different effects on columns of the data. For example, `step_log()` modifies a column in-place without changing the name. Other steps, such as `step_dummy()` eliminate the original data column and replace it with one or more columns with different names. This behavior depends on the type of operation being done. 
 :::

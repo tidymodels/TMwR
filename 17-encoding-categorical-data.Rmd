@@ -53,6 +53,28 @@ These models that can handle categorical features natively can _also_ deal with 
 We advise starting with untransformed categorical variables when a model allows it, and point out that more complex encodings often do not result in better performance for such models.
 :::
 
+## Encoding ordinal predictors
+
+Sometimes qualitative columns can be **ordered**, such as "low", "medium", and "high". In base R, the default encoding strategy is to make new numeric columns that are polynomial expansions of the data. For columns that have five ordinal values, like the example shown in Table \@ref(tab:encoding-ordered-table), the factor column is replaced with columns for linear, quadratic, cubic, and quartic terms: 
+
+```{r encoding-ordered-table, echo = FALSE, results = 'asis'}
+ord_vals <- c("none", "a little", "some", "a bunch", "copious amounts")
+ord_data <- tibble::tibble(`Raw Data` = ordered(ord_vals, levels = ord_vals))
+ord_contrasts <- 
+  model.matrix(~., data = ord_data) %>% 
+  round(2) %>% 
+  as.data.frame() %>% 
+  dplyr::select(-`(Intercept)`) %>% 
+  setNames(c("Linear", "Quadratic", "Cubic", "Quartic"))
+
+bind_cols(ord_data, ord_contrasts) %>% 
+  kable(caption = "Polynominal expansions for encoding an ordered variable.",
+        label = "encoding-ordered-table") %>% 
+  kable_styling(full_width = FALSE)
+```
+
+While this is not unreasonable, it is not an approach that people tend to find useful. For example, an 11-degree polynomial is probably not the most effective way of encoding an ordinal factor for the months of the year.  Instead, consider trying recipe steps related to ordered factors, such as `step_unorder()`, to convert to regular factors, and `step_ordinalscore()` which maps specific numeric values to each factor level. 
+
 ## Using the outcome for encoding predictors
 
 There are multiple options for encodings more complex than dummy or indicator variables. One method called _effect_ or _likelihood encodings_ replaces the original categorical variables with a single numeric column that measures the effect of those data [@MicciBarreca2001; @Zumel2019]. For example, for the neighborhood predictor in the Ames housing data, we can compute the mean or median sale price for each neighborhood (as shown in Figure \@ref(fig:encoding-mean-price)) and substitute these means for the original data values. 
@@ -272,99 +294,23 @@ The number of neighborhoods mapped to each hash value varies between `r min(hash
 It is likely that some hash columns will contain all zeros, as we see in this example. We recommend a zero-variance filter via `step_zv()` to filter such columns out.
 :::
 
-## Entity embeddings
+## More encoding options
 
-Effect encodings replace category levels via a generalized linear model and feature hashing uses only a hashing function to replace category levels, but we can alternatively build a full set of entity embeddings to transform a categorical variable with many levels to a set of lower-dimensional vectors.
+There are even more options available for transforming factors to a numeric representation.
+
+We can build a full set of **entity embeddings** [@Guo2016] to transform a categorical variable with many levels to a set of lower-dimensional vectors. This approach is best suited to a nominal variable with _many_ category levels, many more than the example we've used in the chapter with neighborhoods in Ames.
 
 :::rmdnote
 The idea of entity embeddings comes from the methods used to create word embeddings from text data. See Chapter 5 of @Hvitfeldt2021 for more on word embeddings.
 :::
 
-Embeddings for a categorical variable can be learned via a TensorFlow neural network with the `step_embed()` function in `r pkg(embed)`. We can use the outcome alone or optionally the outcome plus a set of additional predictors. Let's create a set of embeddings for neighborhood, based on the outcome (price) and several of the other predictors we have focused on. Since these predictors will be used by a neural network, let's preprocess them to perform better with this kind of model.
+Embeddings for a categorical variable can be learned via a TensorFlow neural network with the `step_embed()` function in `r pkg(embed)`. We can use the outcome alone or optionally the outcome plus a set of additional predictors. Like in feature hashing, the number of new encoding columns to create is a hyperparameter of the feature engineering. We also must make decisions about the neural network structure (the number of hidden units) and how to fit the neural network (how many epochs to train, how much of the data to use for validation in measuring metrics).
 
-```{r}
-ames_embed <- 
-  recipe(Sale_Price ~ Neighborhood + Gr_Liv_Area + Year_Built + Bldg_Type + 
-           Latitude + Longitude, data = ames_train) %>%
-  # preprocessing for neural network
-  step_YeoJohnson(Gr_Liv_Area, Year_Built, Latitude, Longitude)  %>%
-  step_range(Gr_Liv_Area, Year_Built, Latitude, Longitude)  %>%
-  # create embeddings via neural network
-  step_embed(
-    Neighborhood, 
-    outcome = vars(Sale_Price),
-    predictors = vars(Gr_Liv_Area, Year_Built, Latitude, Longitude),
-    num_terms = 5, 
-    hidden_units = 10, 
-    options = embed_control(epochs = 30, validation_split = 0.2)
-  ) 
-
-ames_embed
-```
-
-Like in feature hashing, the number of new encoding columns to create (`num_terms = 5`) is a hyperparameter of the feature engineering. We also have to make decisions about the neural network structure (the number of hidden units) and how to fit the neural network (how many epochs to train, how much of the data to use for validation in measuring metrics).
-
-:::rmdwarn
-Like much modeling with neural networks, finding embeddings in this way involves many parameters and decisions that can effect your results.
-:::
-
-How did training these embeddings go?
-
-```{r encoding-history}
-#| fig.cap = "Training history for entity embeddings.",
-#| fig.alt = "A line chart of the training loss and validation loss as the entity embeddings were trained. Both loss values started high and decreased as more epochs were trained, and there is not evidence of much overfitting."
-embeddings <- prep(ames_embed)
-
-embeddings$steps[[3]]$history %>%
-  ggplot(aes(x = epochs, y = loss, col = type)) + 
-  geom_line() + 
-  scale_y_log10()
-```
-
-Figure \@ref(fig:encoding-history) visualizes model performance as more epochs were trained. We can find the embeddings themselves by tidying the prepped recipe.
-
-```{r}
-library(stringr)
-
-embeddings %>%
-  tidy(number = 3) %>%
-  rename_at(vars(contains("emb")), 
-            list(~ str_remove(., "Neighborhood_"))) %>%
-  select(-terms, -id)
-```
-
-In creating these embeddings, we have used the complex relationships between our categorical variable `Neighborhood`, the outcome, and the other predictors we included to find a lower dimensional space (five dimensions instead of the `r n_distinct(ames_train$Neighborhood)` different neighborhoods) to represent neighborhood. Let's visualize the new embeddings, together with original, untransformed characteristics of these neighborhoods in Figure \@ref(fig:encoding-results).
-
-```{r encoding-results}
-#| fig.cap = "Embedding values and mean price per neighborhood.",
-#| fig.alt = "A bubble chart for Ames neighborhoods with embedding value on the x-axis, mean price on the y-axis, and root of the number of homes mapped to bubble size. Some embeddings have some correlation with price, but most look uncorrelated."
-embeddings %>%
-  tidy(number = 3) %>%
-  rename(Neighborhood = level) %>%
-  inner_join(
-    ames_train %>%
-      group_by(Neighborhood) %>%
-      summarise(
-        mean = mean(Sale_Price),
-        n = n()
-      )
-  ) %>%
-  pivot_longer(contains("embed")) %>%
-  mutate(name = str_remove(name, "Neighborhood_")) %>%
-  ggplot(aes(value, mean, size = sqrt(n))) +
-  geom_point(alpha = 0.7) +
-  facet_wrap(vars(name), scales = "free_x") +
-  labs(x = "Embedding", y = "Price (mean, log scale)")
-  
-```
-
-:::rmdwarn
-Again, the possibility of overfitting with this type of encoding for categorical variables highlights why feature engineering _must_ be estimated together with model parameters inside resampling. Keep in mind that creating these embeddings is like a mini-model layered inside whatever model these embeddings are the features for. Use care in estimating the embeddings as well as choosing the hyperparameters such as number of new embeddings columns and neural network structure.
-:::
+Yet one more option available when we are dealing with a binary outcome is to transform a set of category levels based on their association with the binary outcome. This **weight of evidence** [@Good1985] transformation uses the logarithm of the "Bayes factor" (the ratio of the posterior odds to the prior odds) and creates a dictionary mapping each category level to a WoE value. WoE encodings can be determined with the `step_woe()` function in `r pkg(embed)`.
 
 ## Chapter summary {#categorical-summary}
 
-In this chapter, you learned about using preprocessing recipes for encoding categorical predictors. The most straightforward option for transforming a categorical variable to a numeric representation is to create dummy variables from the levels, but this option does not work well when you have a variable with high cardinality (too many levels) or when you may see novel values at prediction time (new levels). One option in such a situation is to create _effect encodings_, a supervised encoding method that uses the outcome. Effect encodings can be learned with or without pooling the categories together. Another option uses a _hashing_ function to map category levels to a new, smaller set of dummy variables. Feature hashing is fast and has a low-memory footprint. _Entity embeddings_ use a neural network to learn a new, lower-dimensional space to represent category levels. This approach can take advantage of complex relationships in your data to encode category levels.
+In this chapter, you learned about using preprocessing recipes for encoding categorical predictors. The most straightforward option for transforming a categorical variable to a numeric representation is to create dummy variables from the levels, but this option does not work well when you have a variable with high cardinality (too many levels) or when you may see novel values at prediction time (new levels). One option in such a situation is to create _effect encodings_, a supervised encoding method that uses the outcome. Effect encodings can be learned with or without pooling the categories together. Another option uses a _hashing_ function to map category levels to a new, smaller set of dummy variables. Feature hashing is fast and has a low-memory footprint. Other options include entity embeddings (learned via a neural network) and 
 
 Most model algorithms require some kind of transformation or encoding of this type for categorical variables. A minority of models, including those based on trees and rules, can handle categorical variables natively and do not require such encodings.
 
