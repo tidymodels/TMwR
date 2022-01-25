@@ -90,10 +90,8 @@ Imports:
     xgboost,
     yardstick
 Remotes:
-    tidymodels/embed,
-    tidymodels/finetune,
-    tidymodels/learntidymodels,
-    tidymodels/textrecipes
+    tidymodels/dials,
+    tidymodels/learntidymodels
 biocViews: mixOmics
 Encoding: UTF-8
 SystemRequirements: FFmpeg (>= 3.2); with at least libx264 and lame (mp3)
