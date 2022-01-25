@@ -454,9 +454,3 @@ save(concrete_test, concrete_split, grid_results, race_results,
      boosting_test_results,
      file = "RData/concrete_results.RData", version = 2, compress = "xz")
 ```
-
-
-
-```{r conc-save-2, include = FALSE}
-save.image(file = "concrete_check.RData", version = 2, compress = "xz")
-```
