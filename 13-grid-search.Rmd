@@ -736,8 +736,6 @@ The process continues to resample configurations that remain and the statistical
 
 See @kuhn2014futility for more details on the computational aspects of this approach. 
 
- See @kuhn2014futility for more details on the computational aspects of this approach. 
-
 :::rmdwarning
 Racing methods can be more efficient than basic grid search as long as the interim analysis is fast and some parameter settings have poor performance. It also is most helpful when the model does _not_ have the ability to exploit submodel predictions. 
 :::
