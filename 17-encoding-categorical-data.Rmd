@@ -13,7 +13,7 @@ neighborhood_counts <- count(ames_train, Neighborhood)
 
 For statistical modeling in R, the preferred representation for categorical or nominal data is a factor, a variable which can take on a limited number of different values; internally, factors are stored as a vector of integer values together with a set of text labels.[^python] In Section \@ref(dummies) we introduced feature engineering approaches to encode or transform qualitative or nominal data into a representation better suited for most model algorithms. We discussed how to transform a categorical variable, such as the `Bldg_Type` in our Ames housing data (with levels `r knitr::combine_words(glue::backtick(levels(ames_train$Bldg_Type)))`), to a set of dummy or indicator variables like those shown in Table \@ref(tab:encoding-dummies).
 
-[^python]: This is in contrast to statistical modeling in Python, where categorical variables are often directly represented by integers alone, such as `1, 2, 3` representing red, blue, and green.
+[^python]: This is in contrast to statistical modeling in Python, where categorical variables are often directly represented by integers alone, such as `0, 1, 2` representing red, blue, and green.
 
 ```{r encoding-dummies, echo = FALSE, results = 'asis'}
 show_rows <- 
