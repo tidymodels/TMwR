@@ -241,23 +241,33 @@ If the training set is not pathologically large, using this value of `retain` ca
 
 ## Feature extraction techniques
 
-Since recipes are the primary option in tidymodels for dimensionality reduction, let's write a function that will estimate the transformation and plot the resulting data in a scatter plot matrix via the `r pkg(ggforce)` package:
+Since recipes are the primary option in tidymodels for dimensionality reduction, let's write a function that will estimate the transformation and plot the resulting data in a scatter plot (for the first two features):
 
 ```{r dimensionality-function}
-library(ggforce)
 plot_validation_results <- function(recipe, dat = assessment(bean_val$splits[[1]])) {
-  recipe %>%
+  set.seed(1)
+  plot_data <- 
+    recipe %>%
     # Estimate any additional steps
     prep() %>%
     # Process the data (the validation set by default)
-    bake(new_data = dat) %>%
-    # Create the scatterplot matrix
-    ggplot(aes(x = .panel_x, y = .panel_y, col = class, fill = class)) +
-    geom_point(alpha = 0.4, size = 0.5) +
-    geom_autodensity(alpha = .3) +
-    facet_matrix(vars(-class), layer.diag = 2) + 
-    scale_color_brewer(palette = "Dark2") + 
-    scale_fill_brewer(palette = "Dark2")
+    bake(new_data = dat, all_predictors(), all_outcomes()) %>%
+    # Sample the data down to be more readable
+    sample_n(250)
+  
+  # Convert feature names to symbols to use with quasi-quotation
+  nms <- names(plot_data)
+  x_name <- sym(nms[1])
+  y_name <- sym(nms[2])
+  
+  plot_data %>% 
+    ggplot(aes(x = !!x_name, y = !!y_name, col = class, 
+               fill = class, pch = class)) +
+    geom_point(alpha = 0.8) +
+    scale_shape_manual(values = 1:7) +
+    # Make equally sized axes
+    coord_obs_pred() +
+    theme_bw()
 }
 ```
 
@@ -269,7 +279,7 @@ A series of several feature extraction methodologies are explored here. An overv
 
 As previously mentioned, PCA is an unsupervised method that uses linear combinations of the predictors to define new features. These features attempt to account for as much variation as possible in the original data. We add `step_pca()` to the original recipe and use our function to visualize the results on the validation set:
 
-```{r dimensionality-pca, dev = "png", fig.height=7}
+```{r dimensionality-pca, fig.width=5.1, fig.height=5, out.width = "65%"}
 bean_rec_trained %>%
   step_pca(all_numeric_predictors(), num_comp = 4) %>%
   plot_validation_results() + 
@@ -295,7 +305,7 @@ The top loadings are mostly related to the cluster of correlated predictors show
 
 PLS is a supervised version of PCA. It tries to find components that simultaneously maximize the variation in the predictors while also maximizing the relationship between those components and the outcome.
 
-```{r dimensionality-pls, dev = "png", fig.height=7}
+```{r dimensionality-pls, fig.width=5.1, fig.height=5, out.width = "65%"}
 bean_rec_trained %>%
   step_pls(all_numeric_predictors(), outcome = "class", num_comp = 4) %>%
   plot_validation_results() + 
@@ -319,7 +329,7 @@ Solidity (i.e., the density of the bean) drives the third PLS component, along w
 
 ICA is slightly different than PCA in that it finds components that are as statistically independent from one another as possible (as opposed to being uncorrelated). It can be thought of as maximizing the "non-Gaussianity" of the ICA components.
 
-```{r dimensionality-ica, dev = "png", fig.height=7}
+```{r dimensionality-ica, fig.width=5.1, fig.height=5, out.width = "65%"}
 bean_rec_trained %>%
   step_ica(all_numeric_predictors(), num_comp = 4) %>%
   plot_validation_results() + 
@@ -336,7 +346,7 @@ From there, UMAP translates points in the graph to the reduced dimensional space
 
 To create the mapping, the `r pkg(embed)` package contains a step function for this method:
 
-```{r dimensionality-umap, dev = "png", fig.height=7}
+```{r dimensionality-umap, fig.width=5.1, fig.height=5, out.width = "65%"}
 library(embed)
 bean_rec_trained %>%
   step_umap(all_numeric_predictors(), num_comp = 4) %>%
@@ -348,7 +358,7 @@ While the between-cluster space is pronounced, the clusters can contain a hetero
 
 There is also a supervised version of UMAP:
 
-```{r dimensionality-umap-supervised, dev = "png", fig.height=7}
+```{r dimensionality-umap-supervised, fig.width=5.1, fig.height=5, out.width = "65%"}
 bean_rec_trained %>%
   step_umap(all_numeric_predictors(), outcome = "class", num_comp = 4) %>%
   plot_validation_results() +
