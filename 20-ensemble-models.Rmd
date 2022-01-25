@@ -192,13 +192,14 @@ config_label <- function(x) {
   }
   x$weight <- format(x$weight, digits = 2, scientific = FALSE)
   x$term <- paste0(x$weight, " \\times \\text{", x$config, "} \\notag")
-  select(x, term)
+  select(x, term, weight)
 }
 tmp <- 
   all_members %>% 
   group_nest(obj, keep = TRUE) %>% 
   mutate(data = map(data, ~ config_label(.x))) %>% 
-  unnest(cols = "data")
+  unnest(cols = "data") %>% 
+  arrange(desc(weight))
 
 eqn <- paste(c(glmn_int$estimate, tmp$term), collapse = " \\\\\n\t+&")
 eqn <- paste0("\n\\begin{align}\n \\text{ensemble prediction} &=", eqn, "\n\\end{align}\n")
@@ -226,8 +227,8 @@ param_filter <- function(object, config, stack_obj) {
   if (length(param_labs) > 0) {
     names(params) <- param_labs
     fmt <- format(as.data.frame(params), digits = 3)
-    fmt <- as.matrix(fmt)[1,]
-    chr_param <- paste0(names(fmt), " = ", unname(fmt))
+    fmt <- as.matrix(fmt)[1,,drop = FALSE]
+    chr_param <- paste0(colnames(fmt), " = ", unname(fmt))
     chr_param <- knitr::combine_words(chr_param)
     items <- paste0("- ", gsub("_", " ", object), ": ", chr_param)
   } else {
