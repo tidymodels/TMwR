@@ -59,9 +59,9 @@ The argument `trace = 0` prevents extra logging of the training process. As show
 
 ```{r grid-mlp-param}
 mlp_param <- parameters(mlp_spec)
-mlp_param %>% pull_dials_object("hidden_units")
-mlp_param %>% pull_dials_object("penalty")
-mlp_param %>% pull_dials_object("epochs")
+mlp_param %>% extract_parameter_dials("hidden_units")
+mlp_param %>% extract_parameter_dials("penalty")
+mlp_param %>% extract_parameter_dials("epochs")
 ```
 
 This output indicates that the parameter objects are complete and prints their default ranges. These values will be used to demonstrate how to create different types of parameter grids. 
