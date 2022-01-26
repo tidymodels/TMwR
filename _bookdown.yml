@@ -21,8 +21,8 @@ rmd_files: [
   "14-iterative-search.Rmd",
   "15-workflow-sets.Rmd",
   
-  "16-encoding-categorical-data.Rmd",
-  "17-dimensionality-reduction.Rmd",
+  "16-dimensionality-reduction.Rmd",
+  "17-encoding-categorical-data.Rmd",
   "18-explaining-models-and-predictions.Rmd",
   "19-when-should-you-trust-predictions.Rmd",
   "20-ensemble-models.Rmd",
