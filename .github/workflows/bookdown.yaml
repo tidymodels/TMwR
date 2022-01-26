@@ -14,17 +14,23 @@ env:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: macOS-latest
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v2
 
       - uses: r-lib/actions/setup-pandoc@v2
+      
+      - name: Install system dependencies
+        run: |
+          brew install --cask xquartz
+          brew install pkg-config cairo
+          brew install v8
+          brew install libgit2
+          brew install ffmpeg
 
       - uses: r-lib/actions/setup-r@v2
-        with:
-          use-public-rspm: true
 
       - uses: r-lib/actions/setup-r-dependencies@v2
 
