@@ -41,7 +41,7 @@ The tidymodels packages are fairly young in the software lifecycle. We will do o
 
 This book was written in [RStudio](http://www.rstudio.com/ide/) using [bookdown](http://bookdown.org/). The [`tmwr.org`](https://tmwr.org) website is hosted via [Netlify](http://netlify.com/), and automatically built after every push by [GitHub Actions](https://help.github.com/actions). The complete source is available on [GitHub](https://github.com/tidymodels/TMwR). We generated all plots in this book using [ggplot2](https://ggplot2.tidyverse.org/) and its black and white theme (`theme_bw()`). This version of the book was built with `r R.version.string`, [pandoc](https://pandoc.org/) version `r rmarkdown::pandoc_version()`.
 
-## A note to reviewers
+## A note to reviewers {-} 
 
 Thanks for taking the time to review this work. The book will be published with O’Reilly and will be rendered using their [Atlas system](https://atlas.oreilly.com/). It will take some time to get the TMwR files into their format. 
 
