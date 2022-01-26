@@ -134,29 +134,21 @@ This evaluates the meta-learning model over a pre-defined grid of lasso penalty 
 autoplot(ens)
 ```
 
-The top panel shows the average number of candidate ensemble members retained by the meta-learning model. We can see that the number of members is fairly constant and, as it increases, the RMSE also increases. 
-
-The default range may not have served us well here. To evaluate the  meta-learning model with larger penalties, let's pass an additional option:
-
-
-```{r ensembles-second-blend, cache = TRUE}
-set.seed(2001)
-ens <- blend_predictions(concrete_stack, penalty = 10^seq(-2, -0.5, length = 20))
-autoplot(ens)
-```
-
-Now we see a range where the ensemble model becomes worse than with our first blend (but not by much). The R<sup>2</sup> values increase with larger penalties. This is somewhat counter-intuitive, but the y-axis range of each panel reminds us that these changes are minuscule. 
-
-The penalty value associated with the smallest RMSE was `r round(ens$penalty$penalty, 2)`. Printing the object shows the details of the meta-learning model: 
-
-
-```{r ensembles-second-blend-print}
-ens
-```
 ```{r ensembles-details, include = FALSE}
 res <- stacks:::top_coefs(ens)
 num_coefs <- xfun::numbers_to_words(nrow(res))
 num_types <- xfun::numbers_to_words(length(unique(res$type)))
+```
+
+The top panel shows the average number of candidate ensemble members retained by the meta-learning model. We can see that the number of members is fairly constant and, as it increases, the RMSE also increases. The R<sup>2</sup> values increase with larger penalties. This is somewhat counter-intuitive, but the y-axis range of each panel reminds us that these changes are minuscule. 
+
+It is common, when blending predictions using a regression model, to constrain the blending parameters to be non-negative. For these data, this constraint has the effect of eliminating many of the potential ensemble members; even at fairly low penalties, the ensemble is limited to a fraction of the original eighteen. 
+
+The penalty value associated with the smallest RMSE was `r signif(ens$penalty$penalty, 2)`. Printing the object shows the details of the meta-learning model: 
+
+
+```{r ensembles-second-blend-print}
+ens
 ```
 
 The regularized linear regression meta-learning model contained `r num_coefs` blending coefficients across `r num_types` types of models. The `autoplot()` method can be used again to show the contributions of each model type: 
@@ -266,7 +258,9 @@ get_configs <- function(x) {
 
 param <- map2_chr(all_members$obj, all_members$member, param_filter, ens)
 param <- paste0(param, get_configs(all_members))
-cat(param)
+param <- gsub("full quad linear reg", "linear regression (quadratic features)", param)
+param <- gsub("number of observations sampled", "proportion of observations sampled", param)
+cat(param, sep = "")
 
 ens_rmse <- dplyr::filter(ens$metrics, penalty == ens$penalty$penalty & .metric == "rmse")$mean
 boost_rmse <- collect_metrics(boosting_test_results) %>% dplyr::filter(.metric == "rmse")
@@ -294,7 +288,7 @@ ens_test_pred %>%
   reg_metrics(compressive_strength, .pred)
 ```
 
-This is moderately better than our best single model. It is fairly common for stacking to produce incremental benefits when compared to the best single model. 
+This is slightly better than our best single model. It is fairly common for stacking to produce incremental benefits when compared to the best single model. 
 
 
 ## Chapter summary {#ensembles-summary}
