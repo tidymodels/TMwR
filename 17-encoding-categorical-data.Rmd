@@ -207,7 +207,7 @@ Notice that most estimates for neighborhood effects are about the same when we c
 
 ## Feature hashing
 
-Traditional dummy variables as described in Section \@ref(dummies) require that all of the possible categories be known to create a full set of numeric features. _Feature hashing_ methods also create dummy variables, but only consider the value of the category to assign it to a predefined pool of dummy variables. Let's look at the `Neighborhood` values in Ames again and use the `rlang::hash()` function to understand more.
+Traditional dummy variables as described in Section \@ref(dummies) require that all of the possible categories be known to create a full set of numeric features. _Feature hashing_ methods [@weinberger2009feature] also create dummy variables, but only consider the value of the category to assign it to a predefined pool of dummy variables. Let's look at the `Neighborhood` values in Ames again and use the `rlang::hash()` function to understand more.
 
 ```{r}
 library(rlang)
