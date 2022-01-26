@@ -34,20 +34,20 @@ This Appendix provides recommendations for baseline levels of preprocessing that
 The information in the table below is not exhaustive and somewhat depends on the implementation. For example, as noted below the table, some models may not require a particular preprocessing operation but the implementation may require it. In the table, `r tk` indicates that the method is required for the model and `r x` indicates that it is not. The `r cl` symbol means that the model _may_ be helped by the technique but it is not required.
 
 ```{r pre-proc-table, echo = FALSE, results = "asis"}
-tkp <- paste0("$\\times$", "$+$")
-cl1 <- paste0("$\\circ$", "$^1$")
-xp  <- paste0("$\\times$", "$+$")
+tkp <- paste0("$\\times^\\dagger$")
+cl1 <- paste0("$\\circ^1$")
+xp  <- paste0("$\\times^\\dagger$")
 
 tab <- 
   tribble(
     ~ model,            ~ dummy,   ~ zv, ~ impute, ~ decorrelate, ~ normalize, ~ transform, 
-    "discrim_flexible()",    tk,     tk,       tk,            tk,           x,          cl,
+    "discrim_flexible()",    tk,      x,       tk,            tk,           x,          cl,
     "discrim_linear()",      tk,     tk,       tk,            tk,           x,          cl,
     "discrim_regularized()", tk,     tk,       tk,            tk,           x,          cl,
     "naive_Bayes()",          x,     tk,       tk,           cl1,           x,           x,
     "C5_rules()",             x,      x,        x,             x,           x,           x,
     "cubist_rules()",         x,      x,        x,             x,           x,           x,
-    "rule_fit()",            tk,      x,       tk,           cl1,           x,           x,
+    "rule_fit()",            tk,      x,       tk,           cl1,          tk,           x,
     "bag_mars()",            tk,      x,       tk,            cl,           x,          cl,
     "bag_tree()",             x,      x,        x,           cl1,           x,           x,
     "pls()",                 tk,     tk,       tk,             x,          tk,          tk,
@@ -55,13 +55,15 @@ tab <-
     "linear_reg()",          tk,     tk,       tk,            tk,           x,          cl,
     "mars()",                tk,      x,       tk,            cl,           x,          cl,
     "logistic_reg()",        tk,     tk,       tk,            tk,           x,          cl,
-    "multinom_reg()",        tk,     tk,       tk,            tk,           x,          cl,
+    "multinom_reg()",        tk,     tk,       tk,            tk,          xp,          cl,
     "decision_tree()",        x,      x,        x,           cl1,           x,           x,
     "rand_forest()",          x,     cl,      tkp,           cl1,           x,           x,
     "boost_tree()",          xp,     cl,      tkp,           cl1,           x,           x,
     "mlp()",                 tk,     tk,       tk,            tk,          tk,          tk,
     "svm_*()",               tk,     tk,       tk,            tk,          tk,          tk,
-    "nearest_neighbor()",    tk,     tk,       tk,            cl,          tk,          tk
+    "nearest_neighbor()",    tk,     tk,       tk,            cl,          tk,          tk,
+    "gen_additive_mod()",    tk,     tk,       tk,            tk,           x,          cl,
+    "bart()",                 x,      x,        x,           cl1,           x,           x
   ) 
 
 tab %>% 
@@ -73,12 +75,13 @@ tab %>%
   kable_styling(full_width = FALSE, latex_options = "HOLD_position")
 ```
 
-Footnotes: 
+Notes: 
 
 1. Decorrelating predictors may not help improve performance. However, fewer correlated predictors can improve the estimation of variance importance scores (see [Fig. 11.4](https://bookdown.org/max/FES/recursive-feature-elimination.html#fig:greedy-rf-imp) of @fes). Essentially, the selection of highly correlated predictors is almost random. 
 
-The notation of $^+$ means that the answer depends on the implementation. Specifically: 
+The notation of $^\dagger$ means that the answer depends on the implementation. Specifically: 
 
  * _Theoretically_, any tree-based model does not require imputation. However, many tree ensemble implementations require imputation. 
  
  * While tree-based boosting methods generally do not require the creation of dummy variables, models using the `xgboost` engine do. 
+
