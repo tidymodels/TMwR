@@ -59,7 +59,7 @@ Imports:
     nnet,
     parsnip,
     patchwork,
-    pillar (>= 1.6.5.9001)
+    pillar (>= 1.6.5.9001),
     pscl,
     poissonreg,
     prettyunits,
