@@ -4,6 +4,7 @@
 knitr::opts_chunk$set(fig.path = "figures/")
 data(crickets, package = "modeldata")
 library(tidyverse)
+library(kableExtra)
 ```
 
 This book is about creating models with R. Before describing how to apply tidy data principles, let's review how models are created, trained, and used in the core R language (often called "base R"). This chapter is a brief illustration of core language conventions. It is not exhaustive but provides readers (especially those new to R) the basic, most commonly used motifs. 
@@ -12,9 +13,9 @@ The S language, on which R is based, has had a rich data analysis environment si
 
 ## An example
 
-To demonstrate these fundamentals, let's use experimental data from @mcdonald2009, by way of @mangiafico2015, on the relationship between the ambient temperature and the rate of cricket chirps per minute. Data were collected for two species: _O. exclamationis_ and _O. niveus_. The data are contained in a data frame called `crickets` with a total of `r nrow(crickets)` data points. These data are shown here in a `r pkg(ggplot2)` graph. 
+To demonstrate these fundamentals, let's use experimental data from @mcdonald2009, by way of @mangiafico2015, on the relationship between the ambient temperature and the rate of cricket chirps per minute. Data were collected for two species: _O. exclamationis_ and _O. niveus_. The data are contained in a data frame called `crickets` with a total of `r nrow(crickets)` data points. These data are shown in Figure \@ref(fig:cricket-plot) using the following `r pkg(ggplot2)` code.
 
-```{r base-r-cricket-plot, out.width = '70%', fig.width=6, fig.height=4, warning = FALSE}
+```{r base-r-cricket-plot, eval = FALSE}
 library(tidyverse)
 
 data(crickets, package = "modeldata")
@@ -29,12 +30,24 @@ ggplot(crickets, aes(x = temp, y = rate, col = species)) +
   geom_smooth(method = lm, se = FALSE) + 
   labs(x = "Temperature (C)", y = "Chirp Rate (per minute)")
 ```
- 
+
+
+```{r cricket-plot, ref.label = "base-r-cricket-plot"}
+#| out.width = '70%',
+#| fig.width = 6, 
+#| fig.height = 4, 
+#| warning = FALSE,
+#| message = FALSE,
+#| echo = FALSE,
+#| fig.cap = "Relationship between chirp rate and temperature for two different species of cricket.",
+#| fig.alt = "A scatter plot of the chirp rate and temperature for two different species of cricket with linear trend lines per species. The trends are linearly increasing with a separation between the two species."
+```
+
 The data exhibit fairly linear trends for each species. For a given temperature, _O. exclamationis_ appears to chirp more per minute than the other species. For an inferential model, the researchers might have specified the following null hypotheses prior to seeing the data:
 
- * Temperature has no effect on the chirp rate.
+* Temperature has no effect on the chirp rate.
 
- * There are no differences between the species' chirp rate. 
+* There are no differences between the species' chirp rate. 
 
 There may be some scientific or practical value in predicting the chirp rate but in this example we will focus on inference.
 
@@ -96,9 +109,9 @@ interaction_fit
 
 This output is a little hard to read. For the species indicator variables, R mashes the variable name (`species`) together with the factor level (`O. niveus`) with no delimiter. 
 
-Before going into any inferential results for this model, the fit should be assessed using diagnostic plots. We can use the `plot()` method for `lm` objects. This method produces a set of four plots for the object, each showing different aspects of the fit. Two plots are shown here:
+Before going into any inferential results for this model, the fit should be assessed using diagnostic plots. We can use the `plot()` method for `lm` objects. This method produces a set of four plots for the object, each showing different aspects of the fit, as shown in Figure \@ref(fig:interaction-plots).
 
-```{r interaction-plots, out.width = '100%', fig.width=8, fig.height=4.5, warning = FALSE}
+```{r base-r-interaction-plots, eval = FALSE}
 # Place two plots next to one another:
 par(mfrow = c(1, 2))
 
@@ -109,7 +122,15 @@ plot(interaction_fit, which = 1)
 plot(interaction_fit, which = 2)
 ```
 
-These appear reasonable enough to conduct inferential analysis. 
+```{r interaction-plots, ref.label= "base-r-interaction-plots"}
+#| out.width = '100%',
+#| fig.width = 8,
+#| fig.height = 4.5,
+#| warning = FALSE,
+#| echo = FALSE,
+#| fig.cap = "Residual diagnostic plots for the linear model with interactions, which appear reasonable enough to conduct inferential analysis.",
+#| fig.alt = "On the left is a scatter plot of the model residuals versus predicted values. There are no strong trends in the data. The right-hand panel shows a normal quantile-quantile plot where the points indicate that normality is probably a good assumption."
+```
 
 :::rmdnote
 When it comes to the technical details of evaluating expressions, R is _lazy_ (as opposed to eager). This means that model fitting functions typically compute the minimum possible quantities at the last possible moment. For example, if you are interested in the coefficient table for each model term, this is not automatically computed with the model but is instead computed via the `summary()` method. 
@@ -152,11 +173,11 @@ Note that the non-numeric value of `species` is passed to the predict method, as
 
 While this analysis has obviously not been an exhaustive demonstration of R's modeling capabilities, it does highlight some major features important for the rest of this book: 
 
- * The language has an expressive syntax for specifying model terms for both simple and quite complex models.
+* The language has an expressive syntax for specifying model terms for both simple and quite complex models.
 
- * The R formula method has many conveniences for modeling that are also applied to new data when predictions are generated. 
+* The R formula method has many conveniences for modeling that are also applied to new data when predictions are generated. 
 
- * There are numerous helper functions (e.g., `anova()`, `summary()` and `predict()`) that you can use to conduct specific calculations after the fitted model is created. 
+* There are numerous helper functions (e.g., `anova()`, `summary()` and `predict()`) that you can use to conduct specific calculations after the fitted model is created. 
 
 Finally, as previously mentioned, this framework was first published in 1992. Most of the ideas and methods above were developed in that period but have remained remarkably relevant to this day. It highlights that the S language and, by extension R, has been designed for data analysis since its inception.  
 
@@ -164,11 +185,11 @@ Finally, as previously mentioned, this framework was first published in 1992. Mo
 
 The R model formula is used by many modeling packages. It usually serves multiple purposes: 
 
- * The formula defines the columns that are used by the model.  
+* The formula defines the columns that are used by the model.  
 
- * The standard R machinery uses the formula to encode the columns into an appropriate format. 
+* The standard R machinery uses the formula to encode the columns into an appropriate format. 
 
- * The roles of the columns are defined by the formula. 
+* The roles of the columns are defined by the formula. 
 
 For the most part, practitioners' conception of what the formula does is dominated by the last purpose. Our focus when typing out a formula is often to declare how the columns should be used. For example, the previous specification we discussed sets up predictors to be used in a specific way: 
 
@@ -206,18 +227,32 @@ R is quite different from Python in this respect. An advantage of R's diversity 
 
 Unfortunately, some of the syntactical diversity is due to a focus on the needs of the person developing the code instead of the needs of the person using the code. Inconsistencies between packages can be a stumbling block to R users. 
 
-Suppose your modeling project has an outcome with two classes. There are a variety of statistical and machine learning models you could choose from. In order to produce a class probability estimate for each sample, it is common for a model function to have a corresponding `predict()` method. However, there is significant heterogeneity in the argument values used by those methods to make class probability predictions; this heterogeneity can be difficult for even experienced users to navigate. A sampling of these argument values for different models is: 
+Suppose your modeling project has an outcome with two classes. There are a variety of statistical and machine learning models you could choose from. In order to produce a class probability estimate for each sample, it is common for a model function to have a corresponding `predict()` method. However, there is significant heterogeneity in the argument values used by those methods to make class probability predictions; this heterogeneity can be difficult for even experienced users to navigate. A sampling of these argument values for different models is shown in Table \@ref(tab:probability-args). 
 
-| Function     | Package                             | Code                                          |
-| :----------- | :---------------------------------- | :-------------------------------------------- |
-| `lda`        | <span class="pkg">MASS</span>       | `predict(object)`                             |
-| `glm`        | <span class="pkg">stats</span>      | `predict(object, type = "response")`          |
-| `gbm`        | <span class="pkg">gbm</span>        | `predict(object, type = "response", n.trees)` |
-| `mda`        | <span class="pkg">mda</span>        | `predict(object, type = "posterior")`         |
-| `rpart`      | <span class="pkg">rpart</span>      | `predict(object, type = "prob")`              |
-| various      | <span class="pkg">RWeka</span>      | `predict(object, type = "probability")`       |
-| `logitboost` | <span class="pkg">LogitBoost</span> | `predict(object, type = "raw", nIter)`        |
-| `pamr.train` | <span class="pkg">pamr</span>       | `pamr.predict(object, type = "posterior")`    |
+```{r prob-args, echo = FALSE, results = "asis"}
+prob_tbl <- 
+  tribble(
+    ~ Function, ~Package, ~Code,
+    "lda()"        , "MASS"       ,  "predict(object)"                      ,
+    "glm()"        , "stats"      ,  'predict(object, type = "response")'          ,
+    "gbm()"        , "gbm"        ,  'predict(object, type = "response", n.trees)' ,
+    "mda()"        , "mda"        ,  'predict(object, type = "posterior")'         ,
+    "rpart()"      , "rpart"      ,  'predict(object, type = "prob")'              ,
+    "various"      , "RWeka"      ,  'predict(object, type = "probability")'       ,
+    "logitboost()" , "LogitBoost" ,  'predict(object, type = "raw", nIter)'        ,
+    "pamr.train()" , "pamr"       ,  'pamr.predict(object, type = "posterior")'    
+  ) 
+
+prob_tbl %>% 
+  kable(
+    caption = "Heterogeneous argument names for different modeling functions.",
+    label = "probability-args",
+    escape = FALSE
+  ) %>%
+  kable_styling(full_width = FALSE) %>%
+  column_spec(1, monospace = ifelse(prob_tbl$Function == "various", FALSE, TRUE)) %>%
+  column_spec(3, monospace = TRUE)
+```
 
 Note that the last example has a custom _function_ to make predictions instead of using the more common `predict()` interface (the generic `predict()` _method_). This lack of consistency is a barrier to day-to-day usage of R for modeling.
 
@@ -271,9 +306,9 @@ library(broom)
 tidy(corr_res[[1]])
 ```
 
-These results can be "stacked" and added to a `ggplot()`: 
+These results can be "stacked" and added to a `ggplot()`, as shown in Figure \@ref(fig:corr-plot). 
 
-```{r base-r-corr-plot}
+```{r base-r-corr-plot, eval=FALSE}
 corr_res %>% 
   # Convert each to a tidy format; `map_dfr()` stacks the data frames 
   map_dfr(tidy, .id = "predictor") %>% 
@@ -281,6 +316,12 @@ corr_res %>%
   geom_point(aes(y = estimate)) + 
   geom_errorbar(aes(ymin = conf.low, ymax = conf.high), width = .1) +
   labs(x = NULL, y = "Correlation with mpg")
+```
+
+```{r corr-plot, ref.label = "base-r-corr-plot"}
+#| echo = FALSE,
+#| fig.cap = "Correlations (and 95% confidence intervals) between predictors and the outcome in the `mtcars` data set.",
+#| fig.alt = "A plot of the correlations (and 95% confidence intervals) between predictors and the outcome in the `mtcars` data set. None of the intervals overlap with zero. The car weight had the largest negative correlation and the rear axle ratio has the highest positive correlation."
 ```
 
 Creating such a plot is possible using core R language functions, but automatically reformatting the results makes for more concise code with less potential for errors. 
