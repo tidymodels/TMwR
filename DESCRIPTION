@@ -59,6 +59,7 @@ Imports:
     nnet,
     parsnip,
     patchwork,
+    pillar (>= 1.6.5.9001)
     pscl,
     poissonreg,
     prettyunits,
@@ -89,7 +90,8 @@ Imports:
     yardstick
 Remotes:
     tidymodels/dials,
-    tidymodels/learntidymodels
+    tidymodels/learntidymodels,
+    r-lib/pillar
 biocViews: mixOmics
 Encoding: UTF-8
 SystemRequirements: FFmpeg (>= 3.2); with at least libx264 and lame (mp3)
