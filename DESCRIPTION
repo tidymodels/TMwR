@@ -91,7 +91,8 @@ Imports:
     yardstick
 Remotes:
     tidymodels/dials,
-    tidymodels/learntidymodels
+    tidymodels/learntidymodels,
+    tidymodels/textrecipes
 biocViews: mixOmics
 Encoding: UTF-8
 SystemRequirements: FFmpeg (>= 3.2); with at least libx264 and lame (mp3)
