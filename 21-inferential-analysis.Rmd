@@ -1,4 +1,5 @@
 ```{r inferential-setup, include = FALSE}
+knitr::opts_chunk$set(fig.path = "figures/")
 library(tidymodels)
 library(poissonreg)
 library(infer)
