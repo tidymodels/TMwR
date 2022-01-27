@@ -4,6 +4,7 @@
 knitr::opts_chunk$set(fig.path = "figures/")
 data(crickets, package = "modeldata")
 library(tidyverse)
+library(kableExtra)
 ```
 
 This book is about creating models with R. Before describing how to apply tidy data principles, let's review how models are created, trained, and used in the core R language (often called "base R"). This chapter is a brief illustration of core language conventions. It is not exhaustive but provides readers (especially those new to R) the basic, most commonly used motifs. 
@@ -229,7 +230,6 @@ Unfortunately, some of the syntactical diversity is due to a focus on the needs 
 Suppose your modeling project has an outcome with two classes. There are a variety of statistical and machine learning models you could choose from. In order to produce a class probability estimate for each sample, it is common for a model function to have a corresponding `predict()` method. However, there is significant heterogeneity in the argument values used by those methods to make class probability predictions; this heterogeneity can be difficult for even experienced users to navigate. A sampling of these argument values for different models is shown in Table \@ref(tab:probability-args). 
 
 ```{r prob-args, echo = FALSE, results = "asis"}
-library(kableExtra)
 prob_tbl <- 
   tribble(
     ~ Function, ~Package, ~Code,
