@@ -42,17 +42,21 @@ Binding together the analytical components of a data analysis is important for a
 
 To illustrate, consider principal component analysis (PCA) signal extraction. We'll talk about this more in Section \@ref(example-steps) as well as Chapter \@ref(dimensionality); PCA is a way to replace correlated predictors with new artificial features that are uncorrelated and capture most of the information in the original set. The new features could be used as the predictors and least squares regression could be used to estimate the model parameters. 
 
-There are two ways of thinking about the model workflow. The _incorrect_ method would be to think of the PCA preprocessing step as _not being part of the modeling process_: 
+There are two ways of thinking about the model workflow. Figure \@ref(fig:bad-workflow) illustrates the _incorrect_ method to think of the PCA preprocessing step, as _not being part of the modeling process_.
 
-```{r workflow-bad, echo = FALSE, out.width = '80%', warning = FALSE}
+```{r bad-workflow, echo = FALSE, out.width = '80%', warning = FALSE}
+#| fig.cap = "Incorrect mental model of where model estimation occurs in the data analysis process.",
+#| fig.alt = "An incorrect mental model of where model estimation occurs in the data analysis process. The data and predictor set are substrates for an initial preprocessing step using PCA. These data are passed to the model fitting algorithm to produce a fitted model. The figure indicates that the model workflow only includes the model fitting process. This implies that the model fit is the only place where estimation occurs."
 knitr::include_graphics("premade/bad-workflow.svg")
 ```
 
 The fallacy here is that, although PCA does significant computations to produce the components, its operations are assumed to have no uncertainty associated with them. The PCA components are treated as _known_ and, if not included in the model workflow, the effect of PCA could not be adequately measured. 
 
-An _appropriate_ approach would be: 
+Figure \@ref(fig:good-workflow) shows an _appropriate_ approach. 
 
-```{r workflow-good, echo = FALSE, out.width = '80%', warning = FALSE}
+```{r good-workflow, echo = FALSE, out.width = '80%', warning = FALSE}
+#| fig.cap = "Correct mental model of where model estimation occurs in the data analysis process.",
+#| fig.alt = "A correct mental model of where model estimation occurs in the data analysis process. The data and predictor set are substrates for an initial preprocessing step using PCA. These data are passed to the model fitting algorithm to produce a fitted model. The figure indicates that the model workflow includes the model fitting process and the PCA step. This implies that both operations should be considered estimation steps."
 knitr::include_graphics("premade/proper-workflow.svg")
 ```
 
