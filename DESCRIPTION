@@ -59,6 +59,7 @@ Imports:
     nnet,
     parsnip,
     patchwork,
+    pillar (>= 1.6.5.9001),
     pscl,
     poissonreg,
     prettyunits,
@@ -92,6 +93,7 @@ Imports:
 Remotes:
     tidymodels/dials,
     tidymodels/learntidymodels,
+    r-lib/pillar,
     tidymodels/textrecipes
 biocViews: mixOmics
 Encoding: UTF-8
