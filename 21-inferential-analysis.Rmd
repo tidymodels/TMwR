@@ -1,4 +1,5 @@
 ```{r inferential-setup, include = FALSE}
+knitr::opts_chunk$set(fig.path = "figures/")
 library(tidymodels)
 library(poissonreg)
 library(infer)
@@ -63,12 +64,11 @@ There were many more publications by men, although there were more men in the da
 
 For our application, the hypotheses to compare the two sexes are:
 
-$$
 \begin{align}
 H_0&: \lambda_m = \lambda_f \notag \\
 H_a&: \lambda_m \ne \lambda_f \notag
 \end{align}
-$$
+
 where the $\lambda$ values are the rates of publications (over the same time period). 
 
 A basic application of the test is:
@@ -196,12 +196,10 @@ tidy(log_lin_fit, conf.int = TRUE, conf.level = 0.90)
 
 In this output, the p-values correspond to separate hypothesis tests for each parameter: 
 
-$$
 \begin{align}
 H_0&: \beta_j = 0 \notag \\
 H_a&: \beta_j \ne 0 \notag
 \end{align}
-$$
 
 for each of the model parameters. Looking at these results, `phd` (the prestige of their department) may not have any relationship with the outcome.
 
@@ -238,12 +236,10 @@ glm_boot %>%
 
 Determining which predictors to include in the model is a difficult problem. One approach is to conduct likelihood ratio tests (LRT) [@McCullaghNelder89] between nested models. Based on the confidence intervals, we have evidence that a simpler model without `phd` may be sufficient. Let's fit a smaller model, then conduct a statistical test: 
 
-$$
 \begin{align}
 H_0&: \beta_{phd} = 0 \notag \\
 H_a&: \beta_{phd} \ne 0 \notag
 \end{align}
-$$
 
 This hypothesis was previously tested when we showed the tidied results for `log_lin_fit`. That particular approach used results from a single model fit via a Wald statistic (i.e. the parameter divided by its standard error). For that approach, the p-value was `r tidy(log_lin_fit) %>% filter(term == "phd") %>% pluck("p.value") %>% format.pval()`. We can tidy the results for the LRT to get the p-value: 
 
@@ -270,13 +266,11 @@ $$\lambda = 0 \pi + (1 - \pi) \lambda_{nz}$$
 
 where
 
-$$
 \begin{align}
 \log(\lambda_{nz}) &= \beta_0 + \beta_1x_1 + \ldots + \beta_px_p \notag \\
 & and \notag \\
 log\left(\frac{\pi}{1-\pi}\right) &= \gamma_0 + \gamma_1z_1 + \ldots + \gamma_qz_q \notag 
 \end{align}
-$$
 
 where the $x$ covariates affect the non-zero count values and the $z$ covariates influence the probability of a zero count. The two sets of predictors do not need to be mutually exclusive.
 
@@ -295,13 +289,10 @@ zero_inflated_fit
 
 Since the coefficients for this model are also estimated using maximum likelihood, let's try to use another likelihood ratio test to understand if the new model terms are helpful. We will _simultaneously_ test that
 
-$$
 \begin{align}
 H_0&: \gamma_1 = 0, \gamma_2 = 0, \cdots, \gamma_5 = 0 \notag \\
 H_a&: \text{at least one} \gamma \ne 0  \notag
 \end{align}
-$$
-
 
 ```{r inference-zip-anova, error = TRUE}
 anova(

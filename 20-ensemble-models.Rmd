@@ -1,4 +1,5 @@
 ```{r ensembles-setup, include = FALSE}
+knitr::opts_chunk$set(fig.path = "figures/")
 library(tidymodels)
 library(rules)
 library(baguette)
@@ -199,7 +200,7 @@ tmp <-
   unnest(cols = "data")
 
 eqn <- paste(c(glmn_int$estimate, tmp$term), collapse = " \\\\\n\t+&")
-eqn <- paste0("$$\n\\begin{align}\n \\text{ensemble prediction} &=", eqn, "\n\\end{align}\n$$")
+eqn <- paste0("\n\\begin{align}\n \\text{ensemble prediction} &=", eqn, "\n\\end{align}\n")
 
 cat(eqn)
 ```
