@@ -182,9 +182,11 @@ Before proceeding, let's take an extended tour of the capabilities of recipes.
 
 One of the most common feature engineering tasks is transforming nominal or qualitative data (factors or characters) so that they can be encoded or represented numerically. Sometimes we can alter the factor levels of a qualitative column in helpful ways _prior_ to such a transformation. For example, `step_unknown()` can be used to change missing values to a dedicated factor level. Similarly, if we anticipate that a new factor level may be encountered in future data, `step_novel()` can allot a new level for this purpose. 
 
-Additionally, `step_other()` can be used to analyze the frequencies of the factor levels in the training set and convert infrequently occurring values to a catch-all level of "other", with a specific threshold that can be specified. A good example is the `Neighborhood` predictor in our data:
+Additionally, `step_other()` can be used to analyze the frequencies of the factor levels in the training set and convert infrequently occurring values to a catch-all level of "other", with a specific threshold that can be specified. A good example is the `Neighborhood` predictor in our data, shown in Figure \@ref(fig:ames-neighborhoods).
 
-```{r engineering-ames-neighborhood-bar}
+```{r ames-neighborhoods, echo = FALSE}
+#| fig.cap = "Frequencies of neighborhoods in the Ames training set.",
+#| fig.alt = "A bar chart of the frequencies of neighborhoods in the Ames training set. The most homes are in North Ames while the Greens, Green Hills, and Landmark neighborhood have very few instances."
 ggplot(ames_train, aes(y = Neighborhood)) + 
   geom_bar() + 
   labs(y = NULL)
@@ -207,7 +209,7 @@ simple_ames <-
 Many, but not all, underlying model calculations require predictor values to be encoded as numbers. Notable exceptions include tree-based models, rule-based models, and naive Bayes models. 
 :::
 
-There are a few strategies for converting a factor predictor to a numeric format. The most common method is to create "dummy" or indicator variables. Let's take the predictor in the Ames data for the building type, which is a factor variable with five levels. For dummy variables, the single `Bldg_Type` column would be replaced with four numeric columns whose values are either zero or one. These binary variables represent specific factor level values. In R, the convention is to _exclude_ a column for the first factor level (`OneFam`, in this case). The `Bldg_Type` column would be replaced with a column called `TwoFmCon` that is one when the row has that value and zero otherwise. Three other columns are similarly created: 
+There are a few strategies for converting a factor predictor to a numeric format. The most common method is to create "dummy" or indicator variables. Let's take the predictor in the Ames data for the building type, which is a factor variable with five levels (see Table \@ref(tab:dummy-vars). For dummy variables, the single `Bldg_Type` column would be replaced with four numeric columns whose values are either zero or one. These binary variables represent specific factor level values. In R, the convention is to _exclude_ a column for the first factor level (`OneFam`, in this case). The `Bldg_Type` column would be replaced with a column called `TwoFmCon` that is one when the row has that value and zero otherwise. Three other columns are similarly created: 
 
 ```{r engineering-all-dummies, echo = FALSE, results = 'asis'}
 show_rows <- 
@@ -223,7 +225,10 @@ recipe(~Bldg_Type, data = ames_train) %>%
   bake(ames_train) %>% 
   slice(show_rows) %>% 
   arrange(`Raw Data`) %>% 
-  kable() %>% 
+  kable(
+    caption = "Illustration of binary encodings (i.e., 'dummy variables') for a qualitative predictor.",
+    label = "dummy-vars"
+  ) %>% 
   kable_styling(full_width = FALSE)
 ```
 
@@ -244,9 +249,9 @@ Different recipe steps can have different effects on columns of the data. For ex
 
 Interaction effects involve two or more predictors. Such an effect occurs when one predictor has an effect on the outcome that is contingent on one or more other predictors. For example, if you were trying to predict your morning commute time, two potential predictors could be the amount of traffic and the time of day. However, the relationship between commute time and the amount of traffic is different for different times of day. In this case, you could add an interaction term between the two predictors to the model along with the original two predictors (which are called the "main effects"). Numerically, an interaction term between predictors is encoded as their product. Interactions are only defined in terms of their effect on the outcome and can be combinations of different types of data (e.g., numeric, categorical, etc). [Chapter 7](https://bookdown.org/max/FES/detecting-interaction-effects.html) of @fes discusses interactions and how to detect them in greater detail. 
 
-After exploring the Ames training set, we might find that the regression slopes for the gross living area differ for different building types: 
+After exploring the Ames training set, we might find that the regression slopes for the gross living area differ for different building types, as shown in Figure \@ref(fig:building-type-interactions).
 
-```{r engineering-ames-feature-plots}
+```{r engineering-ames-feature-plots, eval=FALSE}
 ggplot(ames_train, aes(x = Gr_Liv_Area, y = 10^Sale_Price)) + 
   geom_point(alpha = .2) + 
   facet_wrap(~ Bldg_Type) + 
@@ -254,6 +259,12 @@ ggplot(ames_train, aes(x = Gr_Liv_Area, y = 10^Sale_Price)) +
   scale_x_log10() + 
   scale_y_log10() + 
   labs(x = "Gross Living Area", y = "Sale Price (USD)")
+```
+
+```{r building-type-interactions, ref.label = "engineering-ames-feature-plots"}
+#| echo = FALSE,
+#| fig.cap = "Gross living area (in log-10 units) versus sale price (also in log-10 units) for five different building types.",
+#| fig.alt = "Scatter plots of gross living area (in log-10 units) versus sale price (also in log-10 units) for five different building types. All trends are linear but appear to have different slopes and intercepts for the different building types."
 ```
 
 How are interactions specified in a recipe? A base R formula would take an interaction using a `:`, so we would use:
@@ -306,9 +317,9 @@ _Order matters_.  The gross living area is log transformed prior to the interact
 
 When a predictor has a nonlinear relationship with the outcome, some types of predictive models can adaptively approximate this relationship during training. However, simpler is usually better and it is not uncommon to try to use a simple model, such as a linear fit, and add in specific non-linear features for predictors that may need them. One common method for doing this is to use _spline_ functions to represent the data. Splines replace the existing numeric predictor with a set of columns that allow a model to emulate a flexible, non-linear relationship. As more spline terms are added to the data, the capacity to non-linearly represent the relationship increases. Unfortunately, it may also increase the likelihood of picking up on data trends that occur by chance (i.e., over-fitting). 
 
-If you have ever used `geom_smooth()` within a `ggplot`, you have probably used a spline representation of the data. For example, each panel below uses a different number of smooth splines for the latitude predictor:
+If you have ever used `geom_smooth()` within a `ggplot`, you have probably used a spline representation of the data. For example, each panel in Figure \@ref(ames-latitude-splines) uses a different number of smooth splines for the latitude predictor:
 
-```{r engineering-ames-splines}
+```{r engineering-ames-splines, eval=FALSE}
 library(patchwork)
 library(splines)
 
@@ -327,6 +338,12 @@ plot_smoother <- function(deg_free) {
 }
 
 ( plot_smoother(2) + plot_smoother(5) ) / ( plot_smoother(20) + plot_smoother(100) )
+```
+
+```{r ames-latitude-splines, ref.label = "engineering-ames-splines"}
+#| echo = FALSE,
+#| fig.cap = "Sale price versus latitude, with trend lines using natural splines with different degrees of freedom.",
+#| fig.alt = "Scatter plots of sale price versus latitude with trend lines using natural splines with different degrees of freedom. As the degrees of freedom increase, the lines are more responsive to trends in the data but begin to become excessively complex with 100 spline terms."
 ```
 
 The `ns()` function in the `r pkg(splines)` package generates feature columns using functions called _natural splines_.
