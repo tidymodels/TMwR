@@ -50,7 +50,7 @@ library(tidymodels)
 tidymodels_prefer()
 
 ggplot(ames, aes(x = Sale_Price)) + 
-  geom_histogram(bins = 50)
+  geom_histogram(bins = 50, col= "white")
 ```
 
 ```{r ames-sale-price-hist, ref.label = "ames-sale-price-code"}
@@ -107,7 +107,7 @@ knitr::include_graphics("premade/ames.png")
 
 We can see a few noticeable patterns. First, there is a void of data points in the center of Ames. This corresponds to Iowa State University. Second, while there are a number of neighborhoods that are geographically isolated, there are others that are adjacent to each other. For example, as Figure \@ref(fig:ames-timberland) shows, Timberland is located apart from almost all other neighborhoods.
 
-```{r ames-timberland , out.width = "80%", echo = FALSE, warning = FALSE}
+```{r ames-timberland}
 #| out.width = "80%", 
 #| echo = FALSE, 
 #| warning = FALSE,
@@ -119,7 +119,7 @@ knitr::include_graphics("premade/timberland.png")
 
 Figure \@ref(fig:ames-mitchell) visualizes how the Meadow Village neighborhood in Southwest Ames is like an island of properties ensconced inside the sea of properties that make up the Mitchell neighborhood. 
 
-```{r ames-mitchell , out.width = "60%", echo = FALSE, warning = FALSE}
+```{r ames-mitchell}
 #| out.width = "60%", 
 #| echo = FALSE, 
 #| warning = FALSE,
@@ -131,7 +131,7 @@ knitr::include_graphics("premade/mitchell.png")
  
 A detailed inspection of the map also shows that the neighborhood labels are not completely reliable. For example, Figure \@ref(fig:ames-northridge) shows there are some properties labeled as being in Northridge that are surrounded by homes in the adjacent Somerset neighborhood. 
 
-```{r ames-northridge , out.width = "90%", echo = FALSE, warning = FALSE}
+```{r ames-northridge}
 #| out.width = "90%", 
 #| echo = FALSE, 
 #| warning = FALSE,
@@ -143,7 +143,7 @@ knitr::include_graphics("premade/northridge.png")
 
 Also, there are ten isolated homes labeled as being in Crawford that you can see in Figure \@ref(fig:ames-crawford) but are not close to the majority of the other homes in that neighborhood:
 
-```{r ames-crawford , out.width = "80%", echo = FALSE, warning = FALSE}
+```{r ames-crawford}
 #| out.width = "80%", 
 #| echo = FALSE, 
 #| warning = FALSE,
@@ -155,7 +155,7 @@ knitr::include_graphics("premade/crawford.png")
 
 Also notable is the "Iowa Department of Transportation (DOT) and Rail Road" neighborhood adjacent to the main road on the east side of Ames, shown in Figure \@ref(fig:ames-dot_rr). There are several clusters of homes within this neighborhood as well as some longitudinal outliers; the two homes furthest east are isolated from the other locations. 
 
-```{r ames-dot_rr , out.width = "100%", echo = FALSE, warning = FALSE}
+```{r ames-dot_rr}
 #| out.width = "100%", 
 #| echo = FALSE, 
 #| warning = FALSE,

@@ -174,7 +174,7 @@ arg_info %>%
     caption = "Random forest argument names used by parsnip.",
     label = "parsnip-args",
     escape = FALSE
-    ) %>% 
+  ) %>% 
   kable_styling(full_width = FALSE) %>%
   column_spec(2, monospace = TRUE)
 ```
@@ -291,13 +291,13 @@ ames_test_small %>%
 The motivation for the first rule comes from some R packages producing dissimilar data types from prediction functions. For example, the `r pkg(ranger)` package is an excellent tool for computing random forest models. However, instead of returning a data frame or vector as output, a specialized object is returned that has multiple values embedded within it (including the predicted values). This is just one more step for the data analyst to work around in their scripts. As another example, the `r pkg(glmnet)` package can return at least four different output types for predictions, depending on the model and characteristics of the data. These are shown in Table \@ref(tab:predict-types).
 
 ```{r model-pred-types, echo = FALSE, results = "asis"}
-  tribble(
-    ~ `Type of Prediction`, ~ `Returns a:`,
-    "numeric",                 "numeric matrix",
-    "class",                   "character matrix",
-    "probability (2 classes)", "numeric matrix (2nd level only)",
-    "probability (3+ classes)", "3D numeric array (all levels)", 
-  ) %>% 
+tribble(
+  ~ `Type of Prediction`, ~ `Returns a:`,
+  "numeric",                 "numeric matrix",
+  "class",                   "character matrix",
+  "probability (2 classes)", "numeric matrix (2nd level only)",
+  "probability (3+ classes)", "3D numeric array (all levels)", 
+) %>% 
   kable(
     caption = "Different return values for glmnet prediction types.",
     label = "predict-types"
@@ -318,7 +318,10 @@ tribble(
   "conf_int", ".pred_lower, .pred_upper",
   "pred_int", ".pred_lower, .pred_upper"
 ) %>% 
-  kable() %>% 
+  kable(
+    caption = "The tidymodels mapping of prediction types and column names.",
+    label = "predictable-column-names",
+  ) %>% 
   kable_styling(full_width = FALSE)  %>%
   column_spec(1:2, monospace = TRUE)
 ```
