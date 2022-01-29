@@ -19,7 +19,7 @@ Once we have a model, we need to know how well it works. A quantitative approach
 The best approach to empirical validation involves using _resampling_ methods that will be introduced in Chapter \@ref(resampling). In this chapter, we will use the test set for illustration purposes and to motivate the need for empirical validation. Keep in mind that the test set can only be used once, as explained in Section \@ref(splitting-methods).
 :::
 
-The choice of which metrics to examine can be critical. In later chapters, certain model parameters will be empirically optimized and a primary performance metric will be used to choose the best _sub-model_. Choosing the wrong method can easily result in unintended consequences. For example, two common metrics for regression models are the root mean squared error (RMSE) and the coefficient of determination (a.k.a. $R^2$). The former measures _accuracy_ while the latter measures _correlation_. These are not necessarily the same thing. Figure \@ref(fig: performance-reg-metrics) demonstrates the difference between the two. 
+The choice of which metrics to examine can be critical. In later chapters, certain model parameters will be empirically optimized and a primary performance metric will be used to choose the best _sub-model_. Choosing the wrong method can easily result in unintended consequences. For example, two common metrics for regression models are the root mean squared error (RMSE) and the coefficient of determination (a.k.a. $R^2$). The former measures _accuracy_ while the latter measures _correlation_. These are not necessarily the same thing. Figure \@ref(fig:performance-reg-metrics) demonstrates the difference between the two. 
 
 ```{r performance-reg-metrics, echo = FALSE}
 #| fig.cap = "Observed versus predicted values for models that are optimized using the RMSE compared to the coefficient of determination.",
@@ -208,9 +208,9 @@ f_meas(two_class_example, truth, predicted)
 
 For binary classification data sets, these functions have a standard argument called `event_level`. The _default_ is that the **first** level of the outcome factor is the event of interest. 
 
-```{block, type = "rmdnote"}
+:::rmdnote
 There is some heterogeneity in R functions in this regard; some use the first level and others the second to denote the event of interest. We consider it more intuitive that the first level is the most important. The second level logic is borne of encoding the outcome as 0/1 (in which case the second value is the event) and unfortunately remains in some packages. However, tidymodels (along with many other R packages) _require_ a categorical outcome to be encoded as a factor and, for this reason, the legacy justification for the second level as the event becomes irrelevant.  
-```
+:::
 
 As an example where the second class is the event: 
 

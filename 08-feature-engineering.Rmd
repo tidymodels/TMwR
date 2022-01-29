@@ -226,7 +226,7 @@ recipe(~Bldg_Type, data = ames_train) %>%
   slice(show_rows) %>% 
   arrange(`Raw Data`) %>% 
   kable(
-    caption = "Illustration of binary encodings (i.e., 'dummy variables') for a qualitative predictor.",
+    caption = 'Illustration of binary encodings (i.e., "dummy variables") for a qualitative predictor.',
     label = "dummy-vars"
   ) %>% 
   kable_styling(full_width = FALSE)
