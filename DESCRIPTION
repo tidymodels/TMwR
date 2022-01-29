@@ -100,4 +100,4 @@ Encoding: UTF-8
 SystemRequirements: FFmpeg (>= 3.2); with at least libx264 and lame (mp3)
     drivers. Debian/Ubuntu: libavfilter-dev, Fedora/CentOS: ffmpeg-devel
     (via https://rpmfusion.org), MacOS Homebrew: ffmp
-License: CC BY 4.0
+License: CC BY-NC-SA 4.0
