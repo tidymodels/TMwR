@@ -911,7 +911,7 @@ autoplot(svm_sa, type = "performance")
 ```{r sa-parameters}
 #| fig.height = 4,
 #| echo = FALSE,
-#| fig.cap = "Performance versus tuning parameter values when the `autoplot()` method is used with `type = "parameters"`.",
+#| fig.cap = 'Performance versus tuning parameter values when the `autoplot()` method is used with `type = "parameters"`.',
 #| fig.alt = "A visualization of performance versus tuning parameter values when the `autoplot()` method is used with `type = 'parameters'`. The plot shows different panels for each tuning parameter in their transformed units."
 autoplot(svm_sa, type = "parameters")
 ```
