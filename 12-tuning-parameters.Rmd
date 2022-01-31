@@ -373,6 +373,7 @@ tr_plot <-
     label = paste(format(hidden_units), "units"),
     label = ifelse(label == " 1 units", " 1 unit", label)
   ) %>% 
+  ggplot(aes(x = A, y = B)) +
   geom_point(data = training_set, aes(col = Class, pch = Class), 
              alpha = .5, show.legend = FALSE) + 
   geom_contour(aes( z = .pred_Class1), breaks = 0.5, col = "black") + 
