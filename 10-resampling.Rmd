@@ -228,7 +228,9 @@ Consider the Ames data. On average, 10-fold cross-validation uses assessment set
 #| echo = FALSE, 
 #| fig.height = 4,
 #| fig.cap = "Relationship between the relative variance in performance estimates versus the number of cross-validation repeats.",
-#| fig.alt = "The relationship between the relative variance in performance estimates versus the number of cross-validation repeats. As the repeats increase, the variance is reduced in a harmonically decreasing pattern with diminishing returns for large number of replicates."cv_info <- 
+#| fig.alt = "The relationship between the relative variance in performance estimates versus the number of cross-validation repeats. As the repeats increase, the variance is reduced in a harmonically decreasing pattern with diminishing returns for large number of replicates."
+
+cv_info <- 
   tibble(replicates = rep(1:10, 2), V = 10) %>% 
   mutate(B = V * replicates, reduction = 1/B, V = format(V))
 
