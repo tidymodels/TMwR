@@ -664,7 +664,7 @@ To illustrate, we'll use the two main `r pkg(glmnet)` tuning parameters:
 
 * The proportion of the lasso penalty (`mixture`). This is bounded at zero and one with no transformation.
 
-```{r iterative-neighborhood}
+```{r iterative-neighborhood-calcs, echo = FALSE}
 #| echo = FALSE, 
 #| message = FALSE, 
 #| warning = FALSE,
@@ -717,9 +717,16 @@ for (i in 2:6) {
 }
 ```
 
-The process starts with initial values of `penalty = 0.025` and `mixture = 0.050`. Using a radii that randomly fluctuates between 0.050 and 0.015, the data are appropriately scaled, random values are generated on radii around the initial point, then one is randomly chosen as the candidate. For illustration, we will assume that all candidate values are improvements. Using this new value, a set of new random neighbors are generated, one is chosen, and so on. This figure shows `r max(best_values$Iteration)` iterations as the search proceeds toward the upper left corner: 
+The process starts with initial values of `penalty = 0.025` and `mixture = 0.050`. Using a radii that randomly fluctuates between 0.050 and 0.015, the data are appropriately scaled, random values are generated on radii around the initial point, then one is randomly chosen as the candidate. For illustration, we will assume that all candidate values are improvements. Using this new value, a set of new random neighbors are generated, one is chosen, and so on. Figure \@ref(fig:iterative-neighborhood) shows `r max(best_values$Iteration)` iterations as the search proceeds toward the upper left corner.
 
-```{r iterative-neighborhood, echo = FALSE, message = FALSE, warning = FALSE}
+```{r iterative-neighborhood}
+#| echo = FALSE, 
+#| message = FALSE, 
+#| warning = FALSE,
+#| out.width = "80%",
+#| fig.cap = "An illustration of how simulated annealing determines what is the local neighborhood for two numeric tuning parameters. The clouds of points show possible next values where one would be selected at random. ",
+#| fig.alt = "An illustration of how simulated annealing determines what is the local neighborhood for two numeric tuning parameters. The clouds of points show possible next values where one would be selected at random. The candidate points are small circular clouds surrounding the current best point."
+
 ggplot(neighbors_values, aes(x = penalty, y = mixture)) + 
   geom_point(alpha = .3, size = 3/4, aes(col = factor(Iteration)), show.legend = FALSE) + 
   scale_x_continuous(trans = "log10", limits = pen_rng) + 
