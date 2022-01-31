@@ -83,9 +83,14 @@ svm_param <-
 
 Before discussing specific details about iterative search and how it works, let's understand the relationship between the two SVM tuning parameters and the area under the ROC curve for this specific data set. We constructed a very large regular grid, comprised of 2,500 candidate values, and evaluated the grid using resampling. This is obviously impractical in regular data analysis and tremendously inefficient. However, it elucidates the path that the search process _should take_ and where the numerically optimal value(s) occur. 
 
-The plot below shows the results, with lighter color corresponding to higher (better) model performance. There is a large swath in the lower diagonal of the parameter space that is relatively flat with poor performance. A ridge of best performance occurs in the upper right portion of the space. The black dot indicates the best settings. The transition from the plateau of poor results to the ridge of best performance is very sharp. There is also a sharp drop in the area under the ROC curve just to the right of the ridge.
+Figure \@ref(fig:roc-surface) shows the results, with lighter color corresponding to higher (better) model performance. There is a large swath in the lower diagonal of the parameter space that is relatively flat with poor performance. A ridge of best performance occurs in the upper right portion of the space. The black dot indicates the best settings. The transition from the plateau of poor results to the ridge of best performance is very sharp. There is also a sharp drop in the area under the ROC curve just to the right of the ridge.
 
-```{r iterative-roc-surface, out.width = "80%", echo = FALSE, warning = FALSE}
+```{r roc-surface}
+#| out.width = "80%", 
+#| echo = FALSE,
+#| warning = FALSE,
+#| fig.cap = "Heatmap of the mean area under the ROC curve for a high density grid of tuning parameter values. The best point is a solid dot in the upper right corner. ",
+#| fig.alt = "A heatmap of the mean area under the ROC curve for a high density grid of tuning parameter values. The best point is a solid dot in the upper right corner. The surface has a ridge of high performance moving to the lower right. "
 # See file extras/cells_svm_large.R
 knitr::include_graphics("premade/roc_surface.png")
 ```
@@ -122,14 +127,17 @@ When using Bayesian optimization, the primary concerns are how to create the mod
 
 Gaussian process (GP) [@SCHULZ20181] models are well-known statistical techniques that have a history in spatial statistics (under the name of _kriging methods_). They can be derived in multiple ways, including as a Bayesian model; see @RaWi06 for an excellent reference. 
 
-Mathematically, a GP is a collection of random variables whose joint probability distribution is  multivariate Gaussian. In the  context of our application, this collection is the collection of performance metrics for the tuning parameter candidate values. For the initial grid of four samples shown above, the realization of these four random variables were `r knitr::combine_words(round(collect_metrics(svm_initial)$mean, 4))`. These are assumed to be distributed as multivariate Gaussian. The _inputs_ that  define the independent variables/predictors for the GP model are the corresponding tuning parameter values: 
+Mathematically, a GP is a collection of random variables whose joint probability distribution is  multivariate Gaussian. In the  context of our application, this collection is the collection of performance metrics for the tuning parameter candidate values. For the initial grid of four samples shown above, the realization of these four random variables were `r knitr::combine_words(round(collect_metrics(svm_initial)$mean, 4))`. These are assumed to be distributed as multivariate Gaussian. The _inputs_ that  define the independent variables/predictors for the GP model are the corresponding tuning parameter values (shown in Table \@ref(tab:initial-gp-data)).
 
 ```{r iterative-gp-data-table, echo = FALSE, results = "asis"}
 collect_metrics(svm_initial) %>% 
   select(ROC = mean, cost, rbf_sigma) %>% 
   as.data.frame() %>% 
   format(digits = 4, scientific = FALSE) %>% 
-  kable() %>% 
+  kable(
+    caption = "Resampling statistics used as the initial substrate to the Gaussian process model.",
+    label = "initial-gp-data"
+  ) %>% 
   kableExtra::kable_styling(full_width = FALSE) %>% 
   kableExtra::add_header_above(c("outcome" = 1, "predictors" = 2))
 ```
@@ -151,7 +159,7 @@ However, fitting these models can be difficult in some cases and the model becom
 
 An important virtue of this model is that, since a full probability model is specified, the predictions for new inputs can reflect the entire _distribution_ of the outcome. In other words, new performance statistics can be predicted in terms of both mean and variance. 
 
-Suppose that two new tuning parameters were under consideration. In the table below, candidate _A_ has a slightly better mean ROC value than candidate _B_ (the current best is `r round(max(collect_metrics(svm_initial)$mean), 4)`). However, its variance is four-fold larger than _B_. Is this good or bad? Choosing option _A_ is riskier but has potentially higher return. The increase in variance also reflects that this new value is further away from the existing data than _B_. The next section considers these aspects of GP predictions for Bayesian optimization in more detail.
+Suppose that two new tuning parameters were under consideration. In Table \@ref(tab:tuning-candidates), candidate _A_ has a slightly better mean ROC value than candidate _B_ (the current best is `r round(max(collect_metrics(svm_initial)$mean), 4)`). However, its variance is four-fold larger than _B_. Is this good or bad? Choosing option _A_ is riskier but has potentially higher return. The increase in variance also reflects that this new value is further away from the existing data than _B_. The next section considers these aspects of GP predictions for Bayesian optimization in more detail.
 
 ```{r iterative-gp-pred, echo = FALSE, result = "asis"}
 best_val <- max(collect_metrics(svm_initial)$mean)
@@ -161,7 +169,10 @@ tmp %>%
   mutate(variance = variance^2) %>% 
   as.data.frame() %>% 
   format(digits = 4, scientific = FALSE) %>% 
-  kable() %>% 
+  kable(
+    caption = "Two example tuning parameters considered for further sampling.",
+    label = "tuning-candidates"
+  ) %>% 
   kableExtra::kable_styling(full_width = FALSE) %>% 
   kableExtra::add_header_above(c(" " = 1, "GP Prediction of ROC AUC" = 2))
 ```
@@ -219,20 +230,30 @@ gp_pred <-
   )
 ```
 
-To demonstrate, let's look at a toy example with a single parameter that has values between [0, 1] and the performance metric is $R^2$. The true function is shown below in red along with `r nrow(current_iter)` candidate values that have existing results. 
+To demonstrate, let's look at a toy example with a single parameter that has values between [0, 1] and the performance metric is $R^2$. The true function is shown below in red in Figure \@ref(fig:performance-profile), along with `r nrow(current_iter)` candidate values that have existing results.
 
-```{r iterative-aq-plot, echo = FALSE, fig.height = 4}
+```{r performance-profile}
+#| echo = FALSE, 
+#| fig.height = 4,
+#| fig.cap = "Hypothetical true performance profile over an arbitrary tuning parameter, with five estimated points.",
+#| fig.alt = "A hypothetical true performance profile over an arbitrary tuning parameter. Five estimated points are also shown. The profile is highly nonlinear with a peak in-between two of the observed points."
+
 ggplot(grid, aes(x = x, y = y)) + 
   geom_line(col = "red", alpha = .5, lwd = 1.25) + 
   labs(y = expression(paste("Estimated ", R^2)), x = "Tuning Parameter") +
   geom_point(data = current_iter)
 ```
 
-For these data, the GP model model fit is shown below. The shaded region indicates the mean $\pm$ 1 standard error. The two vertical lines indicate two candidate points that are examined in more detail below.
+For these data, the GP model fit is shown in Figure \@ref(fig:estimated-profile). The shaded region indicates the mean $\pm$ 1 standard error. The two vertical lines indicate two candidate points that are examined in more detail below.
 
 The shaded confidence region demonstrates the squared exponential variance function; it becomes very large between points and converges to zero at the existing data points. 
 
-```{r iterative-gp-fit, echo = FALSE, fig.height = 4}
+```{r estimated-profile}
+#| echo = FALSE, 
+#| fig.height = 4,
+#| fig.cap = "Estimated performance profile generated by the Gaussian process model. The shaded region shows one-standard error bounds.",
+#| fig.alt = "The estimated performance profile generated by the Gaussian process model. The shaded region shows one-standard error bounds. Two vertical lines show potential points to be sampled in the next iteration."
+
 gp_pred %>% 
   ggplot(aes(x = x)) + 
   geom_point(data = current_iter, aes(y = y)) + 
@@ -250,9 +271,16 @@ As a way to encourage exploration, a simple (but not often used) approach is to 
 
 One of the most commonly used acquisition functions is _expected improvement_. The notion of improvement requires a value for the current best results (unlike the confidence bound approach). Since the GP can describe a new candidate point using a distribution, we can weight the parts of the distribution that show improvement using the probability of the improvement occurring. 
 
-For example, consider two candidate parameter values of 0.10 and 0.25 (indicated by the vertical lines in the plot above). Using the fitted GP model, their predicted $R^2$ distributions are shown below along with a reference line for the current best results:
+For example, consider two candidate parameter values of 0.10 and 0.25 (indicated by the vertical lines in the plot above). Using the fitted GP model, their predicted $R^2$ distributions are shown in Figure \@ref(fig:two-candidates) along with a reference line for the current best results.
 
-```{r iterative-exp-imp, echo = FALSE, fig.height = 4, fig.width = 6.25, out.width = "100%"}
+```{r two-candidates}
+#| echo = FALSE, 
+#| fig.height = 4, 
+#| fig.width = 6.25, 
+#| out.width = "80%",
+#| fig.cap = "Predicted performance distributions for two sampled tuning parameter values.",
+#| fig.alt = "Predicted performance distributions for two sampled tuning parameter values. For one, the distribution is slightly better than the current value with a small spread. The other parameter value is slightly worse but has a very wide spread."
+
 small_pred <- 
   predict(gp, c(0.1, 0.25))$complete_data %>% 
   as_tibble() %>% 
@@ -283,28 +311,36 @@ small_pred %>%
   group_by(value) %>% 
   do(get_density(.)) %>% 
   ungroup() %>% 
-  ggplot(aes(x = x, y = density, col = `Parameter Value`)) + 
+  ggplot(aes(x = x, y = density, col = `Parameter Value`, lty = `Parameter Value`)) + 
   geom_line() +
-  geom_vline(xintercept = max(current_iter$y), lty = 2) + 
+  geom_vline(xintercept = max(current_iter$y), lty = 3) +  
   labs(x = expression(paste("Predicted ", R^2, " Distribution"))) + 
   scale_color_brewer(palette = "Set1")
 ```
 
-When only considering the mean $R^2$ prediction, a parameter value of 0.10 is the better choice. The tuning parameter recommendation for 0.25 is, on average, predicted to be _worse_ than the current best. However, since it has higher variance, it has more overall probability area above the current best. As a result, it has a larger expected improvement of the two:
+When only considering the mean $R^2$ prediction, a parameter value of 0.10 is the better choice (see Table \@ref(tab:two-exp-improve)). The tuning parameter recommendation for 0.25 is, on average, predicted to be _worse_ than the current best. However, since it has higher variance, it has more overall probability area above the current best. As a result, it has a larger expected improvement of the two:
 
 ```{r iterative-gp-data-table-2, echo = FALSE, results = "asis"}
 small_pred %>% 
   select(`Parameter Value` = x, Mean = .mean, `Std Dev` = .sd, `Expected Improvment` = exp_imp) %>% 
   as.data.frame() %>% 
   format(digits = 4, scientific = FALSE) %>% 
-  kable() %>% 
+  kable(
+    caption = "Expected improvement for the two candidate tuning parameters.",
+    label = "two-exp-improve"
+  ) %>% 
   kableExtra::kable_styling(full_width = FALSE) %>% 
   kableExtra::add_header_above(c(" " = 1, "Predictions" = 3))
 ```
 
-When expected improvement is computed across the range of the tuning parameter, the recommended point to sample  is much closer to 0.25 than 0.10: 
+When expected improvement is computed across the range of the tuning parameter, the recommended point to sample is much closer to 0.25 than 0.10, as shown in Figure \@ref(fig:expected-improvement).
 
-```{r iterative-exp-imp-profile, echo = FALSE, fig.height = 5.5, out.width="100%"}
+```{r expected-improvement}
+#| echo = FALSE, 
+#| fig.height= 5.5, 
+#| fig.cap = "The estimated performance profile generated by the Gaussian process model (top panel) and the expected improvement (bottom panel). The vertical line indicates the point of maximum improvement.",
+#| fig.alt = "The estimated performance profile generated by the Gaussian process model (top panel) and the expected improvement (bottom panel). The vertical line indicates the point of maximum improvement where estimated performance is high and the predicted variation is also large."
+
 p1 <- 
   gp_pred %>% 
   ggplot(aes(x = x)) + 
@@ -485,6 +521,7 @@ if (length(so_stop_index) > 0) {
   cat(svm_bo_output[1:(so_stop_index - 2)], sep = "")
 }
 ```
+
 The search continues. `r improve_text` The best result occurred at iteration `r max(new_best_iter)` with an area under the ROC curve of `r round(best_bo, 5)`. 
 
 ```{r iterative-cells-bo-print-impr, echo = FALSE}
@@ -511,9 +548,13 @@ The functions that are used to interrogate the results are the same as those use
 show_best(svm_bo)
 ```
 
-The `autoplot()` function has several options for iterative search methods. One shows how the outcome changed over the search: 
+The `autoplot()` function has several options for iterative search methods. Figure \@reg(fig:progress-plot) shows how the outcome changed over the search by using `autoplot(svm_bo, type = "performance")`.
 
-```{r iterative-bo-iter, fig.height = 4}
+```{r progress-plot}
+#| fig.height = 4,
+#| echo = FALSE,
+#| fig.cap = "The progress of the Bayesian optimization produced when the `autoplot()` method is used with `type = 'performance'`.",
+#| fig.alt = "The progress of the Bayesian optimization produced when the `autoplot()` method is used with `type = 'performance'`. The plot shows the estimated performance on the y axis versus the iteration number on the x axis. Confidence intervals are shown for the points."
 autoplot(svm_bo, type = "performance")
 ```
 
@@ -573,9 +614,16 @@ where $i$ is the iteration number, $c$ is a user-specified constant, and $D_i$ i
 The acceptance probabilities of simulated annealing allows the search to proceed in the wrong direction, at least for the short term, with the potential to find a much better region of the parameter space in the long run. 
 :::
 
-How are the acceptance probabilities influenced? This heatmap shows how the acceptance probability can change over iterations, performance, and the user-specified coefficient: 
+How are the acceptance probabilities influenced? This heatmap in Figure \@ref(fig:acceptance-prob) shows how the acceptance probability can change over iterations, performance, and the user-specified coefficient.
 
-```{r iterative-acceptance, echo = FALSE, dev = "png", fig.height = 4.5}
+```{r acceptance-prob}
+#| echo = FALSE, 
+#| dev = "png", 
+#| fig.height = 4.5,
+#| out.width = "80%",
+#| fig.cap = "Heatmap of the simulated annealing acceptance probabilities for different coefficient values.",
+#| fig.alt = "A heatmap of the simulated annealing acceptance probabilities for different coefficient values. The probabilities are affected by the both the iteration number as well as how far off the the performance is from the current best."
+
 get_accept_probs <- function(coef, pct_diff) {
   # pct loss to abs value
   candidate <- .8 - (pct_diff  * .8 /100) 
@@ -616,7 +664,14 @@ To illustrate, we'll use the two main `r pkg(glmnet)` tuning parameters:
 
 * The proportion of the lasso penalty (`mixture`). This is bounded at zero and one with no transformation.
 
-```{r iterative-neighborhood-calcs, echo = FALSE}
+```{r iterative-neighborhood}
+#| echo = FALSE, 
+#| message = FALSE, 
+#| warning = FALSE,
+#| out.width = "80%",
+#| fig.cap = "How simulated annealing determines the local neighborhood for two numeric tuning parameters. The clouds of points show possible next values where one would be selected at random. ",
+#| fig.alt = "An illustration of how simulated annealing determines what is the local neighborhood for two numeric tuning parameters. The clouds of points show possible next values where one would be selected at random. The candidate points are small circular clouds surrounding the current best point."
+
 glmn_param <- parameters(penalty(), mixture())
 pen_rng <- unlist(range_get(penalty(), original = TRUE))
 mix_rng <- 0:1
@@ -836,15 +891,21 @@ if (length(so_stop_index) > 0) {
 }
 ```
 
-As with the other `tune_*()` functions, the corresponding `autoplot()` function produces visual assessments of the results: 
+As with the other `tune_*()` functions, the corresponding `autoplot()` function produces visual assessments of the results. Using `autoplot(svm_sa, type = "performance")` shows the performance over iterations (Figure \@ref(fig:sa-iterations)) while `autoplot(svm_sa, type = "parameters")` plots performance versus specific tuning parameter values (Figure \@ref(fig:sa-parameters)).
 
-```{r interative-sa-performance, fig.height = 4.25}
+```{r sa-iterations}
+#| fig.height = 4,
+#| echo = FALSE,
+#| fig.cap = 'Progress of the simulated annealing process shown when the `autoplot()` method is used with `type = "performance"`.',
+#| fig.alt = "The progress of the simulated annealing process shown when the `autoplot()` method is used with `type = 'performance'`. The plot shows the estimated performance on the y axis versus the iteration number on the x axis. Confidence intervals are shown for the points."
 autoplot(svm_sa, type = "performance")
 ```
 
-To show how the parameters change over iterations: 
-
-```{r interative-sa-parameters, fig.height = 4.00}
+```{r sa-parameters}
+#| fig.height = 4,
+#| echo = FALSE,
+#| fig.cap = "Performance versus tuning parameter values when the `autoplot()` method is used with `type = "parameters"`.",
+#| fig.alt = "A visualization of performance versus tuning parameter values when the `autoplot()` method is used with `type = 'parameters'`. The plot shows different panels for each tuning parameter in their transformed units."
 autoplot(svm_sa, type = "parameters")
 ```
 
