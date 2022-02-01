@@ -108,7 +108,7 @@ For cases where the statistical properties of the tuning parameter are tractable
 
 To demonstrate, consider the classification data shown in Figure \@ref(fig:two-class-dat) with two predictors, two classes, and a training set of `r nrow(training_set)` data points.
 
-```{r tuning-two-class-dat}
+```{r two-class-dat}
 #| echo = FALSE,
 #| fig.cap = "An example two-class classification data set with two predictors.",
 #| fig.alt = "An example two-class classification data set with two predictors. The two predictors have a moderate correlation and there is some locations of separation between the classes."
@@ -215,7 +215,7 @@ These results show that there is considerable evidence that the choice of the li
 
 What about a different metric? We also calculated the area under the ROC curve for each resample. These results, which reflect the discriminative ability of the models across numerous probability thresholds, show a lack of difference in Figure \@ref(fig:resampled-roc).
 
-```{r tuning-resampled-roc}
+```{r resampled-roc}
 #| echo = FALSE,
 #| fig.height = 3,
 #| fig.cap = "Means and approximate 90% confidence intervals for the resampled area under the ROC curve with three different link functions.",
@@ -231,7 +231,7 @@ resampled_res %>%
 
 Given the overlap of the intervals, as well as the scale of the x-axis, any of these options could be used. We see this again when the class boundaries for the three models are overlaid on the _test set_ of `r nrow(testing_set)` data points in Figure \@ref(fig:three-link-fits).
 
-```{r tuning-glm-fits}
+```{r three-link-fits}
 #| echo = FALSE,
 #| fig.cap = "The linear class boundary fits for three link functions.",
 #| fig.alt = "The linear class boundary fits for three link functions. The lines have very similar slopes with the complementary log log having a slightly different intercept than the other two links."

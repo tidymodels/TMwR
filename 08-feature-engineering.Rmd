@@ -317,7 +317,7 @@ _Order matters_.  The gross living area is log transformed prior to the interact
 
 When a predictor has a nonlinear relationship with the outcome, some types of predictive models can adaptively approximate this relationship during training. However, simpler is usually better and it is not uncommon to try to use a simple model, such as a linear fit, and add in specific non-linear features for predictors that may need them. One common method for doing this is to use _spline_ functions to represent the data. Splines replace the existing numeric predictor with a set of columns that allow a model to emulate a flexible, non-linear relationship. As more spline terms are added to the data, the capacity to non-linearly represent the relationship increases. Unfortunately, it may also increase the likelihood of picking up on data trends that occur by chance (i.e., over-fitting). 
 
-If you have ever used `geom_smooth()` within a `ggplot`, you have probably used a spline representation of the data. For example, each panel in Figure \@ref(ames-latitude-splines) uses a different number of smooth splines for the latitude predictor:
+If you have ever used `geom_smooth()` within a `ggplot`, you have probably used a spline representation of the data. For example, each panel in Figure \@ref(fig:ames-latitude-splines) uses a different number of smooth splines for the latitude predictor:
 
 ```{r engineering-ames-splines, eval=FALSE}
 library(patchwork)
