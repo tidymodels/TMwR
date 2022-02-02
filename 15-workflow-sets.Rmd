@@ -475,9 +475,11 @@ boosting_test_results <-
 
 We can see the test set metrics results, and visualize the predictions in Figure \@ref(fig:concrete-test-results).
 
-```{r workflow-sets-test-results, eval=FALSE}
+```{r workflow-sets-collect-test-metrics}
 collect_metrics(boosting_test_results)
+```
 
+```{r workflow-sets-test-results, eval=FALSE}
 boosting_test_results %>% 
    collect_predictions() %>% 
    ggplot(aes(x = compressive_strength, y = .pred)) + 

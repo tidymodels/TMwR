@@ -118,7 +118,7 @@ For both models, Table \@ref(tab:rmse-results) summarizes the RMSE estimate for 
 all_res %>% 
   mutate(object = paste0("<tt>", object, "</tt>")) %>% 
   kable(
-    caption = "Performance statstics for training and test sets.",
+    caption = "Performance statistics for training and test sets.",
     label = "rmse-results",
     escape = FALSE
   ) %>% 

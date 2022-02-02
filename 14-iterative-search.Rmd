@@ -553,7 +553,7 @@ The `autoplot()` function has several options for iterative search methods. Figu
 ```{r progress-plot}
 #| fig.height = 4,
 #| echo = FALSE,
-#| fig.cap = "The progress of the Bayesian optimization produced when the `autoplot()` method is used with `type = 'performance'`.",
+#| fig.cap = 'The progress of the Bayesian optimization produced when the `autoplot()` method is used with `type = "performance"`.',
 #| fig.alt = "The progress of the Bayesian optimization produced when the `autoplot()` method is used with `type = 'performance'`. The plot shows the estimated performance on the y axis versus the iteration number on the x axis. Confidence intervals are shown for the points."
 autoplot(svm_bo, type = "performance")
 ```
