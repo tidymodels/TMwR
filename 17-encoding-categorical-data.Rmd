@@ -181,9 +181,9 @@ mixed_estimates %>%
 You can use a fully Bayesian hierarchical model for the effects in the same way with `step_lencode_bayes()`.
 :::
 
-Let's visually compare the effects using pooling vs. no pooling.
+Let's visually compare the effects using pooling vs. no pooling in Figure \@ref(fig:encoding-compare-pooling).
 
-```{r}
+```{r encoding-compare-pooling}
 #| fig.cap = "Comparing the effect encodings for neighborhood estimated without pooling to those with pooling.",
 #| fig.alt = "A scatter chart comparing the effect encodings for neighborhood estimated without pooling to those with pooling. Almost all neighborhoods are very close to the slope = 1 line, but the neighborhoods with the fewest homes are further away."
 glm_estimates %>%
@@ -203,7 +203,7 @@ glm_estimates %>%
   coord_fixed()
 ```
 
-Notice that most estimates for neighborhood effects are about the same when we compare pooling to no pooling. However, the neighborhoods with the fewest homes in them have been pulled (either up or down) toward the mean effect. When we use pooling, we shrink the effect estimates toward the mean because we don't have as much evidence about the price in those neighborhoods.
+Notice in Figure \@ref(fig:encoding-compare-pooling) that most estimates for neighborhood effects are about the same when we compare pooling to no pooling. However, the neighborhoods with the fewest homes in them have been pulled (either up or down) toward the mean effect. When we use pooling, we shrink the effect estimates toward the mean because we don't have as much evidence about the price in those neighborhoods.
 
 ## Feature hashing
 
