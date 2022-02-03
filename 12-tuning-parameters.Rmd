@@ -112,10 +112,10 @@ To demonstrate, consider the classification data shown in Figure \@ref(fig:two-c
 #| echo = FALSE,
 #| fig.cap = "An example two-class classification data set with two predictors.",
 #| fig.alt = "An example two-class classification data set with two predictors. The two predictors have a moderate correlation and there is some locations of separation between the classes."
-ggplot(training_set, aes(x = A, y = B, col = Class)) + 
-  geom_point(alpha = .5) + 
+ggplot(training_set, aes(x = A, y = B, col = Class, pch = Class)) + 
+  geom_point(alpha = .8) + 
   coord_equal()  + 
-  labs(x = "Predictor A", y = "Predictor B", col = NULL) + 
+  labs(x = "Predictor A", y = "Predictor B", color = NULL, pch = NULL) + 
   scale_color_manual(values = c("#CC6677", "#88CCEE"))
 ```
 
@@ -267,7 +267,7 @@ link_grids <-
 link_grids %>% 
   ggplot(aes(x = A, y = B)) + 
   geom_point(data = testing_set, aes(col = Class, pch = Class), 
-             alpha = .5, show.legend = FALSE) + 
+             alpha = .8, show.legend = FALSE) + 
   geom_contour(aes( z = .pred_Class1, lty = link), breaks = 0.5, col = "black") + 
   scale_color_manual(values = c("#CC6677", "#88CCEE")) + 
   coord_equal() + 
@@ -353,7 +353,7 @@ te_plot <-
   ) %>% 
   ggplot(aes(x = A, y = B)) + 
   geom_point(data = testing_set, aes(col = Class, pch = Class), 
-             alpha = .5, show.legend = FALSE) + 
+             alpha = .7, show.legend = FALSE) + 
   geom_contour(aes( z = .pred_Class1), breaks = 0.5, col = "black") + 
   scale_color_manual(values = c("#CC6677", "#88CCEE")) + 
   facet_wrap(~ label, nrow = 1) + 
@@ -375,7 +375,7 @@ tr_plot <-
   ) %>% 
   ggplot(aes(x = A, y = B)) +
   geom_point(data = training_set, aes(col = Class, pch = Class), 
-             alpha = .5, show.legend = FALSE) + 
+             alpha = .7, show.legend = FALSE) + 
   geom_contour(aes( z = .pred_Class1), breaks = 0.5, col = "black") + 
   scale_color_manual(values = c("#CC6677", "#88CCEE")) + 
   facet_wrap(~ label, nrow = 1) + 

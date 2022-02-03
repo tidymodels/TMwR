@@ -560,34 +560,6 @@ autoplot(svm_bo, type = "performance")
 
 An additional type of plot uses `type = "parameters"`  which shows the parameter values over iterations.
 
-The animation below visualizes the results of the search. The black $\times$ values show the starting values contained in `svm_initial`. The top-left blue panel shows the _predicted_ mean value of the area under the ROC curve. The red panel on the top-right displays the _predicted_ variation in the ROC values while the bottom plot visualizes the expected improvement. In each panel, darker colors indicate less attractive values (e.g., small mean values, large variation, and small improvements).  
-
-```{r iterative-bo-progress, include = FALSE}
-# If caching was turned on for the 'iterative-cells-bo-calcs' chunk, the version
-# of the GP results in tempdir will not be available so we use the last copy in 
-# the 'RData' path. 
-
-if (!exists("gp_candidates")) {
-  load("RData/gp_candidates.RData")
-}
-av_capture_graphics(
-  make_bo_animation(gp_candidates, svm_bo),
-  output = "bo_search.mp4",
-  width = 760,
-  height = 760,
-  res = 100,
-  vfilter = 'framerate=fps=10', 
-  framerate = 1/3
-)
-```
-
-<video width="720" height="720" controls>
-<source src="bo_search.mp4" type="video/mp4">
-</video>
-
-
-The surface of the predicted mean surface is very inaccurate in the first few iterations of the search. Despite this, it does help guide the process to the region of good performance.  In other words, the Gaussian process model is wrong but shows itself to be very useful. Within the first ten iterations, the search is sampling near the optimum location. 
-
 While the best tuning parameter combination is on the boundary of the parameter space, Bayesian optimization will often choose new points on other sides of the boundary. While we can adjust the ratio of exploration and exploitation, the search tends to sample boundary points early on.
 
 :::rmdnote
@@ -915,24 +887,6 @@ autoplot(svm_sa, type = "performance")
 #| fig.alt = "A visualization of performance versus tuning parameter values when the `autoplot()` method is used with `type = 'parameters'`. The plot shows different panels for each tuning parameter in their transformed units."
 autoplot(svm_sa, type = "parameters")
 ```
-
-A visualization of the search path helps to understand where the search process did well and where it went astray:  
-
-```{r iterative-sa-plot, include = FALSE}
-av_capture_graphics(
-  sa_2d_plot(svm_sa, result_history, svm_large),
-  output = "sa_search.mp4",
-  width = 720,
-  height = 720,
-  res = 120,
-  vfilter = 'framerate=fps=10', 
-  framerate = 1/3
-)
-```
-
-<video width="720" height="720" controls>
-  <source src="sa_search.mp4" type="video/mp4">
-</video>
 
 Like `tune_bayes()`, manually stopping execution will return the completed iterations. 
 

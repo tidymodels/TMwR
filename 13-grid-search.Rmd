@@ -654,7 +654,7 @@ First, let's consider the raw execution times in Figure \@ref(fig:parallel-times
 
 load("extras/parallel_times/xgb_times.RData")
 ggplot(times, aes(x = num_cores, y = elapsed, col = parallel_over, shape = parallel_over)) + 
-  geom_point() + 
+  geom_point(size = 2) + 
   geom_line() +
   facet_wrap(~ preprocessing) + 
   labs(x = "Number of Workers", y = "Execution Time (s)") + 
@@ -686,7 +686,7 @@ We can also view these data in terms of speed-ups in Figure \@ref(fig:parallel-s
 
 ggplot(times, aes(x = num_cores, y = speed_up, col = parallel_over, shape = parallel_over)) + 
   geom_abline(lty = 1) + 
-  geom_point() + 
+  geom_point(size = 2) + 
   geom_line() +
   facet_wrap(~ preprocessing) + 
   coord_obs_pred() + 
@@ -727,7 +727,7 @@ remaining <-
 ```
 
 
-As an example, in the multilayer perceptron tuning process with a regular grid explored in this chapter, what would the results look like after only the first three folds? Using techniques similar to those shown in Chapter \@ref(compare), we can fit a model where the outcome is the resampled area under the ROC curve and the predictor is an indicator for the parameter combination. The model takes the resample-to-resample effect into account and produces point and interval estimates for each parameter setting. The results of the model are one-sided 95% confidence intervals that measure the loss of the ROC value relative to the currently best performing parameters, as shown in Figure \@ref(fig:racing-process).
+As an example, in the multilayer perceptron tuning process with a regular grid explored in this chapter, what would the results look like after only the first three folds? Using techniques similar to those shown in Chapter \@ref(compare), we can fit a model where the outcome is the resampled area under the ROC curve and the predictor is an indicator for the parameter combination. The model takes the resample-to-resample effect into account and produces point and interval estimates for each parameter setting. The results of the model are one-sided 95% confidence intervals that measure the loss of the ROC value relative to the currently best performing parameters.
 
 ```{r racing-process}
 #| echo = FALSE, 
@@ -780,61 +780,18 @@ iter_three %>%
   ggplot(aes(x = -estimate, y = .config)) + 
   geom_vline(xintercept = 0, lty = 2, col = "green") +
   geom_point(size = 2, aes(col = decision)) +
-  geom_errorbarh(aes(xmin = -estimate, xmax = -upper, col = decision), height = .3, show.legend = FALSE) + 
+  geom_errorbarh(aes(xmin = -estimate, xmax = -upper, col = decision), height = .3, show.legend = FALSE) +
   labs(x = "Loss of ROC AUC", y = NULL) + 
   scale_colour_manual(values = race_cols)
 ```
 
-Any parameter set whose confidence interval includes zero would lack evidence that its performance is not statistically different from the best results. We retain `r sum(iter_three$upper < 0)` settings; these are resampled more. The remaining `r sum(iter_three$upper >= 0)` submodels are no longer considered. 
+Figure \@ref(fig:racing-process) shows the results at several iterations in the process. The points shown in the panel with the first iteration show single ROC AUC values. As iterations progress, the points are averages of the resampled ROC statistics.
 
-```{r grid-mlp-racing-anim, include = FALSE, dev = 'png'}
-race_ci_plots <- function(x, iters = max(x$iter)) {
-  
-  x_rng <- extendrange(c(-x$estimate, -x$upper))
-  
-  for (i in 1:iters) {
-    if (i < 3) {
-      ttl <- paste0("Iteration ", i, ": burn-in")
-    } else {
-      ttl <- paste0("Iteration ", i, ": testing")
-    }
-    p <-
-      x %>% 
-      dplyr::filter(iter == i) %>% 
-      ggplot(aes(x = -estimate, y = .config, col = decision)) +
-      geom_vline(xintercept = 0, col = "green", lty = 2) +
-      geom_point(size = 2) +
-      labs(title = ttl, y = "", x = "Loss of ROC AUC") +
-      scale_color_manual(values = c(best = "blue", retain = "black", discard = "grey"), 
-                         drop = FALSE) +
-      scale_y_discrete(drop = FALSE) +
-      xlim(x_rng) + 
-      theme_bw() +
-      theme(legend.position = "top")
-    
-    if (i >= 3) {
-      p <- p  + geom_errorbar(aes(xmin = -estimate, xmax = -upper), width = .3)
-    }
-    
-    print(p)
-  }
-  invisible(NULL)
-}
-av_capture_graphics(
-  race_ci_plots(race_details),
-  output = "race_results.mp4",
-  width = 720,
-  height = 720,
-  res = 120,
-  framerate = 1/3
-)
-```
+On the third iteration, the leading model configuration has changed and the algorithm computes one-sided confidence intervals. Any parameter set whose confidence interval includes zero would lack evidence that its performance is not statistically different from the best results. We retain `r sum(iter_three$upper < 0)` settings; these are resampled more. The remaining `r sum(iter_three$upper >= 0)` submodels are no longer considered. 
 
-<video width="720" height="720" controls>
-  <source src="race_results.mp4" type="video/mp4">
-</video>
+The process continues to resample configurations that remain and the statistical analysis repeats with the current results. More submodels may be removed from consideration. Prior to the final resample, almost all submodels are eliminated and, after the last iteration, only one remains. 
 
-The process continues for each resample; after the next set of performance metrics, a new model is fit to these statistics, and more  submodels are potentially discarded. See @kuhn2014futility for more details on the computational aspects of this approach. 
+See @kuhn2014futility for more details on the computational aspects of this approach. 
 
 :::rmdwarning
 Racing methods can be more efficient than basic grid search as long as the interim analysis is fast and some parameter settings have poor performance. It also is most helpful when the model does _not_ have the ability to exploit submodel predictions. 

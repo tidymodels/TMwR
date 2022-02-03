@@ -136,8 +136,8 @@ These high correlations indicate that, across models, there are large within-res
 ```{r compare-rsq-plot, eval=FALSE}
 rsq_indiv_estimates %>% 
   mutate(wflow_id = reorder(wflow_id, .estimate)) %>% 
-  ggplot(aes(x = wflow_id, y = .estimate, group = id, col = id)) + 
-  geom_line(alpha = .5, lwd = 1.25) + 
+  ggplot(aes(x = wflow_id, y = .estimate, group = id, col = id, lty = id)) + 
+  geom_line(alpha = .8, lwd = 1.25) + 
   theme(legend.position = "none") + 
   labs(x = NULL, y = expression(paste(R^2, "statistics")))
 ```
