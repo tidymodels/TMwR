@@ -48,7 +48,7 @@ The tidymodels framework does not itself contain software for model explanations
 In Chapters \@ref(resampling) and \@ref(compare), we trained and compared several models to predict the price of homes in Ames, IA, including a linear model with interactions and a random forest model, with results shown in Figure \@ref(fig:explain-obs-pred).
 
 ```{r explain-obs-pred}
-#| echo = FALSE
+#| echo = FALSE,
 #| fig.cap = "Comparing predicted prices for a linear model with interactions and a random forest model.",
 #| fig.alt = "Comparing predicted prices for a linear model with interactions and a random forest model. The random forest results in more accurate predictions."
 bind_rows(
