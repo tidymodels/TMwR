@@ -330,7 +330,7 @@ plot_smoother <- function(deg_free) {
     geom_smooth(
       method = lm,
       formula = y ~ ns(x, df = deg_free),
-      col = "red",
+      col = "lightblue",
       se = FALSE
     ) +
     labs(title = paste(deg_free, "Spline Terms"),

@@ -200,7 +200,7 @@ This iterative process is especially true for modeling. Figure \@ref(fig:softwar
 
 * **Feature engineering:** The understanding gained from EDA results in the creation of specific model terms that make it easier to accurately model the observed data. This can include complex methodologies (e.g., PCA) or simpler features (using the ratio of two predictors). Chapter \@ref(recipes) focuses entirely on this important step.
 
-* **Model tuning and selection (circles with blue and yellow segments):** A variety of models are generated and their performance is compared. Some models require _parameter tuning_ where some structural parameters are required to be specified or optimized. The colored segments within the circles signify the repeated data splitting used during resampling (see Chapter \@ref(resampling)). 
+* **Model tuning and selection (circles with alternating segments):** A variety of models are generated and their performance is compared. Some models require _parameter tuning_ where some structural parameters are required to be specified or optimized. The colored segments within the circles signify the repeated data splitting used during resampling (see Chapter \@ref(resampling)). 
 
 * **Model evaluation:** During this phase of model development, we assess the model's performance metrics, examine residual plots, and conduct other EDA-like analyses to understand how well the models work. In some cases, formal between-model comparisons (Chapter \@ref(compare)) help you to understand whether any differences in models are within the experimental noise.   
 

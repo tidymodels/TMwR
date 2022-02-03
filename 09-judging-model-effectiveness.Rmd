@@ -344,7 +344,8 @@ The groupings also translate to the `autoplot()` methods, with results in in Fig
 hpc_cv %>% 
   group_by(Resample) %>% 
   roc_curve(obs, VF, F, M, L) %>% 
-  autoplot()
+  autoplot() +
+  theme(legend.position = "none")
 ```
 
 ```{r grouped-roc-curves, ref.label = "performance-multi-class-roc-grouped"}
