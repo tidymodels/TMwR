@@ -300,7 +300,7 @@ res_test %>%
   scale_color_brewer(palette = "Set2") +
   scale_shape_manual(values = 15:22) +
   scale_x_date(labels = date_format("%B %d, %Y")) +
-  labs(x = NULL, y = "Daily Ridership (x1000)", color = NULL)
+  labs(x = NULL, y = "Daily Ridership (x1000)", color = NULL, pch = NULL)
 ```
 
 Given the scale of the ridership numbers, these results look particularly good for such a simple model. If this model were deployed, how well would it have done a few years later in June of 2020? The model successfully makes a prediction, as a predictive model will when given input data:
@@ -342,7 +342,7 @@ res_2020 %>%
   scale_shape_manual(values = 15:22) +
   scale_color_brewer(palette = "Set2") +
   scale_x_date(labels = date_format("%B %d, %Y")) +
-  labs(x = NULL, y = "Daily Ridership (x1000)", color = NULL) 
+  labs(x = NULL, y = "Daily Ridership (x1000)", color = NULL, pch = NULL) 
 ```
 
 Confidence and prediction intervals for linear regression expand as the data become more and more removed from the center of the training set. However, that effect is not dramatic enough to flag these predictions as being poor.
@@ -477,8 +477,8 @@ test_pca_dist <-
     aes(x = PC1_mean, y = PC2_mean, xend = PC1, yend = PC2), 
     col = "red"
   )  + 
-  geom_point(data = testing_pca, aes(x = PC1, y = PC2), col = "lightblue", pch = 17) +
-  geom_point(data = new_pca, aes(x = PC1, y = PC2), col = "red") +
+  geom_point(data = testing_pca, aes(x = PC1, y = PC2), col = "lightblue", size = 2, pch = 17) +
+  geom_point(data = new_pca, aes(x = PC1, y = PC2), size = 2, col = "red") +
   coord_obs_pred() + 
   labs(x = "Component 1", y = "Component 2", title = "Distances to Training Set Center") + 
   theme_bw() + 
