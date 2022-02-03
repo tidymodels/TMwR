@@ -198,7 +198,7 @@ glm_estimates %>%
       mutate(level = as.character(Neighborhood))
   ) %>%
   ggplot(aes(`no pooling`, pooling, size = sqrt(n))) +
-  geom_abline(color = "red", lty = 2) +
+  geom_abline(color = "gray50", lty = 2) +
   geom_point(alpha = 0.7) +
   coord_fixed()
 ```

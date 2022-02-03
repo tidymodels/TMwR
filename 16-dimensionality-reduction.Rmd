@@ -267,23 +267,33 @@ If the training set is not pathologically large, using this value of `retain` ca
 
 ## Feature extraction techniques
 
-Since recipes are the primary option in tidymodels for dimensionality reduction, let's write a function that will estimate the transformation and plot the resulting data in a scatter plot matrix via the `r pkg(ggforce)` package:
+Since recipes are the primary option in tidymodels for dimensionality reduction, let's write a function that will estimate the transformation and plot the resulting data:
 
 ```{r dimensionality-function}
-library(ggforce)
 plot_validation_results <- function(recipe, dat = assessment(bean_val$splits[[1]])) {
-  recipe %>%
+  set.seed(1)
+  plot_data <- 
+    recipe %>%
     # Estimate any additional steps
     prep() %>%
     # Process the data (the validation set by default)
-    bake(new_data = dat) %>%
-    # Create the scatterplot matrix
-    ggplot(aes(x = .panel_x, y = .panel_y, col = class, fill = class)) +
-    geom_point(alpha = 0.4, size = 0.5) +
-    geom_autodensity(alpha = .3) +
-    facet_matrix(vars(-class), layer.diag = 2) + 
-    scale_color_brewer(palette = "Dark2") + 
-    scale_fill_brewer(palette = "Dark2")
+    bake(new_data = dat, all_predictors(), all_outcomes()) %>%
+    # Sample the data down to be more readable
+    sample_n(250)
+  
+  # Convert feature names to symbols to use with quasiquotation
+  nms <- names(plot_data)
+  x_name <- sym(nms[1])
+  y_name <- sym(nms[2])
+  
+  plot_data %>% 
+    ggplot(aes(x = !!x_name, y = !!y_name, col = class, 
+               fill = class, pch = class)) +
+    geom_point(alpha = 0.9) +
+    scale_shape_manual(values = 1:7) +
+    # Make equally sized axes
+    coord_obs_pred() +
+    theme_bw()
 }
 ```
 
@@ -305,7 +315,7 @@ bean_rec_trained %>%
 ```{r bean-pca, ref.label = "dimensionality-pca"}
 #| dev = "png", 
 #| fig.height = 7,
-#| fig.cap = "Principal component scores for the bean validation set, colored by class.",
+#| fig.cap = "First two principal component scores for the bean validation set, colored by class.",
 #| fig.alt = "Principal component scores for the bean validation set, colored by class. The classes separate when the first two components are plotted against one another."
 ```
 
@@ -319,6 +329,7 @@ bean_rec_trained %>%
   step_pca(all_numeric_predictors(), num_comp = 4) %>% 
   prep() %>% 
   plot_top_loadings(component_number <= 4, n = 5) + 
+  scale_fill_brewer(palette = "Paired") +
   ggtitle("Principal Component Analysis")
 ```
 
@@ -346,7 +357,7 @@ bean_rec_trained %>%
 ```{r bean-pls, ref.label = "dimensionality-pls"}
 #| dev = "png", 
 #| fig.height = 7,
-#| fig.cap = "PLS component scores for the bean validation set, colored by class.",
+#| fig.cap = "First two PLS component scores for the bean validation set, colored by class.",
 #| fig.alt = "PLS component scores for the bean validation set, colored by class. The first two PLS components are nearly identical to the first two PCA components."
 ```
 
@@ -357,6 +368,7 @@ bean_rec_trained %>%
   step_pls(all_numeric_predictors(), outcome = "class", num_comp = 4) %>%
   prep() %>% 
   plot_top_loadings(component_number <= 4, n = 5, type = "pls") + 
+  scale_fill_brewer(palette = "Paired") +
   ggtitle("Partial Least Squares")
 ```
 
@@ -382,7 +394,7 @@ bean_rec_trained %>%
 ```{r bean-ica, ref.label = "dimensionality-ica"}
 #| dev = "png", 
 #| fig.height = 7,
-#| fig.cap = "ICA component scores for the bean validation set, colored by class.",
+#| fig.cap = "First two ICA component scores for the bean validation set, colored by class.",
 #| fig.alt = "ICA component scores for the bean validation set, colored by class. There is significant overlap in the first two ICA components."
 ```
 
@@ -407,7 +419,7 @@ bean_rec_trained %>%
 ```{r bean-umap, ref.label = "dimensionality-umap"}
 #| dev = "png", 
 #| fig.height = 7,
-#| fig.cap = "UMAP component scores for the bean validation set, colored by class.",
+#| fig.cap = "First two UMAP component scores for the bean validation set, colored by class.",
 #| fig.alt = "UMAP component scores for the bean validation set, colored by class. There is significant overlap in the first two ICA components."
 ```
 

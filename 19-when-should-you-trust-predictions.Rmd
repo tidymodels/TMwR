@@ -96,7 +96,7 @@ grid_pred <-
 grid_pred %>% 
   mutate(`Probability of Class 1` = .pred_class_1) %>% 
   ggplot(aes(x = x, y = y)) + 
-  geom_raster(aes(fill = `Probability of Class 1`)) +
+  geom_raster(aes(fill = `Probability of Class 1`), alpha = 0.5) +
   geom_point(data = testing_set, aes(shape = class, col = class), alpha = .75, size = 2) + 
   geom_contour(aes(z = .pred_class_1), breaks = .5, col = "black", lty = 2) + 
   coord_equal() + 
@@ -164,7 +164,7 @@ eq_zone_results <- function(buffer) {
 # Evaluate a sequence of buffers and plot the results. 
 map_dfr(seq(0, .1, length.out = 40), eq_zone_results) %>% 
   pivot_longer(c(-buffer), names_to = "statistic", values_to = "value") %>% 
-  ggplot(aes(x = buffer, y = value, col = statistic)) + 
+  ggplot(aes(x = buffer, y = value, lty = statistic)) + 
   geom_step(size = 1.2, alpha = 0.8) + 
   labs(y = NULL)
 ```
