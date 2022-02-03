@@ -525,7 +525,7 @@ filter(rankings, rank <= 5) %>% dplyr::select(rank, mean, model, method)
 Figure \@ref(fig:dimensionality-rankings) illustrates this ranking.
 
 ```{r dimensionality-rankings}
-#| echo = FALSE
+#| echo = FALSE,
 #| fig.cap = "Area under the ROC curve from the validation set.",
 #| fig.alt = "Area under the ROC curve from the validation set. The three best model configurations use PLS together with regularized discriminant analysis, a multi-layer perceptron, and a naive Bayes model."
 
