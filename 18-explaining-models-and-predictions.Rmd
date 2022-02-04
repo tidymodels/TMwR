@@ -49,6 +49,7 @@ In Chapters \@ref(resampling) and \@ref(compare), we trained and compared severa
 
 ```{r explain-obs-pred}
 #| echo = FALSE,
+#| fig.height = 4,
 #| fig.cap = "Comparing predicted prices for a linear model with interactions and a random forest model.",
 #| fig.alt = "Comparing predicted prices for a linear model with interactions and a random forest model. The random forest results in more accurate predictions."
 bind_rows(
@@ -59,7 +60,7 @@ bind_rows(
   geom_abline(col = "gray50", lty = 2) + 
   geom_point(alpha = 0.3, show.legend = FALSE) +
   facet_wrap(vars(model)) +
-  scale_color_viridis_d(end = 0.7) +
+  scale_color_brewer(palette = "Paired") +
   labs(x = "true price", y = "predicted price")
 ```
 
