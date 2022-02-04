@@ -892,7 +892,7 @@ The `verbose` option prints details of the search process. The output for the fi
 ```{r iterative-cells-sa-print-start, echo = FALSE}
 so_stop_index <- grep("^ 5", svm_sa_output)
 if (length(so_stop_index) > 0) {
-  cat(svm_sa_output[1:so_stop_index], sep = "")
+  cat(svm_sa_output[1:so_stop_index], sep = "\n")
 }
 ```
 
@@ -902,7 +902,7 @@ The last ten iterations:
 so_start_index <- grep("^40", svm_sa_output)
 so_stop_index <- grep("^50", svm_sa_output)
 if (length(so_stop_index) > 0) {
-  cat(svm_sa_output[so_start_index:so_stop_index], sep = "")
+  cat(svm_sa_output[so_start_index:so_stop_index], sep = "\n")
 }
 ```
 
