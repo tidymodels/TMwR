@@ -77,7 +77,7 @@ For illustration, let's slightly change the kernel parameter range, to improve t
 ```{r iterative-svm-param-set}
 svm_param <- 
   svm_wflow %>% 
-  parameters() %>% 
+  extract_parameter_set_dials() %>% 
   update(rbf_sigma = rbf_sigma(c(-7, -1)))
 ```
 

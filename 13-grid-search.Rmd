@@ -55,10 +55,10 @@ mlp_spec <-
   set_mode("classification")
 ```
 
-The argument `trace = 0` prevents extra logging of the training process. As shown in Section \@ref(tuning-params-tidymodels), the `parameters()` function can extract the set of arguments with unknown values and sets their `r pkg(dials)` objects: 
+The argument `trace = 0` prevents extra logging of the training process. As shown in Section \@ref(tuning-params-tidymodels), the `extract_parameter_set_dials()` function can extract the set of arguments with unknown values and sets their `r pkg(dials)` objects: 
 
 ```{r grid-mlp-param}
-mlp_param <- parameters(mlp_spec)
+mlp_param <- extract_parameter_set_dials(mlp_spec)
 mlp_param %>% extract_parameter_dials("hidden_units")
 mlp_param %>% extract_parameter_dials("penalty")
 mlp_param %>% extract_parameter_dials("epochs")
@@ -218,7 +218,7 @@ In `step_pca()`, using zero PCA components is a shortcut to _skip_ the feature e
 ```{r grid-cells-workflow}
 mlp_param <- 
   mlp_wflow %>% 
-  parameters() %>% 
+  extract_parameter_set_dials() %>% 
   update(
     epochs = epochs(c(50, 200)),
     num_comp = num_comp(c(0, 40))

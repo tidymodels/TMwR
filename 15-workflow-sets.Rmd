@@ -149,12 +149,12 @@ cubist_spec <-
    set_engine("Cubist") 
 ```
 
-The analysis in @apm specifies that the neural network should have up to 27 hidden units in the layer. The `parameters()` function creates a parameter set that we modify to have the correct parameter range.
+The analysis in @apm specifies that the neural network should have up to 27 hidden units in the layer. The `extract_parameter_set_dials()` function extracts the parameter set which we modify to have the correct parameter range.
 
 ```{r workflow-sets-param}
 nnet_param <- 
    nnet_spec %>% 
-   parameters() %>% 
+   extract_parameter_set_dials() %>% 
    update(hidden_units = hidden_units(c(1, 27)))
 ```
 

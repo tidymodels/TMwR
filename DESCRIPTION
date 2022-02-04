@@ -94,7 +94,8 @@ Remotes:
     tidymodels/dials,
     tidymodels/learntidymodels,
     r-lib/pillar,
-    tidymodels/textrecipes
+    tidymodels/textrecipes,
+    tidymodels/tune@deprecate-parameters
 biocViews: mixOmics
 Encoding: UTF-8
 SystemRequirements: FFmpeg (>= 3.2); with at least libx264 and lame (mp3)
