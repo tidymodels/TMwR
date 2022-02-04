@@ -384,7 +384,7 @@ Solidity (i.e., the density of the bean) drives the third PLS component, along w
 
 ICA is slightly different than PCA in that it finds components that are as statistically independent from one another as possible (as opposed to being uncorrelated). It can be thought of as maximizing the "non-Gaussianity" of the ICA components. Let's use `step_ica()` to produce Figure \@ref(fig:bean-ica).
 
-```{r dimensionality-ica, eval = FALSE}
+```{r dimensionality-ica, eval=FALSE}
 bean_rec_trained %>%
   step_ica(all_numeric_predictors(), num_comp = 4) %>%
   plot_validation_results() + 
@@ -420,7 +420,7 @@ The resulting plot is shown on the left-hand side of Figure \@ref(fig:bean-umap)
 
 There is also a supervised version of UMAP:
 
-```{r dimensionality-umap-supervised, eval = FALSE}
+```{r dimensionality-umap-supervised, eval=FALSE}
 bean_rec_trained %>%
   step_umap(all_numeric_predictors(), outcome = "class", num_comp = 4) %>%
   plot_validation_results() +

@@ -428,7 +428,6 @@ Using our previously defined importance plotting function, `ggplot_imp(vip_beans
 ```{r bean-explainer}
 #| echo = FALSE,
 #| fig.width = 8,
-#| fig.height = 4.5,
 #| fig.cap = "Global explainer for the regularized discriminant analysis model on the beans data.",
 #| fig.alt = "Global explainer for the regularized discriminant analysis model on the beans data. Almost all predictors have a significant contribution with shape factors one and four contributing the most. "
 
