@@ -111,7 +111,7 @@ bean_val$splits[[1]]
 
 To visually assess how well different methods perform, we can estimate the methods on the training set (n = `r analysis(bean_val$splits[[1]]) %>% nrow()` beans) and display the results using the validation set (n = `r assessment(bean_val$splits[[1]]) %>% nrow()`).
 
-Before beginning, we can spend some time investigating our data. Since we know that many of these shape features are probably measuring similar concepts, let's take a look at the correlation structure of the data in Figure \@ref(fig:corr-plot) using this code.
+Before beginning, we can spend some time investigating our data. Since we know that many of these shape features are probably measuring similar concepts, let's take a look at the correlation structure of the data in Figure \@ref(fig:beans-corr-plot) using this code.
 
 ```{r dimensionality-corr-plot, eval = FALSE}
 library(corrplot)
@@ -122,7 +122,7 @@ bean_train %>%
   corrplot(col = tmwr_cols(200), tl.col = "black", method = "ellipse")
 ```
 
-```{r corr-plot, ref.label = "dimensionality-corr-plot"}
+```{r beans-corr-plot, ref.label = "dimensionality-corr-plot"}
 #| echo = FALSE,
 #| fig.height=6, 
 #| fig.width=6, 
@@ -384,7 +384,7 @@ Solidity (i.e., the density of the bean) drives the third PLS component, along w
 
 ICA is slightly different than PCA in that it finds components that are as statistically independent from one another as possible (as opposed to being uncorrelated). It can be thought of as maximizing the "non-Gaussianity" of the ICA components. Let's use `step_ica()` to produce Figure \@ref(fig:bean-ica).
 
-```{r dimensionality-ica}
+```{r dimensionality-ica, eval = FALSE}
 bean_rec_trained %>%
   step_ica(all_numeric_predictors(), num_comp = 4) %>%
   plot_validation_results() + 
@@ -416,30 +416,42 @@ bean_rec_trained %>%
   ggtitle("UMAP")
 ```
 
-```{r bean-umap, ref.label = "dimensionality-umap"}
-#| dev = "png", 
-#| fig.height = 7,
-#| fig.cap = "First two UMAP component scores for the bean validation set, colored by class.",
-#| fig.alt = "UMAP component scores for the bean validation set, colored by class. There is significant overlap in the first two ICA components."
-```
-
-While the between-cluster space is pronounced, the clusters can contain a heterogeneous mixture of classes.
+The resulting plot is shown on the left-hand side of Figure \@ref(fig:bean-umap). While the between-cluster space is pronounced, the clusters can contain a heterogeneous mixture of classes.
 
 There is also a supervised version of UMAP:
 
-```{r dimensionality-umap-supervised, dev = "png", fig.height=7}
+```{r dimensionality-umap-supervised, eval = FALSE}
 bean_rec_trained %>%
   step_umap(all_numeric_predictors(), outcome = "class", num_comp = 4) %>%
   plot_validation_results() +
   ggtitle("UMAP (supervised)")
 ```
 
-```{r bean-umap-supervised, ref.label = "dimensionality-umap-supervised"}
-#| dev = "png", 
-#| fig.height = 7,
-#| fig.cap = "Supervised UMAP component scores for the bean validation set, colored by class.",
-#| fig.alt = "Supervised UMAP component scores for the bean validation set, colored by class. There is significant overlap in the first two ICA components."
+```{r bean-umap}
+#| echo = FALSE,
+#| dev = "png",
+#| fig.height = 5,
+#| fig.width = 10.1,
+#| fig.cap = "The first two UMAP component scores for the bean validation set, colored by class. Results are shown for supervised and unsupervised versions.",
+#| fig.alt = "The first two UMAP component scores for the bean validation set, colored by class. Results are shown for supervised and unsupervised versions. There are clusters that are extremely separated form one another but each contains a mixture of the classes. The supervised version shows more separation between classes."
+
+umap_1 <- 
+  bean_rec_trained %>%
+  step_umap(all_numeric_predictors(), num_comp = 4) %>%
+  plot_validation_results() +
+  ggtitle("UMAP")
+
+umap_2 <- 
+  bean_rec_trained %>%
+  step_umap(all_numeric_predictors(), outcome = "class", num_comp = 4) %>%
+  plot_validation_results() +
+  ggtitle("UMAP (supervised)") +
+  theme(legend.position = "none") +
+  labs(y = NULL)
+
+umap_1 + umap_2
 ```
+
 
 The supervised method shown in Figure \@ref(fig:bean-umap-supervised) looks promising for modeling the data.
 
@@ -546,7 +558,8 @@ rankings %>%
   geom_point(cex = 3.5) + 
   theme(legend.position = "right") +
   labs(y = "ROC AUC")  +
-  geom_text(aes(y = mean - 0.01, label = wflow_id), angle = 90, hjust = 1)
+  geom_text(aes(y = mean - 0.01, label = wflow_id), angle = 90, hjust = 1) +
+  lims(y = c(0.9, NA))
 ```
 
 It is clear from these results that most models give very good performance; there are few bad choices here. For demonstration, we'll use the RDA model with PLS features as the final model. We will finalize the workflow with the numerically best parameters, fit it to the training set, then evaluate with the test set:
