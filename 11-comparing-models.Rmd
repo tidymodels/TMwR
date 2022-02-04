@@ -365,7 +365,7 @@ model_post %>%
   mutate(model = forcats::fct_inorder(model)) %>%
   ggplot(aes(x = posterior)) + 
   geom_histogram(bins = 50, color = "white", fill = "blue", alpha = 0.4) + 
-  facet_wrap(~ model, ncolor = 1) + 
+  facet_wrap(~ model, ncol = 1) + 
   labs(x = x_lab)
 ```
 
