@@ -483,7 +483,7 @@ collect_metrics(boosting_test_results)
 boosting_test_results %>% 
    collect_predictions() %>% 
    ggplot(aes(x = compressive_strength, y = .pred)) + 
-   geom_abline(col = "gray50", lty = 2) + 
+   geom_abline(color = "gray50", lty = 2) + 
    geom_point(alpha = 0.5) + 
    coord_obs_pred() + 
    labs(x = "observed", y = "predicted")

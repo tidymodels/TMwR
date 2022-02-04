@@ -255,7 +255,7 @@ After exploring the Ames training set, we might find that the regression slopes 
 ggplot(ames_train, aes(x = Gr_Liv_Area, y = 10^Sale_Price)) + 
   geom_point(alpha = .2) + 
   facet_wrap(~ Bldg_Type) + 
-  geom_smooth(method = lm, formula = y ~ x, se = FALSE, col = "red") + 
+  geom_smooth(method = lm, formula = y ~ x, se = FALSE, color = "lightblue") + 
   scale_x_log10() + 
   scale_y_log10() + 
   labs(x = "Gross Living Area", y = "Sale Price (USD)")
@@ -330,7 +330,7 @@ plot_smoother <- function(deg_free) {
     geom_smooth(
       method = lm,
       formula = y ~ ns(x, df = deg_free),
-      col = "lightblue",
+      color = "lightblue",
       se = FALSE
     ) +
     labs(title = paste(deg_free, "Spline Terms"),

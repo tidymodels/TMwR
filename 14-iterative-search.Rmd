@@ -241,7 +241,7 @@ To demonstrate, let's look at a toy example with a single parameter that has val
 y_lab <- expression(Estimated ~ R^2)
 
 ggplot(grid, aes(x = x, y = y)) + 
-  geom_line(col = "red", alpha = .5, lwd = 1.25) + 
+  geom_line(color = "red", alpha = .5, lwd = 1.25) + 
   labs(y = y_lab, x = "Tuning Parameter") +
   geom_point(data = current_iter)
 ```
@@ -317,7 +317,7 @@ small_pred %>%
   group_by(value) %>% 
   do(get_density(.)) %>% 
   ungroup() %>% 
-  ggplot(aes(x = x, y = density, col = `Parameter Value`, lty = `Parameter Value`)) + 
+  ggplot(aes(x = x, y = density, color = `Parameter Value`, lty = `Parameter Value`)) + 
   geom_line() +
   geom_vline(xintercept = max(current_iter$y), lty = 3) +  
   labs(x = x_lab) + 
@@ -708,7 +708,7 @@ The process starts with initial values of `penalty = 0.025` and `mixture = 0.050
 #| fig.alt = "An illustration of how simulated annealing determines what is the local neighborhood for two numeric tuning parameters. The clouds of points show possible next values where one would be selected at random. The candidate points are small circular clouds surrounding the current best point."
 
 ggplot(neighbors_values, aes(x = penalty, y = mixture)) + 
-  geom_point(alpha = .3, size = 3/4, aes(col = factor(Iteration)), show.legend = FALSE) + 
+  geom_point(alpha = .3, size = 3/4, aes(color = factor(Iteration)), show.legend = FALSE) + 
   scale_x_continuous(trans = "log10", limits = pen_rng) + 
   scale_y_continuous(limits = mix_rng) + 
   geom_point(data = best_values) + 

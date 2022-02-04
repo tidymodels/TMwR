@@ -468,7 +468,7 @@ Since this analysis used 10-fold cross-validation, there is one unique predictio
 assess_res %>% 
   ggplot(aes(x = Sale_Price, y = .pred)) + 
   geom_point(alpha = .15) +
-  geom_abline(col = "red") + 
+  geom_abline(color = "red") + 
   coord_obs_pred() + 
   ylab("Predicted")
 ```

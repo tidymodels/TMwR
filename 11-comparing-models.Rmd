@@ -136,7 +136,7 @@ These high correlations indicate that, across models, there are large within-res
 ```{r compare-rsq-plot, eval=FALSE}
 rsq_indiv_estimates %>% 
   mutate(wflow_id = reorder(wflow_id, .estimate)) %>% 
-  ggplot(aes(x = wflow_id, y = .estimate, group = id, col = id, lty = id)) + 
+  ggplot(aes(x = wflow_id, y = .estimate, group = id, color = id, lty = id)) + 
   geom_line(alpha = .8, lwd = 1.25) + 
   theme(legend.position = "none")
 ```
@@ -151,7 +151,7 @@ y_lab <- expression(R^2 ~ statistics)
 
 rsq_indiv_estimates %>% 
   mutate(wflow_id = reorder(wflow_id, .estimate)) %>% 
-  ggplot(aes(x = wflow_id, y = .estimate, group = id, col = id)) + 
+  ggplot(aes(x = wflow_id, y = .estimate, group = id, color = id)) + 
   geom_line(alpha = .5, lwd = 1.25) + 
   theme(legend.position = "none") + 
   labs(x = NULL, y = y_lab)
@@ -350,7 +350,7 @@ The four posterior distributions are visualized in Figure \@ref(fig:four-posteri
 model_post %>% 
   mutate(model = forcats::fct_inorder(model)) %>%
   ggplot(aes(x = posterior)) + 
-  geom_histogram(bins = 50, col = "white", fill = "blue", alpha = 0.4) + 
+  geom_histogram(bins = 50, color = "white", fill = "blue", alpha = 0.4) + 
   facet_wrap(~ model, ncol = 1)
 ```
 
@@ -364,8 +364,8 @@ x_lab <- expression(Posterior ~ "for" ~ mean ~ R^2)
 model_post %>% 
   mutate(model = forcats::fct_inorder(model)) %>%
   ggplot(aes(x = posterior)) + 
-  geom_histogram(bins = 50, col = "white", fill = "blue", alpha = 0.4) + 
-  facet_wrap(~ model, ncol = 1) + 
+  geom_histogram(bins = 50, color = "white", fill = "blue", alpha = 0.4) + 
+  facet_wrap(~ model, ncolor = 1) + 
   labs(x = x_lab)
 ```
 
@@ -398,7 +398,7 @@ rqs_diff %>%
   as_tibble() %>% 
   ggplot(aes(x = difference)) + 
   geom_vline(xintercept = 0, lty = 2) + 
-  geom_histogram(bins = 50, col = "white", fill = "red", alpha = 0.4)
+  geom_histogram(bins = 50, color = "white", fill = "red", alpha = 0.4)
 ```
 
 ```{r posterior-difference}
@@ -419,7 +419,7 @@ rqs_diff %>%
   as_tibble() %>% 
   ggplot(aes(x = difference)) + 
   geom_vline(xintercept = 0, lty = 2) + 
-  geom_histogram(bins = 50, col = "white", fill = "red", alpha = 0.4) + 
+  geom_histogram(bins = 50, color = "white", fill = "red", alpha = 0.4) + 
   labs(x = x_lab)
 ```
 

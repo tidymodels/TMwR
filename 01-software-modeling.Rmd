@@ -89,7 +89,7 @@ plm_plot <-
 ames_plot <- 
   ggplot(ames, aes(x = Latitude, y = Sale_Price)) + 
   geom_point(alpha = .2) + 
-  geom_smooth(se = FALSE, method = stats::loess, method.args = list(span = .3), col = "red") + 
+  geom_smooth(se = FALSE, method = stats::loess, method.args = list(span = .3), color = "red") + 
   scale_y_log10() + 
   ylab("House Sale Price ($US)") + 
   ggtitle("(b) Using a model-based smoother to discover trends.")
