@@ -44,7 +44,7 @@ tidymodels_prefer()
 data("bioChemists", package = "pscl")
 
 ggplot(bioChemists, aes(x = art)) + 
-  geom_histogram(binwidth = 1, col = "white") + 
+  geom_histogram(binwidth = 1, color = "white") + 
   labs(x = "Number of articles within 3y of graduation")
 ```
 
@@ -253,9 +253,9 @@ glm_boot %>%
       mutate(method = "parametric") %>% 
       select(term, method, .estimate = estimate, .lower = conf.low, .upper = conf.high)
   )%>%
-  ggplot(aes(x = .estimate, y = term, col = method)) +
+  ggplot(aes(x = .estimate, y = term, color = method, pch = method)) +
   geom_vline(xintercept = 0, lty = 3) +
-  geom_point(position = position_dodge(width = 1 / 2), cex = .9) +
+  geom_point(size = 2, position = position_dodge(width = 1 / 2)) +
   geom_errorbar(aes(xmin = .lower, xmax = .upper),
                 width = 1 / 4,
                 position = position_dodge(width = 1 / 2))  +
@@ -399,9 +399,9 @@ It's a good idea to visualize the bootstrap distributions of the coefficients, a
 bootstrap_models %>% 
   unnest(zero_coefs) %>% 
   ggplot(aes(x = estimate)) +
-  geom_histogram(bins = 25, col = "white") + 
+  geom_histogram(bins = 25, color = "white") + 
   facet_wrap(~ term, scales = "free_x") + 
-  geom_vline(xintercept = 0, col = "green")
+  geom_vline(xintercept = 0, lty = 2, color = "gray70")
 ```
 
 ```{r zip-bootstrap, ref.label = "inference-zip-bootstrap"}

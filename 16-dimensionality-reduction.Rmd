@@ -231,13 +231,13 @@ library(patchwork)
 p1 <- 
   bean_validation %>% 
   ggplot(aes(x = area)) + 
-  geom_histogram(bins = 30, col = "white", fill = "blue", alpha = 1/3) + 
+  geom_histogram(bins = 30, color = "white", fill = "blue", alpha = 1/3) + 
   ggtitle("Original validation set data")
 
 p2 <- 
   bean_val_processed %>% 
   ggplot(aes(x = area)) + 
-  geom_histogram(bins = 30, col = "white", fill = "red", alpha = 1/3) + 
+  geom_histogram(bins = 30, color = "white", fill = "red", alpha = 1/3) + 
   ggtitle("Processed validation set data")
 
 p1 + p2
@@ -278,7 +278,7 @@ plot_validation_results <- function(recipe, dat = assessment(bean_val$splits[[1]
     # Process the data (the validation set by default)
     bake(new_data = dat) %>%
     # Create the scatterplot matrix
-    ggplot(aes(x = .panel_x, y = .panel_y, col = class, fill = class)) +
+    ggplot(aes(x = .panel_x, y = .panel_y, color = class, fill = class)) +
     geom_point(alpha = 0.4, size = 0.5) +
     geom_autodensity(alpha = .3) +
     facet_matrix(vars(-class), layer.diag = 2) + 
@@ -319,6 +319,7 @@ bean_rec_trained %>%
   step_pca(all_numeric_predictors(), num_comp = 4) %>% 
   prep() %>% 
   plot_top_loadings(component_number <= 4, n = 5) + 
+  scale_fill_brewer(palette = "Paired") +
   ggtitle("Principal Component Analysis")
 ```
 
@@ -357,6 +358,7 @@ bean_rec_trained %>%
   step_pls(all_numeric_predictors(), outcome = "class", num_comp = 4) %>%
   prep() %>% 
   plot_top_loadings(component_number <= 4, n = 5, type = "pls") + 
+  scale_fill_brewer(palette = "Paired") +
   ggtitle("Partial Least Squares")
 ```
 
@@ -530,7 +532,7 @@ Figure \@ref(fig:dimensionality-rankings) illustrates this ranking.
 #| fig.alt = "Area under the ROC curve from the validation set. The three best model configurations use PLS together with regularized discriminant analysis, a multi-layer perceptron, and a naive Bayes model."
 
 rankings %>% 
-  ggplot(aes(x = rank, y = mean, pch = method, col = model)) + 
+  ggplot(aes(x = rank, y = mean, pch = method, color = model)) + 
   geom_point(cex = 3.5) + 
   theme(legend.position = "right") +
   labs(y = "ROC AUC")  +

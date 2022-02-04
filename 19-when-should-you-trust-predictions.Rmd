@@ -97,8 +97,8 @@ grid_pred %>%
   mutate(`Probability of Class 1` = .pred_class_1) %>% 
   ggplot(aes(x = x, y = y)) + 
   geom_raster(aes(fill = `Probability of Class 1`)) +
-  geom_point(data = testing_set, aes(shape = class, col = class), alpha = .75, size = 2) + 
-  geom_contour(aes(z = .pred_class_1), breaks = .5, col = "black", lty = 2) + 
+  geom_point(data = testing_set, aes(shape = class, color = class), alpha = .75, size = 2) + 
+  geom_contour(aes(z = .pred_class_1), breaks = .5, color = "black", lty = 2) + 
   coord_equal() + 
   labs(x = "Predictor x", y = "Predictor y") + 
   scale_fill_gradient2(low = "#FDB863", mid = "white", high = "#B2ABD2", midpoint = .5) + 
@@ -164,7 +164,7 @@ eq_zone_results <- function(buffer) {
 # Evaluate a sequence of buffers and plot the results. 
 map_dfr(seq(0, .1, length.out = 40), eq_zone_results) %>% 
   pivot_longer(c(-buffer), names_to = "statistic", values_to = "value") %>% 
-  ggplot(aes(x = buffer, y = value, col = statistic)) + 
+  ggplot(aes(x = buffer, y = value, lty = statistic)) + 
   geom_step(size = 1.2, alpha = 0.8) + 
   labs(y = NULL)
 ```
@@ -294,7 +294,7 @@ add_day <- function(x) {
 res_test %>%
   mutate(day = add_day(.)) %>%
   ggplot(aes(x = date)) +
-  geom_point(aes(y = ridership, col = day, pch = day), size = 3) +
+  geom_point(aes(y = ridership, color = day, pch = day), size = 3) +
   geom_line(aes(y = .pred), alpha = .75) +
   geom_ribbon(aes(ymin = .pred_lower, ymax = .pred_upper), fill = "blue", alpha = .1)  +
   scale_color_brewer(palette = "Set2") +
@@ -336,7 +336,7 @@ Look at this terrible model performance visually in Figure \@ref(fig:chicago-202
 res_2020 %>%
   mutate(day = add_day(.)) %>%
   ggplot(aes(x = date)) +
-  geom_point(aes(y = ridership, col = day, pch = day), size = 3) +
+  geom_point(aes(y = ridership, color = day, pch = day), size = 3) +
   geom_line(aes(y = .pred), alpha = .75) +
   geom_ribbon(aes(ymin = .pred_lower, ymax = .pred_upper), fill = "blue", alpha = .1) +
   scale_shape_manual(values = 15:22) +
@@ -430,7 +430,7 @@ pca_dist <-
 dist_hist <-
   training_pca %>%
   ggplot(aes(x = distance)) +
-  geom_histogram(bins = 30, col = "white") +
+  geom_histogram(bins = 30, color = "white") +
   labs(x = "Distance to Training Set Center", title = "(d) Reference Distribution") +
   theme(plot.title = element_text(size = 9))
 
@@ -469,16 +469,16 @@ test_pca_dist <-
   geom_segment(
     data = testing_pca,
     aes(x = PC1_mean, y = PC2_mean, xend = PC1, yend = PC2), 
-    col = "lightblue",
+    color = "lightblue",
     lty = 2
   )  + 
   geom_segment(
     data = new_pca,
     aes(x = PC1_mean, y = PC2_mean, xend = PC1, yend = PC2), 
-    col = "red"
+    color = "red"
   )  + 
-  geom_point(data = testing_pca, aes(x = PC1, y = PC2), col = "lightblue", size = 2, pch = 17) +
-  geom_point(data = new_pca, aes(x = PC1, y = PC2), size = 2, col = "red") +
+  geom_point(data = testing_pca, aes(x = PC1, y = PC2), color = "lightblue", size = 2, pch = 17) +
+  geom_point(data = new_pca, aes(x = PC1, y = PC2), size = 2, color = "red") +
   coord_obs_pred() + 
   labs(x = "Component 1", y = "Component 2", title = "Distances to Training Set Center") + 
   theme_bw() + 
@@ -487,9 +487,9 @@ test_pca_dist <-
 test_dist_hist <- 
   training_pca %>% 
   ggplot(aes(x = distance)) + 
-  geom_histogram(bins = 30, col = "white", alpha = .5) + 
-  geom_vline(xintercept = testing_pca$distance, col = "lightblue", lty = 2) +
-  geom_vline(xintercept = new_pca$distance, col = "red") +
+  geom_histogram(bins = 30, color = "white", alpha = .5) + 
+  geom_vline(xintercept = testing_pca$distance, color = "lightblue", lty = 2) +
+  geom_vline(xintercept = new_pca$distance, color = "red") +
   xlab("Distance to Training Set Center")
 
 test_pca_dist + test_dist_hist

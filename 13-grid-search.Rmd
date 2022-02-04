@@ -501,7 +501,7 @@ load("extras/parallel_times/resamples_times.RData")
 resamples_times %>%
   dplyr::rename(operation = label) %>% 
   ggplot(aes(y = id_alt, x = duration, fill = operation)) +
-  geom_bar(stat = "identity", col = "black") +
+  geom_bar(stat = "identity", color = "black") +
   labs(y = NULL, x = "Elapsed Time") + 
   scale_fill_brewer(palette = "Paired") +
   theme(legend.position = "top")
@@ -615,7 +615,7 @@ start_stop_dat %>%
    ymax = id_stop,
    fill = operation
   ),
-  col = "black"
+  color = "black"
  ) +
  facet_wrap(~ pid, nrow = 2) +
  labs(y = NULL, x = "Elapsed Time") + 
@@ -653,8 +653,8 @@ First, let's consider the raw execution times in Figure \@ref(fig:parallel-times
 #| fig.alt = "Execution times for model tuning versus the number of workers using different delegation schemes. The diagonal black line indicates a linear speedup where the addition of a new worker process has maximal effect. The 'everything' scheme shows that the benefits decrease after three or four workers, especially when there is expensive preprocessing. The 'resamples' scheme has almost linear speedups across all tasks."
 
 load("extras/parallel_times/xgb_times.RData")
-ggplot(times, aes(x = num_cores, y = elapsed, col = parallel_over, shape = parallel_over)) + 
-  geom_point() + 
+ggplot(times, aes(x = num_cores, y = elapsed, color = parallel_over, shape = parallel_over)) + 
+  geom_point(size = 2) + 
   geom_line() +
   facet_wrap(~ preprocessing) + 
   labs(x = "Number of Workers", y = "Execution Time (s)") + 
@@ -684,9 +684,9 @@ We can also view these data in terms of speed-ups in Figure \@ref(fig:parallel-s
 #| fig.cap = "Speed-ups for model tuning versus the number of workers using different delegation schemes.",
 #| fig.alt = "Speed-ups for model tuning versus the number of workers using different delegation schemes."
 
-ggplot(times, aes(x = num_cores, y = speed_up, col = parallel_over, shape = parallel_over)) + 
+ggplot(times, aes(x = num_cores, y = speed_up, color = parallel_over, shape = parallel_over)) + 
   geom_abline(lty = 1) + 
-  geom_point() + 
+  geom_point(size = 2) + 
   geom_line() +
   facet_wrap(~ preprocessing) + 
   coord_obs_pred() + 
@@ -778,9 +778,9 @@ iter_three <- race_details %>% dplyr::filter(iter == 3)
 
 iter_three %>% 
   ggplot(aes(x = -estimate, y = .config)) + 
-  geom_vline(xintercept = 0, lty = 2, col = "green") +
-  geom_point(size = 2, aes(col = decision)) +
-  geom_errorbarh(aes(xmin = -estimate, xmax = -upper, col = decision), height = .3, show.legend = FALSE) + 
+  geom_vline(xintercept = 0, lty = 2, color = "green") +
+  geom_point(size = 2, aes(color = decision)) +
+  geom_errorbarh(aes(xmin = -estimate, xmax = -upper, color = decision), height = .3, show.legend = FALSE) + 
   labs(x = "Loss of ROC AUC", y = NULL) + 
   scale_colour_manual(values = race_cols)
 ```
@@ -801,8 +801,8 @@ race_ci_plots <- function(x, iters = max(x$iter)) {
     p <-
       x %>% 
       dplyr::filter(iter == i) %>% 
-      ggplot(aes(x = -estimate, y = .config, col = decision)) +
-      geom_vline(xintercept = 0, col = "green", lty = 2) +
+      ggplot(aes(x = -estimate, y = .config, color = decision)) +
+      geom_vline(xintercept = 0, color = "green", lty = 2) +
       geom_point(size = 2) +
       labs(title = ttl, y = "", x = "Loss of ROC AUC") +
       scale_color_manual(values = c(best = "blue", retain = "black", discard = "grey"), 
