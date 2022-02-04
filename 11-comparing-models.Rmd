@@ -138,7 +138,7 @@ rsq_indiv_estimates %>%
   mutate(wflow_id = reorder(wflow_id, .estimate)) %>% 
   ggplot(aes(x = wflow_id, y = .estimate, group = id, col = id, lty = id)) + 
   geom_line(alpha = .8, lwd = 1.25) + 
-  theme(legend.position = "none") +  
+  theme(legend.position = "none")
 ```
 
 ```{r rsquared-resamples}
