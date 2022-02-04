@@ -230,6 +230,8 @@ Consider the Ames data. On average, 10-fold cross-validation uses assessment set
 #| fig.cap = "Relationship between the relative variance in performance estimates versus the number of cross-validation repeats.",
 #| fig.alt = "The relationship between the relative variance in performance estimates versus the number of cross-validation repeats. As the repeats increase, the variance is reduced in a harmonically decreasing pattern with diminishing returns for large number of replicates."
 
+y_lab <- expression(Multiplier ~ on ~ sigma)
+
 cv_info <- 
   tibble(replicates = rep(1:10, 2), V = 10) %>% 
   mutate(B = V * replicates, reduction = 1/B, V = format(V))
@@ -238,7 +240,7 @@ ggplot(cv_info, aes(x = replicates, y = reduction)) +
   geom_line() + 
   geom_point() + 
   labs(
-    y = expression(paste("Multiplier on ", sigma)),
+    y = y_lab,
     x = "Number of 10F-CV Replicates"
   ) +
   theme_bw() + 

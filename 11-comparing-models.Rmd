@@ -138,15 +138,23 @@ rsq_indiv_estimates %>%
   mutate(wflow_id = reorder(wflow_id, .estimate)) %>% 
   ggplot(aes(x = wflow_id, y = .estimate, group = id, col = id)) + 
   geom_line(alpha = .5, lwd = 1.25) + 
-  theme(legend.position = "none") + 
-  labs(x = NULL, y = expression(paste(R^2, "statistics")))
+  theme(legend.position = "none")
 ```
 
-```{r rsquared-resamples, ref.label = "compare-rsq-plot"}
+```{r rsquared-resamples}
 #| fig.height = 4,
 #| echo = FALSE,
 #| fig.cap = "Resample statistics across models.",
 #| fig.alt = "A plot connecting the resample statistics across models. The plot connects the results for each model with the same line. The performance metrics tend to be relatively similar across all model results. "
+
+y_lab <- expression(R^2 ~ statistics)
+
+rsq_indiv_estimates %>% 
+  mutate(wflow_id = reorder(wflow_id, .estimate)) %>% 
+  ggplot(aes(x = wflow_id, y = .estimate, group = id, col = id)) + 
+  geom_line(alpha = .5, lwd = 1.25) + 
+  theme(legend.position = "none") + 
+  labs(x = NULL, y = y_lab)
 ```
 
 If the resample-to-resample effect was not real, there would not be any parallel lines. A statistical test for the correlations evaluates whether the magnitudes of these correlations are not simply noise. For the linear models: 
@@ -343,14 +351,22 @@ model_post %>%
   mutate(model = forcats::fct_inorder(model)) %>%
   ggplot(aes(x = posterior)) + 
   geom_histogram(bins = 50, col = "white", fill = "blue", alpha = 0.4) + 
-  facet_wrap(~ model, ncol = 1) + 
-  labs(x = expression(paste("Posterior for mean ", R^2)))
+  facet_wrap(~ model, ncol = 1)
 ```
 
-```{r four-posteriors, ref.label = "compare-group-posteriors-res"}
+```{r four-posteriors}
 #| echo = FALSE,
 #| fig.cap = "Posterior distributions for the coefficient of determination using four different models.",
 #| fig.alt = "Posterior distributions for the coefficient of determination using four different models. The distribution corresponding to random forest is largest and has little overlap with the other model's posteriors."
+
+x_lab <- expression(Posterior ~ "for" ~ mean ~ R^2)
+
+model_post %>% 
+  mutate(model = forcats::fct_inorder(model)) %>%
+  ggplot(aes(x = posterior)) + 
+  geom_histogram(bins = 50, col = "white", fill = "blue", alpha = 0.4) + 
+  facet_wrap(~ model, ncol = 1) + 
+  labs(x = x_lab)
 ```
 
 These histograms describe the estimated probability distributions of the mean R<sup>2</sup> value for each model. There is some overlap, especially for the two linear models. 
@@ -382,15 +398,29 @@ rqs_diff %>%
   as_tibble() %>% 
   ggplot(aes(x = difference)) + 
   geom_vline(xintercept = 0, lty = 2) + 
-  geom_histogram(bins = 50, col = "white", fill = "red", alpha = 0.4) + 
-  labs(x = expression(paste("Posterior for mean difference in ", R^2, 
-                            " (splines + interaction - basic)")))
+  geom_histogram(bins = 50, col = "white", fill = "red", alpha = 0.4)
 ```
 
-```{r posterior-difference, ref.label = "compare-lm-difference-posterior"}
+```{r posterior-difference}
+#| echo = FALSE,
 #| fig.height = 3,
 #| fig.cap = "Posterior distribution for the difference in the coefficient of determination.",
 #| fig.alt = "The posterior distribution for the difference in the coefficient of determination. The distribution has almost no overlap with zero. "
+
+rqs_diff <-
+  contrast_models(rsq_anova,
+                  list_1 = "splines_lm",
+                  list_2 = "basic_lm",
+                  seed = 1103)
+
+x_lab <- expression(Posterior ~ "for" ~ mean ~ difference ~ "in" ~ R^2 ~ (splines + interaction - basic))
+
+rqs_diff %>% 
+  as_tibble() %>% 
+  ggplot(aes(x = difference)) + 
+  geom_vline(xintercept = 0, lty = 2) + 
+  geom_histogram(bins = 50, col = "white", fill = "red", alpha = 0.4) + 
+  labs(x = x_lab)
 ```
 
 The posterior shows that the center of the distribution is greater than zero (indicating that the model with splines had larger values) but does overlap with zero to a degree. The `summary()` method for this object computes the mean of the distribution as well as _credible intervals_. 
@@ -435,15 +465,23 @@ ggplot(intervals,
        aes(x = resamples, y = mean)) +
   geom_path() +
   geom_ribbon(aes(ymin = lower, ymax = upper), fill = "red", alpha = .1) +
-  labs(y = expression(paste("Mean difference in ", R^2)),
-       x = "Number of Resamples (repeated 10-fold cross-validation)")
+  labs(x = "Number of Resamples (repeated 10-fold cross-validation)")
 ```
 
-```{r intervals-over-replicates, ref.label = "compare-cred-int"}
+```{r intervals-over-replicates}
 #| fig.height = 3, 
 #| echo = FALSE,
 #| fig.cap = "Probability of practical equivalence to the random forest model.",
 #| fig.alt = "The probability of practical equivalence to the random forest model."
+
+y_lab <- expression(Mean ~ difference ~ "in" ~ R^2)
+
+ggplot(intervals,
+       aes(x = resamples, y = mean)) +
+  geom_path() +
+  geom_ribbon(aes(ymin = lower, ymax = upper), fill = "red", alpha = .1) +
+  labs(y = y_lab,
+       x = "Number of Resamples (repeated 10-fold cross-validation)")
 ```
 
 The width of the intervals decreases as more resamples are added. Clearly, going from ten resamples to thirty has a larger impact than going from eighty to 100. There are diminishing returns for using a "large" number of resamples ("large" will be different for different data sets). 
