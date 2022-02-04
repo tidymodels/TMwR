@@ -272,12 +272,6 @@ location_models$fit[[1]]
 
 There's a lot more to workflow sets. Their nuances and advantages won't be illustrated until Chapter \@ref(workflow-sets). 
 
-
-## Future plans
-
-The two types of components in a workflow are preprocessors and models. There are also operations that might occur _after_ the model is fit. An example of such a _post-processor_ would be cutoff selection for two-class problems. Previously in this chapter, we discussed the idea of modifying the cutoff for a two-class problem. In the future, workflows will be able to attach a custom cutoff that is applied to probabilities after the model fit. Other approaches, such as probability calibration, could also be added as post-processors. 
-  
-
 ## Chapter summary {#workflows-summary}
 
 In this chapter, you learned that the modeling process encompasses more than just estimating the parameters of an algorithm that connects predictors to an outcome. This process also includes preprocessing steps and operations taken after a model is fit. We introduced a concept called a **model workflow** that can capture the important components of the modeling process. Multiple workflows can also be created inside of a **workflow set**. 
