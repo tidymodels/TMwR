@@ -115,7 +115,7 @@ To demonstrate, consider the classification data shown in Figure \@ref(fig:two-c
 ggplot(training_set, aes(x = A, y = B, color = Class, pch = Class)) + 
   geom_point(alpha = 0.8) + 
   coord_equal()  + 
-  labs(x = "Predictor A", y = "Predictor B", color = NULL, pch = NULL) + 
+  labs(x = "Predictor A", y = "Predictor B", color = NULL, pch = NULL) +
   scale_color_manual(values = c("#CC6677", "#88CCEE"))
 ```
 

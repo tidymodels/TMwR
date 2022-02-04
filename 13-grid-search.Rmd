@@ -498,6 +498,7 @@ To illustrate how the parallel processing works, we'll use a case where there ar
 #| fig.cap = "Worker processes when parallel processing matches resamples to a specific worker process.",
 #| fig.alt = "A diagram of the worker processes when parallel processing matches resamples to a specific worker process. After the preprocess operations are finished, each model fit is executed on the same worker process."
 load("extras/parallel_times/resamples_times.RData")
+
 resamples_times %>%
   dplyr::rename(operation = label) %>% 
   ggplot(aes(y = id_alt, x = duration, fill = operation)) +
