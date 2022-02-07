@@ -1,4 +1,5 @@
 ```{r ensembles-setup, include = FALSE}
+knitr::opts_chunk$set(fig.path = "figures/")
 library(tidymodels)
 library(rules)
 library(baguette)
@@ -50,9 +51,9 @@ Back in Chapter \@ref(workflow-sets), we used five repeats of 10-fold cross-vali
 Simple validation sets can also be used with stacking since tidymodels considers this to be a single resample. 
 :::
 
-For the concrete example, the training set used for model stacking has columns for all of the candidate tuning parameter results. Here are the first six rows and selected columns:
+For the concrete example, the training set used for model stacking has columns for all of the candidate tuning parameter results. Table \@ref(tab:ensemble-candidate-preds) presents the first six rows and selected columns.
 
-```{r ensembles-data-example, echo = FALSE, results = "asis", warning = FALSE, message = FALSE, cache = TRUE}
+```{r ensembles-data-example, echo = FALSE, results = "asis", warning = FALSE, message = FALSE}
 stacks() %>% 
   add_candidates(grid_results) %>% 
   as_tibble() %>% 
@@ -67,7 +68,9 @@ stacks() %>%
     digits = 2,
     align = rep("c", 8),
     col.names = c("Sample #", "Bagged Tree", "MARS 1", "MARS 2", "Cubist 1", 
-                  "...", "Cubist 25", "...")
+                  "...", "Cubist 25", "..."),
+    caption = "Predictions from candidate tuning parameter configurations.",
+    label = "ensemble-candidate-preds"
   ) %>% 
   kable_styling("striped", full_width = TRUE) %>% 
   add_header_above(c(" ", "Ensemble Candidate Predictions" = 7)) %>% 
@@ -112,7 +115,7 @@ If we had not used the `r pkg(workflowsets)` package, objects from the `r pkg(tu
 
 ## Blend the predictions {#blend-predictions}
 
-The training set predictions and the corresponding observed outcome data are used create a **meta-learning model** where the assessment set predictions are the predictors of the observed outcome data. Meta-learning can be accomplished using any model. The most commonly used model is a regularized generalized linear model, which encompasses linear, logistic, and multinomial models. Regularization via the lasso penalty has several advantages: 
+The training set predictions and the corresponding observed outcome data are used to create a **meta-learning model** where the assessment set predictions are the predictors of the observed outcome data. Meta-learning can be accomplished using any model. The most commonly used model is a regularized generalized linear model, which encompasses linear, logistic, and multinomial models. Regularization via the lasso penalty has several advantages: 
 
 - Using the lasso penalty can remove candidates (and sometimes whole model types) from the ensemble. 
 - The correlation between ensemble candidates tends to be very high and regularization helps alleviate this issue. 
@@ -121,15 +124,51 @@ The training set predictions and the corresponding observed outcome data are use
 
 Since our outcome is numeric, linear regression is used for the meta-model. Fitting the meta-model is as straightforward as using: 
 
-```{r ensembles-initial-blend, cache = TRUE}
+```{r ensembles-initial-blend}
 set.seed(2001)
 ens <- blend_predictions(concrete_stack)
 ```
 
 This evaluates the meta-learning model over a pre-defined grid of lasso penalty values and uses an internal resampling method to determine the best value. The `autoplot()` method helps us understand if the default penalization method was sufficient: 
 
-```{r ensembles-initial-blend-plot}
+```{r ensembles-initial-blend-plot, eval=FALSE}
 autoplot(ens)
+```
+
+```{r stacking-autoplot, ref.label = "ensembles-initial-blend-plot"}
+#| echo = FALSE,
+#| fig.cap = "Results of using the `autoplot()` method on the blended stacks object.",
+#| fig.alt = "The results of using the `autoplot()` method on the blended stacks object."
+```
+
+The top panel of Figure \@ref(fig:stacking-autoplot) shows the average number of candidate ensemble members retained by the meta-learning model. We can see that the number of members is fairly constant and, as it increases, the RMSE also increases. 
+
+The default range may not have served us well here. To evaluate the  meta-learning model with larger penalties, let's pass an additional option:
+
+```{r ensembles-second-blend}
+set.seed(2001)
+ens <- blend_predictions(concrete_stack, penalty = 10^seq(-2, -0.5, length = 20))
+```
+
+```{r ensembles-autoplot-calc, eval = FALSE}
+autoplot(ens)
+```
+
+```{r stacking-autoplot-redo, ref.label = "ensembles-autoplot-calc"}
+#| echo = FALSE,
+#| fig.cap = "The results of using the `autoplot()` method on the updated blended stacks object.",
+#| fig.alt = "The results of using the `autoplot()` method on the updated blended stacks object."
+```
+
+
+Now, in Figure \@ref(fig:stacking-autoplot-redo), we see a range where the ensemble model becomes worse than with our first blend (but not by much). The R<sup>2</sup> values increase with larger penalties. This is somewhat counter-intuitive, but the y-axis range of each panel reminds us that these changes are minuscule.  
+
+It is common, when blending predictions using a regression model, to constrain the blending parameters to be non-negative. For these data, this constraint has the effect of eliminating many of the potential ensemble members; even at fairly low penalties, the ensemble is limited to a fraction of the original eighteen.
+
+The penalty value associated with the smallest RMSE was `r signif(ens$penalty$penalty, 2)`. Printing the object shows the details of the meta-learning model: 
+
+```{r ensembles-second-blend-print}
+ens
 ```
 ```{r ensembles-details, include = FALSE}
 res <- stacks:::top_coefs(ens)
@@ -137,21 +176,19 @@ num_coefs <- xfun::numbers_to_words(nrow(res))
 num_types <- xfun::numbers_to_words(length(unique(res$type)))
 ```
 
-The top panel shows the average number of candidate ensemble members retained by the meta-learning model. We can see that the number of members is fairly constant and, as it increases, the RMSE also increases. The R<sup>2</sup> values increase with larger penalties. This is somewhat counter-intuitive, but the y-axis range of each panel reminds us that these changes are minuscule. 
+The regularized linear regression meta-learning model contained `r num_coefs` blending coefficients across `r num_types` types of models. The `autoplot()` method can be used again to show the contributions of each model type, to produce Figure \@ref(fig:blending-weights). 
 
-It is common, when blending predictions using a regression model, to constrain the blending parameters to be non-negative. For these data, this constraint has the effect of eliminating many of the potential ensemble members; even at fairly low penalties, the ensemble is limited to a fraction of the original eighteen. 
-
-The penalty value associated with the smallest RMSE was `r signif(ens$penalty$penalty, 2)`. Printing the object shows the details of the meta-learning model: 
-
-
-```{r ensembles-second-blend-print}
-ens
+```{r ensembles-blending-weights, eval = FALSE}
+autoplot(ens, "weights") +
+  geom_text(aes(x = weight + 0.01, label = model), hjust = 0) + 
+  theme(legend.position = "none") +
+  lims(x = c(-0.01, 0.75))
 ```
 
-The regularized linear regression meta-learning model contained `r num_coefs` blending coefficients across `r num_types` types of models. The `autoplot()` method can be used again to show the contributions of each model type: 
-
-```{r ensembles-blending-weights}
-autoplot(ens, "weights")
+```{r blending-weights, ref.label = "ensembles-blending-weights"}
+#| echo = FALSE,
+#| fig.cap = "Blending coefficients for the stacking ensemble.",
+#| fig.alt = "Blending coefficients for the stacking ensemble. The boosted tree and Cubist models has the largest effects on the ensemble predictions."
 ```
 
 The boosted tree and Cubist models have the largest contributions to the ensemble. For this ensemble, the outcome is predicted with the equation:
@@ -191,7 +228,7 @@ tmp <-
   arrange(desc(weight))
 
 eqn <- paste(c(glmn_int$estimate, tmp$term), collapse = " \\\\\n\t+&")
-eqn <- paste0("$$\n\\begin{align}\n \\text{ensemble prediction} &=", eqn, "\n\\end{align}\n$$")
+eqn <- paste0("\n\\begin{align}\n \\text{ensemble prediction} &=", eqn, "\n\\end{align}\n")
 
 cat(eqn)
 ```

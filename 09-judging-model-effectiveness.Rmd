@@ -19,9 +19,11 @@ Once we have a model, we need to know how well it works. A quantitative approach
 The best approach to empirical validation involves using _resampling_ methods that will be introduced in Chapter \@ref(resampling). In this chapter, we will use the test set for illustration purposes and to motivate the need for empirical validation. Keep in mind that the test set can only be used once, as explained in Section \@ref(splitting-methods).
 :::
 
-The choice of which metrics to examine can be critical. In later chapters, certain model parameters will be empirically optimized and a primary performance metric will be used to choose the best _sub-model_. Choosing the wrong method can easily result in unintended consequences. For example, two common metrics for regression models are the root mean squared error (RMSE) and the coefficient of determination (a.k.a. $R^2$). The former measures _accuracy_ while the latter measures _correlation_. These are not necessarily the same thing. This figure demonstrates the difference between the two: 
+The choice of which metrics to examine can be critical. In later chapters, certain model parameters will be empirically optimized and a primary performance metric will be used to choose the best _sub-model_. Choosing the wrong method can easily result in unintended consequences. For example, two common metrics for regression models are the root mean squared error (RMSE) and the coefficient of determination (a.k.a. $R^2$). The former measures _accuracy_ while the latter measures _correlation_. These are not necessarily the same thing. Figure \@ref(fig:performance-reg-metrics) demonstrates the difference between the two. 
 
 ```{r performance-reg-metrics, echo = FALSE}
+#| fig.cap = "Observed versus predicted values for models that are optimized using the RMSE compared to the coefficient of determination.",
+#| fig.alt = "Scatter plots of numeric observed versus predicted values for models that are optimized using the RMSE and the coefficient of determination. The former results in results that are close to the 45 degree line of identity while the latter shows results with a tight linear correlation but falls well off of the line of identity."
 set.seed(234)
 n <- 200
 obs <- runif(n, min = 2, max = 20)
@@ -53,7 +55,7 @@ full_model_fit <-
   ad_mod %>% 
   fit(Class ~ (Genotype + male + age)^3, , data = ad_data)
 
-full_model_fit %>% pluck("fit") 
+full_model_fit %>% extract_fit_engine() 
 
 two_way_fit <-
   ad_mod %>% 
@@ -61,8 +63,8 @@ two_way_fit <-
 
 three_factor_test <- 
   anova(
-    full_model_fit %>% pluck("fit"), 
-    two_way_fit %>% pluck("fit"),
+    full_model_fit %>% extract_fit_engine(), 
+    two_way_fit %>% extract_fit_engine(),
     test = "LRT"
   )
 
@@ -72,8 +74,8 @@ main_effects_fit <-
 
 two_factor_test <- 
   anova(
-    two_way_fit %>% pluck("fit"), 
-    main_effects_fit %>% pluck("fit"),
+    two_way_fit %>% extract_fit_engine(), 
+    main_effects_fit %>% extract_fit_engine(),
     test = "LRT"
   )
 
@@ -137,9 +139,9 @@ ames_test_res
 
 Note that both the predicted and observed outcomes are in log10 units. It is best practice to analyze the predictions on the transformed scale (if one were used) even if the predictions are reported using the original units. 
 
-Let's plot the data before computing metrics: 
+Let's plot the data in Figure \@ref(fig:ames-performance-plot) before computing metrics: 
 
-```{r performance-ames-plot}
+```{r performance-ames-plot, eval=FALSE}
 ggplot(ames_test_res, aes(x = Sale_Price, y = .pred)) + 
   # Create a diagonal line:
   geom_abline(lty = 2) + 
@@ -147,6 +149,12 @@ ggplot(ames_test_res, aes(x = Sale_Price, y = .pred)) +
   labs(y = "Predicted Sale Price (log10)", x = "Sale Price (log10)") +
   # Scale and size the x- and y-axis uniformly:
   coord_obs_pred()
+```
+
+```{r ames-performance-plot, ref.label = "performance-ames-plot"}
+#| echo = FALSE,
+#| fig.cap = "Observed versus predicted values for an Ames regression model, with log-10 units on both axes.",
+#| fig.alt = "Scatter plots of numeric observed versus predicted values for an Ames regression model. Both axes use log-10 units. The model shows good concordance with some poorly fitting points at high and low prices."
 ```
 
 There is one property that is substantially over-predicted. 
@@ -200,9 +208,9 @@ f_meas(two_class_example, truth, predicted)
 
 For binary classification data sets, these functions have a standard argument called `event_level`. The _default_ is that the **first** level of the outcome factor is the event of interest. 
 
-```{block, type = "rmdnote"}
+:::rmdnote
 There is some heterogeneity in R functions in this regard; some use the first level and others the second to denote the event of interest. We consider it more intuitive that the first level is the most important. The second level logic is borne of encoding the outcome as 0/1 (in which case the second value is the event) and unfortunately remains in some packages. However, tidymodels (along with many other R packages) _require_ a categorical outcome to be encoded as a factor and, for this reason, the legacy justification for the second level as the event becomes irrelevant.  
-```
+:::
 
 As an example where the second class is the event: 
 
@@ -223,10 +231,16 @@ two_class_curve
 roc_auc(two_class_example, truth, Class1)
 ```
 
-The `two_class_curve` object can be used in a `ggplot` call to visualize the curve. There is an `autoplot()` method that will take care of the details:
+The `two_class_curve` object can be used in a `ggplot` call to visualize the curve, as shown in Figure \@ref(fig:example-roc-curve). There is an `autoplot()` method that will take care of the details:
 
-```{r performance-2class-roc-curve}
+```{r performance-2class-roc-curve, eval=FALSE}
 autoplot(two_class_curve)
+```
+
+```{r example-roc-curve, ref.label = "performance-2class-roc-curve"}
+#| echo = FALSE,
+#| fig.cap = "Example ROC curve.",
+#| fig.alt = "An example ROC curve. The x-axis is one minus specificity and the y-axis is sensitivity. The curve bows towards the upper left-hand side of the plot area."
 ```
 
 There are a number of other functions that use probability estimates, including `gain_curve()`, `lift_curve()`, and `pr_curve()`. 
@@ -323,14 +337,20 @@ hpc_cv %>%
   accuracy(obs, pred)
 ```
 
-The groupings also translate to the `autoplot()` methods:
+The groupings also translate to the `autoplot()` methods, with results in in Figure \@ref(fig:grouped-roc-curves).
 
-```{r performance-multi-class-roc-grouped}
+```{r performance-multi-class-roc-grouped, eval=FALSE}
 # Four 1-vs-all ROC curves for each fold
 hpc_cv %>% 
   group_by(Resample) %>% 
   roc_curve(obs, VF, F, M, L) %>% 
   autoplot()
+```
+
+```{r grouped-roc-curves, ref.label = "performance-multi-class-roc-grouped"}
+#| echo = FALSE,
+#| fig.cap = "Resampled ROC curves for each of the four outcome classes.",
+#| fig.alt = "Resampled ROC curves for each of the four outcome classes. There are four panels for classes VF, F, M, and L. Each panel contains ten ROC curves for each of the resampled data sets."
 ```
 
 This can be a quick visualization method for model effectiveness. 

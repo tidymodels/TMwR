@@ -58,7 +58,10 @@ These objects are data frames with the same _columns_ as the original data but o
 
 Simple random sampling is appropriate in many cases but there are exceptions. When there is a dramatic _class imbalance_ in classification problems, one class occurs much less frequently than another. Using a simple random sample may haphazardly allocate these infrequent samples disproportionately into the training or test set. To avoid this, _stratified sampling_ can be used. The training/test split is conducted separately within each class and then these subsamples are combined into the overall training and test set. For regression problems, the outcome data can be artificially binned into _quartiles_ and then stratified sampling conducted four separate times. This is an effective method for keeping the distributions of the outcome similar between the training and test set. 
 
-```{r ames-sale-price, echo = FALSE, fig.cap = "The distribution of the sale price (in log units) for the Ames housing data. The vertical lines indicate the quartiles of the data."}
+```{r ames-sale-price, echo = FALSE}
+#| fig.cap = "The distribution of the sale price (in log units) for the Ames housing data. The vertical lines indicate the quartiles of the data.",
+#| fig.alt = "The distribution of the sale price (in log units) for the Ames housing data. The vertical lines indicate the quartiles of the data."
+
 sale_dens <- 
   density(ames$Sale_Price, n = 2^10) %>% 
   tidy() 
@@ -72,7 +75,7 @@ quart_plot <-
   geom_segment(data = quartiles,
                aes(x = value, xend = value, y = 0, yend = y),
                lty = 2) +
-  xlab("Sale Price (log-10 USD)")
+  labs("x = Sale Price (log-10 USD)", y = NULL)
 quart_plot
 ```
 
@@ -136,7 +139,7 @@ The problem of _information leakage_ occurs when data outside of the training se
 
 For example, in a machine learning competition, the test set data might be provided without the true outcome values so that the model can be scored and ranked. One potential method for improving the score might be to fit the model using the training set points that are most similar to the test set values. While the test set isn't directly used to fit the model, it still has a heavy influence. In general, this technique is highly problematic since it reduces the _generalization error_ of the model to optimize performance on a specific data set. There are more subtle ways that the test set data can be utilized during training. Keeping the training data in a separate data frame from the test set is one small check to make sure that information leakage does not occur by accident. 
 
-In later chapters we discuss techniques to subsample the training set to mitigate specific issues (e.g., class imbalances). This is a valid and common technique that deliberately results in the training set data diverging from the population from which the data were drawn. It is critical that the test set continue to mirror what the model would encounter _in the wild_. In other words, the test set should always resemble new data that will be given to the model. 
+In later chapters we discuss techniques to subsample the training set to mitigate specific issues (e.g., class imbalances). This is a valid and common technique that deliberately results in the training set data diverging from the population from which the data were drawn. It is critical that the test set continues to mirror what the model would encounter _in the wild_. In other words, the test set should always resemble new data that will be given to the model. 
  
 Finally, at the beginning of this chapter, we warned about using the same data for different tasks. Chapter \@ref(resampling) will discuss solid, data-driven methodologies for data usage that will reduce the risks related to bias, overfitting, and other issues. Many of these methods mirror the data-splitting tools shown in this chapter.  
 

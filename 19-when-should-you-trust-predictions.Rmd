@@ -1,5 +1,5 @@
-
 ```{r setup, include=FALSE}
+knitr::opts_chunk$set(fig.path = "figures/")
 library(tidymodels)
 library(applicable)
 library(patchwork)
@@ -27,12 +27,15 @@ If you had a model result indicating that you had a 51% chance of having contrac
 Let's use a function that can simulate classification data with two classes and two predictors (`x` and `y`). The true model is a logistic regression model with the equation: 
 
 $$
-logit\left(\frac{p}{1-p}\right) = -1 - 2x - \frac{x^2}{5} + 2y^2 
+\mathrm{logit}(p) = -1 - 2x - \frac{x^2}{5} + 2y^2 
 $$
 
 The two predictors follow a bivariate normal distribution with a correlation of 0.70. We'll create a training set of 200 samples and a test set of 50: 
 
 ```{r trust-simulation}
+library(tidymodels)
+tidymodels_prefer()
+
 simulate_two_classes <- 
   function (n, error = 0.1, eqn = quote(-1 - 2 * x - 0.2 * x^2 + 2 * y^2))  {
     # Slightly correlated predictors
@@ -41,8 +44,8 @@ simulate_two_classes <-
     colnames(dat) <- c("x", "y")
     cls <- paste0("class_", 1:2)
     dat <- 
-      tibble::as_tibble(dat) %>% 
-      dplyr::mutate(
+      as_tibble(dat) %>% 
+      mutate(
         linear_pred = !!eqn,
         # Add some misclassification noise
         linear_pred = linear_pred + rnorm(n, sd = error),
@@ -61,46 +64,50 @@ testing_set  <- simulate_two_classes(50)
 We estimate a logistic regression model using Bayesian methods (using the default Gaussian prior distributions for the parameters): 
 
 ```{r trust-bayes-glm}
-library(tidymodels)
-tidymodels_prefer()
-
 two_class_mod <- 
-   logistic_reg() %>% 
-   set_engine("stan", seed = 1902) %>% 
-   fit(class ~ . + I(x^2)+ I(y^2), data = training_set)
+  logistic_reg() %>% 
+  set_engine("stan", seed = 1902) %>% 
+  fit(class ~ . + I(x^2)+ I(y^2), data = training_set)
 print(two_class_mod, digits = 3)
 ```
 
-The fitted class boundary is overlaid onto the test set: 
 
-```{r trust-glm-grid, echo = FALSE, fig.width=5, fig.height=5, out.width="70%", fig.align="center"}
+```{r glm-boundaries}
+#| echo = FALSE, 
+#| fig.width=5, 
+#| fig.height=5, 
+#| out.width="70%", 
+#| fig.align="center",
+#| fig.cap = "Simulated two class data set with a logistic regression fit and decision boundary.",
+#| fig.alt = "Simulated two class data set with a logistic regression fit and decision boundary. The scatter plot of the two classes shows fairly correlated data. The decision boundary is a parabola in the x axis that does a good job of separating the classes."
+
 data_grid <-
   crossing(
     x = seq(-4.5, 4.5, length = 100),
     y = seq(-4.5, 4.5, length = 100)
   )
 grid_pred <- 
-   predict(two_class_mod, data_grid, type = "prob") %>% 
-   bind_cols(
-      predict(two_class_mod, data_grid, type = "pred_int", std_error = TRUE),
-      data_grid
-   )
+  predict(two_class_mod, data_grid, type = "prob") %>% 
+  bind_cols(
+    predict(two_class_mod, data_grid, type = "pred_int", std_error = TRUE),
+    data_grid
+  )
 
 grid_pred %>% 
-    mutate(`Probability of Class 1` = .pred_class_1) %>% 
-    ggplot(aes(x = x, y = y)) + 
-    geom_raster(aes(fill = `Probability of Class 1`)) +
-    geom_point(data = testing_set, aes(shape = class, col = class), alpha = .75, size = 2) + 
-    geom_contour(aes(z = .pred_class_1), breaks = .5, col = "black", lty = 2) + 
-    coord_equal() + 
-    labs(x = "Predictor x", y = "Predictor y") + 
-    scale_fill_gradient2(low = "#FDB863", mid = "white", high = "#B2ABD2", midpoint = .5) + 
-    scale_color_manual(values = c("#2D004B", "darkorange"))
+  mutate(`Probability of Class 1` = .pred_class_1) %>% 
+  ggplot(aes(x = x, y = y)) + 
+  geom_raster(aes(fill = `Probability of Class 1`)) +
+  geom_point(data = testing_set, aes(shape = class, color = class), alpha = .75, size = 2) + 
+  geom_contour(aes(z = .pred_class_1), breaks = .5, color = "black", lty = 2) + 
+  coord_equal() + 
+  labs(x = "Predictor x", y = "Predictor y") + 
+  scale_fill_gradient2(low = "#FDB863", mid = "white", high = "#B2ABD2", midpoint = .5) + 
+  scale_color_manual(values = c("#2D004B", "darkorange"))
 ```
 
-The data points closest to the class boundary are the most uncertain. If their values changed slightly, their predicted class might change. One simple method for disqualifying some results is to call them "equivocal" if the values are within some range around 50% (or whatever the appropriate probability cutoff might be). Depending on the problem that the model is being applied to, this might indicate that another measurement should be collected or that we require more information before a trustworthy prediction is possible.  
+The fitted class boundary is overlaid onto the test set in Figure \@ref(fig:glm-boundaries). The data points closest to the class boundary are the most uncertain. If their values changed slightly, their predicted class might change. One simple method for disqualifying some results is to call them "equivocal" if the values are within some range around 50% (or whatever the appropriate probability cutoff might be). Depending on the problem that the model is being applied to, this might indicate that another measurement should be collected or that we require more information before a trustworthy prediction is possible.  
 
-We could base the width of the band around the cutoff on how performance improves when the uncertain results are removed. However, we should also estimate the reportable rate (the expected proportion of usable results). For example, it would be not be useful in real-world situations to have perfect performance but only release predictions on 2% of the samples passed to the model. 
+We could base the width of the band around the cutoff on how performance improves when the uncertain results are removed. However, we should also estimate the reportable rate (the expected proportion of usable results). For example, it would not be useful in real-world situations to have perfect performance but only release predictions on 2% of the samples passed to the model. 
 
 Let's use the test set to determine the balance between improving performance and having enough reportable results. The predictions are created using:  
 
@@ -143,7 +150,7 @@ There is also an `is_equivocal()` function for filtering these rows from the dat
 
 Does the equivocal zone help improve accuracy? Let's look over different buffer sizes:
 
-```{r trust-eq-calcs, out.width="80%"}
+```{r trust-eq-calcs, eval = FALSE}
 # A function to change the buffer then compute performance.
 eq_zone_results <- function(buffer) {
   test_pred <- 
@@ -154,15 +161,22 @@ eq_zone_results <- function(buffer) {
   tibble(accuracy = acc$.estimate, reportable = rep_rate, buffer = buffer)
 }
 
-# Evaluate a seqeunce of buffers and plot the results. 
+# Evaluate a sequence of buffers and plot the results. 
 map_dfr(seq(0, .1, length.out = 40), eq_zone_results) %>% 
   pivot_longer(c(-buffer), names_to = "statistic", values_to = "value") %>% 
-  ggplot(aes(x = buffer, y = value, col = statistic)) + 
+  ggplot(aes(x = buffer, y = value, lty = statistic)) + 
   geom_step(size = 1.2, alpha = 0.8) + 
   labs(y = NULL)
 ```
 
-Accuracy improves by a few percentage points but at the cost of nearly 10% of predictions being unusable! The value of such a compromise depends on how the model predictions will be used. 
+```{r equivocal-zone-results, ref.label = "trust-eq-calcs"}
+#| echo = FALSE,
+#| out.width="80%",
+#| fig.cap = "The effect of equivocal zones on model performance.",
+#| fig.alt = "The effect of equivocal zones on model performance. There is a slight increase in accuracy at the expense of a falling reportable rate."
+```
+
+As shown in Figure \@ref(fig:equivocal-zone-results), accuracy improves by a few percentage points but at the cost of nearly 10% of predictions being unusable! The value of such a compromise depends on how the model predictions will be used. 
 
 This analysis focused on using the predicted class probability to disqualify points, since this is a fundamental measure of uncertainty in classification models. A slightly better approach would be to use the standard error of the class probability. Since we used a Bayesian model, the probability estimates shown above are actually the mean of the posterior predictive distribution. In other words, the Bayesian model gives us a distribution for the class probability.  Measuring the standard deviation of this distribution gives us a _standard error of prediction_ of the probability. In most cases, this value is directly related to the mean class probability. You might recall that, for a Bernoulli random variable with probability $p$, the variance is $p(1-p)$. Because of this relationship, the standard error is largest when the probability is 50%. Instead of assigning an equivocal result using the class probability, we could instead use a cutoff on the standard error of prediction. 
 
@@ -170,23 +184,31 @@ One important aspect of the standard error of prediction is that it takes into a
 
 ```{r trust-pred-int}
 test_pred <- 
-   test_pred %>% 
-   bind_cols(
-      predict(two_class_mod, testing_set, type = "pred_int", std_error = TRUE)
-   )
+  test_pred %>% 
+  bind_cols(
+    predict(two_class_mod, testing_set, type = "pred_int", std_error = TRUE)
+  )
 ```
 
-For our example, where the model and data are well-behaved, this figure shows the standard error of prediction across the space: 
+For our example where the model and data are well-behaved, Figure \@ref(fig:std-errors) shows the standard error of prediction across the space. 
 
-```{r trust-glm-grid-std-err, echo = FALSE, fig.width=5, fig.height=5, out.width="70%", fig.align="center"}
+```{r std-errors}
+#| echo = FALSE, 
+#| fig.width=5, 
+#| fig.height=5, 
+#| out.width="70%", 
+#| fig.align="center",
+#| fig.cap = "The effect of the standard error of prediction overlaid with the test set data.",
+#| fig.alt = "The effect of the standard error of prediction overlaid with the test set data. The region of large variation is very similar to the class boundary space. Additionally, there is a large amount of variation to the west of the inflection point of the boundary curve."
+
 grid_pred %>% 
-    mutate(`Std Error` = .std_error) %>% 
-    ggplot(aes(x = x, y = y)) + 
-    geom_raster(aes(fill = `Std Error`)) + 
-    scale_fill_gradientn(colours = c("#F7FBFF", "#DEEBF7", "#C6DBEF", "#9ECAE1", "#6BAED6")) + 
-    geom_point(data = testing_set, aes(shape = class), alpha = .5, size = 2) + 
-    coord_equal() + 
-    labs(x = "Predictor x", y = "Predictor y")
+  mutate(`Std Error` = .std_error) %>% 
+  ggplot(aes(x = x, y = y)) + 
+  geom_raster(aes(fill = `Std Error`)) + 
+  scale_fill_gradientn(colours = c("#F7FBFF", "#DEEBF7", "#C6DBEF", "#9ECAE1", "#6BAED6")) + 
+  geom_point(data = testing_set, aes(shape = class), alpha = .5, size = 2) + 
+  coord_equal() + 
+  labs(x = "Predictor x", y = "Predictor y")
 ```
 
 Using the standard error as a measure to preclude samples from being predicted can also be applied to models with numeric outcomes. However, as shown in the next section, this may not always work.  
@@ -214,27 +236,27 @@ Using the preprocessed data, we fit a standard linear model:
 
 ```{r trust-chicago-model}
 base_recipe <-
-   recipe(ridership ~ ., data = Chicago_train) %>%
-   # Create date features
-   step_date(date) %>%
-   step_holiday(date) %>%
-   # Change date to be an id column instead of a predictor
-   update_role(date, new_role = "id") %>%
-   # Create dummy variables from factor columns
-   step_dummy(all_nominal()) %>%
-   # Remove any columns with a single unique value
-   step_zv(all_predictors()) %>%
-   step_normalize(!!!stations)%>%
-   step_pls(!!!stations, num_comp = 10, outcome = vars(ridership))
+  recipe(ridership ~ ., data = Chicago_train) %>%
+  # Create date features
+  step_date(date) %>%
+  step_holiday(date) %>%
+  # Change date to be an id column instead of a predictor
+  update_role(date, new_role = "id") %>%
+  # Create dummy variables from factor columns
+  step_dummy(all_nominal()) %>%
+  # Remove any columns with a single unique value
+  step_zv(all_predictors()) %>%
+  step_normalize(!!!stations)%>%
+  step_pls(!!!stations, num_comp = 10, outcome = vars(ridership))
 
 lm_spec <-
-   linear_reg() %>%
-   set_engine("lm") 
+  linear_reg() %>%
+  set_engine("lm") 
 
 lm_wflow <-
-   workflow() %>%
-   add_recipe(base_recipe) %>%
-   add_model(lm_spec)
+  workflow() %>%
+  add_recipe(base_recipe) %>%
+  add_model(lm_spec)
 
 set.seed(1903)
 lm_fit <- fit(lm_wflow, data = Chicago_train)
@@ -244,44 +266,52 @@ How well do the data fit on the test set?
 
 ```{r trust-chicago-test-res}
 res_test <-
-   predict(lm_fit, Chicago_test) %>%
-   bind_cols(
-      predict(lm_fit, Chicago_test, type = "pred_int"),
-      Chicago_test
-   )
+  predict(lm_fit, Chicago_test) %>%
+  bind_cols(
+    predict(lm_fit, Chicago_test, type = "pred_int"),
+    Chicago_test
+  )
 
 res_test %>% select(date, ridership, starts_with(".pred"))
 res_test %>% rmse(ridership, .pred)
 ```
 
-These are fairly good results. Let's also create a function that adds a day-of-the-week column, then visualize the predictions along with 95% prediction intervals: 
+These are fairly good results. Figure \@ref(fig:chicago-2016) visualizes the predictions along with 95% prediction intervals.
 
-```{r trust-chicago-test-pred, echo = FALSE, fig.height=4, out.width="80%", fig.align="center"}
+```{r chicago-2016}
+#| echo = FALSE, 
+#| fig.height=4, 
+#| out.width="80%", 
+#| fig.align="center",
+#| fig.cap = "Two weeks of 2016 predictions for the Chicago data along with 95% prediction intervals. ",
+#| fig.alt = "Two weeks of 2016 predictions for the Chicago data along with 95% prediction intervals. The model fit the data fairly well with reasonable error estimates."
+
 add_day <- function(x) {
-   day <- lubridate::wday(x$date, label = TRUE)
-   factor(as.character(day), ordered = FALSE, levels = levels(day))
+  day <- lubridate::wday(x$date, label = TRUE)
+  factor(as.character(day), ordered = FALSE, levels = levels(day))
 }
 
 res_test %>%
-   mutate(day = add_day(.)) %>%
-   ggplot(aes(x = date)) +
-   geom_point(aes(y = ridership, col = day), size = 2) +
-   geom_line(aes(y = .pred), alpha = .75) +
-   geom_ribbon(aes(ymin = .pred_lower, ymax = .pred_upper), fill = "blue", alpha = .1)  +
-   scale_color_brewer(palette = "Set2") +
-   scale_x_date(labels = date_format("%B %d, %Y")) +
-   labs(x = NULL, y = "Daily Ridership (x1000)", color = NULL)
+  mutate(day = add_day(.)) %>%
+  ggplot(aes(x = date)) +
+  geom_point(aes(y = ridership, color = day, pch = day), size = 3) +
+  geom_line(aes(y = .pred), alpha = .75) +
+  geom_ribbon(aes(ymin = .pred_lower, ymax = .pred_upper), fill = "blue", alpha = .1)  +
+  scale_color_brewer(palette = "Set2") +
+  scale_shape_manual(values = 15:22) +
+  scale_x_date(labels = date_format("%B %d, %Y")) +
+  labs(x = NULL, y = "Daily Ridership (x1000)", color = NULL, pch = NULL)
 ```
 
 Given the scale of the ridership numbers, these results look particularly good for such a simple model. If this model were deployed, how well would it have done a few years later in June of 2020? The model successfully makes a prediction, as a predictive model will when given input data:
 
 ```{r trust-chicago-2020-res}
 res_2020 <-
-   predict(lm_fit, Chicago_2020) %>%
-   bind_cols(
-      predict(lm_fit, Chicago_2020, type = "pred_int"),
-      Chicago_2020
-   ) 
+  predict(lm_fit, Chicago_2020) %>%
+  bind_cols(
+    predict(lm_fit, Chicago_2020, type = "pred_int"),
+    Chicago_2020
+  ) 
 
 res_2020 %>% select(date, contains(".pred"))
 ```
@@ -293,18 +323,26 @@ res_2020 %>% select(date, ridership, starts_with(".pred"))
 res_2020 %>% rmse(ridership, .pred)
 ```
 
-Look at this terrible model performance visually: 
+Look at this terrible model performance visually in Figure \@ref(fig:chicago-2020).
 
-```{r trust-chicago-2020-pred, echo = FALSE, fig.height=4, out.width="80%", fig.align="center"}
+```{r chicago-2020}
+#| echo = FALSE, 
+#| fig.height=4, 
+#| out.width="80%", 
+#| fig.align="center",
+#| fig.cap = "Two weeks of 2020 predictions for the Chicago data along with 95% prediction intervals. ",
+#| fig.alt = "Two weeks of 2016 predictions for the Chicago data along with 95% prediction intervals. The model fit the data fairly well with reasonable error estimates."
+
 res_2020 %>%
-   mutate(day = add_day(.)) %>%
-   ggplot(aes(x = date)) +
-   geom_point(aes(y = ridership, col = day), size = 2) +
-   geom_line(aes(y = .pred), alpha = .75) +
-   geom_ribbon(aes(ymin = .pred_lower, ymax = .pred_upper), fill = "blue", alpha = .1) +
-   scale_color_brewer(palette = "Set2") +
-   scale_x_date(labels = date_format("%B %d, %Y")) +
-   labs(x = NULL, y = "Daily Ridership (x1000)", color = NULL) 
+  mutate(day = add_day(.)) %>%
+  ggplot(aes(x = date)) +
+  geom_point(aes(y = ridership, color = day, pch = day), size = 3) +
+  geom_line(aes(y = .pred), alpha = .75) +
+  geom_ribbon(aes(ymin = .pred_lower, ymax = .pred_upper), fill = "blue", alpha = .1) +
+  scale_shape_manual(values = 15:22) +
+  scale_color_brewer(palette = "Set2") +
+  scale_x_date(labels = date_format("%B %d, %Y")) +
+  labs(x = NULL, y = "Daily Ridership (x1000)", color = NULL, pch = NULL) 
 ```
 
 Confidence and prediction intervals for linear regression expand as the data become more and more removed from the center of the training set. However, that effect is not dramatic enough to flag these predictions as being poor.
@@ -319,11 +357,16 @@ This situation can be avoided by having a secondary methodology that can quantif
 The idea is to accompany a prediction with a score that measures how similar the new point is to the training set.
 :::
 
-One method that works well uses principal component analysis (PCA) on the numeric predictor values. We'll illustrate the process by using only two of the predictors that correspond to ridership at different stations (California and Austin stations). The training set are shown in panel (a) below. The ridership data for these stations are highly correlated and the two distributions shown in the scatter plot correspond to ridership on the weekends and week days. 
+One method that works well uses principal component analysis (PCA) on the numeric predictor values. We'll illustrate the process by using only two of the predictors that correspond to ridership at different stations (California and Austin stations). The training set are shown in panel (a) in Figure \@ref(fig:pca-reference-dist). The ridership data for these stations are highly correlated and the two distributions shown in the scatter plot correspond to ridership on the weekends and week days. 
 
-The first step is to conduct PCA on the training data. The PCA scores for the training set are shown in panel (b). Next, using these results, we measure the distance of each training set point to the center of the PCA data (panel (c)). We can then use this _reference distribution_ (panel (d)) to estimate how far away a data point is from the mainstream of the training data.  
+The first step is to conduct PCA on the training data. The PCA scores for the training set are shown in panel (b) in Figure \@ref(fig:pca-reference-dist). Next, using these results, we measure the distance of each training set point to the center of the PCA data (panel (c) of Figure \@ref(fig:pca-reference-dist)). We can then use this _reference distribution_ (panel (d) of Figure \@ref(fig:pca-reference-dist)) to estimate how far away a data point is from the mainstream of the training data.  
 
-```{r trust-pca-two-class-train, echo = FALSE, out.width = "100%"}
+```{r pca-reference-dist}
+#| echo = FALSE, 
+#| out.width = "100%",
+#| fig.cap = "The PCA reference distribution based on the training set.",
+#| fig.alt = "The PCA reference distribution based on the training set. The majority of the distances to the center of the PCA distribution are below a value of three."
+
 pca_rec <- recipe(~ ., data = Chicago_train) %>% 
   step_normalize(California, Austin) %>% 
   step_pca(California, Austin, num_comp = 2) %>% 
@@ -387,7 +430,7 @@ pca_dist <-
 dist_hist <-
   training_pca %>%
   ggplot(aes(x = distance)) +
-  geom_histogram(bins = 30, col = "white") +
+  geom_histogram(bins = 30, color = "white") +
   labs(x = "Distance to Training Set Center", title = "(d) Reference Distribution") +
   theme(plot.title = element_text(size = 9))
 
@@ -402,13 +445,20 @@ However, what does it mean when a new sample has a distance of _X_? Since the PC
 One approach is to treat the distances from the training set data as "normal". For new samples, we can determine how the new distance compares to the range in the reference distribution (from the training set). A _percentile_ can be computed for new samples that reflect how much of the training set is less extreme than the new samples. 
 
 :::rmdnote
-A percentile of 90% means that most of of the training set data are closer to the data center than the new sample. 
+A percentile of 90% means that most of the training set data are closer to the data center than the new sample. 
 :::
 
 
-The plot below overlays a testing set sample (in blue) and a 2020 sample (in red) with the PCA distances from the training set. 
+The plot in Figure \@ref(fig:two-new-points) overlays a testing set sample (triangle and dashed line) and a 2020 sample (circle and solid line) with the PCA distances from the training set. 
 
-```{r trust-pca-two-class-test, echo = FALSE, fig.width=9, fig.height=4}
+```{r two-new-points}
+#| echo = FALSE, 
+#| out.width = "100%",
+#| fig.width=9, 
+#| fig.height=4,
+#| fig.cap = "The reference distribution with two new points: one using the test set and one from the 2020 data.",
+#| fig.alt = "The reference distribution with two new points: one using the test set and one from the 2020 data. The test set point is snugly within the data mainstream while the 2020 point is outside of the reference distribution."
+
 test_pca_dist <- 
   training_pca %>% 
   ggplot() + 
@@ -419,15 +469,16 @@ test_pca_dist <-
   geom_segment(
     data = testing_pca,
     aes(x = PC1_mean, y = PC2_mean, xend = PC1, yend = PC2), 
-    col = "cyan"
+    color = "lightblue",
+    lty = 2
   )  + 
   geom_segment(
     data = new_pca,
     aes(x = PC1_mean, y = PC2_mean, xend = PC1, yend = PC2), 
-    col = "red"
+    color = "red"
   )  + 
-  geom_point(data = testing_pca, aes(x = PC1, y = PC2), col = "cyan")   + 
-  geom_point(data = new_pca, aes(x = PC1, y = PC2), col = "red") +
+  geom_point(data = testing_pca, aes(x = PC1, y = PC2), color = "lightblue", size = 2, pch = 17) +
+  geom_point(data = new_pca, aes(x = PC1, y = PC2), size = 2, color = "red") +
   coord_obs_pred() + 
   labs(x = "Component 1", y = "Component 2", title = "Distances to Training Set Center") + 
   theme_bw() + 
@@ -436,9 +487,9 @@ test_pca_dist <-
 test_dist_hist <- 
   training_pca %>% 
   ggplot(aes(x = distance)) + 
-  geom_histogram(bins = 30, col = "white", alpha = .5) + 
-  geom_vline(xintercept = testing_pca$distance, col = "cyan")  + 
-  geom_vline(xintercept = new_pca$distance, col = "red") +
+  geom_histogram(bins = 30, color = "white", alpha = .5) + 
+  geom_vline(xintercept = testing_pca$distance, color = "lightblue", lty = 2) +
+  geom_vline(xintercept = new_pca$distance, color = "red") +
   xlab("Distance to Training Set Center")
 
 test_pca_dist + test_dist_hist
@@ -457,10 +508,17 @@ pca_stat <- apd_pca(~ ., data = Chicago_train %>% select(one_of(stations)),
 pca_stat
 ```
 
-The `autoplot()` method plots the reference distribution. It has an optional argument for which data to plot. We'll add a value of `distance` to only plot the training set distance distribution: 
+The `autoplot()` method plots the reference distribution. It has an optional argument for which data to plot. We'll add a value of `distance` to only plot the training set distance distribution. This code generates the plot in Figure \@ref(fig:ap-autoplot):
 
-```{r trust-ref-dist, out.width="80%"}
+```{r trust-ref-dist, eval = FALSE}
 autoplot(pca_stat, distance) + xlab("Distance")
+```
+
+```{r ap-autoplot, ref.label = "trust-ref-dist"}
+#| echo = FALSE,
+#| out.width="70%",
+#| fig.cap = "The results of using the `autoplot()` method on an applicable object.",
+#| fig.alt = "The results of using the `autoplot()` method on an applicable object."
 ```
 
 The x-axis shows the values of the distance and the y-axis displays the distribution's percentiles. For example, half of the training set samples had distances less than `r round(approx(pca_stat$pctls$percentile, pca_stat$pctls$distance, xout = 50)$y, 1)`. 

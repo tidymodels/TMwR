@@ -9,7 +9,7 @@ tidymodels_prefer()
 
 # The Ames housing data {#ames}
 
-The Ames housing data set [@ames] is an excellent resource for learning about models that we will use throughout this book. It contains data on `r format(nrow(ames), big.mark = ",")` properties in Ames, Iowa, including columns related to 
+The Ames housing data set [@ames] is an excellent resource for learning about models that we will use throughout this book. It contains data on `r format(nrow(ames), big.mark = ",")` properties in Ames, Iowa, including columns related to: 
 
  * house characteristics (bedrooms, garage, fireplace, pool, porch, etc.),
  * location (neighborhood),
@@ -43,22 +43,40 @@ dim(ames)
 
 ## Exploring important features
 
-It makes sense to start with the outcome we want to predict: the last sale price of the house (in USD): 
+Let's start with the outcome we want to predict: the last sale price of the house (in USD), as shown in Figure \@ref(fig:ames-sale-price).
 
-```{r ames-sale_price, out.width = '100%', fig.width=8, fig.height=3}
+```{r ames-sale-price-code, eval = FALSE}
 library(tidymodels)
 tidymodels_prefer()
 
 ggplot(ames, aes(x = Sale_Price)) + 
-  geom_histogram(bins = 50)
+  geom_histogram(bins = 50, col= "white")
 ```
 
-The data are right-skewed; there are more inexpensive houses than expensive ones. The median sale price was \$`r format(median(ames$Sale_Price), big.mark = ",")` and the most expensive house was \$`r format(max(ames$Sale_Price), big.mark = ",")`. When modeling this outcome, a strong argument can be made that the price should be log-transformed. The advantages of doing this are that no houses would be predicted with negative sale prices and that errors in predicting expensive houses will not have an undue influence on the model. Also, from a statistical perspective, a logarithmic transform may also _stabilize the variance_ in a way that makes inference more legitimate. Let's visualize the transformed data:
+```{r ames-sale-price-hist, ref.label = "ames-sale-price-code"}
+#| out.width = '100%',
+#| fig.width = 8,
+#| fig.height = 3,
+#| echo = FALSE,
+#| fig.cap = "Sale prices of houses in Ames, Iowa.",
+#| fig.alt = "A histogram of the sale prices of houses in Ames, Iowa. The distribution has a long right tail."
+```
 
-```{r ames-log-sale_price, out.width = '100%', fig.width=8, fig.height=3}
+The data are right-skewed; there are more inexpensive houses than expensive ones. The median sale price was \$`r format(median(ames$Sale_Price), big.mark = ",")` and the most expensive house was \$`r format(max(ames$Sale_Price), big.mark = ",")`. When modeling this outcome, a strong argument can be made that the price should be log-transformed. The advantages of doing this are that no houses would be predicted with negative sale prices and that errors in predicting expensive houses will not have an undue influence on the model. Also, from a statistical perspective, a logarithmic transform may also _stabilize the variance_ in a way that makes inference more legitimate. Figure \@ref(fig:ames-log-sale-price-hist) visualizes the transformed data.
+
+```{r ames-log-sale-price-code, eval = FALSE}
 ggplot(ames, aes(x = Sale_Price)) + 
-  geom_histogram(bins = 50) +
+  geom_histogram(bins = 50, col= "white") +
   scale_x_log10()
+```
+
+```{r ames-log-sale-price-hist, ref.label = "ames-log-sale-price-code"}
+#| out.width = '100%',
+#| fig.width = 8,
+#| fig.height = 3,
+#| echo = FALSE,
+#| fig.cap = "Sale prices of houses in Ames, Iowa after a log (base 10) transformation.",
+#| fig.alt = "A histogram of the sale prices of houses in Ames, Iowa after a log (base 10) transformation. The distribution, while not perfectly symmetric, exhibits far less skewness."
 ```
 
 While not perfect, this will probably result in better models than using the untransformed data. 
@@ -75,44 +93,74 @@ Despite these drawbacks, the models used in this book utilize the log transforma
 ames <- ames %>% mutate(Sale_Price = log10(Sale_Price))
 ```
 
-Another important aspect of these data for our modeling are their geographic locations. This spatial information is contained in the data in two ways: a qualitative `Neighborhood` label as well as quantitative longitude and latitude data. To visualize the spatial information, let's use both together to plot the data on a map and color by neighborhood: 
+Another important aspect of these data for our modeling are their geographic locations. This spatial information is contained in the data in two ways: a qualitative `Neighborhood` label as well as quantitative longitude and latitude data. To visualize the spatial information, let's use both together to plot the data on a map and color by neighborhood in Figure \@ref(fig:ames-map).
 
-```{r ames-map, out.width = "100%", echo = FALSE, fig.cap = "Neighborhoods in Ames IA", warning = FALSE}
+```{r ames-map}
+#| out.width = "100%", 
+#| echo = FALSE, 
+#| warning = FALSE,
+#| fig.cap = "Neighborhoods in Ames, IA.",
+#| fig.alt = "A scatter plot of house locations in Ames superimposed over a street map. There is a significant area in the center of the map where no homes were sold."
 # See file extras/ames_sf.R
 knitr::include_graphics("premade/ames.png")
 ```
 
-We can see a few noticeable patterns. First, there is a void of data points in the center of Ames. This corresponds to Iowa State University. Second, while there are a number of neighborhoods that are geographically isolated, there are others that are adjacent to each other. For example, Timberland is located apart from almost all other neighborhoods:
+We can see a few noticeable patterns. First, there is a void of data points in the center of Ames. This corresponds to Iowa State University. Second, while there are a number of neighborhoods that are geographically isolated, there are others that are adjacent to each other. For example, as Figure \@ref(fig:ames-timberland) shows, Timberland is located apart from almost all other neighborhoods.
 
-```{r ames-timberland , out.width = "80%", echo = FALSE, warning = FALSE}
+```{r ames-timberland}
+#| out.width = "80%", 
+#| echo = FALSE, 
+#| warning = FALSE,
+#| fig.cap = "Locations of homes in Timberland.",
+#| fig.alt = "A scatter plot of locations of homes in Timberland, located in the southern part of Ames."
 # See file extras/ames_sf.R
 knitr::include_graphics("premade/timberland.png")
 ```
 
-The Meadow Village neighborhood in Southwest Ames is like an island of properties ensconced inside the sea of properties that make up the Mitchell neighborhood: 
+Figure \@ref(fig:ames-mitchell) visualizes how the Meadow Village neighborhood in Southwest Ames is like an island of properties ensconced inside the sea of properties that make up the Mitchell neighborhood. 
 
-```{r ames-mitchell , out.width = "60%", echo = FALSE, warning = FALSE}
+```{r ames-mitchell}
+#| out.width = "60%", 
+#| echo = FALSE, 
+#| warning = FALSE,
+#| fig.cap = "Locations of homes in Meadow Village and Mitchell.",
+#| fig.alt = "A scatter plot of locations of homes in Meadow Village and Mitchell. The small number of Meadow Village properties are enclosed inside the the ones labeled as being in Mitchell."
 # See file extras/ames_sf.R
 knitr::include_graphics("premade/mitchell.png")
 ```
  
-A detailed inspection of the map also shows that the neighborhood labels are not completely reliable. For example, there are some properties labeled as being in Northridge that are surrounded by houses in the adjacent Somerset neighborhood: 
+A detailed inspection of the map also shows that the neighborhood labels are not completely reliable. For example, Figure \@ref(fig:ames-northridge) shows there are some properties labeled as being in Northridge that are surrounded by homes in the adjacent Somerset neighborhood. 
 
-```{r ames-northridge , out.width = "90%", echo = FALSE, warning = FALSE}
+```{r ames-northridge}
+#| out.width = "90%", 
+#| echo = FALSE, 
+#| warning = FALSE,
+#| fig.cap = "Locations of homes in Somerset and Northridge.",
+#| fig.alt = "A scatter plot of locations of homes in Somerset and Northridge. There are a few homes in Somerset mixed in the periphery of Northridge (and vice versa)."
 # See file extras/ames_sf.R
 knitr::include_graphics("premade/northridge.png")
 ```
 
-Also, there are ten isolated houses labeled as being in Crawford but are not close to the majority of the other houses in that neighborhood:
+Also, there are ten isolated homes labeled as being in Crawford that you can see in Figure \@ref(fig:ames-crawford) but are not close to the majority of the other homes in that neighborhood:
 
-```{r ames-crawford , out.width = "80%", echo = FALSE, warning = FALSE}
+```{r ames-crawford}
+#| out.width = "80%", 
+#| echo = FALSE, 
+#| warning = FALSE,
+#| fig.cap = "Locations of homes in Crawford.",
+#| fig.alt = "A scatter plot of locations of homes in Crawford. There is a large cluster of homes to the west of a small, separate cluster of properties also labeled as Crawford."
 # See file extras/ames_sf.R
 knitr::include_graphics("premade/crawford.png")
 ```
 
-Also notable is the "Iowa Department of Transportation (DOT) and Rail Road" neighborhood adjacent to the main road on the east side of Ames. There are several clusters of houses within this neighborhood as well as some longitudinal outliers; the two houses furthest east are isolated from the other locations. 
+Also notable is the "Iowa Department of Transportation (DOT) and Rail Road" neighborhood adjacent to the main road on the east side of Ames, shown in Figure \@ref(fig:ames-dot_rr). There are several clusters of homes within this neighborhood as well as some longitudinal outliers; the two homes furthest east are isolated from the other locations. 
 
-```{r ames-dot_rr , out.width = "100%", echo = FALSE, warning = FALSE}
+```{r ames-dot_rr}
+#| out.width = "100%", 
+#| echo = FALSE, 
+#| warning = FALSE,
+#| fig.cap = "Homes labeled as 'Iowa Department of Transportation (DOT) and Rail Road'.",
+#| fig.alt = "A scatter plot of locations of homes labeled as 'Iowa Department of Transportation (DOT) and Rail Road'. The longitude distribution is right-skewed with a few outlying properties."
 # See file extras/ames_sf.R
 knitr::include_graphics("premade/dot_rr.png")
 ```

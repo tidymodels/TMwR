@@ -35,11 +35,9 @@ The content is created using the `bookdown` package. To compile the book, use:
 bookdown::render_book("index.Rmd", "bookdown::gitbook")
 ```
 
-This will create the HTML files in a directory called `_book`. Although we eventually plan to publish a paper version of this work, we do _not_ currently support building to a PDF version.
+This will create the HTML files in a directory called `_book`. Although we are in the process of publishing a print version of this work with O'Reilly, we do _not_ currently support building to a PDF version.
 
 
 # Contributing
 
-This project is released with a [Contributor Code of Conduct](https://contributor-covenant.org/version/2/0/CODE_OF_CONDUCT.html). By contributing to this project, you agree to abide by its terms.
-
-_Tidy Modeling with R_ is currently a work in progress. As we create it, the code here is updated. This openness also allows users to contribute if they wish. Most often, this comes in the form of correcting typos, grammar, and other aspects of our work that could use improvement. Instructions for making contributions can be found in the [`contributing.md`](https://github.com/tidymodels/TMwR/blob/master/contributing.md) file.
+Please note that this work is written under a [Contributor Code of Conduct](CODE_OF_CONDUCT.md) and the online version is licensed under a [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License](https://creativecommons.org/licenses/by-nc-sa/4.0/). By participating in this project (for example, by submitting an [issue](https://github.com/tidymodels/TMwR/issues) with suggestions or edits) you agree to abide by its terms. Instructions for making contributions can be found in the [`contributing.md`](contributing.md) file.
