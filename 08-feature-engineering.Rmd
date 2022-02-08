@@ -403,7 +403,11 @@ There are other step functions that are row-based as well: `step_filter()`, `ste
 
 ### General transformations
 
-Mirroring the original `r pkg(dplyr)` operations, `step_mutate()` and `step_mutate_at()` can be used to conduct a variety of basic operations to the data. 
+Mirroring the original `r pkg(dplyr)` operation, `step_mutate()` can be used to conduct a variety of basic operations to the data. 
+
+:::rmdwarning
+When using this flexible step, use extra care to avoid data leakage in your preprocessing. Consider, for example, the transformation `x = w > mean(w)`. When applied to new data or testing data, this transformation would use the mean of `w` from the _new_ data, not the mean of `w` from the training data.
+:::
 
 
 ### Natural language processing
