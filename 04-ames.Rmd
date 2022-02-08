@@ -21,7 +21,7 @@ The Ames housing data set [@ames] is an excellent resource for learning about mo
 Our goal for these data is to predict the sale price of a house based on its other characteristics. 
 :::
 
-The raw data are provided by the authors, but in our analyses in this book, we use a transformed version available in the `r pkg(modeldata)` package. This version has several changes and improvements to the data^[For a complete account of the differences, see [this script](https://github.com/topepo/AmesHousing/blob/master/R/make_ames.R).]. For example, the longitude and latitude values have been determined for each property. Also, some columns were modified to be more analysis ready. For example: 
+The raw data are provided by the authors, but in our analyses in this book, we use a transformed version available in the `r pkg(modeldata)` package. This version has several changes and improvements to the data^[For a complete account of the differences, see <https://github.com/topepo/AmesHousing/blob/master/R/make_ames.R>.]. For example, the longitude and latitude values have been determined for each property. Also, some columns were modified to be more analysis ready. For example: 
 
  * In the raw data, if a house did not have a particular feature, it was implicitly encoded as missing. For example, there were `r format(sum(ames$Alley == "No_Alley_Access"), big.mark = ",")` properties that did not have an alleyway. Instead of leaving these as missing, they were relabeled in the transformed version to indicate that no alley was available.
 

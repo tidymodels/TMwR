@@ -14,7 +14,7 @@ In this chapter, we briefly discuss these principles and how they apply in the c
 
 ## Principles
 
-The full set of strategies and tactics for writing R code in the tidyverse style can be found at the website [`https://design.tidyverse.org`](https://design.tidyverse.org/). Here we can briefly describe several of the design principles, their motivation, and how we think about modeling as an application of these principles. 
+The full set of strategies and tactics for writing R code in the tidyverse style can be found at the website <https://design.tidyverse.org>. Here we can briefly describe several of the design principles, their motivation, and how we think about modeling as an application of these principles. 
 
 ### Design for humans
 
