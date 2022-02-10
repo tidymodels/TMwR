@@ -90,7 +90,7 @@ mlp_param %>%
   grid_regular(levels = c(hidden_units = 3, penalty = 2, epochs = 2))
 ```
 
-There are techniques for creating regular grids that do not use all possible values of each parameter set. These _fractional factorial designs_ [@BHH] could also be used. To learn more, consult the CRAN Task View for experimental design^[[https://CRAN.R-project.org/view=ExperimentalDesign](https://CRAN.R-project.org/view=ExperimentalDesign)]. 
+There are techniques for creating regular grids that do not use all possible values of each parameter set. These _fractional factorial designs_ [@BHH] could also be used. To learn more, consult the CRAN Task View for experimental design^[<https://CRAN.R-project.org/view=ExperimentalDesign>]. 
 
 :::rmdwarning
 Regular grids can be computationally expensive to use, especially when there are a medium-to-large number of tuning parameters. This is true for many models but not all. As discussed in Section \@ref(efficient-grids) below, there are many models whose tuning time _decreases_ with a regular grid!
