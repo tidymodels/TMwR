@@ -366,7 +366,10 @@ List columns can be very powerful in modeling projects. List columns provide con
 The tidyverse (Chapter \@ref(tidyverse)) is designed as a set of modular R packages, each with a fairly narrow scope. The tidymodels framework follows a similar design. For example, the `r pkg(rsample)` package focuses on data splitting and resampling. Although resampling methods are critical to other activities of modeling (e.g., measuring performance), they reside in a single package and performance metrics are contained in a different, separate package, `r pkg(yardstick)`. There are many benefits to adopting this philosophy of modular packages, from less bloated model deployment to smoother package maintenance.
 
 ```{r base-r-detach, warning = FALSE, message = FALSE, echo = FALSE}
-pkgs <- paste0("package:", c("tidymodels", tidymodels:::core))
+pkgs <- paste0("package:", 
+               c("kableExtra", 
+                 "tidyverse", "tidymodels", 
+                 tidyverse:::core, tidymodels:::core))
 for (i in pkgs) {
   try(detach(i, unload = TRUE, character.only = TRUE, force = TRUE), silent = TRUE)
 }
