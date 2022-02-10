@@ -41,7 +41,7 @@ rf_wflow <-
       Latitude + Longitude) %>% 
   add_model(rf_model) 
 
-set.seed(55)
+set.seed(123)
 ames_folds <- vfold_cv(ames_train, v = 10)
 
 # cached in RData/resampling.RData

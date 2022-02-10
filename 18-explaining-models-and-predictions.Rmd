@@ -403,7 +403,7 @@ In Chapter \@ref(dimensionality), we discussed how to use dimensionality reducti
 
 ```{r explain-bean-data, echo=FALSE}
 library(beans)
-set.seed(1701)
+set.seed(1801)
 bean_split <- initial_split(beans, strata = class, prop = 3/4)
 bean_train <- training(bean_split)
 bean_test  <- testing(bean_split)

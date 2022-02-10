@@ -161,7 +161,7 @@ According to these results, the logistic model has the best statistical properti
 From the scale of the log-likelihood values, it is difficult to understand if these differences are important or negligible.  One way of improving this analysis is to resample the statistics and separate the modeling data from the data used for performance estimation. With this small data set, repeated 10-fold cross-validation is a good choice for resampling. In the `r pkg(yardstick)` package, the `mn_log_loss()` function is used to estimate the negative log-likelihood, with our results shown in Figure \@ref(fig:resampled-log-lhood).
 
 ```{r tuning-resampled-log-lhood, eval=FALSE}
-set.seed(1292)
+set.seed(1201)
 rs <- vfold_cv(training_set, repeats = 10)
 
 # Return the individual resampled performance estimates:

@@ -98,7 +98,7 @@ knitr::include_graphics("premade/roc_surface.png")
 The search procedures described below require at least some resampled performance statistics before proceeding. For this purpose, the code below creates a small regular grid that resides in the flat portion of the parameter space. The `tune_grid()` function resamples these values:  
 
 ```{r iterative-svm-initial, message = FALSE}
-set.seed(234)
+set.seed(1401)
 start_grid <- 
   svm_param %>% 
   update(
@@ -107,7 +107,7 @@ start_grid <-
   ) %>% 
   grid_regular(levels = 2)
 
-set.seed(2)
+set.seed(1402)
 svm_initial <- 
   svm_wflow %>% 
   tune_grid(resamples = cell_folds, grid = start_grid, metrics = roc_res)
@@ -437,7 +437,7 @@ Let's use the first SVM results from Section \@ref(svm) as the initial substrate
 ```{r iterative-cells-bo, eval = FALSE}
 ctrl <- control_bayes(verbose = TRUE)
 
-set.seed(1234)
+set.seed(1403)
 svm_bo <-
   svm_wflow %>%
   tune_bayes(

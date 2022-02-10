@@ -258,7 +258,7 @@ lm_wflow <-
   add_recipe(base_recipe) %>%
   add_model(lm_spec)
 
-set.seed(1903)
+set.seed(1902)
 lm_fit <- fit(lm_wflow, data = Chicago_train)
 ```
 
