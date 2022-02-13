@@ -8,7 +8,7 @@ in TMwR.css? This is not working yet for me
 
 ## Generate `.md` files:
 
-Choose a directory to put the new files in:
+Choose a directory to put the new files in (use `_bookdown.yml` to generate only part of the book):
 
 ```r
 render_book(output_format = html_book(keep_md = TRUE), output_dir = "files_for_print/")
