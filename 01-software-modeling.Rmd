@@ -80,7 +80,7 @@ plm_plot <-
     axis.ticks = element_blank()
   ) + 
   labs(x = "", y = "") + 
-  scale_fill_manual(values = c("#377EB8", "#E41A1C")) + 
+  scale_fill_manual(values = c("white", "midnightblue")) + 
   coord_equal() + 
   ggtitle("(a) Evaluating the quality of two microarray chips using a model.") + 
   theme(plot.title = element_text(hjust = 0.5))
