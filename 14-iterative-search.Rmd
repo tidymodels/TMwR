@@ -519,35 +519,180 @@ autoplot(svm_bo, type = "performance")
 
 An additional type of plot uses `type = "parameters"`  which shows the parameter values over iterations.
 
-The animation below visualizes the results of the search. The black $\times$ values show the starting values contained in `svm_initial`. The top-left blue panel shows the _predicted_ mean value of the area under the ROC curve. The red panel on the top-right displays the _predicted_ variation in the ROC values while the bottom plot visualizes the expected improvement. In each panel, darker colors indicate less attractive values (e.g., small mean values, large variation, and small improvements).  
 
-```{r iterative-bo-progress, include = FALSE}
-# If caching was turned on for the 'iterative-cells-bo-calcs' chunk, the version
-# of the GP results in tempdir will not be available so we use the last copy in 
-# the 'RData' path. 
-
-if (!exists("gp_candidates")) {
-  load("RData/gp_candidates.RData")
+```{r iterative-bo-calcs, include = FALSE}
+bo_path <- 
+  svm_bo %>% 
+  collect_metrics() %>% 
+  select(cost, rbf_sigma, .iter, mean)
+initial <- 
+  bo_path %>% 
+  filter(.iter == 0)
+best_init <- 
+  initial %>% 
+  arrange(desc(mean)) %>% 
+  slice(1)
+srch <- 
+  best_init %>% 
+  bind_rows(
+    bo_path %>% 
+      filter(.iter > 0)
+  ) %>% 
+  mutate(
+    next_cost = dplyr::lead(cost), 
+    next_rbf_sigma = dplyr::lead(rbf_sigma)
+  )
+bo_base <- 
+  bo_path %>% 
+  ggplot(aes(x = rbf_sigma, y = cost)) + 
+  # geom_raster(aes(fill = .mean)) +
+  scale_x_log10(labels = fmt_dcimals(2), limits = x_rng) + 
+  scale_y_continuous(trans = "log2", labels = fmt_dcimals(2), limits = y_rng) +
+  geom_point(data = initial, col = "black", pch = 1) +
+  theme_bw() + 
+  theme(
+    panel.grid.minor.x = element_blank(),
+    panel.grid.minor.y = element_blank(),
+    axis.text.y = element_text(size = 8),
+    axis.text.x = element_text(size = 8)
+  ) + 
+  coord_fixed(ratio = 1/2.5)
+first_5 <- bo_base
+max_iter <- 5
+for (iter in 0:max_iter) {
+  first_5 <- 
+    first_5 + 
+    geom_segment(
+      data = srch %>% slice(iter + 1),
+      aes(xend = next_rbf_sigma, yend = next_cost),
+                 arrow = grid::arrow(length = unit(0.04, "inches"), type = "closed"),
+      alpha = 1/2
+      )
 }
-av_capture_graphics(
-  make_bo_animation(gp_candidates, svm_bo),
-  output = "bo_search.mp4",
-  width = 760,
-  height = 760,
-  res = 100,
-  vfilter = 'framerate=fps=10', 
-  framerate = 1/3
-)
+first_5 <- 
+  first_5 + 
+  ggtitle("First 5 iterations") 
+first_11 <- bo_base
+max_iter <- 11
+for (iter in 0:max_iter) {
+  first_11 <- 
+    first_11 + 
+    geom_segment(
+      data = srch %>% slice(iter + 1),
+      aes(xend = next_rbf_sigma, yend = next_cost),
+      arrow = grid::arrow(length = unit(0.04, "inches"), type = "closed"),
+      alpha = 1/2
+    )
+}
+first_11 <- 
+  first_11 + 
+  ggtitle("First 11 iterations") +
+  ylab(NULL) + 
+  theme(
+    axis.title.y = element_blank(),
+    axis.text.y = element_blank(),
+    axis.ticks.y = element_blank()
+  )
+all_bo <- bo_base
+max_iter <- max(srch$.iter)
+for (iter in 0:max_iter) {
+  all_bo <- 
+    all_bo + 
+    geom_segment(
+      data = srch %>% slice(iter + 1),
+      aes(xend = next_rbf_sigma, yend = next_cost),
+      arrow = grid::arrow(length = unit(0.04, "inches"), type = "closed"),
+      alpha = 1/2
+    )
+}
+all_bo <- 
+  all_bo + 
+  ggtitle("All iterations") +
+  ylab(NULL) + 
+  theme(
+    axis.title.y = element_blank(),
+    axis.text.y = element_blank(),
+    axis.ticks.y = element_blank()
+  )
+surf_mean <- 
+  gp_candidates %>% 
+  filter(.iter == 11) %>% 
+  ggplot(aes(x = rbf_sigma, y = cost)) + 
+  geom_raster(aes(fill = .mean)) +
+  scale_x_log10(labels = fmt_dcimals(2), limits = x_rng) + 
+  scale_y_continuous(trans = "log2", labels = fmt_dcimals(2), limits = y_rng) +
+  scale_fill_distiller(palette = "Blues") + 
+  theme_bw()  +
+  theme(
+    legend.position = "none",
+    panel.grid.minor.x = element_blank(),
+    panel.grid.minor.y = element_blank(),
+    axis.text.y = element_text(size = 8),
+    axis.text.x = element_text(size = 8)
+    ) +
+  labs(title = "Mean") + 
+  coord_fixed(ratio = 1/2.5)
+surf_sd <- 
+  gp_candidates %>% 
+  filter(.iter == 11) %>% 
+  ggplot(aes(x = rbf_sigma, y = cost)) + 
+  geom_raster(aes(fill = -.sd)) +
+  scale_x_log10(labels = fmt_dcimals(2), limits = x_rng) + 
+  scale_y_continuous(trans = "log2", labels = fmt_dcimals(2), limits = y_rng) +
+  scale_fill_distiller(palette = "Reds") +
+  labs(title = "Variance") + 
+  coord_fixed(ratio = 1/2.5) +
+  ylab(NULL) + 
+  theme_bw() + 
+  theme(
+    legend.position = "none",
+    axis.title.y = element_blank(),
+    axis.text.y = element_blank(),
+    axis.ticks.y = element_blank(),
+    panel.grid.minor.x = element_blank(),
+    panel.grid.minor.y = element_blank(),
+    axis.text.x = element_text(size = 8)
+  )
+surf_impr <- 
+  gp_candidates %>% 
+  filter(.iter == 11) %>% 
+  ggplot(aes(x = rbf_sigma, y = cost)) + 
+  geom_raster(aes(fill = log(objective + 0.00001))) +
+  scale_x_log10(labels = fmt_dcimals(2), limits = x_rng) + 
+  scale_y_continuous(trans = "log2", labels = fmt_dcimals(2), limits = y_rng) +
+  scale_fill_gradientn(colours = rev(scales::brewer_pal(palette = "RdPu")(3))) +
+  labs(title = "Expected Improvement") + 
+  coord_fixed(ratio = 1/2.5) +
+  ylab(NULL) + 
+  theme_bw() + 
+  theme(
+    legend.position = "none",
+    axis.title.y = element_blank(),
+    axis.text.y = element_blank(),
+    axis.ticks.y = element_blank(),
+    panel.grid.minor.x = element_blank(),
+    panel.grid.minor.y = element_blank(),
+    axis.text.x = element_text(size = 8)
+  )
 ```
 
-<video width="720" height="720" controls>
-<source src="bo_search.mp4" type="video/mp4">
-</video>
 
+The figure below shows the surfaces of the mean, variance, and expected improvement surfaces estimated by the GP after 11 iterations. The right-hand panel shows a ridge of best estimated improvement along the right side of the candidate space.
 
-The surface of the predicted mean surface is very inaccurate in the first few iterations of the search. Despite this, it does help guide the process to the region of good performance.  In other words, the Gaussian process model is wrong but shows itself to be very useful. Within the first ten iterations, the search is sampling near the optimum location. 
+```{r bo-surfaces, echo = FALSE, dev = "png", out.width="100%", fig.width=9, fig.height=4}
+surf_mean + surf_sd + surf_impr
+```
+
+This figure shows the search process at three different points in the optimization:
+
+```{r bo-search, echo = FALSE, warning = FALSE, dev = "png", out.width="100%", fig.width=9, fig.height=4}
+first_5 + first_11 + all_bo
+```
+
+The first five iterations initially move in a poor direction but quickly move closer to better results.  The middle panel shows the process investigating the region of true optimal results with a short foray to the bottom right boundary of the candidate space. The remaining iterations switch between the region of best results and the far borders of the search space. 
 
 While the best tuning parameter combination is on the boundary of the parameter space, Bayesian optimization will often choose new points on other sides of the boundary. While we can adjust the ratio of exploration and exploitation, the search tends to sample boundary points early on.
+
 
 :::rmdnote
 If the search is seeded with an initial grid, a space-filling design would probably be a better choice than a regular design.  It samples more unique values of the parameter space and would improve the predictions of the standard deviation in the early iterations. 
@@ -848,25 +993,162 @@ To show how the parameters change over iterations:
 autoplot(svm_sa, type = "parameters")
 ```
 
-A visualization of the search path helps to understand where the search process did well and where it went astray:  
+A visualization of the search path helps to understand where the search process did well and where it went astray. The plot below illustrated several "phases" of the optimization; these are separated by a restart of the process at the last best results. 
 
-```{r iterative-sa-plot, include = FALSE}
-av_capture_graphics(
-  sa_2d_plot(svm_sa, result_history, svm_large),
-  output = "sa_search.mp4",
-  width = 720,
-  height = 720,
-  res = 120,
-  vfilter = 'framerate=fps=10', 
-  framerate = 1/3
-)
+```{r iterative-sa-plot, echo = FALSE, warning = FALSE, dev = "pdf", out.width="100%", fig.width=10, fig.height=3.5}
+history <- result_history %>% add_rowindex()
+params <-
+  svm_sa %>%
+  collect_metrics() %>%
+  select(.iter, cost, rbf_sigma, mean) %>%
+  arrange(.iter)
+initial <-
+  params %>%
+  filter(.iter == 0)
+sa_path <- function(branch = 1, y_axis = TRUE) {
+  
+  # ------------------------------------------------------------------------------
+  # Plot before SA optimization
+  
+  base_plot <-
+    params %>%
+    ggplot(aes(x = rbf_sigma, y = cost))  +
+    scale_x_log10(labels = fmt_dcimals(2), limits = x_rng) + 
+    scale_y_continuous(trans = "log2", labels = fmt_dcimals(2), limits = y_rng) + 
+    coord_fixed(ratio = .5)
+  
+  sa_plot <- 
+    base_plot +
+    geom_point(data = initial, col = "black", pch = 1) +
+    theme_bw()
+  
+  # ----------------------------------------------------------------------------
+  # Setup data for the requested path. Determine which rows should be used 
+  # (based on the branch argument) by determining restart locations. 
+  
+  all_restr <- grep("restart", result_history$results)
+  sa_data <- 
+    result_history %>% 
+    add_rowindex() %>% 
+    filter(.row <= all_restr[branch]) %>%
+    select(cost, rbf_sigma, results, .row) %>% 
+    mutate(
+      best = NA_integer_,
+      branch_ind = NA_integer_,
+      next_row = dplyr::lead(.row),  # TODO maybe don't use these
+      next_cost = dplyr::lead(cost), 
+      next_rbf_sigma = dplyr::lead(rbf_sigma)
+    )
+  
+  # Mark where the new global best results occur to add a column (includes the
+  # initial results)
+  restr <- grep("restart", sa_data$results)
+  bests <- c(which.max(initial$mean), grep("new best", history$results))
+  
+  # Loop through the data to set the best results and also count the branches
+  branch_num <- 1
+  for (i in 4:nrow(sa_data)) {
+    prev_best <- max(bests[bests <= i])
+    sa_data$best[i] <- prev_best
+    sa_data$branch_ind[i] <- branch_num
+    if (sa_data$results[i] == "restart from best") {
+      branch_num <- branch_num + 1
+    }
+  }
+  
+  # Remove previous branches (if any) as if they did not occur. This means 
+  # eliminating those rows from previous branches that were not new global best. 
+  # Re-number rows
+  if (branch > 1) {
+    removals <- 
+      sa_data %>% 
+      filter(branch_ind < branch & !(results %in% c("initial", "new best"))) %>% 
+      select(.row)
+    sa_data <- 
+      sa_data %>% 
+      anti_join(removals, by = ".row") %>% 
+      add_rowindex()
+  }
+  
+  
+  last_accepted <- which.max(initial$mean)
+  last_best <- last_accepted
+  
+  
+  for (i in 5:nrow(sa_data)) {
+    dat_start <- 
+      sa_data %>% 
+      slice(last_accepted) %>% 
+      select(cost, rbf_sigma)
+    
+    if (sa_data$results[i] == "new best")  {
+      # The current row is accepted and is globally optimal
+      plot_col <- "black"
+      last_accepted <- i
+      last_best <- i
+      
+    } else if (sa_data$results[i] %in% c("accept suboptimal", "better suboptimal")) {
+      # The current row is accepted. Color blue since it is eliminated with restart
+      plot_col <- "blue"
+      last_accepted <- i
+    } else if (sa_data$results[i] %in% c("discard suboptimal")) {
+      
+      plot_col <- rgb(0, 0, 0, .2)
+    } else if (sa_data$results[i] %in% c("restart from best")) {
+      plot_col <- rgb(0, 0, 0, .2)
+      
+      # Restart goes to previous glbal best
+      last_accepted <- last_best
+    }
+    
+    dat_plot <- 
+      sa_data %>% 
+      slice(i) %>% 
+      select(next_cost = cost, next_rbf_sigma = rbf_sigma) %>% 
+      bind_cols(dat_start)
+    
+    sa_plot <- 
+      sa_plot +
+      geom_segment(
+        data = dat_plot,
+        aes(xend = next_rbf_sigma, yend = next_cost),
+        # arrow = grid::arrow(length = unit(0.1, "inches")),
+        col = plot_col
+      )
+  }
+  sa_plot <- 
+    sa_plot + 
+    geom_point(data = sa_data %>% filter(results == "new best"), 
+               cex = 1) + 
+  theme(
+    panel.grid.minor.x = element_blank(),
+    panel.grid.minor.y = element_blank()
+  )
+  
+  if(!y_axis) {
+    sa_plot <-
+      sa_plot + 
+      ylab(NULL) + 
+      theme(
+        axis.title.y = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank()
+      )
+  }
+  sa_plot
+}
+sa_1 <- sa_path(1) + ggtitle("Phase 1")
+sa_2 <- sa_path(2, FALSE) + ggtitle("Phase 2")
+sa_3 <- sa_path(3, FALSE) + ggtitle("Phase 3")
+sa_4 <- sa_path(4, FALSE) + ggtitle("Phase 4")
+sa_5 <- sa_path(5, FALSE) + ggtitle("Phase 5")
+sa_1 + sa_2 + sa_3 + sa_4 + sa_5 +  plot_layout(ncol = 5)
 ```
 
-<video width="720" height="720" controls>
-  <source src="sa_search.mp4" type="video/mp4">
-</video>
+In the first phase, the search initially finds two new global optima (shown with the solid points). From these, there are several settings that are immediately discarded (light gray lines) while others are suboptimal but acceptable. After a set number of failures, it restarts at the last solid point. The other phases show a slow improvement in global optima with many discarded settings along the way. The process eventually finds its way to the region of optimal results as it exhausts the total number of allowed iterations.
 
 Like `tune_bayes()`, manually stopping execution will return the completed iterations. 
+
 
 ## Chapter summary {#iterative-summary}
 
