@@ -525,6 +525,12 @@ bo_path <-
   svm_bo %>% 
   collect_metrics() %>% 
   select(cost, rbf_sigma, .iter, mean)
+
+# These are based off of all the tuning grids used in the chapter
+x_rng <- c(4.546377230472e-08, 1.54534400806564)
+y_rng <- c(0.000580667536622422, 53.8173705762377)
+
+
 initial <- 
   bo_path %>% 
   filter(.iter == 0)
@@ -677,15 +683,34 @@ surf_impr <-
 ```
 
 
-The figure below shows the surfaces of the mean, variance, and expected improvement surfaces estimated by the GP after 11 iterations. The right-hand panel shows a ridge of best estimated improvement along the right side of the candidate space.
+Figure \@ref(fig:bo-surfaces) shows the surfaces of the mean, variance, and expected improvement surfaces estimated by the GP after 11 iterations. The right-hand panel shows a ridge of best estimated improvement along the right side of the candidate space.
 
-```{r bo-surfaces, echo = FALSE, dev = "png", out.width="100%", fig.width=9, fig.height=4}
+```{r bo-surfaces}
+#| echo = FALSE, 
+#| message = FALSE, 
+#| warning = FALSE,
+#| dev = "png",
+#| fig.height = 9, 
+#| fig.height=4,
+#| out.width = "100%",
+#| fig.cap = "Heat maps of the predicted mean RMSE (left), variance of RMSE (middle), and the expected improvement (right) after 11 search iterations.",
+#| fig.alt = "Heat maps of the predicted mean RMSE (left), variance of RMSE (middle), and the expected improvement (right) after 11 search iterations. The means surface correctly reflects that the best results are near the upper right of the parameter space. The variance patterns show low variance at existing parameter combinations. The expected improvement surface, at this point, is a narrow ridge going form high to low in the cost dimension along higher levels of the kernel function parameter."
+
 surf_mean + surf_sd + surf_impr
 ```
 
-This figure shows the search process at three different points in the optimization:
+Figure \@ref(fig:bo-search) shows the search process at three different points in the optimization.
 
 ```{r bo-search, echo = FALSE, warning = FALSE, dev = "png", out.width="100%", fig.width=9, fig.height=4}
+#| echo = FALSE, 
+#| message = FALSE, 
+#| warning = FALSE,
+#| dev = "png",
+#| fig.height = 9, 
+#| fig.height=4,
+#| out.width = "100%",
+#| fig.cap = "The Bayesian optimization search path after 1, 11, and 25 iterations.",
+#| fig.alt = "The Bayesian optimization search path after 1, 11, and 25 iterations. Initially the search goes in a poor direction before approaching the region of best results. By eleven iterations, the search has focused on the location of the truly optimal results and has probed more extremest directions. By the end, the search focuses on the best area or probes outlying areas, especially at the bounds of the parameter space."
 first_5 + first_11 + all_bo
 ```
 
@@ -993,9 +1018,18 @@ To show how the parameters change over iterations:
 autoplot(svm_sa, type = "parameters")
 ```
 
-A visualization of the search path helps to understand where the search process did well and where it went astray. The plot below illustrated several "phases" of the optimization; these are separated by a restart of the process at the last best results. 
+A visualization of the search path helps to understand where the search process did well and where it went astray. Figure \@ref(fig:sa-plot) illustrates several "phases" of the optimization; these are separated by a restart of the process at the last best results. 
 
-```{r iterative-sa-plot, echo = FALSE, warning = FALSE, dev = "pdf", out.width="100%", fig.width=10, fig.height=3.5}
+```{r sa-plot}
+#| echo = FALSE, 
+#| message = FALSE, 
+#| warning = FALSE,
+#| dev = "png",
+#| fig.height = 10, 
+#| fig.height=7,
+#| out.width = "90%",
+#| fig.cap = "A visualization of different phases of the simulated annealing search.",
+#| fig.alt = "A visualization of different phases of the simulated annealing search. Each portion of the search has many 'dead end paths' that either have immediate poor results or have several iterations before a restart is required. After four restarts, the search finds itself in a region of optimal results."
 history <- result_history %>% add_rowindex()
 params <-
   svm_sa %>%
@@ -1093,9 +1127,9 @@ sa_path <- function(branch = 1, y_axis = TRUE) {
       last_accepted <- i
     } else if (sa_data$results[i] %in% c("discard suboptimal")) {
       
-      plot_col <- rgb(0, 0, 0, .2)
+      plot_col <- rgb(0, 0, 0, .4)
     } else if (sa_data$results[i] %in% c("restart from best")) {
-      plot_col <- rgb(0, 0, 0, .2)
+      plot_col <- rgb(0, 0, 0, .4)
       
       # Restart goes to previous glbal best
       last_accepted <- last_best
@@ -1122,7 +1156,9 @@ sa_path <- function(branch = 1, y_axis = TRUE) {
                cex = 1) + 
   theme(
     panel.grid.minor.x = element_blank(),
-    panel.grid.minor.y = element_blank()
+    panel.grid.minor.y = element_blank(),
+    axis.text.y = element_text(size = 8),
+    axis.text.x = element_text(size = 8)
   )
   
   if(!y_axis) {
@@ -1132,17 +1168,18 @@ sa_path <- function(branch = 1, y_axis = TRUE) {
       theme(
         axis.title.y = element_blank(),
         axis.text.y = element_blank(),
-        axis.ticks.y = element_blank()
+        axis.ticks.y = element_blank(),
+        axis.text.x = element_text(size = 8)
       )
   }
   sa_plot
 }
-sa_1 <- sa_path(1) + ggtitle("Phase 1")
+sa_1 <- sa_path(1, TRUE)  + ggtitle("Phase 1")
 sa_2 <- sa_path(2, FALSE) + ggtitle("Phase 2")
 sa_3 <- sa_path(3, FALSE) + ggtitle("Phase 3")
-sa_4 <- sa_path(4, FALSE) + ggtitle("Phase 4")
+sa_4 <- sa_path(4, TRUE)  + ggtitle("Phase 4")
 sa_5 <- sa_path(5, FALSE) + ggtitle("Phase 5")
-sa_1 + sa_2 + sa_3 + sa_4 + sa_5 +  plot_layout(ncol = 5)
+sa_1 + sa_2 + sa_3 + sa_4 + sa_5 +  plot_layout(ncol = 3)
 ```
 
 In the first phase, the search initially finds two new global optima (shown with the solid points). From these, there are several settings that are immediately discarded (light gray lines) while others are suboptimal but acceptable. After a set number of failures, it restarts at the last solid point. The other phases show a slow improvement in global optima with many discarded settings along the way. The process eventually finds its way to the region of optimal results as it exhausts the total number of allowed iterations.
