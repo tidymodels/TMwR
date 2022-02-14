@@ -89,7 +89,7 @@ plm_plot <-
 ames_plot <- 
   ggplot(ames, aes(x = Latitude, y = Sale_Price)) + 
   geom_point(alpha = .2) + 
-  geom_smooth(se = FALSE, method = stats::loess, method.args = list(span = .3), col = "red") + 
+  geom_smooth(se = FALSE, method = stats::loess, method.args = list(span = .3), color = "red") + 
   scale_y_log10() + 
   ylab("House Sale Price ($US)") + 
   ggtitle("(b) Using a model-based smoother to discover trends.")
@@ -159,9 +159,9 @@ First, many models can be categorized as being _supervised_ or _unsupervised_. U
 
 Within supervised models, there are two main sub-categories: 
 
- * **Regression** predicts a numeric outcome.
+* **Regression** predicts a numeric outcome.
 
- * **Classification** predicts an outcome that is an ordered or unordered set of qualitative values.  
+* **Classification** predicts an outcome that is an ordered or unordered set of qualitative values.  
 
 These are imperfect definitions and do not account for all possible types of models. In Chapter \@ref(models), we refer to this characteristic of supervised techniques as the _model mode_. 
 
@@ -196,17 +196,17 @@ knitr::include_graphics("premade/modeling-process.svg")
 
 This iterative process is especially true for modeling. Figure \@ref(fig:software-modeling-process) is meant to emulate the typical path to determining an appropriate model. The general phases are:
 
- * **Exploratory data analysis (EDA):** Initially there is a back and forth between numerical analysis and visualization of the data (represented in Figure \@ref(fig:software-data-science-model)) where different discoveries lead to more questions and data analysis "side-quests" to gain more understanding. 
- 
- * **Feature engineering:** The understanding gained from EDA results in the creation of specific model terms that make it easier to accurately model the observed data. This can include complex methodologies (e.g., PCA) or simpler features (using the ratio of two predictors). Chapter \@ref(recipes) focuses entirely on this important step.
+* **Exploratory data analysis (EDA):** Initially there is a back and forth between numerical analysis and visualization of the data (represented in Figure \@ref(fig:software-data-science-model)) where different discoveries lead to more questions and data analysis "side-quests" to gain more understanding. 
 
- * **Model tuning and selection (circles with blue and yellow segments):** A variety of models are generated and their performance is compared. Some models require _parameter tuning_ where some structural parameters are required to be specified or optimized. The colored segments within the circles signify the repeated data splitting used during resampling (see Chapter \@ref(resampling)). 
- 
+* **Feature engineering:** The understanding gained from EDA results in the creation of specific model terms that make it easier to accurately model the observed data. This can include complex methodologies (e.g., PCA) or simpler features (using the ratio of two predictors). Chapter \@ref(recipes) focuses entirely on this important step.
+
+* **Model tuning and selection (circles with alternating segments):** A variety of models are generated and their performance is compared. Some models require _parameter tuning_ where some structural parameters are required to be specified or optimized. The colored segments within the circles signify the repeated data splitting used during resampling (see Chapter \@ref(resampling)). 
+
 * **Model evaluation:** During this phase of model development, we assess the model's performance metrics, examine residual plots, and conduct other EDA-like analyses to understand how well the models work. In some cases, formal between-model comparisons (Chapter \@ref(compare)) help you to understand whether any differences in models are within the experimental noise.   
 
 After an initial sequence of these tasks, more understanding is gained regarding which types of models are superior as well as which sub-populations of the data are not being effectively estimated. This leads to additional EDA and feature engineering, another round of modeling, and so on. Once the data analysis goals are achieved, the last steps are typically to finalize, document, and communicate the model. For predictive models, it is common at the end to validate the model on an additional set of data reserved for this specific purpose. 
 
-As an example, @fes use data to model the daily ridership of Chicago's public train system using predictors such as the date, the previous ridership results, the weather, and other factors. An approximation of these authors' "inner monologue" when analyzing these data is, in order:
+As an example, @fes use data to model the daily ridership of Chicago's public train system using predictors such as the date, the previous ridership results, the weather, and other factors. Table \@ref(tab:inner-monologue) walks through an approximation of these authors' "inner monologue" when analyzing these data and eventually selecting a model with sufficient performance.
 
 ```{r software-monolog, echo = FALSE, results = 'as-is'}
 monolog <- 
@@ -251,7 +251,10 @@ if (knitr::is_html_output()) {
   tab <- 
     monolog %>% 
     dplyr::select(Thoughts, Activity) %>% 
-    kable() %>%
+    kable(
+      caption = "Hypothetical inner monologue of a model developer.",
+      label = "inner-monologue"
+    ) %>%
     kable_styling() %>% 
     column_spec(2, width = "25%") %>%
     column_spec(1, width = "75%", italic = TRUE)
@@ -259,13 +262,14 @@ if (knitr::is_html_output()) {
   tab <- 
     monolog %>% 
     dplyr::select(Thoughts, Activity) %>% 
-    kable() %>%
+    kable(
+      caption = "Hypothetical inner monologue of a model developer.",
+      label = "inner-monologue"
+    ) %>%
     kable_styling()
 }
 tab
 ```
-
-and so on. Eventually, a model is selected that is able to achieve sufficient performance.
 
 ## Chapter summary {#software-summary}
 

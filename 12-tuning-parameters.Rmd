@@ -42,6 +42,7 @@ $$\hat \beta_1 = \frac{\sum_i (y_i-\bar{y})(x_i-\bar{x})}{\sum_i(x_i-\bar{x})^2}
 and
 
 $$\hat \beta_0 = \bar{y}-\hat \beta_1 \bar{x}.$$
+
 We can directly estimate these values from the data for this example model because they are analytically tractable; if we have the data, then we can estimate these model parameters. 
 
 :::rmdnote
@@ -51,6 +52,7 @@ There are many situations where a model has parameters that _can't_ be directly 
 For the $K$-nearest neighbors model, the prediction equation for a new value $x_0$ is
 
 $$\hat y = \frac{1}{K}\sum_{\ell = 1}^K x_\ell^*$$
+
 where $K$ is the number of neighbors and the $x_\ell^*$ are the $K$ closest values to $x_0$ in the training set. The model itself is not defined by a model equation; the prediction equation shown above defines it. This characteristic, along with the possible intractability of the distance measure, makes it impossible to create a set of equations that can be solved for $K$ (iteratively or otherwise). The number of neighbors has a profound impact on the model; it governs the flexibility of the class boundary. For small values of $K$, the boundary is very elaborate while for large values, it might be quite smooth. 
 
 The number of nearest neighbors is a good example of a **tuning parameter** or **hyperparameter**: an unknown structural or other kind of value that has significant impact on the model but _cannot be directly estimated from the data_. 
@@ -104,24 +106,31 @@ For cases where the statistical properties of the tuning parameter are tractable
 
 > degrading the likelihood by overfitting actually improves misclassification error rate. Although perhaps counterintuitive, this is not a contradiction; likelihood and error rate measure different aspects of fit quality.
 
-To demonstrate, consider the classification data shown below with two predictors, two classes, and a training set of `r nrow(training_set)` data points:  
+To demonstrate, consider the classification data shown in Figure \@ref(fig:two-class-dat) with two predictors, two classes, and a training set of `r nrow(training_set)` data points.
 
-```{r tuning-two-class-dat, echo = FALSE}
-ggplot(training_set, aes(x = A, y = B, col = Class)) + 
-  geom_point(alpha = .5) + 
-  coord_equal() + 
-  labs(x = "Predictor A", y = "Predictor B", col = NULL)
+```{r two-class-dat}
+#| echo = FALSE,
+#| fig.cap = "An example two-class classification data set with two predictors.",
+#| fig.alt = "An example two-class classification data set with two predictors. The two predictors have a moderate correlation and there is some locations of separation between the classes."
+ggplot(training_set, aes(x = A, y = B, color = Class, pch = Class)) + 
+  geom_point(alpha = 0.7) + 
+  coord_equal()  + 
+  labs(x = "Predictor A", y = "Predictor B", color = NULL, pch = NULL) +
+  scale_color_manual(values = c("#CC6677", "#88CCEE"))
 ```
 
 We could start by fitting a linear class boundary to these data. The most common method for doing this is to use a generalized linear model in the form of _logistic regression_. This model relates the _log odds_ of a sample being Class 1 using the _logit_ transformation: 
 
 $$ \log\left(\frac{\pi}{1 - \pi}\right) = \beta_0 + \beta_1x_1 + \ldots + \beta_px_p$$
+
 In the context of generalized linear models, the logit function is the _link function_ between the outcome ($\pi$) and the predictors. There are other link functions that include the _probit_ model: 
 
 $$\Phi^{-1}(\pi) = \beta_0 + \beta_1x_1 + \ldots + \beta_px_p$$
+
 were $\Phi$ is the cumulative standard normal function, as well as the _complementary log-log_ model:
 
-$$\log(−\log(1−\pi)) = \beta_0 + \beta_1x_1 + \ldots + \beta_px_p$$
+$$\log(-\log(1-\pi)) = \beta_0 + \beta_1x_1 + \ldots + \beta_px_p$$
+
 Each of these models result in linear class boundaries. Which one should be we use? Since, for these data, the number of model parameters does not vary, the statistical approach is to compute the (log) likelihood for each model and determine the model with the largest value. Traditionally, the likelihood is computed using the same data that were used to estimate the parameters, not using approaches like data splitting or resampling from Chapters \@ref(splitting) and \@ref(resampling).
 
 For a data frame `training_set`, let's create a function to compute the different models and extract the likelihood statistics for the training set (using `broom::glance()`): 
@@ -149,9 +158,9 @@ bind_rows(
 
 According to these results, the logistic model has the best statistical properties. 
 
-From the scale of the log-likelihood values, it is difficult to understand if these differences are important or negligible.  One way of improving this analysis is to resample the statistics and separate the modeling data from the data used for performance estimation. With this small data set, repeated 10-fold cross-validation is a good choice for resampling. In the `r pkg(yardstick)` package, the `mn_log_loss()` function is used to estimate the negative log-likelihood: 
+From the scale of the log-likelihood values, it is difficult to understand if these differences are important or negligible.  One way of improving this analysis is to resample the statistics and separate the modeling data from the data used for performance estimation. With this small data set, repeated 10-fold cross-validation is a good choice for resampling. In the `r pkg(yardstick)` package, the `mn_log_loss()` function is used to estimate the negative log-likelihood, with our results shown in Figure \@ref(fig:resampled-log-lhood).
 
-```{r tuning-resampled-log-lhood, fig.height = 3}
+```{r tuning-resampled-log-lhood, eval=FALSE}
 set.seed(1292)
 rs <- vfold_cv(training_set, repeats = 10)
 
@@ -190,15 +199,27 @@ resampled_res %>%
   labs(y = NULL, x = "log-likelihood")
 ```
 
+
+```{r resampled-log-lhood, ref.label = "tuning-resampled-log-lhood"}
+#| echo = FALSE,
+#| fig.height = 3,
+#| fig.cap = "Means and approximate 90% confidence intervals for the resampled binomial log-likelihood with three different link functions.",
+#| fig.alt = "Means and approximate 90% confidence intervals for the resampled binomial log-likelihood with three different link functions. The logit link has the largest value, followed by the probit link. The complementary log log link has far lower values."
+```
+
 :::rmdnote
 The scale of these values is different than the previous values since they are computed on a smaller data set; the value produced by `broom::glance()` is a sum while `yardstick::mn_log_loss()` is an average.  
 :::
 
 These results show that there is considerable evidence that the choice of the link function matters and that the logistic model is superior. 
 
-What about a different metric? We also calculated the area under the ROC curve for each resample. These results, which reflect the discriminative ability of the models across numerous probability thresholds, show a lack of difference: 
+What about a different metric? We also calculated the area under the ROC curve for each resample. These results, which reflect the discriminative ability of the models across numerous probability thresholds, show a lack of difference in Figure \@ref(fig:resampled-roc).
 
-```{r tuning-resampled-roc, echo = FALSE, fig.height = 3}
+```{r resampled-roc}
+#| echo = FALSE,
+#| fig.height = 3,
+#| fig.cap = "Means and approximate 90% confidence intervals for the resampled area under the ROC curve with three different link functions.",
+#| fig.alt = "Means and approximate 90% confidence intervals for the resampled area under the ROC curve with three different link functions. The logit link has the largest value, followed by the probit link. The confidence intervals show a large amount of overlap between the two methods."
 resampled_res %>% 
   filter(.metric == "roc_auc") %>% 
   ggplot(aes(x = mean, y = model)) + 
@@ -208,9 +229,13 @@ resampled_res %>%
   labs(y = NULL, x = "area under the ROC curve")
 ```
 
-Given the overlap of the intervals, as well as the scale of the x-axis, any of these options could be used. We see this again when the class boundaries for the three models are overlaid on the _test set_ of `r nrow(testing_set)` data points: 
+Given the overlap of the intervals, as well as the scale of the x-axis, any of these options could be used. We see this again when the class boundaries for the three models are overlaid on the _test set_ of `r nrow(testing_set)` data points in Figure \@ref(fig:three-link-fits).
 
-```{r tuning-glm-fits, echo = FALSE}
+```{r three-link-fits}
+#| echo = FALSE,
+#| fig.cap = "The linear class boundary fits for three link functions.",
+#| fig.alt = "The linear class boundary fits for three link functions. The lines have very similar slopes with the complementary log log having a slightly different intercept than the other two links."
+
 logit_pred <- 
   logistic_reg() %>% 
   set_engine("glm") %>% 
@@ -241,8 +266,10 @@ link_grids <-
 
 link_grids %>% 
   ggplot(aes(x = A, y = B)) + 
-  geom_point(data = testing_set, aes(col = Class), alpha = .5, show.legend = FALSE) + 
-  geom_contour(aes( z = .pred_Class1, lty = link), breaks = 0.5, col = "black") + 
+  geom_point(data = testing_set, aes(color = Class, pch = Class), 
+             alpha = 0.7, show.legend = FALSE) + 
+  geom_contour(aes( z = .pred_Class1, lty = link), breaks = 0.5, color = "black") + 
+  scale_color_manual(values = c("#CC6677", "#88CCEE")) + 
   coord_equal() + 
   labs(x = "Predictor A", y = "Predictor B")
 ```
@@ -259,7 +286,7 @@ Metric optimization is thoroughly discussed by @thomas2020problem who explore se
 
 ## The consequences of poor parameter estimates {#overfitting-bad}
 
-Many tuning parameters modulate the amount of model complexity. More complexity often implies more malleability in the patterns that a model can emulate. For example, as shown in Section \@ref(other-steps), adding degrees of freedom in a spline function increases the intricacy of the prediction equation. While this is an advantage when the underlying motifs in the data are complex, it can also lead to over-interpretation of chance patterns that would not reproduce in new data. _Overfitting_ is the situation where a model adapts too much to the training data; it performs well on the data used to build the model but poorly for new data. 
+Many tuning parameters modulate the amount of model complexity. More complexity often implies more malleability in the patterns that a model can emulate. For example, as shown in Section \@ref(spline-functions), adding degrees of freedom in a spline function increases the intricacy of the prediction equation. While this is an advantage when the underlying motifs in the data are complex, it can also lead to over-interpretation of chance patterns that would not reproduce in new data. _Overfitting_ is the situation where a model adapts too much to the training data; it performs well on the data used to build the model but poorly for new data. 
 
 :::rmdwarning
 Since tuning model parameters can increase model complexity, poor choices can lead to overfitting. 
@@ -269,9 +296,9 @@ Recall the single layer neural network model described in Section \@ref(tuning-p
 
 We fit neural network classification models to the same two-class data from the previous section, varying the number of hidden units. Using the area under the ROC curve as a performance metric, the effectiveness of the model on the training set increases as more hidden units are added. The network model thoroughly and meticulously learns the training set. If the model judges itself on the training set ROC value, it prefers many hidden units so that it can nearly eliminate errors. 
 
-Chapters \@ref(splitting) and \@ref(resampling) demonstrated that simply repredicting the training set is a poor approach to model evaluation. Here, the neural networks very quickly begin to overinterpret patterns that it sees in the training set. Compare these three example class boundaries (developed with the training set) overlaid on training and test sets: 
+Chapters \@ref(splitting) and \@ref(resampling) demonstrated that simply repredicting the training set is a poor approach to model evaluation. Here, the neural networks very quickly begin to overinterpret patterns that it sees in the training set. Compare these three example class boundaries (developed with the training set) overlaid on training and test sets in Figure \@ref(fig:two-class-boundaries).
 
-```{r tuning-two-class-comps, include = FALSE, cache = TRUE}
+```{r tuning-two-class-comps, include = FALSE}
 two_class_rec <-
  recipe(Class ~ ., data = two_class_dat) %>% 
  step_normalize(all_numeric_predictors()) 
@@ -307,8 +334,11 @@ for(i in 1:nrow(mlp_res)) {
 }
 ```
 
-```{r tuning-two-class-boundaries, echo = FALSE, fig.height = 8}
-
+```{r two-class-boundaries}
+#| echo = FALSE, 
+#| fig.height = 8,
+#| fig.cap = "Class boundaries for three models with increasing numbers of hidden units. The boundaries are fit on the training set and shown for the training and test sets.",
+#| fig.alt = "Class boundaries for three models with increasing numbers of hidden units. The boundaries are fit on the training set and shown for the training and test sets. After a single hidden unit, the boundaries become wildly complex. The test set plots show that the more complex models do not conform to the data that was not used to fit the model."
 te_plot <- 
   mlp_res %>% 
   slice(c(1, 4, 20)) %>% 
@@ -322,8 +352,10 @@ te_plot <-
     label = ifelse(label == " 1 units", " 1 unit", label)
   ) %>% 
   ggplot(aes(x = A, y = B)) + 
-  geom_point(data = testing_set, aes(col = Class), alpha = .5, show.legend = FALSE) + 
-  geom_contour(aes( z = .pred_Class1), breaks = 0.5, col = "black") + 
+  geom_point(data = testing_set, aes(color = Class, pch = Class), 
+             alpha = 0.5, show.legend = FALSE) + 
+  geom_contour(aes( z = .pred_Class1), breaks = 0.5, color = "black") + 
+  scale_color_manual(values = c("#CC6677", "#88CCEE")) + 
   facet_wrap(~ label, nrow = 1) + 
   coord_equal() + 
   ggtitle("Test Set") + 
@@ -341,9 +373,11 @@ tr_plot <-
     label = paste(format(hidden_units), "units"),
     label = ifelse(label == " 1 units", " 1 unit", label)
   ) %>% 
-  ggplot(aes(x = A, y = B)) + 
-  geom_point(data = training_set, aes(col = Class), alpha = .5, show.legend = FALSE) + 
-  geom_contour(aes( z = .pred_Class1), breaks = 0.5, col = "black") + 
+  ggplot(aes(x = A, y = B)) +
+  geom_point(data = training_set, aes(color = Class, pch = Class), 
+             alpha = 0.5, show.legend = FALSE) + 
+  geom_contour(aes( z = .pred_Class1), breaks = 0.5, color = "black") + 
+  scale_color_manual(values = c("#CC6677", "#88CCEE")) + 
   facet_wrap(~ label, nrow = 1) + 
   coord_equal() + 
   ggtitle("Training Set") + 
@@ -375,9 +409,12 @@ The use of pre-defined sets is commonly called **grid search**. The main choices
 
 For sequential or **iterative search** methods, almost any nonlinear optimization method is appropriate, although some are more efficient than others. In some cases, an initial set of results for one or more parameter combinations is required to start the optimization process. Iterative search is discussed more in Chapter \@ref(iterative-search).
 
-The plot below shows two panels to demonstrate these two approaches for a situation with two tuning parameters that range between zero and one. In each, a set of blue contours show the true (simulated) relationship between the parameters and the outcome. The optimal results are in the upper right-hand corner. 
+Figure \@ref(fig:tuning-strategies) shows two panels to demonstrate these two approaches for a situation with two tuning parameters that range between zero and one. In each, a set of contours shows the true (simulated) relationship between the parameters and the outcome. The optimal results are in the upper right-hand corner. 
 
-```{r tuning-strategies, echo = FALSE}
+```{r tuning-strategies}
+#| echo = FALSE,
+#| fig.cap = "Examples of pre-defined grid tuning and an iterative search method. The lines represent contours of a performance metric; it is best in the upper right-hand side of the plot.",
+#| fig.alt = "Examples of pre-defined grid tuning and an iterative search method. The lines represent contours of some performance metric that is best in the upper right-hand side of the plot. The grid search shows points that cover the space well and has one point near the optimum. The iterative search method has many more points and meanders to the optimum where many points zero in on the best value."
 grid_plot <-
   ggplot(sfd_grid, aes(x = x, y = y)) +
   geom_point() +
@@ -409,9 +446,9 @@ search_plot <-
 grid_plot + search_plot
 ```
 
-The left-hand panel shows a type of grid called a space-filling design. This is a type of experimental design devised for covering the parameter space such that tuning parameter combinations are not close to one another. The results for this design do not place any points exactly at the truly optimal location. However, one point is in the general vicinity and would probably have performance metric results that are within the noise of the most optimal value. 
+The left-hand panel of Figure \@ref(fig:tuning-strategies) shows a type of grid called a space-filling design. This is a type of experimental design devised for covering the parameter space such that tuning parameter combinations are not close to one another. The results for this design do not place any points exactly at the truly optimal location. However, one point is in the general vicinity and would probably have performance metric results that are within the noise of the most optimal value. 
 
-The right-hand panel illustrates the results of a global search method: the Nelder-Mead simplex method [@Olsson:1975p3609]. The starting point is in the lower-left part of the parameter space. The search meanders across the space until it reaches the optimum location, where it strives to come as close as possible to the numerically best value. This particular search method, while effective, is not known for its efficiency; it requires many function evaluations, especially near the optimal values. In Chapter \@ref(iterative-search), more efficient search algorithms are discussed. 
+The right-hand panel of Figure \@ref(fig:tuning-strategies) illustrates the results of a global search method: the Nelder-Mead simplex method [@Olsson:1975p3609]. The starting point is in the lower-left part of the parameter space. The search meanders across the space until it reaches the optimum location, where it strives to come as close as possible to the numerically best value. This particular search method, while effective, is not known for its efficiency; it requires many function evaluations, especially near the optimal values. In Chapter \@ref(iterative-search), more efficient search algorithms are discussed. 
 
 :::rmdnote
 Hybrid strategies are also an option and can work well. After an initial grid search, a sequential optimization can start from the best grid combination.
@@ -425,7 +462,7 @@ We've already dealt with quite a number of arguments that correspond to tuning p
 
 * the threshold for combining neighborhoods into an "other" category (with argument name `threshold`) in Section \@ref(dummies), 
 
-* the number of degrees of freedom in a natural spline (`deg_free`, Section \@ref(other-steps)), 
+* the number of degrees of freedom in a natural spline (`deg_free`, Section \@ref(spline-functions)), 
 
 * the number of data points required to execute a split in a tree-based model (`min_n`, Section \@ref(create-a-model)), and 
 
@@ -519,7 +556,7 @@ The `dials` package also has a convenience function for extracting a particular 
 
 ```{r tuning-extract}
 # identify the parameter using the id value:
-wflow_param %>% pull_dials_object("threshold")
+wflow_param %>% extract_parameter_dials("threshold")
 ```
 
 Inside the parameter set, the range of the parameters can also be updated in-place: 
@@ -571,10 +608,10 @@ updated_param <-
   parameters() %>% 
   finalize(ames_train)
 updated_param
-updated_param %>% pull_dials_object("mtry")
+updated_param %>% extract_parameter_dials("mtry")
 ```
 
-When the recipe is prepared, the `finalize()` function learns to set the upper range of `mtry` to  `r updated_param %>% pull_dials_object("mtry") %>% range_get() %>% pluck("upper")` predictors. 
+When the recipe is prepared, the `finalize()` function learns to set the upper range of `mtry` to  `r updated_param %>% extract_parameter_dials("mtry") %>% range_get() %>% pluck("upper")` predictors. 
 
 Additionally, the results of `parameters()` will include engine-specific parameters (if any) . They are discovered in the same way as the main arguments and included in the parameter set. The `r pkg(dials)` package contains parameter functions for all potentially tunable engine-specific parameters: 
 

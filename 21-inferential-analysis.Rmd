@@ -1,4 +1,5 @@
 ```{r inferential-setup, include = FALSE}
+knitr::opts_chunk$set(fig.path = "figures/")
 library(tidymodels)
 library(poissonreg)
 library(infer)
@@ -34,17 +35,24 @@ We'll use biochemistry publication data from the `r pkg(pscl)` package. These da
 Recall that in Chapter \@ref(trust) we asked the question "Is our model applicable for predicting a specific data point?". It is very important to define what populations an inferential analysis apply to. For these data, the results would likely apply to biochemistry doctorates given around the time frame that the data were collected. Does it also apply to other chemistry doctorate types (e.g., medicinal chemistry, etc)? These are important questions to address (and document) when conducting inferential analyses. 
 :::
 
-A plot of the data shows that many graduates did not publish any articles in this time and that the outcome follows a right-skewed distribution.
+A plot of the data shown in Figure \@ref(fig:counts) indicates that many graduates did not publish any articles in this time and that the outcome follows a right-skewed distribution.
 
-```{r inferential-count-dist}
+```{r inferential-count-dist, eval=FALSE}
 library(tidymodels)
 tidymodels_prefer()
 
 data("bioChemists", package = "pscl")
 
 ggplot(bioChemists, aes(x = art)) + 
-  geom_histogram(binwidth = 1, col = "white") + 
+  geom_histogram(binwidth = 1, color = "white") + 
   labs(x = "Number of articles within 3y of graduation")
+```
+
+```{r counts, ref.label = "inferential-count-dist"}
+#| echo = FALSE,
+#| out.width = "80%",
+#| fig.cap = "Distribution of the number of articles written within 3 years of graduation.",
+#| fig.alt = "The distribution of the number of articles written within 3 years of graduation. The distribution is right-skewed and most of the data have counts of zero or one."
 ```
 
 Since the outcome data are counts, the most common distribution assumption to make is that the outcome has a Poisson distribution. This chapter will use these data for several types of analyses.
@@ -63,12 +71,11 @@ There were many more publications by men, although there were more men in the da
 
 For our application, the hypotheses to compare the two sexes are:
 
-$$
 \begin{align}
 H_0&: \lambda_m = \lambda_f \notag \\
 H_a&: \lambda_m \ne \lambda_f \notag
 \end{align}
-$$
+
 where the $\lambda$ values are the rates of publications (over the same time period). 
 
 A basic application of the test is:
@@ -127,14 +134,21 @@ percentile_ci <- get_ci(bootstrapped)
 percentile_ci
 ```
 
-The `r pkg(infer)` package has a very high-level API for showing the results for the analysis:
+The `r pkg(infer)` package has a high-level API for showing the results of the analysis, as shown in Figure \@ref(fig:bootstrapped-mean).
 
-```{r inferential-mean-diff-boot}
+```{r inferential-mean-diff-boot, eval = FALSE}
 visualize(bootstrapped) +
     shade_confidence_interval(endpoints = percentile_ci)
 ```
 
-Since the interval does not include zero, these results indicate that men have published more articles than women.
+```{r bootstrapped-mean, ref.label = "inferential-mean-diff-boot"}
+#| echo = FALSE,
+#| out.width = "80%",
+#| fig.cap = "The bootstrap distribution of the difference in means. The highlighted region is the confidence interval.",
+#| fig.alt = "The bootstrap distribution of the difference in means. The highlighted region is the confidence interval, which does not include a value of zero."
+```
+
+Since the interval visualized in in Figure \@ref(fig:bootstrapped-mean) does not include zero, these results indicate that men have published more articles than women.
 
 If we require a p-value, `r pkg(infer)` can compute one via a permutation test. The syntax is very similar to the bootstrapping code above. We add a `hypothesize()` verb to state the type of assumption to test and the `generate()` call contains an option to shuffle the data.
 
@@ -149,18 +163,28 @@ permuted <-
 permuted
 ```
 
-The visualization code is also very similar. A red line signifies the observed value:
+The visualization code is also very similar to the bootstrap approach. The code below generates Figure \@ref(fig:permutation-dist) where the vertical line signifies the observed value.
 
-```{r inferential-mean-diff-perm}
+```{r inferential-mean-diff-perm, eval = FALSE}
 visualize(permuted) +
     shade_p_value(obs_stat = observed, direction = "two-sided")
+```
 
-# Actual p-value is:
+```{r permutation-dist, ref.label = "inferential-mean-diff-perm"}
+#| echo = FALSE,
+#| out.width = "80%",
+#| fig.cap = "Empirical distribution of the test statistic under the null hypothesis. The vertical line indicates the observed test statistic.",
+#| fig.alt = "The empirical distribution of the test statistic under the null hypothesis. The vertical line indicates the observed test statistic and is far away form the mainstream of the distribution."
+```
+
+The actual p-value is:
+
+```{r inferential-mean-diff-perm-pvalue}
 permuted %>%
   get_p_value(obs_stat = observed, direction = "two-sided")
 ```
 
-Since the line is far away from the permutation distribution (which represents the null hypothesis), the likelihood of observing data that is at least as extreme as what is at hand if in fact the null hypothesis were true is exceedingly small.
+Since the vertical line in Figure \@ref(fig:permutation-dist) is far away from the permutation distribution (which represents the null hypothesis), the likelihood of observing data that is at least as extreme as what is at hand if in fact the null hypothesis were true is exceedingly small.
 
 The two-sample tests shown above are probably suboptimal since they do not take into account other factors that might explain the observed relationship between publication rate and sex. Let's move on to a more complex model that can take into consideration additional covariates.
 
@@ -196,12 +220,10 @@ tidy(log_lin_fit, conf.int = TRUE, conf.level = 0.90)
 
 In this output, the p-values correspond to separate hypothesis tests for each parameter: 
 
-$$
 \begin{align}
 H_0&: \beta_j = 0 \notag \\
 H_a&: \beta_j \ne 0 \notag
 \end{align}
-$$
 
 for each of the model parameters. Looking at these results, `phd` (the prestige of their department) may not have any relationship with the outcome.
 
@@ -215,10 +237,14 @@ glm_boot
 ```
 
 :::rmdwarning
-When we compare these results to the purely parametric results from `glm()`, the bootstrap intervals are somewhat wider. If the data were truly Poisson, these intervals would have more similar widths.
+When we compare these results (in Figure \@ref(fig:glm-intervals)) to the purely parametric results from `glm()`, the bootstrap intervals are somewhat wider. If the data were truly Poisson, these intervals would have more similar widths.
 :::
 
-```{r inferential-glm-intervals, echo = FALSE}
+```{r glm-intervals}
+#| echo = FALSE,
+#| fig.cap = "Two types of confidence intervals for the Poisson regression model.",
+#| fig.alt = "Two types of confidence intervals for the Poisson regression model. the interval for the PhD model is the only interval overlapping zero. The parametric intervals tend to be wider than the bootstrap intervals. "
+
 glm_boot %>% 
   select(term, method = .method, .estimate, .lower, .upper) %>% 
   bind_rows(
@@ -227,23 +253,22 @@ glm_boot %>%
       mutate(method = "parametric") %>% 
       select(term, method, .estimate = estimate, .lower = conf.low, .upper = conf.high)
   )%>%
-  ggplot(aes(x = .estimate, y = term, col = method)) +
+  ggplot(aes(x = .estimate, y = term, color = method, pch = method)) +
   geom_vline(xintercept = 0, lty = 3) +
-  geom_point(position = position_dodge(width = 1 / 2), cex = .9) +
+  geom_point(size = 2, position = position_dodge(width = 1 / 2)) +
   geom_errorbar(aes(xmin = .lower, xmax = .upper),
                 width = 1 / 4,
-                position = position_dodge(width = 1 / 2)) +
-  labs(x = "GLM coefficients", y = NULL)
+                position = position_dodge(width = 1 / 2))  +
+  labs(x = "GLM coefficients", y = NULL) + 
+  scale_color_brewer(palette = "Paired")
 ```
 
 Determining which predictors to include in the model is a difficult problem. One approach is to conduct likelihood ratio tests (LRT) [@McCullaghNelder89] between nested models. Based on the confidence intervals, we have evidence that a simpler model without `phd` may be sufficient. Let's fit a smaller model, then conduct a statistical test: 
 
-$$
 \begin{align}
 H_0&: \beta_{phd} = 0 \notag \\
 H_a&: \beta_{phd} \ne 0 \notag
 \end{align}
-$$
 
 This hypothesis was previously tested when we showed the tidied results for `log_lin_fit`. That particular approach used results from a single model fit via a Wald statistic (i.e. the parameter divided by its standard error). For that approach, the p-value was `r tidy(log_lin_fit) %>% filter(term == "phd") %>% pluck("p.value") %>% format.pval()`. We can tidy the results for the LRT to get the p-value: 
 
@@ -270,13 +295,11 @@ $$\lambda = 0 \pi + (1 - \pi) \lambda_{nz}$$
 
 where
 
-$$
 \begin{align}
 \log(\lambda_{nz}) &= \beta_0 + \beta_1x_1 + \ldots + \beta_px_p \notag \\
 & and \notag \\
 log\left(\frac{\pi}{1-\pi}\right) &= \gamma_0 + \gamma_1z_1 + \ldots + \gamma_qz_q \notag 
 \end{align}
-$$
 
 where the $x$ covariates affect the non-zero count values and the $z$ covariates influence the probability of a zero count. The two sets of predictors do not need to be mutually exclusive.
 
@@ -295,13 +318,10 @@ zero_inflated_fit
 
 Since the coefficients for this model are also estimated using maximum likelihood, let's try to use another likelihood ratio test to understand if the new model terms are helpful. We will _simultaneously_ test that
 
-$$
 \begin{align}
 H_0&: \gamma_1 = 0, \gamma_2 = 0, \cdots, \gamma_5 = 0 \notag \\
 H_a&: \text{at least one} \gamma \ne 0  \notag
 \end{align}
-$$
-
 
 ```{r inference-zip-anova, error = TRUE}
 anova(
@@ -373,15 +393,21 @@ bootstrap_models <-
 bootstrap_models$zero_coefs[[1]]
 ```
 
-It's a good idea to visualize the bootstrap distributions of the coefficients:
+It's a good idea to visualize the bootstrap distributions of the coefficients, as in Figure \@ref(fig:zip-bootstrap).
 
-```{r inference-zip-bootstrap}
+```{r inference-zip-bootstrap, eval=FALSE}
 bootstrap_models %>% 
   unnest(zero_coefs) %>% 
   ggplot(aes(x = estimate)) +
-  geom_histogram(bins = 25, col = "white") + 
+  geom_histogram(bins = 25, color = "white") + 
   facet_wrap(~ term, scales = "free_x") + 
-  geom_vline(xintercept = 0, col = "green")
+  geom_vline(xintercept = 0, lty = 2, color = "gray70")
+```
+
+```{r zip-bootstrap, ref.label = "inference-zip-bootstrap"}
+#| echo = FALSE,
+#| fig.cap = "Bootstrap distributions of the ZIP model coefficients. The vertical lines indicate the observed estimates. ",
+#| fig.alt = "Bootstrap distributions of the ZIP model coefficients. The vertical lines indicate the observed estimates. The ment predictor that appears to be important to the model."
 ```
 
 From visual inspection, one of the covariates (`ment`) that appears to be important has a very skewed distribution. The extra space in some of the facets indicates that there are some outliers in the estimates. This *might* occur when models did not converge; those results should probably be excluded from the resamples. For the results above, the outliers are only due to extreme parameter estimates; all of the models converged.

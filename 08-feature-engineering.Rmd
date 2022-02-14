@@ -182,9 +182,11 @@ Before proceeding, let's take an extended tour of the capabilities of recipes.
 
 One of the most common feature engineering tasks is transforming nominal or qualitative data (factors or characters) so that they can be encoded or represented numerically. Sometimes we can alter the factor levels of a qualitative column in helpful ways _prior_ to such a transformation. For example, `step_unknown()` can be used to change missing values to a dedicated factor level. Similarly, if we anticipate that a new factor level may be encountered in future data, `step_novel()` can allot a new level for this purpose. 
 
-Additionally, `step_other()` can be used to analyze the frequencies of the factor levels in the training set and convert infrequently occurring values to a catch-all level of "other", with a specific threshold that can be specified. A good example is the `Neighborhood` predictor in our data:
+Additionally, `step_other()` can be used to analyze the frequencies of the factor levels in the training set and convert infrequently occurring values to a catch-all level of "other", with a specific threshold that can be specified. A good example is the `Neighborhood` predictor in our data, shown in Figure \@ref(fig:ames-neighborhoods).
 
-```{r engineering-ames-neighborhood-bar}
+```{r ames-neighborhoods, echo = FALSE}
+#| fig.cap = "Frequencies of neighborhoods in the Ames training set.",
+#| fig.alt = "A bar chart of the frequencies of neighborhoods in the Ames training set. The most homes are in North Ames while the Greens, Green Hills, and Landmark neighborhood have very few instances."
 ggplot(ames_train, aes(y = Neighborhood)) + 
   geom_bar() + 
   labs(y = NULL)
@@ -207,7 +209,7 @@ simple_ames <-
 Many, but not all, underlying model calculations require predictor values to be encoded as numbers. Notable exceptions include tree-based models, rule-based models, and naive Bayes models. 
 :::
 
-There are a few strategies for converting a factor predictor to a numeric format. The most common method is to create "dummy" or indicator variables. Let's take the predictor in the Ames data for the building type, which is a factor variable with five levels. For dummy variables, the single `Bldg_Type` column would be replaced with four numeric columns whose values are either zero or one. These binary variables represent specific factor level values. In R, the convention is to _exclude_ a column for the first factor level (`OneFam`, in this case). The `Bldg_Type` column would be replaced with a column called `TwoFmCon` that is one when the row has that value and zero otherwise. Three other columns are similarly created: 
+There are a few strategies for converting a factor predictor to a numeric format. The most common method is to create "dummy" or indicator variables. Let's take the predictor in the Ames data for the building type, which is a factor variable with five levels (see Table \@ref(tab:dummy-vars). For dummy variables, the single `Bldg_Type` column would be replaced with four numeric columns whose values are either zero or one. These binary variables represent specific factor level values. In R, the convention is to _exclude_ a column for the first factor level (`OneFam`, in this case). The `Bldg_Type` column would be replaced with a column called `TwoFmCon` that is one when the row has that value and zero otherwise. Three other columns are similarly created: 
 
 ```{r engineering-all-dummies, echo = FALSE, results = 'asis'}
 show_rows <- 
@@ -223,7 +225,10 @@ recipe(~Bldg_Type, data = ames_train) %>%
   bake(ames_train) %>% 
   slice(show_rows) %>% 
   arrange(`Raw Data`) %>% 
-  kable() %>% 
+  kable(
+    caption = 'Illustration of binary encodings (i.e., "dummy variables") for a qualitative predictor.',
+    label = "dummy-vars"
+  ) %>% 
   kable_styling(full_width = FALSE)
 ```
 
@@ -234,27 +239,7 @@ The full set of encodings can be used for some models. This is traditionally cal
 
 One helpful feature of `step_dummy()` is that there is more control over how the resulting dummy variables are named. In base R, dummy variable names mash the variable name with the level, resulting in names like `NeighborhoodVeenker`. Recipes, by default, use an underscore as the separator between the name and level (e.g., `Neighborhood_Veenker`) and there is an option to use custom formatting for the names. The default naming convention in recipes makes it easier to capture those new columns in future steps using a selector, such as `starts_with("Neighborhood_")`. 
 
-Traditional dummy variables require that all of the possible categories be known to create a full set of numeric features. There are other methods for doing this transformation to a numeric format. _Feature hashing_ methods only consider the value of the category to assign it to a predefined pool of dummy variables. This can be a good strategy when there are a large number of possible categories, but the statistical properties may not be optimal. For example, it may unnecessarily _alias_ categories together (by assigning them to the same dummy variable). This reduces the specificity of the encoding and, if that dummy variable were important, it would be difficult to determine which of the categories is driving the effect. 
-
-Another method that is useful when there are a large number of categories is called _effect_ or _likelihood encodings_. This method replaces the original data with a single numeric column that measures the _effect_ of those data. For example, for the neighborhood predictor, the mean sale price is computed for each neighborhood and these means are substituted for the original data values. This can be effective but should be used with care. In effect, a mini-model is being added to the actual model and this can lead to over-fitting. To be cautious, this type of encoding should be rigorously resampled (see Chapter \@ref(resampling)). Within a recipe, the [`r pkg(embed)`](https://embed.tidymodels.org/) package has several step functions, such as `step_lencode_mixed()`, for effect encodings. Both feature hashing and effect encoding methods can also seamlessly handle situations where a novel factor level is encountered in the data. 
-
-Sometimes qualitative columns can be _ordered_, such as "low", "medium", "high". In base R, the default encoding strategy is to make new numeric columns that are polynomial expansions of the data. For columns that have five ordinal values, the factor column would be replaced with columns for linear, quadratic, cubic, and quartic terms: 
-
-```{r engineering-ordered-table, echo = FALSE, results = 'asis'}
-ord_vals <- c("none", "a little", "some", "a bunch", "copious amounts")
-ord_data <- tibble::tibble(`Raw Data` = ordered(ord_vals, levels = ord_vals))
-ord_contrasts <- 
-  model.matrix(~., data = ord_data) %>% 
-  round(2) %>% 
-  as.data.frame() %>% 
-  dplyr::select(-`(Intercept)`) %>% 
-  setNames(c("Linear", "Quadratic", "Cubic", "Quartic"))
-bind_cols(ord_data, ord_contrasts) %>% 
-  kable() %>% 
-  kable_styling(full_width = FALSE)
-```
-
-While this is not unreasonable, it is not an approach that people tend to find useful. For example, a 11-degree polynomial is probably not the most effective way of encoding an ordinal factor for months.  Instead, consider trying recipe steps related to ordered factors, such as `step_unorder()`, to convert to regular factors, and `step_ordinalscore()` which maps specific numeric values to each factor level. 
+Traditional dummy variables require that all of the possible categories be known to create a full set of numeric features. There are other methods for doing this transformation to a numeric format. _Feature hashing_ methods only consider the value of the category to assign it to a predefined pool of dummy variables. _Effect_ or _likelihood encodings_ replace the original data with a single numeric column that measures the _effect_ of those data. Both feature hashing and effect encoding methods can seamlessly handle situations where a novel factor level is encountered in the data. Chapter \@ref(categorical) explores these and other methods for encoding categorical data, beyond straightforward dummy or indicator variables.
 
 :::rmdnote
 Different recipe steps can have different effects on columns of the data. For example, `step_log()` modifies a column in-place without changing the name. Other steps, such as `step_dummy()` eliminate the original data column and replace it with one or more columns with different names. This behavior depends on the type of operation being done. 
@@ -264,16 +249,22 @@ Different recipe steps can have different effects on columns of the data. For ex
 
 Interaction effects involve two or more predictors. Such an effect occurs when one predictor has an effect on the outcome that is contingent on one or more other predictors. For example, if you were trying to predict your morning commute time, two potential predictors could be the amount of traffic and the time of day. However, the relationship between commute time and the amount of traffic is different for different times of day. In this case, you could add an interaction term between the two predictors to the model along with the original two predictors (which are called the "main effects"). Numerically, an interaction term between predictors is encoded as their product. Interactions are only defined in terms of their effect on the outcome and can be combinations of different types of data (e.g., numeric, categorical, etc). [Chapter 7](https://bookdown.org/max/FES/detecting-interaction-effects.html) of @fes discusses interactions and how to detect them in greater detail. 
 
-After exploring the Ames training set, we might find that the regression slopes for the gross living area differ for different building types: 
+After exploring the Ames training set, we might find that the regression slopes for the gross living area differ for different building types, as shown in Figure \@ref(fig:building-type-interactions).
 
-```{r engineering-ames-feature-plots}
+```{r engineering-ames-feature-plots, eval=FALSE}
 ggplot(ames_train, aes(x = Gr_Liv_Area, y = 10^Sale_Price)) + 
   geom_point(alpha = .2) + 
   facet_wrap(~ Bldg_Type) + 
-  geom_smooth(method = lm, formula = y ~ x, se = FALSE, col = "red") + 
+  geom_smooth(method = lm, formula = y ~ x, se = FALSE, color = "lightblue") + 
   scale_x_log10() + 
   scale_y_log10() + 
   labs(x = "Gross Living Area", y = "Sale Price (USD)")
+```
+
+```{r building-type-interactions, ref.label = "engineering-ames-feature-plots"}
+#| echo = FALSE,
+#| fig.cap = "Gross living area (in log-10 units) versus sale price (also in log-10 units) for five different building types.",
+#| fig.alt = "Scatter plots of gross living area (in log-10 units) versus sale price (also in log-10 units) for five different building types. All trends are linear but appear to have different slopes and intercepts for the different building types."
 ```
 
 How are interactions specified in a recipe? A base R formula would take an interaction using a `:`, so we would use:
@@ -326,9 +317,9 @@ _Order matters_.  The gross living area is log transformed prior to the interact
 
 When a predictor has a nonlinear relationship with the outcome, some types of predictive models can adaptively approximate this relationship during training. However, simpler is usually better and it is not uncommon to try to use a simple model, such as a linear fit, and add in specific non-linear features for predictors that may need them. One common method for doing this is to use _spline_ functions to represent the data. Splines replace the existing numeric predictor with a set of columns that allow a model to emulate a flexible, non-linear relationship. As more spline terms are added to the data, the capacity to non-linearly represent the relationship increases. Unfortunately, it may also increase the likelihood of picking up on data trends that occur by chance (i.e., over-fitting). 
 
-If you have ever used `geom_smooth()` within a `ggplot`, you have probably used a spline representation of the data. For example, each panel below uses a different number of smooth splines for the latitude predictor:
+If you have ever used `geom_smooth()` within a `ggplot`, you have probably used a spline representation of the data. For example, each panel in Figure \@ref(fig:ames-latitude-splines) uses a different number of smooth splines for the latitude predictor:
 
-```{r engineering-ames-splines}
+```{r engineering-ames-splines, eval=FALSE}
 library(patchwork)
 library(splines)
 
@@ -339,7 +330,7 @@ plot_smoother <- function(deg_free) {
     geom_smooth(
       method = lm,
       formula = y ~ ns(x, df = deg_free),
-      col = "red",
+      color = "lightblue",
       se = FALSE
     ) +
     labs(title = paste(deg_free, "Spline Terms"),
@@ -347,6 +338,12 @@ plot_smoother <- function(deg_free) {
 }
 
 ( plot_smoother(2) + plot_smoother(5) ) / ( plot_smoother(20) + plot_smoother(100) )
+```
+
+```{r ames-latitude-splines, ref.label = "engineering-ames-splines"}
+#| echo = FALSE,
+#| fig.cap = "Sale price versus latitude, with trend lines using natural splines with different degrees of freedom.",
+#| fig.alt = "Scatter plots of sale price versus latitude with trend lines using natural splines with different degrees of freedom. As the degrees of freedom increase, the lines are more responsive to trends in the data but begin to become excessively complex with 100 spline terms."
 ```
 
 The `ns()` function in the `r pkg(splines)` package generates feature columns using functions called _natural splines_.
@@ -406,7 +403,11 @@ There are other step functions that are row-based as well: `step_filter()`, `ste
 
 ### General transformations
 
-Mirroring the original `r pkg(dplyr)` operations, `step_mutate()` and `step_mutate_at()` can be used to conduct a variety of basic operations to the data. 
+Mirroring the original `r pkg(dplyr)` operation, `step_mutate()` can be used to conduct a variety of basic operations to the data. 
+
+:::rmdwarning
+When using this flexible step, use extra care to avoid data leakage in your preprocessing. Consider, for example, the transformation `x = w > mean(w)`. When applied to new data or testing data, this transformation would use the mean of `w` from the _new_ data, not the mean of `w` from the training data.
+:::
 
 
 ### Natural language processing
