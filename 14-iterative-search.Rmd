@@ -405,7 +405,7 @@ svm_bo_sshh <-
   )
 
 svm_bo <- svm_bo_sshh$result
-verify_consistent_bo(svm_bo)
+# verify_consistent_bo(svm_bo)
 svm_bo_output <- svm_bo_sshh$messages
 
 gp_candidates <- collect_gp_results(svm_bo)
