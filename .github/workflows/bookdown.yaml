@@ -42,6 +42,12 @@ jobs:
       - name: Build site
         run: Rscript -e 'bookdown::render_book("index.Rmd", quiet = TRUE)'
 
+      - name: Upload results
+        uses: actions/upload-artifact@main
+        with:
+          name: svm_sa
+          path: RData/svm_sa.RData
+
       - name: Deploy to Netlify
         if: contains(env.isExtPR, 'false')
         id: netlify-deploy

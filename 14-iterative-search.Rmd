@@ -1267,5 +1267,6 @@ Like `tune_bayes()`, manually stopping execution will return the completed itera
 
 This chapter describes two iterative search methods for optimizing tuning parameters. Both can be effective at finding good values alone or as a follow-up method that is used after an initial grid search to further `r pkg(finetune)` performance. 
 
-
-
+```{r save, echo = FALSE}
+save(svm_sa, file = "RData/svm_sa.RData", compress = TRUE, version = 2)
+```
