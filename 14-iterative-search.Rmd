@@ -405,7 +405,7 @@ svm_bo_sshh <-
   )
 
 svm_bo <- svm_bo_sshh$result
-verify_consistent_bo(svm_bo)
+#verify_consistent_bo(svm_bo)
 svm_bo_output <- svm_bo_sshh$messages
 
 gp_candidates <- collect_gp_results(svm_bo)
@@ -568,6 +568,196 @@ autoplot(svm_bo, type = "performance")
 
 An additional type of plot uses `type = "parameters"`  which shows the parameter values over iterations.
 
+```{r iterative-bo-calcs, include = FALSE}
+bo_path <- 
+  svm_bo %>% 
+  collect_metrics() %>% 
+  select(cost, rbf_sigma, .iter, mean)
+# These are based off of all the tuning grids used in the chapter
+x_rng <- c(4.546377230472e-08, 1.54534400806564)
+y_rng <- c(0.000580667536622422, 53.8173705762377)
+initial <- 
+  bo_path %>% 
+  filter(.iter == 0)
+best_init <- 
+  initial %>% 
+  arrange(desc(mean)) %>% 
+  slice(1)
+srch <- 
+  best_init %>% 
+  bind_rows(
+    bo_path %>% 
+      filter(.iter > 0)
+  ) %>% 
+  mutate(
+    next_cost = dplyr::lead(cost), 
+    next_rbf_sigma = dplyr::lead(rbf_sigma)
+  )
+bo_base <- 
+  bo_path %>% 
+  ggplot(aes(x = rbf_sigma, y = cost)) + 
+  # geom_raster(aes(fill = .mean)) +
+  scale_x_log10(labels = fmt_dcimals(2), limits = x_rng) + 
+  scale_y_continuous(trans = "log2", labels = fmt_dcimals(2), limits = y_rng) +
+  geom_point(data = initial, col = "black", pch = 1) +
+  theme_bw() + 
+  theme(
+    panel.grid.minor.x = element_blank(),
+    panel.grid.minor.y = element_blank(),
+    axis.text.y = element_text(size = 8),
+    axis.text.x = element_text(size = 8)
+  ) + 
+  coord_fixed(ratio = 1/2.5)
+first_5 <- bo_base
+max_iter <- 5
+for (iter in 0:max_iter) {
+  first_5 <- 
+    first_5 + 
+    geom_segment(
+      data = srch %>% slice(iter + 1),
+      aes(xend = next_rbf_sigma, yend = next_cost),
+                 arrow = grid::arrow(length = unit(0.04, "inches"), type = "closed"),
+      alpha = 1/2
+      )
+}
+first_5 <- 
+  first_5 + 
+  ggtitle("First 5 iterations") 
+first_11 <- bo_base
+max_iter <- 11
+for (iter in 0:max_iter) {
+  first_11 <- 
+    first_11 + 
+    geom_segment(
+      data = srch %>% slice(iter + 1),
+      aes(xend = next_rbf_sigma, yend = next_cost),
+      arrow = grid::arrow(length = unit(0.04, "inches"), type = "closed"),
+      alpha = 1/2
+    )
+}
+first_11 <- 
+  first_11 + 
+  ggtitle("First 11 iterations") +
+  ylab(NULL) + 
+  theme(
+    axis.title.y = element_blank(),
+    axis.text.y = element_blank(),
+    axis.ticks.y = element_blank()
+  )
+all_bo <- bo_base
+max_iter <- max(srch$.iter)
+for (iter in 0:max_iter) {
+  all_bo <- 
+    all_bo + 
+    geom_segment(
+      data = srch %>% slice(iter + 1),
+      aes(xend = next_rbf_sigma, yend = next_cost),
+      arrow = grid::arrow(length = unit(0.04, "inches"), type = "closed"),
+      alpha = 1/2
+    )
+}
+all_bo <- 
+  all_bo + 
+  ggtitle("All iterations") +
+  ylab(NULL) + 
+  theme(
+    axis.title.y = element_blank(),
+    axis.text.y = element_blank(),
+    axis.ticks.y = element_blank()
+  )
+surf_mean <- 
+  gp_candidates %>% 
+  filter(.iter == 11) %>% 
+  ggplot(aes(x = rbf_sigma, y = cost)) + 
+  geom_raster(aes(fill = .mean)) +
+  scale_x_log10(labels = fmt_dcimals(2), limits = x_rng) + 
+  scale_y_continuous(trans = "log2", labels = fmt_dcimals(2), limits = y_rng) +
+  scale_fill_distiller(palette = "Blues") + 
+  theme_bw()  +
+  theme(
+    legend.position = "none",
+    panel.grid.minor.x = element_blank(),
+    panel.grid.minor.y = element_blank(),
+    axis.text.y = element_text(size = 8),
+    axis.text.x = element_text(size = 8)
+    ) +
+  labs(title = "Mean") + 
+  coord_fixed(ratio = 1/2.5)
+surf_sd <- 
+  gp_candidates %>% 
+  filter(.iter == 11) %>% 
+  ggplot(aes(x = rbf_sigma, y = cost)) + 
+  geom_raster(aes(fill = -.sd)) +
+  scale_x_log10(labels = fmt_dcimals(2), limits = x_rng) + 
+  scale_y_continuous(trans = "log2", labels = fmt_dcimals(2), limits = y_rng) +
+  scale_fill_distiller(palette = "Reds") +
+  labs(title = "Variance") + 
+  coord_fixed(ratio = 1/2.5) +
+  ylab(NULL) + 
+  theme_bw() + 
+  theme(
+    legend.position = "none",
+    axis.title.y = element_blank(),
+    axis.text.y = element_blank(),
+    axis.ticks.y = element_blank(),
+    panel.grid.minor.x = element_blank(),
+    panel.grid.minor.y = element_blank(),
+    axis.text.x = element_text(size = 8)
+  )
+surf_impr <- 
+  gp_candidates %>% 
+  filter(.iter == 11) %>% 
+  ggplot(aes(x = rbf_sigma, y = cost)) + 
+  geom_raster(aes(fill = log(objective + 0.00001))) +
+  scale_x_log10(labels = fmt_dcimals(2), limits = x_rng) + 
+  scale_y_continuous(trans = "log2", labels = fmt_dcimals(2), limits = y_rng) +
+  scale_fill_gradientn(colours = rev(scales::brewer_pal(palette = "RdPu")(3))) +
+  labs(title = "Expected Improvement") + 
+  coord_fixed(ratio = 1/2.5) +
+  ylab(NULL) + 
+  theme_bw() + 
+  theme(
+    legend.position = "none",
+    axis.title.y = element_blank(),
+    axis.text.y = element_blank(),
+    axis.ticks.y = element_blank(),
+    panel.grid.minor.x = element_blank(),
+    panel.grid.minor.y = element_blank(),
+    axis.text.x = element_text(size = 8)
+  )
+```
+
+
+Figure \@ref(fig:bo-surfaces) shows the surfaces of the mean, variance, and expected improvement surfaces estimated by the GP after 11 iterations. The right-hand panel shows a ridge of best estimated improvement along the right side of the candidate space.
+
+```{r bo-surfaces}
+#| echo = FALSE, 
+#| message = FALSE, 
+#| warning = FALSE,
+#| fig.width = 9, 
+#| fig.height = 4,
+#| out.width = "100%",
+#| fig.cap = "Heat maps of the predicted mean RMSE (left), variance of RMSE (middle), and the expected improvement (right) after 11 search iterations.",
+#| fig.alt = "Heat maps of the predicted mean RMSE (left), variance of RMSE (middle), and the expected improvement (right) after 11 search iterations. The means surface correctly reflects that the best results are near the upper right of the parameter space. The variance patterns show low variance at existing parameter combinations. The expected improvement surface, at this point, is a narrow ridge going form high to low in the cost dimension along higher levels of the kernel function parameter."
+surf_mean + surf_sd + surf_impr
+```
+
+Figure \@ref(fig:bo-search) shows the search process at three different points in the optimization.
+
+```{r bo-search, echo = FALSE, warning = FALSE, out.width="100%", fig.width=9, fig.height=4}
+#| echo = FALSE, 
+#| message = FALSE, 
+#| warning = FALSE,
+#| fig.width = 9, 
+#| fig.height = 4,
+#| out.width = "100%",
+#| fig.cap = "The Bayesian optimization search path after 1, 11, and 25 iterations.",
+#| fig.alt = "The Bayesian optimization search path after 1, 11, and 25 iterations. Initially the search goes in a poor direction before approaching the region of best results. By eleven iterations, the search has focused on the location of the truly optimal results and has probed more extremest directions. By the end, the search focuses on the best area or probes outlying areas, especially at the bounds of the parameter space."
+first_5 + first_11 + all_bo
+```
+
+The first five iterations initially move in a poor direction but quickly move closer to better results.  The middle panel shows the process investigating the region of true optimal results with a short foray to the bottom right boundary of the candidate space. The remaining iterations switch between the region of best results and the far borders of the search space. 
+
 While the best tuning parameter combination is on the boundary of the parameter space, Bayesian optimization will often choose new points on other sides of the boundary. While we can adjust the ratio of exploration and exploitation, the search tends to sample boundary points early on.
 
 :::rmdnote
@@ -598,7 +788,6 @@ How are the acceptance probabilities influenced? This heatmap in Figure \@ref(fi
 
 ```{r acceptance-prob}
 #| echo = FALSE, 
-#| dev = "png", 
 #| fig.height = 4.5,
 #| out.width = "80%",
 #| fig.cap = "Heatmap of the simulated annealing acceptance probabilities for different coefficient values.",
@@ -897,6 +1086,171 @@ autoplot(svm_sa, type = "parameters")
 ```
 
 Like `tune_bayes()`, manually stopping execution will return the completed iterations. 
+
+A visualization of the search path helps to understand where the search process did well and where it went astray. Figure \@ref(fig:sa-plot) illustrates several "phases" of the optimization; these are separated by a restart of the process at the last best results. 
+
+```{r sa-plot}
+#| echo = FALSE, 
+#| message = FALSE, 
+#| warning = FALSE,
+#| fig.width = 10, 
+#| fig.height = 7,
+#| out.width = "90%",
+#| fig.cap = "A visualization of different phases of the simulated annealing search.",
+#| fig.alt = "A visualization of different phases of the simulated annealing search. Each portion of the search has many 'dead end paths' that either have immediate poor results or have several iterations before a restart is required. After four restarts, the search finds itself in a region of optimal results."
+history <- result_history %>% add_rowindex()
+params <-
+  svm_sa %>%
+  collect_metrics() %>%
+  select(.iter, cost, rbf_sigma, mean) %>%
+  arrange(.iter)
+initial <-
+  params %>%
+  filter(.iter == 0)
+sa_path <- function(branch = 1, y_axis = TRUE) {
+  
+  # ------------------------------------------------------------------------------
+  # Plot before SA optimization
+  
+  base_plot <-
+    params %>%
+    ggplot(aes(x = rbf_sigma, y = cost))  +
+    scale_x_log10(labels = fmt_dcimals(2), limits = x_rng) + 
+    scale_y_continuous(trans = "log2", labels = fmt_dcimals(2), limits = y_rng) + 
+    coord_fixed(ratio = .5)
+  
+  sa_plot <- 
+    base_plot +
+    geom_point(data = initial, col = "black", pch = 1) +
+    theme_bw()
+  
+  # ----------------------------------------------------------------------------
+  # Setup data for the requested path. Determine which rows should be used 
+  # (based on the branch argument) by determining restart locations. 
+  
+  all_restr <- grep("restart", result_history$results)
+  sa_data <- 
+    result_history %>% 
+    add_rowindex() %>% 
+    filter(.row <= all_restr[branch]) %>%
+    select(cost, rbf_sigma, results, .row) %>% 
+    mutate(
+      best = NA_integer_,
+      branch_ind = NA_integer_,
+      next_row = dplyr::lead(.row),  # TODO maybe don't use these
+      next_cost = dplyr::lead(cost), 
+      next_rbf_sigma = dplyr::lead(rbf_sigma)
+    )
+  
+  # Mark where the new global best results occur to add a column (includes the
+  # initial results)
+  restr <- grep("restart", sa_data$results)
+  bests <- c(which.max(initial$mean), grep("new best", history$results))
+  
+  # Loop through the data to set the best results and also count the branches
+  branch_num <- 1
+  for (i in 4:nrow(sa_data)) {
+    prev_best <- max(bests[bests <= i])
+    sa_data$best[i] <- prev_best
+    sa_data$branch_ind[i] <- branch_num
+    if (sa_data$results[i] == "restart from best") {
+      branch_num <- branch_num + 1
+    }
+  }
+  
+  # Remove previous branches (if any) as if they did not occur. This means 
+  # eliminating those rows from previous branches that were not new global best. 
+  # Re-number rows
+  if (branch > 1) {
+    removals <- 
+      sa_data %>% 
+      filter(branch_ind < branch & !(results %in% c("initial", "new best"))) %>% 
+      select(.row)
+    sa_data <- 
+      sa_data %>% 
+      anti_join(removals, by = ".row") %>% 
+      add_rowindex()
+  }
+  
+  
+  last_accepted <- which.max(initial$mean)
+  last_best <- last_accepted
+  
+  
+  for (i in 5:nrow(sa_data)) {
+    dat_start <- 
+      sa_data %>% 
+      slice(last_accepted) %>% 
+      select(cost, rbf_sigma)
+    
+    if (sa_data$results[i] == "new best")  {
+      # The current row is accepted and is globally optimal
+      plot_col <- "black"
+      last_accepted <- i
+      last_best <- i
+      
+    } else if (sa_data$results[i] %in% c("accept suboptimal", "better suboptimal")) {
+      # The current row is accepted. Color blue since it is eliminated with restart
+      plot_col <- "blue"
+      last_accepted <- i
+    } else if (sa_data$results[i] %in% c("discard suboptimal")) {
+      
+      plot_col <- rgb(0, 0, 0, .4)
+    } else if (sa_data$results[i] %in% c("restart from best")) {
+      plot_col <- rgb(0, 0, 0, .4)
+      
+      # Restart goes to previous glbal best
+      last_accepted <- last_best
+    }
+    
+    dat_plot <- 
+      sa_data %>% 
+      slice(i) %>% 
+      select(next_cost = cost, next_rbf_sigma = rbf_sigma) %>% 
+      bind_cols(dat_start)
+    
+    sa_plot <- 
+      sa_plot +
+      geom_segment(
+        data = dat_plot,
+        aes(xend = next_rbf_sigma, yend = next_cost),
+        # arrow = grid::arrow(length = unit(0.1, "inches")),
+        col = plot_col
+      )
+  }
+  sa_plot <- 
+    sa_plot + 
+    geom_point(data = sa_data %>% filter(results == "new best"), 
+               cex = 1) + 
+  theme(
+    panel.grid.minor.x = element_blank(),
+    panel.grid.minor.y = element_blank(),
+    axis.text.y = element_text(size = 8),
+    axis.text.x = element_text(size = 8)
+  )
+  
+  if(!y_axis) {
+    sa_plot <-
+      sa_plot + 
+      ylab(NULL) + 
+      theme(
+        axis.title.y = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank(),
+        axis.text.x = element_text(size = 8)
+      )
+  }
+  sa_plot
+}
+sa_1 <- sa_path(1, TRUE)  + ggtitle("Phase 1")
+sa_2 <- sa_path(2, FALSE) + ggtitle("Phase 2")
+sa_3 <- sa_path(3, FALSE) + ggtitle("Phase 3")
+sa_4 <- sa_path(4, TRUE)  + ggtitle("Phase 4")
+sa_5 <- sa_path(5, FALSE) + ggtitle("Phase 5")
+sa_1 + sa_2 + sa_3 + sa_4 + sa_5 +  plot_layout(ncol = 3)
+```
+
+In the first phase, the search initially finds two new global optima (shown with the solid points). From these, there are several settings that are immediately discarded (light gray lines) while others are suboptimal but acceptable. After a set number of failures, it restarts at the last solid point. The other phases show a slow improvement in global optima with many discarded settings along the way. The process eventually finds its way to the region of optimal results as it exhausts the total number of allowed iterations.
 
 ## Chapter summary {#iterative-summary}
 

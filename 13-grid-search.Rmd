@@ -738,10 +738,9 @@ As an example, in the multilayer perceptron tuning process with a regular grid e
 #| fig.height = 5, 
 #| out.width = "80%",
 #| fig.cap = "The racing process for 20 tuning parameters and 10 resamples.",
-#| fig.alt = "An illustration of the racing process for 20 tuning parameters and 10 resamples. The analysis is conducted at the first, third, and last resample. As the number of resamples increases, the confidence intervals show some model configurations that do not have confidence intervals that overlap with zero. These are excluded from subsequent resamples."
+#| fig.alt = "The racing process for 20 tuning parameters and 10 resamples. The analysis is conducted at the first, third, and last resample. As the number of resamples increases, the confidence intervals show some model configurations that do not have confidence intervals that overlap with zero. These are excluded from subsequent resamples."
 
 full_att <- attributes(mlp_sfd_race)
-
 race_details <- NULL
 for(iter in 1:10) {
   
@@ -759,7 +758,6 @@ for(iter in 1:10) {
       race_details,
       finetune:::test_parameters_gls(tmp) %>% mutate(iter = iter))
 }
-
 race_details <-
   race_details %>%
   mutate(
@@ -771,20 +769,25 @@ race_details <-
   )  %>%
   mutate(
     .config = factor(.config),
+    .config = format(as.integer(.config)),
+    .config = paste("config", .config),
+    .config = factor(.config),
     .config = reorder(.config, estimate),
     decision = factor(decision, levels = c("best", "retain", "discard"))
   ) 
 race_cols <- c(best = "blue", retain = "black", discard = "grey")
-
 iter_three <- race_details %>% dplyr::filter(iter == 3) 
-
-iter_three %>% 
+race_details %>% 
+  filter(iter %in% c(1, 3, 10)) %>% 
+  mutate(iter = paste("resamples:", format(iter))) %>% 
   ggplot(aes(x = -estimate, y = .config)) + 
-  geom_vline(xintercept = 0, lty = 2, color = "green") +
-  geom_point(size = 2, aes(color = decision)) +
-  geom_errorbarh(aes(xmin = -estimate, xmax = -upper, color = decision), height = .3, show.legend = FALSE) + 
+  geom_vline(xintercept = 0, lty = 2, col = "green") +
+  geom_point(size = 2, aes(col = decision, pch = decision)) + 
+  geom_errorbarh(aes(xmin = -estimate, xmax = -upper, col = decision), height = .3, show.legend = FALSE) + 
   labs(x = "Loss of ROC AUC", y = NULL) + 
-  scale_colour_manual(values = race_cols)
+  scale_colour_manual(values = race_cols) + 
+  facet_wrap(~iter) +
+  theme(legend.position = "top")
 ```
 
 Figure \@ref(fig:racing-process) shows the results at several iterations in the process. The points shown in the panel with the first iteration show single ROC AUC values. As iterations progress, the points are averages of the resampled ROC statistics.
