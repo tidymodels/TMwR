@@ -145,7 +145,6 @@ The top panel of Figure \@ref(fig:stacking-autoplot) shows the average number of
 
 The default range may not have served us well here. To evaluate the  meta-learning model with larger penalties, let's pass an additional option:
 
-
 ```{r ensembles-second-blend}
 set.seed(2001)
 ens <- blend_predictions(concrete_stack, penalty = 10^seq(-2, -0.5, length = 20))
@@ -164,8 +163,9 @@ autoplot(ens)
 
 Now, in Figure \@ref(fig:stacking-autoplot-redo), we see a range where the ensemble model becomes worse than with our first blend (but not by much). The R<sup>2</sup> values increase with larger penalties. This is somewhat counter-intuitive, but the y-axis range of each panel reminds us that these changes are minuscule.  
 
-The penalty value associated with the smallest RMSE was `r round(ens$penalty$penalty, 2)`. Printing the object shows the details of the meta-learning model: 
+It is common, when blending predictions using a regression model, to constrain the blending parameters to be non-negative. For these data, this constraint has the effect of eliminating many of the potential ensemble members; even at fairly low penalties, the ensemble is limited to a fraction of the original eighteen.
 
+The penalty value associated with the smallest RMSE was `r signif(ens$penalty$penalty, 2)`. Printing the object shows the details of the meta-learning model: 
 
 ```{r ensembles-second-blend-print}
 ens
@@ -218,13 +218,14 @@ config_label <- function(x) {
   }
   x$weight <- format(x$weight, digits = 2, scientific = FALSE)
   x$term <- paste0(x$weight, " \\times \\text{", x$config, "} \\notag")
-  select(x, term)
+  select(x, term, weight)
 }
 tmp <- 
   all_members %>% 
   group_nest(obj, keep = TRUE) %>% 
   mutate(data = map(data, ~ config_label(.x))) %>% 
-  unnest(cols = "data")
+  unnest(cols = "data") %>% 
+  arrange(desc(weight))
 
 eqn <- paste(c(glmn_int$estimate, tmp$term), collapse = " \\\\\n\t+&")
 eqn <- paste0("\n\\begin{align}\n \\text{ensemble prediction} &=", eqn, "\n\\end{align}\n")
@@ -252,8 +253,8 @@ param_filter <- function(object, config, stack_obj) {
   if (length(param_labs) > 0) {
     names(params) <- param_labs
     fmt <- format(as.data.frame(params), digits = 3)
-    fmt <- as.matrix(fmt)[1,]
-    chr_param <- paste0(names(fmt), " = ", unname(fmt))
+    fmt <- as.matrix(fmt)[1,,drop = FALSE]
+    chr_param <- paste0(colnames(fmt), " = ", unname(fmt))
     chr_param <- knitr::combine_words(chr_param)
     items <- paste0("- ", gsub("_", " ", object), ": ", chr_param)
   } else {
@@ -291,7 +292,9 @@ get_configs <- function(x) {
 
 param <- map2_chr(all_members$obj, all_members$member, param_filter, ens)
 param <- paste0(param, get_configs(all_members))
-cat(param)
+param <- gsub("full quad linear reg", "linear regression (quadratic features)", param)
+param <- gsub("number of observations sampled", "proportion of observations sampled", param)
+cat(param, sep = "")
 
 ens_rmse <- dplyr::filter(ens$metrics, penalty == ens$penalty$penalty & .metric == "rmse")$mean
 boost_rmse <- collect_metrics(boosting_test_results) %>% dplyr::filter(.metric == "rmse")
@@ -320,7 +323,6 @@ ens_test_pred %>%
 ```
 
 This is moderately better than our best single model. It is fairly common for stacking to produce incremental benefits when compared to the best single model. 
-
 
 ## Chapter summary {#ensembles-summary}
 

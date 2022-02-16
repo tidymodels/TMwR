@@ -394,8 +394,9 @@ The new object looks very similar, although the elements of the `result` column 
 race_results
 ```
 
-The same helpful functions are available for this object to interrogate the results and, in fact, the basic `autoplot()` method shown in Figure \@ref(fig:workflow-set-racing-ranks) produces similar trends to Figure \@ref(fig:workflow-sets-autoplot). This is produced by:
+The same helpful functions are available for this object to interrogate the results and, in fact, the basic `autoplot()` method shown in Figure \@ref(fig:workflow-set-racing-ranks)[^nnetnote] produces similar trends to Figure \@ref(fig:workflow-sets-autoplot). This is produced by:
 
+[^nnetnote]: As of February 2022, we see slightly different performance metrics for the neural network when trained using macOS on ARM architecture (Apple M1 chip) compared to Intel architecture.
 
 ```{r workflow-sets-plot-race-rank, eval = FALSE}
 autoplot(

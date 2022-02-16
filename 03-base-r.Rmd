@@ -285,7 +285,7 @@ To resolve the usage issues described here, the tidymodels packages have a set o
 
 * Functions should take the **data structures that users have** as opposed to the data structure that developers want. For example, a model function's _only_ interface should not be constrained to matrices. Frequently, users will have non-numeric predictors such as factors. 
 
-Many of these ideas are described in the tidymodels guidelines for model implementation^[https://tidymodels.github.io/model-implementation-principles]. In subsequent chapters, we will illustrate examples of existing issues, along with their solutions. 
+Many of these ideas are described in the tidymodels guidelines for model implementation^[<https://tidymodels.github.io/model-implementation-principles>]. In subsequent chapters, we will illustrate examples of existing issues, along with their solutions. 
 
 :::rmdnote
 There are a few existing R packages that provide a unified interface to harmonize these heterogeneous modeling APIs, such as `r pkg(caret)` and `r pkg(mlr)`. The tidymodels framework is similar to these in adopting a unification of the function interface, as well as enforcing consistency in the function names and return values. It is different in its opinionated design goals and modeling implementation.
@@ -366,7 +366,10 @@ List columns can be very powerful in modeling projects. List columns provide con
 The tidyverse (Chapter \@ref(tidyverse)) is designed as a set of modular R packages, each with a fairly narrow scope. The tidymodels framework follows a similar design. For example, the `r pkg(rsample)` package focuses on data splitting and resampling. Although resampling methods are critical to other activities of modeling (e.g., measuring performance), they reside in a single package and performance metrics are contained in a different, separate package, `r pkg(yardstick)`. There are many benefits to adopting this philosophy of modular packages, from less bloated model deployment to smoother package maintenance.
 
 ```{r base-r-detach, warning = FALSE, message = FALSE, echo = FALSE}
-pkgs <- paste0("package:", c("tidymodels", tidymodels:::core))
+pkgs <- paste0("package:", 
+               c("kableExtra", 
+                 "tidyverse", "tidymodels", 
+                 tidyverse:::core, tidymodels:::core))
 for (i in pkgs) {
   try(detach(i, unload = TRUE, character.only = TRUE, force = TRUE), silent = TRUE)
 }
