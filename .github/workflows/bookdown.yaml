@@ -45,8 +45,8 @@ jobs:
       - name: Upload results
         uses: actions/upload-artifact@main
         with:
-          name: svm_sa
-          path: RData/svm_sa.RData
+          name: svm_bo
+          path: RData/svm_bo.RData
 
       - name: Deploy to Netlify
         if: contains(env.isExtPR, 'false')
