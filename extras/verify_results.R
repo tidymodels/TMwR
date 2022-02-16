@@ -19,7 +19,7 @@ verify_consistent_sa <- function(x) {
   load("RData/svm_sa_metrics.RData")
   sa_check <- all.equal(x, svm_sa_metrics, tolerance = 0.01)
   if (!isTRUE(sa_check)) {
-    msg <- "These Bsimulated annealing results don't match the previous values.:\n"
+    msg <- "These simulated annealing results don't match the previous values.:\n"
     msg <- paste0(msg, paste0(sa_check, collapse = "\n"))
     rlang::abort(msg)
   }
