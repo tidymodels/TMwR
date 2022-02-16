@@ -1,27 +1,27 @@
-# These functions make sure that our results have not changed so that the interpreation
+# These functions make sure that our results have not changed so that the interpretation
 # in the text is not incorrect.
 
-suppressPackageStartupMessages(library(digest))
-
 verify_consistent_bo <- function(x) {
-  # md5 generated on 2020-11-04
-  expected <- "10f823b50ebe4032a01e414392619286"
-  current <- digest::digest(x$.metrics)
-  if (!identical(expected, current)) {
-    rlang::abort(
-      "These Bayesian optimization results don't match the previous values.")
+  # initial results generated on 2022-02-16
+  load("RData/svm_bo_metrics.RData")
+  bo_check <- all.equal(x, svm_bo_metrics, tolerance = 0.01)
+  if (!isTRUE(bo_check)) {
+    msg <- "These Bayesian optimization results don't match the previous values.:\n"
+    msg <- paste0(msg, paste0(bo_check, collapse = "\n"))
+    rlang::abort(msg)
   }
   invisible(NULL)
 }
 
 
 verify_consistent_sa <- function(x) {
-  # md5 generated on 2020-11-04
-  expected <- "5f04b0de490d2e04a3d3eb2b6d28f86e"
-  current <- digest::digest(x$.metrics)
-  if (!identical(expected, current)) {
-    rlang::abort(
-      "These simulated annealing results don't match the previous values.")
+  # initial results generated on 2022-02-16
+  load("RData/svm_sa_metrics.RData")
+  sa_check <- all.equal(x, svm_sa_metrics, tolerance = 0.01)
+  if (!isTRUE(sa_check)) {
+    msg <- "These simulated annealing results don't match the previous values.:\n"
+    msg <- paste0(msg, paste0(sa_check, collapse = "\n"))
+    rlang::abort(msg)
   }
   invisible(NULL)
 }
