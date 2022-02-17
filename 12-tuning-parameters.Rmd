@@ -497,10 +497,10 @@ tune()
 
 Embedding this value in an argument will tag the parameter for optimization. The model tuning functions shown in the next two chapters parse the model specification and/or recipe to discover the tagged parameters. These functions can automatically configure and process these parameters since they understand their characteristics (e.g. the range of possible values, etc.). 
 
-To enumerate the tuning parameters for an object, use the `dials::parameters()` function: 
+To enumerate the tuning parameters for an object, use the `extract_parameter_set_dials()` function: 
 
 ```{r tuning-mlp-units-param}
-parameters(neural_net_spec)
+extract_parameter_set_dials(neural_net_spec)
 ```
 
 The results show a value of `nparam[+]`, indicating that the number of hidden units is a _numeric_ parameter. 
@@ -518,7 +518,7 @@ ames_rec <-
   step_ns(Longitude, deg_free = tune("longitude df")) %>% 
   step_ns(Latitude,  deg_free = tune("latitude df"))
 
-recipes_param <- parameters(ames_rec)
+recipes_param <- extract_parameter_set_dials(ames_rec)
 recipes_param
 ```
 
@@ -531,7 +531,7 @@ wflow_param <-
   workflow() %>% 
   add_recipe(ames_rec) %>% 
   add_model(neural_net_spec) %>% 
-  parameters()
+  extract_parameter_set_dials()
 wflow_param
 ```
 
@@ -562,11 +562,11 @@ wflow_param %>% extract_parameter_dials("threshold")
 Inside the parameter set, the range of the parameters can also be updated in-place: 
 
 ```{r tuning-update}
-parameters(ames_rec) %>% 
+extract_parameter_set_dials(ames_rec) %>% 
   update(threshold = threshold(c(0.8, 1.0)))
 ```
 
-The _parameter sets_ created by `parameters()` are consumed by the tidymodels tuning functions (when needed). If the defaults for the tuning parameter objects require modification, a modified parameter set is passed to the appropriate tuning function. 
+The _parameter sets_ created by `extract_parameter_set_dials()` are consumed by the tidymodels tuning functions (when needed). If the defaults for the tuning parameter objects require modification, a modified parameter set is passed to the appropriate tuning function. 
 
 :::rmdnote
 Some tuning parameters depend on the dimensions of the data. For example, the number of nearest neighbors must be between one and the number of rows in the data.
@@ -579,7 +579,7 @@ rf_spec <-
   rand_forest(mtry = tune()) %>% 
   set_engine("ranger", regularization.factor = tune("regularization"))
 
-rf_param <- parameters(rf_spec)
+rf_param <- extract_parameter_set_dials(rf_spec)
 rf_param
 ```
  
@@ -605,7 +605,7 @@ updated_param <-
   workflow() %>% 
   add_model(rf_spec) %>% 
   add_recipe(pca_rec) %>% 
-  parameters() %>% 
+  extract_parameter_set_dials() %>% 
   finalize(ames_train)
 updated_param
 updated_param %>% extract_parameter_dials("mtry")
@@ -613,7 +613,7 @@ updated_param %>% extract_parameter_dials("mtry")
 
 When the recipe is prepared, the `finalize()` function learns to set the upper range of `mtry` to  `r updated_param %>% extract_parameter_dials("mtry") %>% range_get() %>% pluck("upper")` predictors. 
 
-Additionally, the results of `parameters()` will include engine-specific parameters (if any) . They are discovered in the same way as the main arguments and included in the parameter set. The `r pkg(dials)` package contains parameter functions for all potentially tunable engine-specific parameters: 
+Additionally, the results of `extract_parameter_set_dials()` will include engine-specific parameters (if any). They are discovered in the same way as the main arguments and included in the parameter set. The `r pkg(dials)` package contains parameter functions for all potentially tunable engine-specific parameters: 
 
 ```{r tuning-engine-param-set}
 rf_param
