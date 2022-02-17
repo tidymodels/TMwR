@@ -404,12 +404,13 @@ svm_bo_sshh <-
     control = ctrl
   )
 
+# Make sure that the results have not changed.
+verify_consistent_bo(collect_metrics(svm_bo_sshh$result))
+
 svm_bo <- svm_bo_sshh$result
-#verify_consistent_bo(svm_bo)
 svm_bo_output <- svm_bo_sshh$messages
 
 gp_candidates <- collect_gp_results(svm_bo)
-save(gp_candidates, file = "RData/gp_candidates.RData")
 ```
 
 ### The `tune_bayes()` function {#tune-bayes}
@@ -727,7 +728,6 @@ surf_impr <-
   )
 ```
 
-
 Figure \@ref(fig:bo-surfaces) shows the surfaces of the mean, variance, and expected improvement surfaces estimated by the GP after 11 iterations. The right-hand panel shows a ridge of best estimated improvement along the right side of the candidate space.
 
 ```{r bo-surfaces}
@@ -953,18 +953,17 @@ svm_sa_sshh <-
     control = ctrl_sa
   )
 
+# Make sure that the results have not changed.
+verify_consistent_sa(collect_metrics(svm_sa_sshh$result))
+
 svm_sa <- svm_sa_sshh$result
-# verify_consistent_sa(svm_sa)
 svm_sa_output <- svm_sa_sshh$messages
 
-# We set tune_sim_anneal() to save a file to the temp directory. If the results
-# are cached, this file won't be there:
-try(
-  file.copy(
-    file.path(tempdir(), "sa_history.RData"),
-    "RData/sa_history.RData"
-  ),
-  silent = TRUE
+# We set tune_sim_anneal() to save a file to the temp directory.
+file.copy(
+  file.path(tempdir(), "sa_history.RData"),
+  "RData/sa_history.RData",
+  overwrite = TRUE
 )
 ```
 ```{r iterative-cells-sa, eval = FALSE}
@@ -986,11 +985,7 @@ svm_sa <-
 
 
 ```{r iterative-sa-history, include = FALSE}
-if (file.exists(file.path(tempdir(), "sa_history.RData"))) {
-  load(file.path(tempdir(), "sa_history.RData"))
-} else {
-  load("RData/sa_history.RData")
-}
+load("RData/sa_history.RData")
 
 ## -----------------------------------------------------------------------------
 
