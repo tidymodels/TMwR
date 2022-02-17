@@ -90,9 +90,13 @@ Imports:
     xgboost,
     yardstick
 Remotes:
+    tidymodels/baguette,
     tidymodels/dials,
+    tidymodels/discrim,
     tidymodels/learntidymodels,
+    tidymodels/parsnip,
     r-lib/pillar,
+    tidymodels/poissonreg,
     tidymodels/textrecipes,
     tidymodels/tune
 biocViews: mixOmics
