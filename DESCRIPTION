@@ -88,11 +88,11 @@ Imports:
 Remotes:
     r-lib/pillar,
     tidymodels/baguette,
-    tidymodels/dials,
     tidymodels/discrim,
     tidymodels/learntidymodels,
     tidymodels/parsnip,
     tidymodels/poissonreg,
+    tidymodels/rules,
     tidymodels/textrecipes,
     tidymodels/tune
 biocViews: mixOmics
