@@ -392,7 +392,7 @@ ctrl$save_gp_scoring <- TRUE
 
 tune_bayes_sssshhh <- purrr::quietly(tune_bayes)
 
-set.seed(1234)
+set.seed(1403)
 svm_bo_sshh <-
   svm_wflow %>%
   tune_bayes_sssshhh(
@@ -774,7 +774,7 @@ ctrl_sa <- control_sim_anneal(no_improve = 10L, verbose = TRUE, save_history = T
 
 tune_sim_anneal_sssshhh <- purrr::quietly(tune_sim_anneal)
 
-set.seed(1234)
+set.seed(1404)
 svm_sa_sshh <-
   svm_wflow %>%
   tune_sim_anneal_sssshhh(
@@ -802,7 +802,7 @@ file.copy(
 ```{r iterative-cells-sa, eval = FALSE}
 ctrl_sa <- control_sim_anneal(verbose = TRUE, no_improve = 10L)
 
-set.seed(1234)
+set.seed(1404)
 svm_sa <-
   svm_wflow %>%
   tune_sim_anneal(
