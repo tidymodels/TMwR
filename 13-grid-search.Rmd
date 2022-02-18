@@ -786,7 +786,7 @@ iter_three %>%
   scale_colour_manual(values = race_cols)
 ```
 
-Any parameter set whose confidence interval includes zero would lack evidence that its performance is not statistically different from the best results. We retain `r sum(iter_three$upper < 0)` settings; these are resampled more. The remaining `r sum(iter_three$upper >= 0)` submodels are no longer considered. 
+Any parameter set whose confidence interval includes zero would lack evidence that its performance is not statistically different from the best results. We retain `r sum(iter_three$upper >= 0)` settings; these are resampled more. The remaining `r sum(iter_three$upper < 0)` submodels are no longer considered. 
 
 ```{r grid-mlp-racing-anim, include = FALSE, dev = 'png'}
 race_ci_plots <- function(x, iters = max(x$iter)) {
