@@ -505,7 +505,7 @@ bean_res <-
   ) %>% 
   workflow_map(
     verbose = TRUE,
-    seed = 1703,
+    seed = 1603,
     resamples = bean_val,
     grid = 10,
     metrics = metric_set(roc_auc),
