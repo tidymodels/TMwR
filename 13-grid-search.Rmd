@@ -118,7 +118,7 @@ library(ggforce)
 set.seed(1302)
 mlp_param %>% 
   # The 'original = FALSE' option keeps penalty in log10 units
-  grid_random(size = 15, original = FALSE) %>% 
+  grid_random(size = 20, original = FALSE) %>% 
   ggplot(aes(x = .panel_x, y = .panel_y)) + 
   geom_point() +
   geom_blank() +
@@ -141,7 +141,7 @@ The `r pkg(dials)` package contains functions for Latin hypercube and maximum en
 ```{r grid-sfd-compare, eval = FALSE}
 set.seed(1303)
 mlp_param %>% 
-  grid_latin_hypercube(size = 15, original = FALSE) %>% 
+  grid_latin_hypercube(size = 20, original = FALSE) %>% 
   ggplot(aes(x = .panel_x, y = .panel_y)) + 
   geom_point() +
   geom_blank() +
