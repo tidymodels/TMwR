@@ -557,7 +557,7 @@ The functions that are used to interrogate the results are the same as those use
 show_best(svm_bo)
 ```
 
-The `autoplot()` function has several options for iterative search methods. Figure \@reg(fig:progress-plot) shows how the outcome changed over the search by using `autoplot(svm_bo, type = "performance")`.
+The `autoplot()` function has several options for iterative search methods. Figure \@ref(fig:progress-plot) shows how the outcome changed over the search by using `autoplot(svm_bo, type = "performance")`.
 
 ```{r progress-plot}
 #| fig.height = 4,
@@ -736,7 +736,7 @@ ggplot(neighbors_values, aes(x = penalty, y = mixture)) +
   geom_point(data = best_values) + 
   geom_path(data = path) + 
   geom_point(data = path) + 
-  facet_wrap(~ Iteration, labeller = label_both) + 
+  facet_wrap(vars(Iteration), labeller = label_both) + 
   labs(
     x = paste(penalty()$label, "(penalty)"),
     y = paste(mixture()$label, "(mixture)")
