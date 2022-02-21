@@ -404,7 +404,11 @@ svm_bo_sshh <-
     control = ctrl
   )
 
-# Make sure that the results have not changed.
+
+# Make sure that the results have not changed since 2022-02-20. Save the results with: 
+#   svm_bo_metrics <- collect_metrics(svm_bo_sshh$result)
+#   save(svm_bo_metrics, file = "RData/svm_bo_metrics.RData")
+# Check with:
 verify_consistent_bo(collect_metrics(svm_bo_sshh$result))
 
 svm_bo <- svm_bo_sshh$result
@@ -786,7 +790,10 @@ svm_sa_sshh <-
     control = ctrl_sa
   )
 
-# Make sure that the results have not changed.
+# Make sure that the results have not changed since 2022-02-20. Save the results with: 
+  # svm_sa_metrics <- collect_metrics(svm_sa_sshh$result)
+  # save(svm_sa_metrics, file = "RData/svm_sa_metrics.RData")
+# Check with:
 verify_consistent_sa(collect_metrics(svm_sa_sshh$result))
 
 svm_sa <- svm_sa_sshh$result
@@ -888,8 +895,10 @@ if (length(so_stop_index) > 0) {
 The last ten iterations: 
 
 ```{r iterative-cells-sa-print-end, echo = FALSE}
-so_start_index <- grep("^40", svm_sa_output)
-so_stop_index <- grep("^50", svm_sa_output)
+last_sa_iter <- max(result_history$.iter)
+
+so_start_index <- grep(paste0("^", last_sa_iter - 10), svm_sa_output)
+so_stop_index  <- grep(paste0("^", last_sa_iter), svm_sa_output)
 if (length(so_stop_index) > 0) {
   cat(svm_sa_output[so_start_index:so_stop_index], sep = "\n")
 }

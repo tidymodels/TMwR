@@ -35,7 +35,7 @@ Imports:
     earth,
     embed (>= 0.1.4.9000),
     fastICA,
-    finetune (>= 0.0.1),
+    finetune (>= 0.1.1),
     forcats,
     ggforce,
     ggplot2,
@@ -90,7 +90,6 @@ Imports:
     xgboost,
     yardstick
 Remotes:
-    tidymodels/dials,
     tidymodels/learntidymodels,
     r-lib/pillar,
     tidymodels/textrecipes

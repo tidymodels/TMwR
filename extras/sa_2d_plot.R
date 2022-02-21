@@ -1,4 +1,20 @@
 sa_2d_plot <- function(sa_obj, history, large_sa, path = tempdir()) {
+  range_data <- 
+    sa_obj %>% 
+    collect_metrics() %>% 
+    select(cost, rbf_sigma) %>% 
+    bind_rows(
+      large_sa %>% 
+        collect_metrics() %>% 
+        select(cost, rbf_sigma)
+    ) %>% 
+    mutate(
+      cost = log2(cost),
+      rbf_sigma = log10(rbf_sigma)
+    )
+  x_rng <- 10^extendrange(range_data$rbf_sigma)
+  y_rng <- 2^extendrange(range_data$cost)
+  
   params <-
     sa_obj %>%
     collect_metrics() %>%
@@ -19,8 +35,8 @@ sa_2d_plot <- function(sa_obj, history, large_sa, path = tempdir()) {
     svm_roc %>%
     ggplot(aes(x = rbf_sigma, y = cost)) +
     geom_raster(aes(fill = mean), show.legend = FALSE) +
-    scale_x_log10() +
-    scale_y_continuous(trans = "log2") +
+    scale_x_log10(labels = fmt_dcimals(2), limits = x_rng) + 
+    scale_y_continuous(trans = "log2", labels = fmt_dcimals(2), limits = y_rng) +
     scale_fill_distiller(palette = "Blues") +
     theme_minimal() +
     theme(
