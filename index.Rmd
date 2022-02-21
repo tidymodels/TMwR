@@ -31,7 +31,7 @@ Investigating and analyzing data are an important part of the model process, and
 
 We do not assume that readers have extensive experience in model building and statistics. Some statistical knowledge is required, such as random sampling, variance, correlation, basic linear regression, and other topics that are usually found in a basic undergraduate statistics or data analysis course. 
 
-## Acknowledgments
+## Acknowledgments {-}
 
 ```{r, eval = FALSE, echo = FALSE}
 library(tidyverse)
@@ -67,7 +67,7 @@ write_csv(contribs_all, "contributors.csv")
 
 We are so thankful for the contributions, help, and perspectives of people who have supported us in this project. There are several we would like to thank in particular.
 
-We would like to thank our RStudio colleagues on the **tidymodels** team (Davis Vaughan, Hannah Frick, and Emil Hvitfeldt) as well as the rest of our coworkers on the RStudio open-source team. Thank you to Desirée De Leon for the site design of the online work. We would also like to thank our technical reviewers, Chelsea Parlett-Pelleriti and Dan Simpson, for their detailed, insightful feedback that substantively improved this book, as well as our editor Nicole Tache for her perspective and guidance during the process of writing and publishing.
+We would like to thank our RStudio colleagues on the `r pkg(tidymodels)` team (Davis Vaughan, Hannah Frick, and Emil Hvitfeldt) as well as the rest of our coworkers on the RStudio open-source team. Thank you to Desirée De Leon for the site design of the online work. We would also like to thank our technical reviewers, Chelsea Parlett-Pelleriti and Dan Simpson, for their detailed, insightful feedback that substantively improved this book, as well as our editor Nicole Tache for her perspective and guidance during the process of writing and publishing.
 
 
 ```{r, results = "asis", echo = FALSE, message = FALSE}
@@ -84,18 +84,26 @@ cat(paste0(contributors$desc, collapse = ", "))
 cat(".\n")
 ```
 
-## Using code examples
+## Using code examples {-}
 
-This book was written in [RStudio](http://www.rstudio.com/ide/) using [bookdown](http://bookdown.org/). The [website](https://tmwr.org) is hosted via [Netlify](http://netlify.com/), and automatically built after every push by [GitHub Actions](https://help.github.com/actions). The complete source is available on [GitHub](https://github.com/tidymodels/TMwR). We generated all plots in this book using [ggplot2](https://ggplot2.tidyverse.org/) and its black and white theme (`theme_bw()`). This version of the book was built with `r R.version.string`, [pandoc](https://pandoc.org/) version `r rmarkdown::pandoc_version()`, and the following packages:
-
-```{r pkg-list, echo = FALSE, results = "asis"}
+```{r pkg-list, echo = FALSE}
 deps <- desc::desc_get_deps()
 pkgs <- sort(deps$package[deps$type == "Imports"])
 pkgs <- sessioninfo::package_info(pkgs, dependencies = FALSE)
 df <- tibble::tibble(
   package = pkgs$package,
   version = pkgs$ondiskversion,
-  source = gsub("@", "\\\\@", pkgs$source)
-)
-knitr::kable(df, format = "markdown")
+  source = pkgs$source
+) %>% 
+  mutate(
+    source = stringr::str_split(source, " "),
+    source = purrr::map_chr(source, ~ .x[1]),
+    info = paste0(package, " (", version, ", ", source, ")")
+    )
+pkg_info <- knitr::combine_words(df$info)
 ```
+
+This book was written in [RStudio](http://www.rstudio.com/ide/) using [bookdown](http://bookdown.org/). The [website](https://tmwr.org) is hosted via [Netlify](http://netlify.com/), and automatically built after every push by [GitHub Actions](https://help.github.com/actions). The complete source is available on [GitHub](https://github.com/tidymodels/TMwR). We generated all plots in this book using [ggplot2](https://ggplot2.tidyverse.org/) and its black and white theme (`theme_bw()`). 
+
+This version of the book was built with `r R.version.string`, [pandoc](https://pandoc.org/) version `r rmarkdown::pandoc_version()`, and the following packages: `r pkg_info`.
+
