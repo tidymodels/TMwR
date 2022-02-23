@@ -277,8 +277,10 @@ This chapter focused on how models describe relationships in data, and different
 
 For all kinds of modeling, software for building models must support good scientific methodology and ease of use for practitioners from diverse backgrounds. The software we develop approaches this with the ideas and syntax of the tidyverse, which we introduce (or review) in Chapter \@ref(tidyverse). Chapter \@ref(base-r) is a quick tour of conventional base R modeling functions and summarize the unmet needs in that area. 
 
-After that, this book is separated into parts, starting with the basics of modeling with tidy data principles. The first part introduces an example data set on house prices and demonstrates how to use the fundamental tidymodels packages: `r pkg(recipes)`, `r pkg(parsnip)`, `r pkg(workflows)`, `r pkg(yardstick)`, and others. 
+After that, this book is separated into parts, starting with the basics of modeling with tidy data principles. Chapters \@ref(ames) through \@ref(performance) introduces an example data set on house prices and demonstrates how to use the fundamental tidymodels packages: `r pkg(recipes)`, `r pkg(parsnip)`, `r pkg(workflows)`, `r pkg(yardstick)`, and others. 
 
-The second part of the book moves forward with more details on the process of creating a good model. This includes creating good estimates of performance as well as tuning model parameters. 
+The next part of the book moves forward with more details on the process of creating an effective model. Chapters \@ref(resampling) through \@ref(workflow-sets) focus on creating good estimates of performance as well as tuning model hyperparameters. 
+
+Finally, the last section of this book, Chapters \@ref(dimensionality) through \@ref(inferential), covers other important topics for model building. We discuss more advanced feature engineering approaches like dimensionality reduction and encoding high cardinality predictors, as well as how to answer questions about why a model makes certain predictions and when to trust your model predictions.
 
 
