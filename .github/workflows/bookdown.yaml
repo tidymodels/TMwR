@@ -25,7 +25,7 @@ jobs:
       - name: Install system dependencies
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y ffmpeg-dev libavfilter-dev
+          sudo apt-get install -y ffmpeg libavfilter-dev
 
       - uses: r-lib/actions/setup-r@v2
 
