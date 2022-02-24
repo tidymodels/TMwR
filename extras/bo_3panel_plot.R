@@ -50,6 +50,7 @@ fmt_dcimals <- function(digits = 2){
 }
 
 mean_plot <- function(grid, object, iter) {
+
   grid <- dplyr::filter(grid, .iter == iter)
   res <- collect_metrics(object)
   initial <- 
@@ -71,13 +72,18 @@ mean_plot <- function(grid, object, iter) {
     geom_point(data =  grid %>% arrange(desc(objective)) %>% slice(1), 
                size = 3, col = "green") + 
     scale_fill_distiller(palette = "Blues") +
-    theme(legend.position = "none") +
+    theme(
+      legend.position = "none",
+      axis.text.y = element_text(size = 4),
+      axis.text.x = element_text(size = 4)
+    ) +
     labs(title = "predicted ROC AUC mean") + 
     coord_fixed(ratio = 1/2.5)
 }
 
 
 sd_plot <- function(grid, object, iter) {
+
   grid <- dplyr::filter(grid, .iter == iter)
   res <- collect_metrics(object)
   initial <- 
@@ -98,12 +104,17 @@ sd_plot <- function(grid, object, iter) {
     geom_point(data =  grid %>% arrange(desc(objective)) %>% slice(1), 
                size = 3, col = "green") + 
     scale_fill_distiller(palette = "Reds") +
-    theme(legend.position = "none") +
+    theme(
+      legend.position = "none",
+      axis.text.y = element_text(size = 4),
+      axis.text.x = element_text(size = 4)
+    ) +
     labs(title = "predicted ROC AUC std dev") + 
     coord_fixed(ratio = 1/2.5)
 }
 
 improv_plot <- function(grid, object, iter) {
+
   grid <- dplyr::filter(grid, .iter == iter)
   res <- collect_metrics(object)
   initial <- 
@@ -124,8 +135,12 @@ improv_plot <- function(grid, object, iter) {
     geom_point(data =  grid %>% arrange(desc(objective)) %>% slice(1), 
                size = 3, col = "green") + 
     scale_fill_gradientn(colours = rev(scales::brewer_pal(palette = "BuPu")(4))) +
-    theme(legend.position = "none") +
-    labs(title = "predicted expected improvement") + 
+    theme(
+      legend.position = "none",
+      axis.text.y = element_text(size = 8),
+      axis.text.x = element_text(size = 8)
+    ) +
+    labs(title = "predicted expected improvement") +
     coord_fixed(ratio = 1/2.5)
 }
 

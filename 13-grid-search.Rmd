@@ -103,7 +103,7 @@ One advantage to using a regular grid is that the relationships and patterns bet
 There are several options for creating non-regular grids. The first is to use random sampling across the range of parameters. The `grid_random()` function generates independent uniform random numbers across the parameter ranges. If the parameter object has an associated transformation (such as we have for `penalty`), the random numbers are generated on the transformed scale.  For example: 
 
 ```{r grid-rand}
-set.seed(10)
+set.seed(1301)
 mlp_param %>% 
   grid_random(size = 1000) %>% # 'size' is the number of combinations
   summary()
@@ -115,10 +115,10 @@ The issue with random grids is that, with small-to-medium grids, random values c
 
 ```{r grid-random-matrix, eval = FALSE}
 library(ggforce)
-set.seed(200)
+set.seed(1302)
 mlp_param %>% 
   # The 'original = FALSE' option keeps penalty in log10 units
-  grid_random(size = 15, original = FALSE) %>% 
+  grid_random(size = 20, original = FALSE) %>% 
   ggplot(aes(x = .panel_x, y = .panel_y)) + 
   geom_point() +
   geom_blank() +
@@ -139,9 +139,9 @@ A much better approach is to use a set of experimental designs called _space-fil
 The `r pkg(dials)` package contains functions for Latin hypercube and maximum entropy designs. As with `grid_random()`, the primary inputs are the number of parameter combinations and a parameter object. Let's compare a random design with a Latin hypercube design for 15 candidate parameter values in Figure \@ref(fig:space-filling-design). 
 
 ```{r grid-sfd-compare, eval = FALSE}
-set.seed(200)
+set.seed(1303)
 mlp_param %>% 
-  grid_latin_hypercube(size = 15, original = FALSE) %>% 
+  grid_latin_hypercube(size = 20, original = FALSE) %>% 
   ggplot(aes(x = .panel_x, y = .panel_y)) + 
   geom_point() +
   geom_blank() +
@@ -182,7 +182,7 @@ cells <- cells %>% select(-case)
 Given the dimensions of the data, we can compute performance metrics using 10-fold cross-validation. 
 
 ```{r grid-cells-folds}
-set.seed(33)
+set.seed(1304)
 cell_folds <- vfold_cv(cells)
 ```
 
@@ -237,7 +237,7 @@ To start, let's evaluate a regular grid with three levels across the resamples:
 
 ```{r grid-cells-regular}
 roc_res <- metric_set(roc_auc)
-set.seed(99)
+set.seed(1305)
 mlp_reg_tune <-
   mlp_wflow %>%
   tune_grid(
@@ -274,7 +274,7 @@ Based on these results, it would make sense to conduct another run of grid searc
 To use a space-filling design, either the `grid` argument can be given an integer or one of the `grid_*()` functions can produce a data frame. To evaluate the same range using a maximum entropy design with 20 candidate values: 
 
 ```{r grid-cells-sdf}
-set.seed(99)
+set.seed(1306)
 mlp_sfd_tune <-
   mlp_wflow %>%
   tune_grid(
@@ -444,7 +444,7 @@ c5_spec <-
   set_engine("C5.0") %>% 
   set_mode("classification")
 
-set.seed(2)
+set.seed(1307)
 c5_spec %>%
   tune_grid(
     class ~ .,
@@ -711,7 +711,7 @@ One issue with grid search is that all models need to be fit across all resample
 In machine learning, the set of techniques called _racing methods_ provide a similar function [@maron1994hoeffding]. Here, the tuning process evaluates all models on an initial subset of resamples. Based on their current performance metrics, some parameter sets are not considered in subsequent resamples. 
 
 ```{r grid-cells-race, include = FALSE}
-set.seed(99)
+set.seed(1308)
 mlp_sfd_race <-
   mlp_wflow %>%
   tune_race_anova(
@@ -786,7 +786,7 @@ iter_three %>%
   scale_colour_manual(values = race_cols)
 ```
 
-Any parameter set whose confidence interval includes zero would lack evidence that its performance is not statistically different from the best results. We retain `r sum(iter_three$upper < 0)` settings; these are resampled more. The remaining `r sum(iter_three$upper >= 0)` submodels are no longer considered. 
+Any parameter set whose confidence interval includes zero would lack evidence that its performance is not statistically different from the best results. We retain `r sum(iter_three$upper >= 0)` settings; these are resampled more. The remaining `r sum(iter_three$upper < 0)` submodels are no longer considered. 
 
 ```{r grid-mlp-racing-anim, include = FALSE, dev = 'png'}
 race_ci_plots <- function(x, iters = max(x$iter)) {
@@ -841,13 +841,13 @@ The process continues for each resample; after the next set of performance metri
 Racing methods can be more efficient than basic grid search as long as the interim analysis is fast and some parameter settings have poor performance. It also is most helpful when the model does _not_ have the ability to exploit submodel predictions. 
 :::
 
-The `r pkg(finetune)` package contains functions for racing. The `tune_race_anova()` function conducts an Analysis of Variance (ANOVA) model to test for statistical significance of the different model configurations. The syntax to reproduce the filtering shown above is
+The `r pkg(finetune)` package contains functions for racing. The `tune_race_anova()` function conducts an Analysis of Variance (ANOVA) model to test for statistical significance of the different model configurations. The syntax to reproduce the filtering shown above is:
 
 
 ```{r grid-cells-race-code, eval = FALSE}
 library(finetune)
 
-set.seed(99)
+set.seed(1308)
 mlp_sfd_race <-
   mlp_wflow %>%
   tune_race_anova(
@@ -883,7 +883,7 @@ library(tidymodels)
 data(cells)
 cells <- cells %>% select(-case)
 
-set.seed(33)
+set.seed(1304)
 cell_folds <- vfold_cv(cells)
 
 roc_res <- metric_set(roc_auc)

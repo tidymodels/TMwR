@@ -146,7 +146,7 @@ The top panel of Figure \@ref(fig:stacking-autoplot) shows the average number of
 The default range may not have served us well here. To evaluate the  meta-learning model with larger penalties, let's pass an additional option:
 
 ```{r ensembles-second-blend}
-set.seed(2001)
+set.seed(2002)
 ens <- blend_predictions(concrete_stack, penalty = 10^seq(-2, -0.5, length = 20))
 ```
 

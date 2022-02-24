@@ -20,7 +20,7 @@ load(file.path("RData", "svm_large.RData"))
 
 data(cells)
 cells <- cells %>% select(-case)
-set.seed(33)
+set.seed(1304)
 cell_folds <- vfold_cv(cells)
 roc_res <- metric_set(roc_auc)
 ```
@@ -98,7 +98,7 @@ knitr::include_graphics("premade/roc_surface.png")
 The search procedures described below require at least some resampled performance statistics before proceeding. For this purpose, the code below creates a small regular grid that resides in the flat portion of the parameter space. The `tune_grid()` function resamples these values:  
 
 ```{r iterative-svm-initial, message = FALSE}
-set.seed(234)
+set.seed(1401)
 start_grid <- 
   svm_param %>% 
   update(
@@ -107,7 +107,7 @@ start_grid <-
   ) %>% 
   grid_regular(levels = 2)
 
-set.seed(2)
+set.seed(1402)
 svm_initial <- 
   svm_wflow %>% 
   tune_grid(resamples = cell_folds, grid = start_grid, metrics = roc_res)
@@ -392,7 +392,7 @@ ctrl$save_gp_scoring <- TRUE
 
 tune_bayes_sssshhh <- purrr::quietly(tune_bayes)
 
-set.seed(1234)
+set.seed(1403)
 svm_bo_sshh <-
   svm_wflow %>%
   tune_bayes_sssshhh(
@@ -404,7 +404,11 @@ svm_bo_sshh <-
     control = ctrl
   )
 
-# Make sure that the results have not changed.
+
+# Make sure that the results have not changed since 2022-02-20. Save the results with: 
+#   svm_bo_metrics <- collect_metrics(svm_bo_sshh$result)
+#   save(svm_bo_metrics, file = "RData/svm_bo_metrics.RData")
+# Check with:
 verify_consistent_bo(collect_metrics(svm_bo_sshh$result))
 
 svm_bo <- svm_bo_sshh$result
@@ -438,7 +442,7 @@ Let's use the first SVM results from Section \@ref(svm) as the initial substrate
 ```{r iterative-cells-bo, eval = FALSE}
 ctrl <- control_bayes(verbose = TRUE)
 
-set.seed(1234)
+set.seed(1403)
 svm_bo <-
   svm_wflow %>%
   tune_bayes(
@@ -557,7 +561,7 @@ The functions that are used to interrogate the results are the same as those use
 show_best(svm_bo)
 ```
 
-The `autoplot()` function has several options for iterative search methods. Figure \@reg(fig:progress-plot) shows how the outcome changed over the search by using `autoplot(svm_bo, type = "performance")`.
+The `autoplot()` function has several options for iterative search methods. Figure \@ref(fig:progress-plot) shows how the outcome changed over the search by using `autoplot(svm_bo, type = "performance")`.
 
 ```{r progress-plot}
 #| fig.height = 4,
@@ -736,7 +740,7 @@ ggplot(neighbors_values, aes(x = penalty, y = mixture)) +
   geom_point(data = best_values) + 
   geom_path(data = path) + 
   geom_point(data = path) + 
-  facet_wrap(~ Iteration, labeller = label_both) + 
+  facet_wrap(vars(Iteration), labeller = label_both) + 
   labs(
     x = paste(penalty()$label, "(penalty)"),
     y = paste(mixture()$label, "(mixture)")
@@ -774,7 +778,7 @@ ctrl_sa <- control_sim_anneal(no_improve = 10L, verbose = TRUE, save_history = T
 
 tune_sim_anneal_sssshhh <- purrr::quietly(tune_sim_anneal)
 
-set.seed(1234)
+set.seed(1404)
 svm_sa_sshh <-
   svm_wflow %>%
   tune_sim_anneal_sssshhh(
@@ -786,7 +790,10 @@ svm_sa_sshh <-
     control = ctrl_sa
   )
 
-# Make sure that the results have not changed.
+# Make sure that the results have not changed since 2022-02-20. Save the results with: 
+  # svm_sa_metrics <- collect_metrics(svm_sa_sshh$result)
+  # save(svm_sa_metrics, file = "RData/svm_sa_metrics.RData")
+# Check with:
 verify_consistent_sa(collect_metrics(svm_sa_sshh$result))
 
 svm_sa <- svm_sa_sshh$result
@@ -802,7 +809,7 @@ file.copy(
 ```{r iterative-cells-sa, eval = FALSE}
 ctrl_sa <- control_sim_anneal(verbose = TRUE, no_improve = 10L)
 
-set.seed(1234)
+set.seed(1404)
 svm_sa <-
   svm_wflow %>%
   tune_sim_anneal(
@@ -888,8 +895,10 @@ if (length(so_stop_index) > 0) {
 The last ten iterations: 
 
 ```{r iterative-cells-sa-print-end, echo = FALSE}
-so_start_index <- grep("^40", svm_sa_output)
-so_stop_index <- grep("^50", svm_sa_output)
+last_sa_iter <- max(result_history$.iter)
+
+so_start_index <- grep(paste0("^", last_sa_iter - 10), svm_sa_output)
+so_stop_index  <- grep(paste0("^", last_sa_iter), svm_sa_output)
 if (length(so_stop_index) > 0) {
   cat(svm_sa_output[so_start_index:so_stop_index], sep = "\n")
 }
