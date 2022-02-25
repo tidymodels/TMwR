@@ -197,7 +197,8 @@ For the hard class predictions, there are a variety of `r pkg(yardstick)` functi
 # A confusion matrix: 
 conf_mat(two_class_example, truth = truth, estimate = predicted)
 
-accuracy(two_class_example, truth = truth, estimate = predicted)
+# Accuracy:
+accuracy(two_class_example, truth, predicted)
 
 # Matthews correlation coefficient:
 mcc(two_class_example, truth, predicted)
@@ -205,9 +206,9 @@ mcc(two_class_example, truth, predicted)
 # F1 metric:
 f_meas(two_class_example, truth, predicted)
 
-# Combining the classification metrics together
+# Combining these three classification metrics together
 classification_metrics <- metric_set(accuracy, mcc, f_meas)
-classification_metrics(two_class_example, truth = truth, estimate = predicted)
+classification_metrics(two_class_example, truth, predicted)
 ```
 
 For binary classification data sets, these functions have a standard argument called `event_level`. The _default_ is that the **first** level of the outcome factor is the event of interest. 
