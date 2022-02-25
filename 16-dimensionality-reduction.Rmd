@@ -447,27 +447,27 @@ library(discrim)
 
 mlp_spec <-
   mlp(hidden_units = tune(), penalty = tune(), epochs = tune()) %>%
-  set_engine('nnet') %>%
-  set_mode('classification')
+  set_engine("nnet") %>%
+  set_mode("classification")
 
 bagging_pec <-
   bag_tree() %>%
-  set_engine('rpart') %>%
-  set_mode('classification')
+  set_engine("rpart") %>%
+  set_mode("classification")
 
 fda_spec <-
   discrim_flexible(
     prod_degree = tune()
   ) %>%
-  set_engine('earth')
+  set_engine("earth")
 
 rda_spec <-
   discrim_regularized(frac_common_cov = tune(), frac_identity = tune()) %>%
-  set_engine('klaR')
+  set_engine("klaR")
 
 bayes_spec <-
   naive_Bayes() %>%
-  set_engine('klaR')
+  set_engine("klaR")
 ```
 
 ```{r dimensionality-recipes}
@@ -499,7 +499,7 @@ ctrl <- control_grid(parallel_over = "everything")
 bean_res <- 
   workflow_set(
     preproc = list(basic = class ~., pls = pls_rec, umap = umap_rec), 
-    models = list(bayes = bayes_spec, fda = fda_spec,
+    models = list(bayes = bayes_spec, 
                   rda = rda_spec, bag = bagging_pec,
                   mlp = mlp_spec)
   ) %>% 
