@@ -56,11 +56,10 @@ bind_rows(
   augment(lm_fit, ames_train) %>% mutate(model = "lm + interactions"),
   augment(rf_fit, ames_train) %>% mutate(model = "random forest")
 ) %>%
-  ggplot(aes(Sale_Price, .pred, color = model)) +
+  ggplot(aes(Sale_Price, .pred)) +
   geom_abline(color = "gray50", lty = 2) + 
   geom_point(alpha = 0.3, show.legend = FALSE) +
   facet_wrap(vars(model)) +
-  scale_color_brewer(palette = "Paired") +
   labs(x = "true price", y = "predicted price")
 ```
 
