@@ -123,7 +123,7 @@ mlp_param %>%
   geom_point() +
   geom_blank() +
   facet_matrix(vars(hidden_units, penalty, epochs), layer.diag = 2) + 
-  labs(title = "Random design with 15 candidates")
+  labs(title = "Random design with 20 candidates")
 ```
 
 ```{r random-grid, ref.label = "grid-random-matrix"}
@@ -131,7 +131,7 @@ mlp_param %>%
 #| fig.width = 6,
 #| echo = FALSE,
 #| fig.cap = "Three tuning parameters with 15 points generated at random.",
-#| fig.alt = "A scatter plot matrix for three tuning parameters with 15 points generated at random. There are significant gaps in the parameter space."
+#| fig.alt = "A scatter plot matrix for three tuning parameters with 20 points generated at random. There are significant gaps in the parameter space."
 ```
 
 A much better approach is to use a set of experimental designs called _space-filling designs_. While different design methods have slightly different goals, they generally find a configuration of points that cover the parameter space with the smallest chance of overlapping or redundant values. Examples of such designs are Latin hypercubes [@lhd], maximum entropy designs [@maxent], maximum projection designs [@maxproj], and others. See @santner2003design for an overview. 
@@ -146,14 +146,14 @@ mlp_param %>%
   geom_point() +
   geom_blank() +
   facet_matrix(vars(hidden_units, penalty, epochs), layer.diag = 2) + 
-  labs(title = "Latin Hypercube design with 15 candidates")
+  labs(title = "Latin Hypercube design with 20 candidates")
 ```
 
 ```{r space-filling-design, ref.label = "grid-sfd-compare"}
 #| fig.height = 6, 
 #| fig.width = 6,
 #| echo = FALSE,
-#| fig.cap = "Three tuning parameters with 15 points generated using a space-filling design.",
+#| fig.cap = "Three tuning parameters with 20 points generated using a space-filling design.",
 #| fig.alt = "A scatter plot matrix for three tuning parameters with 15 points generated using a space-filling design. There are fewer gaps in the parameter space when compared to the random grid."
 ```
 
