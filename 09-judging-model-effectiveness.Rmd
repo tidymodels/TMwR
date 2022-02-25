@@ -208,7 +208,7 @@ f_meas(two_class_example, truth, predicted)
 
 # Combining these three classification metrics together
 classification_metrics <- metric_set(accuracy, mcc, f_meas)
-classification_metrics(two_class_example, truth, predicted)
+classification_metrics(two_class_example, truth = truth, estimate = predicted)
 ```
 
 For binary classification data sets, these functions have a standard argument called `event_level`. The _default_ is that the **first** level of the outcome factor is the event of interest. 
