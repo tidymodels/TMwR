@@ -96,7 +96,7 @@ The `autoplot()` method, with output in Figure \@ref(fig:workflow-set-r-squared)
 library(ggrepel)
 autoplot(four_models, metric = "rsq") +
   # Added for black and white images: 
-  geom_text_repel(aes(label = model), nudge_x = 1/8, nudge_y = 1/100)
+  geom_text_repel(aes(label = wflow_id), nudge_x = 1/8, nudge_y = 1/100)
 ```
 
 ```{r workflow-set-r-squared, ref.label = "compare-workflow-set-rsq"}
