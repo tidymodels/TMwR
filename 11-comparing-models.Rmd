@@ -58,7 +58,7 @@ lm_models <- workflow_set(preproc, list(lm = lm_model), cross = FALSE)
 lm_models
 ```
 
-We'd like to resample each of these models in turn. To do so, a `r pkg(purrr)`-like function called `workflow_map()` is used. This function takes an initial argument of the function to apply to the workflows, followed by an option to that function. We also set a `verbose` argument that will print the progress as well as a `seed` argument that makes sure that each model uses the same random number stream as the others. 
+We'd like to resample each of these models in turn. To do so, a `r pkg(purrr)`-like function called `workflow_map()` is used. This function takes an initial argument of the function to apply to the workflows, followed by options to that function. We also set a `verbose` argument that will print the progress as well as a `seed` argument that makes sure that each model uses the same random number stream as the others. 
 
 ```{r compare-workflow-set-resample}
 lm_models <- 
