@@ -447,13 +447,13 @@ The same process could be used to compare the random forest model to one or both
 autoplot(rsq_anova, type = "ROPE", size = 0.02)
 ```
 
-```{r credible-intervals, ref.label = "compare-rope-plot"}
+```{r credible-rope-intervals, ref.label = "compare-rope-plot"}
 #| echo = FALSE,
-#| fig.cap = "Credible intervals derived from the model posterior distributions.",
-#| fig.alt = "Credible intervals derived from the model posterior distributions. Random forest shows the best results with no overlap with the other credible intervals. "
+#| fig.cap = "Probability of practical equivalence for an effect size of 2%.",
+#| fig.alt = "Probability of practical equivalence for an effect size of 2%. No other models have a non-zero change of matching the random forest results."
 ```
 
-Figure \@ref(fig:credible-intervals) shows us that none of the linear models come close to the random forest model when a 2% practical effect size is used. 
+Figure \@ref(fig:credible-rope-intervals) shows us that none of the linear models come close to the random forest model when a 2% practical effect size is used. 
 
 ### The effect of the amount of resampling {-}
 
