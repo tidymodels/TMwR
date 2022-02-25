@@ -93,7 +93,7 @@ four_models
 The `autoplot()` method, with output in Figure \@ref(fig:workflow-set-r-squared), shows confidence intervals for each model in order of best-to-worst. In this chapter, we'll focus on the coefficient of determination (a.k.a. R<sup>2</sup>): 
 
 ```{r compare-workflow-set-rsq, eval=FALSE}
-library(ggrepl)
+library(ggrepel)
 autoplot(four_models, metric = "rsq") +
   # Added for black and white images: 
   geom_text_repel(aes(label = model), nudge_x = 1/8, nudge_y = 1/100)
