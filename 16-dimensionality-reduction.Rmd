@@ -498,8 +498,8 @@ Once again, `r pkg(workflowsets)` take the preprocessors and models and crosses 
 ctrl <- control_grid(parallel_over = "everything")
 bean_res <- 
   workflow_set(
-    preproc = list(basic = class ~., pls = pls_rec, umap = umap_rec), 
-    models = list(bayes = bayes_spec, 
+    preproc = list(basic = class ~., pls = pls_rec), 
+    models = list(bayes = bayes_spec, fda = fda_spec,
                   rda = rda_spec, bag = bagging_pec,
                   mlp = mlp_spec)
   ) %>% 
