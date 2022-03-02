@@ -7,7 +7,8 @@ knitr::opts_chunk$set(
   comment = "#>",
   collapse = TRUE,
   fig.align = 'center',
-  tidy = FALSE
+  tidy = FALSE,
+  dev.args = list(system_fonts = list(sans = "Arial"))
 )
 
 
