@@ -8,13 +8,16 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   fig.align = 'center',
   tidy = FALSE,
-  dev.args = list(system_fonts = list(sans = "Arial"))
+  dev = "svglite",
+  dev.args = list(web_fonts = list(
+    'https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap'
+  ))
 )
 
 
 
 theme_transparent <- function(...) {
-
+  
   ret <- ggplot2::theme_bw(...)
   
   trans_rect <- ggplot2::element_rect(fill = "transparent", colour = NA)
@@ -55,14 +58,14 @@ is_new_version <- function(x, path) {
   # parsnip model fits have an elapsed time and this will change from run-to-run.
   # We'll remove that to check for a new version. Same for workflows. 
   if (inherits(prev, "model_fit")) {
-       x$elapsed <- NA
+    x$elapsed <- NA
     prev$elapsed <- NA
   }
   if (workflows:::is_workflow(prev)) {
-       x$fit$fit$elapsed <- NA
+    x$fit$fit$elapsed <- NA
     prev$fit$fit$elapsed <- NA
   }
-
+  
   res <- all.equal(x, prev)
   !isTRUE(res)
 }
