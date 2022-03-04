@@ -197,7 +197,7 @@ What are the effects of changing _V_? Larger values result in resampling estimat
 The primary input is the training set data frame as well as the number of folds (defaulting to 10): 
 
 ```{r resampling-ames-cv}
-set.seed(55)
+set.seed(1001)
 ames_folds <- vfold_cv(ames_train, v = 10)
 ames_folds
 ```
@@ -300,7 +300,7 @@ To create a validation set object that uses 3/4 of the data for model fitting:
 
 
 ```{r resampling-validation-split}
-set.seed(12)
+set.seed(1002)
 val_set <- validation_split(ames_train, prop = 3/4)
 val_set
 ```
@@ -412,7 +412,7 @@ For our example, let's save the predictions in order to visualize the model fit 
 ```{r resampling-cv-ames}
 keep_pred <- control_resamples(save_pred = TRUE, save_workflow = TRUE)
 
-set.seed(130)
+set.seed(1003)
 rf_res <- 
   rf_wflow %>% 
   fit_resamples(resamples = ames_folds, control = keep_pred)
@@ -656,7 +656,7 @@ library(tidymodels)
 data(ames)
 ames <- mutate(ames, Sale_Price = log10(Sale_Price))
 
-set.seed(123)
+set.seed(502)
 ames_split <- initial_split(ames, prop = 0.80, strata = Sale_Price)
 ames_train <- training(ames_split)
 ames_test  <-  testing(ames_split)
@@ -691,12 +691,12 @@ rf_wflow <-
       Latitude + Longitude) %>% 
   add_model(rf_model) 
 
-set.seed(55)
+set.seed(1001)
 ames_folds <- vfold_cv(ames_train, v = 10)
 
 keep_pred <- control_resamples(save_pred = TRUE, save_workflow = TRUE)
 
-set.seed(130)
+set.seed(1003)
 rf_res <- rf_wflow %>% fit_resamples(resamples = ames_folds, control = keep_pred)
 ```
 

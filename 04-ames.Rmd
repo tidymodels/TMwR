@@ -153,9 +153,9 @@ Also, there are ten isolated homes labeled as being in Crawford that you can see
 knitr::include_graphics("premade/crawford.png")
 ```
 
-Also notable is the "Iowa Department of Transportation (DOT) and Rail Road" neighborhood adjacent to the main road on the east side of Ames, shown in Figure \@ref(fig:ames-dot_rr). There are several clusters of homes within this neighborhood as well as some longitudinal outliers; the two homes furthest east are isolated from the other locations. 
+Also notable is the "Iowa Department of Transportation (DOT) and Rail Road" neighborhood adjacent to the main road on the east side of Ames, shown in Figure \@ref(fig:ames-dot-rr). There are several clusters of homes within this neighborhood as well as some longitudinal outliers; the two homes furthest east are isolated from the other locations. 
 
-```{r ames-dot_rr}
+```{r ames-dot-rr}
 #| out.width = "100%", 
 #| echo = FALSE, 
 #| warning = FALSE,

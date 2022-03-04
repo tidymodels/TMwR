@@ -56,11 +56,10 @@ bind_rows(
   augment(lm_fit, ames_train) %>% mutate(model = "lm + interactions"),
   augment(rf_fit, ames_train) %>% mutate(model = "random forest")
 ) %>%
-  ggplot(aes(Sale_Price, .pred, color = model)) +
+  ggplot(aes(Sale_Price, .pred)) +
   geom_abline(color = "gray50", lty = 2) + 
   geom_point(alpha = 0.3, show.legend = FALSE) +
   facet_wrap(vars(model)) +
-  scale_color_brewer(palette = "Paired") +
   labs(x = "true price", y = "predicted price")
 ```
 
@@ -110,7 +109,7 @@ Dealing with significant feature engineering transformations during model explai
 Local model explanations provide information about a prediction for a single observation. For example, let's consider an older duplex in the North Ames neighborhood (Section \@ref(exploring-important-features)).
 
 ```{r explain-duplex}
-duplex <- vip_train[121,]
+duplex <- vip_train[120,]
 duplex
 ```
 
@@ -139,8 +138,11 @@ Model break-down explanations like these depend on the _order_ of the features.
 If we choose the order for the random forest model explanation to be the same as the default for the linear model (chosen via a heuristic), we can change the relative importance of the features.
 
 ```{r explain-duplex-rf-breakdown-reorder}
-predict_parts(explainer = explainer_rf, new_observation = duplex,
-              order = lm_breakdown$variable_name)
+predict_parts(
+  explainer = explainer_rf, 
+  new_observation = duplex,
+  order = lm_breakdown$variable_name
+)
 ```
 
 
@@ -148,11 +150,14 @@ We can use the fact that these break-down explanations change based on order to 
 
 
 ```{r explain-duplex-rf-shap-calc}
+set.seed(1801)
 shap_duplex <- 
-  predict_parts(explainer = explainer_rf, 
-                new_observation = duplex, 
-                type = "shap",
-                B = 20)
+  predict_parts(
+    explainer = explainer_rf, 
+    new_observation = duplex, 
+    type = "shap",
+    B = 20
+  )
 ```
 
 We could use the default plot method from `r pkg(DALEX)` by calling `plot(shap_duplex)`, or we can access the underlying data and create a custom plot. The box plots in Figure \@ref(fig:duplex-rf-shap) display the distribution of contributions across all the orderings we tried, and the bars display the average attribution for each feature.
@@ -177,24 +182,27 @@ shap_duplex %>%
 ```{r duplex-rf-shap, ref.label = "explain-duplex-rf-shap"}
 #| echo = FALSE,
 #| fig.cap = "Shapley additive explanations from the random forest model for a duplex property.",
-#| fig.alt = "Shapley additive explanations from the random forest model for a duplex property. Gross living area and year built have the largest contributions."
+#| fig.alt = "Shapley additive explanations from the random forest model for a duplex property. Year built and gross living area have the largest contributions."
 ```
 
 What about a different observation in our data set? Let's look at a larger, newer one-family home in the Gilbert neighborhood.
 
 ```{r explain-gilbert}
-big_house <- vip_train[1177,]
+big_house <- vip_train[1269,]
 big_house
 ```
 
 We compute SHAP average attributions in the same way.
 
 ```{r explain-gilbert-shap-calc}
+set.seed(1802)
 shap_house <- 
-  predict_parts(explainer = explainer_rf, 
-                new_observation = big_house, 
-                type = "shap",
-                B = 20)
+  predict_parts(
+    explainer = explainer_rf, 
+    new_observation = big_house, 
+    type = "shap",
+    B = 20
+  )
 ```
 
 The results are shown in Figure \@ref(fig:gilbert-shap).
@@ -235,7 +243,9 @@ If shuffling a column causes a large degradation in model performance, it is imp
 Using `r pkg(DALEX)`, we compute this kind of variable importance via the `model_parts()` function.
 
 ```{r explain-global-calcs}
-vip_lm <- model_parts(explainer_lm, loss_function = loss_root_mean_square) 
+set.seed(1803)
+vip_lm <- model_parts(explainer_lm, loss_function = loss_root_mean_square)
+set.seed(1804)
 vip_rf <- model_parts(explainer_rf, loss_function = loss_root_mean_square)
 ```
 
@@ -305,6 +315,7 @@ Partial dependence profiles show how the expected value of a model prediction, l
 One way to build such a profile is by aggregating or averaging profiles for individual observations. A profile showing how an individual observation's prediction changes as a function of a given feature is called an ICE (individual conditional expectation) profile or a CP (*ceteris paribus*) profile. We can compute such individual profiles (for 500 of the observations in our training set) and then aggregate them using the `r pkg(DALEX)` function `model_profile()`.
 
 ```{r explain-year-built-pdp-calc}
+set.seed(1805)
 pdp_age <- model_profile(explainer_rf, N = 500, variables = "Year_Built")
 ```
 
@@ -351,6 +362,7 @@ ggplot_pdp(pdp_age, Year_Built)  +
 Partial dependence profiles can be computed for any other feature in the model, and also for groups in the data, such as `Bldg_Type`. Let's use 1,000 observations for these profiles.
 
 ```{r explain-build-type-pdp, eval = FALSE}
+set.seed(1806)
 pdp_liv <- model_profile(explainer_rf, N = 1000, 
                          variables = "Gr_Liv_Area", 
                          groups = "Bldg_Type")
@@ -403,7 +415,7 @@ In Chapter \@ref(dimensionality), we discussed how to use dimensionality reducti
 
 ```{r explain-bean-data, echo=FALSE}
 library(beans)
-set.seed(1701)
+set.seed(1601)
 bean_split <- initial_split(beans, strata = class, prop = 3/4)
 bean_train <- training(bean_split)
 bean_test  <- testing(bean_split)
@@ -412,6 +424,7 @@ load("RData/rda_fit.RData")
 ```
 
 ```{r explain-bea-vip}
+set.seed(1807)
 vip_beans <- 
   explain_tidymodels(
     rda_wflow_fit, 

@@ -20,7 +20,7 @@ load(file.path("RData", "svm_large.RData"))
 
 data(cells)
 cells <- cells %>% select(-case)
-set.seed(33)
+set.seed(1304)
 cell_folds <- vfold_cv(cells)
 roc_res <- metric_set(roc_auc)
 ```
@@ -77,7 +77,7 @@ For illustration, let's slightly change the kernel parameter range, to improve t
 ```{r iterative-svm-param-set}
 svm_param <- 
   svm_wflow %>% 
-  parameters() %>% 
+  extract_parameter_set_dials() %>% 
   update(rbf_sigma = rbf_sigma(c(-7, -1)))
 ```
 
@@ -98,7 +98,7 @@ knitr::include_graphics("premade/roc_surface.png")
 The search procedures described below require at least some resampled performance statistics before proceeding. For this purpose, the code below creates a small regular grid that resides in the flat portion of the parameter space. The `tune_grid()` function resamples these values:  
 
 ```{r iterative-svm-initial, message = FALSE}
-set.seed(234)
+set.seed(1401)
 start_grid <- 
   svm_param %>% 
   update(
@@ -107,7 +107,7 @@ start_grid <-
   ) %>% 
   grid_regular(levels = 2)
 
-set.seed(2)
+set.seed(1402)
 svm_initial <- 
   svm_wflow %>% 
   tune_grid(resamples = cell_folds, grid = start_grid, metrics = roc_res)
@@ -392,7 +392,7 @@ ctrl$save_gp_scoring <- TRUE
 
 tune_bayes_sssshhh <- purrr::quietly(tune_bayes)
 
-set.seed(1234)
+set.seed(1403)
 svm_bo_sshh <-
   svm_wflow %>%
   tune_bayes_sssshhh(
@@ -404,7 +404,11 @@ svm_bo_sshh <-
     control = ctrl
   )
 
-# Make sure that the results have not changed.
+
+# Make sure that the results have not changed since 2022-02-20. Save the results with: 
+#   svm_bo_metrics <- collect_metrics(svm_bo_sshh$result)
+#   save(svm_bo_metrics, file = "RData/svm_bo_metrics.RData")
+# Check with:
 verify_consistent_bo(collect_metrics(svm_bo_sshh$result))
 
 svm_bo <- svm_bo_sshh$result
@@ -438,7 +442,7 @@ Let's use the first SVM results from Section \@ref(svm) as the initial substrate
 ```{r iterative-cells-bo, eval = FALSE}
 ctrl <- control_bayes(verbose = TRUE)
 
-set.seed(1234)
+set.seed(1403)
 svm_bo <-
   svm_wflow %>%
   tune_bayes(
@@ -557,7 +561,7 @@ The functions that are used to interrogate the results are the same as those use
 show_best(svm_bo)
 ```
 
-The `autoplot()` function has several options for iterative search methods. Figure \@reg(fig:progress-plot) shows how the outcome changed over the search by using `autoplot(svm_bo, type = "performance")`.
+The `autoplot()` function has several options for iterative search methods. Figure \@ref(fig:progress-plot) shows how the outcome changed over the search by using `autoplot(svm_bo, type = "performance")`.
 
 ```{r progress-plot}
 #| fig.height = 4,
@@ -774,14 +778,14 @@ Simulated annealing (SA)  [@kirkpatrick1983optimization;@van1987simulated] is a 
 
 The process starts with an initial value and embarks on a controlled random walk through the parameter space. Each new candidate parameter value is a small perturbation of the previous value that keeps the new point within a _local neighborhood_. 
 
-The candidate point is resampled to obtain its corresponding performance value. If this achieves better results than the previous parameters, it is accepted as the new best and the process continues. If the results are worse than the previous value the search procedure _may_ still use this parameter to define further steps. This depends on two factors. First, the likelihood of accepting a bad result decreases as performance becomes worse. In other words, a slightly worse results has a better chance of acceptance than one with a large drop in performance. The other factor is the number of search iterations. Simulated annealing wants to accept fewer suboptimal values as the search proceeds. From these two factors, the _acceptance probability_  for a bad result can be formalized as
+The candidate point is resampled to obtain its corresponding performance value. If this achieves better results than the previous parameters, it is accepted as the new best and the process continues. If the results are worse than the previous value the search procedure _may_ still use this parameter to define further steps. This depends on two factors. First, the likelihood of accepting a bad result decreases as performance becomes worse. In other words, a slightly worse result has a better chance of acceptance than one with a large drop in performance. The other factor is the number of search iterations. Simulated annealing wants to accept fewer suboptimal values as the search proceeds. From these two factors, the _acceptance probability_  for a bad result can be formalized as:
 
 $$Pr[\text{accept suboptimal parameters at iteration } i] = \exp(c\times D_i \times i)$$
 
 where $i$ is the iteration number, $c$ is a user-specified constant, and $D_i$ is the percent difference between the old and new values (where negative values imply worse results). For a bad result, we determine the acceptance probability and compare it to a random uniform number. If the random number is greater than the probability value, the search _discards_ the current parameters and the next iteration creates its candidate value in the neighborhood of the _previous value_. Otherwise, the next iteration forms the next set of parameters based on the current (suboptimal) values. 
 
 :::rmdnote
-The acceptance probabilities of simulated annealing allows the search to proceed in the wrong direction, at least for the short term, with the potential to find a much better region of the parameter space in the long run. 
+The acceptance probabilities of simulated annealing allow the search to proceed in the wrong direction, at least for the short term, with the potential to find a much better region of the parameter space in the long run. 
 :::
 
 How are the acceptance probabilities influenced? This heatmap in Figure \@ref(fig:acceptance-prob) shows how the acceptance probability can change over iterations, performance, and the user-specified coefficient.
@@ -823,7 +827,7 @@ The user can adjust the coefficients to find a probability profile that suits th
 
 This process continues for a set amount of iterations but can halt if no globally best results occur within a pre-determined number of iterations. However, it can be very helpful to set a _restart threshold_. If there are a string of failures, this feature revisits the last globally best parameter settings and starts anew.  
 
-The main important detail is to define how to perturb the tuning parameters from iteration-to-iteration. There are a variety of methods in the literature for this. We follow the simple method given in @gsa called _generalized simulated annealing_. For continuous tuning parameters, we define a small radius to define the local "neighborhood". For example, suppose there are two tuning parameters and each is bounded by zero and one. The simulated annealing process generates random values on the surrounding radius and randomly chooses one to be the current candidate value.
+The main important detail is to define how to perturb the tuning parameters from iteration to iteration. There are a variety of methods in the literature for this. We follow the simple method given in @gsa called _generalized simulated annealing_. For continuous tuning parameters, we define a small radius to specify the local "neighborhood". For example, suppose there are two tuning parameters and each is bounded by zero and one. The simulated annealing process generates random values on the surrounding radius and randomly chooses one to be the current candidate value.
 
 In our implementation, the neighborhood is determined by scaling the current candidate to be between zero and one based on the range of the parameter object, so radius values between 0.05 and 0.15 seem reasonable. For these values, the fastest that the search could go from one side of the parameter space to the other is about 10 iterations. The size of the radius controls how quickly the search explores the parameter space. In our implementation, a range of radii is specified so different magnitudes of "local" define the new candidate values. 
 
@@ -886,7 +890,7 @@ for (i in 2:6) {
 }
 ```
 
-The process starts with initial values of `penalty = 0.025` and `mixture = 0.050`. Using a radii that randomly fluctuates between 0.050 and 0.015, the data are appropriately scaled, random values are generated on radii around the initial point, then one is randomly chosen as the candidate. For illustration, we will assume that all candidate values are improvements. Using this new value, a set of new random neighbors are generated, one is chosen, and so on. Figure \@ref(fig:iterative-neighborhood) shows `r max(best_values$Iteration)` iterations as the search proceeds toward the upper left corner.
+The process starts with initial values of `penalty = 0.025` and `mixture = 0.050`. Using a radius that randomly fluctuates between 0.050 and 0.015, the data are appropriately scaled, random values are generated on radii around the initial point, then one is randomly chosen as the candidate. For illustration, we will assume that all candidate values are improvements. Using the new value, a set of new random neighbors are generated, one is chosen, and so on. Figure \@ref(fig:iterative-neighborhood) shows `r max(best_values$Iteration)` iterations as the search proceeds toward the upper left corner.
 
 ```{r iterative-neighborhood}
 #| echo = FALSE, 
@@ -903,7 +907,7 @@ ggplot(neighbors_values, aes(x = penalty, y = mixture)) +
   geom_point(data = best_values) + 
   geom_path(data = path) + 
   geom_point(data = path) + 
-  facet_wrap(~ Iteration, labeller = label_both) + 
+  facet_wrap(vars(Iteration), labeller = label_both) + 
   labs(
     x = paste(penalty()$label, "(penalty)"),
     y = paste(mixture()$label, "(mixture)")
@@ -941,7 +945,7 @@ ctrl_sa <- control_sim_anneal(no_improve = 10L, verbose = TRUE, save_history = T
 
 tune_sim_anneal_sssshhh <- purrr::quietly(tune_sim_anneal)
 
-set.seed(1234)
+set.seed(1404)
 svm_sa_sshh <-
   svm_wflow %>%
   tune_sim_anneal_sssshhh(
@@ -953,7 +957,10 @@ svm_sa_sshh <-
     control = ctrl_sa
   )
 
-# Make sure that the results have not changed.
+# Make sure that the results have not changed since 2022-02-20. Save the results with: 
+  # svm_sa_metrics <- collect_metrics(svm_sa_sshh$result)
+  # save(svm_sa_metrics, file = "RData/svm_sa_metrics.RData")
+# Check with:
 verify_consistent_sa(collect_metrics(svm_sa_sshh$result))
 
 svm_sa <- svm_sa_sshh$result
@@ -969,7 +976,7 @@ file.copy(
 ```{r iterative-cells-sa, eval = FALSE}
 ctrl_sa <- control_sim_anneal(verbose = TRUE, no_improve = 10L)
 
-set.seed(1234)
+set.seed(1404)
 svm_sa <-
   svm_wflow %>%
   tune_sim_anneal(
@@ -1055,8 +1062,10 @@ if (length(so_stop_index) > 0) {
 The last ten iterations: 
 
 ```{r iterative-cells-sa-print-end, echo = FALSE}
-so_start_index <- grep("^40", svm_sa_output)
-so_stop_index <- grep("^50", svm_sa_output)
+last_sa_iter <- max(result_history$.iter)
+
+so_start_index <- grep(paste0("^", last_sa_iter - 10), svm_sa_output)
+so_stop_index  <- grep(paste0("^", last_sa_iter), svm_sa_output)
 if (length(so_stop_index) > 0) {
   cat(svm_sa_output[so_start_index:so_stop_index], sep = "\n")
 }

@@ -14,7 +14,7 @@ env:
 
 jobs:
   build:
-    runs-on: macOS-latest
+    runs-on: ubuntu-latest
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
     steps:
@@ -24,11 +24,8 @@ jobs:
       
       - name: Install system dependencies
         run: |
-          brew install --cask xquartz
-          brew install pkg-config cairo
-          brew install v8
-          brew install libgit2
-          brew install ffmpeg
+          sudo apt-get update -qq
+          sudo apt-get install -y ffmpeg libavfilter-dev
 
       - uses: r-lib/actions/setup-r@v2
 

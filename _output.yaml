@@ -1,6 +1,6 @@
 bookdown::gitbook:
   css: [style.css, TMwR.css]
-  dev: svglite
+  dev: png
   config:
     toc:
       collapse: section

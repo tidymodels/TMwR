@@ -183,7 +183,7 @@ You can use a fully Bayesian hierarchical model for the effects in the same way 
 
 Let's visually compare the effects using pooling vs. no pooling in Figure \@ref(fig:encoding-compare-pooling).
 
-```{r encoding-compare-pooling}
+```{r encoding-compare-pooling, message=FALSE}
 #| fig.cap = "Comparing the effect encodings for neighborhood estimated without pooling to those with pooling.",
 #| fig.alt = "A scatter chart comparing the effect encodings for neighborhood estimated without pooling to those with pooling. Almost all neighborhoods are very close to the slope = 1 line, but the neighborhoods with the fewest homes are further away."
 glm_estimates %>%

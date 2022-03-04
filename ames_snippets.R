@@ -5,7 +5,7 @@ library(tidymodels)
 data(ames)
 ames <- mutate(ames, Sale_Price = log10(Sale_Price))
 
-set.seed(123)
+set.seed(502)
 ames_split <- initial_split(ames, prop = 0.80, strata = Sale_Price)
 ames_train <- training(ames_split)
 ames_test  <-  testing(ames_split)
@@ -41,9 +41,8 @@ rf_wflow <-
       Latitude + Longitude) %>% 
   add_model(rf_model) 
 
-set.seed(55)
+set.seed(1001)
 ames_folds <- vfold_cv(ames_train, v = 10)
 
-# cached in RData/resampling.RData
-# set.seed(130)
+# cached in RData/resampling.RData from Ch 10
 # rf_res <- rf_wflow %>% fit_resamples(resamples = ames_folds, control = keep_pred)

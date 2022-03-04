@@ -13,7 +13,7 @@ knitr::opts_chunk$set(
 
 
 theme_transparent <- function(...) {
-
+  
   ret <- ggplot2::theme_bw(...)
   
   trans_rect <- ggplot2::element_rect(fill = "transparent", colour = NA)
@@ -54,14 +54,14 @@ is_new_version <- function(x, path) {
   # parsnip model fits have an elapsed time and this will change from run-to-run.
   # We'll remove that to check for a new version. Same for workflows. 
   if (inherits(prev, "model_fit")) {
-       x$elapsed <- NA
+    x$elapsed <- NA
     prev$elapsed <- NA
   }
   if (workflows:::is_workflow(prev)) {
-       x$fit$fit$elapsed <- NA
+    x$fit$fit$elapsed <- NA
     prev$fit$fit$elapsed <- NA
   }
-
+  
   res <- all.equal(x, prev)
   !isTRUE(res)
 }
