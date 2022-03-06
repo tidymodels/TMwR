@@ -1,7 +1,6 @@
 ```{r performance-setup, include = FALSE}
 knitr::opts_chunk$set(fig.path = "figures/")
 library(tidymodels)
-library(kableExtra)
 tidymodels_prefer()
 source("ames_snippets.R")
 load("RData/lm_fit.RData")

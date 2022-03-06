@@ -2,7 +2,6 @@
 knitr::opts_chunk$set(fig.path = "figures/")
 library(tidymodels)
 library(doMC)
-library(kableExtra)
 library(tidyr)
 tidymodels_prefer()
 registerDoMC(cores = parallel::detectCores())
@@ -117,13 +116,11 @@ For both models, Table \@ref(tab:rmse-results) summarizes the RMSE estimate for 
 ```{r resampling-rmse-table, echo = FALSE, results = "asis"}
 all_res %>% 
   mutate(object = paste0("<tt>", object, "</tt>")) %>% 
-  kable(
+  knitr::kable(
     caption = "Performance statistics for training and test sets.",
     label = "rmse-results",
     escape = FALSE
-  ) %>% 
-  kable_styling(full_width = FALSE) %>% 
-  add_header_above(c(" ", "RMSE Estimates" = 2))
+  ) 
 ```
 
 Notice that the linear regression model is consistent between training and testing, because of its limited complexity^[It is possible for a linear model to nearly memorize the training set, like the random forest model did. In the `ames_rec` object, change the number of spline terms for `longitude` and `latitude` to a large number (say 1000). This would produce a model fit with a very small resubstitution RMSE and a test set RMSE that is much larger.]. 

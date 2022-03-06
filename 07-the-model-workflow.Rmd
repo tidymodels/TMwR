@@ -2,7 +2,6 @@
 knitr::opts_chunk$set(fig.path = "figures/")
 library(tidymodels)
 library(workflowsets)
-library(kableExtra)
 tidymodels_prefer()
 source("ames_snippets.R")
 ```

@@ -4,7 +4,6 @@
 knitr::opts_chunk$set(fig.path = "figures/")
 data(crickets, package = "modeldata")
 library(tidyverse)
-library(kableExtra)
 ```
 
 This book is about creating models with R. Before describing how to apply tidy data principles, let's review how models are created, trained, and used in the core R language (often called "base R"). This chapter is a brief illustration of core language conventions. It is not exhaustive but provides readers (especially those new to R) the basic, most commonly used motifs. 
@@ -246,14 +245,11 @@ prob_tbl <-
   ) 
 
 prob_tbl %>% 
-  kable(
+  knitr::kable(
     caption = "Heterogeneous argument names for different modeling functions.",
     label = "probability-args",
     escape = FALSE
-  ) %>%
-  kable_styling(full_width = FALSE) %>%
-  column_spec(1, monospace = ifelse(prob_tbl$Function == "various", FALSE, TRUE)) %>%
-  column_spec(3, monospace = TRUE)
+  ) 
 ```
 
 Note that the last example has a custom _function_ to make predictions instead of using the more common `predict()` interface (the generic `predict()` _method_). This lack of consistency is a barrier to day-to-day usage of R for modeling.

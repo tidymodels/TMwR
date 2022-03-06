@@ -2,7 +2,6 @@
 knitr::opts_chunk$set(fig.path = "figures/")
 library(tidymodels)
 library(kknn)
-library(kableExtra)
 library(tidyr)
 
 tidymodels_prefer()
@@ -144,7 +143,8 @@ arg_info <-
   get_from_env("rand_forest_args") %>% 
   select(engine, parsnip, original) %>% 
   full_join(arg_info, by = "parsnip") %>% 
-  mutate(package = ifelse(engine == "spark", "sparklyr", engine))
+  mutate(package = ifelse(engine == "spark", "sparklyr", engine)) %>%
+  mutate_at(c("parsnip", "original"), glue::backtick) 
 
 arg_info %>%
   select(package, `Argument Type`, original) %>%
@@ -154,13 +154,11 @@ arg_info %>%
     values_from = c(original),
     names_from = c(package)
   ) %>% 
-  kable(
+  knitr::kable(
     caption = "Example argument names for different random forest functions.",
     label = "rand-forest-args",
     escape = FALSE
-  ) %>%
-  kable_styling() %>%
-  column_spec(2:4, monospace = TRUE)
+  )
 ```
 
 In an effort to make argument specification less painful, `r pkg(parsnip)` uses common argument names within and between packages. Table \@ref(tab:parsnip-args) shows, for random forests, what `r pkg(parsnip)` models use.
@@ -170,13 +168,11 @@ arg_info %>%
   select(`Argument Type`, parsnip) %>%
   distinct() %>% 
   # mutate(parsnip = paste0("<tt>", parsnip, "</tt>")) %>% 
-  kable(
+  knitr::kable(
     caption = "Random forest argument names used by parsnip.",
     label = "parsnip-args",
     escape = FALSE
-  ) %>% 
-  kable_styling(full_width = FALSE) %>%
-  column_spec(2, monospace = TRUE)
+  ) 
 ```
 
 Admittedly, this is one more set of arguments to memorize. However, when other types of models have the same argument types, these names still apply. For example, boosted tree ensembles also create a large number of tree-based models, so `trees` is also used there, as is `min_n`, and so on. 
@@ -298,11 +294,10 @@ tribble(
   "probability (2 classes)", "numeric matrix (2nd level only)",
   "probability (3+ classes)", "3D numeric array (all levels)", 
 ) %>% 
-  kable(
+  knitr::kable(
     caption = "Different return values for glmnet prediction types.",
     label = "predict-types"
-  ) %>% 
-  kable_styling(full_width = FALSE)
+  ) 
 ```
 
 Additionally, the column names of the results contain coded values that map to a vector called `lambda` within the glmnet model object. This excellent statistical method can be discouraging to use in practice because of all of the special cases an analyst might encounter that require additional code to be useful.
@@ -318,12 +313,11 @@ tribble(
   "conf_int", ".pred_lower, .pred_upper",
   "pred_int", ".pred_lower, .pred_upper"
 ) %>% 
-  kable(
+  mutate_all(glue::backtick) %>%
+  knitr::kable(
     caption = "The tidymodels mapping of prediction types and column names.",
     label = "predictable-column-names",
-  ) %>% 
-  kable_styling(full_width = FALSE)  %>%
-  column_spec(1:2, monospace = TRUE)
+  ) 
 ```
 
 The third rule regarding the number of rows in the output is critical. For example, if any rows of the new data contain missing values, the output will be padded with missing results for those rows. 

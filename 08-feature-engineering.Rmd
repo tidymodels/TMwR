@@ -1,7 +1,6 @@
 ```{r engineering-setup, include = FALSE}
 knitr::opts_chunk$set(fig.path = "figures/")
 library(tidymodels)
-library(kableExtra)
 
 tidymodels_prefer()
 
@@ -225,11 +224,10 @@ recipe(~Bldg_Type, data = ames_train) %>%
   bake(ames_train) %>% 
   slice(show_rows) %>% 
   arrange(`Raw Data`) %>% 
-  kable(
+  knitr::kable(
     caption = 'Illustration of binary encodings (i.e., "dummy variables") for a qualitative predictor.',
     label = "dummy-vars"
-  ) %>% 
-  kable_styling(full_width = FALSE)
+  )
 ```
 
 
