@@ -11,26 +11,35 @@ in TMwR.css? This is not working yet for me
 Choose a directory to put the new files in (use `_bookdown.yml` to generate only part of the book):
 
 ```r
+library(bookdown)
 render_book(output_format = html_book(
   keep_md = TRUE, pandoc_args = "--lua-filter=lower-header.lua"), 
   output_dir = "files_for_print/")
 ```
 
-We don't need the HTML files so `rm *.html` in the new directory
+## Convert divs to markdown images
 
-## Convert to asciidoc using kramdown: <https://github.com/asciidoctor/kramdown-asciidoc>
+```
+sed -i ".bak" 's/<p class=\"caption\">\(.*\)<\/p>/STARTCAP\1STOPCAP/g' *.md
+sed -i ".bak" 's/<div class=\"figure\" style="text-align: center">//g' *.md
+sed -i ".bak" 's/<img src=\"\(.*\)\" alt=.*/STARTIMAGE\1STOPIMAGE/g' *.md
+perl -i~ -0777 -pe 's/STARTIMAGE(.*?)STOPIMAGE\nSTARTCAP\(\\#fig\:(.*?)\)(.*?)STOPCAP\n<\/div>/[[\2]]\n![\3](\1)/g' *.md
+```
+
+## Make some changes to `index.md`
+
+Make beginning make sense, remove front matter, and also a preface. In the new directory (then edit):
+
+```
+mv index.md preface.md 
+```
+
+## Convert to asciidoc using pandoc
 
 In the new directory:
 
 ```
-find ./ -name "*.md" \
-    -type f \
-    -exec sh -c \
-    'kramdoc {}' \;
-```
-
-```
-pandoc --markdown-headings=atx \
+for f in *.md; do pandoc --markdown-headings=atx \
     --verbose \
     --wrap=none \
     --reference-links \
@@ -38,8 +47,8 @@ pandoc --markdown-headings=atx \
     --bibliography=TMwR.bib \
     --lua-filter=lower-header.lua \
     -f markdown -t asciidoc \
-    -o 01-software-modeling.adoc \
-    01-software-modeling.md
+    -o "${f%.md}.adoc" \
+    "$f"; done
 ```
 
 ## Fix notes/warnings
@@ -50,18 +59,21 @@ Using sed:
 sed -i ".bak" "s/:::rmdnote/[NOTE]\n====/g" *.adoc   
 sed -i ".bak" "s/:::rmdwarning/[WARNING]\n====/g" *.adoc   
 sed -i ".bak" "s/:::/====/g" *.adoc
+sed -i ".bak" -E "s/^{empty}//g" *.adoc
 sed -i ".bak" -E "1 s/\[#([^()]*)]*\]/\[\1\]/" *.adoc
-sed -i ".bak" -E "s/\\\@ref\(fig:([^()]*)\)/<<\1>>/g" *.adoc
-sed -i ".bak" -E "s/\\\@ref\(tab:([^()]*)\)/<<\1>>/g" *.adoc
-sed -i ".bak" -E "s/\\\@ref\(([^()]*)\)/<<\1>>/g" *.adoc
+sed -i ".bak" -E "s/\@ref\(fig:([^()]*)\)/<<\1>>/g" *.adoc
+sed -i ".bak" -E "s/\@ref\(tab:([^()]*)\)/<<\1>>/g" *.adoc
+sed -i ".bak" -E "s/\@ref\(([^()]*)\)/<<\1>>/g" *.adoc
+perl -i~ -0777 -pe 's/\[\[refs\]\].*\Z//sg' *.adoc
+perl -i~ -0777 -pe 's/\.\(\#tab\:(.*?)\)(.*?)/[[\1]]\n\.\2/g' *.adoc
+sed -i ".bak" 's/\[\[\(.*\)\]\] image:\(.*\)\[\(.*\)\]/\[\[\1\]\]\n\.\3\nimage::\2/g' *.adoc
 ```
 
-## Make some changes to `index.adoc`
+## Make preface [actually a preface](https://docs.atlas.oreilly.com/writing_in_asciidoc.html#prefaces-PntlujUD)
 
-Make beginning make sense and also a preface
 
 ```
-mv index.adoc preface.adoc  
+emacs preface.adoc
 ```
 
 ## Clean up extra files when totally done
@@ -69,6 +81,9 @@ mv index.adoc preface.adoc
 ```
 rm *.bak
 rm *.md
+rm *.html
+rm *~
+rm -r libs
 ```
 
 ## Zip up and send!
