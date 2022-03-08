@@ -552,7 +552,7 @@ The `deg_free` parameter is a counterexample; the notion of degrees of freedom c
 spline_degree()
 ```
 
-The `dials` package also has a convenience function for extracting a particular parameter object:
+The `r pkg(dials)` package also has a convenience function for extracting a particular parameter object:
 
 ```{r tuning-extract}
 # identify the parameter using the id value:
