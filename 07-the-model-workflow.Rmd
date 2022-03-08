@@ -270,17 +270,40 @@ location_models
 location_models$fit[[1]]
 ```
 
+There is a much nicer user interface to fit models that will be introduced in Section \@ref(workflow-set).  
+
 There's a lot more to workflow sets. Their nuances and advantages won't be illustrated until Chapter \@ref(workflow-sets). 
 
 
-## Future plans
+## Evaluating the test set
 
-The two types of components in a workflow are preprocessors and models. There are also operations that might occur _after_ the model is fit. An example of such a _post-processor_ would be cutoff selection for two-class problems. Previously in this chapter, we discussed the idea of modifying the cutoff for a two-class problem. In the future, workflows will be able to attach a custom cutoff that is applied to probabilities after the model fit. Other approaches, such as probability calibration, could also be added as post-processors. 
-  
+Let's say that we've concluded our exploratory work and have settled on a final model. There is a convenience function called `last_fit()` that will fit the model to the entire training set then evaluate it with the testing set. 
+
+Using `lm_wflow` as an example, we can pass the model information and the initial training/testing split to the function:
+
+```{r lm-last-fit}
+final_lm_res <- last_fit(lm_wflow, ames_split)
+final_lm_res
+```
+
+The `.workflow` column contains the _fitted workflow_ and can be pulled out of the results using
+
+```{r extract-last-fit, eval = FALSE}
+fitted_lm_wflow <- extract_workflow(final_lm_res)
+```
+
+Similarly, `collect_metrics()` and `collect_predictions()` give easy access to the performance statistics and predictions, respectively. 
+
+```{r collect-last-fit, eval = FALSE}
+collect_metrics(final_lm_res)
+collect_predictions(final_lm_res) %>% slice(1:5)
+```
+
+We'll see these in action again in Section \@ref(bean-models).
 
 ## Chapter summary {#workflows-summary}
 
-In this chapter, you learned that the modeling process encompasses more than just estimating the parameters of an algorithm that connects predictors to an outcome. This process also includes preprocessing steps and operations taken after a model is fit. We introduced a concept called a **model workflow** that can capture the important components of the modeling process. Multiple workflows can also be created inside of a **workflow set**. 
+In this chapter, you learned that the modeling process encompasses more than just estimating the parameters of an algorithm that connects predictors to an outcome. This process also includes preprocessing steps and operations taken after a model is fit. We introduced a concept called a **model workflow** that can capture the important components of the modeling process. Multiple workflows can also be created inside of a **workflow set**. Lastly, the convenient `last_fit()` function makes test set evaluation easy. 
 
 For the Ames data, the code used in later chapters is:
 
