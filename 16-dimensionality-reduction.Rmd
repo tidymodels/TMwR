@@ -41,7 +41,7 @@ This chapter has two goals:
  
 The latter is helpful when testing or debugging a recipe. However, as described in Section \@ref(using-recipes), the best way to use a recipe for modeling is from within a workflow object. 
 
-In addition to the `r pkg(tidymodels)` package, this chapter uses the following packages: `r pkg(baguette)`, `r pkg(beans)`, `r pkg(bestNormalize)`, `r pkg(corrplot)`, `r pkg(discrim)`, `r pkg(embed)`, `r pkg(ggforce)`, `r pkg(klaR)`, `r pkg(learntidymodels)`[^learnnote], `r pkg(mixOmics)`[^mixnote], and `r pkg(uwot)`. .
+In addition to the `r pkg(tidymodels)` package, this chapter uses the following packages: `r pkg(baguette)`, `r pkg(beans)`, `r pkg(bestNormalize)`, `r pkg(corrplot)`, `r pkg(discrim)`, `r pkg(embed)`, `r pkg(ggforce)`, `r pkg(klaR)`, `r pkg(learntidymodels)`[^learnnote], `r pkg(mixOmics)`[^mixnote], and `r pkg(uwot)`. 
 
 [^learnnote]: The `r pkg(learntidymodels)` package can be found at its GitHub site: <https://github.com/tidymodels/learntidymodels>
 
