@@ -7,6 +7,7 @@ site: bookdown::bookdown_site
 description: "The tidymodels framework is a collection of R packages for modeling and machine learning using tidyverse principles. This book provides a thorough introduction to how to use tidymodels, and an outline of good methodology and statistical practice for phases of the modeling process."
 github-repo: tidymodels/TMwR
 twitter-handle: topepos
+cover-image: images/cover.png
 documentclass: book
 classoption: 11pt
 bibliography: [TMwR.bib]
@@ -16,6 +17,8 @@ colorlinks: yes
 ---
 
 # Hello World {-} 
+
+<a href="https://amzn.to/35Hn96s"><img src="images/cover.png" width="350" height="460" alt="Buy from Amazon" class="cover" /></a>
 
 This is the website for _Tidy Modeling with R_. This book is a guide to using a new collection of software in the R programming language for model building, and it has two main goals: 
 

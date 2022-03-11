@@ -419,3 +419,19 @@ p, ul, ol, dl, blockquote, table, pre {
 li p {
   margin-bottom: 1em !important;
 }
+
+/* Cover image */
+
+img.cover {
+  float: right;
+  margin: 0 1rem 0 1rem;
+  box-shadow: 0 .5rem 1rem rgba(0,0,0,.15);
+}
+
+@media (max-width: 767.98px) {
+  img.cover {
+    float: none;
+    display: block;
+    margin: 0 auto 1rem auto;
+  }
+}
