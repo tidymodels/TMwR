@@ -129,7 +129,7 @@ set.seed(2001)
 ens <- blend_predictions(concrete_stack)
 ```
 
-This evaluates the meta-learning model over a pre-defined grid of lasso penalty values and uses an internal resampling method to determine the best value. The `autoplot()` method helps us understand if the default penalization method was sufficient: 
+This evaluates the meta-learning model over a pre-defined grid of lasso penalty values and uses an internal resampling method to determine the best value. The `autoplot()` method, shown in Figure \@ref(fig:stacking-autoplot), helps us understand if the default penalization method was sufficient: 
 
 ```{r ensembles-initial-blend-plot, eval=FALSE}
 autoplot(ens)
@@ -150,6 +150,8 @@ set.seed(2002)
 ens <- blend_predictions(concrete_stack, penalty = 10^seq(-2, -0.5, length = 20))
 ```
 
+Now, in Figure \@ref(fig:stacking-autoplot-redo), we see a range where the ensemble model becomes worse than with our first blend (but not by much). The R<sup>2</sup> values increase with larger penalties. This is somewhat counter-intuitive, but the y-axis range of each panel reminds us that these changes are minuscule.  
+
 ```{r ensembles-autoplot-calc, eval = FALSE}
 autoplot(ens)
 ```
@@ -160,8 +162,6 @@ autoplot(ens)
 #| fig.alt = "The results of using the `autoplot()` method on the updated blended stacks object."
 ```
 
-
-Now, in Figure \@ref(fig:stacking-autoplot-redo), we see a range where the ensemble model becomes worse than with our first blend (but not by much). The R<sup>2</sup> values increase with larger penalties. This is somewhat counter-intuitive, but the y-axis range of each panel reminds us that these changes are minuscule.  
 
 It is common, when blending predictions using a regression model, to constrain the blending parameters to be non-negative. For these data, this constraint has the effect of eliminating many of the potential ensemble members; even at fairly low penalties, the ensemble is limited to a fraction of the original eighteen.
 
