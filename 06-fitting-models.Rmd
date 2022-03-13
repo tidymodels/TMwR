@@ -10,14 +10,14 @@ tidymodels_prefer()
 source("ames_snippets.R")
 ```
 
-# Fitting models with parsnip {#models}
+# Fitting Models with parsnip {#models}
 
 The `r pkg(parsnip)` package provides a fluent and standardized interface for a variety of different models. In this chapter, we both give some motivation for why a common interface is beneficial and show how to use the package. 
 
 In this chapter, we focus on how to `fit()` and `predict()` directly with a `r pkg(parsnip)` object. This may be a good fit for some straightforward modeling problems, but the next chapter illustrates a better approach to these tasks by combining models and preprocessors together into something called a `workflow` object. 
 
 
-## Create a model
+## Create a Model
 
 Once the data have been encoded in a format ready for a modeling algorithm, such as a numeric matrix, they can be used in the model building process.  
 
@@ -63,7 +63,7 @@ For tidymodels, the approach to specifying a model is intended to be more unifie
 
 2. **Specify the _engine_ for fitting the model.** Most often this reflects the software package that should be used. 
 
-3. **When required, declare the _mode_ of the model.** The mode reflects the type of prediction outcome. For numeric outcomes, the mode is _regression_; for qualitative outcomes, it is _classification_^[Note that `r pkg(parsnip)` constrains the outcome column of a classification model to be encoded as a _factor_; using binary numeric values will result in an error.]. If a model can only create one type of model, such as linear regression, the mode is already set. 
+3. **When required, declare the _mode_ of the model.** The mode reflects the type of prediction outcome. For numeric outcomes, the mode is _regression_; for qualitative outcomes, it is _classification_.^[Note that `r pkg(parsnip)` constrains the outcome column of a classification model to be encoded as a _factor_; using binary numeric values will result in an error.] If a model can only create one type of model, such as linear regression, the mode is already set. 
 
 These specifications are built _without referencing the data_. For example, for the three cases above: 
 
@@ -209,7 +209,7 @@ rand_forest(trees = 1000, min_n = 5) %>%
 ```
 
 
-## Use the model results
+## Use the Model Results
 
 Once the model is created and fit, we can use the results in a variety of ways; we might want to plot, print, or otherwise examine the model output. Several quantities are stored in a `r pkg(parsnip)` model object, including the fitted model. This can be found in an element called `fit`, which can be returned using the `extract_fit_engine()` function:
 
@@ -257,7 +257,7 @@ tidy(lm_form_fit)
 The column names are standardized across models and do not contain any additional data (such as the type of statistical test). The data previously contained in the row names are now in a column called `term` and so on. One important principle in the tidymodels ecosystem is that a function should return values that are _predictable, consistent, and unsurprising_. 
 
 
-## Make predictions {#parsnip-predictions}
+## Make Predictions {#parsnip-predictions}
 
 Another area where `r pkg(parsnip)` diverges from conventional R modeling functions is the format of values returned from `predict()`. For predictions, `r pkg(parsnip)` always conforms to the following rules: 
 
@@ -346,11 +346,11 @@ ames_test_small %>%
 
 This demonstrates the benefit of homogenizing the data analysis process and syntax across different models. It enables the user to spend their time on the results and interpretation rather than having to focus on the syntactical differences between R packages. 
 
-## parsnip-adjacent packages
+## parsnip-Adjacent Packages
 
 The `r pkg(parsnip)` package itself contains interfaces to a number of models. However, for ease of package installation and maintenance, there are other tidymodels packages that have `r pkg(parsnip)` model definitions for other sets of models. The `r pkg(discrim)` package has model definitions for the set of classification techniques called _discriminant analysis_ methods (such as linear or quadratic discriminant analysis). In this way, the package dependencies required for installing `r pkg(parsnip)` are reduced. A list of _all_ of the models that can be used with `r pkg(parsnip)` (across different packages that are on CRAN) can be found at <https://www.tidymodels.org/find/>.  
 
-## Creating model specifications {#parsnip-addin}
+## Creating Model Specifications {#parsnip-addin}
 
 It may become tedious to write many model specifications, or to remember how to write the code to generate them. The `r pkg(parsnip)` package includes an RStudio addin^[<https://rstudio.github.io/rstudioaddins/>] that can help. Either choosing this addin from the _Addins_ toolbar menu or running the code: 
 
@@ -364,7 +364,7 @@ will open a window in the Viewer panel of the RStudio IDE with a list of possibl
 The model list includes models from `r pkg(parsnip)` and `r pkg(parsnip)`-adjacent packages that are on CRAN. 
 
 
-## Chapter summary {#models-summary}
+## Chapter Summary {#models-summary}
 
 This chapter introduced the `r pkg(parsnip)` package, which provides a common interface for models across R packages using a standard syntax. The interface and resulting objects have a predictable structure. 
 

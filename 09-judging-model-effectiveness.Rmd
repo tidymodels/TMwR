@@ -11,7 +11,7 @@ set.seed(245)
 ad_folds <- vfold_cv(ad_data, repeats = 5)
 ```
 
-# Judging model effectiveness {#performance}
+# Judging Model Effectiveness {#performance}
 
 Once we have a model, we need to know how well it works. A quantitative approach for estimating effectiveness allows us to understand the model, to compare different models, or to tweak the model to improve performance. Our focus in tidymodels is on _empirical validation_; this usually means using data that were not used to create the model as the substrate to measure effectiveness. 
 
@@ -47,7 +47,7 @@ A model optimized for RMSE has more variability but has relatively uniform accur
 
 This chapter will largely focus on the `r pkg(yardstick)` package. Before illustrating syntax, let's explore whether empirical validation using performance metrics is worthwhile when a model is focused on inference rather than prediction. 
 
-## Performance metrics and inference
+## Performance Metrics and Inference
 
 ```{r performance ad-model, include = FALSE}
 ad_mod <- logistic_reg() %>% set_engine("glm") 
@@ -111,7 +111,7 @@ The point of this analysis is to demonstrate the idea that **optimization of sta
 
 In the remainder of this chapter, general approaches for evaluating models via empirical validation are discussed. These approaches are grouped by the nature of the outcome data: purely numeric, binary classes, and three or more class levels. 
 
-## Regression metrics 
+## Regression Metrics 
 
 Recall from Section \@ref(parsnip-predictions) that tidymodels prediction functions produce tibbles with columns for the predicted values. These columns have consistent names, and the functions in the `r pkg(yardstick)` package that produce performance metrics have consistent interfaces. The functions are data frame-based, as opposed to vector-based, with the general syntax of: 
 
@@ -180,7 +180,7 @@ This tidy data format stacks the metrics vertically.
 The `r pkg(yardstick)` package does _not_ contain a function for adjusted $R^2$. This commonly used modification of the coefficient of determination is needed when the same data used to fit the model are used to evaluate the model. This metric is not fully supported in tidymodels because it is always a better approach to compute performance on a separate data set than the one used to fit the model.  
 :::
 
-## Binary classification metrics 
+## Binary Classification Metrics 
 
 To illustrate other ways to measure model performance, we will switch to a different example. The `r pkg(modeldata)` package contains example predictions from a test data set with two classes ("Class1" and "Class2"):
 
@@ -250,7 +250,7 @@ autoplot(two_class_curve)
 
 There are a number of other functions that use probability estimates, including `gain_curve()`, `lift_curve()`, and `pr_curve()`. 
 
-## Multi-class classification metrics 
+## Multi-Class Classification Metrics 
 
 What about data with three or more classes? To demonstrate, let's explore a different example data set that has four classes: 
 
@@ -360,6 +360,6 @@ hpc_cv %>%
 
 This can be a quick visualization method for model effectiveness. 
 
-## Chapter summary {#performance-summary}
+## Chapter Summary {#performance-summary}
 
 Functions from the `r pkg(yardstick)` package measure the effectiveness of a model using data. The primary interface is based on data frames (as opposed to having vector arguments). There are a variety of regression and classification metrics and, within these, there are sometimes different estimators for the statistics. 

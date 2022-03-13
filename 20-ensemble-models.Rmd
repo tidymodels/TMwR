@@ -10,7 +10,7 @@ library(kableExtra)
 load("RData/concrete_results.RData")
 ```
 
-# Ensembles of models {#ensembles}
+# Ensembles of Models {#ensembles}
 
 
 A model ensemble, where the predictions of multiple single learners are aggregated together to make one prediction, can produce a high-performance final model. The most popular methods for creating ensemble models are bagging [@breiman1996bagging], random forest [@ho1995random; @breiman2001random], and boosting [@freund1997decision]. Each of these methods combines the predictions from multiple versions of the _same type_ of model (e.g., classifications trees). However, one of the earliest methods for creating ensembles is **model stacking** [@wolpert1992stacked; @breiman1996stacked]. 
@@ -41,7 +41,7 @@ We'll use the term "candidate members" to describe the possible model configurat
 This means that a stacking model can include different types of models (e.g., trees and neural networks) as well as different configurations of the same model (e.g., trees with different depths). 
 
 
-## Creating the training set for stacking {#data-stack}
+## Creating the Training Set for Stacking {#data-stack}
 
 Stacking relies on the assessment set predictions from a resampling scheme with multiple splits. For each data point in the training set, stacking requires an out-of-sample prediction of some sort. For regression models, this is the predicted outcome. For classification models, the predicted classes or probabilities are available for use, although the latter contains more information than the hard class predictions. For a set of models, a data set is assembled where rows are the training set samples and columns are the out-of-sample predictions from the set of multiple models.
 
@@ -113,7 +113,7 @@ Why use the racing results instead of the full set of candidate models contained
 
 If we had not used the `r pkg(workflowsets)` package, objects from the `r pkg(tune)` and `r pkg(finetune)` could also be passed to `add_candidates()`. This can include both grid and iterative search objects. 
 
-## Blend the predictions {#blend-predictions}
+## Blend the Predictions {#blend-predictions}
 
 The training set predictions and the corresponding observed outcome data are used to create a **meta-learning model** where the assessment set predictions are the predictors of the observed outcome data. Meta-learning can be accomplished using any model. The most commonly used model is a regularized generalized linear model, which encompasses linear, logistic, and multinomial models. Regularization via the lasso penalty has several advantages: 
 
@@ -129,7 +129,7 @@ set.seed(2001)
 ens <- blend_predictions(concrete_stack)
 ```
 
-This evaluates the meta-learning model over a pre-defined grid of lasso penalty values and uses an internal resampling method to determine the best value. The `autoplot()` method helps us understand if the default penalization method was sufficient: 
+This evaluates the meta-learning model over a pre-defined grid of lasso penalty values and uses an internal resampling method to determine the best value. The `autoplot()` method, shown in Figure \@ref(fig:stacking-autoplot), helps us understand if the default penalization method was sufficient: 
 
 ```{r ensembles-initial-blend-plot, eval=FALSE}
 autoplot(ens)
@@ -150,6 +150,8 @@ set.seed(2002)
 ens <- blend_predictions(concrete_stack, penalty = 10^seq(-2, -0.5, length = 20))
 ```
 
+Now, in Figure \@ref(fig:stacking-autoplot-redo), we see a range where the ensemble model becomes worse than with our first blend (but not by much). The R<sup>2</sup> values increase with larger penalties. This is somewhat counter-intuitive, but the y-axis range of each panel reminds us that these changes are minuscule.  
+
 ```{r ensembles-autoplot-calc, eval = FALSE}
 autoplot(ens)
 ```
@@ -160,8 +162,6 @@ autoplot(ens)
 #| fig.alt = "The results of using the `autoplot()` method on the updated blended stacks object."
 ```
 
-
-Now, in Figure \@ref(fig:stacking-autoplot-redo), we see a range where the ensemble model becomes worse than with our first blend (but not by much). The R<sup>2</sup> values increase with larger penalties. This is somewhat counter-intuitive, but the y-axis range of each panel reminds us that these changes are minuscule.  
 
 It is common, when blending predictions using a regression model, to constrain the blending parameters to be non-negative. For these data, this constraint has the effect of eliminating many of the potential ensemble members; even at fairly low penalties, the ensemble is limited to a fraction of the original eighteen.
 
@@ -235,7 +235,7 @@ cat(eqn)
 
 where the "predictors" in the equation are the predicted compressive strength values from those models. 
 
-## Fit the member models {#fit-members}
+## Fit the Member Models {#fit-members}
 
 The ensemble contains `r num_coefs` candidate members and we now know how their predictions can be blended into a final prediction for the ensemble. However, these individual models fits have not yet been created. To be able to use the stacking model, `r num_coefs` additional model fits are required. These use the entire training set with the original predictors. 
 
@@ -308,7 +308,7 @@ ens <- fit_members(ens)
 
 This updates the stacking object with the fitted workflow objects for each member. At this point, the stacking model can be used for prediction. 
 
-## Test set results
+## Test Set Results
 
 Since the blending process used resampling, we can estimate that the ensemble with `r num_coefs` members had an estimated RMSE of `r round(ens_rmse, 2)`. Recall from Chapter \@ref(workflow-sets) that the best boosted tree had a test set RMSE of `r round(boost_rmse$.estimate, 2)`. How will the ensemble model compare on the test set? 
 
@@ -324,6 +324,6 @@ ens_test_pred %>%
 
 This is moderately better than our best single model. It is fairly common for stacking to produce incremental benefits when compared to the best single model. 
 
-## Chapter summary {#ensembles-summary}
+## Chapter Summary {#ensembles-summary}
 
 This chapter demonstrates how to combine different models into an ensemble for better predictive performance. The process of creating the ensemble can automatically eliminate candidate models to find a small subset that improves performance. The `r pkg(stacks)` package has a fluent interface for combining resampling and tuning results into a meta-model. 

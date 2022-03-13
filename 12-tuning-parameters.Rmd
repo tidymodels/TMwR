@@ -29,7 +29,7 @@ data_grid <- crossing(A = seq(0.4, 4, length = 200), B = seq(.14, 3.9, length = 
 load("RData/search_examples.RData")
 ```
 
-# Model tuning and the dangers of overfitting {#tuning}
+# Model Tuning and the Dangers of Overfitting {#tuning}
 
 Models have parameters with unknown values that must be estimated in order to use the model for predicting. In ordinary linear regression, there are two parameters $\beta_0$ and $\beta_1$ of the model: 
 
@@ -70,7 +70,7 @@ This chapter will:
 Subsequent chapters go into more detail on specific optimization methods for tuning. 
 
 
-## Tuning parameters for different types of models {#tuning-parameter-examples}
+## Tuning Parameters for Different Types of Models {#tuning-parameter-examples}
 
 Tuning parameters or hyperparameters are often found in machine learning models:
 
@@ -98,7 +98,7 @@ A counterexample where it is inappropriate to tune a parameter is the prior dist
 Another (perhaps more debatable) counterexample of a parameter that does _not_ need to be tuned is the number of trees in a random forest or bagging model. This value should instead be chosen to be large enough to ensure numerical stability in the results; tuning it cannot improve performance as long as the value is large enough to produce reliable results. For random forests, this value is typically in the thousands while the number of trees needed for bagging is around 50 to 100. 
 :::
 
-## What do we optimize? {#what-to-optimize}
+## What do we Optimize? {#what-to-optimize}
 
 How should we evaluate models when we optimize tuning parameters?  It depends on the model and the purpose of the model. 
 
@@ -456,7 +456,7 @@ Hybrid strategies are also an option and can work well. After an initial grid se
 
 Examples of these strategies are discussed in detail in the next two chapters. Before moving on, let's learn how to work with tuning parameter objects in tidymodels, using the `r pkg(dials)` package.
 
-## Tuning parameters in tidymodels {#tuning-params-tidymodels}
+## Tuning Parameters in tidymodels {#tuning-params-tidymodels}
 
 We've already dealt with quite a number of arguments that correspond to tuning parameters for recipe and model specifications in previous chapters. It is possible to tune:
 
@@ -642,7 +642,7 @@ The scale can be changed if desired with the `trans` argument. To use natural un
 penalty(trans = NULL, range = 10^c(-10, 0))
 ```
 
-## Chapter summary
+## Chapter Summary
 
 This chapter introduced the process of tuning model hyperparameters that cannot be directly estimated from the data. Tuning such parameters can lead to overfitting, often by allowing a model to grow overly complex, so using resampled datasets together with appropriate metrics for evaluation is important. There are two general strategies for determining the right values, grid search and iterative search, which we will explore in depth in the next two chapters. In tidymodels, the `tune()` function is used to identify parameters for optimization, and functions from the `r pkg(dials)` package can extract and interact with tuning parameters objects.  
 
