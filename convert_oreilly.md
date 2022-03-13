@@ -18,19 +18,13 @@ render_book(output_format = html_book(keep_md = TRUE),
 
 ## Convert divs to markdown images
 
+In new directory:
+
 ```
 sed -i ".bak" 's/<p class=\"caption\">\(.*\)<\/p>/STARTCAP\1STOPCAP/g' *.md
 sed -i ".bak" 's/<div class=\"figure\" style="text-align: center">//g' *.md
 sed -i ".bak" 's/<img src=\"\(.*\)\" alt=.*/STARTIMAGE\1STOPIMAGE/g' *.md
 perl -i~ -0777 -pe 's/STARTIMAGE(.*?)STOPIMAGE\nSTARTCAP\(\\#fig\:(.*?)\)(.*?)STOPCAP\n<\/div>/[[\2]]\n![\3](\1)/g' *.md
-```
-
-## Make some changes to `index.md`
-
-Make beginning make sense, remove front matter, and also a preface. In the new directory (then edit):
-
-```
-mv index.md preface.md 
 ```
 
 ## Convert to asciidoc using pandoc
@@ -66,12 +60,16 @@ sed -i ".bak" -E "s/\@ref\(([^()]*)\)/<<\1>>/g" *.adoc
 perl -i~ -0777 -pe 's/\[\[refs\]\].*\Z//sg' *.adoc
 perl -i~ -0777 -pe 's/\.\(\#tab\:(.*?)\)(.*?)/[[\1]]\n\.\2/g' *.adoc
 sed -i ".bak" 's/\[\[\(.*\)\]\] image:\(.*\)\[\(.*\)\]/\[\[\1\]\]\n\.\3\nimage::\2/g' *.adoc
+sed -i ".bak" 's/Figure <</<</g' *.adoc
+sed -i ".bak" 's/Table <</<</g' *.adoc
 ```
 
 ## Make preface [actually a preface](https://docs.atlas.oreilly.com/writing_in_asciidoc.html#prefaces-PntlujUD)
 
+Make beginning make sense, remove front matter, and also a preface. In the new directory (then edit):
 
 ```
+mv index.adoc preface.adoc
 emacs preface.adoc
 ```
 
@@ -88,6 +86,7 @@ rm *.bak
 rm *.md
 rm *.html
 rm *~
+rm premade/*.svg
 rm -r libs
 ```
 
