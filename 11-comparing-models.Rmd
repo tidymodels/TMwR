@@ -19,13 +19,13 @@ load("RData/post_intervals.RData")
 keep_pred <- control_resamples(save_pred = TRUE)
 ```
 
-# Comparing models with resampling {#compare}
+# Comparing Models with Resampling {#compare}
 
 Once we create two or more models, the next step is to compare them. In some cases, comparisons might be _within-model_, where the same model might be evaluated with different features or preprocessing methods. Alternatively, _between-model_ comparisons, such as when we compared linear regression and random forest models in Chapter \@ref(resampling), are the more common scenario.
 
 In either case, the result is a collection of resampled summary statistics (e.g. RMSE, accuracy, etc.) for each model. The first section of this chapter demonstrates how workflow sets can be used to fit multiple models. The second section discusses important aspects of resampling statistics. Two additional sections follow describing how to formally compare models.
 
-## Creating multiple models {#workflow-set}
+## Creating Multiple Models {#workflow-set}
 
 Previously, Section \@ref(workflow-sets-intro) describes the idea of a workflow set where different preprocessors and/or models can be combinatorially generated. In the last chapter, we used a recipe for the Ames data that included an interaction term as well as spline functions for longitude and latitude. To demonstrate more with workflow sets, let's create different linear models that add these preprocessing steps incrementally. We'll create three recipes then combine them into a workflow set: 
 
@@ -109,7 +109,7 @@ The random forest method is doing the best job and there are minor improvements 
 
 Now that we have 10 resampled performance estimates for each of four models, these summary statistics can be used to make between-model comparisons.
 
-## Resampled performance statistics {#resampled-stats}
+## Resampled Performance Statistics {#resampled-stats}
 
 Considering these results, it appears that the additional terms do not profoundly improve the _mean_ RMSE or R<sup>2</sup> statistics for the linear models. The difference is small, but it might be larger than the experimental noise in the system, i.e., considered statistically significant. We can formally **test the hypothesis that the additional terms increase R<sup>2</sup>**. 
 
@@ -185,7 +185,7 @@ Before making model comparisons or looking at the resampling results, it can be 
 
 Practical significance is subjective; two people can have very different ideas on the threshold for importance. However, as shown later, this consideration can be very helpful when deciding between models.  
 
-## Simple hypothesis testing methods
+## Simple Hypothesis Testing Methods
 
 Consider the familiar linear statistical model: 
 
@@ -274,7 +274,7 @@ In other words, if this analysis were repeated a large number of times under the
 The next section takes a more general approach to making formal comparisons between models using random effects and Bayesian statistics [@mcelreath2020statistical]. While the model is more complex than the ANOVA method shown above, the interpretation is more simple and straight-forward than the p-value approach.  
 
 
-## Bayesian methods {#tidyposterior}
+## Bayesian Methods {#tidyposterior}
 
 The previous ANOVA model for these data had the form: 
 
@@ -493,7 +493,7 @@ ggplot(intervals,
 
 The width of the intervals decreases as more resamples are added. Clearly, going from ten resamples to thirty has a larger impact than going from eighty to 100. There are diminishing returns for using a "large" number of resamples ("large" will be different for different data sets). 
 
-## Chapter summary {#compare-summary}
+## Chapter Summary {#compare-summary}
 
 This chapter describes formal statistical methods for testing differences in performance between models. We demonstrated the within-resample effect, where results for the same resample tend to be similar; this aspect of resampled summary statistics requires appropriate analysis in order for valid model comparisons. Further, although statistical significance and practical significance are both important concepts for model comparisons, they are different. 
 

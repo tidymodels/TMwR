@@ -25,7 +25,7 @@ cell_folds <- vfold_cv(cells)
 roc_res <- metric_set(roc_auc)
 ```
 
-# Iterative search {#iterative-search}
+# Iterative Search {#iterative-search}
 
 Chapter \@ref(grid-search) demonstrated how grid search takes a pre-defined set of candidate values, evaluates them, then chooses the best settings. Iterative search methods pursue a different strategy. During the search process, they predict which values to test next. 
 
@@ -37,7 +37,7 @@ This chapter outlines two search methods. First, we discuss _Bayesian optimizati
 
 We use the same data on cell characteristics as the previous chapter for illustration, but change the model. This chapter uses a support vector machine model because it provides nice two-dimensional visualizations of the search processes. 
 
-## A support vector machine model {#svm}
+## A Support Vector Machine Model {#svm}
 
 We once again use the cell segmentation data, described in Section \@ref(evaluating-grid), for modeling, with a support vector machine (SVM) model to demonstrate sequential tuning methods. See @apm for more information on this model. The two tuning parameters to optimize are the SVM cost value and the radial basis function kernel parameter $\sigma$. Both parameters can have a profound effect on the model complexity and performance. 
 
@@ -117,7 +117,7 @@ collect_metrics(svm_initial)
 
 This initial grid shows fairly equivalent results, with no individual point much better than any of the others. These results can be ingested by the iterative tuning functions we discuss in the following sections to be used as initial values. 
 
-## Bayesian  optimization
+## Bayesian Optimization
 
 Bayesian optimization techniques analyze the current resampling results and create a predictive model to suggest tuning parameter values that have yet to be evaluated. The suggested parameter combination is then resampled. These results are then used in another predictive model that recommends more candidate values for testing, and so on. The process proceeds for a set number of iterations or until no further improvements occur. @Shahriari and @frazier2018tutorial are good introductions to Bayesian optimization. 
 
@@ -770,7 +770,7 @@ If the search is seeded with an initial grid, a space-filling design would proba
 
 Finally, if the user interrupts the `tune_bayes()` computations, the function returns the current results (instead of resulting in an error).  
 
-## Simulated annealing 
+## Simulated Annealing 
 
 Simulated annealing (SA)  [@kirkpatrick1983optimization;@van1987simulated] is a general nonlinear search routine inspired by the process in which metal cools. It is a global search method that can effectively navigate many different types of search landscapes, including discontinuous functions. Unlike most gradient-based optimization routines, simulated annealing can reassess previous solutions. 
 
@@ -1256,7 +1256,7 @@ sa_1 + sa_2 + sa_3 + sa_4 + sa_5 +  plot_layout(ncol = 3)
 
 In the first phase, the search initially finds two new global optima (shown with the solid points). From these, there are several settings that are immediately discarded (light gray lines) while others are suboptimal but acceptable. After a set number of failures, it restarts at the last solid point. The other phases show a slow improvement in global optima with many discarded settings along the way. The process eventually finds its way to the region of optimal results as it exhausts the total number of allowed iterations.
 
-## Chapter summary {#iterative-summary}
+## Chapter Summary {#iterative-summary}
 
 This chapter describes two iterative search methods for optimizing tuning parameters. Both can be effective at finding good values alone or as a follow-up method that is used after an initial grid search to further `r pkg(finetune)` performance. 
 

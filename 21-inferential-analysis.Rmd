@@ -9,7 +9,7 @@ theme_set(theme_bw())
 data("bioChemists", package = "pscl")
 ```
 
-# Inferential analysis {#inferential}
+# Inferential Analysis {#inferential}
 
 :::rmdnote
 In Section \@ref(model-types), we outlined a taxonomy of models and said that most models can be categorized as descriptive, inferential, and/or predictive. 
@@ -27,7 +27,7 @@ There has been a push in recent years to move away from p-values in favor of oth
 
 In this chapter, we describe how to use `r pkg(tidymodels)` for fitting and assessing inferential models. In some cases, the tidymodels framework can help users work with the objects produced by their models. In others, it can help make assessments of the quality of a given model.
 
-## An example: Inference regarding counts
+## An Example: Inference Regarding Counts
 
 We'll use biochemistry publication data from the `r pkg(pscl)` package. These data consist of information on 915 Ph.D. biochemistry graduates and tries to explain factors that impact their academic productivity (measured via number of articles published within three years). The predictors include the gender of the graduate, their marital status, the number of children that are at least five years old, the prestige of their department, and the number of articles produced by their mentor in the same time period. The data reflect biochemistry doctorates who finished their education between 1956 and 1963. The data are a somewhat biased sample of all of the biochemistry doctorates given during this period (based on completeness of information).
 
@@ -57,7 +57,7 @@ ggplot(bioChemists, aes(x = art)) +
 
 Since the outcome data are counts, the most common distribution assumption to make is that the outcome has a Poisson distribution. This chapter will use these data for several types of analyses.
 
-## Comparisons with two-sample tests
+## Comparisons with Two-Sample Tests
 
 The author's original goal was to determine if there is a difference in publications between men and women [@Long1992]. The data from the study show:
 
@@ -188,7 +188,7 @@ Since the vertical line in Figure \@ref(fig:permutation-dist) is far away from t
 
 The two-sample tests shown above are probably suboptimal since they do not take into account other factors that might explain the observed relationship between publication rate and sex. Let's move on to a more complex model that can take into consideration additional covariates.
 
-## Log-linear models
+## Log-Linear Models
 
 The focus of the rest of this chapter will be on a generalized linear model [@Dobson99] where we assume the counts follow a Poisson distribution. For this model, the covariates/predictors enter the model in a log-linear fashion.
 
@@ -287,7 +287,7 @@ anova(
 
 The results are the same and, based on these and the confidence interval for this parameter, we'll exclude `phd` from further analyses since it does not appear to be associated with the outcome. 
 
-## A more complex model
+## A More Complex Model
 
 For count data, there are occasions where the number of zero counts is larger than what a simple Poisson distribution would prescribe. A more complex model appropriate in this situation is the zero-inflated Poisson (ZIP) model; see @Mullahy, @Lambert1992, and @JSSv027i08. Here, there are two sets of covariates: one for the non-zero count data and others that affect the probability of zeros (denoted as $\pi$). The mean function is
 
@@ -421,6 +421,6 @@ bootstrap_models %>% int_t(zero_coefs)
 
 From these results, we can get a good idea of which predictor(s) to include in the zero count probability model. It may be sensible to refit a smaller model to assess if the bootstrap distribution for `ment` is still skewed.
 
-## Chapter summary {#inference-summary}
+## Chapter Summary {#inference-summary}
 
 This chapter demonstrates just a small subset of what is available for inferential analysis in tidymodels and has focused on resampling and frequentist methods. Arguably, Bayesian analysis is a very effective and often superior approach for inference. A variety of Bayesian models are available via `r pkg(parsnip)`. Additionally, the `r pkg(multilevelmod)` package (currently on GitHub) enables users to fit hierarchical Bayesian and non-Bayesian models (e.g., mixed models). The `r pkg(broom.mixed)` and `r pkg(tidybayes)` packages are excellent tools for extracting data for plots and summaries. Finally, for data sets with a single hierarchy, such as simple longitudinal or repeated measures data, `r pkg(rsample)`'s `group_vfold_cv()` function facilitates straightforward out-of-sample characterizations of model performance.

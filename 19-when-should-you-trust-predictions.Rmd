@@ -7,7 +7,7 @@ library(probably)
 load("RData/Chicago_2020.RData")
 ```
 
-# When should you trust your predictions? {#trust}
+# When Should You Trust Your Predictions? {#trust}
 
 A predictive model can almost always produce a prediction, given input data. However, there are plenty of situations where it is **inappropriate** to do so. When a new data point is well outside of the range of data used to create the model, making a prediction may be an inappropriate _extrapolation_. A more qualitative example of an inappropriate prediction occurs when the model is used in a completely different context. The cell segmentation data used in Chapter \@ref(iterative-search) flags when human breast cancer cells can or cannot be accurately isolated inside an image. A model built from these data could be inappropriately applied to stomach cells for the same purpose. We can produce a prediction but it is unlikely to be **applicable** to the different cell type.
 
@@ -16,7 +16,7 @@ This chapter discusses two methods for quantifying the potential quality of a pr
 - The first uses the predicted values to alert the user that the results may be suspect. 
 - The second approach uses the predictors to measure the amount of extrapolation (if any) for new samples. 
 
-## Equivocal results {#equivocal-zones}
+## Equivocal Results {#equivocal-zones}
 
 :::rmdwarning
 In some cases, the amount of uncertainty associated with a prediction is too high to be trusted. 
@@ -71,6 +71,7 @@ two_class_mod <-
 print(two_class_mod, digits = 3)
 ```
 
+The fitted class boundary is overlaid onto the test set in Figure \@ref(fig:glm-boundaries). The data points closest to the class boundary are the most uncertain. If their values changed slightly, their predicted class might change. One simple method for disqualifying some results is to call them "equivocal" if the values are within some range around 50% (or whatever the appropriate probability cutoff might be). Depending on the problem that the model is being applied to, this might indicate that another measurement should be collected or that we require more information before a trustworthy prediction is possible.
 
 ```{r glm-boundaries}
 #| echo = FALSE, 
@@ -104,8 +105,6 @@ grid_pred %>%
   scale_fill_gradient2(low = "#FDB863", mid = "white", high = "#B2ABD2", midpoint = .5) + 
   scale_color_manual(values = c("#2D004B", "darkorange"))
 ```
-
-The fitted class boundary is overlaid onto the test set in Figure \@ref(fig:glm-boundaries). The data points closest to the class boundary are the most uncertain. If their values changed slightly, their predicted class might change. One simple method for disqualifying some results is to call them "equivocal" if the values are within some range around 50% (or whatever the appropriate probability cutoff might be). Depending on the problem that the model is being applied to, this might indicate that another measurement should be collected or that we require more information before a trustworthy prediction is possible.  
 
 We could base the width of the band around the cutoff on how performance improves when the uncertain results are removed. However, we should also estimate the reportable rate (the expected proportion of usable results). For example, it would not be useful in real-world situations to have perfect performance but only release predictions on 2% of the samples passed to the model. 
 
@@ -148,7 +147,7 @@ test_pred %>% conf_mat(class, .pred_with_eqz)
 
 There is also an `is_equivocal()` function for filtering these rows from the data. 
 
-Does the equivocal zone help improve accuracy? Let's look over different buffer sizes:
+Does the equivocal zone help improve accuracy? Let's look over different buffer sizes, as shown in Figure \@ref(fig:equivocal-zone-results):
 
 ```{r trust-eq-calcs, eval = FALSE}
 # A function to change the buffer then compute performance.
@@ -176,7 +175,7 @@ map_dfr(seq(0, .1, length.out = 40), eq_zone_results) %>%
 #| fig.alt = "The effect of equivocal zones on model performance. There is a slight increase in accuracy at the expense of a falling reportable rate."
 ```
 
-As shown in Figure \@ref(fig:equivocal-zone-results), accuracy improves by a few percentage points but at the cost of nearly 10% of predictions being unusable! The value of such a compromise depends on how the model predictions will be used. 
+Accuracy improves by a few percentage points but at the cost of nearly 10% of predictions being unusable! The value of such a compromise depends on how the model predictions will be used. 
 
 This analysis focused on using the predicted class probability to disqualify points, since this is a fundamental measure of uncertainty in classification models. A slightly better approach would be to use the standard error of the class probability. Since we used a Bayesian model, the probability estimates shown above are actually the mean of the posterior predictive distribution. In other words, the Bayesian model gives us a distribution for the class probability.  Measuring the standard deviation of this distribution gives us a _standard error of prediction_ of the probability. In most cases, this value is directly related to the mean class probability. You might recall that, for a Bernoulli random variable with probability $p$, the variance is $p(1-p)$. Because of this relationship, the standard error is largest when the probability is 50%. Instead of assigning an equivocal result using the class probability, we could instead use a cutoff on the standard error of prediction. 
 
@@ -213,7 +212,7 @@ grid_pred %>%
 
 Using the standard error as a measure to preclude samples from being predicted can also be applied to models with numeric outcomes. However, as shown in the next section, this may not always work.  
 
-## Determining model applicability {#applicability-domains}
+## Determining Model Applicability {#applicability-domains}
 
 Equivocal zones try to measure the reliability of a prediction based on the model outputs. It may be that model statistics, such as the standard error of prediction, cannot measure the impact of extrapolation. Let's take the Chicago train data used extensively in [Kuhn and Johnson (2019)](https://bookdown.org/max/FES/chicago-intro.html) and first shown in Section \@ref(examples-of-tidyverse-syntax). The goal is to predict the number of customers entering the Clark and Lake train station each day. 
 
@@ -543,7 +542,7 @@ The 2020 distance values indicate that these predictor values are outside of the
 One important aspect of this analysis concerns which predictors are used to develop the applicability domain model. In the analysis above, we used the raw predictor columns. However, in building the model, PLS score features were used in their place. Which of these should `apd_pca()` use? The  `apd_pca()` function can also take a recipe as the input (instead of a formula) so that the distances reflect the PLS scores instead of the individual predictor columns. Users can evaluate both methods to understand which one gives more relevant results. 
 :::
 
-## Chapter summary {#trust-summary}
+## Chapter Summary {#trust-summary}
 
 This chapter shows two methods for evaluating whether predictions should be reported to the consumers of models. Equivocal zones deal with outcomes/predictions and can be helpful when the amount of uncertainty in a prediction is too large. 
 

@@ -20,7 +20,7 @@ if (!grepl("mingw32", R.Version()$platform)) {
 }
 ```
 
-# Screening many models  {#workflow-sets}
+# Screening Many Models  {#workflow-sets}
 
 We introduced workflow sets in Chapter \@ref(workflows) and demonstrated how to use them with resampled data sets in Chapter \@ref(compare). In this chapter, we discuss these sets of multiple modeling workflows in more detail and describe a use case where they can be helpful. 
 
@@ -32,7 +32,7 @@ A good strategy is to spend some initial effort trying a variety of modeling app
 
 Workflow sets provide a user interface to create and manage this process. We'll also demonstrate how to evaluate these models efficiently using the racing methods discussed in Section \@ref(racing-example).
 
-## Modeling concrete strength
+## Modeling Concrete Strength
 
 Let's use the concrete data from _Applied Predictive Modeling_ [@apm] as an example. Chapter 10 of that book demonstrated models to predict the compressive strength of concrete mixtures using the ingredients as predictors. A wide variety of models were evaluated with different predictor sets and preprocessing needs. How can workflow sets make the large scale testing of models easier? 
 
@@ -160,7 +160,7 @@ nnet_param <-
 
 How can we match these models to their recipes, tune them, then evaluate their performance efficiently? A workflow set offers a solution. 
 
-## Creating the workflow set
+## Creating the Workflow Set
 
 Workflow sets take named lists of preprocessors and model specifications and combine them into an object containing multiple workflows. There are three possible kinds of preprocessors: 
 
@@ -237,7 +237,7 @@ all_workflows <-
 all_workflows
 ```
 
-## Tuning and evaluating the models
+## Tuning and Evaluating the Models
 
 Almost all of these workflows contain tuning parameters. In order to evaluate their performance, we can use the standard tuning or resampling functions (e.g., `tune_grid()` and so on). The `workflow_map()` function will apply the same function to all of the workflows in the set; the default is `tune_grid()`. 
 
@@ -341,7 +341,7 @@ There are also methods for `collect_predictions()` and `collect_metrics()`.
 
 This approach to model screening fits a total of `r format(num_grid_models, big.mark = ",")` models. Using `r cores` workers in parallel, the estimation process took  `r round(full_results_time[3]/60/60, 1)` hours to complete.
 
-## Efficiently screening models {#racing-example}
+## Efficiently Screening Models {#racing-example}
 
 One effective method for screening a large set of models efficiently is to use the racing approach described in Section \@ref(racing). With a workflow set, we can use the `workflow_map()` function for this racing approach. Recall that after we pipe in our workflow set, the argument we use is the _function_ to apply to the workflows; in this case, we can use a value of `"tune_race_anova"`. We also pass an appropriate control object; otherwise the options would be the same as the code in the previous section. 
 
@@ -456,7 +456,7 @@ matched_results %>%
 
 While the racing approach selected the same candidate parameters as the complete grid for only `r round(mean(matched_results$config_race == matched_results$config_complete) * 100, 2)`% of the models, the performance metrics of the models selected by racing were nearly equal. The  correlation of RMSE values was `r signif(cor(matched_results$race, matched_results$complete), 3)` and the rank correlation was `r signif(cor(matched_results$race, matched_results$complete, method = "spearman"), 3)`. This indicates that, within a model, there were multiple tuning parameter combinations that had nearly identical results. 
 
-## Finalizing a model
+## Finalizing a Model
 
 Similar to what we have shown in previous chapters, choosing the final model and fitting it on the training set is straightforward. The first step is to pick a workflow to finalize. Since the boosted tree model worked well, we'll extract that from the set, update the parameters with the numerically best settings, and fit to the training set: 
 
@@ -498,7 +498,7 @@ boosting_test_results %>%
 #| fig.alt = "Observed versus predicted values for the test set. The values fall closely along the 45 degree line of identity."
 ```
 
-## Chapter summary {#workflow-sets-summary}
+## Chapter Summary {#workflow-sets-summary}
 
 Often a data practitioner needs to consider a large number of possible modeling approaches for a task at hand. This chapter illustrates how to use workflow sets to investigate multiple models or feature engineering strategies in such a situation. Racing methods can more efficiently rank models than fitting every candidate model being considered. 
 

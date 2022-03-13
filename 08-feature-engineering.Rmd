@@ -18,7 +18,7 @@ lm_wflow <-
   add_variables(outcome = Sale_Price, predictors = c(Longitude, Latitude))
 ```
 
-# Feature engineering with recipes {#recipes}
+# Feature Engineering with recipes {#recipes}
 
 Feature engineering encompasses activities that reformat predictor values to make them easier for a model to use effectively. This includes transformations and encodings of the data to best represent their important characteristics. Imagine that you have two predictors in a data set that can be more effectively represented in your model of interest as a ratio; creating a new predictor from the ratio of the original two is a simple example of feature engineering. 
 
@@ -42,7 +42,7 @@ In this chapter, we introduce the [`r pkg(recipes)`](https://recipes.tidymodels.
 
 This chapter uses the Ames housing data and the R objects created in the book so far, as summarized in Section \@ref(workflows-summary).
 
-## A simple recipe for the Ames housing data 
+## A Simple `recipe()` for the Ames Housing Data 
 
 In this section, we will focus on a small subset of the predictors available in the Ames housing data: 
 
@@ -110,7 +110,7 @@ What is the advantage to using a recipe? There are a few, including:
  
  
 
-## Using recipes
+## Using Recipes
 
 As we discussed in Chapter \@ref(workflows), preprocessing choices and feature engineering should typically be considered part of a modeling workflow, not as a separate task. The `r pkg(workflows)` package contains high level functions to handle different types of preprocessors. Our previous workflow (`lm_wflow`) used a simple set of `r pkg(dplyr)` selectors. Instead of that approach, let's use the `simple_ames` recipe to preprocess data for modeling.
 
@@ -163,7 +163,7 @@ lm_fit %>%
 There are tools for using (and debugging) recipes outside of workflow objects. These are described in Section \@ref(recipe-functions). 
 :::
 
-## How data are used by the recipe
+## How Data are Used by the `recipe()`
 
 Data are passed to recipes at different stages. 
 
@@ -173,9 +173,9 @@ Second, when preparing the data using `fit(workflow, data)`, the training data a
 
 Finally, when using `predict(workflow, new_data)`, no model or preprocessor parameters are re-estimated using the values in `new_data`. Take centering and scaling using `step_normalize()` as an example. Using this step, the means and standard deviations from the appropriate columns are determined from the training set; new samples at prediction time are standardized using these values from training when `predict()` is invoked. 
 
-Before proceeding, let's take an extended tour of the capabilities of recipes. 
+Before proceeding, let's take an extended tour of the capabilities of `r pkg(recipes)`. 
 
-## Examples of recipe steps {#example-steps}
+## Examples of `recipe()` Steps {#example-steps}
 
 ### Encoding qualitative data in a numeric format  {#dummies}
 
@@ -235,7 +235,7 @@ Why not all five? The most basic reason is simplicity; if you know the value for
 
 The full set of encodings can be used for some models. This is traditionally called the "one-hot" encoding and can be achieved using the `one_hot` argument of `step_dummy()`. 
 
-One helpful feature of `step_dummy()` is that there is more control over how the resulting dummy variables are named. In base R, dummy variable names mash the variable name with the level, resulting in names like `NeighborhoodVeenker`. Recipes, by default, use an underscore as the separator between the name and level (e.g., `Neighborhood_Veenker`) and there is an option to use custom formatting for the names. The default naming convention in recipes makes it easier to capture those new columns in future steps using a selector, such as `starts_with("Neighborhood_")`. 
+One helpful feature of `step_dummy()` is that there is more control over how the resulting dummy variables are named. In base R, dummy variable names mash the variable name with the level, resulting in names like `NeighborhoodVeenker`. Recipes, by default, use an underscore as the separator between the name and level (e.g., `Neighborhood_Veenker`) and there is an option to use custom formatting for the names. The default naming convention in `r pkg(recipes)` makes it easier to capture those new columns in future steps using a selector, such as `starts_with("Neighborhood_")`. 
 
 Traditional dummy variables require that all of the possible categories be known to create a full set of numeric features. There are other methods for doing this transformation to a numeric format. _Feature hashing_ methods only consider the value of the category to assign it to a predefined pool of dummy variables. _Effect_ or _likelihood encodings_ replace the original data with a single numeric column that measures the _effect_ of those data. Both feature hashing and effect encoding methods can seamlessly handle situations where a novel factor level is encountered in the data. Chapter \@ref(categorical) explores these and other methods for encoding categorical data, beyond straightforward dummy or indicator variables.
 
@@ -413,7 +413,7 @@ When using this flexible step, use extra care to avoid data leakage in your prep
 Recipes can also handle data that are not in the traditional structure where the columns are features. For example, the [`r pkg(textrecipes)`](https://textrecipes.tidymodels.org/) package can apply natural language processing methods to the data. The input column is typically a string of text and different steps can be used to tokenize the data (e.g., split the text into separate words), filter out tokens, and create new features appropriate for modeling. 
 
 
-## Skipping steps for new data {#skip-equals-true}
+## Skipping Steps for New Data {#skip-equals-true}
 
 The sale price data are already log transformed in the `ames` data frame. Why not use:
 
@@ -456,7 +456,7 @@ skip_list <- paste0("`", steps[skip], "()`")
 At the time of this writing, the step functions in the `r pkg(recipes)` and `r pkg(themis)` packages that are only applied to the modeling data are: `r knitr::combine_words(skip_list)`.
 
 
-## Tidy a recipe
+## Tidy a `recipe()`
 
 In Section \@ref(tidiness-modeling), we introduced the `tidy()` verb for statistical objects. There is also a `tidy()` method for recipes, as well as individual recipe steps. Before proceeding, let's create an extended recipe for the Ames data using some of the new steps we've discussed in this chapter: 
 
@@ -523,11 +523,11 @@ tidy(estimated_recipe, number = 2)
 
 Each `tidy()` method returns the relevant information about that step. For example, the `tidy()` method for `step_dummy()` returns a column with the variables that were converted to dummy variables and another column with all of the known levels for each column. 
 
-## Column roles
+## Column Roles
 
 When a formula is used with the initial call to `recipe()` it assigns _roles_ to each of the columns depending on which side of the tilde that they are on. Those roles are either `"predictor"` or `"outcome"`. However, other roles can be assigned as needed. 
 
-For example, in our Ames data set, the original raw data contained a field for address^[Our version of these data does not contain that column.]. It may be useful to keep that column in the data so that, after predictions are made, problematic results can be investigated in detail. In other words, the column is important but isn't a predictor or outcome. 
+For example, in our Ames data set, the original raw data contained a field for address.^[Our version of these data does not contain that column.] It may be useful to keep that column in the data so that, after predictions are made, problematic results can be investigated in detail. In other words, the column is important but isn't a predictor or outcome. 
 
 To solve this, the `add_role()`, `remove_role()`, and `update_role()` functions can be helpful. For example, for the house price data, the street address column could be modified using
 
@@ -541,9 +541,9 @@ This can be helpful when the data are _resampled_. It helps to keep the columns 
 
 Finally, all step functions have a `role` field that can assign roles to the results of the step. In many cases, columns affected by a step retain their existing role. For example, the `step_log()` calls to the `ames_rec` object above affected the `Gr_Liv_Area` column. For that step, the default behavior is to keep the existing role for this column since no new column is created. As a counter-example, the step to produce splines defaults new columns to have a role of `"predictor"` since that is usually how spline columns are used in a model. Most steps have sensible defaults but, since the defaults can be different, be sure to check the documentation page to understand which role(s) will be assigned. 
 
-## Chapter summary {#recipes-summary}
+## Chapter Summary {#recipes-summary}
 
-In this chapter, you learned about using recipes for flexible feature engineering and data preprocessing, from creating dummy variables to handling class imbalance and more. Feature engineering is an important part of the modeling process where information leakage can easily occur and good practices must be adopted. Between the `r pkg(recipes)` package and other packages that extend recipes, there are over 100 available steps. All possible recipe steps are enumerated at [`tidymodels.org/find`](https://www.tidymodels.org/find/). The recipes framework provides a rich data manipulation environment for preprocessing and transforming data prior to modeling. 
+In this chapter, you learned about using `r pkg(recipes)` for flexible feature engineering and data preprocessing, from creating dummy variables to handling class imbalance and more. Feature engineering is an important part of the modeling process where information leakage can easily occur and good practices must be adopted. Between the `r pkg(recipes)` package and other packages that extend recipes, there are over 100 available steps. All possible recipe steps are enumerated at [`tidymodels.org/find`](https://www.tidymodels.org/find/). The `r pkg(recipes)` framework provides a rich data manipulation environment for preprocessing and transforming data prior to modeling. 
 Additionally, [`tidymodels.org/learn/develop/recipes/`](https://www.tidymodels.org/learn/develop/recipes/) shows how custom steps can be created.
 
 Our work here has used recipes solely inside of a workflow object. For modeling, that is the recommended use because feature engineering should be estimated together with a model. However, for visualization and other activities, a workflow may not be appropriate; more recipe-specific functions may be required. Chapter \@ref(dimensionality) discusses lower-level APIs for fitting, using, and troubleshooting recipes. 
