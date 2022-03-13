@@ -58,7 +58,7 @@ To fit an ordinary linear model in R, the `lm()` function is commonly used. The 
 ```r
 rate ~ temp
 ```
-specifies that the chirp rate is the outcome (since it is on the left-hand side of the tilde `~`) and that the temperature value is the predictor^[Most model functions implicitly add an intercept column.]. Suppose the data contained the time of day in which the measurements were obtained in a column called `time`. The formula:
+specifies that the chirp rate is the outcome (since it is on the left-hand side of the tilde `~`) and that the temperature value is the predictor.^[Most model functions implicitly add an intercept column.] Suppose the data contained the time of day in which the measurements were obtained in a column called `time`. The formula:
 
 ```r
 rate ~ temp + time
@@ -273,7 +273,7 @@ predict(main_effect_fit, new_values, na.action = na.fail)
 predict(main_effect_fit, new_values, na.action = na.omit)
 ```
 
-From a user's point of view, `na.omit()` can be problematic. In our example, `new_values` has `r nrow(new_values)` rows but only `r nrow(new_values) - 1` would be returned with `na.omit()`. To adjust for this, the user would have to determine which row had the missing value and interleave a missing value in the appropriate place if the predictions were merged into `new_values`^[A base R policy called `na.exclude()` does exactly this.]. While it is rare that a prediction function uses `na.omit()` as its missing data policy, this does occur. Users who have determined this as the cause of an error in their code find it _quite memorable_. 
+From a user's point of view, `na.omit()` can be problematic. In our example, `new_values` has `r nrow(new_values)` rows but only `r nrow(new_values) - 1` would be returned with `na.omit()`. To adjust for this, the user would have to determine which row had the missing value and interleave a missing value in the appropriate place if the predictions were merged into `new_values`.^[A base R policy called `na.exclude()` does exactly this.] While it is rare that a prediction function uses `na.omit()` as its missing data policy, this does occur. Users who have determined this as the cause of an error in their code find it _quite memorable_. 
 
 To resolve the usage issues described here, the tidymodels packages have a set of design goals. Most of the tidymodels design goals fall under the existing rubric of **Design for Humans** from the tidyverse [@tidyverse], but with specific applications for modeling code. There are a few additional design goals that complement those of the tidyverse. Some examples: 
 
@@ -285,7 +285,7 @@ To resolve the usage issues described here, the tidymodels packages have a set o
 
 * Functions should take the **data structures that users have** as opposed to the data structure that developers want. For example, a model function's _only_ interface should not be constrained to matrices. Frequently, users will have non-numeric predictors such as factors. 
 
-Many of these ideas are described in the tidymodels guidelines for model implementation^[<https://tidymodels.github.io/model-implementation-principles>]. In subsequent chapters, we will illustrate examples of existing issues, along with their solutions. 
+Many of these ideas are described in the tidymodels guidelines for model implementation.^[<https://tidymodels.github.io/model-implementation-principles>] In subsequent chapters, we will illustrate examples of existing issues, along with their solutions. 
 
 :::rmdnote
 There are a few existing R packages that provide a unified interface to harmonize these heterogeneous modeling APIs, such as `r pkg(caret)` and `r pkg(mlr)`. The tidymodels framework is similar to these in adopting a unification of the function interface, as well as enforcing consistency in the function names and return values. It is different in its opinionated design goals and modeling implementation.
