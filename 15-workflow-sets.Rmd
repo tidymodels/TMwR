@@ -498,7 +498,7 @@ boosting_test_results %>%
 #| fig.alt = "Observed versus predicted values for the test set. The values fall closely along the 45 degree line of identity."
 ```
 
-## Chapter summary {#workflow-sets-summary}
+## Chapter Summary {#workflow-sets-summary}
 
 Often a data practitioner needs to consider a large number of possible modeling approaches for a task at hand. This chapter illustrates how to use workflow sets to investigate multiple models or feature engineering strategies in such a situation. Racing methods can more efficiently rank models than fitting every candidate model being considered. 
 
