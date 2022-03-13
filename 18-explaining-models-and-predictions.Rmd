@@ -27,7 +27,7 @@ rf_fit <- rf_wflow %>% fit(data = ames_train)
 lm_fit <- lm_wflow %>% fit(data = ames_train)
 ```
 
-# Explaining models and predictions {#explain}
+# Explaining Models and Predictions {#explain}
 
 In Section \@ref(model-types), we outlined a taxonomy of models and suggested that models typically are built as one or more of descriptive, inferential, or predictive. We suggested that model performance, as measured by appropriate metrics (like RMSE for regression or area under the ROC curve for classification), can be important for all applications of modeling. Similarly, model explanations, answering _why_ a model makes the predictions it does, can be important whether the purpose of your model is largely descriptive, to test a hypothesis, or to make a prediction. Answering the question "why?" allows modeling practitioners to understand which features were important in predictions and even how model predictions would change under different values for the features.
 
@@ -38,7 +38,7 @@ There are two types of model explanations, **global** and **local**. Global mode
 :::
 
 
-## Software for model explanations
+## Software for Model Explanations
 
 The tidymodels framework does not itself contain software for model explanations. Instead, models trained and evaluated with tidymodels can be explained with other, supplementary software in R packages such as `r pkg(lime)`, `r pkg(vip)`, and `r pkg(DALEX)`. We ourselves often choose: 
 
@@ -104,7 +104,7 @@ Dealing with significant feature engineering transformations during model explai
 - **derived features**, such as those created via dimensionality reduction (Chapter \@ref(dimensionality)) or interactions and spline terms, as in this example.
 
 
-## Local explanations
+## Local Explanations
 
 Local model explanations provide information about a prediction for a single observation. For example, let's consider an older duplex in the North Ames neighborhood (Section \@ref(exploring-important-features)).
 
@@ -230,7 +230,7 @@ shap_house %>%
 Unlike the duplex, the size and age of this house contribute to its price being higher.
 
 
-## Global explanations
+## Global Explanations
 
 Global model explanations, also called global feature importance or variable importance, help us understand which features are most important in driving the predictions of these two models overall, aggregated over the whole training set. While the previous section addressed what variables or features are most important in predicting sale price for an individual home, global feature importance addresses what variables are most important for a model in aggregate.
 
@@ -303,7 +303,7 @@ ggplot_imp(vip_lm, vip_rf)
 
 The dashed line in each panel shows the RMSE for the full model, either the linear model or the random forest model. Features further to the right are more important, because permuting them results in higher RMSE. There is quite a lot of interesting information to learn from this plot; for example, neighborhood is quite important in the linear model with interactions/splines but the second least important feature for the random forest model.
 
-## Building global explanations from local explanations
+## Building Global Explanations from Local Explanations
 
 So far in this chapter, we have focused on local model explanations for a single observation (via Shapley additive explanations) and global model explanations for a data set as a whole (via permuting features). It is also possible to build global model explanations up by aggregating local model explanations, as with _partial dependence profiles_.
 
@@ -409,7 +409,7 @@ as_tibble(pdp_liv$agr_profiles) %>%
 
 There is not one right approach for building model explanations and the options outlined in this chapter are not exhaustive. We point you to @Biecek2021 and @Molnar2021 for further reading, but highlight in this chapter good options for explanations at both the individual and global level, and how to bridge from one to the other.
 
-## Beans beans beans
+## Beans Beans Beans
 
 In Chapter \@ref(dimensionality), we discussed how to use dimensionality reduction as a feature engineering or preprocessing step when modeling high dimensional data. For our example data set of dry bean morphology measures predicting bean type, we saw great results from partial least squares (PLS) dimensionality reduction combined with a regularized discriminant analysis model. Which of those morphological characteristics were _most_ important in the bean type predictions? We can use the same approach outlined throughout this chapter to create a model-agnostic explainer and compute, say, global model explanations.
 
@@ -458,7 +458,7 @@ $$\text{SF4} = \frac{A}{\pi(L/2)(l/2)}$$
 
 Shape factor 1 (the ratio of the major axis to the area), the minor axis length, and roundness are the next most important bean characteristics for predicting bean variety.
 
-## Chapter summary {#explain-summary}
+## Chapter Summary {#explain-summary}
 
 For some types of models, the answer to "why" a model made a certain prediction is straightforward, but for other types of models, we must use separate explainer algorithms to understand what features are relatively most important for predictions. There are two main kinds of model explanations that you can generate from a trained model. Global explanations provide information aggregated over an entire data set, while local explanations provide understanding about a model's predictions for a single observation. 
 

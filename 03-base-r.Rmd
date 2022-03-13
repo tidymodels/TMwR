@@ -1,4 +1,4 @@
-# A review of R modeling fundamentals {#base-r}
+# A Review of R Modeling Fundamentals {#base-r}
 
 ```{r base-r-setup, include = FALSE}
 knitr::opts_chunk$set(fig.path = "figures/")
@@ -11,7 +11,7 @@ This book is about creating models with R. Before describing how to apply tidy d
 
 The S language, on which R is based, has had a rich data analysis environment since the publication of @WhiteBook (commonly known as The White Book). This version of S introduced standard infrastructure components familiar to R users today, such as symbolic model formulae, model matrices, and data frames, as well as standard object-oriented programming methods for data analysis. These user-interfaces have not substantively changed since then.  
 
-## An example
+## An Example
 
 To demonstrate these fundamentals, let's use experimental data from @mcdonald2009, by way of @mangiafico2015, on the relationship between the ambient temperature and the rate of cricket chirps per minute. Data were collected for two species: _O. exclamationis_ and _O. niveus_. The data are contained in a data frame called `crickets` with a total of `r nrow(crickets)` data points. These data are shown in Figure \@ref(fig:cricket-plot) using the following `r pkg(ggplot2)` code.
 
@@ -183,7 +183,7 @@ While this analysis has obviously not been an exhaustive demonstration of R's mo
 
 Finally, as previously mentioned, this framework was first published in 1992. Most of the ideas and methods above were developed in that period but have remained remarkably relevant to this day. It highlights that the S language and, by extension R, has been designed for data analysis since its inception.  
 
-## What does the R formula do? {#formula}
+## What Does the R Formula Do? {#formula}
 
 The R model formula is used by many modeling packages. It usually serves multiple purposes: 
 
@@ -205,7 +205,7 @@ Our focus, when seeing this, is that there are two predictors and the model shou
 This is an important point which will come up multiple times in this text, especially when we discuss more complex feature engineering in Chapter \@ref(recipes) and beyond. The formula in R has some limitations and our approaches to overcoming them contend with all three aspects listed above. 
 :::
 
-## Why tidiness is important for modeling {#tidiness-modeling}
+## Why Tidiness is Important for Modeling {#tidiness-modeling}
 
 One of the strengths of R is that it encourages developers to create a user-interface that fits their needs.  As an example, here are three common methods for creating a scatter plot of two numeric variables in a data frame called `plot_data`:
 
@@ -328,7 +328,7 @@ corr_res %>%
 
 Creating such a plot is possible using core R language functions, but automatically reformatting the results makes for more concise code with less potential for errors. 
 
-## Combining base R models and the tidyverse
+## Combining Base R Models and the Tidyverse
 
 R modeling functions from the core language or other R packages can be used in conjunction with the tidyverse, especially with the `r pkg(dplyr)`, `r pkg(purrr)`, and `r pkg(tidyr)` packages. For example, if we wanted to fit separate models for each cricket species, we can first break out the cricket data by this column using `dplyr::group_nest()`: 
 
@@ -361,7 +361,7 @@ model_by_species %>%
 List columns can be very powerful in modeling projects. List columns provide containers for any type of R objects, from a fitted model itself to the important data frame structure. 
 :::
 
-## The tidymodels metapackage
+## The tidymodels Metapackage
 
 The tidyverse (Chapter \@ref(tidyverse)) is designed as a set of modular R packages, each with a fairly narrow scope. The tidymodels framework follows a similar design. For example, the `r pkg(rsample)` package focuses on data splitting and resampling. Although resampling methods are critical to other activities of modeling (e.g., measuring performance), they reside in a single package and performance metrics are contained in a different, separate package, `r pkg(yardstick)`. There are many benefits to adopting this philosophy of modular packages, from less bloated model deployment to smoother package maintenance.
 
@@ -402,6 +402,6 @@ tidymodels_prefer(quiet = FALSE)
 Be aware that using this function opts you in to using `conflicted::conflict_prefer()` for _all_ namespace conflicts, making every conflict an error and forcing you to choose which function to use. The function `tidymodels::tidymodels_prefer()` handles the most common conflicts from tidymodels functions, but you will need to handle other conflicts in your R session yourself. 
 :::
 
-## Chapter summary
+## Chapter Summary
 
 This chapter reviewed core R language conventions for creating and using models that are an important foundation for the rest of this book. The formula operator is an expressive and important aspect of fitting models in R and often serves multiple purposes in non-tidymodels functions. Traditional R approaches to modeling have some limitations, especially when it comes to fluently handling and visualizing model output. The `r pkg(tidymodels)` metapackage applies tidyverse design philosophy to modeling packages.

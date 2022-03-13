@@ -7,12 +7,12 @@ tidymodels_prefer()
 source("ames_snippets.R")
 ```
 
-# A model workflow {#workflows}
+# A Model Workflow {#workflows}
 
 In the previous chapter, we discussed the `r pkg(parsnip)` package, which can be used to define and fit the model. This chapter introduces a new object called a _model workflow_. The purpose of this object is to encapsulate the major pieces of the modeling _process_ (previously discussed in Section \@ref(model-phases)). The workflow is important in two ways. First, using a workflow object encourages good methodology since it is a single point of entry to the estimation components of a data analysis. Second, it enables the user to better organize their projects. These two points are discussed in the following sections.  
 
 
-## Where does the model begin and end? {#begin-model-end}
+## Where Does the Model Begin and End? {#begin-model-end}
 
 So far, when we have used the term "the model", we have meant a structural equation that relates some predictors to one or more outcomes. Let's consider again linear regression as an example. The outcome data are denoted as $y_i$, where there are $i = 1 \ldots n$ samples in the training set. Suppose that there are $p$ predictors $x_{i1}, \ldots, x_{ip}$ that are used in the model. Linear regression produces a model equation of 
 
@@ -62,7 +62,7 @@ knitr::include_graphics("premade/proper-workflow.svg")
 
 In this way, the PCA preprocessing is considered part of the modeling process. 
 
-## Workflow basics
+## Workflow Basics
 
 The `r pkg(workflows)` package allows the user to bind modeling and preprocessing objects together. Let's start again with the Ames data and a simple linear model:
 
@@ -121,7 +121,7 @@ lm_fit %>% update_formula(Sale_Price ~ Longitude)
 Note that, in this new object, the output shows that the previous _fitted_ model was removed since the new formula is inconsistent with the previous model fit. 
 
 
-## Adding raw variables to the workflow
+## Adding Raw Variables to the `workflow()`
 
 There is another interface for passing data to the model, the `add_variables()` function which uses a `r pkg(dplyr)`-like syntax for choosing variables. The function has two primary arguments: `outcomes` and `predictors`. These use a selection approach similar to the `r pkg(tidyselect)` back-end of `r pkg(tidyverse)` packages to capture multiple selectors using `c()`. 
 
@@ -155,7 +155,7 @@ If you would like the underlying modeling method to do what it would normally do
 
 As seen in the next chapter, a more powerful preprocessor (called a _recipe_) can also be added to a workflow. 
 
-## How does a workflow use the formula? {#workflow-encoding}
+## How Does a `workflow()` Use the Formula? {#workflow-encoding}
 
 Recall from Section \@ref(formula) that the formula method in R has multiple purposes (we will discuss this further in Chapter \@ref(recipes)). One of these is to properly encode the original data into an analysis ready format. This can involve executing in-line transformations (e.g., `log(x)`), creating dummy variable columns, creating interactions or other column expansions, and so on. However, there are many statistical methods that require different types of encodings: 
 
@@ -227,7 +227,7 @@ parametric_fit
 
 Notice how, in the call printed above, the model-specific formula was used. 
 
-## Creating multiple workflows at once {#workflow-sets-intro}
+## Creating Multiple Workflows at Once {#workflow-sets-intro}
 
 There are some situations where the data require numerous attempts to find an appropriate model. For example: 
 
@@ -276,7 +276,7 @@ We use a `r pkg(purrr)` function here to map through our models, but there is an
 In general, there's a lot more to workflow sets! Their nuances and advantages won't be illustrated until Chapter \@ref(workflow-sets). 
 :::
 
-## Evaluating the test set
+## Evaluating the Test Set
 
 Let's say that we've concluded our model development and have settled on a final model. There is a convenience function called `last_fit()` that will _fit_ the model to the entire training set and _evaluate_ it with the testing set. 
 
@@ -306,7 +306,7 @@ collect_predictions(final_lm_res) %>% slice(1:5)
 
 We'll see more about `last_fit()` in action and how to use it again in Section \@ref(bean-models).
 
-## Chapter summary {#workflows-summary}
+## Chapter Summary {#workflows-summary}
 
 In this chapter, you learned that the modeling process encompasses more than just estimating the parameters of an algorithm that connects predictors to an outcome. This process also includes preprocessing steps and operations taken after a model is fit. We introduced a concept called a **model workflow** that can capture the important components of the modeling process. Multiple workflows can also be created inside of a **workflow set**. The `last_fit()` function is convenient for fitting a final model to the training set and evaluating with the test set. 
 

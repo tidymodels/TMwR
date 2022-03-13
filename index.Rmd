@@ -87,7 +87,7 @@ cat(paste0(contributors$desc, collapse = ", "))
 cat(".\n")
 ```
 
-## Using code examples {-}
+## Using Code Examples {-}
 
 ```{r pkg-list, echo = FALSE}
 deps <- desc::desc_get_deps()

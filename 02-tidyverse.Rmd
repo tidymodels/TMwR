@@ -1,4 +1,4 @@
-# A tidyverse primer {#tidyverse}
+# A Tidyverse Primer {#tidyverse}
 
 ```{r tidyverse-setup, include = FALSE}
 knitr::opts_chunk$set(fig.path = "figures/")
@@ -183,7 +183,7 @@ For functional programming in tidy modeling, functions should be defined so that
 :::
 
 
-## Examples of tidyverse syntax
+## Examples of Tidyverse Syntax
 
 Before diving into examples, let's discuss how the tidyverse relies on a type of data frame called a "tibble". Tibbles have slightly different rules than basic data frames in R. For example, tibbles naturally work with column names that are not syntactically valid variable names:
 
@@ -274,6 +274,6 @@ all_stations <-
 
 This pipeline of operations illustrates why the tidyverse is popular. A series of data manipulations is used that have simple and easy to understand user interfaces; the series is bundled together in a streamlined and readable way. The focus is on how the user interacts with the software. This approach enables more people to learn R and achieve their analysis goals, and adopting these same principles for modeling in R has the same benefits. 
 
-## Chapter summary 
+## Chapter Summary 
 
 This chapter introduced the tidyverse, with a focus on applications for modeling. We described differences in conventions between the tidyverse and base R, and introduced two important components of the tidyverse system, tibbles and the pipe operator `%>%`. Data cleaning and processing can feel mundane at times, but these tasks are important for modeling in the real world; we illustrated how to use tibbles, the pipe, and tidyverse functions in an example data import and processing exercise.  

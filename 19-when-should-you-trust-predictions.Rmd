@@ -7,7 +7,7 @@ library(probably)
 load("RData/Chicago_2020.RData")
 ```
 
-# When should you trust your predictions? {#trust}
+# When Should You Trust Your Predictions? {#trust}
 
 A predictive model can almost always produce a prediction, given input data. However, there are plenty of situations where it is **inappropriate** to do so. When a new data point is well outside of the range of data used to create the model, making a prediction may be an inappropriate _extrapolation_. A more qualitative example of an inappropriate prediction occurs when the model is used in a completely different context. The cell segmentation data used in Chapter \@ref(iterative-search) flags when human breast cancer cells can or cannot be accurately isolated inside an image. A model built from these data could be inappropriately applied to stomach cells for the same purpose. We can produce a prediction but it is unlikely to be **applicable** to the different cell type.
 
@@ -16,7 +16,7 @@ This chapter discusses two methods for quantifying the potential quality of a pr
 - The first uses the predicted values to alert the user that the results may be suspect. 
 - The second approach uses the predictors to measure the amount of extrapolation (if any) for new samples. 
 
-## Equivocal results {#equivocal-zones}
+## Equivocal Results {#equivocal-zones}
 
 :::rmdwarning
 In some cases, the amount of uncertainty associated with a prediction is too high to be trusted. 
@@ -212,7 +212,7 @@ grid_pred %>%
 
 Using the standard error as a measure to preclude samples from being predicted can also be applied to models with numeric outcomes. However, as shown in the next section, this may not always work.  
 
-## Determining model applicability {#applicability-domains}
+## Determining Model Applicability {#applicability-domains}
 
 Equivocal zones try to measure the reliability of a prediction based on the model outputs. It may be that model statistics, such as the standard error of prediction, cannot measure the impact of extrapolation. Let's take the Chicago train data used extensively in [Kuhn and Johnson (2019)](https://bookdown.org/max/FES/chicago-intro.html) and first shown in Section \@ref(examples-of-tidyverse-syntax). The goal is to predict the number of customers entering the Clark and Lake train station each day. 
 
@@ -542,7 +542,7 @@ The 2020 distance values indicate that these predictor values are outside of the
 One important aspect of this analysis concerns which predictors are used to develop the applicability domain model. In the analysis above, we used the raw predictor columns. However, in building the model, PLS score features were used in their place. Which of these should `apd_pca()` use? The  `apd_pca()` function can also take a recipe as the input (instead of a formula) so that the distances reflect the PLS scores instead of the individual predictor columns. Users can evaluate both methods to understand which one gives more relevant results. 
 :::
 
-## Chapter summary {#trust-summary}
+## Chapter Summary {#trust-summary}
 
 This chapter shows two methods for evaluating whether predictions should be reported to the consumers of models. Equivocal zones deal with outcomes/predictions and can be helpful when the amount of uncertainty in a prediction is too large. 
 

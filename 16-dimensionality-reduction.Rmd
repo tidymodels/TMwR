@@ -17,7 +17,7 @@ tidymodels_prefer()
 
 # (PART\*) Other Topics {-} 
 
-# Dimensionality reduction {#dimensionality}
+# Dimensionality Reduction {#dimensionality}
 
 Dimensionality reduction can be a good choice when you suspect there are "too many" variables. An excess of variables, usually predictors, can be a problem because it is difficult to understand or visualize data in higher dimensions. For example, in high dimensional biology experiments, one of the first tasks is to determine if there are any unwanted trends in the data (e.g., effects not related to the question of interest, such as lab-to-lab differences). Debugging the data is difficult when there are hundreds of thousands of dimensions, and dimensionality reduction can be an aid for exploratory data analysis.
 
@@ -47,7 +47,7 @@ In addition to the `r pkg(tidymodels)` package, this chapter uses the following 
 
 [^mixnote]: The `r pkg(mixOmics)` package is not available on CRAN, but instead on Bioconductor: <https://doi.org/doi:10.18129/B9.bioc.mixOmics>
 
-## A picture is worth a thousand... beans {#beans}
+## A Picture is Worth a Thousand... Beans {#beans}
 
 @beans describe methods for determining the varieties of dried beans in an image. From their manuscript:
 
@@ -133,7 +133,7 @@ bean_train %>%
 
 While we don't take the time to do it here, it is also important to see if this correlation structure significantly changes across the outcome categories. This can help create better models.
 
-## A starter recipe
+## A Starter Recipe
 
 It's time to look at these data in a smaller space. We can start with a basic recipe to preprocess the data prior to any dimensionality reduction steps. Several predictors are ratios and so are likely to have skewed distributions. Such distributions can wreak havoc on variance calculations (such as the ones used in PCA). The `r pkg(bestNormalize)` package has a step that can enforce a symmetric distribution for the predictors. We'll use this to mitigate the issue of skewed distributions.
 
@@ -153,7 +153,7 @@ Remember that when invoking the `recipe()` function, the steps are not estimated
 
 This recipe will be extended with additional steps for the dimensionality reduction analyses. Before doing so, let's go over how a recipe can be used _outside_ of a workflow. 
 
-## Recipes in the wild {#recipe-functions}
+## Recipes in the Wild {#recipe-functions}
 
 As mentioned in Section \@ref(using-recipes), a workflow containing a recipe uses `fit()` to estimate the recipe and model, then `predict()` to process the data and make model predictions. There are analogous functions in the `r pkg(recipes)` package that can be used for the same purpose: 
 
@@ -265,7 +265,7 @@ If the training set is not pathologically large, using this value of `retain` ca
 
 `prep()` and `bake()` will be used in the code below to illustrate some of these options. 
 
-## Feature extraction techniques
+## Feature Extraction Techniques
 
 Since recipes are the primary option in tidymodels for dimensionality reduction, let's write a function that will estimate the transformation and plot the resulting data in a scatter plot matrix via the `r pkg(ggforce)` package:
 
@@ -566,6 +566,6 @@ Pretty good! We'll use this model in the next chapter to demonstrate variable im
 save(rda_wflow_fit, bean_train, file = "RData/rda_fit.RData", version = 2, compress = "xz")
 ```
 
-## Chapter summary {#dimensionality-summary}
+## Chapter Summary {#dimensionality-summary}
 
 Dimensionality reduction can be a helpful tool for exploratory data analysis as well as modeling. The `r pkg(recipes)` and `r pkg(embed)` packages contain steps for a variety of different methods and `r pkg(workflowsets)` facilitates choosing an appropriate method for a data set. This chapter also discussed how recipes can be used on their own, either for debugging problems with a recipe or directly for exploratory data analysis and data visualization. 

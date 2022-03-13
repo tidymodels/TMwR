@@ -7,7 +7,7 @@ tidymodels_prefer()
 
 # (PART\*) Basics {-} 
 
-# The Ames housing data {#ames}
+# The Ames Housing Data {#ames}
 
 The Ames housing data set [@ames] is an excellent resource for learning about models that we will use throughout this book. It contains data on `r format(nrow(ames), big.mark = ",")` properties in Ames, Iowa, including columns related to: 
 
@@ -41,7 +41,7 @@ data(ames, package = "modeldata")
 dim(ames)
 ```
 
-## Exploring important features
+## Exploring Important Features
 
 Let's start with the outcome we want to predict: the last sale price of the house (in USD), as shown in Figure \@ref(fig:ames-sale-price).
 
@@ -175,7 +175,7 @@ As previously described in Chapter \@ref(software-modeling), it is critical to c
 
 Many of these questions will be revisited as these data are used in upcoming examples. 
 
-## Chapter summary {#ames-summary}
+## Chapter Summary {#ames-summary}
  
 This chapter introduced a data set used in later chapters to demonstrate tidymodels syntax and investigated some of its characteristics. Exploratory data analysis like this is an essential component of any modeling project; EDA uncovers information that contributes to better modeling practice.
 

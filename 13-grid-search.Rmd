@@ -21,13 +21,13 @@ load("RData/mlp_times.RData")
 ```
 
 
-# Grid search {#grid-search}
+# Grid Search {#grid-search}
 
 In Chapter \@ref(tuning) we demonstrated how users can mark or tag arguments in preprocessing recipes and/or model specifications for optimization using the `tune()` function.  Once we know what to optimize, it's time to address the question of how to optimize the parameters. This chapter describes **grid search** methods that specify the possible values of the parameters _a priori_. (Chapter \@ref(iterative-search) will continue the discussion by describing iterative search methods.) 
 
 Let's start by describing two main approaches for assembling a grid. 
 
-## Regular and non-regular grids {#grids}
+## Regular and Non-Regular Grids {#grids}
 
 There are two main types of grids. The first is a regular grid where each parameter has a corresponding set of possible values. A regular grid combines these factorially, i.e., by using all combinations of the sets. Alternatively, a non-regular grid is one where the parameter combinations are not formed from a small set of points. 
 
@@ -161,7 +161,7 @@ While not perfect, this design spaces the points further away from one another.
 
 Space-filling designs can be very effective at representing the parameter space. The default design used by the `r pkg(tune)` package is the maximum entropy design. These tend to produce grids that cover the candidate space well and drastically increase the chances of finding good results. 
 
-## Evaluating the grid {#evaluating-grid}
+## Evaluating the Grid {#evaluating-grid}
 
 To choose the best tuning parameter combination, each candidate set is assessed using data that were not used to train that model. Resampling methods or a single validation set work well for this purpose. The process (and syntax) closely resembles the approach in Section \@ref(resampling-performance) that used the `fit_resamples()` function from the `r pkg(tune)` package. 
 
@@ -314,7 +314,7 @@ Generally, it is a good idea to evaluate the models over multiple metrics so tha
 
 As with the results from `fit_resamples()`, there is usually no value in retaining the intermediary model fits across the resamples and tuning parameters. However, as before, the `extract` option to `control_grid()` allows the retention of the fitted models and/or recipes. Also, setting the `save_pred` option to `TRUE` retains the assessment set predictions and these can be accessed using `collect_predictions()`. 
 
-## Finalizing the model
+## Finalizing the Model
 
 If one of the sets of possible model parameters found via `show_best()` were an attractive final option for these data, we might wish to evaluate how well it does on the test set. However, the results of `tune_grid()` only provide the substrate to choose appropriate tuning parameters. The function _does not fit_ a final model. 
 
@@ -359,7 +359,7 @@ This object can now be used to make future predictions on new data.
 If you did not use a workflow, finalization of a model and/or recipe is done using `finalize_model()` and `finalize_recipe()`. 
 
 
-## Tools for creating tuning specifications {#tuning-usemodels}
+## Tools for Creating Tuning Specifications {#tuning-usemodels}
 
 The `r pkg(usemodels)` package can take a data frame and model formula, then write out R code for tuning the model. The code also creates an appropriate recipe whose steps depend on the requested model as well as the predictor data.
 
@@ -416,7 +416,7 @@ The `r pkg(usemodels)` package can also be used to create model fitting code wit
 :::
 
 
-## Tools for efficient grid search {#efficient-grids}
+## Tools for Efficient Grid Search {#efficient-grids}
 
 A few different tricks and optimizations are possible to make grid search more computationally efficient. This section describes several techniques. 
 
@@ -871,7 +871,7 @@ show_best(mlp_sfd_race, n = 10)
 There are other interim analysis techniques for discarding settings. For example, @krueger15a use traditional sequential analysis methods whereas @kuhn2014futility treats the data as a sports competition and uses the Bradley-Terry model [@bradley1952rank] to measure the winning ability of parameter settings. 
 
 
-## Chapter summary {#grid-summary}
+## Chapter Summary {#grid-summary}
 
 This chapter discussed the two main classes of grids (regular and non-regular) that can be used for model tuning and demonstrated how to construct these grids, either manually or using the family of `grid_*()` functions. The `tune_grid()` function can evaluate these candidate sets of model parameters using resampling. The chapter also showed how to finalize a model, recipe, or workflow to update the parameter values for the final fit. Grid search can be computationally expensive, but thoughtful choices in the experimental design of such searches can make them tractable.
 

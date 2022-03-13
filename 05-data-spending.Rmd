@@ -6,7 +6,7 @@ tidymodels_prefer()
 source("ames_snippets.R")
 ```
 
-# Spending our data {#splitting}
+# Spending our Data {#splitting}
 
 There are several steps to create a useful model, including parameter estimation, model selection and tuning, and performance assessment. At the start of a new project, there is usually an initial finite pool of data available for all these tasks. How should the data be applied to these steps? The idea of _data spending_ is an important first consideration when modeling, especially as it relates to empirical validation. 
 
@@ -18,7 +18,7 @@ As data are reused for multiple tasks, certain risks increase, such as the risks
 
 If the initial pool of data available is not huge, there will be some overlap of how and when our data is "spent" or allocated, and a solid methodology for data spending is important. This chapter demonstrates the basics of _splitting_ our initial pool of samples for different purposes. 
 
-## Common methods for splitting data {#splitting-methods}
+## Common Methods for Splitting Data {#splitting-methods}
 
 The primary approach for empirical model validation is to split the existing pool of data into two distinct sets. Some observations are used to develop and optimize the model. This _training set_ is usually the majority of the data. These data are a sandbox for model building where different models can be fit, feature engineering strategies are investigated, and so on. We as modeling practitioners spend the vast majority of the modeling process using the training set as the substrate to develop the model.  
 
@@ -98,11 +98,11 @@ There is very little downside to using stratified sampling.
 
 Are there situations when random sampling is not the best choice? One case is when the data have a significant _time_ component, such as time series data. Here, it is more common to use the most recent data as the test set. The `r pkg(rsample)` package contains a function called `initial_time_split()` that is very similar to `initial_split()`. Instead of using random sampling, the `prop` argument denotes what proportion of the first part of the data should be used as the training set; the function assumes that the data have been pre-sorted in an appropriate order. 
 
-## What proportion should be used? 
+## What Proportion Should Be Used? 
 
 The proportion of data that should be allocated for splitting is highly dependent on the context of the problem at hand. Too little data in the training set hampers the model's ability to find appropriate parameter estimates. Conversely, too little data in the test set lowers the quality of the performance estimates. There are parts of the statistics community that eschew test sets in general because they believe all of the data should be used for parameter estimation. While there is merit to this argument, it is good modeling practice to have an unbiased set of observations as the final arbiter of model quality. A test set should be avoided only when the data are pathologically small.
 
-## What about a validation set? 
+## What About a Validation Set? 
 
 Previously, when describing the goals of data splitting, we singled out the test set as the data that should be used to conduct a proper evaluation of model performance on the final model(s). This begs the question of, "How can we tell what is best if we don't measure performance until the test set?" 
 
@@ -114,7 +114,7 @@ It is largely semantics as to whether validation sets are a subset of the traini
 
 Validation sets are discussed more in Section \@ref(validation) as a special case of _resampling_ methods that are used on the training set.
 
-## Multi-level data
+## Multi-Level Data
 
 With the Ames housing data, a property is considered to be the _independent experimental unit_. It is safe to assume that, statistically, the data from a property are independent. For other applications, that is not always the case: 
 
@@ -129,7 +129,7 @@ Chapter 9 of @fes contains other examples.
 In these situations, the data set will have multiple rows per experimental unit. Simple resampling across rows would lead to some data within an experimental unit being in the training set and others in the test set. Data splitting should occur at the independent experimental unit level of the data. For example, to produce an 80/20 split of the data, 80% of the experimental units should be allocated for the training set.  
 
 
-## Other considerations 
+## Other Considerations 
 
 Throughout this book, notice which data are exposed to the model at any given time. Remember that it is critical to quarantine the test set from any model building activities. 
 
@@ -144,7 +144,7 @@ In later chapters we discuss techniques to subsample the training set to mitigat
 Finally, at the beginning of this chapter, we warned about using the same data for different tasks. Chapter \@ref(resampling) will discuss solid, data-driven methodologies for data usage that will reduce the risks related to bias, overfitting, and other issues. Many of these methods mirror the data-splitting tools shown in this chapter.  
 
 
-## Chapter summary {#splitting-summary}
+## Chapter Summary {#splitting-summary}
  
 Data splitting is the fundamental tool for empirical validation of models. Even in the era of unrestrained data collection, a typical modeling project has a limited amount of appropriate data and wise "spending" of a project's data is necessary. In this chapter, we discussed several strategies for partitioning the data into distinct groups for modeling and evaluation. 
 
