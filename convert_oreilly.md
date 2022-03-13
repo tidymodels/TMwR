@@ -12,9 +12,8 @@ Choose a directory to put the new files in (use `_bookdown.yml` to generate only
 
 ```r
 library(bookdown)
-render_book(output_format = html_book(
-  keep_md = TRUE, pandoc_args = "--lua-filter=lower-header.lua"), 
-  output_dir = "files_for_print/")
+render_book(output_format = html_book(keep_md = TRUE), 
+  output_dir = "tmwr-to-ch9/")
 ```
 
 ## Convert divs to markdown images
@@ -74,6 +73,12 @@ sed -i ".bak" 's/\[\[\(.*\)\]\] image:\(.*\)\[\(.*\)\]/\[\[\1\]\]\n\.\3\nimage::
 
 ```
 emacs preface.adoc
+```
+
+## Convert SVG to PNG in /premade dir
+
+```
+mogrify -format png *.svg
 ```
 
 ## Clean up extra files when totally done
