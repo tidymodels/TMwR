@@ -326,9 +326,9 @@ ames_test  <-  testing(ames_split)
 lm_model <- linear_reg() %>% set_engine("lm")
 
 lm_wflow <- 
-  workflow() %>% 
+  lm_wflow %>% 
   add_model(lm_model) %>% 
-  add_formula(Sale_Price ~ Longitude + Latitude)
+  add_variables(outcome = Sale_Price, predictors = c(Longitude, Latitude))
 
 lm_fit <- fit(lm_wflow, ames_train)
 ```
