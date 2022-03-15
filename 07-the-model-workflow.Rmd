@@ -3,6 +3,8 @@ knitr::opts_chunk$set(fig.path = "figures/")
 library(tidymodels)
 library(workflowsets)
 library(kableExtra)
+library(censored)
+library(survival)
 tidymodels_prefer()
 source("ames_snippets.R")
 ```
@@ -208,10 +210,9 @@ The solution in `r pkg(workflows)` is an optional supplementary model formula th
 
 ```{r workflows-strata}
 library(survival)
+library(censored)
 
-parametric_model <- 
-  surv_reg() %>% 
-  set_engine("survival")
+parametric_model <- survival_reg()
 
 parametric_workflow <- 
   workflow() %>% 

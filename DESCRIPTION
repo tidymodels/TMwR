@@ -19,6 +19,7 @@ Imports:
     bestNormalize,
     bookdown,
     broom,
+    censored,
     corrplot,
     corrr,
     Cubist,
@@ -86,9 +87,9 @@ Imports:
     xgboost,
     yardstick
 Remotes:
-    tidymodels/learntidymodels,
     r-lib/pillar,
     tidymodels/baguette,
+    tidymodels/censored,
     tidymodels/discrim,
     tidymodels/learntidymodels,
     tidymodels/parsnip,
