@@ -1133,10 +1133,16 @@ sa_path <- function(branch = 1, y_axis = TRUE) {
   # (based on the branch argument) by determining restart locations. 
   
   all_restr <- grep("restart", result_history$results)
+  if (branch <= length(all_restr)) {
+    row_limit <- all_restr[branch]
+  } else {
+    row_limit <- nrow(result_history)
+  }
+  
   sa_data <- 
     result_history %>% 
     add_rowindex() %>% 
-    filter(.row <= all_restr[branch]) %>%
+    filter(.row <= row_limit) %>%
     select(cost, rbf_sigma, results, .row) %>% 
     mutate(
       best = NA_integer_,
@@ -1176,10 +1182,8 @@ sa_path <- function(branch = 1, y_axis = TRUE) {
       add_rowindex()
   }
   
-  
   last_accepted <- which.max(initial$mean)
   last_best <- last_accepted
-  
   
   for (i in 5:nrow(sa_data)) {
     dat_start <- 
@@ -1251,7 +1255,8 @@ sa_2 <- sa_path(2, FALSE) + ggtitle("Phase 2")
 sa_3 <- sa_path(3, FALSE) + ggtitle("Phase 3")
 sa_4 <- sa_path(4, TRUE)  + ggtitle("Phase 4")
 sa_5 <- sa_path(5, FALSE) + ggtitle("Phase 5")
-sa_1 + sa_2 + sa_3 + sa_4 + sa_5 +  plot_layout(ncol = 3)
+
+sa_1 + sa_2 + sa_3 + sa_4 + sa_5 + plot_layout(ncol = 3)
 ```
 
 In the first phase, the search initially finds two new global optima (shown with the solid points). From these, there are several settings that are immediately discarded (light gray lines) while others are suboptimal but acceptable. After a set number of failures, it restarts at the last solid point. The other phases show a slow improvement in global optima with many discarded settings along the way. The process eventually finds its way to the region of optimal results as it exhausts the total number of allowed iterations.
