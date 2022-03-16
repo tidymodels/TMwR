@@ -34,13 +34,17 @@ reg_ex <-
     predicted = c(obs + rnorm(n, sd = 1.5), 5 + .5 * obs + rnorm(n, sd = .5)),
     approach = rep(c("RMSE optimized", "R^2 optimized"), each = n)
   ) %>% 
-  mutate(approach = factor(approach, levels = c("RMSE optimized", "R^2 optimized")))
+  mutate(approach = factor(
+    approach, 
+    levels = c("RMSE optimized", "R^2 optimized"),
+    labels = c(expression(RMSE ~ optimized), expression(R^2 ~ optimized)))
+  )
 
 ggplot(reg_ex, aes(x = observed, y = predicted)) + 
   geom_abline(lty = 2) + 
   geom_point(alpha = 0.5) + 
   coord_obs_pred() + 
-  facet_wrap(~ approach)
+  facet_wrap(~ approach, labeller = "label_parsed")
 ```
 
 A model optimized for RMSE has more variability but has relatively uniform accuracy across the range of the outcome. The right panel shows that there is a tighter correlation between the observed and predicted values but this model performs poorly in the tails. 
