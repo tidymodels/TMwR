@@ -80,7 +80,7 @@ tab %>%
 
 Footnotes: 
 
-* Decorrelating predictors may not help improve performance. However, fewer correlated predictors can improve the estimation of variance importance scores (see [Fig. 11.4](https://bookdown.org/max/FES/recursive-feature-elimination.html#fig:greedy-rf-imp) of @fes). Essentially, the selection of highly correlated predictors is almost random. 
-* The notation of `r symbol$sup_plus` means that the answer depends on the implementation. Specifically: 
+1. Decorrelating predictors may not help improve performance. However, fewer correlated predictors can improve the estimation of variance importance scores (see [Fig. 11.4](https://bookdown.org/max/FES/recursive-feature-elimination.html#fig:greedy-rf-imp) of @fes). Essentially, the selection of highly correlated predictors is almost random. 
+1. The notation of `r symbol$sup_plus` means that the answer depends on the implementation. Specifically: 
   * _Theoretically_, any tree-based model does not require imputation. However, many tree ensemble implementations require imputation. 
   * While tree-based boosting methods generally do not require the creation of dummy variables, models using the `xgboost` engine do. 
