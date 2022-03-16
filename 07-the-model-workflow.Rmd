@@ -3,6 +3,8 @@ knitr::opts_chunk$set(fig.path = "figures/")
 library(tidymodels)
 library(workflowsets)
 library(kableExtra)
+library(censored)
+library(survival)
 tidymodels_prefer()
 source("ames_snippets.R")
 ```
@@ -207,11 +209,9 @@ Even if this formula could be used with `model.matrix()`, this would still prese
 The solution in `r pkg(workflows)` is an optional supplementary model formula that can be passed to `add_model()`. For example, using the previously mentioned `strata()` function in the `r pkg(survival)` package, the `add_variables()` specification provides the bare column names and then the actual formula given to the model is set within `add_model()`:  
 
 ```{r workflows-strata}
-library(survival)
+library(censored)
 
-parametric_model <- 
-  surv_reg() %>% 
-  set_engine("survival")
+parametric_model <- survival_reg()
 
 parametric_workflow <- 
   workflow() %>% 
