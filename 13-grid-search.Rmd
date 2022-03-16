@@ -726,6 +726,8 @@ remaining <-
   mlp_sfd_race %>% 
   collect_metrics() %>% 
   dplyr::filter(n == 10)
+
+remaining_text <- cli::pluralize("{nrow(remaining)} remain{?s/}.")
 ```
 
 
@@ -794,7 +796,7 @@ Figure \@ref(fig:racing-process) shows the results at several iterations in the 
 
 On the third iteration, the leading model configuration has changed and the algorithm computes one-sided confidence intervals. Any parameter set whose confidence interval includes zero would lack evidence that its performance is not statistically different from the best results. We retain `r sum(iter_three$upper < 0)` settings; these are resampled more. The remaining `r sum(iter_three$upper >= 0)` submodels are no longer considered. 
 
-The process continues to resample configurations that remain and the statistical analysis repeats with the current results. More submodels may be removed from consideration. Prior to the final resample, almost all submodels are eliminated and, after the last iteration, only one remains. 
+The process continues to resample configurations that remain and the statistical analysis repeats with the current results. More submodels may be removed from consideration. Prior to the final resample, almost all submodels are eliminated and, at the last iteration, only `r remaining_text`
 
 See @kuhn2014futility for more details on the computational aspects of this approach. 
 
