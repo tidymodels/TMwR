@@ -95,8 +95,8 @@ The `autoplot()` method, with output in Figure \@ref(fig:workflow-set-r-squared)
 ```{r compare-workflow-set-rsq, eval=FALSE}
 library(ggrepel)
 autoplot(four_models, metric = "rsq") +
-  # Added for black and white images: 
-  geom_text_repel(aes(label = wflow_id), nudge_x = 1/8, nudge_y = 1/100)
+  geom_text_repel(aes(label = wflow_id), nudge_x = 1/8, nudge_y = 1/100) +
+  theme(legend.position = "none")
 ```
 
 ```{r workflow-set-r-squared, ref.label = "compare-workflow-set-rsq"}
@@ -378,8 +378,8 @@ There is also a basic `autoplot()` method for the model results, shown in Figure
 
 ```{r compare-autoplot-intervals, eval=FALSE}
 autoplot(rsq_anova) +
-  # Added for black and white images: 
-  geom_text_repel(aes(label = workflow), nudge_x = 1/8, nudge_y = 1/100)
+  geom_text_repel(aes(label = workflow), nudge_x = 1/8, nudge_y = 1/100) +
+  theme(legend.position = "none")
 ```
 
 ```{r credible-intervals, ref.label = "compare-autoplot-intervals"}
@@ -450,8 +450,8 @@ The same process could be used to compare the random forest model to one or both
 
 ```{r compare-rope-plot, eval=FALSE}
 autoplot(rsq_anova, type = "ROPE", size = 0.02) +
-  # Added for black and white images: 
-  geom_text_repel(aes(label = workflow))
+  geom_text_repel(aes(label = workflow)) +
+  theme(legend.position = "none")
 ```
 
 ```{r practical-equivalence, ref.label = "compare-rope-plot"}
