@@ -390,7 +390,7 @@ conflict_prefer("filter", winner = "dplyr")
 
 For convenience, `r pkg(tidymodels)` contains a function that captures most of the common naming conflicts that we might encounter:
 
-```{r base-r-clonflicts}
+```{r base-r-conflicts}
 tidymodels_prefer(quiet = FALSE)
 ```
 
