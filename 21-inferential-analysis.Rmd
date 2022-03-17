@@ -255,11 +255,11 @@ glm_boot %>%
   )%>%
   ggplot(aes(x = .estimate, y = term, color = method, pch = method)) +
   geom_vline(xintercept = 0, lty = 3) +
-  geom_point(size = 2, position = position_dodge(width = 1 / 2)) +
+  geom_point(size = 2.5, position = position_dodge(width = 1 / 2)) +
   geom_errorbar(aes(xmin = .lower, xmax = .upper),
                 width = 1 / 4,
                 position = position_dodge(width = 1 / 2))  +
-  labs(x = "GLM coefficients", y = NULL) + 
+  labs(x = "GLM coefficients", y = NULL, color = NULL, pch = NULL) + 
   scale_color_brewer(palette = "Paired")
 ```
 

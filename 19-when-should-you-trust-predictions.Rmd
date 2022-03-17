@@ -75,8 +75,8 @@ The fitted class boundary is overlaid onto the test set in Figure \@ref(fig:glm-
 
 ```{r glm-boundaries}
 #| echo = FALSE, 
-#| fig.width=5, 
-#| fig.height=5, 
+#| fig.width=6, 
+#| fig.height=6, 
 #| out.width="70%", 
 #| fig.align="center",
 #| fig.cap = "Simulated two class data set with a logistic regression fit and decision boundary.",
@@ -98,10 +98,10 @@ grid_pred %>%
   mutate(`Probability of Class 1` = .pred_class_1) %>% 
   ggplot(aes(x = x, y = y)) + 
   geom_raster(aes(fill = `Probability of Class 1`)) +
-  geom_point(data = testing_set, aes(shape = class, color = class), alpha = .75, size = 2) + 
+  geom_point(data = testing_set, aes(shape = class, color = class), alpha = .75, size = 2.5) + 
   geom_contour(aes(z = .pred_class_1), breaks = .5, color = "black", lty = 2) + 
   coord_equal() + 
-  labs(x = "Predictor x", y = "Predictor y") + 
+  labs(x = "Predictor x", y = "Predictor y", color = NULL, shape = NULL) + 
   scale_fill_gradient2(low = "#FDB863", mid = "white", high = "#B2ABD2", midpoint = .5) + 
   scale_color_manual(values = c("#2D004B", "darkorange"))
 ```
@@ -165,7 +165,7 @@ map_dfr(seq(0, .1, length.out = 40), eq_zone_results) %>%
   pivot_longer(c(-buffer), names_to = "statistic", values_to = "value") %>% 
   ggplot(aes(x = buffer, y = value, lty = statistic)) + 
   geom_step(size = 1.2, alpha = 0.8) + 
-  labs(y = NULL)
+  labs(y = NULL, lty = NULL)
 ```
 
 ```{r equivocal-zone-results, ref.label = "trust-eq-calcs"}
@@ -207,7 +207,7 @@ grid_pred %>%
   scale_fill_gradientn(colours = c("#F7FBFF", "#DEEBF7", "#C6DBEF", "#9ECAE1", "#6BAED6")) + 
   geom_point(data = testing_set, aes(shape = class), alpha = .5, size = 2) + 
   coord_equal() + 
-  labs(x = "Predictor x", y = "Predictor y")
+  labs(x = "Predictor x", y = "Predictor y", shape = NULL)
 ```
 
 Using the standard error as a measure to preclude samples from being predicted can also be applied to models with numeric outcomes. However, as shown in the next section, this may not always work.  
@@ -510,7 +510,7 @@ pca_stat
 The `autoplot()` method plots the reference distribution. It has an optional argument for which data to plot. We'll add a value of `distance` to only plot the training set distance distribution. This code generates the plot in Figure \@ref(fig:ap-autoplot):
 
 ```{r trust-ref-dist, eval = FALSE}
-autoplot(pca_stat, distance) + xlab("Distance")
+autoplot(pca_stat, distance) + labs(x = "distance")
 ```
 
 ```{r ap-autoplot, ref.label = "trust-ref-dist"}
