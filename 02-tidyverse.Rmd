@@ -6,15 +6,15 @@ library(tidyverse)
 library(lubridate)
 ```
 
-The tidyverse is a collection of R packages for data analysis that are developed with common ideas and norms. From @tidyverse: 
+What is the tidyverse, and where does the tidymodels framework fit in? The tidyverse is a collection of R packages for data analysis that are developed with common ideas and norms. From @tidyverse: 
 
 > "At a high level, the tidyverse is a language for solving data science challenges with R code. Its primary goal is to facilitate a conversation between a human and a computer about data. Less abstractly, the tidyverse is a collection of R packages that share a high-level design philosophy and low-level grammar and data structures, so that learning one package makes it easier to learn the next."
 
-In this chapter, we briefly discuss these principles and how they apply in the context of modeling, before diving into specific examples of tidyverse syntax. 
+In this chapter, we briefly discuss these principles and how they apply in the context of modeling, before diving into specific examples of tidyverse syntax. The next chapter covers modeling conventions from the core R language. Together, you can use these discussions to understand the relationships between the tidyverse, tidymodels, and the core or base R language. Both tidymodels and the tidyverse build on the R language, and tidymodels applies tidyverse principles to building models.
 
 ## Principles
 
-The full set of strategies and tactics for writing R code in the tidyverse style can be found at the website <https://design.tidyverse.org>. Here we can briefly describe several of the design principles, their motivation, and how we think about modeling as an application of these principles. 
+The full set of strategies and tactics for writing R code in the tidyverse style can be found at the website <https://design.tidyverse.org>. Here we can briefly describe several of the general tidyverse design principles, their motivation, and how we think about modeling as an application of these principles. 
 
 ### Design for humans
 
@@ -50,7 +50,7 @@ When there are similar functions in a package, function names are designed to be
 
 Whenever possible, functions should avoid returning a novel data structure. If the results are conducive to an existing data structure, it should be used. This reduces the cognitive load when using software; no additional syntax or methods are required. 
 
-One data structure that is used as much as possible in tidyverse and tidymodels packages is the data frame. Data frames can represent different types of data in each column, and multiple values in each row. Tibbles, a type of data frame described below, are preferred since they have additional properties that are helpful for data analysis. 
+One data structure that is used as much as possible in tidyverse and tidymodels packages is the data frame. Data frames can represent different types of data in each column, and multiple values in each row. Tibbles, a type of data frame described more in the next section, are preferred since they have additional properties that are helpful for data analysis. 
 
 As an example, the `r pkg(rsample)` package can be used to create _resamples_ of a data set, such as cross-validation or the bootstrap (described in Chapter \@ref(resampling)). The resampling functions return a tibble with a column called `splits` of objects that define the resampled data sets. Three bootstrap samples of a data set might look like: 
 
@@ -176,7 +176,7 @@ map2_dbl(mtcars$mpg, mtcars$wt, ~ log(.x/.y)) %>%
   head()
 ```
 
-These examples have been trivial but, in later sections, are applied to more complex problems. 
+These examples have been trivial but, in later sections, will be applied to more complex problems. 
 
 :::rmdnote
 For functional programming in tidy modeling, functions should be defined so that functions like `map()` can be used for iterative computations.
@@ -185,7 +185,7 @@ For functional programming in tidy modeling, functions should be defined so that
 
 ## Examples of Tidyverse Syntax
 
-Before diving into examples, let's discuss how the tidyverse relies on a type of data frame called a "tibble". Tibbles have slightly different rules than basic data frames in R. For example, tibbles naturally work with column names that are not syntactically valid variable names:
+Before diving into syntax examples, let's discuss how the tidyverse relies on a type of data frame called a "tibble". Tibbles have slightly different rules than basic data frames in R. For example, tibbles naturally work with column names that are not syntactically valid variable names:
 
 ```{r tidyverse-names}
 # Wants valid names:
@@ -215,7 +215,7 @@ df[, "two"]
 tbbl[, "two"]
 ```
 
-There are various other advantages to using tibbles instead of data frames, such as better printing and more.  [Chapter 10](https://r4ds.had.co.nz/tibbles.html) of @wickham2016 has more details on tibbles.
+There are various other advantages to using tibbles instead of data frames, such as better printing and more.^[Chapter 10 of @wickham2016 has more details on tibbles.]
 
 ```{r tidyverse-import-raw, include = FALSE}
 url <- "chi.csv"
@@ -245,11 +245,11 @@ Our tidyverse pipeline will conduct the following tasks, in order:
 
 1. We will use the tidyverse package `r pkg(readr)` to read the data from the source website and convert them into a tibble. To do this, the `read_csv()` function can determine the type of data by reading an initial number of rows. Alternatively, if the column names and types are already known, a column specification can be created in R and passed to `read_csv()`. 
 
-1. We filter the data to eliminate a few columns that are not needed (such as the station ID) and change the column `stationname` to `station`. The function `select()` is used for this. When filtering, use either the names of the column names or a `r pkg(dplyr)` selector function. When selecting names, a new variable name can be declared using the argument format `new_name = old_name`.
+1. We filter the data to eliminate a few columns that are not needed (such as the station ID) and change the column `stationname` to `station`. The function `select()` is used for this. When filtering, use either the column names or a `r pkg(dplyr)` selector function. When selecting names, a new variable name can be declared using the argument format `new_name = old_name`.
 
 1. The date field is converted to the R date format using the `mdy()` function from the `r pkg(lubridate)` package. We also convert the ridership numbers to thousands. Both of these computations are executed using the `dplyr::mutate()` function.  
 
-1. There are a small number of days that have replicate ridership numbers at certain stations. To mitigate this issue, we use the maximum number of rides for each station and day combination. We _group_ the ridership data by station and day, and then _summarize_ within each of the `r num_combos` unique combinations with the maximum statistic. 
+1. There are a small number of days that have more than one record of ridership numbers at certain stations. To mitigate this issue, we use the maximum number of rides for each station and day combination. We _group_ the ridership data by station and day, and then _summarize_ within each of the `r num_combos` unique combinations with the maximum statistic. 
 
 The tidyverse code for these steps is:
 
@@ -272,8 +272,8 @@ all_stations <-
   summarize(rides = max(rides), .groups = "drop")
 ```
 
-This pipeline of operations illustrates why the tidyverse is popular. A series of data manipulations is used that have simple and easy to understand user interfaces; the series is bundled together in a streamlined and readable way. The focus is on how the user interacts with the software. This approach enables more people to learn R and achieve their analysis goals, and adopting these same principles for modeling in R has the same benefits. 
+This pipeline of operations illustrates why the tidyverse is popular. A series of data manipulations is used that have simple and easy to understand functions for each transformation; the series is bundled together in a streamlined and readable way. The focus is on how the user interacts with the software. This approach enables more people to learn R and achieve their analysis goals, and adopting these same principles for modeling in R has the same benefits. 
 
 ## Chapter Summary 
 
-This chapter introduced the tidyverse, with a focus on applications for modeling. We described differences in conventions between the tidyverse and base R, and introduced two important components of the tidyverse system, tibbles and the pipe operator `%>%`. Data cleaning and processing can feel mundane at times, but these tasks are important for modeling in the real world; we illustrated how to use tibbles, the pipe, and tidyverse functions in an example data import and processing exercise.  
+This chapter introduced the tidyverse, with a focus on applications for modeling and how tidyverse design principles inform the tidymodels framework. Think of the tidymodels framework as applying tidyverse principles to the domain of building models. We described differences in conventions between the tidyverse and base R, and introduced two important components of the tidyverse system, tibbles and the pipe operator `%>%`. Data cleaning and processing can feel mundane at times, but these tasks are important for modeling in the real world; we illustrated how to use tibbles, the pipe, and tidyverse functions in an example data import and processing exercise.  

@@ -30,7 +30,7 @@ Imports:
     doMC,
     dplyr,
     earth,
-    embed (>= 0.1.4.9000),
+    embed (>= 0.1.5),
     fastICA,
     finetune (>= 0.1.1),
     forcats,
@@ -55,7 +55,7 @@ Imports:
     nnet,
     parsnip,
     patchwork,
-    pillar (>= 1.6.5.9001),
+    pillar (>= 1.6.6),
     poissonreg,
     prettyunits,
     probably,
@@ -87,14 +87,8 @@ Imports:
     xgboost,
     yardstick
 Remotes:
-    r-lib/pillar,
-    tidymodels/baguette,
     tidymodels/censored,
-    tidymodels/discrim,
     tidymodels/learntidymodels,
-    tidymodels/parsnip,
-    tidymodels/poissonreg,
-    tidymodels/rules,
     tidymodels/textrecipes,
     tidymodels/tune
 biocViews: mixOmics

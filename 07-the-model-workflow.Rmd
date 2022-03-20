@@ -11,7 +11,7 @@ source("ames_snippets.R")
 
 # A Model Workflow {#workflows}
 
-In the previous chapter, we discussed the `r pkg(parsnip)` package, which can be used to define and fit the model. This chapter introduces a new object called a _model workflow_. The purpose of this object is to encapsulate the major pieces of the modeling _process_ (previously discussed in Section \@ref(model-phases)). The workflow is important in two ways. First, using a workflow object encourages good methodology since it is a single point of entry to the estimation components of a data analysis. Second, it enables the user to better organize their projects. These two points are discussed in the following sections.  
+In the previous chapter, we discussed the `r pkg(parsnip)` package, which can be used to define and fit the model. This chapter introduces a new concept called a _model workflow_. The purpose of this concept (and the corresponding tidymodels `workflow()` object) is to encapsulate the major pieces of the modeling process (previously discussed in Section \@ref(model-phases)). The workflow is important in two ways. First, using a workflow concept encourages good methodology since it is a single point of entry to the estimation components of a data analysis. Second, it enables the user to better organize their projects. These two points are discussed in the following sections.  
 
 
 ## Where Does the Model Begin and End? {#begin-model-end}
@@ -34,7 +34,7 @@ For some data sets that are straightforward in nature, fitting the model itself 
 
 While the examples above are related to steps that occur before the model fit, there may also be operations that occur _after_ the model is created. When a classification model is created where the outcome is binary (e.g., `event` and `non-event`), it is customary to use a 50% probability cutoff to create a discrete class prediction, also known as a "hard prediction". For example, a classification model might estimate that the probability of an event was 62%. Using the typical default, the hard prediction would be `event`. However, the model may need to be more focused on reducing false positive results (i.e., where true non-events are classified as events). One way to do this is to raise the cutoff from 50% to some greater value. This increases the level of evidence required to call a new sample an event. While this reduces the true positive rate (which is bad), it may have a more dramatic effect on reducing false positives. The choice of the cutoff value should be optimized using data. This is an example of a _post-processing_ step that has a significant effect on how well the model works, even though it is not contained in the model fitting step. 
 
-It is important to focus on the broader _modeling process_, instead of only fitting the specific model used to estimate parameters. This broader process includes any preprocessing steps, the model fit itself, as well as potential post-processing activities. In this book, we will refer to this broader process as the **model workflow** and include in it any data-driven activities that are used to produce a final model equation. 
+It is important to focus on the broader _modeling process_, instead of only fitting the specific model used to estimate parameters. This broader process includes any preprocessing steps, the model fit itself, as well as potential post-processing activities. In this book, we will refer to this more comprehensive concept as the **model workflow** and highlight how to handle all it components to produce a final model equation. 
 
 :::rmdnote
 In other software, such as Python or Spark, similar collections of steps are called  _pipelines_. In tidymodels, the term "pipeline" already connotes a sequence of operations chained together with a pipe operator (such as `%>%`). Rather than using ambiguous terminology in this context, we call the sequence of computational operations related to modeling **workflows**. 
@@ -44,7 +44,7 @@ Binding together the analytical components of a data analysis is important for a
 
 To illustrate, consider principal component analysis (PCA) signal extraction. We'll talk about this more in Section \@ref(example-steps) as well as Chapter \@ref(dimensionality); PCA is a way to replace correlated predictors with new artificial features that are uncorrelated and capture most of the information in the original set. The new features could be used as the predictors and least squares regression could be used to estimate the model parameters. 
 
-There are two ways of thinking about the model workflow. Figure \@ref(fig:bad-workflow) illustrates the _incorrect_ method to think of the PCA preprocessing step, as _not being part of the modeling process_.
+There are two ways of thinking about the model workflow. Figure \@ref(fig:bad-workflow) illustrates the _incorrect_ method to think of the PCA preprocessing step, as _not being part of the modeling workflow_.
 
 ```{r bad-workflow, echo = FALSE, out.width = '80%', warning = FALSE}
 #| fig.cap = "Incorrect mental model of where model estimation occurs in the data analysis process.",
@@ -153,9 +153,9 @@ When the model is fit, the specification assembles these data, unaltered, into a
 fit(lm_wflow, ames_train)
 ```
 
-If you would like the underlying modeling method to do what it would normally do with the data, `add_variables()` can be a helpful interface. As we will discuss in Section \@ref(special-model-formulas), it also facilitates more complex modeling specifications. However, as we mention in the next section, models such as `glmnet` and `xgboost` expect the user to make indicator variables from factor predictors. In these cases, a recipe or formula interface will typically be a better choice. 
+If you would like the underlying modeling method to do what it would normally do with the data, `add_variables()` can be a helpful interface. As we will see in Section \@ref(special-model-formulas), it also facilitates more complex modeling specifications. However, as we mention in the next section, models such as `glmnet` and `xgboost` expect the user to make indicator variables from factor predictors. In these cases, a recipe or formula interface will typically be a better choice. 
 
-As seen in the next chapter, a more powerful preprocessor (called a _recipe_) can also be added to a workflow. 
+In the next chapter, we will look at a more powerful preprocessor (called a _recipe_) that can also be added to a workflow. 
 
 ## How Does a `workflow()` Use the Formula? {#workflow-encoding}
 
@@ -273,7 +273,7 @@ location_models$fit[[1]]
 We use a `r pkg(purrr)` function here to map through our models, but there is an easier, better approach to fit workflow sets that will be introduced in Section \@ref(workflow-set). 
 
 :::rmdnote
-In general, there's a lot more to workflow sets! Their nuances and advantages won't be illustrated until Chapter \@ref(workflow-sets). 
+In general, there's a lot more to workflow sets! While we've covered the basics here, the nuances and advantages of workflow sets won't be illustrated until Chapter \@ref(workflow-sets). 
 :::
 
 ## Evaluating the Test Set
@@ -310,7 +310,7 @@ We'll see more about `last_fit()` in action and how to use it again in Section \
 
 In this chapter, you learned that the modeling process encompasses more than just estimating the parameters of an algorithm that connects predictors to an outcome. This process also includes preprocessing steps and operations taken after a model is fit. We introduced a concept called a **model workflow** that can capture the important components of the modeling process. Multiple workflows can also be created inside of a **workflow set**. The `last_fit()` function is convenient for fitting a final model to the training set and evaluating with the test set. 
 
-For the Ames data, the code used in later chapters is:
+For the Ames data, the related code that we'll see used again in later chapters is:
 
 ```{r workflows-summary, eval = FALSE}
 library(tidymodels)
