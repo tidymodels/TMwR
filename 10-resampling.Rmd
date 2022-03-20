@@ -26,7 +26,7 @@ To motivate this chapter, the next section demonstrates how naive performance es
 
 ## The Resubstitution Approach {#resampling-resubstition}
 
-Let's again use the Ames data to demonstrate the concepts in this chapter. Section \@ref(recipes-summary) summarizes the current state of our Ames analysis. It includes a recipe object named `ames_rec`, a linear model, and a workflow using that recipe and model called `lm_wflow`. This workflow was fit on the training set, resulting in `lm_fit`. 
+Let's again use the Ames data to demonstrate the concepts in this chapter. The end of Chapter \@ref(recipes) summarizes the current state of our Ames analysis. It includes a recipe object named `ames_rec`, a linear model, and a workflow using that recipe and model called `lm_wflow`. This workflow was fit on the training set, resulting in `lm_fit`. 
 
 For a comparison to this linear model, we can also fit a different type of model. _Random forests_ are a tree ensemble method that operate by creating a large number of decision trees from slightly different versions of the training set [@breiman2001random]. This collection of trees makes up the ensemble. When predicting a new sample, each ensemble member makes a separate prediction. These are averaged to create the final ensemble prediction for the new data point. 
 
@@ -170,7 +170,7 @@ Cross-validation is a well established resampling method. While there are a numb
 knitr::include_graphics("premade/three-CV.svg")
 ```
 
-The color of the symbols represent their randomly assigned folds. Stratified sampling is also an option for assigning folds (previously discussed in Section \@ref(splitting-methods)). 
+The color of the symbols represent their randomly assigned folds. Stratified sampling is also an option for assigning folds (previously discussed in Chapter \@ref(splitting)). 
 
 For 3-fold cross-validation, the three iterations of resampling are illustrated in Figure \@ref(fig:cross-validation). For each iteration, one fold is held out for assessment statistics and the remaining folds are substrate for the model. This process continues for each fold so that three models produce three sets of performance statistics. 
 
@@ -208,7 +208,7 @@ To manually retrieve the partitioned data, the `analysis()` and `assessment()` f
 ames_folds$splits[[1]] %>% analysis() %>% dim()
 ```
 
-The `r pkg(tidymodels)` packages, such as `r pkg(tune)`, contain high-level user interfaces so that functions like `analysis()` are not generally needed for day-to-day work. Section \@ref(resampling-performance) demonstrates a function to fit a model over these resamples. 
+The `r pkg(tidymodels)` packages, such as `r pkg(tune)`, contain high-level user interfaces so that functions like `analysis()` are not generally needed for day-to-day work. Chapter \@ref(resampling) demonstrates functions to fit a model over these resamples. 
 
 These `r pkg(rsample)` objects also always contain a character column called `id` that labels the partition. Some resampling methods require multiple `id` fields.  
 
@@ -268,7 +268,7 @@ mc_cv(ames_train, prop = 9/10, times = 20)
 
 ### Validation sets {#validation}
 
-Previously mentioned in Section \@ref(what-about-a-validation-set), a validation set is a single partition that is set aside to estimate performance, before using the test set (see Figure \@ref(fig:three-way-split)).
+Previously mentioned in Chapter \@ref(splitting), a validation set is a single partition that is set aside to estimate performance, before using the test set (see Figure \@ref(fig:three-way-split)).
 
 ```{r three-way-split}
 #| echo = FALSE,
@@ -444,7 +444,7 @@ collect_metrics(rf_res)
 
 These are the resampling estimates averaged over the individual replicates. To get the metrics for each resample, use the option `summarize = FALSE` 
 
-Notice how much more realistic the performance estimates are than the resubstitution estimates from Section \@ref(resampling-resubstition)!
+Notice how much more realistic the performance estimates are than the resubstitution estimates from earlier in the chapter!
 
 To obtain the assessment set predictions: 
 

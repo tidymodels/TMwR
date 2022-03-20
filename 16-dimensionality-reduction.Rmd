@@ -36,10 +36,10 @@ This chapter has two goals:
 
  * Demonstrate how to use recipes to create a small set of features that capture the main aspects of the original predictor set.
  
- * Describe how recipes can be used on their own (as opposed to being used in a workflow object, as in Section \@ref(using-recipes)). 
+ * Describe how recipes can be used on their own (as opposed to being used in a workflow object, as in Chapter \@ref(recipes)). 
 :::
  
-The latter is helpful when testing or debugging a recipe. However, as described in Section \@ref(using-recipes), the best way to use a recipe for modeling is from within a workflow object. 
+The latter is helpful when testing or debugging a recipe. However, as described in Chapter \@ref(recipes), the best way to use a recipe for modeling is from within a workflow object. 
 
 In addition to the `r pkg(tidymodels)` package, this chapter uses the following packages: `r pkg(baguette)`, `r pkg(beans)`, `r pkg(bestNormalize)`, `r pkg(corrplot)`, `r pkg(discrim)`, `r pkg(embed)`, `r pkg(ggforce)`, `r pkg(klaR)`, `r pkg(learntidymodels)`,[^learnnote] `r pkg(mixOmics)`,[^mixnote] and `r pkg(uwot)`. 
 
@@ -155,7 +155,7 @@ This recipe will be extended with additional steps for the dimensionality reduct
 
 ## Recipes in the Wild {#recipe-functions}
 
-As mentioned in Section \@ref(using-recipes), a workflow containing a recipe uses `fit()` to estimate the recipe and model, then `predict()` to process the data and make model predictions. There are analogous functions in the `r pkg(recipes)` package that can be used for the same purpose: 
+As mentioned in Chapter \@ref(recipes), a workflow containing a recipe uses `fit()` to estimate the recipe and model, then `predict()` to process the data and make model predictions. There are analogous functions in the `r pkg(recipes)` package that can be used for the same purpose: 
 
 * `prep(recipe, training)` fits the recipe to the training set. 
 * `bake(recipe, new_data)` applies the recipe operations to `new_data`. 

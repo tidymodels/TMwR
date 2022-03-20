@@ -55,7 +55,7 @@ mlp_spec <-
   set_mode("classification")
 ```
 
-The argument `trace = 0` prevents extra logging of the training process. As shown in Section \@ref(tuning-params-tidymodels), the `extract_parameter_set_dials()` function can extract the set of arguments with unknown values and sets their `r pkg(dials)` objects: 
+The argument `trace = 0` prevents extra logging of the training process. As shown in Chapter \@ref(tuning), the `extract_parameter_set_dials()` function can extract the set of arguments with unknown values and sets their `r pkg(dials)` objects: 
 
 ```{r grid-mlp-param}
 mlp_param <- extract_parameter_set_dials(mlp_spec)
@@ -93,7 +93,7 @@ mlp_param %>%
 There are techniques for creating regular grids that do not use all possible values of each parameter set. These _fractional factorial designs_ [@BHH] could also be used. To learn more, consult the CRAN Task View for experimental design.^[<https://CRAN.R-project.org/view=ExperimentalDesign>] 
 
 :::rmdwarning
-Regular grids can be computationally expensive to use, especially when there are a medium-to-large number of tuning parameters. This is true for many models but not all. As discussed in Section \@ref(efficient-grids) below, there are many models whose tuning time _decreases_ with a regular grid!
+Regular grids can be computationally expensive to use, especially when there are a medium-to-large number of tuning parameters. This is true for many models but not all. As discussed further in this chapter, there are many models whose tuning time _decreases_ with a regular grid!
 :::
 
 One advantage to using a regular grid is that the relationships and patterns between the tuning parameters and the model metrics are easily understood. The factorial nature of these designs allows for examination of each parameter separately with little confounding between parameters.   
@@ -163,7 +163,7 @@ Space-filling designs can be very effective at representing the parameter space.
 
 ## Evaluating the Grid {#evaluating-grid}
 
-To choose the best tuning parameter combination, each candidate set is assessed using data that were not used to train that model. Resampling methods or a single validation set work well for this purpose. The process (and syntax) closely resembles the approach in Section \@ref(resampling-performance) that used the `fit_resamples()` function from the `r pkg(tune)` package. 
+To choose the best tuning parameter combination, each candidate set is assessed using data that were not used to train that model. Resampling methods or a single validation set work well for this purpose. The process (and syntax) closely resembles the approach in Chapter \@ref(resampling) that used the `fit_resamples()` function from the `r pkg(tune)` package. 
 
 After resampling, the user selects the most appropriate candidate parameter set. It might make sense to choose the empirically best parameter combination or bias the choice towards other aspects of the model fit, such as simplicity. 
 
@@ -225,7 +225,7 @@ mlp_param <-
   )
 ```
 
-The `tune_grid()` function is the primary function for conducting grid search. Its functionality is very similar to `fit_resamples()` from Section \@ref(resampling-performance), although it has additional arguments related to the grid: 
+The `tune_grid()` function is the primary function for conducting grid search. Its functionality is very similar to `fit_resamples()`, although it has additional arguments related to the grid: 
 
 * `grid`: An integer or data frame. When an integer is used, the function creates a space-filling design with `grid` number of candidate parameter combinations. If specific parameter combinations exist, the `grid` parameter is used to pass them to the function. 
 
@@ -462,7 +462,7 @@ Even though we fit the model with and without the submodel prediction trick, thi
 
 ### Parallel processing
 
-As previously mentioned in Section \@ref(parallel), parallel processing is an effective method for decreasing execution time when resampling models. This advantage conveys to model tuning via grid search, although there are additional considerations. 
+As previously mentioned in Chapter \@ref(resampling), parallel processing is an effective method for decreasing execution time when resampling models. This advantage conveys to model tuning via grid search, although there are additional considerations. 
 
 Let's consider two different parallel processing schemes. 
 
@@ -699,7 +699,7 @@ ggplot(times, aes(x = num_cores, y = speed_up, color = parallel_over, shape = pa
 
 The best speed-ups, for these data, occur when `parallel_over = "resamples"` and when the computations are expensive. However, in the latter case, remember that the previous analysis indicates that the overall model fits are slower.  
 
-What is the benefit of using the submodel optimization method _in conjunction_ with parallel processing?  The C5.0 classification model shown in Section \@ref(submodel-trick) was also run in parallel with ten workers. The parallel computations took 13.3 seconds for a speed-up of `r round(100.147/13.265, 1)`-fold (both runs used the submodel optimization trick). Between the submodel optimization trick and parallel processing, there was a __total speed-up of `r round(3734.249/13.265, 0)`-fold__ over the most basic grid search code. 
+What is the benefit of using the submodel optimization method _in conjunction_ with parallel processing?  The C5.0 classification model shown in Chapter \@ref(grid-search) was also run in parallel with ten workers. The parallel computations took 13.3 seconds for a speed-up of `r round(100.147/13.265, 1)`-fold (both runs used the submodel optimization trick). Between the submodel optimization trick and parallel processing, there was a __total speed-up of `r round(3734.249/13.265, 0)`-fold__ over the most basic grid search code. 
 
 :::rmdwarning
 Overall, note that the increased computational savings will vary from model-to-model and are also affected by the size of the grid, the number of resamples, etc. A very computationally efficient model may not benefit as much from parallel processing. 

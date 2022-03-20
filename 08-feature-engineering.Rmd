@@ -40,7 +40,7 @@ Different models have different preprocessing requirements and some, such as tre
 
 In this chapter, we introduce the [`r pkg(recipes)`](https://recipes.tidymodels.org/) package which you can use to combine different feature engineering and preprocessing tasks into a single object and then apply these transformations to different data sets. The `r pkg(recipes)` package is, like `r pkg(parsnip)` for models, one of the core tidymodels packages.
 
-This chapter uses the Ames housing data and the R objects created in the book so far, as summarized in Section \@ref(workflows-summary).
+This chapter uses the Ames housing data and the R objects created in the book so far, as summarized at the end of Chapter \@ref(workflows).
 
 ## A Simple `recipe()` for the Ames Housing Data 
 
@@ -60,7 +60,7 @@ Suppose that an initial ordinary linear regression model were fit to these data.
 lm(Sale_Price ~ Neighborhood + log10(Gr_Liv_Area) + Year_Built + Bldg_Type, data = ames)
 ```
 
-When this function is executed, the data are converted from a data frame to a numeric _design matrix_ (also called a _model matrix_) and then the least squares method is used to estimate parameters. In Section \@ref(formula) we listed the multiple purposes of the R model formula; let's focus only on the data manipulation aspects for now. What the formula above does can be decomposed into a series of _steps_:
+When this function is executed, the data are converted from a data frame to a numeric _design matrix_ (also called a _model matrix_) and then the least squares method is used to estimate parameters. In Chapter \@ref(base-r) we listed the multiple purposes of the R model formula; let's focus only on the data manipulation aspects for now. What the formula above does can be decomposed into a series of _steps_:
 
 1. Sale price is defined as the outcome while neighborhood, gross living area, the year built, and building type variables are all defined as predictors. 
 
@@ -70,7 +70,7 @@ When this function is executed, the data are converted from a data frame to a nu
 
 As mentioned in Chapter \@ref(base-r), the formula method will apply these data manipulations to any data, including new data, that are passed to the `predict()` function. 
 
-A recipe is also an object that defines a series of _steps_ for data processing. Unlike the formula method inside a modeling function, the recipe defines the steps via `step_*()` functions without immediately executing them; it is only a specification of what should be done. Here is a recipe equivalent to the formula above that builds on the code summary in Section \@ref(splitting-summary):
+A recipe is also an object that defines a series of _steps_ for data processing. Unlike the formula method inside a modeling function, the recipe defines the steps via `step_*()` functions without immediately executing them; it is only a specification of what should be done. Here is a recipe equivalent to the formula above that builds on the code summary at the end of Chapter \@ref(splitting):
 
 ```{r engineering-ames-simple-recipe}
 library(tidymodels) # Includes the recipes package
@@ -90,7 +90,7 @@ Let's break this down:
 
 1. `step_log()` declares that `Gr_Liv_Area` should be log transformed. 
 
-1. `step_dummy()` is used to specify which variables should be converted from a qualitative format to a quantitative format, in this case, using dummy or indicator variables. An indicator or dummy variable is a binary numeric variable (a column of ones and zeroes) that encodes qualitative information; we will dig deeper into these kinds of variables in Section \@ref(dummies). 
+1. `step_dummy()` is used to specify which variables should be converted from a qualitative format to a quantitative format, in this case, using dummy or indicator variables. An indicator or dummy variable is a binary numeric variable (a column of ones and zeroes) that encodes qualitative information; we will dig deeper into these kinds of variables later in this chapter. 
 
 The function `all_nominal_predictors()` captures the names of any predictor columns that are currently factor or character (i.e., nominal) in nature. This is a `r pkg(dplyr)`-like selector function similar to `starts_with()` or `matches()` but can only be used inside of a recipe. 
 
@@ -160,7 +160,7 @@ lm_fit %>%
 ```
 
 :::rmdnote
-There are tools for using (and debugging) recipes outside of workflow objects. These are described in Section \@ref(recipe-functions). 
+There are tools for using (and debugging) recipes outside of workflow objects. These are described in Chapter \@ref(dimensionality). 
 :::
 
 ## How Data are Used by the `recipe()`
@@ -399,7 +399,7 @@ The [`r pkg(themis)`](https://themis.tidymodels.org/) package has recipe steps t
 ```
 
 :::rmdwarning
-Only the training set should be affected by these techniques. The test set or other holdout samples should be left as-is when processed using the recipe. For this reason, all of the subsampling steps default the `skip` argument to have a value of `TRUE` (Section \@ref(skip-equals-true)).
+Only the training set should be affected by these techniques. The test set or other holdout samples should be left as-is when processed using the recipe. For this reason, all of the subsampling steps default the `skip` argument to have a value of `TRUE`.
 :::
 
 There are other step functions that are row-based as well: `step_filter()`, `step_sample()`, `step_slice()`, and `step_arrange()`. In almost all uses of these steps, the `skip` argument should be set to `TRUE`. 
@@ -463,7 +463,7 @@ At the time of this writing, the step functions in the `r pkg(recipes)` and `r p
 
 ## Tidy a `recipe()`
 
-In Section \@ref(tidiness-modeling), we introduced the `tidy()` verb for statistical objects. There is also a `tidy()` method for recipes, as well as individual recipe steps. Before proceeding, let's create an extended recipe for the Ames data using some of the new steps we've discussed in this chapter: 
+In Chapter \@ref(base-r), we introduced the `tidy()` verb for statistical objects. There is also a `tidy()` method for recipes, as well as individual recipe steps. Before proceeding, let's create an extended recipe for the Ames data using some of the new steps we've discussed in this chapter: 
 
 ```{r engineering-lm-extended-recipe}
 ames_rec <- 

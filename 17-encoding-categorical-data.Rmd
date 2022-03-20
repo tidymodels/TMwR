@@ -11,7 +11,7 @@ neighborhood_counts <- count(ames_train, Neighborhood)
 
 # Encoding Categorical Data  {#categorical}
 
-For statistical modeling in R, the preferred representation for categorical or nominal data is a factor, a variable which can take on a limited number of different values; internally, factors are stored as a vector of integer values together with a set of text labels.[^python] In Section \@ref(dummies) we introduced feature engineering approaches to encode or transform qualitative or nominal data into a representation better suited for most model algorithms. We discussed how to transform a categorical variable, such as the `Bldg_Type` in our Ames housing data (with levels `r knitr::combine_words(glue::backtick(levels(ames_train$Bldg_Type)))`), to a set of dummy or indicator variables like those shown in Table \@ref(tab:encoding-dummies).
+For statistical modeling in R, the preferred representation for categorical or nominal data is a factor, a variable which can take on a limited number of different values; internally, factors are stored as a vector of integer values together with a set of text labels.[^python] In Chapter \@ref(recipes) we introduced feature engineering approaches, including those to encode or transform qualitative or nominal data into a representation better suited for most model algorithms. We discussed how to transform a categorical variable, such as the `Bldg_Type` in our Ames housing data (with levels `r knitr::combine_words(glue::backtick(levels(ames_train$Bldg_Type)))`), to a set of dummy or indicator variables like those shown in Table \@ref(tab:encoding-dummies).
 
 [^python]: This is in contrast to statistical modeling in Python, where categorical variables are often directly represented by integers alone, such as `0, 1, 2` representing red, blue, and green.
 
@@ -114,7 +114,7 @@ ames_glm
 When using a recipe step like `step_lencode_glm()`, specify the variable being encoded first and then the outcome using `vars()`.
 :::
 
-As detailed in Section \@ref(recipe-functions), we can `prep()` our recipe to fit or estimate parameters for the preprocessing transformations using training data. We can then `tidy()` this prepared recipe to see the results.
+As detailed in Chapter \@ref(dimensionality), we can `prep()` our recipe to fit or estimate parameters for the preprocessing transformations using training data. We can then `tidy()` this prepared recipe to see the results.
 
 ```{r}
 glm_estimates <-
@@ -207,7 +207,7 @@ Notice in Figure \@ref(fig:encoding-compare-pooling) that most estimates for nei
 
 ## Feature Hashing
 
-Traditional dummy variables as described in Section \@ref(dummies) require that all of the possible categories be known to create a full set of numeric features. _Feature hashing_ methods [@weinberger2009feature] also create dummy variables, but only consider the value of the category to assign it to a predefined pool of dummy variables. Let's look at the `Neighborhood` values in Ames again and use the `rlang::hash()` function to understand more.
+Traditional dummy variables as described in Chapter \@ref(recipes) require that all of the possible categories be known to create a full set of numeric features. _Feature hashing_ methods [@weinberger2009feature] also create dummy variables, but only consider the value of the category to assign it to a predefined pool of dummy variables. Let's look at the `Neighborhood` values in Ames again and use the `rlang::hash()` function to understand more.
 
 ```{r}
 library(rlang)

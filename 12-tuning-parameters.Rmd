@@ -88,11 +88,11 @@ In some cases, preprocessing techniques require tuning:
 
 Some classical statistical models also have structural parameters:
 
- * In binary regression, the logit link is commonly used (i.e., logistic regression). Other link functions, such as the probit and complementary log-log, are also available [@Dobson99]. This example is described in more detail in the Section \@ref(what-to-optimize). 
+ * In binary regression, the logit link is commonly used (i.e., logistic regression). Other link functions, such as the probit and complementary log-log, are also available [@Dobson99]. This example is described in more detail in the next section. 
 
  * Non-Bayesian longitudinal and repeated measures models require a specification for the covariance or correlation structure of the data. Options include compound symmetric (a.k.a. exchangeable), autoregressive, Toeplitz, and others [@littell2000modelling]. 
 
-A counterexample where it is inappropriate to tune a parameter is the prior distribution required for Bayesian analysis. The prior encapsulates the analyst's belief about the distribution of a quantity before evidence or data are taken into account. For example, in Section \@ref(tidyposterior), we used a Bayesian ANOVA model and we were unclear about what the prior should be for the regression parameters (beyond being a symmetric distribution). We chose a t-distribution with one degree of freedom for the prior since it has heavier tails; this reflects our added uncertainty. Our prior beliefs should not be subject to optimization. Tuning parameters are typically optimized for performance whereas the prior should not be tweaked to get "the right results." 
+A counterexample where it is inappropriate to tune a parameter is the prior distribution required for Bayesian analysis. The prior encapsulates the analyst's belief about the distribution of a quantity before evidence or data are taken into account. For example, in Chapter \@ref(compare), we used a Bayesian ANOVA model and we were unclear about what the prior should be for the regression parameters (beyond being a symmetric distribution). We chose a t-distribution with one degree of freedom for the prior since it has heavier tails; this reflects our added uncertainty. Our prior beliefs should not be subject to optimization. Tuning parameters are typically optimized for performance whereas the prior should not be tweaked to get "the right results." 
 
 :::rmdwarning
 Another (perhaps more debatable) counterexample of a parameter that does _not_ need to be tuned is the number of trees in a random forest or bagging model. This value should instead be chosen to be large enough to ensure numerical stability in the results; tuning it cannot improve performance as long as the value is large enough to produce reliable results. For random forests, this value is typically in the thousands while the number of trees needed for bagging is around 50 to 100. 
@@ -286,13 +286,13 @@ Metric optimization is thoroughly discussed by @thomas2020problem who explore se
 
 ## The consequences of poor parameter estimates {#overfitting-bad}
 
-Many tuning parameters modulate the amount of model complexity. More complexity often implies more malleability in the patterns that a model can emulate. For example, as shown in Section \@ref(spline-functions), adding degrees of freedom in a spline function increases the intricacy of the prediction equation. While this is an advantage when the underlying motifs in the data are complex, it can also lead to over-interpretation of chance patterns that would not reproduce in new data. _Overfitting_ is the situation where a model adapts too much to the training data; it performs well on the data used to build the model but poorly for new data. 
+Many tuning parameters modulate the amount of model complexity. More complexity often implies more malleability in the patterns that a model can emulate. For example, as shown in Chapter \@ref(recipes), adding degrees of freedom in a spline function increases the intricacy of the prediction equation. While this is an advantage when the underlying motifs in the data are complex, it can also lead to over-interpretation of chance patterns that would not reproduce in new data. _Overfitting_ is the situation where a model adapts too much to the training data; it performs well on the data used to build the model but poorly for new data. 
 
 :::rmdwarning
 Since tuning model parameters can increase model complexity, poor choices can lead to overfitting. 
 :::
 
-Recall the single layer neural network model described in Section \@ref(tuning-parameter-examples). With a single hidden unit and sigmoidal activation functions, a neural network for classification is, for all intents and purposes, just logistic regression. However, as the number of hidden units increases, so does the complexity of the model. In fact, when the network model uses sigmoidal activation units, @cybenko1989approximation showed that the model is a universal function approximator as long as there are enough hidden units.
+Recall the single layer neural network model described in the first section of this chapter. With a single hidden unit and sigmoidal activation functions, a neural network for classification is, for all intents and purposes, just logistic regression. However, as the number of hidden units increases, so does the complexity of the model. In fact, when the network model uses sigmoidal activation units, @cybenko1989approximation showed that the model is a universal function approximator as long as there are enough hidden units.
 
 We fit neural network classification models to the same two-class data from the previous section, varying the number of hidden units. Using the area under the ROC curve as a performance metric, the effectiveness of the model on the training set increases as more hidden units are added. The network model thoroughly and meticulously learns the training set. If the model judges itself on the training set ROC value, it prefers many hidden units so that it can nearly eliminate errors. 
 
@@ -460,13 +460,13 @@ Examples of these strategies are discussed in detail in the next two chapters. B
 
 We've already dealt with quite a number of arguments that correspond to tuning parameters for recipe and model specifications in previous chapters. It is possible to tune:
 
-* the threshold for combining neighborhoods into an "other" category (with argument name `threshold`) in Section \@ref(dummies), 
+* the threshold for combining neighborhoods into an "other" category (with argument name `threshold`) in Chapter \@ref(recipes), 
 
-* the number of degrees of freedom in a natural spline (`deg_free`, Section \@ref(spline-functions)), 
+* the number of degrees of freedom in a natural spline (`deg_free`, Chapter \@ref(recipes)), 
 
-* the number of data points required to execute a split in a tree-based model (`min_n`, Section \@ref(create-a-model)), and 
+* the number of data points required to execute a split in a tree-based model (`min_n`, Chapter \@ref(models)), and 
 
-* the amount of regularization in penalized models (`penalty`, Section \@ref(create-a-model)).  
+* the amount of regularization in penalized models (`penalty`, Chapter \@ref(models)).  
 
 For `r pkg(parsnip)` model specifications, there are two kinds of parameter arguments. **Main arguments** are those that are most often optimized for performance and are available in multiple engines. The main tuning parameters are top-level arguments to the model specification function. For example, the `rand_forest()` function has main arguments `trees`, `min_n`, and `mtry` since these are most frequently specified or optimized. 
 
@@ -481,7 +481,7 @@ rand_forest(trees = 2000, min_n = 10) %>%                   # <- main arguments
 The main arguments use a  "harmonized"  naming system to remove inconsistencies across engines while engine-specific arguments do not. 
 :::
 
-How can we signal to tidymodels functions which arguments should be optimized?  Parameters are marked for tuning by assigning them a value of `tune()`. For the single layer neural network used in Section \@ref(overfitting-bad), the number of hidden units is designated for tuning using:
+How can we signal to tidymodels functions which arguments should be optimized?  Parameters are marked for tuning by assigning them a value of `tune()`. For the single layer neural network used earlier in this chapter, the number of hidden units is designated for tuning using:
 
 ```{r tuning-mlp-units}
 neural_net_spec <- 
@@ -505,7 +505,7 @@ extract_parameter_set_dials(neural_net_spec)
 
 The results show a value of `nparam[+]`, indicating that the number of hidden units is a _numeric_ parameter. 
 
-There is an optional identification argument that associates a name with the parameters. This can come in handy when the same kind of parameter is being tuned in different places. For example, with the Ames housing data from Section \@ref(resampling-summary), the recipe encoded both longitude and latitude with spline functions. If we want to tune the two spline functions to potentially have different levels of smoothness, we call `step_ns()` twice, once for each predictor. To make the parameters identifiable, the identification argument can take any character string: 
+There is an optional identification argument that associates a name with the parameters. This can come in handy when the same kind of parameter is being tuned in different places. For example, with the Ames housing data example from the end of Chapter \@ref(resampling), the recipe encoded both longitude and latitude with spline functions. If we want to tune the two spline functions to potentially have different levels of smoothness, we call `step_ns()` twice, once for each predictor. To make the parameters identifiable, the identification argument can take any character string: 
 
 ```{r tuning-id}
 ames_rec <- 

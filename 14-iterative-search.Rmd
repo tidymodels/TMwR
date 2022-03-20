@@ -39,11 +39,11 @@ We use the same data on cell characteristics as the previous chapter for illustr
 
 ## A Support Vector Machine Model {#svm}
 
-We once again use the cell segmentation data, described in Section \@ref(evaluating-grid), for modeling, with a support vector machine (SVM) model to demonstrate sequential tuning methods. See @apm for more information on this model. The two tuning parameters to optimize are the SVM cost value and the radial basis function kernel parameter $\sigma$. Both parameters can have a profound effect on the model complexity and performance. 
+We once again use the cell segmentation data, described in Chapter \@ref(grid-search), for modeling, with a support vector machine (SVM) model to demonstrate sequential tuning methods. See @apm for more information on this model. The two tuning parameters to optimize are the SVM cost value and the radial basis function kernel parameter $\sigma$. Both parameters can have a profound effect on the model complexity and performance. 
 
 The SVM model uses a dot-product and, for this reason, it is necessary to center and scale the predictors. Like the multilayer perceptron model, this model would benefit from the use of PCA feature extraction. However, we will not use this third tuning parameter in this chapter so that we can visualize the search process in two dimensions.
 
-Along with the previously used objects (shown in Section \@ref(grid-summary)), the following tidymodels objects define the model process: 
+Along with the previously used objects (shown in the summary of Chapter \@ref(grid-search)), the following tidymodels objects define the model process: 
 
 ```{r iterative-svm-defs, message = FALSE}
 library(tidymodels)
@@ -437,7 +437,7 @@ The `control` argument now uses the results of `control_bayes()`. Some helpful a
 
 * `verbose` is a logical that will print logging information as the search proceeds. 
 
-Let's use the first SVM results from Section \@ref(svm) as the initial substrate for the Gaussian process model. Recall that, for this application, we want to maximize the area under the ROC curve. Our code is: 
+Let's use the first SVM results from the beginning of this chapter as the initial substrate for the Gaussian process model. Recall that, for this application, we want to maximize the area under the ROC curve. Our code is: 
 
 ```{r iterative-cells-bo, eval = FALSE}
 ctrl <- control_bayes(verbose = TRUE)
