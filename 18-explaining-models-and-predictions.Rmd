@@ -58,7 +58,7 @@ bind_rows(
 ) %>%
   ggplot(aes(Sale_Price, .pred)) +
   geom_abline(color = "gray50", lty = 2) + 
-  geom_point(alpha = 0.3, show.legend = FALSE) +
+  geom_point(alpha = 0.2, show.legend = FALSE) +
   facet_wrap(vars(model)) +
   labs(x = "true price", y = "predicted price")
 ```

@@ -10,19 +10,19 @@ source("ames_snippets.R")
 
 There are several steps to create a useful model, including parameter estimation, model selection and tuning, and performance assessment. At the start of a new project, there is usually an initial finite pool of data available for all these tasks. How should the data be applied to these steps? The idea of _data spending_ is an important first consideration when modeling, especially as it relates to empirical validation. 
 
-When there are copious amounts of data available, a smart strategy is to allocate specific subsets of data for different tasks, as opposed to allocating the largest possible amount to the model parameter estimation only. There may be questions about many modeling project steps that must be answered with limited prior knowledge. For example, one possible strategy (when both data and predictors are abundant) is to spend a specific subset of data to determine which predictors are informative, before considering parameter estimation at all. 
-
 :::rmdwarning
-As data are reused for multiple tasks, certain risks increase, such as the risks of adding bias or large effects from methodological errors.
+When data are reused for multiple tasks, instead of carefully "spent" from the finite data budget, certain risks increase, such as adding bias or large effects from methodological errors.
 :::
 
-If the initial pool of data available is not huge, there will be some overlap of how and when our data is "spent" or allocated, and a solid methodology for data spending is important. This chapter demonstrates the basics of _splitting_ our initial pool of samples for different purposes. 
+When there are copious amounts of data available, a smart strategy is to allocate specific subsets of data for different tasks, as opposed to allocating the largest possible amount (or even all) to the model parameter estimation only. For example, one possible strategy (when both data and predictors are abundant) is to spend a specific subset of data to determine which predictors are informative, before considering parameter estimation at all. If the initial pool of data available is not huge, there will be some overlap in how and when our data is "spent" or allocated, and a solid methodology for data spending is important. 
+
+This chapter demonstrates the basics of _splitting_ our initial pool of samples for different purposes. 
 
 ## Common Methods for Splitting Data {#splitting-methods}
 
-The primary approach for empirical model validation is to split the existing pool of data into two distinct sets. Some observations are used to develop and optimize the model. This _training set_ is usually the majority of the data. These data are a sandbox for model building where different models can be fit, feature engineering strategies are investigated, and so on. We as modeling practitioners spend the vast majority of the modeling process using the training set as the substrate to develop the model.  
+The primary approach for empirical model validation is to split the existing pool of data into two distinct sets, the training set and the test set. One portion of the data is used to develop and optimize the model. This _training set_ is usually the majority of the data. These data are a sandbox for model building where different models can be fit, feature engineering strategies are investigated, and so on. We as modeling practitioners spend the vast majority of the modeling process using the training set as the substrate to develop the model.  
 
-The other portion of the observations are placed into the _test set_. This is held in reserve until one or two models are chosen as the methods that are most likely to succeed. The test set is then used as the final arbiter to determine the efficacy of the model. It is critical to only look at the test set once; otherwise, it becomes part of the modeling process. 
+The other portion of the data is placed into the _test set_. This is held in reserve until one or two models are chosen as the methods that are most likely to succeed. The test set is then used as the final arbiter to determine the efficacy of the model. It is critical to only look at the test set once; otherwise, it becomes part of the modeling process. 
 
 :::rmdnote
 How should we conduct this split of the data? This depends on the context. 
@@ -56,7 +56,7 @@ dim(ames_train)
 
 These objects are data frames with the same _columns_ as the original data but only the appropriate _rows_ for each set. 
 
-Simple random sampling is appropriate in many cases but there are exceptions. When there is a dramatic _class imbalance_ in classification problems, one class occurs much less frequently than another. Using a simple random sample may haphazardly allocate these infrequent samples disproportionately into the training or test set. To avoid this, _stratified sampling_ can be used. The training/test split is conducted separately within each class and then these subsamples are combined into the overall training and test set. For regression problems, the outcome data can be artificially binned into _quartiles_ and then stratified sampling conducted four separate times. This is an effective method for keeping the distributions of the outcome similar between the training and test set. The distribution of the sale price outcome for the Ames housing data is shown in Figure \@ref(fig:ames-sale-price). 
+Simple random sampling is appropriate in many cases but there are exceptions. When there is a dramatic _class imbalance_ in classification problems, one class occurs much less frequently than another. Using a simple random sample may haphazardly allocate these infrequent samples disproportionately into the training or test set. To avoid this, _stratified sampling_ can be used. The training/test split is conducted separately within each class and then these subsamples are combined into the overall training and test set. For regression problems, the outcome data can be artificially binned into _quartiles_ and then stratified sampling can be conducted four separate times. This is an effective method for keeping the distributions of the outcome similar between the training and test set. The distribution of the sale price outcome for the Ames housing data is shown in Figure \@ref(fig:ames-sale-price). 
 
 ```{r ames-sale-price, echo = FALSE}
 #| fig.cap = "The distribution of the sale price (in log units) for the Ames housing data. The vertical lines indicate the quartiles of the data.",
@@ -79,7 +79,7 @@ quart_plot <-
 quart_plot
 ```
 
-As previously discussed, the sale price distribution is right-skewed, with proportionally more inexpensive houses than expensive houses on either side of the center of the distribution. The worry here is that the more expensive houses would not be represented in the training set well with simple splitting; this would increase the risk that our model would be ineffective at predicting the price for such properties.  The dotted vertical lines in Figure \@ref(fig:ames-sale-price) indicate the four quartiles for these data. A stratified random sample would conduct the 80/20 split within each of these data subsets and then pool the results together. In `r pkg(rsample)`, this is achieved using the `strata` argument: 
+As previously discussed, the sale price distribution is right-skewed, with proportionally more inexpensive houses than expensive houses on either side of the center of the distribution. The worry here with simple splitting is that the more expensive houses would not be well represented in the training set; this would increase the risk that our model would be ineffective at predicting the price for such properties.  The dotted vertical lines in Figure \@ref(fig:ames-sale-price) indicate the four quartiles for these data. A stratified random sample would conduct the 80/20 split within each of these data subsets and then pool the results together. In `r pkg(rsample)`, this is achieved using the `strata` argument: 
 
 ```{r ames-strata-split}
 set.seed(502)
@@ -98,9 +98,9 @@ There is very little downside to using stratified sampling.
 
 Are there situations when random sampling is not the best choice? One case is when the data have a significant _time_ component, such as time series data. Here, it is more common to use the most recent data as the test set. The `r pkg(rsample)` package contains a function called `initial_time_split()` that is very similar to `initial_split()`. Instead of using random sampling, the `prop` argument denotes what proportion of the first part of the data should be used as the training set; the function assumes that the data have been pre-sorted in an appropriate order. 
 
-## What Proportion Should Be Used? 
-
-The proportion of data that should be allocated for splitting is highly dependent on the context of the problem at hand. Too little data in the training set hampers the model's ability to find appropriate parameter estimates. Conversely, too little data in the test set lowers the quality of the performance estimates. There are parts of the statistics community that eschew test sets in general because they believe all of the data should be used for parameter estimation. While there is merit to this argument, it is good modeling practice to have an unbiased set of observations as the final arbiter of model quality. A test set should be avoided only when the data are pathologically small.
+:::rmdnote
+As we've mentioned, the proportion of data that should be allocated for splitting is highly dependent on the context of the problem at hand. Too little data in the training set hampers the model's ability to find appropriate parameter estimates. Conversely, too little data in the test set lowers the quality of the performance estimates. There are parts of the statistics community that eschew test sets in general because they believe all of the data should be used for parameter estimation. While there is merit to this argument, it is good modeling practice to have an unbiased set of observations as the final arbiter of model quality. A test set should be avoided only when the data are pathologically small.
+:::
 
 ## What About a Validation Set? 
 
@@ -109,16 +109,16 @@ Previously, when describing the goals of data splitting, we singled out the test
 It is common to hear about _validation sets_ as an answer to this question, especially in the neural network and deep learning literature. The validation set was originally defined in the early days of neural networks when researchers realized that measuring performance by re-predicting the training set samples led to results that were overly optimistic (significantly, unrealistically so). This led to models that overfit, meaning that they performed very well on the training set but poorly on the test set.^[This is discussed in much greater detail in Section \@ref(overfitting-bad).] To combat this issue, a small validation set of data were held back and used to measure performance as the network was trained. Once the validation set error rate began to rise, the training would be halted. In other words, the validation set was a means to get a rough sense of how well the model performed prior to the test set. 
 
 :::rmdnote
-It is largely semantics as to whether validation sets are a subset of the training set or a third allocation in the initial split of the data.
+Whether validation sets are a subset of the training set or a third allocation in the initial split of the data largely comes down to semantics.
 :::
 
 Validation sets are discussed more in Section \@ref(validation) as a special case of _resampling_ methods that are used on the training set.
 
 ## Multi-Level Data
 
-With the Ames housing data, a property is considered to be the _independent experimental unit_. It is safe to assume that, statistically, the data from a property are independent. For other applications, that is not always the case: 
+With the Ames housing data, a property is considered to be the _independent experimental unit_. It is safe to assume that, statistically, the data from a property are independent of other properties. For other applications, that is not always the case: 
 
- * For longitudinal data, the same independent experimental unit can be measured over multiple time points. An example would be a human subject in a medical trial. 
+ * For longitudinal data, for example, the same independent experimental unit can be measured over multiple time points. An example would be a human subject in a medical trial. 
  
  * A batch of manufactured product might also be considered the independent experimental unit. In repeated measures designs, replicate data points from a batch are collected. 
  
@@ -126,7 +126,7 @@ With the Ames housing data, a property is considered to be the _independent expe
  
 Chapter 9 of @fes contains other examples. 
 
-In these situations, the data set will have multiple rows per experimental unit. Simple resampling across rows would lead to some data within an experimental unit being in the training set and others in the test set. Data splitting should occur at the independent experimental unit level of the data. For example, to produce an 80/20 split of the data, 80% of the experimental units should be allocated for the training set.  
+In these situations, the data set will have multiple rows per experimental unit. Simple resampling across rows would lead to some data within an experimental unit being in the training set and others in the test set. Data splitting should occur at the independent experimental unit level of the data. For example, to produce an 80/20 split of the Ames housing data set, 80% of the properties should be allocated for the training set.  
 
 
 ## Other Considerations 
@@ -141,7 +141,7 @@ For example, in a machine learning competition, the test set data might be provi
 
 In later chapters we discuss techniques to subsample the training set to mitigate specific issues (e.g., class imbalances). This is a valid and common technique that deliberately results in the training set data diverging from the population from which the data were drawn. It is critical that the test set continues to mirror what the model would encounter _in the wild_. In other words, the test set should always resemble new data that will be given to the model. 
  
-Finally, at the beginning of this chapter, we warned about using the same data for different tasks. Chapter \@ref(resampling) will discuss solid, data-driven methodologies for data usage that will reduce the risks related to bias, overfitting, and other issues. Many of these methods mirror the data-splitting tools shown in this chapter.  
+Finally, at the beginning of this chapter, we warned about using the same data for different tasks. Chapter \@ref(resampling) will discuss solid, data-driven methodologies for data usage that will reduce the risks related to bias, overfitting, and other issues. Many of these methods apply the data-splitting tools introduced in this chapter.  
 
 
 ## Chapter Summary {#splitting-summary}

@@ -252,7 +252,7 @@ There are high-level convenience functions to understand the results. First, the
 
 ```{r grid-cells-reg-plot, eval = FALSE}
 autoplot(mlp_reg_tune) + 
-  scale_color_viridis_d() + 
+  scale_color_viridis_d(direction = -1) + 
   theme(legend.position = "top")
 ```
 
