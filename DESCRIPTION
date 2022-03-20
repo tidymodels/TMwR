@@ -87,6 +87,7 @@ Imports:
     xgboost,
     yardstick
 Remotes:
+    tidymodels/censored,
     tidymodels/learntidymodels,
     tidymodels/textrecipes,
     tidymodels/tune
