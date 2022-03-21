@@ -44,7 +44,7 @@ for f in *.md; do pandoc --markdown-headings=atx \
     "$f"; done
 ```
 
-## Fix notes/warnings
+## Fix notes/warnings/image/etc
 
 Using sed:
 
@@ -60,8 +60,11 @@ sed -i ".bak" -E "s/\@ref\(([^()]*)\)/<<\1>>/g" *.adoc
 perl -i~ -0777 -pe 's/\[\[refs\]\].*\Z//sg' *.adoc
 perl -i~ -0777 -pe 's/\.\(\#tab\:(.*?)\)(.*?)/[[\1]]\n\.\2/g' *.adoc
 sed -i ".bak" 's/\[\[\(.*\)\]\] image:\(.*\)\[\(.*\)\]/\[\[\1\]\]\n\.\3\nimage::\2/g' *.adoc
+sed -i ".bak" 's/\.svg/\.png/g' *.adoc
 sed -i ".bak" 's/Figure <</<</g' *.adoc
 sed -i ".bak" 's/Table <</<</g' *.adoc
+sed -i ".bak" 's/Chapters <</<</g' *.adoc
+sed -i ".bak" 's/Chapter <</<</g' *.adoc
 ```
 
 ## Make preface [actually a preface](https://docs.atlas.oreilly.com/writing_in_asciidoc.html#prefaces-PntlujUD)
@@ -82,12 +85,15 @@ mogrify -format png *.svg
 ## Clean up extra files when totally done
 
 ```
+ren -v "*.adoc" "#1.asciidoc"
+mv pre-proc-table.asciidoc appendix.asciidoc
 rm *.bak
 rm *.md
 rm *.html
 rm *~
 rm premade/*.svg
 rm -r libs
+ren -v "*-*.adoc" "ch#1.asciidoc"
 ```
 
 ## Zip up and send!
