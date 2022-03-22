@@ -120,7 +120,8 @@ plain_ames <-
   ggplot() +
   xlim(ames_x) +
   ylim(ames_y) + 
-  theme_void() + 
+  theme_vo
+<id() + 
   theme(legend.position = "none") +
   geom_sf(data = ia_roads, aes(geometry = geometry), alpha = .1) +
   geom_point(
@@ -133,7 +134,7 @@ plain_ames <-
     alpha = .25
   )
 
-agg_png("ames_plain.png", width = 820 * 3, height = 820 * 3, res = 300, scaling = 1)
+agg_png("ames_plain.png", width = 820 * 3, height = 550 * 3, res = 300, scaling = 1)
 print(plain_ames)
 dev.off()
 
@@ -165,9 +166,11 @@ chull_ames <-
     show.legend = FALSE,
     size = 1, 
     alpha = .5
-  ) 
+  ) + 
+  scale_color_manual(values = ames_cols) + 
+  scale_fill_manual(values = ames_cols)
 
-agg_png("ames_chull.png", width = 820 * 3, height = 820 * 3, res = 300, scaling = 1)
+agg_png("ames_chull.png", width = 820 * 3, height = 550 * 3, res = 300, scaling = 1)
 print(chull_ames)
 dev.off()
 
