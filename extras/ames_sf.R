@@ -114,6 +114,63 @@ agg_png("ames.png", width = 820 * 3, height = 820 * 3, res = 300, scaling = 1)
 print(all_ames)
 dev.off()
 
+# ------------------------------------------------------------------------------
+
+plain_ames <- 
+  ggplot() +
+  xlim(ames_x) +
+  ylim(ames_y) + 
+  theme_void() + 
+  theme(legend.position = "none") +
+  geom_sf(data = ia_roads, aes(geometry = geometry), alpha = .1) +
+  geom_point(
+    data = ames,
+    aes(
+      x = Longitude,
+      y = Latitude,
+    ),
+    size = 1/2, 
+    alpha = .25
+  )
+
+agg_png("ames_plain.png", width = 820 * 3, height = 820 * 3, res = 300, scaling = 1)
+print(plain_ames)
+dev.off()
+
+# ------------------------------------------------------------------------------
+
+chull_ames <- 
+  ames %>% 
+  select(Neighborhood, Longitude, Latitude) %>% 
+  group_nest(Neighborhood) %>% 
+  mutate(con_hull = map(data, ~ .x[chull(.x),])) %>% 
+  select(-data) %>% 
+  unnest(con_hull)
+
+chull_ames <- 
+  ggplot() +
+  xlim(ames_x) +
+  ylim(ames_y) + 
+  theme_void() + 
+  theme(legend.position = "none") +
+  geom_sf(data = ia_roads, aes(geometry = geometry), alpha = .1) +
+  geom_polygon(
+    data = chull_ames,
+    aes(
+      x = Longitude,
+      y = Latitude,
+      col = Neighborhood,
+      fill = Neighborhood
+    ),
+    show.legend = FALSE,
+    size = 1, 
+    alpha = .5
+  ) 
+
+agg_png("ames_chull.png", width = 820 * 3, height = 820 * 3, res = 300, scaling = 1)
+print(chull_ames)
+dev.off()
+
 ## -----------------------------------------------------------------------------
 
 mitchell_x <- extendrange(ames$Longitude[ames$Neighborhood == "Mitchell"], f = .1)
@@ -138,7 +195,7 @@ mitchell_box <-
     size = .3, 
     alpha = .5
   ) + 
-  scale_color_manual(values = ames_cols) + 
+  scale_color_manual(values = c(Meadow_Village = "#1F78B4", Mitchell = "#A6CEE3")) + 
   scale_shape_manual(values = ames_pch) +
   geom_rect(
     aes(
@@ -183,8 +240,8 @@ mitchell <-
     size = 4, 
     alpha = .5
   ) + 
-  scale_color_manual(values = ames_cols) + 
-  scale_shape_manual(values = ames_pch)
+  scale_color_manual(values = c(Meadow_Village = "#1F78B4", Mitchell = "#A6CEE3")) + 
+  scale_shape_manual(values = c(Meadow_Village = 17, Mitchell = 16))
 
 
 # make plot and guide side-by-side
@@ -214,9 +271,7 @@ timberland_box <-
     data = ames,
     aes(
       x = Longitude,
-      y = Latitude,
-      col = Neighborhood,
-      shape = Neighborhood
+      y = Latitude
     ),
     size = .2, 
     alpha = .5
@@ -250,9 +305,7 @@ timberland <-
     data = ames,
     aes(
       x = Longitude,
-      y = Latitude,
-      col = Neighborhood,
-      shape = Neighborhood
+      y = Latitude
     ),
     size = 5, 
     alpha = .5
@@ -283,15 +336,11 @@ dot_rr_box <-
     data = ames %>% filter(Neighborhood %in% c("Iowa_DOT_and_Rail_Road")),
     aes(
       x = Longitude,
-      y = Latitude,
-      col = Neighborhood,
-      shape = Neighborhood
+      y = Latitude
     ),
     size = .3, 
     alpha = .5
   ) + 
-  scale_color_manual(values = ames_cols) + 
-  scale_shape_manual(values = ames_pch) +
   geom_rect(
     aes(
       xmin = dot_rr_x[1],
@@ -319,15 +368,11 @@ dot_rr <-
     data = ames %>% filter(Neighborhood %in% c("Iowa_DOT_and_Rail_Road")),
     aes(
       x = Longitude,
-      y = Latitude,
-      col = Neighborhood,
-      shape = Neighborhood
+      y = Latitude
     ),
     size = 6, 
     alpha = .5
-  ) + 
-  scale_color_manual(values = ames_cols) + 
-  scale_shape_manual(values = ames_pch)
+  ) 
 
 # guide inset in plot
 agg_png("dot_rr.png", width = 480 * dot_rr_ratio)
@@ -353,15 +398,11 @@ crawford_box <-
     data = ames %>% filter(Neighborhood %in% c("Crawford")),
     aes(
       x = Longitude,
-      y = Latitude,
-      col = Neighborhood,
-      shape = Neighborhood
+      y = Latitude
     ),
     size = .3, 
     alpha = .5
   ) + 
-  scale_color_manual(values = ames_cols) + 
-  scale_shape_manual(values = ames_pch) +
   geom_rect(
     aes(
       xmin = crawford_x[1],
@@ -389,15 +430,11 @@ crawford <-
     data = ames %>% filter(Neighborhood %in% c("Crawford")),
     aes(
       x = Longitude,
-      y = Latitude,
-      col = Neighborhood,
-      shape = Neighborhood
+      y = Latitude
     ),
     size = 5, 
     alpha = .5
-  ) + 
-  scale_color_manual(values = ames_cols) + 
-  scale_shape_manual(values = ames_pch)
+  ) 
 
 # guide inset in plot
 agg_png("crawford.png", width = 480 * crawford_ratio)
@@ -430,8 +467,8 @@ northridge_box <-
     size = .3, 
     alpha = .5
   ) + 
-  scale_color_manual(values = ames_cols) + 
-  scale_shape_manual(values = ames_pch) +
+  scale_color_manual(values = c(Northridge = "#B2DF8A", Somerset = "#6A3D9A")) + 
+  scale_shape_manual(values = c(Northridge = 16, Somerset = 17)) +
   geom_rect(
     aes(
       xmin = northridge_x[1],
@@ -475,8 +512,8 @@ northridge <-
     size = 4, 
     alpha = .5
   ) + 
-  scale_color_manual(values = ames_cols) + 
-  scale_shape_manual(values = ames_pch)
+  scale_color_manual(values = c(Northridge = "#B2DF8A", Somerset = "#6A3D9A")) + 
+  scale_shape_manual(values = c(Northridge = 16, Somerset = 17)) 
 
 
 # make plot and guide side-by-side
