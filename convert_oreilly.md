@@ -93,7 +93,7 @@ rm *.html
 rm *~
 rm premade/*.svg
 rm -r libs
-ren -v "*-*.adoc" "ch#1.asciidoc"
+ren -v "*-*.asciidoc" "ch#1.asciidoc"
 ```
 
 ## Zip up and send!
