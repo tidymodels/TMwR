@@ -707,7 +707,13 @@ Overall, note that the increased computational savings will vary from model-to-m
 
 ### Access to global variables
 
-When using tidymodels, it is possible to use values in your local environment (usually the global environment) in model objects. For example, 
+When using tidymodels, it is possible to use values in your local environment (usually the global environment) in model objects. 
+
+:::rmdnote
+What do we mean by "environment" here? Think of an environment in R as a place to store variables that you can work with. See the "Environments" chapter of @wickham2019advanced to learn more.
+:::
+
+If we define a variable to use as a model parameter and then pass it to a function like `linear_reg()`, the variable is typically defined in the global environment.
 
 ```{r grid-spec-global}
 coef_penalty <- 0.1
@@ -715,24 +721,26 @@ spec <- linear_reg(penalty = coef_penalty) %>% set_engine("glmnet")
 spec
 ```
 
-parsnip models save any arguments as _quosures_; these are objects that track the name of the object as well as where it lives: 
+Models created with the parsnip package save arguments like these as _quosures_; these are objects that track both the name of the object as well as the environment where it lives: 
 
 ```{r grid-spec-quo}
 spec$args$penalty
 ```
 
-This code works when run in a user's regular session since that session is using the global environment and it can easily find the object `coef_penalty`. 
+Notice that we have `env:  global` because this variable was created in the global environment. The model specification defined by `spec` works correctly when run in a user's regular session because that session is also using the global environment; R can easily find the object `coef_penalty`. 
 
-However, when the model is evaluated with parallel workers, it may fail. Depending on the technology that is used, the parallel workers may not have access to the global environment. 
+:::rmdwarning
+When such a model is evaluated with parallel workers, it may fail. Depending on the particular technology that is used for parallel processing, the workers may not have access to the global environment.
+:::
 
-When writing code that will be run in parallel, it is a good idea to insert the actual data into the objects rather than the reference to the object. The rlang and dplyr package can be very helpful for this. For example, the `!!` operator can splice a single value into an object: 
+When writing code that will be run in parallel, it is a good idea to insert the actual data into the objects rather than the reference to the object. The `r pkg(rlang)` and `r pkg(dplyr)` packages can be very helpful for this. For example, the `!!` operator can splice a single value into an object: 
 
 ```{r grid-spec-bang-bang}
 spec <- linear_reg(penalty = !!coef_penalty) %>% set_engine("glmnet")
 spec$args$penalty
 ```
 
-The output of `^0.1` indicates that the value is there instead of the reference to the object. When you have multiple external values to insert into an object, the `!!!` operator can help: 
+Now the output is `^0.1`, indicating that the value is there instead of the reference to the object. When you have multiple external values to insert into an object, the `!!!` operator can help: 
 
 ```{r grid-spec-bang-bang-bang}
 mcmc_args <- list(chains = 3, iter = 1000, cores = 3)
@@ -740,7 +748,7 @@ mcmc_args <- list(chains = 3, iter = 1000, cores = 3)
 linear_reg() %>% set_engine("stan", !!!mcmc_args)
 ```
 
-Recipe selectors are another place where one might want access to global variables. Suppose you have a recipe step that should use all of the predictors in the cell data that were measures using the second optical channel. We can create a vector of these column names: 
+Recipe selectors are another place where you might want access to global variables. Suppose you have a recipe step that should use all of the predictors in the cell data that were measured using the second optical channel. We can create a vector of these column names: 
 
 ```{r grid-ch-2}
 library(stringr)
@@ -760,7 +768,7 @@ recipe(class ~ ., data = cells) %>%
   step_spatialsign(!!!ch_2_vars)
 ```
 
-The latter is better for parallel processing since all of the information is embedded in the recipe object. 
+The latter is better for parallel processing because all of the needed information is embedded in the recipe object. 
 
 ### Racing methods {#racing}
 
