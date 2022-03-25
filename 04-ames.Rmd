@@ -41,6 +41,20 @@ data(ames, package = "modeldata")
 dim(ames)
 ```
 
+Figure \@ref(fig:ames-map) shows the locations of the properties in Ames. The locations will be revisited in the next section. 
+
+```{r ames-map}
+#| out.width = "100%", 
+#| echo = FALSE, 
+#| warning = FALSE,
+#| fig.cap = "Property locations in Ames, IA.",
+#| fig.alt = "A scatter plot of house locations in Ames superimposed over a street map. There is a significant area in the center of the map where no homes were sold."
+# See file extras/ames_sf.R
+knitr::include_graphics("premade/ames_plain.png")
+```
+
+The void of data points in the center of Ames corresponds to Iowa State University. 
+
 ## Exploring Important Features
 
 Let's start with the outcome we want to predict: the last sale price of the house (in USD), as shown in Figure \@ref(fig:ames-sale-price).
@@ -93,19 +107,19 @@ Despite these drawbacks, the models used in this book utilize the log transforma
 ames <- ames %>% mutate(Sale_Price = log10(Sale_Price))
 ```
 
-Another important aspect of these data for our modeling are their geographic locations. This spatial information is contained in the data in two ways: a qualitative `Neighborhood` label as well as quantitative longitude and latitude data. To visualize the spatial information, let's use both together to plot the data on a map in Figure \@ref(fig:ames-map).
+Another important aspect of these data for our modeling are their geographic locations. This spatial information is contained in the data in two ways: a qualitative `Neighborhood` label as well as quantitative longitude and latitude data. To visualize the spatial information, Figure \@ref(fig:ames-chull) duplicates the data from Figure \@ref(fig:ames-map) with convex hulls around the data from each neighborhood. 
 
-```{r ames-map}
+```{r ames-chull}
 #| out.width = "100%", 
 #| echo = FALSE, 
 #| warning = FALSE,
-#| fig.cap = "Neighborhoods in Ames, IA.",
-#| fig.alt = "A scatter plot of house locations in Ames superimposed over a street map. There is a significant area in the center of the map where no homes were sold."
+#| fig.cap = "Neighborhoods in Ames represented using a convex hull.",
+#| fig.alt = "A scatter plot of house locations in Ames superimposed over a street map with colored regions that show the locations of neighborhoods. Show neighborhoods overlap and a few are nested within other neighborhoods."
 # See file extras/ames_sf.R
-knitr::include_graphics("premade/ames.png")
+knitr::include_graphics("premade/ames_chull.png")
 ```
 
-We can see a few noticeable patterns. First, there is a void of data points in the center of Ames. This corresponds to Iowa State University. Second, while there are a number of neighborhoods that are geographically isolated, there are others that are adjacent to each other. For example, as Figure \@ref(fig:ames-timberland) shows, Timberland is located apart from almost all other neighborhoods.
+We can see a few noticeable patterns. While there are a number of neighborhoods that are geographically isolated, there are others that are adjacent to each other (or even overlap). For example, as Figure \@ref(fig:ames-timberland) shows, Timberland is located apart from almost all other neighborhoods.
 
 ```{r ames-timberland}
 #| out.width = "80%", 
