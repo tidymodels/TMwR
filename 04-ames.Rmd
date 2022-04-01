@@ -93,7 +93,7 @@ Despite these drawbacks, the models used in this book utilize the log transforma
 ames <- ames %>% mutate(Sale_Price = log10(Sale_Price))
 ```
 
-Another important aspect of these data for our modeling are their geographic locations. This spatial information is contained in the data in two ways: a qualitative `Neighborhood` label as well as quantitative longitude and latitude data. To visualize the spatial information, let's use both together to plot the data on a map in Figure \@ref(fig:ames-map).
+Another important aspect of these data for our modeling is their geographic locations. This spatial information is contained in the data in two ways: a qualitative `Neighborhood` label as well as quantitative longitude and latitude data. To visualize the spatial information, let's use both together to plot the data on a map in Figure \@ref(fig:ames-map).
 
 ```{r ames-map}
 #| out.width = "100%", 
