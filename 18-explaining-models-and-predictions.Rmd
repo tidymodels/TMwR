@@ -344,7 +344,7 @@ ggplot_pdp <- function(obj, x) {
 }
 ```
 
-Using this function generates Figure \@ref(fig:year-built).
+Using this function generates Figure \@ref(fig:year-built), where we can see the nonlinear behavior of the random forest model.
 
 ```{r explain-year-built, eval = FALSE}
 ggplot_pdp(pdp_age, Year_Built)  +
@@ -359,7 +359,7 @@ ggplot_pdp(pdp_age, Year_Built)  +
 #| fig.alt = "Partial dependence profiles for the random forest model focusing on the year built predictor. The profiles are mostly relatively constant but then increase linearly around 1950."
 ```
 
-Partial dependence profiles can be computed for any other feature in the model, and also for groups in the data, such as `Bldg_Type`. Let's use 1,000 observations for these profiles.
+Sale price for houses built in different years is mostly flat, with a modest rise after about 1960. Partial dependence profiles can be computed for any other feature in the model, and also for groups in the data, such as `Bldg_Type`. Let's use 1,000 observations for these profiles.
 
 ```{r explain-build-type-pdp, eval = FALSE}
 set.seed(1806)
@@ -375,7 +375,7 @@ ggplot_pdp(pdp_liv, Gr_Liv_Area) +
        color = NULL)
 ```
 
-This code produces Figure \@ref(fig:building-type-profiles).
+This code produces Figure \@ref(fig:building-type-profiles), where we see that sale price increases the most between about 1000 and 3000 square feet of living area, and that different home types (like single family homes or different types of townhouses) mostly exhibit similar increasing trends in price with more living space.
 
 ```{r building-type-profiles, ref.label = "explain-build-type-pdp"}
 #| echo = FALSE,
@@ -383,7 +383,7 @@ This code produces Figure \@ref(fig:building-type-profiles).
 #| fig.alt = "Partial dependence profiles for the random forest model focusing on building types and gross living area. The building type profiles are, for the most part, parallel over gross living area."
 ```
 
-We have the option of using `plot(pdp_liv)` for default `r pkg(DALEX)` plots, but since we are making plots with the underlying data here, we can even facet by one of the features to visualize how the predictions change differently, highlighting the model's behavior for subgroups (as shown in Figure \@ref(fig:building-type-facets)).
+We have the option of using `plot(pdp_liv)` for default `r pkg(DALEX)` plots, but since we are making plots with the underlying data here, we can even facet by one of the features to visualize if the predictions change differently and highlighting the imbalance we have in these subgroups (as shown in Figure \@ref(fig:building-type-facets)).
 
 ```{r explain-build-type-facet, eval = FALSE}
 as_tibble(pdp_liv$agr_profiles) %>%

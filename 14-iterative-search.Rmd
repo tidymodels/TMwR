@@ -144,7 +144,7 @@ collect_metrics(svm_initial) %>%
 
 Gaussian process models are specified by their mean and covariance functions, although the latter has the most effect on the nature of the GP model. The covariance function is often parameterized in terms of the input values (denoted as $x$ below). As an example, a commonly used covariance function is the squared exponential^[This equation is also the same as the _radial basis function_ used in kernel methods, such as the SVM model that is currently being used. This is a coincidence; this covariance function is unrelated to the SVM tuning parameter that we are using. ] function: 
 
-$$cov(\boldsymbol{x}_i, \boldsymbol{x}_j) = exp\left(-\frac{1}{2}|\boldsymbol{x}_i - \boldsymbol{x}_j|^2\right) + \sigma^2_{ij}$$
+$$\operatorname{cov}(\boldsymbol{x}_i, \boldsymbol{x}_j) = \exp\left(-\frac{1}{2}|\boldsymbol{x}_i - \boldsymbol{x}_j|^2\right) + \sigma^2_{ij}$$
 where $\sigma^2_{ij}$ is a constant error variance term that is zero when $i=j$. This equation translates to: 
 
 > As the distance between two tuning parameter combinations increases, the covariance between the performance metrics increase exponentially. 
@@ -612,7 +612,7 @@ The process starts with an initial value and embarks on a controlled random walk
 
 The candidate point is resampled to obtain its corresponding performance value. If this achieves better results than the previous parameters, it is accepted as the new best and the process continues. If the results are worse than the previous value the search procedure _may_ still use this parameter to define further steps. This depends on two factors. First, the likelihood of accepting a bad result decreases as performance becomes worse. In other words, a slightly worse result has a better chance of acceptance than one with a large drop in performance. The other factor is the number of search iterations. Simulated annealing wants to accept fewer suboptimal values as the search proceeds. From these two factors, the _acceptance probability_  for a bad result can be formalized as:
 
-$$Pr[\text{accept suboptimal parameters at iteration } i] = \exp(c\times D_i \times i)$$
+$$\operatorname{Pr}[\text{accept suboptimal parameters at iteration } i] = \exp(c\times D_i \times i)$$
 
 where $i$ is the iteration number, $c$ is a user-specified constant, and $D_i$ is the percent difference between the old and new values (where negative values imply worse results). For a bad result, we determine the acceptance probability and compare it to a random uniform number. If the random number is greater than the probability value, the search _discards_ the current parameters and the next iteration creates its candidate value in the neighborhood of the _previous value_. Otherwise, the next iteration forms the next set of parameters based on the current (suboptimal) values. 
 

@@ -173,7 +173,7 @@ The within-resample correlation appears to be real.
 
 What effect does the extra correlation have on our analysis? Consider the variance of a difference of two variables: 
 
-$$Var[X - Y] = Var[X] + Var[Y]  - 2 Cov[X, Y]$$
+$$\operatorname{Var}[X - Y] = \operatorname{Var}[X] + \operatorname{Var}[Y]  - 2 \operatorname{Cov}[X, Y]$$
 
 The last term is the covariance between two items. If there is a significant positive covariance, then any statistical test of this difference would be critically under-powered comparing the difference in two models. In other words, ignoring the resample-to-resample effect would bias our model comparisons towards finding no differences between models. 
 

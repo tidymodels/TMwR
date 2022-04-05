@@ -450,7 +450,7 @@ mlp_spec <-
   set_engine('nnet') %>%
   set_mode('classification')
 
-bagging_pec <-
+bagging_spec <-
   bag_tree() %>%
   set_engine('rpart') %>%
   set_mode('classification')
@@ -500,7 +500,7 @@ bean_res <-
   workflow_set(
     preproc = list(basic = class ~., pls = pls_rec, umap = umap_rec), 
     models = list(bayes = bayes_spec, fda = fda_spec,
-                  rda = rda_spec, bag = bagging_pec,
+                  rda = rda_spec, bag = bagging_spec,
                   mlp = mlp_spec)
   ) %>% 
   workflow_map(

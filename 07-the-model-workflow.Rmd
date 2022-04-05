@@ -20,7 +20,7 @@ So far, when we have used the term "the model", we have meant a structural equat
 
 $$ \hat{y}_i = \hat{\beta}_0 + \hat{\beta}_1x_{i1} + \ldots + \hat{\beta}_px_{ip} $$
 
-While this is a _linear_ model, it is only linear in the parameters. The predictors could be nonlinear terms (such as the $log(x_i)$). 
+While this is a _linear_ model, it is only linear in the parameters. The predictors could be nonlinear terms (such as the $\log(x_i)$). 
 
 :::rmdwarning
 The conventional way of thinking about the modeling process is that it only includes the model fit. 

@@ -11,7 +11,7 @@ source("ames_snippets.R")
 There are several steps to create a useful model, including parameter estimation, model selection and tuning, and performance assessment. At the start of a new project, there is usually an initial finite pool of data available for all these tasks. How should the data be applied to these steps? The idea of _data spending_ is an important first consideration when modeling, especially as it relates to empirical validation. 
 
 :::rmdwarning
-When data are reused for multiple tasks, instead of carefully "spent" from the finite data budget, certain risks increase, such as adding bias or large effects from methodological errors.
+When data are reused for multiple tasks, instead of carefully "spent" from the finite data budget, certain risks increase, such as the risk of accentuating bias or compounding effects from methodological errors.
 :::
 
 When there are copious amounts of data available, a smart strategy is to allocate specific subsets of data for different tasks, as opposed to allocating the largest possible amount (or even all) to the model parameter estimation only. For example, one possible strategy (when both data and predictors are abundant) is to spend a specific subset of data to determine which predictors are informative, before considering parameter estimation at all. If the initial pool of data available is not huge, there will be some overlap in how and when our data is "spent" or allocated, and a solid methodology for data spending is important. 
@@ -120,7 +120,7 @@ With the Ames housing data, a property is considered to be the _independent expe
 
  * For longitudinal data, for example, the same independent experimental unit can be measured over multiple time points. An example would be a human subject in a medical trial. 
  
- * A batch of manufactured product might also be considered the independent experimental unit. In repeated measures designs, replicate data points from a batch are collected. 
+ * A batch of manufactured product might also be considered the independent experimental unit. In repeated measures designs, replicate data points from a batch are collected at multiple times. 
  
  * @spicer2018 report an experiment where different trees were sampled across the top and bottom portions of a stem. Here, the tree is the experimental unit and the data hierarchy is sample within stem position within tree.  
  

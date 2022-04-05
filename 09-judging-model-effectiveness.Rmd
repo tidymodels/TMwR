@@ -215,7 +215,7 @@ classification_metrics <- metric_set(accuracy, mcc, f_meas)
 classification_metrics(two_class_example, truth = truth, estimate = predicted)
 ```
 
-For binary classification data sets, functions have a standard argument called `event_level`. The _default_ (which we used above) is that the **first** level of the outcome factor is the event of interest.
+The Matthews correlation coefficient and F1 score both summarize the confusion matrix, but compared to `mcc()` which measures the quality of both positive and negative examples, the `f_meas()` metric emphasizes the positive class, i.e., the event of interest. For binary classification data sets like this example, `r pkg(yardstick)` functions have a standard argument called `event_level` to distinguish positive and negative levels. The _default_ (which we used above) is that the **first** level of the outcome factor is the event of interest.
 
 :::rmdnote
 There is some heterogeneity in R functions in this regard; some use the first level and others the second to denote the event of interest. We consider it more intuitive that the first level is the most important. The second level logic is borne of encoding the outcome as 0/1 (in which case the second value is the event) and unfortunately remains in some packages. However, tidymodels (along with many other R packages) _require_ a categorical outcome to be encoded as a factor and, for this reason, the legacy justification for the second level as the event becomes irrelevant.  

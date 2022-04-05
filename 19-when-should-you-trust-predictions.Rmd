@@ -219,6 +219,7 @@ Equivocal zones try to measure the reliability of a prediction based on the mode
 The data set in the `modeldata` package has daily values between `r format(min(Chicago$date), "%B %d %Y")` and `r format(max(Chicago$date), "%B %d %Y")`. Let's create a small test set using the last two weeks of the data: 
 
 ```{r trust-chicago-data}
+## loads both `Chicago` dataset as well as `stations`
 data(Chicago)
 
 Chicago <- Chicago %>% select(ridership, date, one_of(stations))

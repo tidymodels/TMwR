@@ -291,14 +291,14 @@ The results are the same and, based on these and the confidence interval for thi
 
 For count data, there are occasions where the number of zero counts is larger than what a simple Poisson distribution would prescribe. A more complex model appropriate in this situation is the zero-inflated Poisson (ZIP) model; see @Mullahy, @Lambert1992, and @JSSv027i08. Here, there are two sets of covariates: one for the count data and others that affect the probability of zeros (denoted as $\pi$). The mean function is
 
-$$\lambda = 0 \pi + (1 - \pi) \lambda_{nz}$$
+$$\lambda = \pi + (1 - \pi) \lambda_{nz}$$
 
 where
 
 \begin{align}
 \log(\lambda_{nz}) &= \beta_0 + \beta_1x_1 + \ldots + \beta_px_p \notag \\
-& and \notag \\
-log\left(\frac{\pi}{1-\pi}\right) &= \gamma_0 + \gamma_1z_1 + \ldots + \gamma_qz_q \notag 
+& \text{and} \notag \\
+\log\left(\frac{\pi}{1-\pi}\right) &= \gamma_0 + \gamma_1z_1 + \ldots + \gamma_qz_q \notag 
 \end{align}
 
 where the $x$ covariates affect the count values and the $z$ covariates influence the probability of a zero count. The two sets of predictors do not need to be mutually exclusive.
@@ -320,7 +320,7 @@ Since the coefficients for this model are also estimated using maximum likelihoo
 
 \begin{align}
 H_0&: \gamma_1 = 0, \gamma_2 = 0, \cdots, \gamma_5 = 0 \notag \\
-H_a&: \text{at least one} \gamma \ne 0  \notag
+H_a&: \text{at least one } \gamma \ne 0  \notag
 \end{align}
 
 ```{r inference-zip-anova, error = TRUE}

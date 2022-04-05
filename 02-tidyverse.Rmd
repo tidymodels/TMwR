@@ -165,8 +165,8 @@ map_dbl(head(mtcars$mpg, 3), sqrt)
 There are also mapping functions that operate across multiple vectors: 
 
 ```{r map2}
-ratios <- map2_dbl(mtcars$mpg, mtcars$wt, compute_log_ratio)
-head(ratios)
+log_ratios <- map2_dbl(mtcars$mpg, mtcars$wt, compute_log_ratio)
+head(log_ratios)
 ```
 
 The `map()` functions also allow for temporary, anonymous functions defined using the tilde character. The argument values are `.x` and `.y` for `map2()`:
