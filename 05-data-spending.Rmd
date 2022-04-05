@@ -141,7 +141,9 @@ For example, in a machine learning competition, the test set data might be provi
 
 In later chapters we discuss techniques to subsample the training set to mitigate specific issues (e.g., class imbalances). This is a valid and common technique that deliberately results in the training set data diverging from the population from which the data were drawn. It is critical that the test set continues to mirror what the model would encounter _in the wild_. In other words, the test set should always resemble new data that will be given to the model. 
  
-Finally, at the beginning of this chapter, we warned about using the same data for different tasks. Chapter \@ref(resampling) will discuss solid, data-driven methodologies for data usage that will reduce the risks related to bias, overfitting, and other issues. Many of these methods apply the data-splitting tools introduced in this chapter.  
+At the beginning of this chapter, we warned about using the same data for different tasks. Chapter \@ref(resampling) will discuss solid, data-driven methodologies for data usage that will reduce the risks related to bias, overfitting, and other issues. Many of these methods apply the data-splitting tools introduced in this chapter.  
+
+Finally, the considerations in this chapter apply to developing and choosing a reliable model, the main topic of this book. When training a final chosen model for production, after ascertaining the expected performance on new data, practitioners often use all available data for better parameter estimation.
 
 
 ## Chapter Summary {#splitting-summary}
