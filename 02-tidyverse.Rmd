@@ -79,7 +79,7 @@ One important feature in the tibble produced by `r pkg(rsample)` is that the `sp
 
 ### Design for the pipe and functional programming
 
-The `r pkg(magrittr)` pipe operator (`%>%`) is a tool for chaining together a sequence of R functions. To demonstrate, consider the following commands which sort a data frame and then retain the first 10 rows:
+The `r pkg(magrittr)` pipe operator (`%>%`) is a tool for chaining together a sequence of R functions.^[In R 4.1, a native pipe operator `|>` was introduced as well. In this book, we use the `r pkg(magrittr)` pipe since users on older versions of R will not have the new native pipe.] To demonstrate, consider the following commands which sort a data frame and then retain the first 10 rows:
 
 ```{r tidyverse-no-pipe, eval = FALSE}
 small_mtcars <- arrange(mtcars, gear)
@@ -165,8 +165,8 @@ map_dbl(head(mtcars$mpg, 3), sqrt)
 There are also mapping functions that operate across multiple vectors: 
 
 ```{r map2}
-ratios <- map2_dbl(mtcars$mpg, mtcars$wt, compute_log_ratio)
-head(ratios)
+log_ratios <- map2_dbl(mtcars$mpg, mtcars$wt, compute_log_ratio)
+head(log_ratios)
 ```
 
 The `map()` functions also allow for temporary, anonymous functions defined using the tilde character. The argument values are `.x` and `.y` for `map2()`:

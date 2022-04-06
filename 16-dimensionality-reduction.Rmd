@@ -368,11 +368,11 @@ bean_rec_trained %>%
 #| fig.alt = "Predictor loadings for the PLS transformation. For the first component, the major axis length, second shape factor, the equivalent diameter, convex area, and area have the largest effect. "
 ```
 
-Solidity (i.e., the density of the bean) drives the third PLS component, along with roundness. Solidity may be capturing bean features related to "bumpiness" of the bean surface since it can measure irregularity of the bean boundaries. Extent is the largest effect in the fourth component; it is an image texture measure similar to solidity.
+Solidity (i.e., the density of the bean) drives the third PLS component, along with roundness. Solidity may be capturing bean features related to "bumpiness" of the bean surface since it can measure irregularity of the bean boundaries.
 
 ### Independent component analysis
 
-ICA is slightly different than PCA in that it finds components that are as statistically independent from one another as possible (as opposed to being uncorrelated). It can be thought of as maximizing the "non-Gaussianity" of the ICA components. Let's use `step_ica()` to produce Figure \@ref(fig:bean-ica).
+ICA is slightly different than PCA in that it finds components that are as statistically independent from one another as possible (as opposed to being uncorrelated). It can be thought of as maximizing the "non-Gaussianity" of the ICA components, or separating information instead of compressing information like PCA. Let's use `step_ica()` to produce Figure \@ref(fig:bean-ica).
 
 ```{r dimensionality-ica, eval=FALSE}
 bean_rec_trained %>%
@@ -388,7 +388,7 @@ bean_rec_trained %>%
 #| fig.alt = "ICA component scores for the bean validation set, colored by class. There is significant overlap in the first two ICA components."
 ```
 
-Inspecting this plot, there does not appear to be much separation between the classes in the first few components when using ICA.
+Inspecting this plot, there does not appear to be much separation between the classes in the first few components when using ICA. These independent (or as independent as possible) components do not separate the bean types.
 
 ### Uniform manifold approximation and projection
 
@@ -450,7 +450,7 @@ mlp_spec <-
   set_engine('nnet') %>%
   set_mode('classification')
 
-bagging_pec <-
+bagging_spec <-
   bag_tree() %>%
   set_engine('rpart') %>%
   set_mode('classification')
@@ -500,7 +500,7 @@ bean_res <-
   workflow_set(
     preproc = list(basic = class ~., pls = pls_rec, umap = umap_rec), 
     models = list(bayes = bayes_spec, fda = fda_spec,
-                  rda = rda_spec, bag = bagging_pec,
+                  rda = rda_spec, bag = bagging_spec,
                   mlp = mlp_spec)
   ) %>% 
   workflow_map(

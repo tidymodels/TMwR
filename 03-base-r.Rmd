@@ -148,7 +148,7 @@ main_effect_fit <-  lm(rate ~ temp + species, data = crickets)
 anova(main_effect_fit, interaction_fit)
 ```
 
-This statistical test generates a p-value of `r format.pval(anova(interaction_fit, main_effect_fit)[2,6])`. This implies that there is a lack of evidence for the alternative hypothesis that the interaction term is needed by the model. For this reason, we will conduct further analysis on the model without the interaction. 
+This statistical test generates a p-value of `r format.pval(anova(interaction_fit, main_effect_fit)[2,6])`. This implies that there is a lack of evidence against the null hypothesis that the interaction term is not needed by the model. For this reason, we will conduct further analysis on the model without the interaction. 
 
 Residual plots should be re-assessed to make sure that our theoretical assumptions are valid enough to trust the p-values produced by the model (plots not shown here but spoiler alert: they are). 
 

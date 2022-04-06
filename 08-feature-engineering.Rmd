@@ -534,7 +534,7 @@ Each `tidy()` method returns the relevant information about that step. For examp
 
 When a formula is used with the initial call to `recipe()` it assigns _roles_ to each of the columns depending on which side of the tilde that they are on. Those roles are either `"predictor"` or `"outcome"`. However, other roles can be assigned as needed. 
 
-For example, in our Ames data set, the original raw data contained a field for address.^[Our version of these data does not contain that column.] It may be useful to keep that column in the data so that, after predictions are made, problematic results can be investigated in detail. In other words, the column could be important even when it isn't a predictor or outcome. 
+For example, in our Ames data set, the original raw data contained a column for address.^[Our version of these data does not contain that column.] It may be useful to keep that column in the data so that, after predictions are made, problematic results can be investigated in detail. In other words, the column could be important even when it isn't a predictor or outcome. 
 
 To solve this, the `add_role()`, `remove_role()`, and `update_role()` functions can be helpful. For example, for the house price data, the role of the street address column could be modified using:
 
@@ -542,7 +542,7 @@ To solve this, the `add_role()`, `remove_role()`, and `update_role()` functions 
 ames_rec %>% update_role(address, new_role = "street address")
 ```
 
-After this change, `address` will no longer be a predictor but instead will be a `"street address"` according to the recipe. Any character string can be used as a role. Also, columns can have multiple roles (additional roles are added via `add_role()`) so that they can be selected under more than one context. 
+After this change, the `address` column in the dataframe will no longer be a predictor but instead will be a `"street address"` according to the recipe. Any character string can be used as a role. Also, columns can have multiple roles (additional roles are added via `add_role()`) so that they can be selected under more than one context. 
 
 This can be helpful when the data are _resampled_. It helps to keep the columns that are _not_ involved with the model fit in the same data frame (rather than in an external vector). Resampling, described in Chapter \@ref(resampling), creates alternate versions of the data mostly by row subsampling. If the street address were in another column, additional subsampling would be required and might lead to more complex code and a higher likelihood of errors. 
 

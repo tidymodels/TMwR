@@ -181,23 +181,23 @@ mixed_estimates %>%
 You can use a fully Bayesian hierarchical model for the effects in the same way with `step_lencode_bayes()`.
 :::
 
-Let's visually compare the effects using pooling vs. no pooling in Figure \@ref(fig:encoding-compare-pooling).
+Let's visually compare the effects using partial pooling vs. no pooling in Figure \@ref(fig:encoding-compare-pooling).
 
 ```{r encoding-compare-pooling, message=FALSE}
-#| fig.cap = "Comparing the effect encodings for neighborhood estimated without pooling to those with pooling.",
-#| fig.alt = "A scatter chart comparing the effect encodings for neighborhood estimated without pooling to those with pooling. Almost all neighborhoods are very close to the slope = 1 line, but the neighborhoods with the fewest homes are further away."
+#| fig.cap = "Comparing the effect encodings for neighborhood estimated without pooling to those with partial pooling.",
+#| fig.alt = "A scatter chart comparing the effect encodings for neighborhood estimated without pooling to those with partial pooling. Almost all neighborhoods are very close to the slope = 1 line, but the neighborhoods with the fewest homes are further away."
 glm_estimates %>%
   rename(`no pooling` = value) %>%
   left_join(
     mixed_estimates %>%
-      rename(pooling = value), by = "level"
+      rename(`partial pooling` = value), by = "level"
   ) %>%
   left_join(
     ames_train %>% 
       count(Neighborhood) %>% 
       mutate(level = as.character(Neighborhood))
   ) %>%
-  ggplot(aes(`no pooling`, pooling, size = sqrt(n))) +
+  ggplot(aes(`no pooling`, `partial pooling`, size = sqrt(n))) +
   geom_abline(color = "gray50", lty = 2) +
   geom_point(alpha = 0.7) +
   coord_fixed()
