@@ -78,7 +78,7 @@ H_a&: \lambda_m \ne \lambda_f \notag
 
 where the $\lambda$ values are the rates of publications (over the same time period). 
 
-A basic application of the test is:^[The `T` argument allows us to account for how there are more men in the sample to start with.]
+A basic application of the test is:^[The `T` argument allows us to account for the time during which the data were observed.]
 
 ```{r inferential-test-basic}
 poisson.test(c(930, 619), T = 3)
@@ -290,7 +290,7 @@ The results are the same and, based on these and the confidence interval for thi
 
 ## A More Complex Model
 
-For count data, there are occasions where the number of zero counts is larger than what a simple Poisson distribution would prescribe. A more complex model appropriate in this situation is the zero-inflated Poisson (ZIP) model; see @Mullahy, @Lambert1992, and @JSSv027i08. Here, there are two sets of covariates: one for the count data and others that affect the probability (denoted as $\pi$) of extra zeros. The equation for the mean $\lambda$ is:
+For count data, there are occasions where the number of zero counts is larger than what a simple Poisson distribution would prescribe. A more complex model appropriate in this situation is the zero-inflated Poisson (ZIP) model; see @Mullahy, @Lambert1992, and @JSSv027i08. Here, there are two sets of covariates: one for the count data and others that affect the probability (denoted as $\pi$) of zeros. The equation for the mean $\lambda$ is:
 
 $$\lambda = 0 \pi + (1 - \pi) \lambda_{nz}$$
 
@@ -303,7 +303,7 @@ where
 \end{align}
 ```
 
-and the $x$ covariates affect the count values while the $z$ covariates influence the probability of an extra zero count. The two sets of predictors do not need to be mutually exclusive.
+and the $x$ covariates affect the count values while the $z$ covariates influence the probability of a zero. The two sets of predictors do not need to be mutually exclusive.
 
 We'll fit a model with a full set of $z$ covariates:
 
