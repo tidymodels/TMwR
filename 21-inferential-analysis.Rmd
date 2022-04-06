@@ -194,7 +194,7 @@ The focus of the rest of this chapter will be on a generalized linear model [@Do
 
 $$
 \log(\lambda) = \beta_0 + \beta_1x_1 + \ldots + \beta_px_p
-$$ 
+$$
 
 where $\lambda$ is the expected value of the counts.
 
@@ -218,13 +218,14 @@ The `tidy()` method succinctly summarizes the coefficients for the model (along 
 tidy(log_lin_fit, conf.int = TRUE, conf.level = 0.90)
 ```
 
-In this output, the p-values correspond to separate hypothesis tests for each parameter: 
+In this output, the p-values correspond to separate hypothesis tests for each parameter:
 
+```{=tex}
 \begin{align}
 H_0&: \beta_j = 0 \notag \\
 H_a&: \beta_j \ne 0 \notag
 \end{align}
-
+```
 for each of the model parameters. Looking at these results, `phd` (the prestige of their department) may not have any relationship with the outcome.
 
 While the Poisson distribution is the routine assumption for data like these, it may be beneficial to conduct a rough check of the model assumptions by fitting the models without using the Poisson likelihood to calculate the confidence intervals. The `r pkg(rsample)` package has a convenience function to compute bootstrap confidence intervals for `lm()` and `glm()` models. We can use this function, while explicitly declaring `family = poisson`, to compute a large number of model fits. By default, we compute a 90% confidence bootstrap-t interval (percentile and BCa intervals are also available):
@@ -285,23 +286,24 @@ anova(
   tidy()
 ```
 
-The results are the same and, based on these and the confidence interval for this parameter, we'll exclude `phd` from further analyses since it does not appear to be associated with the outcome. 
+The results are the same and, based on these and the confidence interval for this parameter, we'll exclude `phd` from further analyses since it does not appear to be associated with the outcome.
 
 ## A More Complex Model
 
-For count data, there are occasions where the number of zero counts is larger than what a simple Poisson distribution would prescribe. A more complex model appropriate in this situation is the zero-inflated Poisson (ZIP) model; see @Mullahy, @Lambert1992, and @JSSv027i08. Here, there are two sets of covariates: one for the count data and others that affect the probability of zeros (denoted as $\pi$). The mean function is
+For count data, there are occasions where the number of zero counts is larger than what a simple Poisson distribution would prescribe. A more complex model appropriate in this situation is the zero-inflated Poisson (ZIP) model; see @Mullahy, @Lambert1992, and @JSSv027i08. Here, there are two sets of covariates: one for the count data and others that affect the probability (denoted as $\pi$) of extra zeros. The equation for the mean $\lambda$ is:
 
-$$\lambda = \pi + (1 - \pi) \lambda_{nz}$$
+$$\lambda = 0 \pi + (1 - \pi) \lambda_{nz}$$
 
 where
 
+```{=tex}
 \begin{align}
-\log(\lambda_{nz}) &= \beta_0 + \beta_1x_1 + \ldots + \beta_px_p \notag \\
-& \text{and} \notag \\
-\log\left(\frac{\pi}{1-\pi}\right) &= \gamma_0 + \gamma_1z_1 + \ldots + \gamma_qz_q \notag 
+\log(\lambda_{nz}) = \beta_0 + \beta_1x_1 + \ldots + \beta_px_ \notag \\
+\log\left(\frac{\pi}{1-\pi}\right) = \gamma_0 + \gamma_1z_1 + \ldots + \gamma_qz_q \notag
 \end{align}
+```
 
-where the $x$ covariates affect the count values and the $z$ covariates influence the probability of a zero count. The two sets of predictors do not need to be mutually exclusive.
+and the $x$ covariates affect the count values while the $z$ covariates influence the probability of an extra zero count. The two sets of predictors do not need to be mutually exclusive.
 
 We'll fit a model with a full set of $z$ covariates:
 
@@ -316,12 +318,15 @@ zero_inflated_fit <-
 zero_inflated_fit
 ```
 
-Since the coefficients for this model are also estimated using maximum likelihood, let's try to use another likelihood ratio test to understand if the new model terms are helpful. We will _simultaneously_ test that
+Since the coefficients for this model are also estimated using maximum likelihood, let's try to use another likelihood ratio test to understand if the new model terms are helpful. We will *simultaneously* test that
 
+```{=tex}
 \begin{align}
 H_0&: \gamma_1 = 0, \gamma_2 = 0, \cdots, \gamma_5 = 0 \notag \\
 H_a&: \text{at least one } \gamma \ne 0  \notag
 \end{align}
+```
+
 
 ```{r inference-zip-anova, error = TRUE}
 anova(
@@ -332,10 +337,9 @@ anova(
   tidy()
 ```
 
-An `anova()` method isn't implemented for `zeroinfl` objects. 
+An `anova()` method isn't implemented for `zeroinfl` objects.
 
-
-An alternative is to use an *information criterion statistic*, such as the Akaike information criterion (AIC) [@claeskens2016statistical]. This computes the log-likelihood (from the training set) and penalizes that value based on the training set size and the number of model parameters. In R's parameterization, smaller AIC values are better. In this case, we are not conducting a formal statistical test but _estimating_ the ability of the data to fit the data. 
+An alternative is to use an *information criterion statistic*, such as the Akaike information criterion (AIC) [@claeskens2016statistical]. This computes the log-likelihood (from the training set) and penalizes that value based on the training set size and the number of model parameters. In R's parameterization, smaller AIC values are better. In this case, we are not conducting a formal statistical test but *estimating* the ability of the data to fit the data.
 
 The results indicate that the ZIP model is preferable:
 
@@ -344,7 +348,7 @@ zero_inflated_fit %>% extract_fit_engine() %>% AIC()
 log_lin_reduced   %>% extract_fit_engine() %>% AIC()
 ```
 
-However, it's hard to contextualize this pair of single values and assess *how* different they actually are. To solve this problem, we'll resample a large number of each of these two models. From these, we can compute the AIC values for each and determine how often the results favor the ZIP model. Basically, we will be characterizing the uncertainty of the AIC statistics to gauge their difference relative to the noise in the data. 
+However, it's hard to contextualize this pair of single values and assess *how* different they actually are. To solve this problem, we'll resample a large number of each of these two models. From these, we can compute the AIC values for each and determine how often the results favor the ZIP model. Basically, we will be characterizing the uncertainty of the AIC statistics to gauge their difference relative to the noise in the data.
 
 We'll also compute more bootstrap confidence intervals for the parameters in a bit so we specify the `apparent = TRUE` option when creating the bootstrap samples. This is required for some types of intervals.
 
