@@ -43,7 +43,7 @@ dim(ames)
 
 ## Exploring Important Features
 
-Let's start with the outcome we want to predict: the last sale price of the house (in USD), as shown in Figure \@ref(fig:ames-sale-price).
+Let's start with the outcome we want to predict: the last sale price of the house (in USD), as shown in Figure \@ref(fig:ames-sale-price-hist).
 
 ```{r ames-sale-price-code, eval = FALSE}
 library(tidymodels)
