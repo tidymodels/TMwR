@@ -420,7 +420,7 @@ autoplot(
 ```
 
 
-Overall, the racing approach estimated a total of `r format(num_race_models, big.mark = ",")` models, `r round(num_race_models/num_grid_models*100, 2)`% of the full set of `r format(num_grid_models, big.mark = ",")` models in the full grid. As a result, the racing approach was `r round(full_results_time[3]/race_results_time[3], 2)`-fold faster. 
+Overall, the racing approach estimated a total of `r format(num_race_models, big.mark = ",")` models, `r round(num_race_models/num_grid_models*100, 2)`% of the full set of `r format(num_grid_models, big.mark = ",")` models in the full grid. As a result, the racing approach was `r round(full_results_time[3]/race_results_time[3], 1)`-fold faster. 
 
 Did we get similar results? For both objects, we rank the results, merge them together, and plot them against one another in Figure \@ref(fig:racing-concordance).
 

@@ -96,7 +96,7 @@ Note that `missing_arg()` is just a placeholder for the data that has yet to be 
 Note that we supplied a required `penalty` argument for the glmnet engine. Also, for the Stan and glmnet engines, the `family` argument was automatically added as a default. As will be shown below, this option can be changed.  
 :::
 
-Let's walk through how to predict the sale price of houses in the Ames data as a function of only longitude and latitude:
+Let's walk through how to predict the sale price of houses in the Ames data as a function of only longitude and latitude:[^fitxy]
 
 
 ```{r models-ames-geocodes}
@@ -120,13 +120,7 @@ lm_form_fit
 lm_xy_fit
 ```
 
-:::rmdwarning
-The differences between `fit()` and `fit_xy()` may not be obvious. 
-
-When `fit()` is used with a model specification, this _almost always_ means that dummy variables will be created from qualitative predictors. If the underlying function requires a matrix (like glmnet), it will make them. However, if the underlying function uses a formula, `fit()` just passes the formula to that function. We estimate that 99% of modeling functions using formulas make dummy variables. The other 1% include tree-based methods that do not require purely numeric predictors.^[See Chapter \@ref(workflows) for more about using formulas in tidymodels.]
-
-The `fit_xy()` function always passes the data as-is to the underlying model function. It will not create dummy variables before doing so.
-:::
+[^fitxy]: What are the differences between `fit()` and `fit_xy()`? The `fit_xy()` function always passes the data as-is to the underlying model function. It will not create dummy/indicator variables before doing so. When `fit()` is used with a model specification, this _almost always_ means that dummy variables will be created from qualitative predictors. If the underlying function requires a matrix (like glmnet), it will make them. However, if the underlying function uses a formula, `fit()` just passes the formula to that function. We estimate that 99% of modeling functions using formulas make dummy variables. The other 1% include tree-based methods that do not require purely numeric predictors. See Section \@ref(workflow-encoding) for more about using formulas in tidymodels. 
 
 Not only does `r pkg(parsnip)` enable a consistent model interface for different packages, it also provides consistency in the _model arguments_. It is common for different functions which fit the same model to have different argument names. Random forest model functions are a good example. Three commonly used arguments are the number of trees in the ensemble, the number of predictors to randomly sample with each split within a tree, and the number of data points required to make a split. For three different R packages implementing this algorithm, those arguments are shown in Table \@ref(tab:rand-forest-args).
 
@@ -250,7 +244,7 @@ As a solution, the `r pkg(broom)` package has methods to convert many types of m
 tidy(lm_form_fit)
 ```
 
-The column names are standardized across models and do not contain any additional data (such as the type of statistical test). The data previously contained in the row names are now in a column called `term` and so on. One important principle in the tidymodels ecosystem is that a function should return values that are _predictable, consistent, and unsurprising_. 
+The column names are standardized across models and do not contain any additional data (such as the type of statistical test). The data previously contained in the row names are now in a column called `term` and so on. One important principle in the tidymodels ecosystem is that a function should return values that are _predictable, consistent,_ and _unsurprising_. 
 
 
 ## Make Predictions {#parsnip-predictions}
@@ -340,7 +334,7 @@ ames_test_small %>%
 
 This demonstrates the benefit of homogenizing the data analysis process and syntax across different models. It enables the user to spend their time on the results and interpretation rather than having to focus on the syntactical differences between R packages. 
 
-## parsnip-Adjacent Packages
+## parsnip-Extension Packages
 
 The `r pkg(parsnip)` package itself contains interfaces to a number of models. However, for ease of package installation and maintenance, there are other tidymodels packages that have `r pkg(parsnip)` model definitions for other sets of models. The `r pkg(discrim)` package has model definitions for the set of classification techniques called _discriminant analysis_ methods (such as linear or quadratic discriminant analysis). In this way, the package dependencies required for installing `r pkg(parsnip)` are reduced. A list of _all_ of the models that can be used with `r pkg(parsnip)` (across different packages that are on CRAN) can be found at <https://www.tidymodels.org/find/>.  
 

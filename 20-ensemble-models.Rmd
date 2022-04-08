@@ -150,7 +150,7 @@ set.seed(2002)
 ens <- blend_predictions(concrete_stack, penalty = 10^seq(-2, -0.5, length = 20))
 ```
 
-Now, in Figure \@ref(fig:stacking-autoplot-redo), we see a range where the ensemble model becomes worse than with our first blend (but not by much). The R<sup>2</sup> values increase with larger penalties. This is somewhat counter-intuitive, but the y-axis range of each panel reminds us that these changes are minuscule.  
+Now, in Figure \@ref(fig:stacking-autoplot-redo), we see a range where the ensemble model becomes worse than with our first blend (but not by much). The R<sup>2</sup> values increase with more members and larger penalties.
 
 ```{r ensembles-autoplot-calc, eval = FALSE}
 autoplot(ens)

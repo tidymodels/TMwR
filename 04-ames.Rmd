@@ -57,7 +57,7 @@ The void of data points in the center of Ames corresponds to Iowa State Universi
 
 ## Exploring Important Features
 
-Let's start with the outcome we want to predict: the last sale price of the house (in USD), as shown in Figure \@ref(fig:ames-sale-price).
+Let's start with the outcome we want to predict: the last sale price of the house (in USD), as shown in Figure \@ref(fig:ames-sale-price-hist).
 
 ```{r ames-sale-price-code, eval = FALSE}
 library(tidymodels)
@@ -93,13 +93,13 @@ ggplot(ames, aes(x = Sale_Price)) +
 #| fig.alt = "A histogram of the sale prices of houses in Ames, Iowa after a log (base 10) transformation. The distribution, while not perfectly symmetric, exhibits far less skewness."
 ```
 
-While not perfect, this will probably result in better models than using the untransformed data. 
+While not perfect, this will probably result in better models than using the untransformed data, for the reasons outlined above. 
 
 :::rmdwarning
 The downside to transforming the outcome is mostly related to interpretation.  
 :::
 
-The units of the model coefficients might be more difficult to interpret, as will measures of performance. For example, the root mean squared error (RMSE) is a common performance metric that is used in regression models. It uses the difference between the observed and predicted values in its calculations. If the sale price is on the log scale, these differences (i.e. the residuals) are also in log units. For this reason, it can be difficult to understand the quality of a model whose RMSE is 0.15 log units. 
+The units of the model coefficients might be more difficult to interpret, as will measures of performance. For example, the root mean squared error (RMSE) is a common performance metric that is used in regression models. It uses the difference between the observed and predicted values in its calculations. If the sale price is on the log scale, these differences (i.e. the residuals) are also on the log scale. It can be difficult to understand the quality of a model whose RMSE is 0.15 on such a log scale. 
 
 Despite these drawbacks, the models used in this book utilize the log transformation for this outcome. _From this point on_, the outcome column is pre-logged in the `ames` data frame: 
 
