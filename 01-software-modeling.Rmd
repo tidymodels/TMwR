@@ -16,14 +16,16 @@ Models are mathematical tools that can describe a system and capture relationshi
 Since the beginning of the twenty-first century, mathematical models have become ubiquitous in our daily lives, in both obvious and subtle ways. A typical day for many people might involve checking the weather to see when might be a good time to walk the dog, ordering a product from a website, typing a text message to a friend and having it autocorrected, and checking email. In each of these instances, there is a good chance that some type of model was involved. In some cases, the contribution of the model might be easily perceived ("You might also be interested in purchasing product _X_") while in other cases, the impact could be the absence of something (e.g., spam email). Models are used to choose clothing that a customer might like, to identify a molecule that should be evaluated as a drug candidate, and might even be the mechanism that a nefarious company uses to avoid the discovery of cars that over-pollute.  For better or worse, models are here to stay.
 
 :::rmdnote
-There are two reasons that models permeate our lives today: an abundance of **software** exists to create models and it has become easier to record **data** and make it accessible. 
+There are two reasons that models permeate our lives today: 
+- an abundance of software exists to create models, and 
+- it has become easier to capture and store data, as well as make it accessible. 
 :::
 
 This book focuses largely on software. It is obviously critical that software produces the correct relationships to represent the data. For the most part, determining mathematical correctness is possible, but the reliable creation of appropriate models requires more. In this chapter, we outline considerations for building or choose modeling software, the purposes of models, and where modeling sits in the broader data analysis process.
 
 ## Fundamentals for Modeling Software
 
-It is important that it is easy to operate software in a proper way. The user interface should not be so poorly designed that the user would not know that they used it inappropriately. For example, @baggerly2009 report myriad problems in the data analyses from a high profile computational biology publication. One of the issues was related to how the users were required to add the names of the model inputs. The user interface of the software made it easy to offset the column names of the data from the actual data columns. This resulted in the wrong genes being identified as important for treating cancer patients and eventually contributed to the termination of several clinical trials [@Carlson2012]. 
+It is important that the modeling software you use is easy to operate in a proper way. The user interface should not be so poorly designed that the user would not know that they used it inappropriately. For example, @baggerly2009 report myriad problems in the data analyses from a high profile computational biology publication. One of the issues was related to how the users were required to add the names of the model inputs. The user interface of the software made it easy to offset the column names of the data from the actual data columns. This resulted in the wrong genes being identified as important for treating cancer patients and eventually contributed to the termination of several clinical trials [@Carlson2012]. 
 
 If we need high quality models, software must facilitate proper usage. @abrams2003 describes an interesting principle to guide us: 
 
@@ -31,13 +33,13 @@ If we need high quality models, software must facilitate proper usage. @abrams20
 
 Data analysis and modeling software should espouse this idea. 
 
-The second important aspect of model building is related to scientific methodology. When working with complex predictive models, it can be easy to unknowingly commit errors related to logical fallacies or inappropriate assumptions. Many machine learning models are so adept at discovering patterns that they can effortlessly find empirical patterns in the data that fail to reproduce later. Some of these types of methodological errors are insidious in that the issue can go undetected until a later time when new data that contain the true result are obtained. 
+Second, modeling software should promote good scientific methodology. When working with complex predictive models, it can be easy to unknowingly commit errors related to logical fallacies or inappropriate assumptions. Many machine learning models are so adept at discovering patterns that they can effortlessly find empirical patterns in the data that fail to reproduce later. Some of these types of methodological errors are insidious in that the issue can go undetected until a later time when new data that contain the true result are obtained. 
 
 :::rmdwarning
 As our models have become more powerful and complex, it has also become easier to commit latent errors. 
 :::
 
-This same principle also applies to programming. Whenever possible, the software should be able to protect users from committing mistakes. Software should make it easy for users to **do the right thing**. 
+This same principle also applies to programming. Whenever possible, the software should be able to protect users from committing mistakes. Software should make it easy for users to do the right thing. 
 
 These two aspects of model development -- ease of proper use and good methodological practice -- are crucial. Since tools for creating models are easily accessible and models can have such a profound impact, many more people are creating them. In terms of technical expertise and training, their backgrounds will vary. It is important that their tools be _robust_ to the experience of the user. Tools should be powerful enough to create high-performance models, but, on the other hand, should be easy to use in an appropriate way.  This book describes a suite of software for modeling which has been designed with these characteristics in mind.
 
@@ -277,13 +279,5 @@ tab
 ## Chapter Summary {#software-summary}
 
 This chapter focused on how models describe relationships in data, and different types of models such as descriptive models, inferential models, and predictive models. The predictive capacity of a model can be used to evaluate it, even when its main goal is not prediction. Modeling itself sits within the broader data analysis process, and exploratory data analysis is a key part of building high-quality models.
-
-For all kinds of modeling, software for building models must support good scientific methodology and ease of use for practitioners from diverse backgrounds. The ideas and syntax of the tidyverse, which we introduce (or review) in Chapter \@ref(tidyverse), are the basis for the tidymodels approach to these challenges. Chapter \@ref(base-r) provides a quick tour of conventional base R modeling functions and summarizes the unmet needs in that area. 
-
-After that, this book is separated into parts, starting with the basics of modeling with tidy data principles. Chapters \@ref(ames) through \@ref(performance) introduces an example data set on house prices and demonstrates how to use the fundamental tidymodels packages: `r pkg(recipes)`, `r pkg(parsnip)`, `r pkg(workflows)`, `r pkg(yardstick)`, and others. 
-
-The next part of the book moves forward with more details on the process of creating an effective model. Chapters \@ref(resampling) through \@ref(workflow-sets) focus on creating good estimates of performance as well as tuning model hyperparameters. 
-
-Finally, the last section of this book, Chapters \@ref(dimensionality) through \@ref(inferential), covers other important topics for model building. We discuss more advanced feature engineering approaches like dimensionality reduction and encoding high cardinality predictors, as well as how to answer questions about why a model makes certain predictions and when to trust your model predictions.
 
 

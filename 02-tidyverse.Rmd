@@ -10,9 +10,9 @@ What is the tidyverse, and where does the tidymodels framework fit in? The tidyv
 
 > "At a high level, the tidyverse is a language for solving data science challenges with R code. Its primary goal is to facilitate a conversation between a human and a computer about data. Less abstractly, the tidyverse is a collection of R packages that share a high-level design philosophy and low-level grammar and data structures, so that learning one package makes it easier to learn the next."
 
-In this chapter, we briefly discuss these principles and how they apply in the context of modeling, before diving into specific examples of tidyverse syntax. The next chapter covers modeling conventions from the core R language. Together, you can use these discussions to understand the relationships between the tidyverse, tidymodels, and the core or base R language. Both tidymodels and the tidyverse build on the R language, and tidymodels applies tidyverse principles to building models.
+In this chapter, we briefly discuss important principles of the tidyverse design philosophy and how they apply in the context of modeling software that is easy to use properly and supports good statistical practice, like we outlined in Chapter \@ref(software-modeling). The next chapter covers modeling conventions from the core R language. Together, you can use these discussions to understand the relationships between the tidyverse, tidymodels, and the core or base R language. Both tidymodels and the tidyverse build on the R language, and tidymodels applies tidyverse principles to building models.
 
-## Principles
+## Tidyverse Principles
 
 The full set of strategies and tactics for writing R code in the tidyverse style can be found at the website <https://design.tidyverse.org>. Here we can briefly describe several of the general tidyverse design principles, their motivation, and how we think about modeling as an application of these principles. 
 
@@ -22,7 +22,7 @@ The tidyverse focuses on designing R packages and functions that can be easily u
 
 For this reason, it is critical that R code be easy to work with to accomplish your goals. Documentation, training, accessibility, and other factors play an important part in achieving this. However, if the syntax itself is difficult for people to easily comprehend, documentation is a poor solution. The software itself must be intuitive.
 
-To contrast the tidyverse approach with more traditional R semantics, consider sorting a data frame. Using only the core language, we can sort a data frame using one or more columns by reordering the rows via R's subscripting rules in conjunction with `order()`; you _cannot_ successfully use a function you might be tempted to try in such a situation because of its name, `sort()`. To sort the `mtcars` data by two of its columns, the call might look like:
+To contrast the tidyverse approach with more traditional R semantics, consider sorting a data frame. Data frames can represent different types of data in each column, and multiple values in each row. Using only the core language, we can sort a data frame using one or more columns by reordering the rows via R's subscripting rules in conjunction with `order()`; you _cannot_ successfully use a function you might be tempted to try in such a situation because of its name, `sort()`. To sort the `mtcars` data by two of its columns, the call might look like:
 
 ```{r tidyverse-base-sort, eval = FALSE}
 mtcars[order(mtcars$gear, mtcars$mpg), ]
@@ -50,7 +50,7 @@ When there are similar functions in a package, function names are designed to be
 
 Whenever possible, functions should avoid returning a novel data structure. If the results are conducive to an existing data structure, it should be used. This reduces the cognitive load when using software; no additional syntax or methods are required. 
 
-One data structure that is used as much as possible in tidyverse and tidymodels packages is the data frame. Data frames can represent different types of data in each column, and multiple values in each row. Tibbles, a type of data frame described more in the next section, are preferred since they have additional properties that are helpful for data analysis. 
+The data frame is the preferred data structure in tidyverse and tidymodels packages, because its structure is a good fit for such a broad swath of data science tasks. Specifically, the tidyverse and tidymodels favor the tibble, a modern reimagining of R's data frame that we describe in the next section on example tidyverse syntax.
 
 As an example, the `r pkg(rsample)` package can be used to create _resamples_ of a data set, such as cross-validation or the bootstrap (described in Chapter \@ref(resampling)). The resampling functions return a tibble with a column called `splits` of objects that define the resampled data sets. Three bootstrap samples of a data set might look like: 
 
@@ -89,7 +89,7 @@ small_mtcars <- slice(small_mtcars, 1:10)
 small_mtcars <- slice(arrange(mtcars, gear), 1:10)
 ```
 
-The pipe operator substitutes the value of the left-hand side of the operator as the first argument to the right-hand side, so we can implement the same result as above with: 
+The pipe operator substitutes the value of the left-hand side of the operator as the first argument to the right-hand side, so we can implement the same result as before with: 
 
 ```{r tidyverse-pipe, eval = FALSE}
 small_mtcars <- 
@@ -185,7 +185,7 @@ For functional programming in tidy modeling, functions should be defined so that
 
 ## Examples of Tidyverse Syntax
 
-Before diving into syntax examples, let's discuss how the tidyverse relies on a type of data frame called a "tibble". Tibbles have slightly different rules than basic data frames in R. For example, tibbles naturally work with column names that are not syntactically valid variable names:
+Let's being our discussion of tidyverse syntax by exploring more deeply what a tibble is, and how tibbles work. Tibbles have slightly different rules than basic data frames in R. For example, tibbles naturally work with column names that are not syntactically valid variable names:
 
 ```{r tidyverse-names}
 # Wants valid names:
