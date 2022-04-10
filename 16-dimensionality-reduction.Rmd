@@ -19,7 +19,11 @@ tidymodels_prefer()
 
 # Dimensionality Reduction {#dimensionality}
 
-Dimensionality reduction can be a good choice when you suspect there are "too many" variables. An excess of variables, usually predictors, can be a problem because it is difficult to understand or visualize data in higher dimensions. For example, in high dimensional biology experiments, one of the first tasks is to determine if there are any unwanted trends in the data (e.g., effects not related to the question of interest, such as lab-to-lab differences). Debugging the data is difficult when there are hundreds of thousands of dimensions, and dimensionality reduction can be an aid for exploratory data analysis.
+Dimensionality reduction transforms a data set from a high-dimensional space into a low-dimensional space, and can be a good choice when you suspect there are "too many" variables. An excess of variables, usually predictors, can be a problem because it is difficult to understand or visualize data in higher dimensions. 
+
+## When Problems Can Dimensionality Reduction Solve?
+
+Dimensionality reduction can be used either in feature engineering or in exploratory data analysis. For example, in high dimensional biology experiments, one of the first tasks, before any modeling, is to determine if there are any unwanted trends in the data (e.g., effects not related to the question of interest, such as lab-to-lab differences). Debugging the data is difficult when there are hundreds of thousands of dimensions, and dimensionality reduction can be an aid for exploratory data analysis.
 
 Another potential consequence of having a multitude of predictors is possible harm for a model. The simplest example is a method like ordinary linear regression where the number of predictors should be less than the number of data points used to fit the model. Another issue is multicollinearity, where between-predictor correlations can negatively impact the mathematical operations used to estimate a model. If there are an extremely large number of predictors, it is fairly unlikely that there are an equal number of real underlying effects. Predictors may be measuring the same latent effect(s), and thus such predictors will be highly correlated. Many dimensionality reduction techniques thrive in this situation. In fact, most can only be effective when there are such relationships between predictors that can be exploited.
 
@@ -29,7 +33,7 @@ When starting a new modeling project, reducing the dimensions of the data may pr
 
 Principal component analysis (PCA) is one of the most straightforward methods for reducing the number of columns in the data set because it relies on linear methods and it is unsupervised (i.e., does not consider the outcome data). For a high dimensional classification problem, an initial plot of the main PCA components might show a clear separation between the classes. If this is the case, then it is fairly safe to assume that a linear classifier might do a good job. However, the converse is not true; a lack of separation does not mean that the problem is insurmountable.
 
-The dimensionality reduction methods discussed here are generally _not_ feature selection methods. Methods such as PCA represent the original predictors using a smaller subset of new features. All of the original predictors are required to compute these new features. The exception to this are sparse methods that have the ability to completely remove the impact of predictors when creating the new features.
+The dimensionality reduction methods discussed in this chapter are generally _not_ feature selection methods. Methods such as PCA represent the original predictors using a smaller subset of new features. All of the original predictors are required to compute these new features. The exception to this are sparse methods that have the ability to completely remove the impact of predictors when creating the new features.
 
 :::rmdnote
 This chapter has two goals: 
@@ -49,7 +53,7 @@ In addition to the `r pkg(tidymodels)` package, this chapter uses the following 
 
 ## A Picture is Worth a Thousand... Beans {#beans}
 
-@beans describe methods for determining the varieties of dried beans in an image. From their manuscript:
+Let's walk through how to use dimensionality reduction with `r pkg(recipes)` for an example dataset. @beans publish a data set of visual characteristics of dried beans and describe methods for determining the varieties of dried beans in an image. While the dimensionality of these data is not very large compared to many real-world modeling problems, it does provide a nice working example to demonstrate how to reduce the number of features. From their manuscript:
 
 > The primary objective of this study is to provide a method for obtaining uniform seed varieties from crop production, which is in the form of population, so the seeds are not certified as a sole variety. Thus, a computer vision system was developed to distinguish seven different registered varieties of dry beans with similar features in order to obtain uniform seed classification. For the classification model, images of 13,611 grains of 7 different registered dry beans were taken with a high-resolution camera.
 
@@ -57,15 +61,15 @@ Each image contains multiple beans. The process of determining which pixels corr
 
 There are numerous methods to quantify shapes of objects [@Mingqiang08]. Many are related to the boundaries or regions of the object of interest. Example of features include:
 
--   The **area** (or size) can be estimated using the number of pixels in the object or the size of the convex hull around the object.
+-   The *area* (or size) can be estimated using the number of pixels in the object or the size of the convex hull around the object.
 
--   We can measure the **perimeter** using the number of pixels in the boundary as well as the area of the bounding box (the smallest rectangle enclosing an object).
+-   We can measure the *perimeter* using the number of pixels in the boundary as well as the area of the bounding box (the smallest rectangle enclosing an object).
 
--   The **major axis** quantifies the longest line connecting the most extreme parts of the object. The **minor axis** is perpendicular to the major axis.
+-   The *major axis* quantifies the longest line connecting the most extreme parts of the object. The *minor axis* is perpendicular to the major axis.
 
--   We can measure the **compactness** of an object using the ratio of the object's area to the area of a circle with the same perimeter. For example, the symbols "`r cli::symbol$bullet`" and "`r cli::symbol$times`" have very different compactness.
+-   We can measure the *compactness* of an object using the ratio of the object's area to the area of a circle with the same perimeter. For example, the symbols "`r cli::symbol$bullet`" and "`r cli::symbol$times`" have very different compactness.
 
--   There are also different measures of how oblong or **elongated** an object is. For example, the **eccentricity** statistic is the ratio of the major and minor axes. There are also related estimates for roundness and convexity.
+-   There are also different measures of how *elongated* or oblong an object is. For example, the *eccentricity* statistic is the ratio of the major and minor axes. There are also related estimates for roundness and convexity.
 
 Notice the eccentricity for the different shapes in Figure \@ref(fig:eccentricity).
 
@@ -81,7 +85,7 @@ Shapes such as circles and squares have low eccentricity while oblong shapes hav
 
 Many of these image features have high correlations; objects with large areas are more likely to have large perimeters. There are often multiple methods to quantify the same underlying characteristics (e.g. size).
 
-In the bean data, `r ncol(beans) - 1` morphology features were computed: `r knitr::combine_words(gsub("_", " ", names(beans)[-ncol(beans)]))`. The latter four are described in @symons1988211. While the dimensionality of these data is not very large compared to many real-world modeling problems, it does provide a nice working example to demonstrate how to reduce the number of features.
+In the bean data, `r ncol(beans) - 1` morphology features were computed: `r knitr::combine_words(gsub("_", " ", names(beans)[-ncol(beans)]))`. The latter four are described in @symons1988211. 
 
 We can begin by loading the data:
 
@@ -111,7 +115,7 @@ bean_val$splits[[1]]
 
 To visually assess how well different methods perform, we can estimate the methods on the training set (n = `r analysis(bean_val$splits[[1]]) %>% nrow()` beans) and display the results using the validation set (n = `r assessment(bean_val$splits[[1]]) %>% nrow()`).
 
-Before beginning, we can spend some time investigating our data. Since we know that many of these shape features are probably measuring similar concepts, let's take a look at the correlation structure of the data in Figure \@ref(fig:beans-corr-plot) using this code.
+Before beginning any dimensionality reduction, we can spend some time investigating our data. Since we know that many of these shape features are probably measuring similar concepts, let's take a look at the correlation structure of the data in Figure \@ref(fig:beans-corr-plot) using this code.
 
 ```{r dimensionality-corr-plot, eval = FALSE}
 library(corrplot)
@@ -131,11 +135,11 @@ bean_train %>%
 #| fig.alt = "A correlation matrix of the predictors with variables ordered via clustering. There are two to three clusters that have high within cluster correlations."
 ```
 
-While we don't take the time to do it here, it is also important to see if this correlation structure significantly changes across the outcome categories. This can help create better models.
+Many of these predictors are highly correlated, such as area and perimeter or shape factors 2 and 3. While we don't take the time to do it here, it is also important to see if this correlation structure significantly changes across the outcome categories. This can help create better models.
 
 ## A Starter Recipe
 
-It's time to look at these data in a smaller space. We can start with a basic recipe to preprocess the data prior to any dimensionality reduction steps. Several predictors are ratios and so are likely to have skewed distributions. Such distributions can wreak havoc on variance calculations (such as the ones used in PCA). The `r pkg(bestNormalize)` package has a step that can enforce a symmetric distribution for the predictors. We'll use this to mitigate the issue of skewed distributions.
+It's time to look at these beans data in a smaller space. We can start with a basic recipe to preprocess the data prior to any dimensionality reduction steps. Several predictors are ratios and so are likely to have skewed distributions. Such distributions can wreak havoc on variance calculations (such as the ones used in PCA). The [`r pkg(bestNormalize)` package](https://petersonr.github.io/bestNormalize/) has a step that can enforce a symmetric distribution for the predictors. We'll use this to mitigate the issue of skewed distributions:
 
 ```{r dimensionality-initial-rec}
 library(bestNormalize)
@@ -175,7 +179,7 @@ knitr::include_graphics("premade/recipes-process.svg")
 
 ### Preparing a recipe {#prep}
 
-Let's estimate `bean_rec` using the training set data:
+Let's estimate `bean_rec` using the training set data, with `prep(bean_rec)`:
 
 
 ```{r dimensionality-prep-rec}
@@ -191,7 +195,7 @@ Note in the output that the steps have been trained and that the selectors are n
 
 One important argument to `prep()` is `retain`. When `retain = TRUE` (the default), the estimated version of the training set is kept within the recipe. This data set has been pre-processed using all of the steps listed in the recipe. Since `prep()` has to execute the recipe as it proceeds, it may be advantageous to keep this version of the training set so that, if that data set is to be used later, redundant calculations can be avoided. However, if the training set is big, it may be problematic to keep such a large amount of data in memory. Use `retain = FALSE` to avoid this. 
 
-Once new steps are added to this estimated recipe, re-applying `prep()` will only estimate the untrained steps. This will come in handy when we try different feature extraction methods below. 
+Once new steps are added to this estimated recipe, re-applying `prep()` will only estimate the untrained steps. This will come in handy when we try different feature extraction methods.
 
 :::rmdwarning
 If you encounter errors when working with a recipe, `prep()` can be used with its `verbose` option to troubleshoot: 
@@ -252,7 +256,7 @@ p1 + p2
 
 There are two important aspects of `bake()` that are worth noting here. 
 
-**First**, as previously mentioned, using `prep(recipe, retain = TRUE)` keeps the existing processed version of the training set in the recipe. This enables the user to use `bake(recipe, new_data = NULL)`, which returns that data set without further computations. For example: 
+First, as previously mentioned, using `prep(recipe, retain = TRUE)` keeps the existing processed version of the training set in the recipe. This enables the user to use `bake(recipe, new_data = NULL)`, which returns that data set without further computations. For example: 
 
 ```{r dimensionality-new-data-null}
 bake(bean_rec_trained, new_data = NULL) %>% nrow()
@@ -261,9 +265,9 @@ bean_val$splits %>% pluck(1) %>% analysis() %>% nrow()
 
 If the training set is not pathologically large, using this value of `retain` can save a lot of computational time. 
 
-**Second**, additional selectors can be used in the call to specify which columns to return. The default selector is `everything()`, but more specific directives can be used. 
+Second, additional selectors can be used in the call to specify which columns to return. The default selector is `everything()`, but more specific directives can be used. 
 
-`prep()` and `bake()` will be used in the code below to illustrate some of these options. 
+We will use `prep()` and `bake()` in the next section to illustrate some of these options. 
 
 ## Feature Extraction Techniques
 
@@ -287,13 +291,13 @@ plot_validation_results <- function(recipe, dat = assessment(bean_val$splits[[1]
 }
 ```
 
-We will reuse this function several times below.
+We will reuse this function several times in this chapter.
 
 A series of several feature extraction methodologies are explored here. An overview of most can be found in [Section 6.3.1](https://bookdown.org/max/FES/numeric-many-to-many.html#linear-projection-methods) of @fes and the references therein. The UMAP method is described in @mcinnes2020umap.
 
 ### Principal component analysis
 
-As previously mentioned, PCA is an unsupervised method that uses linear combinations of the predictors to define new features. These features attempt to account for as much variation as possible in the original data. We add `step_pca()` to the original recipe and use our function to visualize the results on the validation set in Figure \@ref(fig:bean-pca) using:
+We've mentioned PCA several times already in this book, and it's time to go into more detail. PCA is an unsupervised method that uses linear combinations of the predictors to define new features. These features attempt to account for as much variation as possible in the original data. We add `step_pca()` to the original recipe and use our function to visualize the results on the validation set in Figure \@ref(fig:bean-pca) using:
 
 ```{r dimensionality-pca, eval = FALSE}
 bean_rec_trained %>%
@@ -309,9 +313,9 @@ bean_rec_trained %>%
 #| fig.alt = "Principal component scores for the bean validation set, colored by class. The classes separate when the first two components are plotted against one another."
 ```
 
-We see that the first two components, especially when used together, do an effective job separating the classes. This may lead us to expect that the overall problem of classifying these beans will not be especially difficult.
+We see that the first two components `PC1` and `PC2`, especially when used together, do an effective job distinguishing between or separating the classes. This may lead us to expect that the overall problem of classifying these beans will not be especially difficult.
 
-Recall that PCA is unsupervised. For these data, it turns out that the PCA components that explain the most variation in the predictors also happen to be predictive of the classes. What features are driving performance? The `r pkg(learntidymodels)` package, found on GitHub, has functions that can help visualize the top features for each component. We'll need the prepared recipe; the PCA step is added below along with a call to `prep()`:
+Recall that PCA is unsupervised. For these data, it turns out that the PCA components that explain the most variation in the predictors also happen to be predictive of the classes. What features are driving performance? The `r pkg(learntidymodels)` package has functions that can help visualize the top features for each component. We'll need the prepared recipe; the PCA step is added in the following code along with a call to `prep()`:
 
 ```{r dimensionality-pca-loadings, eval=FALSE}
 library(learntidymodels)
@@ -335,7 +339,7 @@ The top loadings are mostly related to the cluster of correlated predictors show
 
 ### Partial least squares
 
-PLS is a supervised version of PCA. It tries to find components that simultaneously maximize the variation in the predictors while also maximizing the relationship between those components and the outcome. Figure \@ref(fig:bean-pls) shows the results of a slightly modified version of the PCA code.
+PLS, which we introduced in Section \@ref(submodel-trick), is a supervised version of PCA. It tries to find components that simultaneously maximize the variation in the predictors while also maximizing the relationship between those components and the outcome. Figure \@ref(fig:bean-pls) shows the results of this slightly modified version of the PCA code:
 
 ```{r dimensionality-pls, eval = FALSE}
 bean_rec_trained %>%
@@ -351,7 +355,7 @@ bean_rec_trained %>%
 #| fig.alt = "PLS component scores for the bean validation set, colored by class. The first two PLS components are nearly identical to the first two PCA components."
 ```
 
-The first two PLS components are nearly identical to the first two PCA components! We find this result because those PCA components are so effective at separating the varieties of beans. The remaining components are different. Figure \@ref(fig:pls-loadings) visualizes the loadings.
+The first two PLS components plotted in Figure \@ref(fig:bean-pls) are nearly identical to the first two PCA components! We find this result because those PCA components are so effective at separating the varieties of beans. The remaining components are different. Figure \@ref(fig:pls-loadings) visualizes the loadings, the top features for each component.
 
 ```{r dimensionality-pls-loadings, eval = FALSE}
 bean_rec_trained %>%
@@ -372,7 +376,7 @@ Solidity (i.e., the density of the bean) drives the third PLS component, along w
 
 ### Independent component analysis
 
-ICA is slightly different than PCA in that it finds components that are as statistically independent from one another as possible (as opposed to being uncorrelated). It can be thought of as maximizing the "non-Gaussianity" of the ICA components, or separating information instead of compressing information like PCA. Let's use `step_ica()` to produce Figure \@ref(fig:bean-ica).
+ICA is slightly different than PCA in that it finds components that are as statistically independent from one another as possible (as opposed to being uncorrelated). It can be thought of as maximizing the "non-Gaussianity" of the ICA components, or separating information instead of compressing information like PCA. Let's use `step_ica()` to produce Figure \@ref(fig:bean-ica):
 
 ```{r dimensionality-ica, eval=FALSE}
 bean_rec_trained %>%
@@ -439,7 +443,7 @@ UMAP is a powerful method to reduce the feature space. However, it can be very s
 
 Both the PLS and UMAP methods are worth investigating in conjunction with different models. Let's explore a variety of different models with these dimensionality reduction techniques (along with no transformation at all): a single layer neural network, bagged trees, flexible discriminant analysis (FDA), naive Bayes, and regularized discriminant analysis (RDA).
 
-Now that we are back in "modeling mode", we'll create a series of model specifications and then use a workflow set to tune the models. Note that the model parameters are tuned in conjunction with the recipe parameters (e.g. size of the reduced dimension, UMAP parameters).
+Now that we are back in "modeling mode", we'll create a series of model specifications and then use a workflow set to tune the models in the following code. Note that the model parameters are tuned in conjunction with the recipe parameters (e.g. size of the reduced dimension, UMAP parameters).
 
 ```{r dimensionality-models}
 library(baguette)
@@ -470,6 +474,8 @@ bayes_spec <-
   set_engine('klaR')
 ```
 
+We also need recipes for the dimensionality reduction methods we'll try. Let's start with a base recipe `bean_rec` and then extend it with different dimensionality reduction steps:
+
 ```{r dimensionality-recipes}
 bean_rec <-
   recipe(class ~ ., data = bean_train) %>%
@@ -482,7 +488,7 @@ pls_rec <-
   step_pls(all_numeric_predictors(), outcome = "class", num_comp = tune())
 
 umap_rec <-
-  bean_rec_trained %>%
+  bean_rec %>%
   step_umap(
     all_numeric_predictors(),
     outcome = "class",
@@ -492,7 +498,7 @@ umap_rec <-
   )
 ```
 
-Once again, `r pkg(workflowsets)` take the preprocessors and models and crosses them. The `control` option `parallel_over` is set so that the parallel processing can work simultaneously across tuning parameter combinations. The `workflow_map()` function applies grid search to optimize the model/preprocessing parameters (if any) across 10 parameter combinations. The multiclass area under the ROC curve is estimated on the validation set.
+Once again, the `r pkg(workflowsets)` package takes the preprocessors and models and crosses them. The `control` option `parallel_over` is set so that the parallel processing can work simultaneously across tuning parameter combinations. The `workflow_map()` function applies grid search to optimize the model/preprocessing parameters (if any) across 10 parameter combinations. The multiclass area under the ROC curve is estimated on the validation set.
 
 ```{r dimensionality-workflows, message=FALSE, warning=FALSE}
 ctrl <- control_grid(parallel_over = "everything")
@@ -556,6 +562,8 @@ rda_res <-
 rda_wflow_fit <- rda_res$.workflow[[1]]
 ```
 
+What are the results for our metric (multiclass ROC AUC) on the testing set?
+
 ```{r dimensionality-test}
 collect_metrics(rda_res)
 ```
@@ -568,4 +576,4 @@ save(rda_wflow_fit, bean_train, file = "RData/rda_fit.RData", version = 2, compr
 
 ## Chapter Summary {#dimensionality-summary}
 
-Dimensionality reduction can be a helpful tool for exploratory data analysis as well as modeling. The `r pkg(recipes)` and `r pkg(embed)` packages contain steps for a variety of different methods and `r pkg(workflowsets)` facilitates choosing an appropriate method for a data set. This chapter also discussed how recipes can be used on their own, either for debugging problems with a recipe or directly for exploratory data analysis and data visualization. 
+Dimensionality reduction can be a helpful method for exploratory data analysis as well as modeling. The `r pkg(recipes)` and `r pkg(embed)` packages contain steps for a variety of different methods and `r pkg(workflowsets)` facilitates choosing an appropriate method for a data set. This chapter also discussed how recipes can be used on their own, either for debugging problems with a recipe or directly for exploratory data analysis and data visualization. 
