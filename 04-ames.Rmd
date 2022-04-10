@@ -78,7 +78,7 @@ ggplot(ames, aes(x = Sale_Price)) +
 #| fig.alt = "A histogram of the sale prices of houses in Ames, Iowa after a log (base 10) transformation. The distribution, while not perfectly symmetric, exhibits far less skewness."
 ```
 
-While not perfect, this will probably result in better models than using the untransformed data, for the reasons outlined above. 
+While not perfect, this will probably result in better models than using the untransformed data, for the reasons we just outlined previously.
 
 :::rmdwarning
 The disadvantages to transforming the outcome are mostly related to interpretation of model results.  

@@ -101,7 +101,7 @@ While the Poisson distribution is reasonable, we might also want to make an asse
 
 The `r pkg(infer)` package, which is part of the tidymodels framework, is a powerful and intuitive tool for hypothesis testing [@ModernDive]. Its syntax is concise and designed for non-statisticians.
 
-First, we `specify()` that we will use the difference in the mean number of articles between the sexes and then `calculate()` the statistic from the data. Recall that the maximum likelihood estimator for the Poisson mean is the sample mean. The hypotheses tested below are the same as the previous test (but is conducted using a different testing procedure).  
+First, we `specify()` that we will use the difference in the mean number of articles between the sexes and then `calculate()` the statistic from the data. Recall that the maximum likelihood estimator for the Poisson mean is the sample mean. The hypotheses tested here are the same as the previous test (but are conducted using a different testing procedure).  
 
 With `r pkg(infer)`, we specify the outcome and covariate, then state the statistic of interest:
 
@@ -163,7 +163,7 @@ permuted <-
 permuted
 ```
 
-The following visualization code is also very similar to the bootstrap approach. The code below generates Figure \@ref(fig:permutation-dist) where the vertical line signifies the observed value.
+The following visualization code is also very similar to the bootstrap approach. This code generates Figure \@ref(fig:permutation-dist) where the vertical line signifies the observed value:
 
 ```{r inferential-mean-diff-perm, eval = FALSE}
 visualize(permuted) +
@@ -415,7 +415,7 @@ bootstrap_models %>%
 #| fig.alt = "Bootstrap distributions of the ZIP model coefficients. The vertical lines indicate the observed estimates. The ment predictor that appears to be important to the model."
 ```
 
-From visual inspection, one of the covariates (`ment`) that appears to be important has a very skewed distribution. The extra space in some of the facets indicates that there are some outliers in the estimates. This *might* occur when models did not converge; those results should probably be excluded from the resamples. For the results above, the outliers are only due to extreme parameter estimates; all of the models converged.
+From visual inspection, one of the covariates (`ment`) that appears to be important has a very skewed distribution. The extra space in some of the facets indicates that there are some outliers in the estimates. This *might* occur when models did not converge; those results should probably be excluded from the resamples. For the results visualized in Figure \@ref(fig:zip-bootstrap), the outliers are only due to extreme parameter estimates; all of the models converged.
 
 The `r pkg(rsample)` package contains a set of functions named `int_*()` that compute different types of bootstrap intervals. Since the `tidy()` method contains standard error estimates, the bootstrap-t intervals can be computed. We'll also compute the standard percentile intervals too. By default, 90% confidence intervals are computed.
 

@@ -169,7 +169,7 @@ Let's compute the root mean squared error for this model using the `rmse()` func
 rmse(ames_test_res, truth = Sale_Price, estimate = .pred)
 ```
 
-Above, we see the standard format of the output of `r pkg(yardstick)` functions. Metrics for numeric outcomes usually have a value of "standard" for the `.estimator` column. Examples with different values for this column are shown in the next sections.
+This shows us the standard format of the output of `r pkg(yardstick)` functions. Metrics for numeric outcomes usually have a value of "standard" for the `.estimator` column. Examples with different values for this column are shown in the next sections.
 
 To compute multiple metrics at once, we can create a _metric set_. Let's add $R^2$ and the mean absolute error: 
 
@@ -215,7 +215,7 @@ classification_metrics <- metric_set(accuracy, mcc, f_meas)
 classification_metrics(two_class_example, truth = truth, estimate = predicted)
 ```
 
-The Matthews correlation coefficient and F1 score both summarize the confusion matrix, but compared to `mcc()` which measures the quality of both positive and negative examples, the `f_meas()` metric emphasizes the positive class, i.e., the event of interest. For binary classification data sets like this example, `r pkg(yardstick)` functions have a standard argument called `event_level` to distinguish positive and negative levels. The _default_ (which we used above) is that the **first** level of the outcome factor is the event of interest.
+The Matthews correlation coefficient and F1 score both summarize the confusion matrix, but compared to `mcc()` which measures the quality of both positive and negative examples, the `f_meas()` metric emphasizes the positive class, i.e., the event of interest. For binary classification data sets like this example, `r pkg(yardstick)` functions have a standard argument called `event_level` to distinguish positive and negative levels. The _default_ (which we used in this code) is that the **first** level of the outcome factor is the event of interest.
 
 :::rmdnote
 There is some heterogeneity in R functions in this regard; some use the first level and others the second to denote the event of interest. We consider it more intuitive that the first level is the most important. The second level logic is borne of encoding the outcome as 0/1 (in which case the second value is the event) and unfortunately remains in some packages. However, tidymodels (along with many other R packages) _require_ a categorical outcome to be encoded as a factor and, for this reason, the legacy justification for the second level as the event becomes irrelevant.  
@@ -227,7 +227,7 @@ As an example where the second level is the event:
 f_meas(two_class_example, truth, predicted, event_level = "second")
 ```
 
-In the output above, the `.estimator` value of "binary" indicates that the standard formula for binary classes will be used. 
+In this output, the `.estimator` value of "binary" indicates that the standard formula for binary classes will be used. 
 
 There are numerous classification metrics that use the predicted probabilities as inputs rather than the hard class predictions. For example, the receiver operating characteristic (ROC) curve computes the sensitivity and specificity over a continuum of different event thresholds. The predicted class column is not used. There are two `r pkg(yardstick)` functions for this method: `roc_curve()` computes the data points that make up the ROC curve and `roc_auc()` computes the area under the curve. 
 

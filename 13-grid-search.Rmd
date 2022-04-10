@@ -510,7 +510,7 @@ resamples_times %>%
 
 Note that each fold is assigned to its own worker process and, since only model parameters are being tuned, the preprocessing is conducted once per fold/worker. If fewer than 5 worker processes were used, some workers would receive multiple folds. 
 
-In the control functions for the `tune_*()` functions, the argument `parallel_over` controls how the process is executed. To use the approach shown above, the argument is `parallel_over = "resamples"`. 
+In the control functions for the `tune_*()` functions, the argument `parallel_over` controls how the process is executed. To use the previous parallelization strategy, the argument is `parallel_over = "resamples"`. 
 
 Instead of parallel processing the resamples, an alternate scheme combines the loops over resamples and models into a single loop. In pseudocode, this process would look like: 
 
@@ -635,7 +635,7 @@ For this scheme, the control function argument is `parallel_over = "everything"`
 
 To compare different possible parallelization schemes, we tuned a boosted tree with the `r pkg(xgboost)` engine using a data set of 4,000 samples, with 5-fold cross-validation and 10 candidate models. These data required some baseline preprocessing that did not require any estimation. The preprocessing was handled three different ways:
 
-1. Preprocess the data prior to modeling using a `r pkg(dplyr)` pipeline (labeled as "none" in the plots below).
+1. Preprocess the data prior to modeling using a `r pkg(dplyr)` pipeline (labeled as "none" in the later plots).
 2. Conduct the same preprocessing via a recipe (shown as "light" preprocessing).
 3. With a recipe, add an additional step that has a high computational cost (labeled as "expensive"). 
 

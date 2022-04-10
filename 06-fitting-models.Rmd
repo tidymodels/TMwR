@@ -65,7 +65,7 @@ For tidymodels, the approach to specifying a model is intended to be more unifie
 
 3. **When required, declare the _mode_ of the model.** The mode reflects the type of prediction outcome. For numeric outcomes, the mode is _regression_; for qualitative outcomes, it is _classification_.^[Note that `r pkg(parsnip)` constrains the outcome column of a classification model to be encoded as a _factor_; using binary numeric values will result in an error.] If a model algorithm can only address one type of prediction outcome, such as linear regression, the mode is already set. 
 
-These specifications are built _without referencing the data_. For example, for the three cases above: 
+These specifications are built _without referencing the data_. For example, for the three cases we outlined: 
 
 ```{r models-lin-reg-spec}
 library(tidymodels)
@@ -94,7 +94,7 @@ linear_reg() %>% set_engine("stan") %>% translate()
 Note that `missing_arg()` is just a placeholder for the data that has yet to be provided. 
 
 :::rmdnote
-Note that we supplied a required `penalty` argument for the glmnet engine. Also, for the Stan and glmnet engines, the `family` argument was automatically added as a default. As will be shown below, this option can be changed.  
+Note that we supplied a required `penalty` argument for the glmnet engine. Also, for the Stan and glmnet engines, the `family` argument was automatically added as a default. As will be shown later, this option can be changed.  
 :::
 
 Let's walk through how to predict the sale price of houses in the Ames data as a function of only longitude and latitude:[^fitxy]
@@ -195,7 +195,7 @@ Modeling functions in `r pkg(parsnip)` separate model arguments into two categor
 
 * _Engine arguments_ are either specific to a particular engine or used more rarely. 
 
-For example, in the translation of the random forest code above, the arguments `num.threads`, `verbose`, and `seed` were added by default. These arguments are specific to the `r pkg(ranger)` implementation of random forest models and wouldn't make sense as main arguments. Engine-specific arguments can be specified in `set_engine()`. For example, to have the `ranger::ranger()` function print out more information about the fit:
+For example, in the translation of the previous random forest code, the arguments `num.threads`, `verbose`, and `seed` were added by default. These arguments are specific to the `r pkg(ranger)` implementation of random forest models and wouldn't make sense as main arguments. Engine-specific arguments can be specified in `set_engine()`. For example, to have the `ranger::ranger()` function print out more information about the fit:
 
 ```{r models-ranger-verb}
 rand_forest(trees = 1000, min_n = 5) %>% 

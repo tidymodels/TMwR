@@ -251,7 +251,7 @@ p1 + p2
 #| echo = FALSE, 
 #| fig.height=4,
 #| fig.cap = "The `area` predictor before and after preprocessing.",
-#| fig.alt = "The `area` predictor before and after preprocessing. The below panel shows a right-skewed, slightly bimodal distribution. The after panel has a distribution that is fairly bell shaped."
+#| fig.alt = "The `area` predictor before and after preprocessing. The before panel shows a right-skewed, slightly bimodal distribution. The after panel has a distribution that is fairly bell shaped."
 ```
 
 There are two important aspects of `bake()` that are worth noting here. 

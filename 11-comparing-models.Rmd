@@ -299,7 +299,7 @@ To adapt our Bayesian ANOVA model so that the resamples are adequately modeled, 
 
 $$y_{ij} = (\beta_0 + b_{i}) + \beta_1x_{i1} + \beta_2x_{i2} + \beta_3x_{i3} + \epsilon_{ij}$$
 
-This is not an unreasonable model for resampled statistics which, when plotted across models (as above), tend to have fairly parallel effects across models (i.e., little cross-over of lines). 
+This is not an unreasonable model for resampled statistics which, when plotted across models as in Figure \@ref(fig:rsquared-resamples), tend to have fairly parallel effects across models (i.e., little cross-over of lines). 
 
 For this model configuration, an additional assumption is made for the prior distribution of random effects. A reasonable assumption for this distribution is another symmetric distribution, such as another bell-shaped curve. Given the effective sample size of 10 in our summary statistic data, let's use a prior that is wider than a standard normal distribution. We'll use a t-distribution with a single degree of freedom (i.e. $b_i \sim t(1)$), which has heavier tails than an analogous Gaussian distribution. 
 

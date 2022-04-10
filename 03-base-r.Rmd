@@ -78,7 +78,7 @@ Species is not a quantitative variable; in the data frame, it is represented as 
 Suppose there were five species instead of two. The model formula would automatically add _four_ additional binary columns that are binary indicators for four of the species. The _reference level_ of the factor (i.e., the first level) is always left out of the predictor set. The idea is that, if you know the values of the four indicator variables, the value of the species can be determined. We discuss binary indicator variables in more detail in Section \@ref(dummies).
 :::
 
-The model formula shown above creates a model with different y-intercepts for each species; the slopes of the regression lines could be different for each species as well. To accommodate this structure, an _interaction_ term can be added to the model. This can be specified in a few different ways, and the most basic uses the colon:
+The model formula `rate ~ temp + species` creates a model with different y-intercepts for each species; the slopes of the regression lines could be different for each species as well. To accommodate this structure, an _interaction_ term can be added to the model. This can be specified in a few different ways, and the most basic uses the colon:
 
 ```r
 rate ~ temp + species + temp:species
@@ -181,7 +181,7 @@ While this analysis has obviously not been an exhaustive demonstration of R's mo
 
 * There are numerous helper functions (e.g., `anova()`, `summary()` and `predict()`) that you can use to conduct specific calculations after the fitted model is created. 
 
-Finally, as previously mentioned, this framework was first published in 1992. Most of the ideas and methods above were developed in that period but have remained remarkably relevant to this day. It highlights that the S language and, by extension R, has been designed for data analysis since its inception.  
+Finally, as previously mentioned, this framework was first published in 1992. Most of these ideas and methods were developed in that period but have remained remarkably relevant to this day. It highlights that the S language and, by extension R, has been designed for data analysis since its inception.  
 
 ## What Does the R Formula Do? {#formula}
 
@@ -199,10 +199,10 @@ For the most part, practitioners' understanding of what the formula does is domi
 (temp + species)^2
 ```
 
-Our focus, when seeing this, is that there are two predictors and the model should contain their main effects and the two-way interactions.  However, this formula also implies that, since `species` is a factor, it should also create indicator variable columns for this predictor (see Section \@ref(dummies)) and multiply those columns by the `temp` column to create the interactions. This transformation represents the second bullet point above; the formula also defines _how each column is encoded_ and can create additional columns that are not in the original data. 
+Our focus, when seeing this, is that there are two predictors and the model should contain their main effects and the two-way interactions.  However, this formula also implies that, since `species` is a factor, it should also create indicator variable columns for this predictor (see Section \@ref(dummies)) and multiply those columns by the `temp` column to create the interactions. This transformation represents our second bullet point on encoding; the formula also defines _how each column is encoded_ and can create additional columns that are not in the original data. 
 
 :::rmdwarning
-This is an important point which will come up multiple times in this text, especially when we discuss more complex feature engineering in Chapter \@ref(recipes) and beyond. The formula in R has some limitations and our approaches to overcoming them contend with all three aspects listed above. 
+This is an important point which will come up multiple times in this text, especially when we discuss more complex feature engineering in Chapter \@ref(recipes) and beyond. The formula in R has some limitations and our approaches to overcoming them contend with all three aspects. 
 :::
 
 ## Why Tidiness is Important for Modeling {#tidiness-modeling}
@@ -387,7 +387,7 @@ Loading the metapackage also shows if there are function naming conflicts with p
 
 There are a few ways to handle naming conflicts. The function can be called with its namespace (e.g., `stats::filter()`). This is not bad practice but it does make the code less readable. 
 
-Another option is to use the `r pkg(conflicted)` package. We can set a rule that remains in effect until the end of the R session to ensure that one specific function will always run if no namespace is given in the code. As an example, if we prefer the `r pkg(dplyr)` version of the above function:
+Another option is to use the `r pkg(conflicted)` package. We can set a rule that remains in effect until the end of the R session to ensure that one specific function will always run if no namespace is given in the code. As an example, if we prefer the `r pkg(dplyr)` version of the previous function:
 
 ```{r base-r-conflicted, eval = FALSE}
 library(conflicted)

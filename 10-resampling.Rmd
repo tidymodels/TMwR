@@ -191,7 +191,7 @@ When _V_ = 3, the analysis sets are 2/3 of the training set and each assessment 
 Using _V_ = 3 is a good choice to illustrate cross-validation but is a poor choice in practice because it is too low to generate reliable estimates. In practice, values of _V_ are most often 5 or 10; we generally prefer 10-fold cross-validation as a default because it is large enough for good results in most situations. 
 
 :::rmdnote
-What are the effects of changing _V_? Larger values result in resampling estimates with small bias but substantial variance. Smaller values of _V_ have large bias but low variance. We prefer 10-fold since noise is reduced by replication, as shown below, but bias is not.^[See Section 3.4 of @fes for a longer description of the results of change _V_: <https://bookdown.org/max/FES/resampling.html>]. 
+What are the effects of changing _V_? Larger values result in resampling estimates with small bias but substantial variance. Smaller values of _V_ have large bias but low variance. We prefer 10-fold since noise is reduced by replication, but bias is not.^[See Section 3.4 of @fes for a longer description of the results of change _V_: <https://bookdown.org/max/FES/resampling.html>]. 
 :::
 
 The primary input is the training set data frame as well as the number of folds (defaulting to 10): 
@@ -387,7 +387,7 @@ Any of the resampling methods discussed in this chapter can be used to evaluate 
 
 This sequence repeats for every resample. If there are _B_ resamples, there are _B_ replicates of each of the performance metrics. The final resampling estimate is the average of these _B_ statistics. If _B_ = 1, as with a validation set, the individual statistics represent overall performance. 
 
-Let's reconsider the previous random forest model contained in the `rf_wflow` object. The `fit_resamples()` function is analogous to `fit()`, but instead of having a `data` argument, `fit_resamples()` has `resamples` which expects an `rset` object like the ones shown above. The possible interfaces to the function are:  
+Let's reconsider the previous random forest model contained in the `rf_wflow` object. The `fit_resamples()` function is analogous to `fit()`, but instead of having a `data` argument, `fit_resamples()` has `resamples` which expects an `rset` object like the ones shown in this chapter. The possible interfaces to the function are:  
 
 ```{r resampling-usage, eval = FALSE}
 model_spec %>% fit_resamples(formula,  resamples, ...)
@@ -405,7 +405,7 @@ The control arguments include:
 
 * `verbose`: A logical for printing logging. 
 
-* `extract`: A function for retaining objects from each model iteration (discussed below). 
+* `extract`: A function for retaining objects from each model iteration (discussed later in this chapter). 
 
 * `save_pred`: A logical for saving the assessment set predictions. 
 
