@@ -5,7 +5,7 @@ data(ames)
 tidymodels_prefer()
 ```
 
-# (PART\*) Basics {-} 
+# (PART\*) Modeling Basics {-} 
 
 # The Ames Housing Data {#ames}
 
