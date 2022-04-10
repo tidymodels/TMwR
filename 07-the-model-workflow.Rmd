@@ -20,27 +20,27 @@ So far, when we have used the term "the model", we have meant a structural equat
 
 $$ \hat{y}_i = \hat{\beta}_0 + \hat{\beta}_1x_{i1} + \ldots + \hat{\beta}_px_{ip} $$
 
-While this is a _linear_ model, it is only linear in the parameters. The predictors could be nonlinear terms (such as the $\log(x_i)$). 
+While this is a linear model, it is only linear in the parameters. The predictors could be nonlinear terms (such as the $\log(x_i)$). 
 
 :::rmdwarning
 The conventional way of thinking about the modeling process is that it only includes the model fit. 
 :::
 
-For some data sets that are straightforward in nature, fitting the model itself may be the entire process. However, there are a variety of choices and additional steps that often occur _before_ the model is fit:
+For some data sets that are straightforward in nature, fitting the model itself may be the entire process. However, there are a variety of choices and additional steps that often occur before the model is fit:
 
 * While our example model has $p$ predictors, it is common to start with more than $p$ candidate predictors. Through exploratory data analysis or using domain knowledge, some of the predictors may be excluded from the analysis. In other cases, a feature selection algorithm may be used to make a data-driven choice for the minimum predictor set for the model. 
-* There are times when the value of an important predictor is missing. Rather than eliminating this sample from the data set, the missing value could be _imputed_ using other values in the data. For example, if $x_1$ were missing but was correlated with predictors $x_2$ and $x_3$, an imputation method could estimate the missing $x_1$ observation from the values of $x_2$ and $x_3$. 
+* There are times when the value of an important predictor is missing. Rather than eliminating this sample from the data set, the missing value could be imputed using other values in the data. For example, if $x_1$ were missing but was correlated with predictors $x_2$ and $x_3$, an imputation method could estimate the missing $x_1$ observation from the values of $x_2$ and $x_3$. 
 * It may be beneficial to transform the scale of a predictor. If there is not _a priori_ information on what the new scale should be, we can estimate the proper scale using a statistical transformation technique, the existing data, and some optimization criterion. Other transformations, such as PCA, take groups of predictors and transform them into new features that are used as the predictors.
 
-While the examples above are related to steps that occur before the model fit, there may also be operations that occur _after_ the model is created. When a classification model is created where the outcome is binary (e.g., `event` and `non-event`), it is customary to use a 50% probability cutoff to create a discrete class prediction, also known as a "hard prediction". For example, a classification model might estimate that the probability of an event was 62%. Using the typical default, the hard prediction would be `event`. However, the model may need to be more focused on reducing false positive results (i.e., where true non-events are classified as events). One way to do this is to raise the cutoff from 50% to some greater value. This increases the level of evidence required to call a new sample an event. While this reduces the true positive rate (which is bad), it may have a more dramatic effect on reducing false positives. The choice of the cutoff value should be optimized using data. This is an example of a _post-processing_ step that has a significant effect on how well the model works, even though it is not contained in the model fitting step. 
+While these examples are related to steps that occur before the model fit, there may also be operations that occur after the model is created. When a classification model is created where the outcome is binary (e.g., `event` and `non-event`), it is customary to use a 50% probability cutoff to create a discrete class prediction, also known as a "hard prediction". For example, a classification model might estimate that the probability of an event was 62%. Using the typical default, the hard prediction would be `event`. However, the model may need to be more focused on reducing false positive results (i.e., where true non-events are classified as events). One way to do this is to raise the cutoff from 50% to some greater value. This increases the level of evidence required to call a new sample an event. While this reduces the true positive rate (which is bad), it may have a more dramatic effect on reducing false positives. The choice of the cutoff value should be optimized using data. This is an example of a post-processing step that has a significant effect on how well the model works, even though it is not contained in the model fitting step. 
 
-It is important to focus on the broader _modeling process_, instead of only fitting the specific model used to estimate parameters. This broader process includes any preprocessing steps, the model fit itself, as well as potential post-processing activities. In this book, we will refer to this more comprehensive concept as the **model workflow** and highlight how to handle all its components to produce a final model equation. 
+It is important to focus on the broader _modeling process_, instead of only fitting the specific model used to estimate parameters. This broader process includes any preprocessing steps, the model fit itself, as well as potential post-processing activities. In this book, we will refer to this more comprehensive concept as the *model workflow* and highlight how to handle all its components to produce a final model equation. 
 
 :::rmdnote
-In other software, such as Python or Spark, similar collections of steps are called  _pipelines_. In tidymodels, the term "pipeline" already connotes a sequence of operations chained together with a pipe operator (such as `%>%` from `r pkg(magrittr)` or the newer native `|>`). Rather than using ambiguous terminology in this context, we call the sequence of computational operations related to modeling **workflows**. 
+In other software, such as Python or Spark, similar collections of steps are called  _pipelines_. In tidymodels, the term "pipeline" already connotes a sequence of operations chained together with a pipe operator (such as `%>%` from `r pkg(magrittr)` or the newer native `|>`). Rather than using ambiguous terminology in this context, we call the sequence of computational operations related to modeling *workflows*. 
 :::
 
-Binding together the analytical components of a data analysis is important for another reason. Future chapters will demonstrate how to accurately measure performance, as well as how to optimize structural parameters (i.e. model tuning). To correctly quantify model performance on the training set, Chapter \@ref(resampling) advocates using _resampling_ methods. To do this properly, no data-driven parts of the analysis should be excluded from validation. To this end, the workflow must include all significant estimation steps.
+Binding together the analytical components of a data analysis is important for another reason. Future chapters will demonstrate how to accurately measure performance, as well as how to optimize structural parameters (i.e. model tuning). To correctly quantify model performance on the training set, Chapter \@ref(resampling) advocates using resampling methods. To do this properly, no data-driven parts of the analysis should be excluded from validation. To this end, the workflow must include all significant estimation steps.
 
 To illustrate, consider principal component analysis (PCA) signal extraction. We'll talk about this more in Section \@ref(example-steps) as well as Chapter \@ref(dimensionality); PCA is a way to replace correlated predictors with new artificial features that are uncorrelated and capture most of the information in the original set. The new features could be used as the predictors and least squares regression could be used to estimate the model parameters. 
 
@@ -120,7 +120,7 @@ Both the model and preprocessor can be removed or updated:
 lm_fit %>% update_formula(Sale_Price ~ Longitude)
 ```
 
-Note that, in this new object, the output shows that the previous _fitted_ model was removed since the new formula is inconsistent with the previous model fit. 
+Note that, in this new object, the output shows that the previous fitted model was removed since the new formula is inconsistent with the previous model fit. 
 
 
 ## Adding Raw Variables to the `workflow()`
@@ -161,21 +161,21 @@ In the next chapter, we will look at a more powerful preprocessor (called a _rec
 
 Recall from Section \@ref(formula) that the formula method in R has multiple purposes (we will discuss this further in Chapter \@ref(recipes)). One of these is to properly encode the original data into an analysis ready format. This can involve executing in-line transformations (e.g., `log(x)`), creating dummy variable columns, creating interactions or other column expansions, and so on. However, there are many statistical methods that require different types of encodings: 
 
- * Most packages for tree-based models use the formula interface but **do not** encode the categorical predictors as dummy variables. 
+ * Most packages for tree-based models use the formula interface but *do not* encode the categorical predictors as dummy variables. 
  
  * Packages can use special in-line functions that tell the model function how to treat the predictor in the analysis. For example, in survival analysis models, a formula term such as `strata(site)` would indicate that the column `site` is a stratification variable. This means that it should not be treated as a regular predictor and does not have a corresponding location parameter estimate in the model. 
 
  * A few R packages have extended the formula in ways that base R functions cannot parse or execute. In multilevel models (e.g. mixed models or hierarchical Bayesian models), a model term such as `(week | subject)` indicates that the column `week` is a random effect that has different slope parameter estimates for each value of the `subject` column. 
 
-A workflow is a general purpose interface. When `add_formula()` is used, how should the workflow pre-process the data? Since the preprocessing is model dependent, `r pkg(workflows)` attempts to emulate what the underlying model would do _whenever possible_. If it is not possible, the formula processing should not do anything to the columns used in the formula. Let's look at this in more detail.
+A workflow is a general purpose interface. When `add_formula()` is used, how should the workflow pre-process the data? Since the preprocessing is model dependent, `r pkg(workflows)` attempts to emulate what the underlying model would do whenever possible. If it is not possible, the formula processing should not do anything to the columns used in the formula. Let's look at this in more detail.
 
 ### Tree-based models {-}
 
 When we fit a tree to the data, the `r pkg(parsnip)` package understands what the modeling function would do. For example, if a random forest model is fit using the `r pkg(ranger)` or `r pkg(randomForest)` packages, the workflow knows predictors columns that are factors should be left as-is. 
 
-As a counter example, a boosted tree created with the `r pkg(xgboost)` package requires the user to create dummy variables from factor predictors (since `xgboost::xgb.train()` will not). This requirement is embedded into the model specification object and a workflow using `r pkg(xgboost)` _will_ create the indicator columns for this engine. Also note that a different engine for boosted trees, C5.0, does not require dummy variables so none are made by the workflow. 
+As a counter example, a boosted tree created with the `r pkg(xgboost)` package requires the user to create dummy variables from factor predictors (since `xgboost::xgb.train()` will not). This requirement is embedded into the model specification object and a workflow using `r pkg(xgboost)` will create the indicator columns for this engine. Also note that a different engine for boosted trees, C5.0, does not require dummy variables so none are made by the workflow. 
 
-This determination is made for _each model and engine combination_. 
+This determination is made for each model and engine combination. 
 
 ### Special formulas and in-line functions {#special-model-formulas}
 
@@ -225,7 +225,7 @@ parametric_fit <- fit(parametric_workflow, data = ovarian)
 parametric_fit
 ```
 
-Notice how, in the call printed above, the model-specific formula was used. 
+Notice how in this call the model-specific formula was used. 
 
 ## Creating Multiple Workflows at Once {#workflow-sets-intro}
 
@@ -258,7 +258,7 @@ location_models$info[[1]]
 extract_workflow(location_models, id = "coords_lm")
 ```
 
-Workflow sets are mostly designed to work with resampling, which is discussed in Chapter \@ref(resampling). In the object above, the columns `option` and `result` must be populated with specific types of objects that result from resampling. We will demonstrate this in more detail in Chapters \@ref(compare) and  \@ref(workflow-sets).  
+Workflow sets are mostly designed to work with resampling, which is discussed in Chapter \@ref(resampling). The columns `option` and `result` must be populated with specific types of objects that result from resampling. We will demonstrate this in more detail in Chapters \@ref(compare) and  \@ref(workflow-sets).  
 
 In the meantime, let's create model fits for each formula and save them in a new column called `fit`. We'll use basic `r pkg(dplyr)` and `r pkg(purrr)` operations: 
 
@@ -291,7 +291,7 @@ final_lm_res
 Notice that `last_fit()` takes a data split as an input, not a dataframe. This function uses the split to generate the training and test sets for the final fitting and evaluation.
 :::
 
-The `.workflow` column contains the _fitted workflow_ and can be pulled out of the results using:
+The `.workflow` column contains the fitted workflow and can be pulled out of the results using:
 
 ```{r extract-last-fit, eval = FALSE}
 fitted_lm_wflow <- extract_workflow(final_lm_res)
@@ -308,7 +308,7 @@ We'll see more about `last_fit()` in action and how to use it again in Section \
 
 ## Chapter Summary {#workflows-summary}
 
-In this chapter, you learned that the modeling process encompasses more than just estimating the parameters of an algorithm that connects predictors to an outcome. This process also includes preprocessing steps and operations taken after a model is fit. We introduced a concept called a **model workflow** that can capture the important components of the modeling process. Multiple workflows can also be created inside of a **workflow set**. The `last_fit()` function is convenient for fitting a final model to the training set and evaluating with the test set. 
+In this chapter, you learned that the modeling process encompasses more than just estimating the parameters of an algorithm that connects predictors to an outcome. This process also includes preprocessing steps and operations taken after a model is fit. We introduced a concept called a *model workflow* that can capture the important components of the modeling process. Multiple workflows can also be created inside of a *workflow set*. The `last_fit()` function is convenient for fitting a final model to the training set and evaluating with the test set. 
 
 For the Ames data, the related code that we'll see used again in later chapters is:
 

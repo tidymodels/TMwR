@@ -32,9 +32,9 @@ A good strategy is to spend some initial effort trying a variety of modeling app
 
 Workflow sets provide a user interface to create and manage this process. We'll also demonstrate how to evaluate these models efficiently using the racing methods discussed in Section \@ref(racing-example).
 
-## Modeling Concrete Strength
+## Modeling Concrete Mixture Strength
 
-Let's use the concrete data from _Applied Predictive Modeling_ [@apm] as an example. Chapter 10 of that book demonstrated models to predict the compressive strength of concrete mixtures using the ingredients as predictors. A wide variety of models were evaluated with different predictor sets and preprocessing needs. How can workflow sets make the large scale testing of models easier? 
+To demonstrate how to screen multiple model workflows, we will use the concrete mixture data from _Applied Predictive Modeling_ [@apm] as an example. Chapter 10 of that book demonstrated models to predict the compressive strength of concrete mixtures using the ingredients as predictors. A wide variety of models were evaluated with different predictor sets and preprocessing needs. How can workflow sets make such a process of large scale testing for models easier? 
 
 First, let's define the data splitting and resampling schemes.
 
@@ -51,7 +51,7 @@ The `compressive_strength` column is the outcome. The `age` predictor tells us t
 There are some cases in this data set where the same concrete formula was tested multiple times. We'd rather not include these replicate mixtures as individual data points since they might be distributed across both the training and test set. Doing so might artificially inflate our performance estimates.  
 :::
 
-To address this, we will use the mean compressive strength per concrete mixture for modeling. 
+To address this, we will use the mean compressive strength per concrete mixture for modeling:
 
 ```{r workflow-sets-means}
 concrete <- 
@@ -62,7 +62,7 @@ concrete <-
 nrow(concrete)
 ```
 
-Let's split the data using the default 3:1 ratio of training-to-test and resample the training set using five repeats of 10-fold cross-validation. 
+Let's split the data using the default 3:1 ratio of training-to-test and resample the training set using five repeats of 10-fold cross-validation: 
 
 ```{r workflow-sets-splitting}
 set.seed(1501)
@@ -149,7 +149,7 @@ cubist_spec <-
    set_engine("Cubist") 
 ```
 
-The analysis in @apm specifies that the neural network should have up to 27 hidden units in the layer. The `extract_parameter_set_dials()` function extracts the parameter set which we modify to have the correct parameter range.
+The analysis in @apm specifies that the neural network should have up to 27 hidden units in the layer. The `extract_parameter_set_dials()` function extracts the parameter set which we modify to have the correct parameter range:
 
 ```{r workflow-sets-param}
 nnet_param <- 
@@ -168,7 +168,7 @@ Workflow sets take named lists of preprocessors and model specifications and com
 * A recipe object (prior to estimation/prepping)
 * A `r pkg(dplyr)`-style selector to choose the outcome and predictors
 
-As a first workflow set example, let's combine the recipe that only standardizes the predictors to the nonlinear models that require that the predictors be in the same units. 
+As a first workflow set example, let's combine the recipe that only standardizes the predictors to the nonlinear models that require that the predictors be in the same units: 
 
 ```{r workflow-sets-normalized}
 normalized <- 
@@ -239,9 +239,9 @@ all_workflows
 
 ## Tuning and Evaluating the Models
 
-Almost all of these workflows contain tuning parameters. In order to evaluate their performance, we can use the standard tuning or resampling functions (e.g., `tune_grid()` and so on). The `workflow_map()` function will apply the same function to all of the workflows in the set; the default is `tune_grid()`. 
+Almost all of the members of `all_workflows` contain tuning parameters. In order to evaluate their performance, we can use the standard tuning or resampling functions (e.g., `tune_grid()` and so on). The `workflow_map()` function will apply the same function to all of the workflows in the set; the default is `tune_grid()`. 
 
-For this example, grid search is applied to each workflow using up to 25 different parameter candidates. There are a set of common options to use with each execution of `tune_grid()`. For example, we will use the same resampling and control objects for each workflow, along with a grid size of 25. The `workflow_map()` function has an additional argument called `seed` that is used to ensure that each execution of `tune_grid()` consumes the same random numbers. 
+For this example, grid search is applied to each workflow using up to 25 different parameter candidates. There are a set of common options to use with each execution of `tune_grid()`. For example, in the following code we will use the same resampling and control objects for each workflow, along with a grid size of 25. The `workflow_map()` function has an additional argument called `seed` that is used to ensure that each execution of `tune_grid()` consumes the same random numbers. 
 
 ```{r workflow-sets-grid, eval = FALSE}
 grid_ctrl <-
@@ -282,13 +282,15 @@ full_results_time <-
 num_grid_models <- nrow(collect_metrics(grid_results, summarize = FALSE))
 ```
 
+What do our `grid_results` look like?
+
 ```{r workflow-sets-grid-print}
 grid_results
 ```
 
 The `option` column now contains all of the options that we used in the `workflow_map()` call. This makes our results reproducible. In the `result` columns, the "`tune[+]`" and "`rsmp[+]`" notations mean that the object had no issues. A value such as "`tune[x]`" occurs if all of the models failed for some reason. 
 
-There are a few convenience functions for examining the results. The `rank_results()` function will order the models by some performance metric. By default, it uses the first metric in the metric set (RMSE in this instance). 
+There are a few convenience functions for examining results such as `grid_results`. The `rank_results()` function will order the models by some performance metric. By default, it uses the first metric in the metric set (RMSE in this instance). Let's `filter()` to only look at RMSE:
 
 ```{r workflow-sets-rank}
 grid_results %>% 
@@ -339,11 +341,11 @@ autoplot(grid_results, id = "Cubist", metric = "rmse")
 
 There are also methods for `collect_predictions()` and `collect_metrics()`. 
 
-This approach to model screening fits a total of `r format(num_grid_models, big.mark = ",")` models. Using `r cores` workers in parallel, the estimation process took  `r round(full_results_time[3]/60/60, 1)` hours to complete.
+The example model screening with our concrete mixture data fits a total of `r format(num_grid_models, big.mark = ",")` models. Using `r cores` workers in parallel, the estimation process took  `r round(full_results_time[3]/60/60, 1)` hours to complete.
 
 ## Efficiently Screening Models {#racing-example}
 
-One effective method for screening a large set of models efficiently is to use the racing approach described in Section \@ref(racing). With a workflow set, we can use the `workflow_map()` function for this racing approach. Recall that after we pipe in our workflow set, the argument we use is the _function_ to apply to the workflows; in this case, we can use a value of `"tune_race_anova"`. We also pass an appropriate control object; otherwise the options would be the same as the code in the previous section. 
+One effective method for screening a large set of models efficiently is to use the racing approach described in Section \@ref(racing). With a workflow set, we can use the `workflow_map()` function for this racing approach. Recall that after we pipe in our workflow set, the argument we use is the function to apply to the workflows; in this case, we can use a value of `"tune_race_anova"`. We also pass an appropriate control object; otherwise the options would be the same as the code in the previous section. 
 
 
 ```{r workflow-sets-race, eval = FALSE}
@@ -458,7 +460,7 @@ While the racing approach selected the same candidate parameters as the complete
 
 ## Finalizing a Model
 
-Similar to what we have shown in previous chapters, choosing the final model and fitting it on the training set is straightforward. The first step is to pick a workflow to finalize. Since the boosted tree model worked well, we'll extract that from the set, update the parameters with the numerically best settings, and fit to the training set: 
+Similar to what we have shown in previous chapters, the process of choosing the final model and fitting it on the training set is straightforward. The first step is to pick a workflow to finalize. Since the boosted tree model worked well, we'll extract that from the set, update the parameters with the numerically best settings, and fit to the training set: 
 
 ```{r workflow-sets-finalize}
 best_results <- 
@@ -498,9 +500,11 @@ boosting_test_results %>%
 #| fig.alt = "Observed versus predicted values for the test set. The values fall closely along the 45 degree line of identity."
 ```
 
+We see here how well the observed and predicted compressive strength for these concrete mixtures align.
+
 ## Chapter Summary {#workflow-sets-summary}
 
-Often a data practitioner needs to consider a large number of possible modeling approaches for a task at hand. This chapter illustrates how to use workflow sets to investigate multiple models or feature engineering strategies in such a situation. Racing methods can more efficiently rank models than fitting every candidate model being considered. 
+Often a data practitioner needs to consider a large number of possible modeling approaches for a task at hand, especially for new data sets and/or when there is little knowledge about what modeling strategy will work best. This chapter illustrated how to use workflow sets to investigate multiple models or feature engineering strategies in such a situation. Racing methods can more efficiently rank models than fitting every candidate model being considered. 
 
 ```{r workflow-sets-save, include = FALSE}
 save(concrete_test, concrete_split, grid_results, race_results, 

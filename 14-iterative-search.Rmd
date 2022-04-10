@@ -41,9 +41,9 @@ We use the same data on cell characteristics as the previous chapter for illustr
 
 We once again use the cell segmentation data, described in Section \@ref(evaluating-grid), for modeling, with a support vector machine (SVM) model to demonstrate sequential tuning methods. See @apm for more information on this model. The two tuning parameters to optimize are the SVM cost value and the radial basis function kernel parameter $\sigma$. Both parameters can have a profound effect on the model complexity and performance. 
 
-The SVM model uses a dot-product and, for this reason, it is necessary to center and scale the predictors. Like the multilayer perceptron model, this model would benefit from the use of PCA feature extraction. However, we will not use this third tuning parameter in this chapter so that we can visualize the search process in two dimensions.
+The SVM model uses a dot product and, for this reason, it is necessary to center and scale the predictors. Like the multilayer perceptron model, this model would benefit from the use of PCA feature extraction. However, we will not use this third tuning parameter in this chapter so that we can visualize the search process in two dimensions.
 
-Along with the previously used objects (shown in Section \@ref(grid-summary)), the following tidymodels objects define the model process: 
+Along with the previously used objects (shown in Section \@ref(grid-summary)), the tidymodels objects `svm_rec`, `svm_spec`, and `svm_wflow` define the model process: 
 
 ```{r iterative-svm-defs, message = FALSE}
 library(tidymodels)
@@ -65,7 +65,7 @@ svm_wflow <-
   add_recipe(svm_rec)
 ```
 
-The default parameter ranges for these two tuning parameters are: 
+The default parameter ranges for the two tuning parameters `cost` and `rbf_sigma` are: 
 
 ```{r iterative-svm-param}
 cost()
@@ -81,9 +81,9 @@ svm_param <-
   update(rbf_sigma = rbf_sigma(c(-7, -1)))
 ```
 
-Before discussing specific details about iterative search and how it works, let's understand the relationship between the two SVM tuning parameters and the area under the ROC curve for this specific data set. We constructed a very large regular grid, comprised of 2,500 candidate values, and evaluated the grid using resampling. This is obviously impractical in regular data analysis and tremendously inefficient. However, it elucidates the path that the search process _should take_ and where the numerically optimal value(s) occur. 
+Before discussing specific details about iterative search and how it works, let's explore the relationship between the two SVM tuning parameters and the area under the ROC curve for this specific data set. We constructed a very large regular grid, comprised of 2,500 candidate values, and evaluated the grid using resampling. This is obviously impractical in regular data analysis and tremendously inefficient. However, it elucidates the path that the search process should take and where the numerically optimal value(s) occur. 
 
-Figure \@ref(fig:roc-surface) shows the results, with lighter color corresponding to higher (better) model performance. There is a large swath in the lower diagonal of the parameter space that is relatively flat with poor performance. A ridge of best performance occurs in the upper right portion of the space. The black dot indicates the best settings. The transition from the plateau of poor results to the ridge of best performance is very sharp. There is also a sharp drop in the area under the ROC curve just to the right of the ridge.
+Figure \@ref(fig:roc-surface) shows the results of evaluating this grid, with lighter color corresponding to higher (better) model performance. There is a large swath in the lower diagonal of the parameter space that is relatively flat with poor performance. A ridge of best performance occurs in the upper right portion of the space. The black dot indicates the best settings. The transition from the plateau of poor results to the ridge of best performance is very sharp. There is also a sharp drop in the area under the ROC curve just to the right of the ridge.
 
 ```{r roc-surface}
 #| out.width = "80%", 
@@ -95,7 +95,7 @@ Figure \@ref(fig:roc-surface) shows the results, with lighter color correspondin
 knitr::include_graphics("premade/roc_surface.png")
 ```
 
-The search procedures described below require at least some resampled performance statistics before proceeding. For this purpose, the code below creates a small regular grid that resides in the flat portion of the parameter space. The `tune_grid()` function resamples these values:  
+The following search procedures require at least some resampled performance statistics before proceeding. For this purpose, the following code creates a small regular grid that resides in the flat portion of the parameter space. The `tune_grid()` function resamples this grid:  
 
 ```{r iterative-svm-initial, message = FALSE}
 set.seed(1401)
@@ -127,7 +127,7 @@ When using Bayesian optimization, the primary concerns are how to create the mod
 
 Gaussian process (GP) [@SCHULZ20181] models are well-known statistical techniques that have a history in spatial statistics (under the name of _kriging methods_). They can be derived in multiple ways, including as a Bayesian model; see @RaWi06 for an excellent reference. 
 
-Mathematically, a GP is a collection of random variables whose joint probability distribution is  multivariate Gaussian. In the  context of our application, this collection is the collection of performance metrics for the tuning parameter candidate values. For the initial grid of four samples shown above, the realization of these four random variables were `r knitr::combine_words(round(collect_metrics(svm_initial)$mean, 4))`. These are assumed to be distributed as multivariate Gaussian. The _inputs_ that  define the independent variables/predictors for the GP model are the corresponding tuning parameter values (shown in Table \@ref(tab:initial-gp-data)).
+Mathematically, a GP is a collection of random variables whose joint probability distribution is  multivariate Gaussian. In the  context of our application, this collection is the collection of performance metrics for the tuning parameter candidate values. For the previous initial grid of four samples, the realization of these four random variables were `r knitr::combine_words(round(collect_metrics(svm_initial)$mean, 4))`. These are assumed to be distributed as multivariate Gaussian. The inputs that  define the independent variables/predictors for the GP model are the corresponding tuning parameter values (shown in Table \@ref(tab:initial-gp-data)).
 
 ```{r iterative-gp-data-table, echo = FALSE, results = "asis"}
 collect_metrics(svm_initial) %>% 
@@ -142,7 +142,7 @@ collect_metrics(svm_initial) %>%
   kableExtra::add_header_above(c("outcome" = 1, "predictors" = 2))
 ```
 
-Gaussian process models are specified by their mean and covariance functions, although the latter has the most effect on the nature of the GP model. The covariance function is often parameterized in terms of the input values (denoted as $x$ below). As an example, a commonly used covariance function is the squared exponential^[This equation is also the same as the _radial basis function_ used in kernel methods, such as the SVM model that is currently being used. This is a coincidence; this covariance function is unrelated to the SVM tuning parameter that we are using. ] function: 
+Gaussian process models are specified by their mean and covariance functions, although the latter has the most effect on the nature of the GP model. The covariance function is often parameterized in terms of the input values (denoted as $x$). As an example, a commonly used covariance function is the squared exponential^[This equation is also the same as the _radial basis function_ used in kernel methods, such as the SVM model that is currently being used. This is a coincidence; this covariance function is unrelated to the SVM tuning parameter that we are using. ] function: 
 
 $$\operatorname{cov}(\boldsymbol{x}_i, \boldsymbol{x}_j) = \exp\left(-\frac{1}{2}|\boldsymbol{x}_i - \boldsymbol{x}_j|^2\right) + \sigma^2_{ij}$$
 where $\sigma^2_{ij}$ is a constant error variance term that is zero when $i=j$. This equation translates to: 
@@ -157,7 +157,7 @@ The nature of this covariance function allows the Gaussian process to represent 
 However, fitting these models can be difficult in some cases and the model becomes more computationally expensive as the number of tuning parameter combinations increases. 
 :::
 
-An important virtue of this model is that, since a full probability model is specified, the predictions for new inputs can reflect the entire _distribution_ of the outcome. In other words, new performance statistics can be predicted in terms of both mean and variance. 
+An important virtue of this model is that, since a full probability model is specified, the predictions for new inputs can reflect the entire distribution of the outcome. In other words, new performance statistics can be predicted in terms of both mean and variance. 
 
 Suppose that two new tuning parameters were under consideration. In Table \@ref(tab:tuning-candidates), candidate _A_ has a slightly better mean ROC value than candidate _B_ (the current best is `r round(max(collect_metrics(svm_initial)$mean), 4)`). However, its variance is four-fold larger than _B_. Is this good or bad? Choosing option _A_ is riskier but has potentially higher return. The increase in variance also reflects that this new value is further away from the existing data than _B_. The next section considers these aspects of GP predictions for Bayesian optimization in more detail.
 
@@ -230,7 +230,7 @@ gp_pred <-
   )
 ```
 
-To demonstrate, let's look at a toy example with a single parameter that has values between [0, 1] and the performance metric is $R^2$. The true function is shown below in red in Figure \@ref(fig:performance-profile), along with `r nrow(current_iter)` candidate values that have existing results.
+To demonstrate, let's look at a toy example with a single parameter that has values between [0, 1] and the performance metric is $R^2$. The true function is shown in Figure \@ref(fig:performance-profile), along with `r nrow(current_iter)` candidate values that have existing results as points.
 
 ```{r performance-profile}
 #| echo = FALSE, 
@@ -246,7 +246,7 @@ ggplot(grid, aes(x = x, y = y)) +
   geom_point(data = current_iter)
 ```
 
-For these data, the GP model fit is shown in Figure \@ref(fig:estimated-profile). The shaded region indicates the mean $\pm$ 1 standard error. The two vertical lines indicate two candidate points that are examined in more detail below.
+For these data, the GP model fit is shown in Figure \@ref(fig:estimated-profile). The shaded region indicates the mean $\pm$ 1 standard error. The two vertical lines indicate two candidate points that are examined in more detail later.
 
 The shaded confidence region demonstrates the squared exponential variance function; it becomes very large between points and converges to zero at the existing data points. 
 
@@ -275,7 +275,7 @@ As a way to encourage exploration, a simple (but not often used) approach is to 
 
 One of the most commonly used acquisition functions is _expected improvement_. The notion of improvement requires a value for the current best results (unlike the confidence bound approach). Since the GP can describe a new candidate point using a distribution, we can weight the parts of the distribution that show improvement using the probability of the improvement occurring. 
 
-For example, consider two candidate parameter values of 0.10 and 0.25 (indicated by the vertical lines in the plot above). Using the fitted GP model, their predicted $R^2$ distributions are shown in Figure \@ref(fig:two-candidates) along with a reference line for the current best results.
+For example, consider two candidate parameter values of 0.10 and 0.25 (indicated by the vertical lines in Figure \@ref(fig:estimated-profile)). Using the fitted GP model, their predicted $R^2$ distributions are shown in Figure \@ref(fig:two-candidates) along with a reference line for the current best results.
 
 ```{r two-candidates}
 #| echo = FALSE, 
@@ -324,7 +324,7 @@ small_pred %>%
   scale_color_brewer(palette = "Set1")
 ```
 
-When only considering the mean $R^2$ prediction, a parameter value of 0.10 is the better choice (see Table \@ref(tab:two-exp-improve)). The tuning parameter recommendation for 0.25 is, on average, predicted to be _worse_ than the current best. However, since it has higher variance, it has more overall probability area above the current best. As a result, it has a larger expected improvement of the two:
+When only considering the mean $R^2$ prediction, a parameter value of 0.10 is the better choice (see Table \@ref(tab:two-exp-improve)). The tuning parameter recommendation for 0.25 is, on average, predicted to be worse than the current best. However, since it has higher variance, it has more overall probability area above the current best. As a result, it has a larger expected improvement of the two:
 
 ```{r iterative-gp-data-table-2, echo = FALSE, results = "asis"}
 small_pred %>% 
@@ -375,7 +375,7 @@ p1/p2
 ```
 
 
-Numerous acquisition functions have been discussed in the literature. For tidymodels, expected improvement is the default. 
+Numerous acquisition functions have been proposed and discussed; in tidymodels, expected improvement is the default. 
 
 ```{r iterative-cells-bo-calcs, echo = FALSE}
 # We will do the calculations here but use some non-standard options. First, 
@@ -573,7 +573,7 @@ autoplot(svm_bo, type = "performance")
 
 An additional type of plot uses `type = "parameters"`  which shows the parameter values over iterations.
 
-The animation below visualizes the results of the search. The black $\times$ values show the starting values contained in `svm_initial`. The top-left blue panel shows the _predicted_ mean value of the area under the ROC curve. The red panel on the top-right displays the _predicted_ variation in the ROC values while the bottom plot visualizes the expected improvement. In each panel, darker colors indicate less attractive values (e.g., small mean values, large variation, and small improvements).  
+The animation below visualizes the results of the search. The black $\times$ values show the starting values contained in `svm_initial`. The top-left blue panel shows the predicted mean value of the area under the ROC curve. The red panel on the top-right displays the predicted variation in the ROC values while the bottom plot visualizes the expected improvement. In each panel, darker colors indicate less attractive values (e.g., small mean values, large variation, and small improvements).  
 
 ```{r iterative-bo-progress, include = FALSE}
 av_capture_graphics(
@@ -604,23 +604,23 @@ Finally, if the user interrupts the `tune_bayes()` computations, the function re
 
 ## Simulated Annealing 
 
-Simulated annealing (SA)  [@kirkpatrick1983optimization;@van1987simulated] is a general nonlinear search routine inspired by the process in which metal cools. It is a global search method that can effectively navigate many different types of search landscapes, including discontinuous functions. Unlike most gradient-based optimization routines, simulated annealing can reassess previous solutions. 
+_Simulated annealing_ (SA)  [@kirkpatrick1983optimization;@van1987simulated] is a general nonlinear search routine inspired by the process in which metal cools. It is a global search method that can effectively navigate many different types of search landscapes, including discontinuous functions. Unlike most gradient-based optimization routines, simulated annealing can reassess previous solutions. 
 
-### Aspects of simulated annealing search
+### Simulated annealing search process
 
-The process starts with an initial value and embarks on a controlled random walk through the parameter space. Each new candidate parameter value is a small perturbation of the previous value that keeps the new point within a _local neighborhood_. 
+The process of using simulated annealing starts with an initial value and embarks on a controlled random walk through the parameter space. Each new candidate parameter value is a small perturbation of the previous value that keeps the new point within a local neighborhood. 
 
-The candidate point is resampled to obtain its corresponding performance value. If this achieves better results than the previous parameters, it is accepted as the new best and the process continues. If the results are worse than the previous value the search procedure _may_ still use this parameter to define further steps. This depends on two factors. First, the likelihood of accepting a bad result decreases as performance becomes worse. In other words, a slightly worse result has a better chance of acceptance than one with a large drop in performance. The other factor is the number of search iterations. Simulated annealing wants to accept fewer suboptimal values as the search proceeds. From these two factors, the _acceptance probability_  for a bad result can be formalized as:
+The candidate point is resampled to obtain its corresponding performance value. If this achieves better results than the previous parameters, it is accepted as the new best and the process continues. If the results are worse than the previous value the search procedure may still use this parameter to define further steps. This depends on two factors. First, the likelihood of accepting a bad result decreases as performance becomes worse. In other words, a slightly worse result has a better chance of acceptance than one with a large drop in performance. The other factor is the number of search iterations. Simulated annealing wants to accept fewer suboptimal values as the search proceeds. From these two factors, the _acceptance probability_  for a bad result can be formalized as:
 
 $$\operatorname{Pr}[\text{accept suboptimal parameters at iteration } i] = \exp(c\times D_i \times i)$$
 
-where $i$ is the iteration number, $c$ is a user-specified constant, and $D_i$ is the percent difference between the old and new values (where negative values imply worse results). For a bad result, we determine the acceptance probability and compare it to a random uniform number. If the random number is greater than the probability value, the search _discards_ the current parameters and the next iteration creates its candidate value in the neighborhood of the _previous value_. Otherwise, the next iteration forms the next set of parameters based on the current (suboptimal) values. 
+where $i$ is the iteration number, $c$ is a user-specified constant, and $D_i$ is the percent difference between the old and new values (where negative values imply worse results). For a bad result, we determine the acceptance probability and compare it to a random uniform number. If the random number is greater than the probability value, the search discards the current parameters and the next iteration creates its candidate value in the neighborhood of the previous value. Otherwise, the next iteration forms the next set of parameters based on the current (suboptimal) values. 
 
 :::rmdnote
 The acceptance probabilities of simulated annealing allow the search to proceed in the wrong direction, at least for the short term, with the potential to find a much better region of the parameter space in the long run. 
 :::
 
-How are the acceptance probabilities influenced? This heatmap in Figure \@ref(fig:acceptance-prob) shows how the acceptance probability can change over iterations, performance, and the user-specified coefficient.
+How are the acceptance probabilities influenced? The heatmap in Figure \@ref(fig:acceptance-prob) shows how the acceptance probability can change over iterations, performance, and the user-specified coefficient.
 
 ```{r acceptance-prob}
 #| echo = FALSE, 
@@ -660,7 +660,7 @@ The user can adjust the coefficients to find a probability profile that suits th
 
 This process continues for a set amount of iterations but can halt if no globally best results occur within a pre-determined number of iterations. However, it can be very helpful to set a _restart threshold_. If there are a string of failures, this feature revisits the last globally best parameter settings and starts anew.  
 
-The main important detail is to define how to perturb the tuning parameters from iteration to iteration. There are a variety of methods in the literature for this. We follow the simple method given in @gsa called _generalized simulated annealing_. For continuous tuning parameters, we define a small radius to specify the local "neighborhood". For example, suppose there are two tuning parameters and each is bounded by zero and one. The simulated annealing process generates random values on the surrounding radius and randomly chooses one to be the current candidate value.
+The main important detail is to define how to perturb the tuning parameters from iteration to iteration. There are a variety of methods in the literature for this. We follow the method given in @gsa called _generalized simulated annealing_. For continuous tuning parameters, we define a small radius to specify the local "neighborhood". For example, suppose there are two tuning parameters and each is bounded by zero and one. The simulated annealing process generates random values on the surrounding radius and randomly chooses one to be the current candidate value.
 
 In our implementation, the neighborhood is determined by scaling the current candidate to be between zero and one based on the range of the parameter object, so radius values between 0.05 and 0.15 seem reasonable. For these values, the fastest that the search could go from one side of the parameter space to the other is about 10 iterations. The size of the radius controls how quickly the search explores the parameter space. In our implementation, a range of radii is specified so different magnitudes of "local" define the new candidate values. 
 
@@ -753,7 +753,7 @@ For non-numeric parameters, we assign a probability for how often the parameter 
 
 ### The `tune_sim_anneal()` function {#tune-sim-anneal}
 
-The syntax for this function is nearly identical to `tune_bayes()`. There are no options for acquisition functions or uncertainty sampling. The `control_sim_anneal()` function has some details that define the local neighborhood and the cooling schedule:
+To implement iterative search via simulated annealing, use the `tune_sim_anneal()` function. The syntax for this function is nearly identical to `tune_bayes()`. There are no options for acquisition functions or uncertainty sampling. The `control_sim_anneal()` function has some details that define the local neighborhood and the cooling schedule:
 
 * `no_improve`, for simulated annealing, is an integer that will stop the search if no global best or improved results are discovered within `no_improve` iterations. Accepted suboptimal or discarded parameters count as "no improvement".
 
@@ -892,7 +892,7 @@ if (length(so_stop_index) > 0) {
 }
 ```
 
-The last ten iterations: 
+The output for last ten iterations was: 
 
 ```{r iterative-cells-sa-print-end, echo = FALSE}
 last_sa_iter <- max(result_history$.iter)
@@ -944,7 +944,7 @@ Like `tune_bayes()`, manually stopping execution will return the completed itera
 
 ## Chapter Summary {#iterative-summary}
 
-This chapter describes two iterative search methods for optimizing tuning parameters. Both can be effective at finding good values alone or as a follow-up method that is used after an initial grid search to further `r pkg(finetune)` performance. 
+This chapter described two iterative search methods for optimizing tuning parameters. Bayes optimization uses a predictive model trained on existing resampling results to suggest tuning parameter values, while simulated annealing walks through the hyperparameter space to find good values. Both can be effective at finding good values alone or as a follow-up method that is used after an initial grid search to further `r pkg(finetune)` performance. 
 
 
 

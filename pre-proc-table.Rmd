@@ -17,7 +17,7 @@ It has been said previously that the type of preprocessing is dependent on the t
 
 To learn more about each of these models, and others that might be available, see <https://www.tidymodels.org/find/parsnip/>. 
 
-This Appendix provides recommendations for baseline levels of preprocessing that are needed for various model functions. In the table below, the preprocessing methods are categorized as: 
+This Appendix provides recommendations for baseline levels of preprocessing that are needed for various model functions. In Table \@ref(tab:preprocessing), the preprocessing methods are categorized as: 
 
  * **dummy**: Do qualitative predictors require a numeric encoding (e.g. via dummy variables or other methods). 
  

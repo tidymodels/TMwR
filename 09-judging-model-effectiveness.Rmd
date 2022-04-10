@@ -13,10 +13,10 @@ ad_folds <- vfold_cv(ad_data, repeats = 5)
 
 # Judging Model Effectiveness {#performance}
 
-Once we have a model, we need to know how well it works. A quantitative approach for estimating effectiveness allows us to understand the model, to compare different models, or to tweak the model to improve performance. Our focus in tidymodels is on _empirical validation_; this usually means using data that were not used to create the model as the substrate to measure effectiveness. 
+Once we have a model, we need to know how well it works. A quantitative approach for estimating effectiveness allows us to understand the model, to compare different models, or to tweak the model to improve performance. Our focus in tidymodels is on empirical validation; this usually means using data that were not used to create the model as the substrate to measure effectiveness. 
 
 :::rmdwarning
-The best approach to empirical validation involves using _resampling_ methods that will be introduced in Chapter \@ref(resampling). In this chapter, we will motivate the _need_ for empirical validation by using the test set. Keep in mind that the test set can only be used once, as explained in Section \@ref(splitting-methods).
+The best approach to empirical validation involves using _resampling_ methods that will be introduced in Chapter \@ref(resampling). In this chapter, we will motivate the need for empirical validation by using the test set. Keep in mind that the test set can only be used once, as explained in Section \@ref(splitting-methods).
 :::
 
 When judging model effectiveness, your decision about which metrics to examine can be critical. In later chapters, certain model parameters will be empirically optimized and a primary performance metric will be used to choose the best sub-model. Choosing the wrong metric can easily result in unintended consequences. For example, two common metrics for regression models are the root mean squared error (RMSE) and the coefficient of determination (a.k.a. $R^2$). The former measures _accuracy_ while the latter measures _correlation_. These are not necessarily the same thing. Figure \@ref(fig:performance-reg-metrics) demonstrates the difference between the two. 
@@ -93,7 +93,7 @@ two_factor_res <-
   pull(mean)
 ```
 
-The effectiveness of any given model depends on how the model will be used. An inferential model is used primarily to understand relationships, and typically emphasizes the choice (and validity) of probabilistic distributions and other generative qualities that define the model. For a model used primarily for prediction, by contrast, predictive strength is of primary importance and other concerns about underlying statistical qualities may be less important. Predictive strength is usually determined by how close our predictions come to the observed data, i.e., fidelity of the model predictions to the actual results. This chapter focuses on functions that can be used to measure predictive strength. However, our advice for those developing inferential models is to use these techniques _even when the model will not be used with the primary goal of prediction_. 
+The effectiveness of any given model depends on how the model will be used. An inferential model is used primarily to understand relationships, and typically emphasizes the choice (and validity) of probabilistic distributions and other generative qualities that define the model. For a model used primarily for prediction, by contrast, predictive strength is of primary importance and other concerns about underlying statistical qualities may be less important. Predictive strength is usually determined by how close our predictions come to the observed data, i.e., fidelity of the model predictions to the actual results. This chapter focuses on functions that can be used to measure predictive strength. However, our advice for those developing inferential models is to use these techniques even when the model will not be used with the primary goal of prediction. 
 
 A longstanding issue with the practice of inferential statistics is that, with a focus purely on inference, it is difficult to assess the credibility of a model. For example, consider the Alzheimer's disease data from @CraigSchapiro when `r nrow(ad_data)` patients were studied to determine the factors that influence cognitive impairment. An analysis might take the known risk factors and build a logistic regression model where the outcome is binary (impaired/non-impaired). Let's consider predictors for age, sex, and the Apolipoprotein E genotype. The latter is a categorical variable with the six possible combinations of the three main variants of this gene. Apolipoprotein E is known to have an association with dementia [@Kim:2009p4370].
 
@@ -107,10 +107,10 @@ A superficial, but not uncommon, approach to this analysis would be to fit a lar
 
 While shallow, this analysis strategy is common in practice as well as in the literature. This is especially true if the practitioner has limited formal training in data analysis. 
 
-One missing piece of information in this approach is how closely this model fits the actual data. Using resampling methods, discussed in Chapter \@ref(resampling), we can estimate the accuracy of this model to be about `r round(two_factor_res * 100, 1)`%. Accuracy is often a poor measure of model performance; we use it here because it is commonly understood. If the model has `r round(two_factor_res * 100, 1)`% fidelity to the data, should we trust conclusions it produces? We might think so until we realize that the baseline rate of non-impaired patients in the data is `r round(mean(ad_data$Class == "Control") * 100, 1)`%. This means that, despite our statistical analysis, the two-factor model appears to be _only `r round((two_factor_res - mean(ad_data$Class == "Control")) * 100, 1)`% better than a simple heuristic that always predicts patients to be unimpaired_, irregardless of the observed data. 
+One missing piece of information in this approach is how closely this model fits the actual data. Using resampling methods, discussed in Chapter \@ref(resampling), we can estimate the accuracy of this model to be about `r round(two_factor_res * 100, 1)`%. Accuracy is often a poor measure of model performance; we use it here because it is commonly understood. If the model has `r round(two_factor_res * 100, 1)`% fidelity to the data, should we trust conclusions it produces? We might think so until we realize that the baseline rate of non-impaired patients in the data is `r round(mean(ad_data$Class == "Control") * 100, 1)`%. This means that, despite our statistical analysis, the two-factor model appears to be only `r round((two_factor_res - mean(ad_data$Class == "Control")) * 100, 1)`% better than a simple heuristic that always predicts patients to be unimpaired, irregardless of the observed data. 
 
 :::rmdnote
-The point of this analysis is to demonstrate the idea that **optimization of statistical characteristics of the model does not imply that the model fits the data well.** Even for purely inferential models, some measure of fidelity to the data should accompany the inferential results. Using this, the consumers of the analyses can calibrate their expectations of the results. 
+The point of this analysis is to demonstrate the idea that optimization of statistical characteristics of the model does not imply that the model fits the data well. Even for purely inferential models, some measure of fidelity to the data should accompany the inferential results. Using this, the consumers of the analyses can calibrate their expectations of the results. 
 :::
 
 In the remainder of this chapter, we will discuss general approaches for evaluating models via empirical validation. These approaches are grouped by the nature of the outcome data: purely numeric, binary classes, and three or more class levels. 
@@ -169,7 +169,7 @@ Let's compute the root mean squared error for this model using the `rmse()` func
 rmse(ames_test_res, truth = Sale_Price, estimate = .pred)
 ```
 
-Above, we see the standard format of the output of `r pkg(yardstick)` functions. Metrics for numeric outcomes usually have a value of "standard" for the `.estimator` column. Examples with different values for this column are shown in the next sections.
+This shows us the standard format of the output of `r pkg(yardstick)` functions. Metrics for numeric outcomes usually have a value of "standard" for the `.estimator` column. Examples with different values for this column are shown in the next sections.
 
 To compute multiple metrics at once, we can create a _metric set_. Let's add $R^2$ and the mean absolute error: 
 
@@ -215,10 +215,10 @@ classification_metrics <- metric_set(accuracy, mcc, f_meas)
 classification_metrics(two_class_example, truth = truth, estimate = predicted)
 ```
 
-The Matthews correlation coefficient and F1 score both summarize the confusion matrix, but compared to `mcc()` which measures the quality of both positive and negative examples, the `f_meas()` metric emphasizes the positive class, i.e., the event of interest. For binary classification data sets like this example, `r pkg(yardstick)` functions have a standard argument called `event_level` to distinguish positive and negative levels. The _default_ (which we used above) is that the **first** level of the outcome factor is the event of interest.
+The Matthews correlation coefficient and F1 score both summarize the confusion matrix, but compared to `mcc()` which measures the quality of both positive and negative examples, the `f_meas()` metric emphasizes the positive class, i.e., the event of interest. For binary classification data sets like this example, `r pkg(yardstick)` functions have a standard argument called `event_level` to distinguish positive and negative levels. The default (which we used in this code) is that the *first* level of the outcome factor is the event of interest.
 
 :::rmdnote
-There is some heterogeneity in R functions in this regard; some use the first level and others the second to denote the event of interest. We consider it more intuitive that the first level is the most important. The second level logic is borne of encoding the outcome as 0/1 (in which case the second value is the event) and unfortunately remains in some packages. However, tidymodels (along with many other R packages) _require_ a categorical outcome to be encoded as a factor and, for this reason, the legacy justification for the second level as the event becomes irrelevant.  
+There is some heterogeneity in R functions in this regard; some use the first level and others the second to denote the event of interest. We consider it more intuitive that the first level is the most important. The second level logic is borne of encoding the outcome as 0/1 (in which case the second value is the event) and unfortunately remains in some packages. However, tidymodels (along with many other R packages) require_a categorical outcome to be encoded as a factor and, for this reason, the legacy justification for the second level as the event becomes irrelevant.  
 :::
 
 As an example where the second level is the event: 
@@ -227,7 +227,7 @@ As an example where the second level is the event:
 f_meas(two_class_example, truth, predicted, event_level = "second")
 ```
 
-In the output above, the `.estimator` value of "binary" indicates that the standard formula for binary classes will be used. 
+In this output, the `.estimator` value of "binary" indicates that the standard formula for binary classes will be used. 
 
 There are numerous classification metrics that use the predicted probabilities as inputs rather than the hard class predictions. For example, the receiver operating characteristic (ROC) curve computes the sensitivity and specificity over a continuum of different event thresholds. The predicted class column is not used. There are two `r pkg(yardstick)` functions for this method: `roc_curve()` computes the data points that make up the ROC curve and `roc_auc()` computes the area under the curve. 
 
