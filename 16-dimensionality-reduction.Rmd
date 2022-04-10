@@ -15,7 +15,7 @@ registerDoMC(cores = parallel::detectCores())
 tidymodels_prefer()
 ```
 
-# (PART\*) Advanced Topics {-} 
+# (PART\*) Beyond the Basics {-} 
 
 # Dimensionality Reduction {#dimensionality}
 
