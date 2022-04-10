@@ -27,15 +27,15 @@ There has been a push in recent years to move away from p-values in favor of oth
 
 In this chapter, we describe how to use `r pkg(tidymodels)` for fitting and assessing inferential models. In some cases, the tidymodels framework can help users work with the objects produced by their models. In others, it can help make assessments of the quality of a given model.
 
-## An Example: Inference Regarding Counts
+## Inference for Count Data
 
-We'll use biochemistry publication data from the `r pkg(pscl)` package. These data consist of information on 915 Ph.D. biochemistry graduates and tries to explain factors that impact their academic productivity (measured via number of articles published within three years). The predictors include the gender of the graduate, their marital status, the number of children that are at least five years old, the prestige of their department, and the number of articles produced by their mentor in the same time period. The data reflect biochemistry doctorates who finished their education between 1956 and 1963. The data are a somewhat biased sample of all of the biochemistry doctorates given during this period (based on completeness of information).
+To understand how tidymodels packages can be used for inferential modeling, let's focus on an example with count data. We'll use biochemistry publication data from the `r pkg(pscl)` package. These data consist of information on 915 Ph.D. biochemistry graduates and tries to explain factors that impact their academic productivity (measured via number or count of articles published within three years). The predictors include the gender of the graduate, their marital status, the number of children of the graduate that are at least five years old, the prestige of their department, and the number of articles produced by their mentor in the same time period. The data reflect biochemistry doctorates who finished their education between 1956 and 1963. The data are a somewhat biased sample of all of the biochemistry doctorates given during this period (based on completeness of information).
 
 :::rmdnote
 Recall that in Chapter \@ref(trust) we asked the question "Is our model applicable for predicting a specific data point?". It is very important to define what populations an inferential analysis apply to. For these data, the results would likely apply to biochemistry doctorates given around the time frame that the data were collected. Does it also apply to other chemistry doctorate types (e.g., medicinal chemistry, etc)? These are important questions to address (and document) when conducting inferential analyses. 
 :::
 
-A plot of the data shown in Figure \@ref(fig:counts) indicates that many graduates did not publish any articles in this time and that the outcome follows a right-skewed distribution.
+A plot of the data shown in Figure \@ref(fig:counts) indicates that many graduates did not publish any articles in this time and that the outcome follows a right-skewed distribution:
 
 ```{r inferential-count-dist, eval=FALSE}
 library(tidymodels)
@@ -59,7 +59,7 @@ Since the outcome data are counts, the most common distribution assumption to ma
 
 ## Comparisons with Two-Sample Tests
 
-The author's original goal was to determine if there is a difference in publications between men and women [@Long1992]. The data from the study show:
+We can start with hypothesis testing. The original author's goal with this data set on biochemistry publication data was to determine if there is a difference in publications between men and women [@Long1992]. The data from the study show:
 
 ```{r inferential-counts}
 bioChemists %>% 
@@ -86,7 +86,7 @@ poisson.test(c(930, 619), T = 3)
 
 The function reports a p-value as well as a confidence interval for the ratio of the publication rates. The results indicate that the observed difference is greater than the experiential noise and favors $H_a$. 
 
-One issue with using this function is that the results come back as an `htest` object. While this type of object has a well defined structure, it can be difficult to consume for subsequent operations such as reporting or visualizations. The most impactful tool that tidymodels has to offer for inferential models is the `tidy()` functions in the `r pkg(broom)` package. As previously seen, this function makes a well formed, predictably named tibble from the object. Using this function:
+One issue with using this function is that the results come back as an `htest` object. While this type of object has a well defined structure, it can be difficult to consume for subsequent operations such as reporting or visualizations. The most impactful tool that tidymodels has to offer for inferential models is the `tidy()` functions in the `r pkg(broom)` package. As previously seen, this function makes a well formed, predictably named tibble from the object. We can `tidy()` the results of our two-sample comparison test:
 
 ```{r inferential-test-tidy}
 poisson.test(c(930, 619)) %>% 
@@ -94,12 +94,12 @@ poisson.test(c(930, 619)) %>%
 ```
 
 :::rmdnote
-Between the `r pkg(broom)` and `r pkg(broom.mixed)` packages, there are `tidy()` methods for more than 150 models.
+Between the [`r pkg(broom)`](https://broom.tidymodels.org/) and [`r pkg(broom.mixed)`](https://CRAN.R-project.org/package=broom.mixed) packages, there are `tidy()` methods for more than 150 models.
 :::
 
 While the Poisson distribution is reasonable, we might also want to make an assessment using fewer distributional assumptions. Two methods that might be helpful are the bootstrap and permutation tests [@davison1997bootstrap].
 
-The `r pkg(infer)` package is a very powerful and intuitive tool for hypothesis testing [@ModernDive]. Its syntax is concise and designed for non-statisticians.
+The `r pkg(infer)` package, which is part of the tidymodels framework, is a powerful and intuitive tool for hypothesis testing [@ModernDive]. Its syntax is concise and designed for non-statisticians.
 
 First, we `specify()` that we will use the difference in the mean number of articles between the sexes and then `calculate()` the statistic from the data. Recall that the maximum likelihood estimator for the Poisson mean is the sample mean. The hypotheses tested below are the same as the previous test (but is conducted using a different testing procedure).  
 
@@ -115,7 +115,7 @@ observed <-
 observed
 ```
 
-From here, we compute a confidence interval for this mean by creating the bootstrap distribution via `generate()`; the same statistic is computed for each resampled version of the data.
+From here, we compute a confidence interval for this mean by creating the bootstrap distribution via `generate()`; the same statistic is computed for each resampled version of the data:
 
 ```{r inferential-mean-diff-boot-gen}
 set.seed(2101)
@@ -150,7 +150,7 @@ visualize(bootstrapped) +
 
 Since the interval visualized in in Figure \@ref(fig:bootstrapped-mean) does not include zero, these results indicate that men have published more articles than women.
 
-If we require a p-value, `r pkg(infer)` can compute one via a permutation test. The syntax is very similar to the bootstrapping code above. We add a `hypothesize()` verb to state the type of assumption to test and the `generate()` call contains an option to shuffle the data.
+If we require a p-value, the `r pkg(infer)` package can compute one via a permutation test, shown in the following code. The syntax is very similar to the bootstrapping code we used earlier. We add a `hypothesize()` verb to state the type of assumption to test and the `generate()` call contains an option to shuffle the data.
 
 ```{r inferential-mean-diff-perm-gen}
 set.seed(2102)
@@ -163,7 +163,7 @@ permuted <-
 permuted
 ```
 
-The visualization code is also very similar to the bootstrap approach. The code below generates Figure \@ref(fig:permutation-dist) where the vertical line signifies the observed value.
+The following visualization code is also very similar to the bootstrap approach. The code below generates Figure \@ref(fig:permutation-dist) where the vertical line signifies the observed value.
 
 ```{r inferential-mean-diff-perm, eval = FALSE}
 visualize(permuted) +
@@ -184,13 +184,13 @@ permuted %>%
   get_p_value(obs_stat = observed, direction = "two-sided")
 ```
 
-Since the vertical line in Figure \@ref(fig:permutation-dist) is far away from the permutation distribution (which represents the null hypothesis), the likelihood of observing data that is at least as extreme as what is at hand if in fact the null hypothesis were true is exceedingly small.
+Since the vertical line representing the null hypothesis in Figure \@ref(fig:permutation-dist) is far away from the permutation distribution (which represents the null hypothesis), the likelihood of observing data that is at least as extreme as what is at hand if in fact the null hypothesis were true is exceedingly small.
 
-The two-sample tests shown above are probably suboptimal since they do not take into account other factors that might explain the observed relationship between publication rate and sex. Let's move on to a more complex model that can take into consideration additional covariates.
+The two-sample tests shown in this section are probably suboptimal because they do not take into account other factors that might explain the observed relationship between publication rate and sex. Let's move on to a more complex model that can take into consideration additional covariates.
 
 ## Log-Linear Models
 
-The focus of the rest of this chapter will be on a generalized linear model [@Dobson99] where we assume the counts follow a Poisson distribution. For this model, the covariates/predictors enter the model in a log-linear fashion.
+The focus of the rest of this chapter will be on a generalized linear model [@Dobson99] where we assume the counts follow a Poisson distribution. For this model, the covariates/predictors enter the model in a log-linear fashion:
 
 $$
 \log(\lambda) = \beta_0 + \beta_1x_1 + \ldots + \beta_px_p
@@ -198,7 +198,7 @@ $$
 
 where $\lambda$ is the expected value of the counts.
 
-Let's fit a simple model that contains all of the predictor columns. The `r pkg(poissonreg)` package will create this model specification:
+Let's fit a simple model that contains all of the predictor columns. The `r pkg(poissonreg)` package, a `r pkg(parsnip)` extension package in tidymodels, will create this model specification:
 
 ```{r inferential-glm}
 library(poissonreg)
@@ -212,7 +212,7 @@ log_lin_fit <-
 log_lin_fit
 ```
 
-The `tidy()` method succinctly summarizes the coefficients for the model (along with 90% confidence intervals).
+The `tidy()` method succinctly summarizes the coefficients for the model (along with 90% confidence intervals):
 
 ```{r inferential-glm-tidy}
 tidy(log_lin_fit, conf.int = TRUE, conf.level = 0.90)
@@ -290,7 +290,7 @@ The results are the same and, based on these and the confidence interval for thi
 
 ## A More Complex Model
 
-For count data, there are occasions where the number of zero counts is larger than what a simple Poisson distribution would prescribe. A more complex model appropriate in this situation is the zero-inflated Poisson (ZIP) model; see @Mullahy, @Lambert1992, and @JSSv027i08. Here, there are two sets of covariates: one for the count data and others that affect the probability (denoted as $\pi$) of zeros. The equation for the mean $\lambda$ is:
+We can move into even more complex models within our tidymodels approach. For count data, there are occasions where the number of zero counts is larger than what a simple Poisson distribution would prescribe. A more complex model appropriate in this situation is the zero-inflated Poisson (ZIP) model; see @Mullahy, @Lambert1992, and @JSSv027i08. Here, there are two sets of covariates: one for the count data and others that affect the probability (denoted as $\pi$) of zeros. The equation for the mean $\lambda$ is:
 
 $$\lambda = 0 \pi + (1 - \pi) \lambda_{nz}$$
 
@@ -318,7 +318,7 @@ zero_inflated_fit <-
 zero_inflated_fit
 ```
 
-Since the coefficients for this model are also estimated using maximum likelihood, let's try to use another likelihood ratio test to understand if the new model terms are helpful. We will *simultaneously* test that
+Since the coefficients for this model are also estimated using maximum likelihood, let's try to use another likelihood ratio test to understand if the new model terms are helpful. We will *simultaneously* test that:
 
 ```{=tex}
 \begin{align}
@@ -327,6 +327,7 @@ H_a&: \text{at least one } \gamma \ne 0  \notag
 \end{align}
 ```
 
+Let's try ANOVA again:
 
 ```{r inference-zip-anova, error = TRUE}
 anova(
@@ -337,7 +338,7 @@ anova(
   tidy()
 ```
 
-An `anova()` method isn't implemented for `zeroinfl` objects.
+An `anova()` method isn't implemented for `zeroinfl` objects!
 
 An alternative is to use an *information criterion statistic*, such as the Akaike information criterion (AIC) [@claeskens2016statistical]. This computes the log-likelihood (from the training set) and penalizes that value based on the training set size and the number of model parameters. In R's parameterization, smaller AIC values are better. In this case, we are not conducting a formal statistical test but *estimating* the ability of the data to fit the data.
 
@@ -425,6 +426,10 @@ bootstrap_models %>% int_t(zero_coefs)
 
 From these results, we can get a good idea of which predictor(s) to include in the zero count probability model. It may be sensible to refit a smaller model to assess if the bootstrap distribution for `ment` is still skewed.
 
+## More Inferential Analysis {#inference-options}
+
+This chapter demonstrated just a small subset of what is available for inferential analysis in tidymodels and has focused on resampling and frequentist methods. Arguably, Bayesian analysis is a very effective and often superior approach for inference. A variety of Bayesian models are available via `r pkg(parsnip)`. Additionally, the `r pkg(multilevelmod)` package enables users to fit hierarchical Bayesian and non-Bayesian models (e.g., mixed models). The `r pkg(broom.mixed)` and `r pkg(tidybayes)` packages are excellent tools for extracting data for plots and summaries. Finally, for data sets with a single hierarchy, such as simple longitudinal or repeated measures data, `r pkg(rsample)`'s `group_vfold_cv()` function facilitates straightforward out-of-sample characterizations of model performance.
+
 ## Chapter Summary {#inference-summary}
 
-This chapter demonstrates just a small subset of what is available for inferential analysis in tidymodels and has focused on resampling and frequentist methods. Arguably, Bayesian analysis is a very effective and often superior approach for inference. A variety of Bayesian models are available via `r pkg(parsnip)`. Additionally, the `r pkg(multilevelmod)` package (currently on GitHub) enables users to fit hierarchical Bayesian and non-Bayesian models (e.g., mixed models). The `r pkg(broom.mixed)` and `r pkg(tidybayes)` packages are excellent tools for extracting data for plots and summaries. Finally, for data sets with a single hierarchy, such as simple longitudinal or repeated measures data, `r pkg(rsample)`'s `group_vfold_cv()` function facilitates straightforward out-of-sample characterizations of model performance.
+The tidymodels framework is for more than predictive modeling alone. Packages and functions from tidymodels can be used for hypothesis testing, as well as fitting and assessing inferential models. The tidymodels framework provides support for working with non-tidymodels R models, and can help assess the statistical qualities of your models.
