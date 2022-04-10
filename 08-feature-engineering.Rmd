@@ -386,7 +386,7 @@ There are existing recipe steps for other extraction methods, such as: independe
 
 ### Row sampling steps
 
-Recipe steps can affect the rows of a data set as well. For example, _subsampling_ techniques for class imbalances will change the class proportions in the data being given to the model. There are several possible approaches to try when your data exhibits class imbalance:
+Recipe steps can affect the rows of a data set as well. For example, _subsampling_ techniques for class imbalances change the class proportions in the data being given to the model; these techniques often don't improve overall performance but can generate better behaved distributions of the predicted class probabilities. There are several possible approaches to try when subsampling your data with class imbalance:
 
  * _Downsampling_ the data keeps the minority class and takes a random sample of the majority class so that class frequencies are balanced. 
 
