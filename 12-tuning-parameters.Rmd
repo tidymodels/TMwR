@@ -31,11 +31,15 @@ load("RData/search_examples.RData")
 
 # Model Tuning and the Dangers of Overfitting {#tuning}
 
-Models have parameters with unknown values that must be estimated in order to use the model for predicting. In ordinary linear regression, there are two parameters $\beta_0$ and $\beta_1$ of the model: 
+In order to use a model for prediction, the parameters for that model must be estimated. Some of these parameters can be estimated directly from the training data, but other parameters, called _tuning parameters_ or _hyperparameters_, must be specified ahead of time and can't be directly found from training data. These are unknown structural or other kind of values that have significant impact on the model but cannot be directly estimated from the data. This chapter will provide examples of tuning parameters and show how we use tidymodels function to create and handle tuning parameters. We'll also demonstrate how poor choices of these values lead to overfitting and introduce several tactics for finding optimal tuning parameters values. Chapters \@ref(grid-search) and \@ref(iterative-search) go into more detail on specific optimization methods for tuning.
+
+## Model Parameters
+
+In ordinary linear regression, there are two parameters $\beta_0$ and $\beta_1$ of the model: 
 
 $$ y_i = \beta_0 + \beta_1 x_i + \epsilon_i$$
 
-When we have the outcome ($y$) and predictor ($x$) data, we can directly estimate the two parameters $\beta_0$ and $\beta_1$: 
+When we have the outcome ($y$) and predictor ($x$) data, we can estimate the two parameters $\beta_0$ and $\beta_1$: 
 
 $$\hat \beta_1 = \frac{\sum_i (y_i-\bar{y})(x_i-\bar{x})}{\sum_i(x_i-\bar{x})^2}$$ 
 
@@ -55,30 +59,18 @@ $$\hat y = \frac{1}{K}\sum_{\ell = 1}^K x_\ell^*$$
 
 where $K$ is the number of neighbors and the $x_\ell^*$ are the $K$ closest values to $x_0$ in the training set. The model itself is not defined by a model equation; the prediction equation shown above defines it. This characteristic, along with the possible intractability of the distance measure, makes it impossible to create a set of equations that can be solved for $K$ (iteratively or otherwise). The number of neighbors has a profound impact on the model; it governs the flexibility of the class boundary. For small values of $K$, the boundary is very elaborate while for large values, it might be quite smooth. 
 
-The number of nearest neighbors is a good example of a **tuning parameter** or **hyperparameter**: an unknown structural or other kind of value that has significant impact on the model but _cannot be directly estimated from the data_. 
-
-This chapter will:
-
- * provide additional examples of tuning parameters,
-
- * demonstrate that poor choices of these values lead to overfitting,
-
- * introduce several tactics for finding optimal tuning parameters values, and
- 
- * present tidymodels functions for tuning parameters.
-
-Subsequent chapters go into more detail on specific optimization methods for tuning. 
+The number of nearest neighbors is a good example of a tuning parameter or hyperparameter that cannot be directly estimated from the data. 
 
 
 ## Tuning Parameters for Different Types of Models {#tuning-parameter-examples}
 
-Tuning parameters or hyperparameters are often found in machine learning models:
+There are many examples of tuning parameters or hyperparameters in different statistical and machine learning models:
 
-* Boosting is an ensemble method that combines a series of base models, each of which is created sequentially and depends on the previous models. The number of boosting iterations is an important parameter that usually requires optimization.  
+* Boosting is an ensemble method that combines a series of base models, each of which is created sequentially and depends on the previous models. The number of boosting iterations is an important tuning parameter that usually requires optimization.  
 
 * In the classic single-layer artificial neural network (a.k.a. the multilayer perceptron), the predictors are combined using two or more hidden units. The hidden units are linear combinations of the predictors that are captured in an _activation function_ (typically a nonlinear function, such as a sigmoid). The hidden units are then connected to the outcome units; one outcome unit is used for regression models and multiple outcome units are required for classification. The number of hidden units and the type of activation function are important structural tuning parameters. 
 
-* Modern gradient descent methods are improved by finding the right optimization parameters. Examples are learning rates, momentum, and the number of optimization iterations/epochs [@Goodfellow]. Neural networks and some ensemble models use gradient descent to estimate the model parameters. While the tuning parameters associated with gradient descent are not structural parameters, they often require tuning. 
+* Modern gradient descent methods are improved by finding the right optimization parameters. Examples of such hyperparameters are learning rates, momentum, and the number of optimization iterations/epochs [@Goodfellow]. Neural networks and some ensemble models use gradient descent to estimate the model parameters. While the tuning parameters associated with gradient descent are not structural parameters, they often require tuning. 
 
 In some cases, preprocessing techniques require tuning:
 
@@ -393,23 +385,20 @@ The single unit model does not adapt very flexibly to the data (since it is cons
 This occurrence of overfitting is obvious with two predictors that we can plot. However, in general, we must use a quantitative approach for detecting overfitting.
 
 :::rmdnote
-Using **out-of-sample data** is the solution for detecting when a model is overemphasizing the training set. 
+The solutions for detecting when a model is overemphasizing the training set is using out-of-sample data.
 :::
 
 Rather than using the test set, some form of resampling is required. This could mean an iterative approach (e.g., 10-fold cross-validation) or a single data source (e.g., a validation set). 
 
 ## Two general strategies for optimization
 
-Tuning parameter optimization usually falls into one of two categories: 
+Tuning parameter optimization usually falls into one of two categories, grid search and iterative search. 
 
-- pre-define a set of parameter values to evaluate or
-- sequentially discover new parameter combinations based on previous results. 
+_Grid search_ is when pre-define a set of parameter values to evaluate. The main choices involved in grid search are how to make the grid and how many parameter combinations to evaluate. Grid search is often judged as inefficient since the number of grid points required to cover the parameter space can grow unmanageable with the curse of dimensionality. There is truth to this concern, but it is most true when the process is not optimized. This is discussed more in Chapter \@ref(grid-search).
 
-The use of pre-defined sets is commonly called **grid search**. The main choices involved in grid search are how to make the grid and how many parameter combinations to evaluate. Grid search is often judged as inefficient since the number of grid points required to cover the parameter space can grow unmanageable with the curse of dimensionality. There is truth to this concern, but it is most true when the process is not optimized. This is discussed more in Chapter \@ref(grid-search).
+_Iterative search_ or sequential search is when we sequentially discover new parameter combinations based on previous results. Almost any nonlinear optimization method is appropriate, although some are more efficient than others. In some cases, an initial set of results for one or more parameter combinations is required to start the optimization process. Iterative search is discussed more in Chapter \@ref(iterative-search).
 
-For sequential or **iterative search** methods, almost any nonlinear optimization method is appropriate, although some are more efficient than others. In some cases, an initial set of results for one or more parameter combinations is required to start the optimization process. Iterative search is discussed more in Chapter \@ref(iterative-search).
-
-Figure \@ref(fig:tuning-strategies) shows two panels to demonstrate these two approaches for a situation with two tuning parameters that range between zero and one. In each, a set of contours shows the true (simulated) relationship between the parameters and the outcome. The optimal results are in the upper right-hand corner. 
+Figure \@ref(fig:tuning-strategies) shows two panels to demonstrate these two approaches for a situation with two tuning parameters that range between zero and one. In each, a set of contours shows the true (simulated) relationship between the parameters and the outcome. The optimal results are in the upper right-hand corners. 
 
 ```{r tuning-strategies}
 #| echo = FALSE,
@@ -460,7 +449,7 @@ Examples of these strategies are discussed in detail in the next two chapters. B
 
 We've already dealt with quite a number of arguments that correspond to tuning parameters for recipe and model specifications in previous chapters. It is possible to tune:
 
-* the threshold for combining neighborhoods into an "other" category (with argument name `threshold`) in Section \@ref(dummies), 
+* the threshold for combining neighborhoods into an "other" category (with argument name `threshold`) discussed in Section \@ref(dummies), 
 
 * the number of degrees of freedom in a natural spline (`deg_free`, Section \@ref(spline-functions)), 
 
@@ -468,9 +457,9 @@ We've already dealt with quite a number of arguments that correspond to tuning p
 
 * the amount of regularization in penalized models (`penalty`, Section \@ref(create-a-model)).  
 
-For `r pkg(parsnip)` model specifications, there are two kinds of parameter arguments. **Main arguments** are those that are most often optimized for performance and are available in multiple engines. The main tuning parameters are top-level arguments to the model specification function. For example, the `rand_forest()` function has main arguments `trees`, `min_n`, and `mtry` since these are most frequently specified or optimized. 
+For `r pkg(parsnip)` model specifications, there are two kinds of parameter arguments. *Main arguments* are those that are most often optimized for performance and are available in multiple engines. The main tuning parameters are top-level arguments to the model specification function. For example, the `rand_forest()` function has main arguments `trees`, `min_n`, and `mtry` since these are most frequently specified or optimized. 
 
-A secondary set of tuning parameters are **engine-specific**. These are either infrequently optimized or are only specific to certain engines. Again using random forests as an example, the `r pkg(ranger)` package contains some arguments that are not used by other packages. One example is _gain penalization_, which regularizes the predictor selection in the tree induction process. This parameter can help modulate the trade-off between the number of predictors used in the ensemble and performance [@wundervald2020generalizing]. The name of this argument in  `ranger()` is `regularization.factor`. To specify a value via a `r pkg(parsnip)` model specification, it is added as a supplemental argument to `set_engine()`: 
+A secondary set of tuning parameters are *engine-specific*. These are either infrequently optimized or are only specific to certain engines. Again using random forests as an example, the `r pkg(ranger)` package contains some arguments that are not used by other packages. One example is gain penalization, which regularizes the predictor selection in the tree induction process. This parameter can help modulate the trade-off between the number of predictors used in the ensemble and performance [@wundervald2020generalizing]. The name of this argument in  `ranger()` is `regularization.factor`. To specify a value via a `r pkg(parsnip)` model specification, it is added as a supplemental argument to `set_engine()`: 
 
 ```{r tuning-args, eval = FALSE}
 rand_forest(trees = 2000, min_n = 10) %>%                   # <- main arguments
@@ -478,7 +467,7 @@ rand_forest(trees = 2000, min_n = 10) %>%                   # <- main arguments
 ```
 
 :::rmdwarning
-The main arguments use a  "harmonized"  naming system to remove inconsistencies across engines while engine-specific arguments do not. 
+The main arguments use a harmonized naming system to remove inconsistencies across engines while engine-specific arguments do not. 
 :::
 
 How can we signal to tidymodels functions which arguments should be optimized?  Parameters are marked for tuning by assigning them a value of `tune()`. For the single layer neural network used in Section \@ref(overfitting-bad), the number of hidden units is designated for tuning using:
@@ -495,7 +484,7 @@ The `tune()` function doesn't execute any particular parameter value; it simply 
 tune()
 ```
 
-Embedding this value in an argument will tag the parameter for optimization. The model tuning functions shown in the next two chapters parse the model specification and/or recipe to discover the tagged parameters. These functions can automatically configure and process these parameters since they understand their characteristics (e.g. the range of possible values, etc.). 
+Embedding this `tune()` value in an argument will tag the parameter for optimization. The model tuning functions shown in the next two chapters parse the model specification and/or recipe to discover the tagged parameters. These functions can automatically configure and process these parameters since they understand their characteristics (e.g. the range of possible values, etc.). 
 
 To enumerate the tuning parameters for an object, use the `extract_parameter_set_dials()` function: 
 
