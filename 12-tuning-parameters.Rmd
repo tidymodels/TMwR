@@ -195,8 +195,8 @@ resampled_res %>%
 ```{r resampled-log-lhood, ref.label = "tuning-resampled-log-lhood"}
 #| echo = FALSE,
 #| fig.height = 3,
-#| fig.cap = "Means and approximate 90% confidence intervals for the resampled binomial log-likelihood with three different link functions.",
-#| fig.alt = "Means and approximate 90% confidence intervals for the resampled binomial log-likelihood with three different link functions. The logit link has the largest value, followed by the probit link. The complementary log log link has far lower values."
+#| fig.cap = "Means and approximate 95% confidence intervals for the resampled binomial log-likelihood with three different link functions.",
+#| fig.alt = "Means and approximate 95% confidence intervals for the resampled binomial log-likelihood with three different link functions. The logit link has the largest value, followed by the probit link. The complementary log log link has far lower values."
 ```
 
 :::rmdnote
@@ -210,8 +210,8 @@ What about a different metric? We also calculated the area under the ROC curve f
 ```{r resampled-roc}
 #| echo = FALSE,
 #| fig.height = 3,
-#| fig.cap = "Means and approximate 90% confidence intervals for the resampled area under the ROC curve with three different link functions.",
-#| fig.alt = "Means and approximate 90% confidence intervals for the resampled area under the ROC curve with three different link functions. The logit link has the largest value, followed by the probit link. The confidence intervals show a large amount of overlap between the two methods."
+#| fig.cap = "Means and approximate 95% confidence intervals for the resampled area under the ROC curve with three different link functions.",
+#| fig.alt = "Means and approximate 95% confidence intervals for the resampled area under the ROC curve with three different link functions. The logit link has the largest value, followed by the probit link. The confidence intervals show a large amount of overlap between the two methods."
 resampled_res %>% 
   filter(.metric == "roc_auc") %>% 
   ggplot(aes(x = mean, y = model)) + 
