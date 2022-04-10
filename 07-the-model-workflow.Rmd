@@ -206,26 +206,43 @@ The issue is that the special formula has to be processed by the underlying pack
 
 Even if this formula could be used with `model.matrix()`, this would still present a problem since the formula also specifies the statistical attributes of the model. 
 
-The solution in `r pkg(workflows)` is an optional supplementary model formula that can be passed to `add_model()`. For example, using the previously mentioned `strata()` function in the `r pkg(survival)` package, the `add_variables()` specification provides the bare column names and then the actual formula given to the model is set within `add_model()`:  
+The solution in `r pkg(workflows)` is an optional supplementary model formula that can be passed to `add_model()`. The `add_variables()` specification provides the bare column names and then the actual formula given to the model is set within `add_model()`: 
+
+```{r workflows-special-formula}
+library(multilevelmod)
+
+multilevel_spec <- linear_reg() %>% set_engine("lmer")
+
+multilevel_workflow <- 
+  workflow() %>% 
+  # Pass the data along as-is: 
+  add_variables(outcome = distance, predictors = c(Sex, age, Subject)) %>% 
+  add_model(multilevel_spec, 
+            # This formula is given to the model
+            formula = distance ~ Sex + (age | Subject))
+
+multilevel_fit <- fit(multilevel_workflow, data = Orthodont)
+multilevel_fit
+```
+
+We can even use the previously mentioned `strata()` function from the `r pkg(survival)` package for survival analysis:  
 
 ```{r workflows-strata}
 library(censored)
 
-parametric_model <- survival_reg()
+parametric_spec <- survival_reg()
 
 parametric_workflow <- 
   workflow() %>% 
-  # Pass the data along as-is: 
   add_variables(outcome = c(fustat, futime), predictors = c(age, rx)) %>% 
-  add_model(parametric_model, 
-            # This formula is given to the model
+  add_model(parametric_spec, 
             formula = Surv(futime, fustat) ~ age + strata(rx))
 
 parametric_fit <- fit(parametric_workflow, data = ovarian)
 parametric_fit
 ```
 
-Notice how in this call the model-specific formula was used. 
+Notice how in this both of these calls the model-specific formula was used. 
 
 ## Creating Multiple Workflows at Once {#workflow-sets-intro}
 
