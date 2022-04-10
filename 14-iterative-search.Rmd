@@ -733,7 +733,7 @@ surf_impr <-
   )
 ```
 
-Figure \@ref(fig:bo-surfaces) shows the surfaces of the mean, variance, and expected improvement surfaces estimated by the GP after 11 iterations. The right-hand panel shows a ridge of best estimated improvement along the right side of the candidate space.
+Figure \@ref(fig:bo-surfaces) shows the surfaces of the mean, variance, and expected improvement surfaces estimated by the GP after 11 iterations. The panel on the right shows a ridge of best estimated improvement along the right side of the candidate space.
 
 ```{r bo-surfaces}
 #| echo = FALSE, 
@@ -761,7 +761,7 @@ Figure \@ref(fig:bo-search) shows the search process at three different points i
 first_5 + first_11 + all_bo
 ```
 
-The first five iterations initially move in a poor direction but quickly move closer to better results.  The middle panel shows the process investigating the region of true optimal results with a short foray to the bottom right boundary of the candidate space. The remaining iterations switch between the region of best results and the far borders of the search space. 
+The first five iterations initially moved in a poor direction but quickly moved closer to better results.  The middle panel shows the first eleven iterations where the process investigates the region of true optimal results with a short foray to the bottom right boundary of the candidate space. The remaining iterations shown in the panel on the left switch between the region of best results and the far borders of the search space. 
 
 While the best tuning parameter combination is on the boundary of the parameter space, Bayesian optimization will often choose new points on other sides of the boundary. While we can adjust the ratio of exploration and exploitation, the search tends to sample boundary points early on.
 
