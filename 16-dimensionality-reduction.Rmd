@@ -155,7 +155,7 @@ bean_rec <-
 Remember that when invoking the `recipe()` function, the steps are not estimated or executed in any way. 
 :::
 
-This recipe will be extended with additional steps for the dimensionality reduction analyses. Before doing so, let's go over how a recipe can be used _outside_ of a workflow. 
+This recipe will be extended with additional steps for the dimensionality reduction analyses. Before doing so, let's go over how a recipe can be used outside of a workflow. 
 
 ## Recipes in the Wild {#recipe-functions}
 

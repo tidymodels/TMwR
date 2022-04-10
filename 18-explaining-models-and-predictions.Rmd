@@ -34,7 +34,7 @@ In Section \@ref(model-types), we outlined a taxonomy of models and suggested th
 For some models, like linear regression, it is usually clear how to explain why the model makes the predictions it does. The structure of a linear model contains coefficients for each predictor that are typically straightforward to interpret. For other models, like random forests that can capture non-linear behavior by design, it is less transparent how to explain the model's predictions from only the structure of the model itself. Instead, we can apply model explainer algorithms to generate understanding of predictions.
 
 :::rmdnote
-There are two types of model explanations, **global** and **local**. Global model explanations provide an overall understanding aggregated over a whole set of observations; local model explanations provide information about a prediction for a single observation.
+There are two types of model explanations, *global* and *local*. Global model explanations provide an overall understanding aggregated over a whole set of observations; local model explanations provide information about a prediction for a single observation.
 :::
 
 
@@ -100,8 +100,8 @@ A linear model is typically straightforward to interpret and explain; you may no
 
 Dealing with significant feature engineering transformations during model explainability highlights some options we have (or sometimes, ambiguity in such analyses). We can quantify global or local model explanations either in terms of:
 
-- **original, basic predictors** as they existed without significant feature engineering transformations, or
-- **derived features**, such as those created via dimensionality reduction (Chapter \@ref(dimensionality)) or interactions and spline terms, as in this example.
+- *original, basic predictors* as they existed without significant feature engineering transformations, or
+- *derived features*, such as those created via dimensionality reduction (Chapter \@ref(dimensionality)) or interactions and spline terms, as in this example.
 
 
 ## Local Explanations
@@ -120,7 +120,7 @@ lm_breakdown <- predict_parts(explainer = explainer_lm, new_observation = duplex
 lm_breakdown
 ```
 
-[^dalexlevels]: Notice that this package for model explanations focuses on the **level** of categorical predictors in this type of output, like `Bldg_Type = 3` for duplex and `Neighborhood = 1` for North Ames.
+[^dalexlevels]: Notice that this package for model explanations focuses on the *level* of categorical predictors in this type of output, like `Bldg_Type = 3` for duplex and `Neighborhood = 1` for North Ames.
 
 Since this linear model was trained using spline terms for latitude and longitude, the contribution to price for `Longitude` shown here combines the effects of all of its individual spline terms. The contribution here is in terms of the original `Longitude` feature, not the derived spline features.
 

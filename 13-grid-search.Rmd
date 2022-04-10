@@ -24,7 +24,7 @@ load("RData/mlp_times.RData")
 
 # Grid Search {#grid-search}
 
-In Chapter \@ref(tuning) we demonstrated how users can mark or tag arguments in preprocessing recipes and/or model specifications for optimization using the `tune()` function.  Once we know what to optimize, it's time to address the question of how to optimize the parameters. This chapter describes **grid search** methods that specify the possible values of the parameters _a priori_. (Chapter \@ref(iterative-search) will continue the discussion by describing iterative search methods.) 
+In Chapter \@ref(tuning) we demonstrated how users can mark or tag arguments in preprocessing recipes and/or model specifications for optimization using the `tune()` function.  Once we know what to optimize, it's time to address the question of how to optimize the parameters. This chapter describes *grid search* methods that specify the possible values of the parameters _a priori_. (Chapter \@ref(iterative-search) will continue the discussion by describing iterative search methods.) 
 
 Let's start by looking at two main approaches for assembling a grid. 
 
@@ -84,7 +84,8 @@ The parameter object knows the ranges of the parameters. The `r pkg(dials)` pack
 ```{r grid-reg}
 grid_regular(mlp_param, levels = 2)
 ```
-The `levels` argument is the number of levels _per parameter_ to create. It can also take a named vector of values: 
+
+The `levels` argument is the number of levels per parameter to create. It can also take a named vector of values: 
 
 ```{r grid-reg-lvls}
 mlp_param %>% 
@@ -193,7 +194,7 @@ Because of the high degree of correlation between predictors, it makes sense to 
 While the resulting PCA components are technically on the same scale, the lower-rank components tend to have a wider range than the higher-rank components. For this reason, we normalize again to coerce the predictors to have the same mean and variance.
 :::
 
-Many of the predictors have skewed distributions. Since PCA is variance based, extreme values can have a detrimental effect on these calculations. To counter this, let's add a recipe step estimating a Yeo-Johnson transformation for each predictor [@yeo2000new]. While originally intended as a transformation of the _outcome_, it can also be used to estimate transformations that encourage more symmetric distributions. This step `step_YeoJohnson()` occurs in the recipe just prior to the initial normalization via `step_normalize()`. Then, let's combine this feature engineering recipe with our neural network model specification `mlp_spec`.
+Many of the predictors have skewed distributions. Since PCA is variance based, extreme values can have a detrimental effect on these calculations. To counter this, let's add a recipe step estimating a Yeo-Johnson transformation for each predictor [@yeo2000new]. While originally intended as a transformation of the outcome, it can also be used to estimate transformations that encourage more symmetric distributions. This step `step_YeoJohnson()` occurs in the recipe just prior to the initial normalization via `step_normalize()`. Then, let's combine this feature engineering recipe with our neural network model specification `mlp_spec`.
 
 ```{r grid-cells-objects}
 mlp_rec <-
@@ -222,14 +223,14 @@ mlp_param <-
 ```
 
 :::rmdnote
-In `step_pca()`, using zero PCA components is a shortcut to _skip_ the feature extraction. In this way, the original predictors can be directly compared to the results that include PCA components. 
+In `step_pca()`, using zero PCA components is a shortcut to skip the feature extraction. In this way, the original predictors can be directly compared to the results that include PCA components. 
 :::
 
 The `tune_grid()` function is the primary function for conducting grid search. Its functionality is very similar to `fit_resamples()` from Section \@ref(resampling-performance), although it has additional arguments related to the grid: 
 
 * `grid`: An integer or data frame. When an integer is used, the function creates a space-filling design with `grid` number of candidate parameter combinations. If specific parameter combinations exist, the `grid` parameter is used to pass them to the function. 
 
-* `param_info`: An _optional_ argument for defining the parameter ranges. The argument is most useful when `grid` is an integer. 
+* `param_info`: An optional argument for defining the parameter ranges. The argument is most useful when `grid` is an integer. 
 
 Otherwise, the interface to `tune_grid()` is the same as `fit_resamples()`. The first argument is either a model specification or workflow. When a model is given, the second argument can be either a recipe or formula. The other required argument is an `r pkg(rsample)` resampling object (such as `cell_folds`). The following call also passes a metric set so that the area under the ROC curve is measured during resampling. 
 
@@ -302,7 +303,7 @@ This marginal effects plot (Figure \@ref(fig:sfd-plot)) shows the relationship o
 Care should be taken when examining this plot; since a regular grid is not used, the values of the other tuning parameters can affect each panel. 
 :::
 
-The penalty parameter appears to result in better performance with _smaller_ amounts of weight decay. This is the opposite of the results from the regular grid. Since each point in each panel is shared with the other three tuning parameters, the trends in one panel can be affected by the others. Using a regular grid, each point in each panel is equally averaged over the other parameters. For this reason, the effect of each parameter is better isolated with regular grids.  
+The penalty parameter appears to result in better performance with smaller amounts of weight decay. This is the opposite of the results from the regular grid. Since each point in each panel is shared with the other three tuning parameters, the trends in one panel can be affected by the others. Using a regular grid, each point in each panel is equally averaged over the other parameters. For this reason, the effect of each parameter is better isolated with regular grids.  
 
 As with the regular grid, `show_best()` can report on the numerically best results: 
 
@@ -346,7 +347,7 @@ final_mlp_wflow <-
 final_mlp_wflow
 ```
 
-No more values of `tune()` are included in this finalized workflow. Now the model can be fit to the _entire training set_: 
+No more values of `tune()` are included in this finalized workflow. Now the model can be fit to the entire training set: 
 
 ```{r grid-final-model}
 final_mlp_fit <- 
@@ -457,7 +458,7 @@ c5_spec %>%
 Without the submodel optimization, the call to `tune_grid()` used `r round(3734.249/60, 1)` minutes to resample 100 submodels. With the optimization, the same call took 100 _seconds_ (a speedup of `r round(3734.249/100.147, 0)`-fold). The reduced time is the difference in `tune_grid()` fitting 1000 models versus 10 models. 
 
 :::rmdnote
-Even though we fit the model with and without the submodel prediction trick, this optimization is _automatically_ applied by `r pkg(parsnip)`. 
+Even though we fit the model with and without the submodel prediction trick, this optimization is automatically applied by `r pkg(parsnip)`. 
 :::
 
 ### Parallel processing
@@ -525,7 +526,7 @@ for (iter in all_tasks) {
 }
 ```
 
-In this case, parallelization now occurs over the single loop. For example, if we use 5-fold cross-validation with $M$ tuning parameter values, the loop is executed over $5\times M$ iterations. This increases the number of potential workers that can be used. However, the work in lines 12-13 (related to data preprocessing) is _repeated_ multiple times. If those steps are expensive, this approach will be  inefficient. 
+In this case, parallelization now occurs over the single loop. For example, if we use 5-fold cross-validation with $M$ tuning parameter values, the loop is executed over $5\times M$ iterations. This increases the number of potential workers that can be used. However, the work related to data preprocessing is repeated multiple times. If those steps are expensive, this approach will be inefficient. 
 
 In tidymodels, validation sets are treated as a single resample. In these cases, this parallelization scheme would be best. 
 
@@ -698,7 +699,7 @@ ggplot(times, aes(x = num_cores, y = speed_up, color = parallel_over, shape = pa
 
 The best speed-ups, for these data, occur when `parallel_over = "resamples"` and when the computations are expensive. However, in the latter case, remember that the previous analysis indicates that the overall model fits are slower.  
 
-What is the benefit of using the submodel optimization method _in conjunction_ with parallel processing?  The C5.0 classification model shown in Section \@ref(submodel-trick) was also run in parallel with ten workers. The parallel computations took 13.3 seconds for a speed-up of `r round(100.147/13.265, 1)`-fold (both runs used the submodel optimization trick). Between the submodel optimization trick and parallel processing, there was a __total speed-up of `r round(3734.249/13.265, 0)`-fold__ over the most basic grid search code. 
+What is the benefit of using the submodel optimization method in conjunction with parallel processing?  The C5.0 classification model shown in Section \@ref(submodel-trick) was also run in parallel with ten workers. The parallel computations took 13.3 seconds for a speed-up of `r round(100.147/13.265, 1)`-fold (both runs used the submodel optimization trick). Between the submodel optimization trick and parallel processing, there was a total speed-up of `r round(3734.249/13.265, 0)`-fold over the most basic grid search code. 
 
 :::rmdwarning
 Overall, note that the increased computational savings will vary from model-to-model and are also affected by the size of the grid, the number of resamples, etc. A very computationally efficient model may not benefit as much from parallel processing. 

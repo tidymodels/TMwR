@@ -55,7 +55,7 @@ We advise starting with untransformed categorical variables when a model allows 
 
 ## Encoding Ordinal Predictors
 
-Sometimes qualitative columns can be **ordered**, such as "low", "medium", and "high". In base R, the default encoding strategy is to make new numeric columns that are polynomial expansions of the data. For columns that have five ordinal values, like the example shown in Table \@ref(tab:encoding-ordered-table), the factor column is replaced with columns for linear, quadratic, cubic, and quartic terms: 
+Sometimes qualitative columns can be *ordered*, such as "low", "medium", and "high". In base R, the default encoding strategy is to make new numeric columns that are polynomial expansions of the data. For columns that have five ordinal values, like the example shown in Table \@ref(tab:encoding-ordered-table), the factor column is replaced with columns for linear, quadratic, cubic, and quartic terms: 
 
 ```{r encoding-ordered-table, echo = FALSE, results = 'asis'}
 ord_vals <- c("none", "a little", "some", "a bunch", "copious amounts")
@@ -139,7 +139,7 @@ When you create an effect encoding for your categorical variable, you are effect
 
 ### Effect encodings with partial pooling
 
-Creating an effect encoding with `step_lencode_glm()` estimates the effect separately for each factor level (in this example, neighborhood). However, some of these neighborhoods have many houses in them and some have only a few. There is much more uncertainty in our measurement of price for the single training set home in the `r neighborhood_counts %>% slice_min(n) %>% pull(Neighborhood) %>% as.character()` neighborhood than the `r neighborhood_counts %>% slice_max(n) %>% pull(n)` training set homes in North Ames. We can use **partial pooling** to adjust these estimates so that levels with small sample sizes are shrunken toward the overall mean. The effects for each level are modeled all at once using a mixed or hierarchical generalized linear model:
+Creating an effect encoding with `step_lencode_glm()` estimates the effect separately for each factor level (in this example, neighborhood). However, some of these neighborhoods have many houses in them and some have only a few. There is much more uncertainty in our measurement of price for the single training set home in the `r neighborhood_counts %>% slice_min(n) %>% pull(Neighborhood) %>% as.character()` neighborhood than the `r neighborhood_counts %>% slice_max(n) %>% pull(n)` training set homes in North Ames. We can use *partial pooling* to adjust these estimates so that levels with small sample sizes are shrunken toward the overall mean. The effects for each level are modeled all at once using a mixed or hierarchical generalized linear model:
 
 
 ```{r}

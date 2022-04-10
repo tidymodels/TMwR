@@ -221,7 +221,7 @@ resampled_res %>%
   labs(y = NULL, x = "area under the ROC curve")
 ```
 
-Given the overlap of the intervals, as well as the scale of the x-axis, any of these options could be used. We see this again when the class boundaries for the three models are overlaid on the _test set_ of `r nrow(testing_set)` data points in Figure \@ref(fig:three-link-fits).
+Given the overlap of the intervals, as well as the scale of the x-axis, any of these options could be used. We see this again when the class boundaries for the three models are overlaid on the test set of `r nrow(testing_set)` data points in Figure \@ref(fig:three-link-fits).
 
 ```{r three-link-fits}
 #| echo = FALSE,
@@ -268,7 +268,7 @@ link_grids %>%
 
 
 :::rmdwarning
-This exercise emphasizes that **different metrics** might lead to **different decisions** about the choice of tuning parameter values. In this case, one metric appears to clearly sort the models while another metric shows no difference.  
+This exercise emphasizes that different metrics might lead to different decisions about the choice of tuning parameter values. In this case, one metric appears to clearly sort the models while another metric shows no difference.  
 :::
 
 Metric optimization is thoroughly discussed by @thomas2020problem who explore several issues, including the gaming of metrics. They warn that: 
@@ -478,7 +478,7 @@ neural_net_spec <-
   set_engine("keras")
 ```
 
-The `tune()` function doesn't execute any particular parameter value; it simply returns an _expression_: 
+The `tune()` function doesn't execute any particular parameter value; it only returns an expression: 
 
 ```{r tuning-tune-exprs}
 tune()
@@ -492,7 +492,7 @@ To enumerate the tuning parameters for an object, use the `extract_parameter_set
 extract_parameter_set_dials(neural_net_spec)
 ```
 
-The results show a value of `nparam[+]`, indicating that the number of hidden units is a _numeric_ parameter. 
+The results show a value of `nparam[+]`, indicating that the number of hidden units is a numeric parameter. 
 
 There is an optional identification argument that associates a name with the parameters. This can come in handy when the same kind of parameter is being tuned in different places. For example, with the Ames housing data from Section \@ref(resampling-summary), the recipe encoded both longitude and latitude with spline functions. If we want to tune the two spline functions to potentially have different levels of smoothness, we call `step_ns()` twice, once for each predictor. To make the parameters identifiable, the identification argument can take any character string: 
 
@@ -615,7 +615,7 @@ Finally, some tuning parameters are best associated with transformations. A good
 penalty()
 ```
 
-This is important to know, especially when altering the range. New range values _must be in the transformed_ units:
+This is important to know, especially when altering the range. New range values must be in the transformed units:
 
 ```{r tuning-penalty-set}
 # correct method to have penalty values between 0.1 and 1.0

@@ -85,7 +85,7 @@ For classification models, the candidate prediction columns would be predicted c
 
 To summarize where we are so far, the first step to stacking is to assemble the assessment set predictions for the training set from each candidate model. We can use these assessment set predictions to move forward and build a stacked ensemble.
 
-To start ensembling with the `r pkg(stacks)` package, create an empty data stack using the `stacks()` function and then add candidate models. Recall that we used workflow sets to fit a wide variety of models to these data. We'll use the _racing results_:
+To start ensembling with the `r pkg(stacks)` package, create an empty data stack using the `stacks()` function and then add candidate models. Recall that we used workflow sets to fit a wide variety of models to these data. We'll use the racing results:
 
 ```{r ensembles-race}
 race_results
@@ -115,7 +115,7 @@ If we had not used the `r pkg(workflowsets)` package, objects from the `r pkg(tu
 
 ## Blend the Predictions {#blend-predictions}
 
-The training set predictions and the corresponding observed outcome data are used to create a **meta-learning model** where the assessment set predictions are the predictors of the observed outcome data. Meta-learning can be accomplished using any model. The most commonly used model is a regularized generalized linear model, which encompasses linear, logistic, and multinomial models. Specifically, regularization via the lasso penalty [@lasso], which uses shrinkage to pull points toward a central value, has several advantages: 
+The training set predictions and the corresponding observed outcome data are used to create a *meta-learning model* where the assessment set predictions are the predictors of the observed outcome data. Meta-learning can be accomplished using any model. The most commonly used model is a regularized generalized linear model, which encompasses linear, logistic, and multinomial models. Specifically, regularization via the lasso penalty [@lasso], which uses shrinkage to pull points toward a central value, has several advantages: 
 
 - Using the lasso penalty can remove candidates (and sometimes whole model types) from the ensemble. 
 - The correlation between ensemble candidates tends to be very high and regularization helps alleviate this issue. 

@@ -116,7 +116,7 @@ test_pred <- augment(two_class_mod, testing_set)
 test_pred %>% head()
 ```
 
-With tidymodels, the `r pkg(probably)` package contains functions for equivocal zones. For cases with two classes, the `make_two_class_pred()` function creates a _factor-like_ column that has the predicted classes with an equivocal zone: 
+With tidymodels, the `r pkg(probably)` package contains functions for equivocal zones. For cases with two classes, the `make_two_class_pred()` function creates a factor-like column that has the predicted classes with an equivocal zone: 
 
 ```{r trust-make-eq}
 library(probably)
@@ -439,11 +439,11 @@ library(patchwork)
 tr_plot + pca_plot + pca_dist + dist_hist
 ```
 
-For a new sample, the PCA scores are computed along with the distance to the center of the _training set_. 
+For a new sample, the PCA scores are computed along with the distance to the center of the training set. 
 
 However, what does it mean when a new sample has a distance of _X_? Since the PCA components can have different ranges from data set to data set, there is no obvious limit to say that a distance is too large.
 
-One approach is to treat the distances from the training set data as "normal". For new samples, we can determine how the new distance compares to the range in the reference distribution (from the training set). A _percentile_ can be computed for new samples that reflect how much of the training set is less extreme than the new samples. 
+One approach is to treat the distances from the training set data as "normal". For new samples, we can determine how the new distance compares to the range in the reference distribution (from the training set). A percentile can be computed for new samples that reflect how much of the training set is less extreme than the new samples. 
 
 :::rmdnote
 A percentile of 90% means that most of the training set data are closer to the data center than the new sample. 

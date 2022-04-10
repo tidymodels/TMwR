@@ -22,7 +22,7 @@ The tidyverse focuses on designing R packages and functions that can be easily u
 
 For this reason, it is critical that R code be easy to work with to accomplish your goals. Documentation, training, accessibility, and other factors play an important part in achieving this. However, if the syntax itself is difficult for people to easily comprehend, documentation is a poor solution. The software itself must be intuitive.
 
-To contrast the tidyverse approach with more traditional R semantics, consider sorting a data frame. Data frames can represent different types of data in each column, and multiple values in each row. Using only the core language, we can sort a data frame using one or more columns by reordering the rows via R's subscripting rules in conjunction with `order()`; you _cannot_ successfully use a function you might be tempted to try in such a situation because of its name, `sort()`. To sort the `mtcars` data by two of its columns, the call might look like:
+To contrast the tidyverse approach with more traditional R semantics, consider sorting a data frame. Data frames can represent different types of data in each column, and multiple values in each row. Using only the core language, we can sort a data frame using one or more columns by reordering the rows via R's subscripting rules in conjunction with `order()`; you cannot successfully use a function you might be tempted to try in such a situation because of its name, `sort()`. To sort the `mtcars` data by two of its columns, the call might look like:
 
 ```{r tidyverse-base-sort, eval = FALSE}
 mtcars[order(mtcars$gear, mtcars$mpg), ]
@@ -66,7 +66,7 @@ One downside to relying on common data structures is the potential loss of compu
 
  * In computational chemistry, the structure-data file format (SDF) is a tool to take chemical structures and encode them in a format that is computationally efficient to work with. 
 
- * Data that have a large number of values that are the same (such as zeros for binary data) can be stored in a _sparse matrix format_. This format can reduce the size of the data as well as enable more efficient computational techniques. 
+ * Data that have a large number of values that are the same (such as zeros for binary data) can be stored in a sparse matrix format. This format can reduce the size of the data as well as enable more efficient computational techniques. 
 
 These formats are advantageous when the problem is well scoped and the potential data processing methods are both well defined and suited to such a format.^[Not all algorithms can take advantage of sparse representations of data. In such cases, a sparse matrix must be converted to a more conventional format before proceeding.] However, once such constraints are violated, specialized data formats are less useful. For example, if we perform a transformation of the data that converts the data into fractional numbers, the output is no longer sparse; the sparse matrix representation is helpful for one specific algorithmic step in modeling but this is often not true before or after that specific step. 
 
@@ -111,7 +111,7 @@ ggplot(mtcars, aes(x = wt, y = mpg)) +
 
 While similar to the `r pkg(dplyr)` pipeline, note that the first argument to this pipeline is a data set (`mtcars`) and that each function call returns a `ggplot` object. Not all pipelines need to keep the returned values (plot objects) the same as the initial value (a data frame). Using the pipe operator with `r pkg(dplyr)` operations has acclimated many R users to expect to return a data frame when pipelines are used; as shown with `r pkg(ggplot2)`, this does not need to be the case. Pipelines are incredibly useful in modeling workflows but modeling pipelines can return, instead of a data frame, objects such as model components.
 
-R has excellent tools for creating, changing, and operating on functions, making it a great language for _functional programming_. This approach can replace iterative loops in many situations, such as when a function returns a value without other side effects.^[Examples of function side effects could include changing global data or printing a value.] 
+R has excellent tools for creating, changing, and operating on functions, making it a great language for functional programming. This approach can replace iterative loops in many situations, such as when a function returns a value without other side effects.^[Examples of function side effects could include changing global data or printing a value.] 
 
 Let's look at an example. Suppose you are interested in the logarithm of the ratio of the fuel efficiency to the car weight. To those new to R and/or coming from other programming languages, a loop might seem like a good option:
 
@@ -124,13 +124,13 @@ for (car in 1:n) {
 head(ratios)
 ```
 
-Those with more experience in R may know that there is a much simpler and faster _vectorized version_ that can be computed by:
+Those with more experience in R may know that there is a much simpler and faster vectorized version that can be computed by:
 
 ```{r tidyverse-vectorized}
 ratios <- log(mtcars$mpg/mtcars$wt)
 ```
 
-However, in many real-world cases, the element-wise operation of interest is too complex for a vectorized solution. In such a case, a good approach is to write a _function_ to do the computations. When we design for functional programming, it is important that the output only depends on the inputs and that the function has no side effects. Violations of these ideas in the following function are shown with comments:
+However, in many real-world cases, the element-wise operation of interest is too complex for a vectorized solution. In such a case, a good approach is to write a function to do the computations. When we design for functional programming, it is important that the output only depends on the inputs and that the function has no side effects. Violations of these ideas in the following function are shown with comments:
 
 ```{r tidyverse-non-functional}
 compute_log_ratio <- function(mpg, wt) {
@@ -207,7 +207,7 @@ df$tw
 tbbl$tw
 ```
 
-Tibbles also prevent one of the most common R errors: dropping dimensions. If a standard data frame subsets the columns down to a single column, the object is converted to a vector. Tibbles _never_ do this:
+Tibbles also prevent one of the most common R errors: dropping dimensions. If a standard data frame subsets the columns down to a single column, the object is converted to a vector. Tibbles never do this:
 
 ```{r tidyverse-drop}
 df[, "two"]
@@ -249,7 +249,7 @@ Our tidyverse pipeline will conduct the following tasks, in order:
 
 1. The date field is converted to the R date format using the `mdy()` function from the `r pkg(lubridate)` package. We also convert the ridership numbers to thousands. Both of these computations are executed using the `dplyr::mutate()` function.  
 
-1. There are a small number of days that have more than one record of ridership numbers at certain stations. To mitigate this issue, we use the maximum number of rides for each station and day combination. We _group_ the ridership data by station and day, and then _summarize_ within each of the `r num_combos` unique combinations with the maximum statistic. 
+1. There are a small number of days that have more than one record of ridership numbers at certain stations. To mitigate this issue, we use the maximum number of rides for each station and day combination. We group the ridership data by station and day, and then summarize within each of the `r num_combos` unique combinations with the maximum statistic. 
 
 The tidyverse code for these steps is:
 

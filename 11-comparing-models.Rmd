@@ -111,7 +111,7 @@ Now that we have 10 resampled performance estimates for each of four models, the
 
 ## Comparing Resampled Performance Statistics {#resampled-stats}
 
-Considering the preceding results for the three linear models, it appears that the additional terms do not profoundly improve the _mean_ RMSE or R<sup>2</sup> statistics for the linear models. The difference is small, but it might be larger than the experimental noise in the system, i.e., considered statistically significant. We can formally test the hypothesis that the additional terms increase R<sup>2</sup>. 
+Considering the preceding results for the three linear models, it appears that the additional terms do not profoundly improve the mean RMSE or R<sup>2</sup> statistics for the linear models. The difference is small, but it might be larger than the experimental noise in the system, i.e., considered statistically significant. We can formally test the hypothesis that the additional terms increase R<sup>2</sup>. 
 
 :::rmdnote
 Before making between-model comparisons, it is important for us to discuss the within-resample correlation for resampling statistics. Each model was measured with the same cross-validation folds, and results for the same resample tend to be similar. 
@@ -225,17 +225,17 @@ where
 
  * $\beta_0$ is the estimate of the mean R<sup>2</sup> statistic for the basic linear models (i.e., without splines or interactions),
  
- * $\beta_1$ is the _change_ in mean R<sup>2</sup> when interactions are added to the basic linear model,
+ * $\beta_1$ is the change in mean R<sup>2</sup> when interactions are added to the basic linear model,
  
- * $\beta_2$ is the _change_ in mean R<sup>2</sup> between the basic linear model and the random forest model. 
+ * $\beta_2$ is the change in mean R<sup>2</sup> between the basic linear model and the random forest model. 
 
- * $\beta_3$ is the _change_ in mean R<sup>2</sup> between the basic linear model and one with interactions and splines. 
+ * $\beta_3$ is the change in mean R<sup>2</sup> between the basic linear model and one with interactions and splines. 
 
 From these model parameters, hypothesis tests and p-values are generated to statistically compare models, but we must contend with how to handle the resample-to-resample effect. Historically, the resample groups would be considered a _block effect_ and an appropriate term was added to the model. Alternatively, the resample effect could be considered a _random effect_ where these particular resamples were drawn at random from a larger population of possible resamples. However, we aren't really interested in these effects; we only want to adjust for them in the model so that the variances of the interesting differences are properly estimated. 
 
 Treating the resamples as random effects is theoretically appealing. Methods for fitting an ANOVA model with this type of random effect could include the linear mixed model [@faraway2016extending] or a Bayesian hierarchical model (shown in the next section). 
 
-A simple and fast method for comparing two models at a time is to use the _differences in R<sup>2</sup> values_ as the outcome data in the ANOVA model. Since the outcomes are matched by resample, the differences _do not contain the resample-to-resample effect_ and, for this reason, the standard ANOVA model is appropriate. To illustrate, this call to `lm()` tests the difference between two of the linear regression models: 
+A simple and fast method for comparing two models at a time is to use the differences in R<sup>2</sup> values as the outcome data in the ANOVA model. Since the outcomes are matched by resample, the differences do not contain the resample-to-resample effect and, for this reason, the standard ANOVA model is appropriate. To illustrate, this call to `lm()` tests the difference between two of the linear regression models: 
 
 ```{r compare-t-test}
 compare_lm <- 
@@ -263,12 +263,12 @@ lm_t <-
 ```
 
 
-We could evaluate each pair-wise difference in this way. Note that the p-value indicates a _statistically significant signal_; the collection of spline terms for longitude and latitude do appear to have an effect. However, the difference in R<sup>2</sup> is estimated at `r round(lm_t$estimate * 100, 2)`%. If our practical effect size were 2%, we might not consider these terms worth including in the model.
+We could evaluate each pair-wise difference in this way. Note that the p-value indicates a _statistically significant_ signal; the collection of spline terms for longitude and latitude do appear to have an effect. However, the difference in R<sup>2</sup> is estimated at `r round(lm_t$estimate * 100, 2)`%. If our practical effect size were 2%, we might not consider these terms worth including in the model.
 
 :::rmdnote
 We've briefly mentioned p-values already, but what actually are they? From @pvalue: "Informally, a p-value is the probability under a specified statistical model that a statistical summary of the data (e.g., the sample mean difference between two compared groups) would be equal to or more extreme than its observed value." 
 
-In other words, if this analysis were repeated a large number of times under the null hypothesis of no differences, the p-value reflects how extreme our _observed_ results would be in comparison.
+In other words, if this analysis were repeated a large number of times under the null hypothesis of no differences, the p-value reflects how extreme our observed results would be in comparison.
 :::
 
   
@@ -435,7 +435,7 @@ summary(rqs_diff) %>%
 
 The `probability` column reflects the proportion of the posterior that is greater than zero. This is the probability that the positive difference is real. The value is not close to zero, providing a strong case for statistical significance, i.e., the idea that statistically the actual difference is not zero. 
 
-However, the estimate of the mean difference is fairly close to zero. Recall that the practical effect size we suggested previously is 2%. With a posterior distribution, the _probability of being practically significant_ is also computed. In Bayesian analysis, this is a "ROPE estimate" (for Region Of Practical Equivalence, @kruschke2018bayesian). To estimate this, the `size` option to the summary function is used: 
+However, the estimate of the mean difference is fairly close to zero. Recall that the practical effect size we suggested previously is 2%. With a posterior distribution, we can also compute the probability of being practically significant. In Bayesian analysis, this is a "ROPE estimate" (for Region Of Practical Equivalence, @kruschke2018bayesian). To estimate this, the `size` option to the summary function is used: 
 
 ```{r compare-lm-pract}
 summary(rqs_diff, size = 0.02) %>% 
