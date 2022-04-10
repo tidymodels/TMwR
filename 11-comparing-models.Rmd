@@ -21,13 +21,13 @@ keep_pred <- control_resamples(save_pred = TRUE)
 
 # Comparing Models with Resampling {#compare}
 
-Once we create two or more models, the next step is to compare them. In some cases, comparisons might be _within-model_, where the same model might be evaluated with different features or preprocessing methods. Alternatively, _between-model_ comparisons, such as when we compared linear regression and random forest models in Chapter \@ref(resampling), are the more common scenario.
+Once we create two or more models, the next step is to compare them to understand which one is best. In some cases, comparisons might be _within-model_, where the same model might be evaluated with different features or preprocessing methods. Alternatively, _between-model_ comparisons, such as when we compared linear regression and random forest models in Chapter \@ref(resampling), are the more common scenario.
 
-In either case, the result is a collection of resampled summary statistics (e.g. RMSE, accuracy, etc.) for each model. The first section of this chapter demonstrates how workflow sets can be used to fit multiple models. The second section discusses important aspects of resampling statistics. Two additional sections follow describing how to formally compare models.
+In either case, the result is a collection of resampled summary statistics (e.g. RMSE, accuracy, etc.) for each model. In this chapter, we'll first demonstrate how workflow sets can be used to fit multiple models. Then, we'll discuss important aspects of resampling statistics. Finally, we'll look at how to formally compare models (using either hypothesis testing or a Bayesian approach).
 
-## Creating Multiple Models {#workflow-set}
+## Creating Multiple Models with Workflow Sets {#workflow-set}
 
-Previously, Section \@ref(workflow-sets-intro) describes the idea of a workflow set where different preprocessors and/or models can be combinatorially generated. In the last chapter, we used a recipe for the Ames data that included an interaction term as well as spline functions for longitude and latitude. To demonstrate more with workflow sets, let's create different linear models that add these preprocessing steps incrementally. We'll create three recipes then combine them into a workflow set: 
+In Section \@ref(workflow-sets-intro) we described the idea of a workflow set where different preprocessors and/or models can be combinatorially generated. In Chapter \@ref(resampling), we used a recipe for the Ames data that included an interaction term as well as spline functions for longitude and latitude. To demonstrate more with workflow sets, let's create three different linear models that add these preprocessing steps incrementally; we can test whether these additional terms improve the model results. We'll create three recipes then combine them into a workflow set: 
 
 ```{r compare-workflow-set}
 library(tidymodels)
@@ -58,7 +58,7 @@ lm_models <- workflow_set(preproc, list(lm = lm_model), cross = FALSE)
 lm_models
 ```
 
-We'd like to resample each of these models in turn. To do so, a `r pkg(purrr)`-like function called `workflow_map()` is used. This function takes an initial argument of the function to apply to the workflows, followed by options to that function. We also set a `verbose` argument that will print the progress as well as a `seed` argument that makes sure that each model uses the same random number stream as the others. 
+We'd like to resample each of these models in turn. To do so, we will use a `r pkg(purrr)`-like function called `workflow_map()`. This function takes an initial argument of the function to apply to the workflows, followed by options to that function. We also set a `verbose` argument that will print the progress as well as a `seed` argument that makes sure that each model uses the same random number stream as the others. 
 
 ```{r compare-workflow-set-resample}
 lm_models <- 
@@ -73,7 +73,7 @@ lm_models
 
 Notice that the `option` and `result` columns are now populated. The former includes the options to `fit_resamples()` that were given (for reproducibility) and the latter column contains the results produced by `fit_resamples()`.  
 
-There are few convenience functions for workflow sets, including one to collate the performance statistics: 
+There are few convenience functions for workflow sets, including `collect_metrics()` to collate the performance statistics. We can `filter()` to any specific metric we are interested in:
 
 ```{r compare-workflow-set-collect}
 collect_metrics(lm_models) %>% 
@@ -90,7 +90,7 @@ four_models
 ```
 
 
-The `autoplot()` method, with output in Figure \@ref(fig:workflow-set-r-squared), shows confidence intervals for each model in order of best-to-worst. In this chapter, we'll focus on the coefficient of determination (a.k.a. R<sup>2</sup>): 
+The `autoplot()` method, with output in Figure \@ref(fig:workflow-set-r-squared), shows confidence intervals for each model in order of best-to-worst. In this chapter, we'll focus on the coefficient of determination (a.k.a. R<sup>2</sup>) and use `metric = "rsq"` in the call to set up our plot: 
 
 ```{r compare-workflow-set-rsq, eval=FALSE}
 library(ggrepel)
@@ -105,21 +105,21 @@ autoplot(four_models, metric = "rsq") +
 #| fig.alt = "Confidence intervals for the coefficient of determination using four different models. The random forest model has the best results and its intervals do not overlap with the intervals of the other models. "
 ```
 
-The random forest method is doing the best job and there are minor improvements in the linear models as we add more recipe steps.
+From this plot of R<sup>2</sup> confidence intervals, we can see that the random forest method is doing the best job and there are minor improvements in the linear models as we add more recipe steps.
 
 Now that we have 10 resampled performance estimates for each of four models, these summary statistics can be used to make between-model comparisons.
 
-## Resampled Performance Statistics {#resampled-stats}
+## Comparing Resampled Performance Statistics {#resampled-stats}
 
-Considering these results, it appears that the additional terms do not profoundly improve the _mean_ RMSE or R<sup>2</sup> statistics for the linear models. The difference is small, but it might be larger than the experimental noise in the system, i.e., considered statistically significant. We can formally **test the hypothesis that the additional terms increase R<sup>2</sup>**. 
+Considering the preceding results for the three linear models, it appears that the additional terms do not profoundly improve the _mean_ RMSE or R<sup>2</sup> statistics for the linear models. The difference is small, but it might be larger than the experimental noise in the system, i.e., considered statistically significant. We can formally test the hypothesis that the additional terms increase R<sup>2</sup>. 
 
 :::rmdnote
-Before comparing models, it is important to discuss the within-resample correlation for resampling statistics. Each model was measured with the same cross-validation folds, and _results for the same resample tend to be similar_. 
+Before making between-model comparisons, it is important for us to discuss the within-resample correlation for resampling statistics. Each model was measured with the same cross-validation folds, and results for the same resample tend to be similar. 
 :::
 
-In other words, there are some resamples where performance across models tends to be low and others where it tends to be high. In statistics, this is called a resample-to-resample component of variation. 
+In other words, there are some resamples where performance across models tends to be low and others where it tends to be high. In statistics, this is called a _resample-to-resample_ component of variation. 
 
-To illustrate, let's gather the individual resampling statistics for the linear models and the random forest. We will focus on the R<sup>2</sup> statistic for each model, which measures correlation between the observed and predicted sale prices for each house.  
+To illustrate, let's gather the individual resampling statistics for the linear models and the random forest. We will focus on the R<sup>2</sup> statistic for each model, which measures correlation between the observed and predicted sale prices for each house. Let's `filter()` to keep only the R<sup>2</sup> metrics, reshape the results, and compute how the metrics are correlated with each other.
 
 ```{r compare-collect}
 rsq_indiv_estimates <- 
@@ -134,7 +134,7 @@ rsq_wider <-
 corrr::correlate(rsq_wider %>% select(-id), quiet = TRUE)
 ```
 
-These high correlations indicate that, across models, there are large within-resample correlations. To see this visually in Figure \@ref(fig:rsquared-resamples), the R<sup>2</sup> statistics are shown for each model with lines connecting the resamples: 
+These correlations are high, and indicate that, across models, there are large within-resample correlations. To see this visually in Figure \@ref(fig:rsquared-resamples), the R<sup>2</sup> statistics are shown for each model with lines connecting the resamples: 
 
 ```{r compare-rsq-plot, eval=FALSE}
 rsq_indiv_estimates %>% 
@@ -169,7 +169,7 @@ rsq_wider %>%
   select(estimate, starts_with("conf"))
 ```
 
-The within-resample correlation appears to be real. 
+The results of the correlation test (the `estimate` of the correlation and the confidence intervals) show us that the within-resample correlation appears to be real. 
 
 What effect does the extra correlation have on our analysis? Consider the variance of a difference of two variables: 
 
@@ -183,11 +183,11 @@ This characteristic of resampling statistics will come into play in the next two
 
 Before making model comparisons or looking at the resampling results, it can be helpful to define a relevant _practical effect size_. Since these analyses focus on the R<sup>2</sup> statistics, the practical effect size is the change in R<sup>2</sup> that we would consider to be a realistic difference that matters. For example, we might think that two models are not practically different if their R<sup>2</sup> values are within $\pm 2$%. If this were the case, differences smaller than 2% are not deemed important even if they are statistically significant. 
 
-Practical significance is subjective; two people can have very different ideas on the threshold for importance. However, as shown later, this consideration can be very helpful when deciding between models.  
+Practical significance is subjective; two people can have very different ideas on the threshold for importance. However, we'll show later that this consideration can be very helpful when deciding between models.  
 
 ## Simple Hypothesis Testing Methods
 
-Consider the familiar linear statistical model: 
+We can use simple hypothesis testing to make formal comparisons between models. Consider the familiar linear statistical model: 
 
 $$y_{ij} = \beta_0 + \beta_1x_{i1} + \ldots + \beta_px_{ip} + \epsilon_{ij}$$
 
@@ -266,17 +266,15 @@ lm_t <-
 We could evaluate each pair-wise difference in this way. Note that the p-value indicates a _statistically significant signal_; the collection of spline terms for longitude and latitude do appear to have an effect. However, the difference in R<sup>2</sup> is estimated at `r round(lm_t$estimate * 100, 2)`%. If our practical effect size were 2%, we might not consider these terms worth including in the model.
 
 :::rmdnote
-What's a p-value? From @pvalue: "Informally, a p-value is the probability under a specified statistical model that a statistical summary of the data (e.g., the sample mean difference between two compared groups) would be equal to or more extreme than its observed value." 
+We've briefly mentioned p-values already, but what actually are they? From @pvalue: "Informally, a p-value is the probability under a specified statistical model that a statistical summary of the data (e.g., the sample mean difference between two compared groups) would be equal to or more extreme than its observed value." 
 
 In other words, if this analysis were repeated a large number of times under the null hypothesis of no differences, the p-value reflects how extreme our _observed_ results would be in comparison.
 :::
 
-The next section takes a more general approach to making formal comparisons between models using random effects and Bayesian statistics [@mcelreath2020statistical]. While the model is more complex than the ANOVA method shown above, the interpretation is more simple and straight-forward than the p-value approach.  
-
-
+  
 ## Bayesian Methods {#tidyposterior}
 
-The previous ANOVA model for these data had the form: 
+We just used hypothesis testing to formally compare models, but we can also take a more general approach to making these formal comparisons using random effects and Bayesian statistics [@mcelreath2020statistical]. While the model is more complex than the ANOVA method, the interpretation is more simple and straight-forward than the p-value approach. The previous ANOVA model had the form: 
 
 $$y_{ij} = \beta_0 + \beta_1x_{i1} + \beta_2x_{i2} + \beta_3x_{i3} + \epsilon_{ij}$$
 
@@ -315,7 +313,7 @@ The `r pkg(tidyposterior)` package has functions to fit such Bayesian models for
 
 From any of these types of objects, the `perf_mod()` function determines an appropriate Bayesian model and fits it with the resampling statistics. For our example, it will model the four sets of R<sup>2</sup> statistics associated with the workflows. 
 
-The `r pkg(tidyposterior)` package uses the Stan software for specifying and fitting the models via the `r pkg(rstanarm)` package. The functions within that package have default priors (see `?priors` for more details). The model below uses the default priors for all parameters except for the random intercepts (which follow a  _t_-distribution). The estimation process uses random numbers so the seed is set within the function call. The estimation process is iterative and is replicated several times in collections called _chains_. The `iter` parameter tells the function how long to run the estimation process in each chain. When several chains are used, their results are combined (assume that this is validated by diagnostic assessments).  
+The `r pkg(tidyposterior)` package uses the [Stan software](https://mc-stan.org/) for specifying and fitting the models via the `r pkg(rstanarm)` package. The functions within that package have default priors (see `?priors` for more details). The following model uses the default priors for all parameters except for the random intercepts (which follow a  _t_-distribution). The estimation process uses random numbers so the seed is set within the function call. The estimation process is iterative and is replicated several times in collections called _chains_. The `iter` parameter tells the function how long to run the estimation process in each chain. When several chains are used, their results are combined (assume that this is validated by diagnostic assessments).  
 
 ```{r compare-fit-stan, results = "hide"}
 library(tidyposterior)
@@ -428,7 +426,7 @@ rqs_diff %>%
   labs(x = x_lab)
 ```
 
-The posterior shows that the center of the distribution is greater than zero (indicating that the model with splines typically had larger values) but does overlap with zero to a degree. The `summary()` method for this object computes the mean of the distribution as well as _credible intervals_. 
+The posterior shows that the center of the distribution is greater than zero (indicating that the model with splines typically had larger values) but does overlap with zero to a degree. The `summary()` method for this object computes the mean of the distribution as well as credible intervals, the Bayesian analog to confidence intervals. 
 
 ```{r compare-lm-summary}
 summary(rqs_diff) %>% 
@@ -464,7 +462,7 @@ Figure \@ref(fig:practical-equivalence) shows us that none of the linear models 
 
 ### The effect of the amount of resampling {-}
 
-How does the number of resamples affect this analysis? More resamples increases the precision of the overall resampling estimate; that precision propagates to this type of analysis. For illustration, additional resamples were added using repeated cross-validation. How did the posterior distribution change? Figure \@ref(fig:intervals-over-replicates) shows the 90% credible intervals with up to 100 resamples (generated from 10 repeats of 10-fold cross-validation). 
+How does the number of resamples affect these types of formal Bayesian comparisons? More resamples increases the precision of the overall resampling estimate; that precision propagates to this type of analysis. For illustration, additional resamples were added using repeated cross-validation. How did the posterior distribution change? Figure \@ref(fig:intervals-over-replicates) shows the 90% credible intervals with up to 100 resamples (generated from 10 repeats of 10-fold cross-validation). 
 
 ```{r compare-cred-int, eval = FALSE}
 # calculations in extras/ames_posterior_intervals.R
