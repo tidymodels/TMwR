@@ -457,7 +457,7 @@ umap_1 + umap_2
 ```
 
 
-The supervised method shown in Figure \@ref(fig:bean-umap-supervised) looks promising for modeling the data.
+The supervised method shown in Figure \@ref(fig:bean-umap) looks promising for modeling the data.
 
 UMAP is a powerful method to reduce the feature space. However, it can be very sensitive to tuning parameters (e.g. the number of neighbors and so on). For this reason, it would help to experiment with a few of the parameters to assess how robust the results are for these data.
 
