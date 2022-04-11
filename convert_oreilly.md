@@ -88,7 +88,6 @@ mogrify -format png *.svg
 ren -v "*.adoc" "#1.asciidoc"
 mv pre-proc-table.asciidoc appendix.asciidoc
 rm *.bak
-rm *.md
 rm *.html
 rm *~
 rm premade/*.svg
