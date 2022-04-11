@@ -405,9 +405,9 @@ svm_bo_sshh <-
   )
 
 
-# Make sure that the results have not changed since 2022-02-20. Save the results with: 
-#   svm_bo_metrics <- collect_metrics(svm_bo_sshh$result)
-#   save(svm_bo_metrics, file = "RData/svm_bo_metrics.RData")
+# Make sure that the results have not changed since 2022-04-11. Save the results with: 
+  # svm_bo_metrics <- collect_metrics(svm_bo_sshh$result)
+  # save(svm_bo_metrics, file = "RData/svm_bo_metrics.RData")
 # Check with:
 verify_consistent_bo(collect_metrics(svm_bo_sshh$result))
 
@@ -790,7 +790,7 @@ svm_sa_sshh <-
     control = ctrl_sa
   )
 
-# Make sure that the results have not changed since 2022-02-20. Save the results with: 
+# Make sure that the results have not changed since 2022-04-11. Save the results with: 
   # svm_sa_metrics <- collect_metrics(svm_sa_sshh$result)
   # save(svm_sa_metrics, file = "RData/svm_sa_metrics.RData")
 # Check with:
