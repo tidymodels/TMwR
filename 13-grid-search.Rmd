@@ -324,13 +324,13 @@ To fit a final model, a final set of parameter values must be determined. There 
 - manually pick values that appear appropriate or 
 - use a `select_*()` function. 
 
-For example, `select_best()` will choose the parameters with the numerically best results:
+For example, `select_best()` will choose the parameters with the numerically best results. Let's go back to our regular grid results and see which one is best:
 
 ```{r grid-select}
 select_best(mlp_reg_tune, metric = "roc_auc")
 ```
 
-Looking at the results for the regular grid plot, a model with a single hidden unit trained for 125 epochs on the original predictors with a large amount of penalization has performance competitive with this option, and is simpler. This is basically penalized logistic regression! To manually specify these parameters, we can create a tibble with these values and then use a _finalization_ function to splice the values back into the workflow: 
+Looking back at Figure \@ref(fig:regular-grid-plot), we can see that a model with a single hidden unit trained for 125 epochs on the original predictors with a large amount of penalization has performance competitive with this option, and is simpler. This is basically penalized logistic regression! To manually specify these parameters, we can create a tibble with these values and then use a _finalization_ function to splice the values back into the workflow: 
 
 ```{r grid-finalize-manual}
 logistic_param <- 
