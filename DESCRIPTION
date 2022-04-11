@@ -40,7 +40,7 @@ Imports:
     gridExtra,
     infer,
     kableExtra (>= 1.2.1),
-    kernlab,
+    kernlab (>= 0.9-30),
     kknn,
     klaR,
     knitr,
