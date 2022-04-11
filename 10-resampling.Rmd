@@ -479,14 +479,14 @@ assess_res %>%
 #| fig.alt = "Scatter plots of out-of-sample observed versus predicted values for an Ames regression model. Both axes using log-10 units. The model shows good concordance with two outlying data points that are significantly over-predicted."
 ```
 
-There was one house in the training set with a low observed sale price that is significantly overpredicted by the model. Which house was that? Let's find out from the `assess_res` result:
+There are two houses in the training set with a low observed sale price that are significantly overpredicted by the model. Which houses are these? Let's find out from the `assess_res` result:
 
 ```{r resampling-investigate}
 over_predicted <- 
   assess_res %>% 
   mutate(residual = Sale_Price - .pred) %>% 
   arrange(desc(abs(residual))) %>% 
-  slice(1)
+  slice(1:2)
 over_predicted
 
 ames_train %>% 
@@ -494,7 +494,7 @@ ames_train %>%
   select(Gr_Liv_Area, Neighborhood, Year_Built, Bedroom_AbvGr, Full_Bath)
 ```
 
-Identifying this house can help us follow up and investigate why its prediction was so poor. 
+Identifying examples like these with especially poor performance can help us follow up and investigate why these specific predictions are so poor. 
 
 Let's move back to the homes overall. How can we use a validation set instead of cross-validation? From our previous `r pkg(rsample)` object:
 

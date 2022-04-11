@@ -51,6 +51,7 @@ Imports:
     mda,
     mixOmics,
     modeldata,
+    multilevelmod,
     nlme,
     nnet,
     parsnip,

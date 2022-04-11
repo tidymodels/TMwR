@@ -186,7 +186,7 @@ resampled_res %>%
   filter(.metric == "mn_log_loss") %>% 
   ggplot(aes(x = mean, y = model)) + 
   geom_point() + 
-  geom_errorbar(aes(xmin = mean - 1.96 * std_err, xmax = mean + 1.96 * std_err),
+  geom_errorbar(aes(xmin = mean - 1.64 * std_err, xmax = mean + 1.64 * std_err),
                 width = .1) + 
   labs(y = NULL, x = "log-likelihood")
 ```
@@ -216,7 +216,7 @@ resampled_res %>%
   filter(.metric == "roc_auc") %>% 
   ggplot(aes(x = mean, y = model)) + 
   geom_point() + 
-  geom_errorbar(aes(xmin = mean - 1.96 * std_err, xmax = mean+ 1.96 * std_err),
+  geom_errorbar(aes(xmin = mean - 1.64 * std_err, xmax = mean+ 1.64 * std_err),
                 width = .1) + 
   labs(y = NULL, x = "area under the ROC curve")
 ```
