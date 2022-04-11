@@ -13,7 +13,7 @@ Choose a directory to put the new files in (use `_bookdown.yml` to generate only
 ```r
 library(bookdown)
 render_book(output_format = html_book(keep_md = TRUE), 
-  output_dir = "tmwr-to-ch9/")
+  output_dir = "tmwr-atlas/")
 ```
 
 ## Convert divs to markdown images
