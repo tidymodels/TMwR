@@ -296,12 +296,10 @@ $$\lambda = 0 \pi + (1 - \pi) \lambda_{nz}$$
 
 where
 
-```{=tex}
 \begin{align}
 \log(\lambda_{nz}) = \beta_0 + \beta_1x_1 + \ldots + \beta_px_ \notag \\
 \log\left(\frac{\pi}{1-\pi}\right) = \gamma_0 + \gamma_1z_1 + \ldots + \gamma_qz_q \notag
 \end{align}
-```
 
 and the $x$ covariates affect the count values while the $z$ covariates influence the probability of a zero. The two sets of predictors do not need to be mutually exclusive.
 
