@@ -25,6 +25,9 @@ sed -i ".bak" 's/<p class=\"caption\">\(.*\)<\/p>/STARTCAP\1STOPCAP/g' *.md
 sed -i ".bak" 's/<div class=\"figure\" style="text-align: center">//g' *.md
 sed -i ".bak" 's/<img src=\"\(.*\)\" alt=.*/STARTIMAGE\1STOPIMAGE/g' *.md
 perl -i~ -0777 -pe 's/STARTIMAGE(.*?)STOPIMAGE\nSTARTCAP\(\\#fig\:(.*?)\)(.*?)STOPCAP\n<\/div>/[[\2]]\n![\3](\1)/g' *.md
+sed -i ".bak" "s/:::rmdnote/STARTNOTE/g" *.md  
+sed -i ".bak" "s/:::rmdwarning/STARTWARNING/g" *.md
+sed -i ".bak" "s/:::/STOPBOX/g" *.md
 ```
 
 ## Convert to asciidoc using pandoc
@@ -49,9 +52,9 @@ for f in *.md; do pandoc --markdown-headings=atx \
 Using sed:
 
 ```
-sed -i ".bak" "s/:::rmdnote/[NOTE]\n====/g" *.adoc   
-sed -i ".bak" "s/:::rmdwarning/[WARNING]\n====/g" *.adoc   
-sed -i ".bak" "s/:::/====/g" *.adoc
+sed -i ".bak" "s/STARTNOTE/[NOTE]\n====\n/g" *.adoc   
+sed -i ".bak" "s/STARTWARNING/[WARNING]\n====\n/g" *.adoc   
+sed -i ".bak" "s/STOPBOX/\n====/g" *.adoc
 sed -i ".bak" -E "s/^{empty}//g" *.adoc
 sed -i ".bak" -E "1 s/\[#([^()]*)]*\]/\[\1\]/" *.adoc
 sed -i ".bak" -E "s/\@ref\(fig:([^()]*)\)/<<\1>>/g" *.adoc
@@ -59,7 +62,9 @@ sed -i ".bak" -E "s/\@ref\(tab:([^()]*)\)/<<\1>>/g" *.adoc
 sed -i ".bak" -E "s/\@ref\(([^()]*)\)/<<\1>>/g" *.adoc
 perl -i~ -0777 -pe 's/\[\[refs\]\].*\Z//sg' *.adoc
 perl -i~ -0777 -pe 's/\.\(\#tab\:(.*?)\)(.*?)/[[\1]]\n\.\2/g' *.adoc
-sed -i ".bak" 's/\[\[\(.*\)\]\] image:\(.*\)\[\(.*\)\]/\[\[\1\]\]\n\.\3\nimage::\2/g' *.adoc
+sed -i ".bak" 's/\[\[\(.*\)\]\] image:\(.*\)\[\(.*\)\]/\[\[\1\]\]\n\.\3\nimage::\2\[\]/g' *.adoc
+sed -i ".bak" 's/image::figures/image::images/g' *.adoc
+sed -i ".bak" 's/image::premade/image::images/g' *.adoc
 sed -i ".bak" 's/\.svg/\.png/g' *.adoc
 sed -i ".bak" 's/Figure <</<</g' *.adoc
 sed -i ".bak" 's/Table <</<</g' *.adoc
