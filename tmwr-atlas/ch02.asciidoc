@@ -34,7 +34,10 @@ library(dplyr)
 arrange(.data = mtcars, gear, mpg)
 ----
 
-The variable names used here are ``unquoted''; many traditional R functions require a character string to specify variables, but tidyverse functions take unquoted names or _selector functions_. The selectors allow for one or more readable rules that are applied to the column names. For example, `ends_with("t")` would select the `drat` and `wt` columns of the `mtcars` data frame.
+[NOTE]
+====
+ The variable names used here are ``unquoted''; many traditional R functions require a character string to specify variables, but tidyverse functions take unquoted names or _selector functions_. The selectors allow for one or more readable rules that are applied to the column names. For example, `ends_with("t")` would select the `drat` and `wt` columns of the `mtcars` data frame. 
+====
 
 Additionally, naming is crucial. If you were new to R and were writing data analysis or modeling code involving linear algebra, you might be stymied when searching for a function that computes the matrix inverse. Using `apropos("inv")` yields no candidates. It turns out that the base R function for this task is `solve()`, for solving systems of linear equations. For a matrix `X`, you would use `solve(X)` to invert `X` (with no vector for the right-hand side of the equation). This is only documented in the description of one of the _arguments_ in the help file. In essence, you need to know the name of the solution to be able to find the solution.
 
@@ -74,7 +77,10 @@ One downside to relying on common data structures is the potential loss of compu
 
 These formats are advantageous when the problem is well scoped and the potential data processing methods are both well defined and suited to such a format.footnote:[Not all algorithms can take advantage of sparse representations of data. In such cases, a sparse matrix must be converted to a more conventional format before proceeding.] However, once such constraints are violated, specialized data formats are less useful. For example, if we perform a transformation of the data that converts the data into fractional numbers, the output is no longer sparse; the sparse matrix representation is helpful for one specific algorithmic step in modeling but this is often not true before or after that specific step.
 
-A specialized data structure is not flexible enough for an entire modeling workflow in the way that a common data structure is.
+[WARNING]
+====
+ A specialized data structure is not flexible enough for an entire modeling workflow in the way that a common data structure is. 
+====
 
 One important feature in the tibble produced by [.pkg]#rsample# is that the `splits` column is a list. In this instance, each element of the list has the same type of object: an `rsplit` object that contains the information about which rows of `mtcars` belong in the bootstrap sample. _List columns_ can be very useful in data analysis and, as will be seen throughout this book, are important to tidymodels.
 
@@ -202,7 +208,10 @@ map2_dbl(mtcars$mpg, mtcars$wt, ~ log(.x/.y)) %>%
 
 These examples have been trivial but, in later sections, will be applied to more complex problems.
 
-For functional programming in tidy modeling, functions should be defined so that functions like `map()` can be used for iterative computations.
+[NOTE]
+====
+ For functional programming in tidy modeling, functions should be defined so that functions like `map()` can be used for iterative computations. 
+====
 
 === Examples of Tidyverse Syntax
 

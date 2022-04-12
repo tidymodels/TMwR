@@ -67,7 +67,10 @@ TwnhsE
 
 Many model implementations require such a transformation to a numeric representation for categorical data.
 
-Appendix <<pre-proc-table>> presents a table of recommended preprocessing techniques for different models; notice how many of the models in the table require a numeric encoding for all predictors.
+[NOTE]
+====
+ Appendix <<pre-proc-table>> presents a table of recommended preprocessing techniques for different models; notice how many of the models in the table require a numeric encoding for all predictors. 
+====
 
 However, for some realistic data sets, straightforward dummy variables are not a good fit. This often happens because there are _too many_ categories or there are _new_ categories at prediction time. In this chapter, we discuss more sophisticated options for encoding categorical predictors that address these issues. These options are available as tidymodels recipe steps in the https://embed.tidymodels.org/[[.pkg]#embed#] and https://textrecipes.tidymodels.org/[[.pkg]#textrecipes#] packages.
 
@@ -77,7 +80,10 @@ A minority of models, such as those based on trees or rules, can handle categori
 
 These models that can handle categorical features natively can _also_ deal with numeric, continuous features, making the transformation or encoding of such variables optional. Does this help in some way, perhaps perhaps with model performance or time to train models? Typically no, as Section 5.7 of Kuhn and Johnson (2020) shows using benchmark data sets with untransformed factor variables compared with transformed dummy variables for those same features. In short, using dummy encodings did not typically result in better model performance but often required more time to train the models.
 
-We advise starting with untransformed categorical variables when a model allows it, and point out that more complex encodings often do not result in better performance for such models.
+[NOTE]
+====
+ We advise starting with untransformed categorical variables when a model allows it, and point out that more complex encodings often do not result in better performance for such models. 
+====
 
 === Encoding Ordinal Predictors
 
@@ -165,7 +171,7 @@ ames_train %>%
 
 [[encoding-mean-price]]
 .Mean home price for neighborhoods in the Ames training set, which can be used as an effect encoding for this categorical variable.
-image::17-encoding-categorical-data_files/figure-html/encoding-mean-price-1.png
+image::17-encoding-categorical-data_files/figure-html/encoding-mean-price-1.png[]
 
 This kind of effect encoding works well when your categorical variable has many levels. In tidymodels, the [.pkg]#embed# package includes several recipe step functions for different kinds of effect encodings, such as `step_lencode_glm()`, `step_lencode_mixed()`, and `step_lencode_bayes()`. These steps use a generalized linear model to estimate the effect of each level in a categorical predictor on the outcome. When using a recipe step like `step_lencode_glm()`, specify the variable being encoded first and then the outcome using `vars()`:
 
@@ -235,7 +241,9 @@ glm_estimates %>%
 #> 1 ..new  5.23 Neighborhood lencode_glm_ZsXdy
 ----
 
-Effect encodings can be powerful but should be used with care. The effects should be computed from the training set, after data splitting. This type of supervised preprocessing should be rigorously resampled to avoid overfitting (see <<resampling>>).
+
+====rmdwarn Effect encodings can be powerful but should be used with care. The effects should be computed from the training set, after data splitting. This type of supervised preprocessing should be rigorously resampled to avoid overfitting (see <<resampling>>). 
+====
 
 When you create an effect encoding for your categorical variable, you are effectively layering a mini-model inside your actual model. The possibility of overfitting with effect encodings is a representative example for why feature engineering _must_ be considered part of the model process, as described in <<workflows>>, and why feature engineering must be estimated together with model parameters inside resampling.
 
@@ -305,7 +313,10 @@ mixed_estimates %>%
 #> 1 ..new  5.23 Neighborhood lencode_mixed_SC9hi
 ----
 
-You can use a fully Bayesian hierarchical model for the effects in the same way with `step_lencode_bayes()`.
+[NOTE]
+====
+ You can use a fully Bayesian hierarchical model for the effects in the same way with `step_lencode_bayes()`. 
+====
 
 Let’s visually compare the effects using partial pooling vs. no pooling in <<encoding-compare-pooling>>:
 
@@ -331,7 +342,7 @@ glm_estimates %>%
 
 [[encoding-compare-pooling]]
 .Comparing the effect encodings for neighborhood estimated without pooling to those with partial pooling.
-image::17-encoding-categorical-data_files/figure-html/encoding-compare-pooling-1.png
+image::17-encoding-categorical-data_files/figure-html/encoding-compare-pooling-1.png[]
 
 Notice in <<encoding-compare-pooling>> that most estimates for neighborhood effects are about the same when we compare pooling to no pooling. However, the neighborhoods with the fewest homes in them have been pulled (either up or down) toward the mean effect. When we use pooling, we shrink the effect estimates toward the mean because we don’t have as much evidence about the price in those neighborhoods.
 
@@ -363,7 +374,10 @@ ames_hashed %>%
 
 If we input Briardale to this hashing function, we will always get the same output. The neighborhoods in this case are called the ``keys'', while the outputs are the ``hashes''.
 
-A hashing function takes an input of variable size and maps it to an output of fixed size. Hashing functions are commonly used in cryptography and databases.
+[NOTE]
+====
+ A hashing function takes an input of variable size and maps it to an output of fixed size. Hashing functions are commonly used in cryptography and databases. 
+====
 
 The `rlang::hash()` function generates a 128-bit hash, which means there are `2^128` possible hash values. This is great for some applications but doesn’t help with feature hashing of _high cardinality_ variables (variables with many levels). In feature hashing, the number of possible hashes is a hyperparameter and is set by the model developer through computing the modulo of the integer hashes. We can get sixteen possible hash values by using `Hash %% 16`:
 
@@ -389,7 +403,10 @@ ames_hashed %>%
 
 Now instead of the 28 neighborhoods in our original data or an incredibly huge number of the original hashes, we have sixteen hash values. This method is very fast and memory efficient, and it can be a good strategy when there are a large number of possible categories.
 
-Feature hashing is useful for text data as well as high cardinality categorical data. See Section 6.7 of Hvitfeldt and Silge (2021) for a case study demonstration with text predictors.
+[NOTE]
+====
+ Feature hashing is useful for text data as well as high cardinality categorical data. See Section 6.7 of Hvitfeldt and Silge (2021) for a case study demonstration with text predictors. 
+====
 
 We can implement feature hashing using a tidymodels recipe step from the [.pkg]#textrecipes# package:
 
@@ -440,7 +457,9 @@ What are some things to consider when using feature hashing?
 * Feature hashing can handle new category levels at prediction time, since it does not rely on pre-determined dummy variables.
 * You can reduce hash collisions with a _signed_ hash by using `signed = TRUE`. This expands the values from only 1 to either +1 or -1, depending on the sign of the hash.
 
-It is likely that some hash columns will contain all zeros, as we see in this example. We recommend a zero-variance filter via `step_zv()` to filter such columns out.
+
+====rmdwarn It is likely that some hash columns will contain all zeros, as we see in this example. We recommend a zero-variance filter via `step_zv()` to filter such columns out. 
+====
 
 === More Encoding Options
 
@@ -448,7 +467,10 @@ There are even more options available for transforming factors to a numeric repr
 
 We can build a full set of _entity embeddings_ (Guo and Berkhahn 2016) to transform a categorical variable with many levels to a set of lower-dimensional vectors. This approach is best suited to a nominal variable with many category levels, many more than the example we’ve used in the chapter with neighborhoods in Ames.
 
-The idea of entity embeddings comes from the methods used to create word embeddings from text data. See Chapter 5 of Hvitfeldt and Silge (2021) for more on word embeddings.
+[NOTE]
+====
+ The idea of entity embeddings comes from the methods used to create word embeddings from text data. See Chapter 5 of Hvitfeldt and Silge (2021) for more on word embeddings. 
+====
 
 Embeddings for a categorical variable can be learned via a TensorFlow neural network with the `step_embed()` function in [.pkg]#embed#. We can use the outcome alone or optionally the outcome plus a set of additional predictors. Like in feature hashing, the number of new encoding columns to create is a hyperparameter of the feature engineering. We also must make decisions about the neural network structure (the number of hidden units) and how to fit the neural network (how many epochs to train, how much of the data to use for validation in measuring metrics).
 

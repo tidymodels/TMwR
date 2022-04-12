@@ -11,16 +11,22 @@ Dimensionality reduction can be used either in feature engineering or in explora
 
 Another potential consequence of having a multitude of predictors is possible harm for a model. The simplest example is a method like ordinary linear regression where the number of predictors should be less than the number of data points used to fit the model. Another issue is multicollinearity, where between-predictor correlations can negatively impact the mathematical operations used to estimate a model. If there are an extremely large number of predictors, it is fairly unlikely that there are an equal number of real underlying effects. Predictors may be measuring the same latent effect(s), and thus such predictors will be highly correlated. Many dimensionality reduction techniques thrive in this situation. In fact, most can only be effective when there are such relationships between predictors that can be exploited.
 
-When starting a new modeling project, reducing the dimensions of the data may provide some intuition about how hard the modeling problem may be.
+[NOTE]
+====
+ When starting a new modeling project, reducing the dimensions of the data may provide some intuition about how hard the modeling problem may be. 
+====
 
 Principal component analysis (PCA) is one of the most straightforward methods for reducing the number of columns in the data set because it relies on linear methods and it is unsupervised (i.e., does not consider the outcome data). For a high dimensional classification problem, an initial plot of the main PCA components might show a clear separation between the classes. If this is the case, then it is fairly safe to assume that a linear classifier might do a good job. However, the converse is not true; a lack of separation does not mean that the problem is insurmountable.
 
 The dimensionality reduction methods discussed in this chapter are generally _not_ feature selection methods. Methods such as PCA represent the original predictors using a smaller subset of new features. All of the original predictors are required to compute these new features. The exception to this are sparse methods that have the ability to completely remove the impact of predictors when creating the new features.
 
-This chapter has two goals:
+[NOTE]
+====
+ This chapter has two goals:
 
 * Demonstrate how to use recipes to create a small set of features that capture the main aspects of the original predictor set.
-* Describe how recipes can be used on their own (as opposed to being used in a workflow object, as in <<recipes>>).
+* Describe how recipes can be used on their own (as opposed to being used in a workflow object, as in <<recipes>>). 
+====
 
 The latter is helpful when testing or debugging a recipe. However, as described in <<recipes>>, the best way to use a recipe for modeling is from within a workflow object.
 
@@ -49,7 +55,7 @@ Notice the eccentricity for the different shapes in <<eccentricity>>.
 
 [[eccentricity]]
 .Some example shapes and their eccentricity statistics.
-image::premade/morphology.png
+image::images/morphology.png[]
 
 Shapes such as circles and squares have low eccentricity while oblong shapes have high values. Also, the metric is unaffected by the rotation of the object.
 
@@ -66,7 +72,10 @@ tidymodels_prefer()
 library(beans)
 ----
 
-It is important to maintain good data discipline when evaluating dimensionality reduction techniques, especially if you will use them within a model.
+[WARNING]
+====
+ It is important to maintain good data discipline when evaluating dimensionality reduction techniques, especially if you will use them within a model. 
+====
 
 For our analyses, we start by holding back a testing set with `initial_split()`. The remaining data are split into training and validation sets:
 
@@ -101,7 +110,7 @@ bean_train %>%
 
 [[beans-corr-plot]]
 .Correlation matrix of the predictors with variables ordered via clustering.
-image::16-dimensionality-reduction_files/figure-html/beans-corr-plot-1.png
+image::16-dimensionality-reduction_files/figure-html/beans-corr-plot-1.png[]
 
 Many of these predictors are highly correlated, such as area and perimeter or shape factors 2 and 3. While we don’t take the time to do it here, it is also important to see if this correlation structure significantly changes across the outcome categories. This can help create better models.
 
@@ -120,7 +129,10 @@ bean_rec <-
   step_normalize(all_numeric_predictors())
 ----
 
-Remember that when invoking the `recipe()` function, the steps are not estimated or executed in any way.
+[NOTE]
+====
+ Remember that when invoking the `recipe()` function, the steps are not estimated or executed in any way. 
+====
 
 This recipe will be extended with additional steps for the dimensionality reduction analyses. Before doing so, let’s go over how a recipe can be used outside of a workflow.
 
@@ -136,7 +148,7 @@ As mentioned in <<recipes>>, a workflow containing a recipe uses `fit()` to esti
 
 [[recipe-process]]
 .Summary of recipe-related functions.
-image::premade/recipes-process.png
+image::images/recipes-process.png[]
 
 [[prep]]
 ==== Preparing a recipe
@@ -164,7 +176,10 @@ bean_rec_trained
 #> Centering and scaling for area, perimeter, major_axis_length, minor_axis_leng... [trained]
 ----
 
-Remember that `prep()` for a recipe is like `fit()` for a model.
+[NOTE]
+====
+ Remember that `prep()` for a recipe is like `fit()` for a model. 
+====
 
 Note in the output that the steps have been trained and that the selectors are no longer general (i.e., `all_numeric_predictors()`); they now show the actual columns that were selected. Also, `prep(bean_rec)` does not require the `training` argument. You can pass any data into that argument, but omitting it means that the original `data` from the call to `recipe()` will be used. In our case, this was the training set data.
 
@@ -172,7 +187,10 @@ One important argument to `prep()` is `retain`. When `retain = TRUE` (the defaul
 
 Once new steps are added to this estimated recipe, re-applying `prep()` will only estimate the untrained steps. This will come in handy when we try different feature extraction methods.
 
-If you encounter errors when working with a recipe, `prep()` can be used with its `verbose` option to troubleshoot:
+[WARNING]
+====
+ If you encounter errors when working with a recipe, `prep()` can be used with its `verbose` option to troubleshoot: 
+====
 
 [source,r]
 ----
@@ -205,7 +223,10 @@ show_variables <-
 [[bake]]
 ==== Baking the recipe
 
-Using `bake()` with a recipe is much like using `predict()` with a model; the operations estimated from the training set are applied to any data, like testing data or new data at prediction time.
+[NOTE]
+====
+ Using `bake()` with a recipe is much like using `predict()` with a model; the operations estimated from the training set are applied to any data, like testing data or new data at prediction time. 
+====
 
 For example, the validation set samples can be processed:
 
@@ -237,7 +258,7 @@ p1 + p2
 
 [[bean-area]]
 .The `area` predictor before and after preprocessing.
-image::16-dimensionality-reduction_files/figure-html/bean-area-1.png
+image::16-dimensionality-reduction_files/figure-html/bean-area-1.png[]
 
 There are two important aspects of `bake()` that are worth noting here.
 
@@ -316,7 +337,7 @@ bean_rec_trained %>%
 
 [[bean-pca]]
 .First two principal component scores for the bean validation set, colored by class.
-image::16-dimensionality-reduction_files/figure-html/bean-pca-1.png
+image::16-dimensionality-reduction_files/figure-html/bean-pca-1.png[]
 
 We see that the first two components `PC1` and `PC2`, especially when used together, do an effective job distinguishing between or separating the classes. This may lead us to expect that the overall problem of classifying these beans will not be especially difficult.
 
@@ -337,7 +358,7 @@ This produces <<pca-loadings>>.
 
 [[pca-loadings]]
 .Predictor loadings for the PCA transformation.
-image::16-dimensionality-reduction_files/figure-html/pca-loadings-1.png
+image::16-dimensionality-reduction_files/figure-html/pca-loadings-1.png[]
 
 The top loadings are mostly related to the cluster of correlated predictors shown in the top left portion of the previous correlation plot: perimeter, area, major axis length, and convex area. These are all related to bean size. Shape factor 2, from Symons and Fulcher (1988), is the area over the cube of the major axis length and is therefore also related to bean size. Measures of elongation appear to dominate the second PCA component.
 
@@ -363,7 +384,7 @@ bean_rec_trained %>%
 
 [[bean-pls]]
 .First two PLS component scores for the bean validation set, colored by class.
-image::16-dimensionality-reduction_files/figure-html/bean-pls-1.png
+image::16-dimensionality-reduction_files/figure-html/bean-pls-1.png[]
 
 The first two PLS components plotted in <<bean-pls>> are nearly identical to the first two PCA components! We find this result because those PCA components are so effective at separating the varieties of beans. The remaining components are different. <<pls-loadings>> visualizes the loadings, the top features for each component.
 
@@ -379,7 +400,7 @@ bean_rec_trained %>%
 
 [[pls-loadings]]
 .Predictor loadings for the PLS transformation.
-image::16-dimensionality-reduction_files/figure-html/pls-loadings-1.png
+image::16-dimensionality-reduction_files/figure-html/pls-loadings-1.png[]
 
 Solidity (i.e., the density of the bean) drives the third PLS component, along with roundness. Solidity may be capturing bean features related to ``bumpiness'' of the bean surface since it can measure irregularity of the bean boundaries.
 
@@ -405,7 +426,7 @@ bean_rec_trained %>%
 
 [[bean-ica]]
 .First two ICA component scores for the bean validation set, colored by class.
-image::16-dimensionality-reduction_files/figure-html/bean-ica-1.png
+image::16-dimensionality-reduction_files/figure-html/bean-ica-1.png[]
 
 Inspecting this plot, there does not appear to be much separation between the classes in the first few components when using ICA. These independent (or as independent as possible) components do not separate the bean types.
 
@@ -440,7 +461,7 @@ bean_rec_trained %>%
 
 [[bean-umap]]
 .The first two UMAP component scores for the bean validation set, colored by class. Results are shown for supervised and unsupervised versions.
-image::16-dimensionality-reduction_files/figure-html/bean-umap-1.png
+image::16-dimensionality-reduction_files/figure-html/bean-umap-1.png[]
 
 The supervised method shown in <<bean-umap>> looks promising for modeling the data.
 
@@ -554,7 +575,7 @@ filter(rankings, rank <= 5) %>% dplyr::select(rank, mean, model, method)
 
 [[dimensionality-rankings]]
 .Area under the ROC curve from the validation set.
-image::16-dimensionality-reduction_files/figure-html/dimensionality-rankings-1.png
+image::16-dimensionality-reduction_files/figure-html/dimensionality-rankings-1.png[]
 
 It is clear from these results that most models give very good performance; there are few bad choices here. For demonstration, we’ll use the RDA model with PLS features as the final model. We will finalize the workflow with the numerically best parameters, fit it to the training set, then evaluate with the test set:
 

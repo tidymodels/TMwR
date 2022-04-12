@@ -5,7 +5,10 @@
 
 We have already covered several pieces that must be put together to evaluate the performance of a model. <<performance>> described statistics for measuring model performance, and <<splitting>> introduced the idea of data spending where we recommended the test set for obtaining an unbiased estimate of performance. However, we usually need to understand the performance of a model or even multiple models _before using the test set_.
 
-Typically we can’t decide on which final model to use with the test set before first assessing model performance. There is a gap between our need to measure performance reliably and the data splits (training and testing) we have available.
+[WARNING]
+====
+ Typically we can’t decide on which final model to use with the test set before first assessing model performance. There is a gap between our need to measure performance reliably and the data splits (training and testing) we have available. 
+====
 
 In this chapter, we describe an approach called resampling that can fill this gap. Resampling estimates of performance can generalize to new data in a similar way as estimates from a test set. The next chapter complements this one by demonstrating statistical methods that compare resampling results.
 
@@ -96,7 +99,10 @@ The test set RMSE estimate, 0.0704, is _much worse than the training set_ value 
 
 Many predictive models are capable of learning complex trends from the data. In statistics, these are commonly referred to as _low bias models_.
 
-In this context, _bias_ is the difference between the true pattern or relationships in data and the types of patterns that the model can emulate. Many black-box machine learning models have low bias, meaning they can reproduce complex relationships. Other models (such as linear/logistic regression, discriminant analysis, and others) are not as adaptable and are considered _high bias_ models.footnote:[See Section 1.2.5 of Kuhn and Johnson (2020) for a discussion: https://bookdown.org/max/FES/important-concepts.html#model-bias-and-variance].
+[NOTE]
+====
+ In this context, _bias_ is the difference between the true pattern or relationships in data and the types of patterns that the model can emulate. Many black-box machine learning models have low bias, meaning they can reproduce complex relationships. Other models (such as linear/logistic regression, discriminant analysis, and others) are not as adaptable and are considered _high bias_ models.footnote:[See Section 1.2.5 of Kuhn and Johnson (2020) for a discussion: https://bookdown.org/max/FES/important-concepts.html#model-bias-and-variance]. 
+====
 
 For a low-bias model, the high degree of predictive capacity can sometimes result in the model nearly memorizing the training set data. As an obvious example, consider a 1-nearest neighbor model. It will always provide perfect predictions for the training set no matter how well it truly works for other data sets. Random forest models are similar; re-predicting the training set will always result in an artificially optimistic estimate of performance.
 
@@ -113,7 +119,10 @@ For both models, <<rmse-results>> summarizes the RMSE estimate for the training 
 
 Notice that the linear regression model is consistent between training and testing, because of its limited complexity.footnote:[It is possible for a linear model to nearly memorize the training set, like the random forest model did. In the `ames_rec` object, change the number of spline terms for `longitude` and `latitude` to a large number (say 1000). This would produce a model fit with a very small resubstitution RMSE and a test set RMSE that is much larger.]
 
-The main take-away from this example is that re-predicting the training set will result in an artificially optimistic estimate of performance. It is a bad idea for most models.
+[WARNING]
+====
+ The main take-away from this example is that re-predicting the training set will result in an artificially optimistic estimate of performance. It is a bad idea for most models. 
+====
 
 If the test set should not be used immediately, and re-predicting the training set is a bad idea, what should be done? Resampling methods, such as cross-validation or validation sets, are the solution.
 
@@ -123,7 +132,7 @@ Resampling methods are empirical simulation systems that emulate the process of 
 
 [[resampling-scheme]]
 .Data splitting scheme from the initial data split to resampling.
-image::premade/resampling.png
+image::images/resampling.png[]
 
 Resampling is only conducted on the training set, as you see in <<resampling-scheme>>. The test set is not involved. For each iteration of resampling, the data are partitioned into two subsamples:
 
@@ -143,7 +152,7 @@ Cross-validation is a well established resampling method. While there are a numb
 
 [[cross-validation-allocation]]
 .V-fold cross-validation randomly assigns data to folds.
-image::premade/three-CV.png
+image::images/three-CV.png[]
 
 The color of the symbols in <<cross-validation-allocation>> represent their randomly assigned folds. Stratified sampling is also an option for assigning folds (previously discussed in <<splitting>>).
 
@@ -155,7 +164,10 @@ When _V_ = 3, the analysis sets are 2/3 of the training set and each assessment 
 
 Using _V_ = 3 is a good choice to illustrate cross-validation but is a poor choice in practice because it is too low to generate reliable estimates. In practice, values of _V_ are most often 5 or 10; we generally prefer 10-fold cross-validation as a default because it is large enough for good results in most situations.
 
-What are the effects of changing _V_? Larger values result in resampling estimates with small bias but substantial variance. Smaller values of _V_ have large bias but low variance. We prefer 10-fold since noise is reduced by replication, but bias is not.footnote:[See Section 3.4 of Kuhn and Johnson (2020) for a longer description of the results of change _V_: https://bookdown.org/max/FES/resampling.html].
+[NOTE]
+====
+ What are the effects of changing _V_? Larger values result in resampling estimates with small bias but substantial variance. Smaller values of _V_ have large bias but low variance. We prefer 10-fold since noise is reduced by replication, but bias is not.footnote:[See Section 3.4 of Kuhn and Johnson (2020) for a longer description of the results of change _V_: https://bookdown.org/max/FES/resampling.html]. 
+====
 
 The primary input is the training set data frame as well as the number of folds (defaulting to 10):
 
@@ -204,7 +216,7 @@ Consider the Ames data. On average, 10-fold cross-validation uses assessment set
 
 [[variance-reduction]]
 .Relationship between the relative variance in performance estimates versus the number of cross-validation repeats.
-image::figures/variance-reduction-1.png
+image::images/variance-reduction-1.png[]
 
 Larger number of replicates tend to have less impact on the standard error. However, if the baseline value of latexmath:[$\sigma$] is impractically large, the diminishing returns on replication may still be worth the extra computational costs.
 
@@ -259,7 +271,7 @@ In <<splitting>>, we briefly discussed the use of a validation set, a single par
 
 [[three-way-split]]
 .A three-way initial split into training, testing, and validation sets.
-image::premade/validation.png
+image::images/validation.png[]
 
 Validation sets are often used when the original pool of data is very large. In this case, a single large partition may be adequate to characterize model performance without having to do multiple iterations of resampling.
 
@@ -267,7 +279,7 @@ With the [.pkg]#rsample# package, a validation set is like any other resampling 
 
 [[validation-split]]
 .A two-way initial split into training and testing with an additional validation set split on the training set.
-image::premade/validation-alt.png
+image::images/validation-alt.png[]
 
 To create a validation set object that uses 3/4 of the data for model fitting:
 
@@ -327,7 +339,7 @@ To illustrate, a training set of fifteen samples was resampled with an analysis 
 
 [[rolling]]
 .Data usage for rolling forecasting origin resampling.
-image::premade/rolling.png
+image::images/rolling.png[]
 
 There are a few different configurations of this method:
 
@@ -466,7 +478,10 @@ assess_res
 
 The prediction column names follow the conventions discussed for [.pkg]#parsnip# models in <<models>>, for consistency and ease of use. The observed outcome column always uses the original column name from the source data. The `.row` column is an integer that matches the row of the original training set so that these results can be properly arranged and joined with the original data.
 
-For some resampling methods, such as the bootstrap or repeated cross-validation, there will be multiple predictions per row of the original training set. To obtain summarized values (averages of the replicate predictions) use `collect_predictions(object, summarize = TRUE)`.
+[NOTE]
+====
+ For some resampling methods, such as the bootstrap or repeated cross-validation, there will be multiple predictions per row of the original training set. To obtain summarized values (averages of the replicate predictions) use `collect_predictions(object, summarize = TRUE)`. 
+====
 
 Since this analysis used 10-fold cross-validation, there is one unique prediction for each training set sample. These data can generate helpful plots of the model to understand where it potentially failed. For example, <<ames-resampled-performance>> compares the observed and held-out predicted values (analogous to <<ames-performance-plot>>):
 
@@ -482,7 +497,7 @@ assess_res %>%
 
 [[ames-resampled-performance]]
 .Out-of-sample observed versus predicted values for an Ames regression model, using log-10 units on both axes.
-image::figures/ames-resampled-performance-1.png
+image::images/ames-resampled-performance-1.png[]
 
 There are two houses in the training set with a low observed sale price that are significantly overpredicted by the model. Which houses are these? Let’s find out from the `assess_res` result:
 
@@ -535,7 +550,10 @@ collect_metrics(val_res)
 
 These results are also much closer to the test set results than the resubstitution estimates of performance.
 
-In these analyses, the resampling results are very close to the test set results. The two types of estimates tend to be well correlated. However, this could be from random chance. A seed value of `55` fixed the random numbers before creating the resamples. Try changing this value and re-running the analyses to investigate whether the resampled estimates match the test set results as well.
+[NOTE]
+====
+ In these analyses, the resampling results are very close to the test set results. The two types of estimates tend to be well correlated. However, this could be from random chance. A seed value of `55` fixed the random numbers before creating the resamples. Try changing this value and re-running the analyses to investigate whether the resampled estimates match the test set results as well. 
+====
 
 [[parallel]]
 === Parallel Processing
@@ -594,7 +612,10 @@ stopCluster(cl)
 
 Another R package that facilitates parallel processing is the https://future.futureverse.org/[[.pkg]#future#] package. Like [.pkg]#foreach#, it provides a framework for parallelism. It is used in conjunction with [.pkg]#foreach# via the [.pkg]#doFuture# package.
 
-The R packages with parallel backends for [.pkg]#foreach# start with the prefix `"do"`.
+[NOTE]
+====
+ The R packages with parallel backends for [.pkg]#foreach# start with the prefix `"do"`. 
+====
 
 Parallel processing with the [.pkg]#tune# package tends to provide linear speed-ups for the first few cores. This means that, with two cores, the computations are twice as fast. Depending on the data and type of model, the linear speedup deteriorates after 4-5 cores. Using more cores will still reduce the time it takes to complete the task; there are just diminishing returns for the additional cores.
 

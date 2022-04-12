@@ -28,7 +28,10 @@ and
 
 We can directly estimate these values from the data for this example model because they are analytically tractable; if we have the data, then we can estimate these model parameters.
 
-There are many situations where a model has parameters that _can’t_ be directly estimated from the data.
+[NOTE]
+====
+ There are many situations where a model has parameters that _can’t_ be directly estimated from the data. 
+====
 
 For the latexmath:[$K$]-nearest neighbors model, the prediction equation for a new value latexmath:[$x_0$] is
 
@@ -62,7 +65,10 @@ Some classical statistical models also have structural parameters:
 
 A counterexample where it is inappropriate to tune a parameter is the prior distribution required for Bayesian analysis. The prior encapsulates the analyst’s belief about the distribution of a quantity before evidence or data are taken into account. For example, in <<compare>>, we used a Bayesian ANOVA model and we were unclear about what the prior should be for the regression parameters (beyond being a symmetric distribution). We chose a t-distribution with one degree of freedom for the prior since it has heavier tails; this reflects our added uncertainty. Our prior beliefs should not be subject to optimization. Tuning parameters are typically optimized for performance whereas priors should not be tweaked to get ``the right results.''
 
-Another (perhaps more debatable) counterexample of a parameter that does _not_ need to be tuned is the number of trees in a random forest or bagging model. This value should instead be chosen to be large enough to ensure numerical stability in the results; tuning it cannot improve performance as long as the value is large enough to produce reliable results. For random forests, this value is typically in the thousands while the number of trees needed for bagging is around 50 to 100.
+[WARNING]
+====
+ Another (perhaps more debatable) counterexample of a parameter that does _not_ need to be tuned is the number of trees in a random forest or bagging model. This value should instead be chosen to be large enough to ensure numerical stability in the results; tuning it cannot improve performance as long as the value is large enough to produce reliable results. For random forests, this value is typically in the thousands while the number of trees needed for bagging is around 50 to 100. 
+====
 
 [[what-to-optimize]]
 === What do we Optimize?
@@ -79,7 +85,7 @@ To demonstrate, consider the classification data shown in <<two-class-dat>> with
 
 [[two-class-dat]]
 .An example two-class classification data set with two predictors.
-image::figures/two-class-dat-1.png
+image::images/two-class-dat-1.png[]
 
 We could start by fitting a linear class boundary to these data. The most common method for doing this is to use a generalized linear model in the form of _logistic regression_. This model relates the _log odds_ of a sample being Class 1 using the _logit_ transformation:
 
@@ -180,9 +186,13 @@ resampled_res %>%
 
 [[resampled-log-lhood]]
 .Means and approximate 90% confidence intervals for the resampled binomial log-likelihood with three different link functions.
-image::figures/resampled-log-lhood-1.png
+image::images/resampled-log-lhood-1.png[]
 
-The scale of these values is different than the previous values since they are computed on a smaller data set; the value produced by `broom::glance()` is a sum while `yardstick::mn_log_loss()` is an average.
+[NOTE]
+====
+ The scale of these values is different than the previous values since they are computed on a smaller data set; the value produced by `broom::glance()` is a sum while `yardstick::mn_log_loss()` is an average. +
+
+====
 
 These results show that there is considerable evidence that the choice of the link function matters and that the logistic model is superior.
 
@@ -190,15 +200,19 @@ What about a different metric? We also calculated the area under the ROC curve f
 
 [[resampled-roc]]
 .Means and approximate 90% confidence intervals for the resampled area under the ROC curve with three different link functions.
-image::figures/resampled-roc-1.png
+image::images/resampled-roc-1.png[]
 
 Given the overlap of the intervals, as well as the scale of the x-axis, any of these options could be used. We see this again when the class boundaries for the three models are overlaid on the test set of 198 data points in <<three-link-fits>>.
 
 [[three-link-fits]]
 .The linear class boundary fits for three link functions.
-image::figures/three-link-fits-1.png
+image::images/three-link-fits-1.png[]
 
-This exercise emphasizes that different metrics might lead to different decisions about the choice of tuning parameter values. In this case, one metric appears to clearly sort the models while another metric shows no difference.
+[WARNING]
+====
+ This exercise emphasizes that different metrics might lead to different decisions about the choice of tuning parameter values. In this case, one metric appears to clearly sort the models while another metric shows no difference. +
+
+====
 
 Metric optimization is thoroughly discussed by Thomas and Uminsky (2020) who explore several issues, including the gaming of metrics. They warn that:
 
@@ -211,7 +225,10 @@ ____
 
 Many tuning parameters modulate the amount of model complexity. More complexity often implies more malleability in the patterns that a model can emulate. For example, as shown in <<recipes>>, adding degrees of freedom in a spline function increases the intricacy of the prediction equation. While this is an advantage when the underlying motifs in the data are complex, it can also lead to over-interpretation of chance patterns that would not reproduce in new data. _Overfitting_ is the situation where a model adapts too much to the training data; it performs well on the data used to build the model but poorly for new data.
 
-Since tuning model parameters can increase model complexity, poor choices can lead to overfitting.
+[WARNING]
+====
+ Since tuning model parameters can increase model complexity, poor choices can lead to overfitting. 
+====
 
 Recall the single layer neural network model described in the first section of this chapter. With a single hidden unit and sigmoidal activation functions, a neural network for classification is, for all intents and purposes, just logistic regression. However, as the number of hidden units increases, so does the complexity of the model. In fact, when the network model uses sigmoidal activation units, Cybenko (1989) showed that the model is a universal function approximator as long as there are enough hidden units.
 
@@ -221,13 +238,16 @@ We fit neural network classification models to the same two-class data from the 
 
 [[two-class-boundaries]]
 .Class boundaries for three models with increasing numbers of hidden units. The boundaries are fit on the training set and shown for the training and test sets.
-image::figures/two-class-boundaries-1.png
+image::images/two-class-boundaries-1.png[]
 
 The single unit model does not adapt very flexibly to the data (since it is constrained to be linear). A model with four hidden units begins to show signs of overfitting with an unrealistic boundary for values away from the data mainstream. This is caused by a single data point from the first class in the upper right corner of the data. By 20 hidden units, the model is beginning to memorize the training set, creating small islands around those data to minimize the resubstitution error rate. These patterns do not repeat in the test set. This last panel is the best illustration of how tuning parameters that control complexity must be modulated so that the model is effective. For a 20 unit model, the training set ROC AUC is 0.944 but the test set value is 0.849.
 
 This occurrence of overfitting is obvious with two predictors that we can plot. However, in general, we must use a quantitative approach for detecting overfitting.
 
-The solutions for detecting when a model is overemphasizing the training set is using out-of-sample data.
+[NOTE]
+====
+ The solutions for detecting when a model is overemphasizing the training set is using out-of-sample data. 
+====
 
 Rather than using the test set, some form of resampling is required. This could mean an iterative approach (e.g., 10-fold cross-validation) or a single data source (e.g., a validation set).
 
@@ -243,13 +263,16 @@ _Iterative search_ or sequential search is when we sequentially discover new par
 
 [[tuning-strategies]]
 .Examples of pre-defined grid tuning and an iterative search method. The lines represent contours of a performance metric; it is best in the upper right-hand side of the plot.
-image::figures/tuning-strategies-1.png
+image::images/tuning-strategies-1.png[]
 
 The left-hand panel of <<tuning-strategies>> shows a type of grid called a space-filling design. This is a type of experimental design devised for covering the parameter space such that tuning parameter combinations are not close to one another. The results for this design do not place any points exactly at the truly optimal location. However, one point is in the general vicinity and would probably have performance metric results that are within the noise of the most optimal value.
 
 The right-hand panel of <<tuning-strategies>> illustrates the results of a global search method: the Nelder-Mead simplex method (Olsson and Nelson 1975). The starting point is in the lower-left part of the parameter space. The search meanders across the space until it reaches the optimum location, where it strives to come as close as possible to the numerically best value. This particular search method, while effective, is not known for its efficiency; it requires many function evaluations, especially near the optimal values. In <<iterative-search>>, more efficient search algorithms are discussed.
 
-Hybrid strategies are also an option and can work well. After an initial grid search, a sequential optimization can start from the best grid combination.
+[NOTE]
+====
+ Hybrid strategies are also an option and can work well. After an initial grid search, a sequential optimization can start from the best grid combination. 
+====
 
 Examples of these strategies are discussed in detail in the next two chapters. Before moving on, let’s learn how to work with tuning parameter objects in tidymodels, using the [.pkg]#dials# package.
 
@@ -273,7 +296,10 @@ rand_forest(trees = 2000, min_n = 10) %>%                   # <- main arguments
   set_engine("ranger", regularization.factor = 0.5)         # <- engine-specific
 ----
 
-The main arguments use a harmonized naming system to remove inconsistencies across engines while engine-specific arguments do not.
+[WARNING]
+====
+ The main arguments use a harmonized naming system to remove inconsistencies across engines while engine-specific arguments do not. 
+====
 
 How can we signal to tidymodels functions which arguments should be optimized? Parameters are marked for tuning by assigning them a value of `tune()`. For the single layer neural network used earlier in this chapter, the number of hidden units is designated for tuning using:
 
@@ -352,7 +378,10 @@ wflow_param
 #>   latitude df     deg_free nparam[+]
 ----
 
-Neural networks are exquisitely capable of emulating nonlinear patterns. Adding spline terms to this type of model is unnecessary; we combined this model and recipe for illustration only.
+[WARNING]
+====
+ Neural networks are exquisitely capable of emulating nonlinear patterns. Adding spline terms to this type of model is unnecessary; we combined this model and recipe for illustration only. 
+====
 
 Each tuning parameter argument has a corresponding function in the [.pkg]#dials# package. In the vast majority of the cases, the function has the same name as the parameter argument:
 
@@ -401,7 +430,10 @@ extract_parameter_set_dials(ames_rec) %>%
 
 The _parameter sets_ created by `extract_parameter_set_dials()` are consumed by the tidymodels tuning functions (when needed). If the defaults for the tuning parameter objects require modification, a modified parameter set is passed to the appropriate tuning function.
 
-Some tuning parameters depend on the dimensions of the data. For example, the number of nearest neighbors must be between one and the number of rows in the data.
+[NOTE]
+====
+ Some tuning parameters depend on the dimensions of the data. For example, the number of nearest neighbors must be between one and the number of rows in the data. 
+====
 
 In some cases, it is easy to have reasonable defaults for the range of possible values. In other cases, the parameter range is critical and cannot be assumed. The primary tuning parameter for random forest models is the number of predictor columns that are randomly sampled for each split in the tree, usually denoted as `mtry()`. Without knowing the number of predictors, this parameter range cannot be pre-configured and requires finalization.
 

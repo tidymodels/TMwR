@@ -5,7 +5,11 @@ We introduced workflow sets in <<workflows>> and demonstrated how to use them wi
 
 For projects with new data sets that have not yet been well understood, a data practitioner may need to screen many combinations of models and preprocessors. It is common to have little or no _a priori_ knowledge about which method will work best with a novel data set.
 
-A good strategy is to spend some initial effort trying a variety of modeling approaches, determine what works best, then invest additional time tweaking/optimizing a small set of models.
+[NOTE]
+====
+ A good strategy is to spend some initial effort trying a variety of modeling approaches, determine what works best, then invest additional time tweaking/optimizing a small set of models. +
+
+====
 
 Workflow sets provide a user interface to create and manage this process. We’ll also demonstrate how to evaluate these models efficiently using the racing methods discussed later in this chapter.
 
@@ -36,7 +40,11 @@ glimpse(concrete)
 
 The `compressive_strength` column is the outcome. The `age` predictor tells us the age of the concrete sample at testing in days (concrete strengthens over time) and the rest of the predictors like `cement` and `water` are concrete components in units of kilograms per cubic meter.
 
-There are some cases in this data set where the same concrete formula was tested multiple times. We’d rather not include these replicate mixtures as individual data points since they might be distributed across both the training and test set. Doing so might artificially inflate our performance estimates.
+[WARNING]
+====
+ There are some cases in this data set where the same concrete formula was tested multiple times. We’d rather not include these replicate mixtures as individual data points since they might be distributed across both the training and test set. Doing so might artificially inflate our performance estimates. +
+
+====
 
 To address this, we will use the mean compressive strength per concrete mixture for modeling:
 
@@ -418,7 +426,7 @@ autoplot(
 
 [[workflow-set-ranks]]
 .Estimated RMSE (and approximate confidence intervals) for the best model configuration in each workflow.
-image::figures/workflow-set-ranks-1.png
+image::images/workflow-set-ranks-1.png[]
 
 In case you want to see the tuning parameter results for a specific model, like <<workflow-sets-autoplot>>, the `id` argument can take a single value from the `wflow_id` column for which model to plot:
 
@@ -429,7 +437,7 @@ autoplot(grid_results, id = "Cubist", metric = "rmse")
 
 [[workflow-sets-autoplot]]
 .The `autoplot()` results for the Cubist model contained in the workflow set.
-image::figures/workflow-sets-autoplot-1.png
+image::images/workflow-sets-autoplot-1.png[]
 
 There are also methods for `collect_predictions()` and `collect_metrics()`.
 
@@ -496,7 +504,7 @@ autoplot(
 
 [[workflow-set-racing-ranks]]
 .Estimated RMSE (and approximate confidence intervals) for the best model configuration in each workflow in the racing results.
-image::figures/workflow-set-racing-ranks-1.png
+image::images/workflow-set-racing-ranks-1.png[]
 
 Overall, the racing approach estimated a total of 4,594 models, 18.23% of the full set of 25,200 models in the full grid. As a result, the racing approach was 2.3-fold faster.
 
@@ -528,7 +536,7 @@ matched_results %>%
 
 [[racing-concordance]]
 .Estimated RMSE for the full grid and racing results.
-image::figures/racing-concordance-1.png
+image::images/racing-concordance-1.png[]
 
 While the racing approach selected the same candidate parameters as the complete grid for only 41.67% of the models, the performance metrics of the models selected by racing were nearly equal. The correlation of RMSE values was 0.971 and the rank correlation was 0.951. This indicates that, within a model, there were multiple tuning parameter combinations that had nearly identical results.
 
@@ -580,7 +588,7 @@ boosting_test_results %>%
 
 [[concrete-test-results]]
 .Observed versus predicted values for the test set.
-image::figures/concrete-test-results-1.png
+image::images/concrete-test-results-1.png[]
 
 We see here how well the observed and predicted compressive strength for these concrete mixtures align.
 

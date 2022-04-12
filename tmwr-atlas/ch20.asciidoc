@@ -3,7 +3,10 @@
 
 A model ensemble, where the predictions of multiple single learners are aggregated together to make one prediction, can produce a high-performance final model. The most popular methods for creating ensemble models are bagging (Breiman 1996a), random forest (Ho 1995; Breiman 2001), and boosting (Freund and Schapire 1997). Each of these methods combines the predictions from multiple versions of the same type of model (e.g., classifications trees). However, one of the earliest methods for creating ensembles is _model stacking_ (Wolpert 1992; Breiman 1996b).
 
-Model stacking combines the predictions for multiple models of any type. For example, a logistic regression, classification tree, and support vector machine can be included in a stacking ensemble.
+[NOTE]
+====
+ Model stacking combines the predictions for multiple models of any type. For example, a logistic regression, classification tree, and support vector machine can be included in a stacking ensemble. 
+====
 
 This chapter shows how to stack predictive models using the [.pkg]#stacks# package. We’ll re-use the results from <<workflow-sets>> where multiple models were evaluated to predict the compressive strength of concrete mixtures.
 
@@ -20,7 +23,10 @@ In general, we’ll talk about a ``multilayer perceptron model'' as the _type_ o
 
 One important aspect of a model are its tuning parameters. Back in <<workflow-sets>>, the MLP model was tuned over 25 tuning parameter values. In the previous chapters, we’ve called these _candidate tuning parameter_ values or _model configurations_. In literature on ensembling these have also been called the ``base models''.
 
-We’ll use the term ``candidate members'' to describe the possible model configurations (of all model types) that might be included in the stacking ensemble.
+[NOTE]
+====
+ We’ll use the term ``candidate members'' to describe the possible model configurations (of all model types) that might be included in the stacking ensemble. 
+====
 
 This means that a stacking model can include different types of models (e.g., trees and neural networks) as well as different configurations of the same model (e.g., trees with different depths).
 
@@ -31,7 +37,10 @@ The first step to building a stacked ensemble relies on the assessment set predi
 
 Back in <<workflow-sets>>, we used five repeats of 10-fold cross-validation to resample the data. This resampling scheme generates five assessment set predictions for each training set sample. Multiple out-of-sample predictions can occur in several other resampling techniques (e.g. bootstrapping). For the purpose of stacking, any replicate predictions for a data point in the training set are averaged so that there is a single prediction per training set sample per candidate member.
 
-Simple validation sets can also be used with stacking since tidymodels considers this to be a single resample.
+[NOTE]
+====
+ Simple validation sets can also be used with stacking since tidymodels considers this to be a single resample. 
+====
 
 For the concrete example, the training set used for model stacking has columns for all of the candidate tuning parameter results. <<ensemble-candidate-preds>> presents the first six rows and selected columns.
 
@@ -129,7 +138,10 @@ Cubist 25
 
 There is a single column for the bagged tree model since it has no tuning parameters. Also, recall that MARS was tuned over a single parameter (the product degree) with two possible configurations, so this model is represented by two columns. Most of the other models have 25 corresponding columns, as shown for Cubist in this example.
 
-For classification models, the candidate prediction columns would be predicted class probabilities. Since these columns add to one for each model, the probabilities for one of the classes can be left out.
+[WARNING]
+====
+ For classification models, the candidate prediction columns would be predicted class probabilities. Since these columns add to one for each model, the probabilities for one of the classes can be left out. 
+====
 
 To summarize where we are so far, the first step to stacking is to assemble the assessment set predictions for the training set from each candidate model. We can use these assessment set predictions to move forward and build a stacked ensemble.
 
@@ -181,7 +193,10 @@ concrete_stack
 
 Recall that racing methods (introduced in <<grid-search>>) are more efficient since they might not evaluate all configurations on all resamples. Stacking requires that all candidate members have the complete set of resamples. `add_candidates()` only includes the model configurations that have complete results.
 
-Why use the racing results instead of the full set of candidate models contained in `grid_results`? Either can be used. We found better performance for these data using the racing results. This might be due to the racing method pre-selecting the best model(s) from the larger grid.
+[NOTE]
+====
+ Why use the racing results instead of the full set of candidate models contained in `grid_results`? Either can be used. We found better performance for these data using the racing results. This might be due to the racing method pre-selecting the best model(s) from the larger grid. 
+====
 
 If we had not used the [.pkg]#workflowsets# package, objects from the [.pkg]#tune# and [.pkg]#finetune# could also be passed to `add_candidates()`. This can include both grid and iterative search objects.
 
@@ -212,7 +227,7 @@ autoplot(ens)
 
 [[stacking-autoplot]]
 .Results of using the `autoplot()` method on the blended stacks object.
-image::figures/stacking-autoplot-1.png
+image::images/stacking-autoplot-1.png[]
 
 The top panel of <<stacking-autoplot>> shows the average number of candidate ensemble members retained by the meta-learning model. We can see that the number of members is fairly constant and, as it increases, the RMSE also increases.
 
@@ -233,7 +248,7 @@ autoplot(ens)
 
 [[stacking-autoplot-redo]]
 .The results of using the `autoplot()` method on the updated blended stacks object.
-image::figures/stacking-autoplot-redo-1.png
+image::images/stacking-autoplot-redo-1.png[]
 
 It is common, when blending predictions using a regression model, to constrain the blending parameters to be non-negative. For these data, this constraint has the effect of eliminating many of the potential ensemble members; even at fairly low penalties, the ensemble is limited to a fraction of the original eighteen.
 
@@ -278,7 +293,7 @@ autoplot(ens, "weights") +
 
 [[blending-weights]]
 .Blending coefficients for the stacking ensemble.
-image::figures/blending-weights-1.png
+image::images/blending-weights-1.png[]
 
 The boosted tree and Cubist models have the largest contributions to the ensemble. For this ensemble, the outcome is predicted with the equation:
 

@@ -15,7 +15,10 @@ So far, when we have used the term ``the model'', we have meant a structural equ
 
 While this is a linear model, it is only linear in the parameters. The predictors could be nonlinear terms (such as the latexmath:[$\log(x_i)$]).
 
-The conventional way of thinking about the modeling process is that it only includes the model fit.
+[WARNING]
+====
+ The conventional way of thinking about the modeling process is that it only includes the model fit. 
+====
 
 For some data sets that are straightforward in nature, fitting the model itself may be the entire process. However, there are a variety of choices and additional steps that often occur before the model is fit:
 
@@ -27,7 +30,10 @@ While these examples are related to steps that occur before the model fit, there
 
 It is important to focus on the broader _modeling process_, instead of only fitting the specific model used to estimate parameters. This broader process includes any preprocessing steps, the model fit itself, as well as potential post-processing activities. In this book, we will refer to this more comprehensive concept as the _model workflow_ and highlight how to handle all its components to produce a final model equation.
 
-In other software, such as Python or Spark, similar collections of steps are called _pipelines_. In tidymodels, the term ``pipeline'' already connotes a sequence of operations chained together with a pipe operator (such as `%>%` from [.pkg]#magrittr# or the newer native `|>`). Rather than using ambiguous terminology in this context, we call the sequence of computational operations related to modeling _workflows_.
+[NOTE]
+====
+ In other software, such as Python or Spark, similar collections of steps are called _pipelines_. In tidymodels, the term ``pipeline'' already connotes a sequence of operations chained together with a pipe operator (such as `%>%` from [.pkg]#magrittr# or the newer native `|>`). Rather than using ambiguous terminology in this context, we call the sequence of computational operations related to modeling _workflows_. 
+====
 
 Binding together the analytical components of a data analysis is important for another reason. Future chapters will demonstrate how to accurately measure performance, as well as how to optimize structural parameters (i.e. model tuning). To correctly quantify model performance on the training set, <<resampling>> advocates using resampling methods. To do this properly, no data-driven parts of the analysis should be excluded from validation. To this end, the workflow must include all significant estimation steps.
 
@@ -37,7 +43,7 @@ There are two ways of thinking about the model workflow. <<bad-workflow>> illust
 
 [[bad-workflow]]
 .Incorrect mental model of where model estimation occurs in the data analysis process.
-image::premade/bad-workflow.png
+image::images/bad-workflow.png[]
 
 The fallacy here is that, although PCA does significant computations to produce the components, its operations are assumed to have no uncertainty associated with them. The PCA components are treated as _known_ and, if not included in the model workflow, the effect of PCA could not be adequately measured.
 
@@ -45,7 +51,7 @@ The fallacy here is that, although PCA does significant computations to produce 
 
 [[good-workflow]]
 .Correct mental model of where model estimation occurs in the data analysis process.
-image::premade/proper-workflow.png
+image::images/proper-workflow.png[]
 
 In this way, the PCA preprocessing is considered part of the modeling process.
 
@@ -281,7 +287,10 @@ model.matrix(distance ~ Sex + (age | Subject), data = Orthodont)
 
 The result is a zero row data frame.
 
-The issue is that the special formula has to be processed by the underlying package code, not the standard `model.matrix()` approach.
+[WARNING]
+====
+ The issue is that the special formula has to be processed by the underlying package code, not the standard `model.matrix()` approach. 
+====
 
 Even if this formula could be used with `model.matrix()`, this would still present a problem since the formula also specifies the statistical attributes of the model.
 
@@ -463,7 +472,10 @@ location_models$fit[[1]]
 
 We use a [.pkg]#purrr# function here to map through our models, but there is an easier, better approach to fit workflow sets that will be introduced in <<compare>>.
 
-In general, there’s a lot more to workflow sets! While we’ve covered the basics here, the nuances and advantages of workflow sets won’t be illustrated until <<workflow-sets>>.
+[NOTE]
+====
+ In general, there’s a lot more to workflow sets! While we’ve covered the basics here, the nuances and advantages of workflow sets won’t be illustrated until <<workflow-sets>>. 
+====
 
 === Evaluating the Test Set
 
@@ -483,7 +495,10 @@ final_lm_res
 #> 1 <split [2342/588]> train/test split <tibble> <tibble> <tibble>     <workflow>
 ----
 
-Notice that `last_fit()` takes a data split as an input, not a dataframe. This function uses the split to generate the training and test sets for the final fitting and evaluation.
+[NOTE]
+====
+ Notice that `last_fit()` takes a data split as an input, not a dataframe. This function uses the split to generate the training and test sets for the final fitting and evaluation. 
+====
 
 The `.workflow` column contains the fitted workflow and can be pulled out of the results using:
 

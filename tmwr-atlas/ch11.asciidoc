@@ -117,7 +117,7 @@ autoplot(four_models, metric = "rsq") +
 
 [[workflow-set-r-squared]]
 .Confidence intervals for the coefficient of determination using four different models.
-image::figures/workflow-set-r-squared-1.png
+image::images/workflow-set-r-squared-1.png[]
 
 From this plot of R2 confidence intervals, we can see that the random forest method is doing the best job and there are minor improvements in the linear models as we add more recipe steps.
 
@@ -128,7 +128,10 @@ Now that we have 10 resampled performance estimates for each of four models, the
 
 Considering the preceding results for the three linear models, it appears that the additional terms do not profoundly improve the mean RMSE or R2 statistics for the linear models. The difference is small, but it might be larger than the experimental noise in the system, i.e., considered statistically significant. We can formally test the hypothesis that the additional terms increase R2.
 
-Before making between-model comparisons, it is important for us to discuss the within-resample correlation for resampling statistics. Each model was measured with the same cross-validation folds, and results for the same resample tend to be similar.
+[NOTE]
+====
+ Before making between-model comparisons, it is important for us to discuss the within-resample correlation for resampling statistics. Each model was measured with the same cross-validation folds, and results for the same resample tend to be similar. 
+====
 
 In other words, there are some resamples where performance across models tends to be low and others where it tends to be high. In statistics, this is called a _resample-to-resample_ component of variation.
 
@@ -168,7 +171,7 @@ rsq_indiv_estimates %>%
 
 [[rsquared-resamples]]
 .Resample statistics across models.
-image::figures/rsquared-resamples-1.png
+image::images/rsquared-resamples-1.png[]
 
 If the resample-to-resample effect was not real, there would not be any parallel lines. A statistical test for the correlations evaluates whether the magnitudes of these correlations are not simply noise. For the linear models:
 
@@ -195,7 +198,10 @@ What effect does the extra correlation have on our analysis? Consider the varian
 
 The last term is the covariance between two items. If there is a significant positive covariance, then any statistical test of this difference would be critically under-powered comparing the difference in two models. In other words, ignoring the resample-to-resample effect would bias our model comparisons towards finding no differences between models.
 
-This characteristic of resampling statistics will come into play in the next two sections.
+[WARNING]
+====
+ This characteristic of resampling statistics will come into play in the next two sections. 
+====
 
 Before making model comparisons or looking at the resampling results, it can be helpful to define a relevant _practical effect size_. Since these analyses focus on the R2 statistics, the practical effect size is the change in R2 that we would consider to be a realistic difference that matters. For example, we might think that two models are not practically different if their R2 values are within latexmath:[$\pm 2$]%. If this were the case, differences smaller than 2% are not deemed important even if they are statistically significant.
 
@@ -349,9 +355,12 @@ rsq_wider %>%
 
 We could evaluate each pair-wise difference in this way. Note that the p-value indicates a _statistically significant_ signal; the collection of spline terms for longitude and latitude do appear to have an effect. However, the difference in R2 is estimated at 0.91%. If our practical effect size were 2%, we might not consider these terms worth including in the model.
 
-We’ve briefly mentioned p-values already, but what actually are they? From Wasserstein and Lazar (2016): ``Informally, a p-value is the probability under a specified statistical model that a statistical summary of the data (e.g., the sample mean difference between two compared groups) would be equal to or more extreme than its observed value.''
+[NOTE]
+====
+ We’ve briefly mentioned p-values already, but what actually are they? From Wasserstein and Lazar (2016): ``Informally, a p-value is the probability under a specified statistical model that a statistical summary of the data (e.g., the sample mean difference between two compared groups) would be equal to or more extreme than its observed value.''
 
-In other words, if this analysis were repeated a large number of times under the null hypothesis of no differences, the p-value reflects how extreme our observed results would be in comparison.
+In other words, if this analysis were repeated a large number of times under the null hypothesis of no differences, the p-value reflects how extreme our observed results would be in comparison. 
+====
 
 [[tidyposterior]]
 === Bayesian Methods
@@ -443,7 +452,7 @@ model_post %>%
 
 [[four-posteriors]]
 .Posterior distributions for the coefficient of determination using four different models.
-image::figures/four-posteriors-1.png
+image::images/four-posteriors-1.png[]
 
 These histograms describe the estimated probability distributions of the mean R2 value for each model. There is some overlap, especially for the three linear models.
 
@@ -458,7 +467,7 @@ autoplot(rsq_anova) +
 
 [[credible-intervals]]
 .Credible intervals derived from the model posterior distributions.
-image::figures/credible-intervals-1.png
+image::images/credible-intervals-1.png[]
 
 One wonderful aspect of using resampling with Bayesian models is that, once we have the posteriors for the parameters, it is trivial to get the posterior distributions for combinations of the parameters. For example, to compare the two linear regression models, we are interested in the difference in means. The posterior of this difference is computed by sampling from the individual posteriors and taking the differences. The `contrast_models()` function can do this. To specify the comparisons to make, the `list_1` and `list_2` parameters take character vectors and compute the differences between the models in those lists (parameterized as `list_1 - list_2`).
 
@@ -481,7 +490,7 @@ rqs_diff %>%
 
 [[posterior-difference]]
 .Posterior distribution for the difference in the coefficient of determination.
-image::figures/posterior-difference-1.png
+image::images/posterior-difference-1.png[]
 
 The posterior shows that the center of the distribution is greater than zero (indicating that the model with splines typically had larger values) but does overlap with zero to a degree. The `summary()` method for this object computes the mean of the distribution as well as credible intervals, the Bayesian analog to confidence intervals.
 
@@ -522,7 +531,7 @@ autoplot(rsq_anova, type = "ROPE", size = 0.02) +
 
 [[practical-equivalence]]
 .Probability of practical equivalence for an effect size of 2%.
-image::figures/practical-equivalence-1.png
+image::images/practical-equivalence-1.png[]
 
 <<practical-equivalence>> shows us that none of the linear models come close to the random forest model when a 2% practical effect size is used.
 
@@ -542,7 +551,7 @@ ggplot(intervals,
 
 [[intervals-over-replicates]]
 .Probability of practical equivalence to the random forest model.
-image::figures/intervals-over-replicates-1.png
+image::images/intervals-over-replicates-1.png[]
 
 The width of the intervals decreases as more resamples are added. Clearly, going from ten resamples to thirty has a larger impact than going from eighty to 100. There are diminishing returns for using a ``large'' number of resamples (``large'' will be different for different data sets).
 

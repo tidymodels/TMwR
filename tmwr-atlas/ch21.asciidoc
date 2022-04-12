@@ -1,7 +1,10 @@
 [[inferential]]
 == Inferential Analysis
 
-In <<software-modeling>>, we outlined a taxonomy of models and said that most models can be categorized as descriptive, inferential, and/or predictive.
+[NOTE]
+====
+ In <<software-modeling>>, we outlined a taxonomy of models and said that most models can be categorized as descriptive, inferential, and/or predictive. 
+====
 
 Most of the chapters in this book have focused on models from the perspective of the accuracy of predicted values, an important quality of models for all purposes but most relevant for predictive models. Inferential models are not usually created only for their predictions, but to make inferences or judgments about some component of the model, such as a coefficient value or other parameter. These results are often used to answer some (hopefully) pre-defined questions or hypotheses. In predictive models, predictions on hold-out data are used to validate or characterize the quality of the model. Inferential methods focus on validating the probabilistic or structural assumptions that are made prior to fitting the model.
 
@@ -9,7 +12,10 @@ For example, in ordinary linear regression, the common assumption is that the re
 
 We will use p-values in this chapter. However, the tidymodels framework tends to promote confidence intervals over p-values as a method for quantifying the evidence for an alternative hypothesis. As previously shown in <<compare>>, Bayesian methods are often superior to both p-values and confidence intervals in terms of ease of interpretation (but they can be more computationally expensive).
 
-There has been a push in recent years to move away from p-values in favor of other methods (Wasserstein and Lazar 2016). See the Volume 73 of https://www.tandfonline.com/toc/utas20/73/[_The American Statistician_] for more information and discussion.
+[WARNING]
+====
+ There has been a push in recent years to move away from p-values in favor of other methods (Wasserstein and Lazar 2016). See the Volume 73 of https://www.tandfonline.com/toc/utas20/73/[_The American Statistician_] for more information and discussion. 
+====
 
 In this chapter, we describe how to use [.pkg]#tidymodels# for fitting and assessing inferential models. In some cases, the tidymodels framework can help users work with the objects produced by their models. In others, it can help make assessments of the quality of a given model.
 
@@ -17,7 +23,10 @@ In this chapter, we describe how to use [.pkg]#tidymodels# for fitting and asses
 
 To understand how tidymodels packages can be used for inferential modeling, let’s focus on an example with count data. We’ll use biochemistry publication data from the [.pkg]#pscl# package. These data consist of information on 915 Ph.D. biochemistry graduates and tries to explain factors that impact their academic productivity (measured via number or count of articles published within three years). The predictors include the gender of the graduate, their marital status, the number of children of the graduate that are at least five years old, the prestige of their department, and the number of articles produced by their mentor in the same time period. The data reflect biochemistry doctorates who finished their education between 1956 and 1963. The data are a somewhat biased sample of all of the biochemistry doctorates given during this period (based on completeness of information).
 
-Recall that in <<trust>> we asked the question ``Is our model applicable for predicting a specific data point?''. It is very important to define what populations an inferential analysis apply to. For these data, the results would likely apply to biochemistry doctorates given around the time frame that the data were collected. Does it also apply to other chemistry doctorate types (e.g., medicinal chemistry, etc)? These are important questions to address (and document) when conducting inferential analyses.
+[NOTE]
+====
+ Recall that in <<trust>> we asked the question ``Is our model applicable for predicting a specific data point?''. It is very important to define what populations an inferential analysis apply to. For these data, the results would likely apply to biochemistry doctorates given around the time frame that the data were collected. Does it also apply to other chemistry doctorate types (e.g., medicinal chemistry, etc)? These are important questions to address (and document) when conducting inferential analyses. 
+====
 
 A plot of the data shown in <<counts>> indicates that many graduates did not publish any articles in this time and that the outcome follows a right-skewed distribution:
 
@@ -35,7 +44,7 @@ ggplot(bioChemists, aes(x = art)) +
 
 [[counts]]
 .Distribution of the number of articles written within 3 years of graduation.
-image::figures/counts-1.png
+image::images/counts-1.png[]
 
 Since the outcome data are counts, the most common distribution assumption to make is that the outcome has a Poisson distribution. This chapter will use these data for several types of analyses.
 
@@ -93,7 +102,10 @@ poisson.test(c(930, 619)) %>%
 #> 1     1.50       930 2.73e-15      774.     1.36      1.67 Comparison o… two.sided
 ----
 
-Between the https://broom.tidymodels.org/[[.pkg]#broom#] and https://CRAN.R-project.org/package=broom.mixed[[.pkg]#broom.mixed#] packages, there are `tidy()` methods for more than 150 models.
+[NOTE]
+====
+ Between the https://broom.tidymodels.org/[[.pkg]#broom#] and https://CRAN.R-project.org/package=broom.mixed[[.pkg]#broom.mixed#] packages, there are `tidy()` methods for more than 150 models. 
+====
 
 While the Poisson distribution is reasonable, we might also want to make an assessment using fewer distributional assumptions. Two methods that might be helpful are the bootstrap and permutation tests (Davison and Hinkley 1997).
 
@@ -167,7 +179,7 @@ visualize(bootstrapped) +
 
 [[bootstrapped-mean]]
 .The bootstrap distribution of the difference in means. The highlighted region is the confidence interval.
-image::figures/bootstrapped-mean-1.png
+image::images/bootstrapped-mean-1.png[]
 
 Since the interval visualized in in <<bootstrapped-mean>> does not include zero, these results indicate that men have published more articles than women.
 
@@ -208,7 +220,7 @@ visualize(permuted) +
 
 [[permutation-dist]]
 .Empirical distribution of the test statistic under the null hypothesis. The vertical line indicates the observed test statistic.
-image::figures/permutation-dist-1.png
+image::images/permutation-dist-1.png[]
 
 The actual p-value is:
 
@@ -304,11 +316,14 @@ glm_boot
 #> 5 phd        -0.0707      0.0130  0.102    0.05 student-t
 ----
 
-When we compare these results (in <<glm-intervals>>) to the purely parametric results from `glm()`, the bootstrap intervals are somewhat wider. If the data were truly Poisson, these intervals would have more similar widths.
+[WARNING]
+====
+ When we compare these results (in <<glm-intervals>>) to the purely parametric results from `glm()`, the bootstrap intervals are somewhat wider. If the data were truly Poisson, these intervals would have more similar widths. 
+====
 
 [[glm-intervals]]
 .Two types of confidence intervals for the Poisson regression model.
-image::figures/glm-intervals-1.png
+image::images/glm-intervals-1.png[]
 
 Determining which predictors to include in the model is a difficult problem. One approach is to conduct likelihood ratio tests (LRT) (McCullagh and Nelder 1989) between nested models. Based on the confidence intervals, we have evidence that a simpler model without `phd` may be sufficient. Let’s fit a smaller model, then conduct a statistical test:
 
@@ -453,7 +468,10 @@ mean(bootstrap_models$zip_aic < bootstrap_models$glm_aic)
 
 It seems definitive from these results that accounting for the excessive number of zero counts is a good idea.
 
-We could have used `fit_resamples()` or a workflow set to conduct these computations. In this section, we used `mutate()` and `map()` to compute the models to demonstrate how one might use tidymodels tools for models that are not supported by one of the [.pkg]#parsnip# packages.
+[NOTE]
+====
+ We could have used `fit_resamples()` or a workflow set to conduct these computations. In this section, we used `mutate()` and `map()` to compute the models to demonstrate how one might use tidymodels tools for models that are not supported by one of the [.pkg]#parsnip# packages. 
+====
 
 Since we have computed the resampled model fits, let’s create bootstrap intervals for the zero probability model coefficients (i.e., the latexmath:[$\gamma_j$]). We can extract these with the `tidy()` method and use the `type = "zero"` option to obtain these estimates:
 
@@ -490,7 +508,7 @@ bootstrap_models %>%
 
 [[zip-bootstrap]]
 .Bootstrap distributions of the ZIP model coefficients. The vertical lines indicate the observed estimates.
-image::figures/zip-bootstrap-1.png
+image::images/zip-bootstrap-1.png[]
 
 From visual inspection, one of the covariates (`ment`) that appears to be important has a very skewed distribution. The extra space in some of the facets indicates that there are some outliers in the estimates. This _might_ occur when models did not converge; those results should probably be excluded from the resamples. For the results visualized in <<zip-bootstrap>>, the outliers are only due to extreme parameter estimates; all of the models converged.
 

@@ -34,7 +34,7 @@ ggplot(crickets,
 
 [[cricket-plot]]
 .Relationship between chirp rate and temperature for two different species of cricket.
-image::figures/cricket-plot-1.png
+image::images/cricket-plot-1.png[]
 
 The data exhibit fairly linear trends for each species. For a given temperature, _O. exclamationis_ appears to chirp more per minute than the other species. For an inferential model, the researchers might have specified the following null hypotheses prior to seeing the data:
 
@@ -68,7 +68,10 @@ rate ~ temp + species
 
 Species is not a quantitative variable; in the data frame, it is represented as a factor column with levels `"O. exclamationis"` and `"O. niveus"`. The vast majority of model functions cannot operate on non-numeric data. For species, the model needs to encode the species data in a numeric format. The most common approach is to use indicator variables (also known as ``dummy variables'') in place of the original qualitative values. In this instance, since species has two possible values, the model formula will automatically encode this column as numeric by adding a new column that has a value of zero when the species is `"O. exclamationis"` and a value of one when the data correspond to `"O. niveus"`. The underlying formula machinery automatically converts these values for the data set used to create the model, as well as for any new data points (for example, when the model is used for prediction).
 
-Suppose there were five species instead of two. The model formula would automatically add four additional binary columns that are binary indicators for four of the species. The _reference level_ of the factor (i.e., the first level) is always left out of the predictor set. The idea is that, if you know the values of the four indicator variables, the value of the species can be determined. We discuss binary indicator variables in more detail in <<recipes>>.
+[NOTE]
+====
+ Suppose there were five species instead of two. The model formula would automatically add four additional binary columns that are binary indicators for four of the species. The _reference level_ of the factor (i.e., the first level) is always left out of the predictor set. The idea is that, if you know the values of the four indicator variables, the value of the species can be determined. We discuss binary indicator variables in more detail in <<recipes>>. 
+====
 
 The model formula `rate ~ temp + species` creates a model with different y-intercepts for each species; the slopes of the regression lines could be different for each species as well. To accommodate this structure, an interaction term can be added to the model. This can be specified in a few different ways, and the most basic uses the colon:
 
@@ -128,9 +131,12 @@ plot(interaction_fit, which = 2)
 
 [[interaction-plots]]
 .Residual diagnostic plots for the linear model with interactions, which appear reasonable enough to conduct inferential analysis.
-image::figures/interaction-plots-1.png
+image::images/interaction-plots-1.png[]
 
-When it comes to the technical details of evaluating expressions, R is _lazy_ (as opposed to eager). This means that model fitting functions typically compute the minimum possible quantities at the last possible moment. For example, if you are interested in the coefficient table for each model term, this is not automatically computed with the model but is instead computed via the `summary()` method.
+[NOTE]
+====
+ When it comes to the technical details of evaluating expressions, R is _lazy_ (as opposed to eager). This means that model fitting functions typically compute the minimum possible quantities at the last possible moment. For example, if you are interested in the coefficient table for each model term, this is not automatically computed with the model but is instead computed via the `summary()` method. 
+====
 
 Our next order of business with the crickets is to assess if the inclusion of the interaction term is necessary. The most appropriate approach for this model is to re-compute the model without the interaction term and use the `anova()` method.
 
@@ -194,7 +200,11 @@ predict(main_effect_fit, new_values)
 #> 46.83 50.43 54.04 57.64 61.24 64.84
 ----
 
-Note that the non-numeric value of `species` is passed to the predict method, as opposed to the numeric, binary indicator variable.
+[WARNING]
+====
+ Note that the non-numeric value of `species` is passed to the predict method, as opposed to the numeric, binary indicator variable. +
+
+====
 
 While this analysis has obviously not been an exhaustive demonstration of R’s modeling capabilities, it does highlight some major features important for the rest of this book:
 
@@ -222,7 +232,10 @@ For the most part, practitioners’ understanding of what the formula does is do
 
 Our focus, when seeing this, is that there are two predictors and the model should contain their main effects and the two-way interactions. However, this formula also implies that, since `species` is a factor, it should also create indicator variable columns for this predictor (see <<recipes>>) and multiply those columns by the `temp` column to create the interactions. This transformation represents our second bullet point on encoding; the formula also defines how each column is encoded and can create additional columns that are not in the original data.
 
-This is an important point which will come up multiple times in this text, especially when we discuss more complex feature engineering in <<recipes>> and beyond. The formula in R has some limitations and our approaches to overcoming them contend with all three aspects.
+[WARNING]
+====
+ This is an important point which will come up multiple times in this text, especially when we discuss more complex feature engineering in <<recipes>> and beyond. The formula in R has some limitations and our approaches to overcoming them contend with all three aspects. 
+====
 
 [[tidiness-modeling]]
 === Why Tidiness is Important for Modeling
@@ -303,7 +316,10 @@ To resolve the usage issues described here, the tidymodels packages have a set o
 
 Many of these ideas are described in the tidymodels guidelines for model implementation.footnote:[https://tidymodels.github.io/model-implementation-principles] In subsequent chapters, we will illustrate examples of existing issues, along with their solutions.
 
-There are a few existing R packages that provide a unified interface to harmonize these heterogeneous modeling APIs, such as [.pkg]#caret# and [.pkg]#mlr#. The tidymodels framework is similar to these in adopting a unification of the function interface, as well as enforcing consistency in the function names and return values. It is different in its opinionated design goals and modeling implementation, discussed in detail throughout this book.
+[NOTE]
+====
+ There are a few existing R packages that provide a unified interface to harmonize these heterogeneous modeling APIs, such as [.pkg]#caret# and [.pkg]#mlr#. The tidymodels framework is similar to these in adopting a unification of the function interface, as well as enforcing consistency in the function names and return values. It is different in its opinionated design goals and modeling implementation, discussed in detail throughout this book. 
+====
 
 The `broom::tidy()` function, which we use throughout this book, is another tool for standardizing the structure of R objects. It can return many types of R objects in a more usable format. For example, suppose that predictors are being screened based on their correlation to the outcome column. Using `purrr::map()`, the results from `cor.test()` can be returned in a list for each predictor:
 
@@ -354,7 +370,7 @@ corr_res %>%
 
 [[corr-plot]]
 .Correlations (and 95% confidence intervals) between predictors and the outcome in the `mtcars` data set.
-image::figures/corr-plot-1.png
+image::images/corr-plot-1.png[]
 
 Creating such a plot is possible using core R language functions, but automatically reformatting the results makes for more concise code with less potential for errors.
 
@@ -407,7 +423,10 @@ model_by_species %>%
 #> 4 O. niveus        temp            3.52     0.105     33.6  1.57e-15
 ----
 
-List columns can be very powerful in modeling projects. List columns provide containers for any type of R objects, from a fitted model itself to the important data frame structure.
+[NOTE]
+====
+ List columns can be very powerful in modeling projects. List columns provide containers for any type of R objects, from a fitted model itself to the important data frame structure. 
+====
 
 === The tidymodels Metapackage
 
@@ -473,7 +492,10 @@ tidymodels_prefer(quiet = FALSE)
 #> ── Conflicts ───────────────────────────────────────────────── tidymodels_prefer() ──
 ----
 
-Be aware that using this function opts you in to using `conflicted::conflict_prefer()` for all namespace conflicts, making every conflict an error and forcing you to choose which function to use. The function `tidymodels::tidymodels_prefer()` handles the most common conflicts from tidymodels functions, but you will need to handle other conflicts in your R session yourself.
+[WARNING]
+====
+ Be aware that using this function opts you in to using `conflicted::conflict_prefer()` for all namespace conflicts, making every conflict an error and forcing you to choose which function to use. The function `tidymodels::tidymodels_prefer()` handles the most common conflicts from tidymodels functions, but you will need to handle other conflicts in your R session yourself. 
+====
 
 === Chapter Summary
 

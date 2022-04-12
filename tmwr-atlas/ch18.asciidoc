@@ -5,7 +5,10 @@ In <<software-modeling>>, we outlined a taxonomy of models and suggested that mo
 
 For some models, like linear regression, it is usually clear how to explain why the model makes the predictions it does. The structure of a linear model contains coefficients for each predictor that are typically straightforward to interpret. For other models, like random forests that can capture non-linear behavior by design, it is less transparent how to explain the model’s predictions from only the structure of the model itself. Instead, we can apply model explainer algorithms to generate understanding of predictions.
 
-There are two types of model explanations, _global_ and _local_. Global model explanations provide an overall understanding aggregated over a whole set of observations; local model explanations provide information about a prediction for a single observation.
+[NOTE]
+====
+ There are two types of model explanations, _global_ and _local_. Global model explanations provide an overall understanding aggregated over a whole set of observations; local model explanations provide information about a prediction for a single observation. 
+====
 
 === Software for Model Explanations
 
@@ -18,7 +21,7 @@ In <<resampling>> and <<compare>>, we trained and compared several models to pre
 
 [[explain-obs-pred]]
 .Comparing predicted prices for a linear model with interactions and a random forest model.
-image::figures/explain-obs-pred-1.png
+image::images/explain-obs-pred-1.png[]
 
 Let’s build model-agnostic explainers for both of these models to find out why they make the predictions they do. We can use the [.pkg]#DALEXtra# add-on package for [.pkg]#DALEX#, which provides support for tidymodels. Biecek and Burzykowski (2021) provide a thorough exploration of how to use [.pkg]#DALEX# for model explanations; this chapter only summarizes some important approaches, specific to tidymodels. To compute any kind of model explanation, global or local, using [.pkg]#DALEX#, we first prepare the appropriate data and then create an _explainer_ for each model:
 
@@ -51,7 +54,10 @@ explainer_rf <-
   )
 ----
 
-A linear model is typically straightforward to interpret and explain; you may not often find yourself using separate model explanation algorithms for a linear model. However, it can sometimes be difficult to understand or explain the predictions of even a linear model once it has splines and interaction terms!
+[WARNING]
+====
+ A linear model is typically straightforward to interpret and explain; you may not often find yourself using separate model explanation algorithms for a linear model. However, it can sometimes be difficult to understand or explain the predictions of even a linear model once it has splines and interaction terms! 
+====
 
 Dealing with significant feature engineering transformations during model explainability highlights some options we have (or sometimes, ambiguity in such analyses). We can quantify global or local model explanations either in terms of:
 
@@ -108,7 +114,10 @@ rf_breakdown
 #> random forest: prediction                    4.969
 ----
 
-Model break-down explanations like these depend on the _order_ of the features.
+[WARNING]
+====
+ Model break-down explanations like these depend on the _order_ of the features. 
+====
 
 If we choose the `order` for the random forest model explanation to be the same as the default for the linear model (chosen via a heuristic), we can change the relative importance of the features:
 
@@ -166,7 +175,7 @@ shap_duplex %>%
 
 [[duplex-rf-shap]]
 .Shapley additive explanations from the random forest model for a duplex property.
-image::figures/duplex-rf-shap-1.png
+image::images/duplex-rf-shap-1.png[]
 
 What about a different observation in our data set? Let’s look at a larger, newer one-family home in the Gilbert neighborhood:
 
@@ -198,7 +207,7 @@ The results are shown in <<gilbert-shap>>.
 
 [[gilbert-shap]]
 .Shapley additive explanations from the random forest model for a one-family home in Gilbert.
-image::figures/gilbert-shap-1.png
+image::images/gilbert-shap-1.png[]
 
 <<gilbert-shap>> shows that, unlike the duplex, the size and age of this house contribute to its price being higher.
 
@@ -206,7 +215,10 @@ image::figures/gilbert-shap-1.png
 
 Global model explanations, also called global feature importance or variable importance, help us understand which features are most important in driving the predictions of the linear and random forest models overall, aggregated over the whole training set. While the previous section addressed what variables or features are most important in predicting sale price for an individual home, global feature importance addresses what variables are most important for a model in aggregate.
 
-One way to compute variable importance is to _permute_ the features (Breiman 2001). We can permute or shuffle the values of a feature, predict from the model, and then measure how much worse the model fits the data compared to before shuffling.
+[NOTE]
+====
+ One way to compute variable importance is to _permute_ the features (Breiman 2001). We can permute or shuffle the values of a feature, predict from the model, and then measure how much worse the model fits the data compared to before shuffling. 
+====
 
 If shuffling a column causes a large degradation in model performance, it is important; if shuffling a column’s values doesn’t make much difference to how the model performs, it must not be an important variable. This approach can be applied to any kind of model (it is _model-agnostic_) and the results are straightforward to understand.
 
@@ -266,7 +278,7 @@ Using `ggplot_imp(vip_lm, vip_rf)` produces <<global-rf>>.
 
 [[global-rf]]
 .Global explainer for the random forest and linear regression models.
-image::figures/global-rf-1.png
+image::images/global-rf-1.png[]
 
 The dashed line in each panel of <<global-rf>> shows the RMSE for the full model, either the linear model or the random forest model. Features further to the right are more important, because permuting them results in higher RMSE. There is quite a lot of interesting information to learn from this plot; for example, neighborhood is quite important in the linear model with interactions/splines but the second least important feature for the random forest model.
 
@@ -274,7 +286,10 @@ The dashed line in each panel of <<global-rf>> shows the RMSE for the full model
 
 So far in this chapter, we have focused on local model explanations for a single observation (via Shapley additive explanations) and global model explanations for a data set as a whole (via permuting features). It is also possible to build global model explanations up by aggregating local model explanations, as with _partial dependence profiles_.
 
-Partial dependence profiles show how the expected value of a model prediction, like the predicted price of a home in Ames, changes as a function of a feature, like the age or gross living area.
+[NOTE]
+====
+ Partial dependence profiles show how the expected value of a model prediction, like the predicted price of a home in Ames, changes as a function of a feature, like the age or gross living area. 
+====
 
 One way to build such a profile is by aggregating or averaging profiles for individual observations. A profile showing how an individual observation’s prediction changes as a function of a given feature is called an ICE (individual conditional expectation) profile or a CP (_ceteris paribus_) profile. We can compute such individual profiles (for 500 of the observations in our training set) and then aggregate them using the [.pkg]#DALEX# function `model_profile()`:
 
@@ -322,7 +337,7 @@ ggplot_pdp(pdp_age, Year_Built)  +
 
 [[year-built]]
 .Partial dependence profiles for the random forest model focusing on the year built predictor.
-image::figures/year-built-1.png
+image::images/year-built-1.png[]
 
 Sale price for houses built in different years is mostly flat, with a modest rise after about 1960. Partial dependence profiles can be computed for any other feature in the model, and also for groups in the data, such as `Bldg_Type`. Let’s use 1,000 observations for these profiles.
 
@@ -345,7 +360,7 @@ This code produces <<building-type-profiles>>, where we see that sale price incr
 
 [[building-type-profiles]]
 .Partial dependence profiles for the random forest model focusing on building types and gross living area.
-image::figures/building-type-profiles-1.png
+image::images/building-type-profiles-1.png[]
 
 We have the option of using `plot(pdp_liv)` for default [.pkg]#DALEX# plots, but since we are making plots with the underlying data here, we can even facet by one of the features to visualize if the predictions change differently and highlighting the imbalance we have in these subgroups (as shown in <<building-type-facets>>).
 
@@ -368,7 +383,7 @@ as_tibble(pdp_liv$agr_profiles) %>%
 
 [[building-type-facets]]
 .Partial dependence profiles for the random forest model focusing on building types and gross living area using facets.
-image::figures/building-type-facets-1.png
+image::images/building-type-facets-1.png[]
 
 There is not one right approach for building model explanations and the options outlined in this chapter are not exhaustive. In this chapter we have highlighted good options for explanations at both the individual and global level, as well as how to bridge from one to the other, and we point you to Biecek and Burzykowski (2021) and Molnar (2020) for further reading
 
@@ -394,9 +409,12 @@ Using our previously defined importance plotting function, `ggplot_imp(vip_beans
 
 [[bean-explainer]]
 .Global explainer for the regularized discriminant analysis model on the beans data.
-image::figures/bean-explainer-1.png
+image::images/bean-explainer-1.png[]
 
-The measures of global feature importance that we see in <<bean-explainer>> incorporate the effects of all of the PLS components, but in terms of the original variables.
+[WARNING]
+====
+ The measures of global feature importance that we see in <<bean-explainer>> incorporate the effects of all of the PLS components, but in terms of the original variables. 
+====
 
 <<bean-explainer>> shows us that shape factors are among the most important features for predicting bean type, especially shape factor 4, a measure of solidity which takes into account both the area latexmath:[$A$], major axis latexmath:[$L$], and minor axis latexmath:[$l$]:
 

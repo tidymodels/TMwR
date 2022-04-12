@@ -3,13 +3,16 @@
 
 Once we have a model, we need to know how well it works. A quantitative approach for estimating effectiveness allows us to understand the model, to compare different models, or to tweak the model to improve performance. Our focus in tidymodels is on empirical validation; this usually means using data that were not used to create the model as the substrate to measure effectiveness.
 
-The best approach to empirical validation involves using _resampling_ methods that will be introduced in <<resampling>>. In this chapter, we will motivate the need for empirical validation by using the test set. Keep in mind that the test set can only be used once, as explained in <<splitting>>.
+[WARNING]
+====
+ The best approach to empirical validation involves using _resampling_ methods that will be introduced in <<resampling>>. In this chapter, we will motivate the need for empirical validation by using the test set. Keep in mind that the test set can only be used once, as explained in <<splitting>>. 
+====
 
 When judging model effectiveness, your decision about which metrics to examine can be critical. In later chapters, certain model parameters will be empirically optimized and a primary performance metric will be used to choose the best sub-model. Choosing the wrong metric can easily result in unintended consequences. For example, two common metrics for regression models are the root mean squared error (RMSE) and the coefficient of determination (a.k.a. latexmath:[$R^2$]). The former measures _accuracy_ while the latter measures _correlation_. These are not necessarily the same thing. <<performance-reg-metrics>> demonstrates the difference between the two.
 
 [[performance-reg-metrics]]
 .Observed versus predicted values for models that are optimized using the RMSE compared to the coefficient of determination.
-image::figures/performance-reg-metrics-1.png
+image::images/performance-reg-metrics-1.png[]
 
 A model optimized for RMSE has more variability but has relatively uniform accuracy across the range of the outcome. The right panel shows that there is a tighter correlation between the observed and predicted values but this model performs poorly in the tails.
 
@@ -31,7 +34,10 @@ While shallow, this analysis strategy is common in practice as well as in the li
 
 One missing piece of information in this approach is how closely this model fits the actual data. Using resampling methods, discussed in <<resampling>>, we can estimate the accuracy of this model to be about 73.3%. Accuracy is often a poor measure of model performance; we use it here because it is commonly understood. If the model has 73.3% fidelity to the data, should we trust conclusions it produces? We might think so until we realize that the baseline rate of non-impaired patients in the data is 72.7%. This means that, despite our statistical analysis, the two-factor model appears to be only 0.6% better than a simple heuristic that always predicts patients to be unimpaired, irregardless of the observed data.
 
-The point of this analysis is to demonstrate the idea that optimization of statistical characteristics of the model does not imply that the model fits the data well. Even for purely inferential models, some measure of fidelity to the data should accompany the inferential results. Using this, the consumers of the analyses can calibrate their expectations of the results.
+[NOTE]
+====
+ The point of this analysis is to demonstrate the idea that optimization of statistical characteristics of the model does not imply that the model fits the data well. Even for purely inferential models, some measure of fidelity to the data should accompany the inferential results. Using this, the consumers of the analyses can calibrate their expectations of the results. 
+====
 
 In the remainder of this chapter, we will discuss general approaches for evaluating models via empirical validation. These approaches are grouped by the nature of the outcome data: purely numeric, binary classes, and three or more class levels.
 
@@ -99,7 +105,7 @@ ggplot(ames_test_res, aes(x = Sale_Price, y = .pred)) +
 
 [[ames-performance-plot]]
 .Observed versus predicted values for an Ames regression model, with log-10 units on both axes.
-image::figures/ames-performance-plot-1.png
+image::images/ames-performance-plot-1.png[]
 
 There is one low-price property that is substantially over-predicted, i.e., quite high above the dashed line.
 
@@ -132,7 +138,11 @@ ames_metrics(ames_test_res, truth = Sale_Price, estimate = .pred)
 
 This tidy data format stacks the metrics vertically. The root mean squared error and mean absolute error metrics are both on the scale of the outcome (so `log10(Sale_Price)` for our example) and measure the difference between the predicted and observed values. The value for latexmath:[$R^2$] measures the squared correlation between the predicted and observed values, so values closer to one are better.
 
-The [.pkg]#yardstick# package does _not_ contain a function for adjusted latexmath:[$R^2$]. This modification of the coefficient of determination is commonly used when the same data used to fit the model are used to evaluate the model. This metric is not fully supported in tidymodels because it is always a better approach to compute performance on a separate data set than the one used to fit the model.
+[WARNING]
+====
+ The [.pkg]#yardstick# package does _not_ contain a function for adjusted latexmath:[$R^2$]. This modification of the coefficient of determination is commonly used when the same data used to fit the model are used to evaluate the model. This metric is not fully supported in tidymodels because it is always a better approach to compute performance on a separate data set than the one used to fit the model. +
+
+====
 
 === Binary Classification Metrics
 
@@ -201,7 +211,11 @@ classification_metrics(two_class_example, truth = truth, estimate = predicted)
 
 The Matthews correlation coefficient and F1 score both summarize the confusion matrix, but compared to `mcc()` which measures the quality of both positive and negative examples, the `f_meas()` metric emphasizes the positive class, i.e., the event of interest. For binary classification data sets like this example, [.pkg]#yardstick# functions have a standard argument called `event_level` to distinguish positive and negative levels. The default (which we used in this code) is that the _first_ level of the outcome factor is the event of interest.
 
-There is some heterogeneity in R functions in this regard; some use the first level and others the second to denote the event of interest. We consider it more intuitive that the first level is the most important. The second level logic is borne of encoding the outcome as 0/1 (in which case the second value is the event) and unfortunately remains in some packages. However, tidymodels (along with many other R packages) require_a categorical outcome to be encoded as a factor and, for this reason, the legacy justification for the second level as the event becomes irrelevant.
+[NOTE]
+====
+ There is some heterogeneity in R functions in this regard; some use the first level and others the second to denote the event of interest. We consider it more intuitive that the first level is the most important. The second level logic is borne of encoding the outcome as 0/1 (in which case the second value is the event) and unfortunately remains in some packages. However, tidymodels (along with many other R packages) require_a categorical outcome to be encoded as a factor and, for this reason, the legacy justification for the second level as the event becomes irrelevant. +
+
+====
 
 As an example where the second level is the event:
 
@@ -251,7 +265,7 @@ autoplot(two_class_curve)
 
 [[example-roc-curve]]
 .Example ROC curve.
-image::figures/example-roc-curve-1.png
+image::images/example-roc-curve-1.png[]
 
 If the curve was close to the diagonal line, then the model’s predictions would be no better than random guessing. Since the curve is up in the top, left-hand corner, we see that our model performs well at different thresholds.
 
@@ -432,7 +446,7 @@ hpc_cv %>%
 
 [[grouped-roc-curves]]
 .Resampled ROC curves for each of the four outcome classes.
-image::figures/grouped-roc-curves-1.png
+image::images/grouped-roc-curves-1.png[]
 
 This visualization shows us that the different groups all perform about the same, but that the `VF` class is predicted better than the `F` or `M` classes, since the `VF` ROC curves are up in the top left corner more. This example uses resamples as the groups, but any grouping in your data can be used. This `autoplot()` method can be a quick visualization method for model effectiveness across outcome classes and/or groups.
 

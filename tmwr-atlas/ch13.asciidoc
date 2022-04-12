@@ -15,7 +15,10 @@ Before we look at each type in more detail, let’s consider an example model: t
 * the number of fitting epochs/iterations in model training, and
 * the amount of weight decay penalization.
 
-Historically, the number of epochs was determined by early stopping; a separate validation set determined the length of training based on the error rate, since re-predicting the training set led to overfitting. In our case, the use of a weight decay penalty should prohibit overfitting, and there is little harm in tuning the penalty and the number of epochs.
+[NOTE]
+====
+ Historically, the number of epochs was determined by early stopping; a separate validation set determined the length of training based on the error rate, since re-predicting the training set led to overfitting. In our case, the use of a weight decay penalty should prohibit overfitting, and there is little harm in tuning the penalty and the number of epochs. 
+====
 
 Using [.pkg]#parsnip#, the specification for a classification model fit using the [.pkg]#nnet# package is:
 
@@ -109,7 +112,10 @@ mlp_param %>%
 
 There are techniques for creating regular grids that do not use all possible values of each parameter set. These _fractional factorial designs_ (Box, Hunter, and Hunter 2005) could also be used. To learn more, consult the CRAN Task View for experimental design.footnote:[https://CRAN.R-project.org/view=ExperimentalDesign]
 
-Regular grids can be computationally expensive to use, especially when there are a medium-to-large number of tuning parameters. This is true for many models but not all. As discussed further in this chapter, there are many models whose tuning time _decreases_ with a regular grid!
+[WARNING]
+====
+ Regular grids can be computationally expensive to use, especially when there are a medium-to-large number of tuning parameters. This is true for many models but not all. As discussed further in this chapter, there are many models whose tuning time _decreases_ with a regular grid! 
+====
 
 One advantage to using a regular grid is that the relationships and patterns between the tuning parameters and the model metrics are easily understood. The factorial nature of these designs allows for examination of each parameter separately with little confounding between parameters.
 
@@ -152,7 +158,7 @@ mlp_param %>%
 
 [[random-grid]]
 .Three tuning parameters with 15 points generated at random.
-image::figures/random-grid-1.png
+image::images/random-grid-1.png[]
 
 A much better approach is to use a set of experimental designs called _space-filling designs_. While different design methods have slightly different goals, they generally find a configuration of points that cover the parameter space with the smallest chance of overlapping or redundant values. Examples of such designs are Latin hypercubes (McKay, Beckman, and Conover 1979), maximum entropy designs (Shewry and Wynn 1987), maximum projection designs (Joseph, Gul, and Ba 2015), and others. See Santner et al. (2003) for an overview.
 
@@ -172,7 +178,7 @@ mlp_param %>%
 
 [[space-filling-design]]
 .Three tuning parameters with 20 points generated using a space-filling design.
-image::figures/space-filling-design-1.png
+image::images/space-filling-design-1.png[]
 
 While not perfect, this Latin hypercube design spaces the points further away from one another and allows a better exploration of the hyperparameter space.
 
@@ -208,7 +214,10 @@ cell_folds <- vfold_cv(cells)
 
 Because of the high degree of correlation between predictors, it makes sense to use PCA feature extraction to decorrelate the predictors. The following recipe contains steps to transform the predictors to increase symmetry, normalize them to be on the same scale, then conduct feature extraction. The number of PCA components to retain is also tuned, along with the model parameters.
 
-While the resulting PCA components are technically on the same scale, the lower-rank components tend to have a wider range than the higher-rank components. For this reason, we normalize again to coerce the predictors to have the same mean and variance.
+[WARNING]
+====
+ While the resulting PCA components are technically on the same scale, the lower-rank components tend to have a wider range than the higher-rank components. For this reason, we normalize again to coerce the predictors to have the same mean and variance. 
+====
 
 Many of the predictors have skewed distributions. Since PCA is variance based, extreme values can have a detrimental effect on these calculations. To counter this, let’s add a recipe step estimating a Yeo-Johnson transformation for each predictor (Yeo and Johnson 2000). While originally intended as a transformation of the outcome, it can also be used to estimate transformations that encourage more symmetric distributions. This step `step_YeoJohnson()` occurs in the recipe just prior to the initial normalization via `step_normalize()`. Then, let’s combine this feature engineering recipe with our neural network model specification `mlp_spec`.
 
@@ -240,7 +249,10 @@ mlp_param <-
   )
 ----
 
-In `step_pca()`, using zero PCA components is a shortcut to skip the feature extraction. In this way, the original predictors can be directly compared to the results that include PCA components.
+[NOTE]
+====
+ In `step_pca()`, using zero PCA components is a shortcut to skip the feature extraction. In this way, the original predictors can be directly compared to the results that include PCA components. 
+====
 
 The `tune_grid()` function is the primary function for conducting grid search. Its functionality is very similar to `fit_resamples()`, although it has additional arguments related to the grid:
 
@@ -288,7 +300,7 @@ autoplot(mlp_reg_tune) +
 
 [[regular-grid-plot]]
 .The regular grid results.
-image::figures/regular-grid-plot-1.png
+image::images/regular-grid-plot-1.png[]
 
 For these data, the amount of penalization has the largest impact on the area under the ROC curve. The number of epochs doesn’t appear to have a pronounced effect on performance. The change in the number of hidden units appears to matter most when the amount of regularization is low (and harms performance). There are several parameter configurations that have roughly equivalent performance, as seen using the function `show_best()`:
 
@@ -340,11 +352,14 @@ The `autoplot()` method will also work with these designs, although the format o
 
 [[sfd-plot]]
 .The `autoplot()` method results when used with a space-filling design.
-image::figures/sfd-plot-1.png
+image::images/sfd-plot-1.png[]
 
 This marginal effects plot (<<sfd-plot>>) shows the relationship of each parameter with the performance metric.
 
-Care should be taken when examining this plot; since a regular grid is not used, the values of the other tuning parameters can affect each panel.
+[WARNING]
+====
+ Care should be taken when examining this plot; since a regular grid is not used, the values of the other tuning parameters can affect each panel. 
+====
 
 The penalty parameter appears to result in better performance with smaller amounts of weight decay. This is the opposite of the results from the regular grid. Since each point in each panel is shared with the other three tuning parameters, the trends in one panel can be affected by the others. Using a regular grid, each point in each panel is equally averaged over the other parameters. For this reason, the effect of each parameter is better isolated with regular grids.
 
@@ -497,7 +512,10 @@ xgboost_tune <-
 
 This code is, based on what [.pkg]#usemodels# understands about the data, the minimal preprocessing required. For other models, operations like `step_normalize()` are added to fulfill the basic needs of the model. Notice that it is our responsibility, as the modeling practitioner, to choose what `resamples` to use for tuning, as well as what kind of `grid`.
 
-The [.pkg]#usemodels# package can also be used to create model fitting code with no tuning by setting the argument `tune = FALSE`.
+[NOTE]
+====
+ The [.pkg]#usemodels# package can also be used to create model fitting code with no tuning by setting the argument `tune = FALSE`. 
+====
 
 [[efficient-grids]]
 === Tools for Efficient Grid Search
@@ -540,7 +558,10 @@ c5_spec %>%
 
 Without the submodel optimization, the call to `tune_grid()` used 62.2 minutes to resample 100 submodels. With the optimization, the same call took 100 _seconds_ (a speedup of 37-fold). The reduced time is the difference in `tune_grid()` fitting 1000 models versus 10 models.
 
-Even though we fit the model with and without the submodel prediction trick, this optimization is automatically applied by [.pkg]#parsnip#.
+[NOTE]
+====
+ Even though we fit the model with and without the submodel prediction trick, this optimization is automatically applied by [.pkg]#parsnip#. 
+====
 
 ==== Parallel processing
 
@@ -573,7 +594,7 @@ To illustrate how the parallel processing works, we’ll use a case where there 
 
 [[one-resample-per-worker]]
 .Worker processes when parallel processing matches resamples to a specific worker process.
-image::figures/one-resample-per-worker-1.png
+image::images/one-resample-per-worker-1.png[]
 
 Note that each fold is assigned to its own worker process and, since only model parameters are being tuned, the preprocessing is conducted once per fold/worker. If fewer than 5 worker processes were used, some workers would receive multiple folds.
 
@@ -601,7 +622,7 @@ In tidymodels, validation sets are treated as a single resample. In these cases,
 
 [[distributed-tasks]]
 .Worker processes when preprocessing and modeling tasks are distributed to many workers.
-image::figures/distributed-tasks-1.png
+image::images/distributed-tasks-1.png[]
 
 Here, each worker process handles multiple folds and the preprocessing is needlessly repeated. For example, for the first fold, the preprocessing was computed 7 times instead of once.
 
@@ -624,7 +645,7 @@ First, let’s consider the raw execution times in <<parallel-times>>.
 
 [[parallel-times]]
 .Execution times for model tuning versus the number of workers using different delegation schemes. The diagonal black line indicates a linear speedup where the addition of a new worker process has maximal effect.
-image::figures/parallel-times-1.png
+image::images/parallel-times-1.png[]
 
 Since there were only five resamples, the number of cores used when `parallel_over = "resamples"` is limited to five.
 
@@ -639,19 +660,25 @@ We can also view these data in terms of speed-ups in <<parallel-speedups>>.
 
 [[parallel-speedups]]
 .Speed-ups for model tuning versus the number of workers using different delegation schemes.
-image::figures/parallel-speedups-1.png
+image::images/parallel-speedups-1.png[]
 
 The best speed-ups, for these data, occur when `parallel_over = "resamples"` and when the computations are expensive. However, in the latter case, remember that the previous analysis indicates that the overall model fits are slower.
 
 What is the benefit of using the submodel optimization method in conjunction with parallel processing? The C5.0 classification model shown in <<grid-search>> was also run in parallel with ten workers. The parallel computations took 13.3 seconds for a speed-up of 7.5-fold (both runs used the submodel optimization trick). Between the submodel optimization trick and parallel processing, there was a total speed-up of 282-fold over the most basic grid search code.
 
-Overall, note that the increased computational savings will vary from model-to-model and are also affected by the size of the grid, the number of resamples, etc. A very computationally efficient model may not benefit as much from parallel processing.
+[WARNING]
+====
+ Overall, note that the increased computational savings will vary from model-to-model and are also affected by the size of the grid, the number of resamples, etc. A very computationally efficient model may not benefit as much from parallel processing. 
+====
 
 ==== Access to global variables
 
 When using tidymodels, it is possible to use values in your local environment (usually the global environment) in model objects.
 
-What do we mean by ``environment'' here? Think of an environment in R as a place to store variables that you can work with. See the ``Environments'' chapter of Wickham (2019) to learn more.
+[NOTE]
+====
+ What do we mean by ``environment'' here? Think of an environment in R as a place to store variables that you can work with. See the ``Environments'' chapter of Wickham (2019) to learn more. 
+====
 
 If we define a variable to use as a model parameter and then pass it to a function like `linear_reg()`, the variable is typically defined in the global environment.
 
@@ -680,7 +707,10 @@ spec$args$penalty
 
 Notice that we have `env:  global` because this variable was created in the global environment. The model specification defined by `spec` works correctly when run in a user’s regular session because that session is also using the global environment; R can easily find the object `coef_penalty`.
 
-When such a model is evaluated with parallel workers, it may fail. Depending on the particular technology that is used for parallel processing, the workers may not have access to the global environment.
+[WARNING]
+====
+ When such a model is evaluated with parallel workers, it may fail. Depending on the particular technology that is used for parallel processing, the workers may not have access to the global environment. 
+====
 
 When writing code that will be run in parallel, it is a good idea to insert the actual data into the objects rather than the reference to the object. The [.pkg]#rlang# and [.pkg]#dplyr# packages can be very helpful for this. For example, the `!!` operator can splice a single value into an object:
 
@@ -768,7 +798,7 @@ As an example, in the multilayer perceptron tuning process with a regular grid e
 
 [[racing-process]]
 .The racing process for 20 tuning parameters and 10 resamples.
-image::figures/racing-process-1.png
+image::images/racing-process-1.png[]
 
 <<racing-process>> shows the results at several iterations in the process. The points shown in the panel with the first iteration show single ROC AUC values. As iterations progress, the points are averages of the resampled ROC statistics.
 
@@ -776,7 +806,10 @@ On the third iteration, the leading model configuration has changed and the algo
 
 The process continues to resample configurations that remain and the statistical analysis repeats with the current results. More submodels may be removed from consideration. Prior to the final resample, almost all submodels are eliminated and, at the last iteration, only 2 remain.footnote:[See Max Kuhn (2014) for more details on the computational aspects of this approach.]
 
-Racing methods can be more efficient than basic grid search as long as the interim analysis is fast and some parameter settings have poor performance. It also is most helpful when the model does _not_ have the ability to exploit submodel predictions.
+[WARNING]
+====
+ Racing methods can be more efficient than basic grid search as long as the interim analysis is fast and some parameter settings have poor performance. It also is most helpful when the model does _not_ have the ability to exploit submodel predictions. 
+====
 
 The [.pkg]#finetune# package contains functions for racing. The `tune_race_anova()` function conducts an Analysis of Variance (ANOVA) model to test for statistical significance of the different model configurations. The syntax to reproduce the filtering shown previously is:
 

@@ -7,7 +7,10 @@ Models are mathematical tools that can describe a system and capture relationshi
 
 Since the beginning of the twenty-first century, mathematical models have become ubiquitous in our daily lives, in both obvious and subtle ways. A typical day for many people might involve checking the weather to see when might be a good time to walk the dog, ordering a product from a website, typing a text message to a friend and having it autocorrected, and checking email. In each of these instances, there is a good chance that some type of model was involved. In some cases, the contribution of the model might be easily perceived (``You might also be interested in purchasing product _X_'') while in other cases, the impact could be the absence of something (e.g., spam email). Models are used to choose clothing that a customer might like, to identify a molecule that should be evaluated as a drug candidate, and might even be the mechanism that a nefarious company uses to avoid the discovery of cars that over-pollute. For better or worse, models are here to stay.
 
-There are two reasons that models permeate our lives today: - an abundance of software exists to create models, and - it has become easier to capture and store data, as well as make it accessible.
+[NOTE]
+====
+ There are two reasons that models permeate our lives today: - an abundance of software exists to create models, and - it has become easier to capture and store data, as well as make it accessible. 
+====
 
 This book focuses largely on software. It is obviously critical that software produces the correct relationships to represent the data. For the most part, determining mathematical correctness is possible, but the reliable creation of appropriate models requires more. In this chapter, we outline considerations for building or choose modeling software, the purposes of models, and where modeling sits in the broader data analysis process.
 
@@ -25,7 +28,10 @@ Data analysis and modeling software should espouse this idea.
 
 Second, modeling software should promote good scientific methodology. When working with complex predictive models, it can be easy to unknowingly commit errors related to logical fallacies or inappropriate assumptions. Many machine learning models are so adept at discovering patterns that they can effortlessly find empirical patterns in the data that fail to reproduce later. Some of these types of methodological errors are insidious in that the issue can go undetected until a later time when new data that contain the true result are obtained.
 
-As our models have become more powerful and complex, it has also become easier to commit latent errors.
+[WARNING]
+====
+ As our models have become more powerful and complex, it has also become easier to commit latent errors. 
+====
 
 This same principle also applies to programming. Whenever possible, the software should be able to protect users from committing mistakes. Software should make it easy for users to do the right thing.
 
@@ -56,7 +62,7 @@ An early method for evaluating such issues were probe-level models, or PLM’s (
 
 [[software-descr-examples]]
 .Two examples of how descriptive models can be used to illustrate specific patterns.
-image::figures/software-descr-examples-1.png
+image::images/software-descr-examples-1.png[]
 
 Another example of a descriptive model is the _locally estimated scatterplot smoothing_ model, more commonly known as LOESS (Cleveland 1979). Here, a smooth and flexible regression model is fit to a data set, usually with a single independent variable, and the fitted regression line is used to elucidate some trend in the data. These types of smoothers are used to discover potential ways to represent a variable in a model. This is demonstrated in <<software-descr-examples>>(b) where a nonlinear trend is illuminated by the flexible smoother. From this plot, it is clear that there is a highly nonlinear relationship between the sale price of a house and its latitude.
 
@@ -68,7 +74,10 @@ For example, the goal of a clinical trial might be to provide confirmation that 
 
 What are the important aspects of this type of analysis? Inferential modeling techniques typically produce some type of probabilistic output, such as a p-value, confidence interval, or posterior probability. Generally, to compute such a quantity, formal probabilistic assumptions must be made about the data and the underlying processes that generated the data. The quality of the statistical modeling results are highly dependent on these pre-defined assumptions as well as how much the observed data appear to agree with them. The most critical factors here are theoretical in nature: ``If my data were independent and the residuals follow distribution _X_, then test statistic _Y_ can be used to produce a p-value. Otherwise, the resulting p-value might be inaccurate.''
 
-One aspect of inferential analyses is that there tends to be a delayed feedback loop in understanding how well the data matches the model assumptions. In our clinical trial example, if statistical (and clinical) significance indicate that the new therapy should be available for patients to use, it still may be years before it is used in the field and enough data are generated for an independent assessment of whether the original statistical analysis led to the appropriate decision.
+[WARNING]
+====
+ One aspect of inferential analyses is that there tends to be a delayed feedback loop in understanding how well the data matches the model assumptions. In our clinical trial example, if statistical (and clinical) significance indicate that the new therapy should be available for patients to use, it still may be years before it is used in the field and enough data are generated for an independent assessment of whether the original statistical analysis led to the appropriate decision. 
+====
 
 ==== Predictive models
 
@@ -86,7 +95,10 @@ _Empirically driven models_ are created with more vague assumptions. These model
 
 === Connections Between Types of Models
 
-Note that we have defined the type of a model by how it is used, rather than its mathematical qualities.
+[NOTE]
+====
+ Note that we have defined the type of a model by how it is used, rather than its mathematical qualities. 
+====
 
 An ordinary linear regression model might fall into any of these three classes of model, depending on how it is used:
 
@@ -100,7 +112,10 @@ There is an additional connection between the types of models. While the primary
 
 This approach can be dangerous when statistical significance is used as the only measure of model quality. It is possible that this statistically optimized model has poor model accuracy, or performs poorly on some other measure of predictive capacity. While the model might not be used for prediction, how much should inferences be trusted from a model that has significant p-values but dismal accuracy? Predictive performance tends to be related to how close the model’s fitted values are to the observed data.
 
-If a model has limited fidelity to the data, the inferences generated by the model should be highly suspect. In other words, statistical significance may not be sufficient proof that a model is appropriate.
+[WARNING]
+====
+ If a model has limited fidelity to the data, the inferences generated by the model should be highly suspect. In other words, statistical significance may not be sufficient proof that a model is appropriate. 
+====
 
 This may seem intuitively obvious, but is often ignored in real-world data analysis.
 
@@ -127,7 +142,10 @@ In terms of the data or variables themselves, whether used for supervised or uns
 
 In what circumstances are models created? Are there steps that precede such an undertaking? Is model creation the first step in data analysis?
 
-There are always a few critical phases of data analysis that come before modeling.
+[NOTE]
+====
+ There are always a few critical phases of data analysis that come before modeling. 
+====
 
 First, there is the chronically underestimated process of _cleaning the data_. No matter the circumstances, you should investigate the data to make sure that they are applicable to your project goals, accurate, and appropriate. These steps can easily take more time than the rest of the data analysis process (depending on the circumstances).
 
@@ -139,7 +157,7 @@ The process of investigating the data may not be simple. Wickham and Grolemund (
 
 [[software-data-science-model]]
 .The data science process (from R for Data Science, used with permission).
-image::premade/data-science-model.png
+image::images/data-science-model.png[]
 
 This iterative process is especially true for modeling. <<software-modeling-process>> is meant to emulate the typical path to determining an appropriate model. The general phases are:
 
@@ -150,7 +168,7 @@ This iterative process is especially true for modeling. <<software-modeling-proc
 
 [[software-modeling-process]]
 .A schematic for the typical modeling process.
-image::premade/modeling-process.png
+image::images/modeling-process.png[]
 
 After an initial sequence of these tasks, more understanding is gained regarding which types of models are superior as well as which sub-populations of the data are not being effectively estimated. This leads to additional EDA and feature engineering, another round of modeling, and so on. Once the data analysis goals are achieved, the last steps are typically to finalize, document, and communicate the model. For predictive models, it is common at the end to validate the model on an additional set of data reserved for this specific purpose.
 

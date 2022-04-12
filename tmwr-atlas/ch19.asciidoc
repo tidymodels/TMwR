@@ -11,7 +11,10 @@ This chapter discusses two methods for quantifying the potential quality of a pr
 [[equivocal-zones]]
 === Equivocal Results
 
-In some cases, the amount of uncertainty associated with a prediction is too high to be trusted.
+[WARNING]
+====
+ In some cases, the amount of uncertainty associated with a prediction is too high to be trusted. 
+====
 
 If you had a model result indicating that you had a 51% chance of having contracted COVID-19, it would be natural to view the diagnosis with some skepticism. In fact, regulatory bodies often require many medical diagnostics to have an _equivocal zone_. This zone is a range of results where the prediction should not be reported to patients, such as some range of COVID-19 test results that are too uncertain to be reported to a patient. See Danowski et al. (1970) and Kerleguer et al. (2003) for examples. The same notion can be applied to models created outside of medical diagnostics.
 
@@ -89,7 +92,7 @@ The fitted class boundary is overlaid onto the test set in <<glm-boundaries>>. T
 
 [[glm-boundaries]]
 .Simulated two class data set with a logistic regression fit and decision boundary.
-image::figures/glm-boundaries-1.png
+image::images/glm-boundaries-1.png[]
 
 We could base the width of the band around the cutoff on how performance improves when the uncertain results are removed. However, we should also estimate the reportable rate (the expected proportion of usable results). For example, it would not be useful in real-world situations to have perfect performance but only release predictions on 2% of the samples passed to the model.
 
@@ -133,7 +136,10 @@ test_pred %>% count(.pred_with_eqz)
 
 Rows that are within latexmath:[$0.50\pm0.15$] are given a value of `[EQ]`.
 
-It is important to realize that `[EQ]` in this example is not a factor level, but an attribute of that column.
+[NOTE]
+====
+ It is important to realize that `[EQ]` in this example is not a factor level, but an attribute of that column. 
+====
 
 Since the factor levels are the same as the original data, confusion matrices and other statistics can be computed without error. When using standard functions from the [.pkg]#yardstick# package, the equivocal results are converted to `NA` and are not used in the calculations that use the hard class predictions. Notice the differences in these confusion matrices:
 
@@ -180,7 +186,7 @@ map_dfr(seq(0, .1, length.out = 40), eq_zone_results) %>%
 
 [[equivocal-zone-results]]
 .The effect of equivocal zones on model performance.
-image::figures/equivocal-zone-results-1.png
+image::images/equivocal-zone-results-1.png[]
 
 <<equivocal-zone-results>> shows us that accuracy improves by a few percentage points but at the cost of nearly 10% of predictions being unusable! The value of such a compromise depends on how the model predictions will be used.
 
@@ -201,7 +207,7 @@ For our example where the model and data are well-behaved, <<std-errors>> shows 
 
 [[std-errors]]
 .The effect of the standard error of prediction overlaid with the test set data.
-image::figures/std-errors-1.png
+image::images/std-errors-1.png[]
 
 Using the standard error as a measure to preclude samples from being predicted can also be applied to models with numeric outcomes. However, as shown in the next section, this may not always work.
 
@@ -291,7 +297,7 @@ These are fairly good results. <<chicago-2016>> visualizes the predictions along
 
 [[chicago-2016]]
 .Two weeks of 2016 predictions for the Chicago data along with 95% prediction intervals.
-image::figures/chicago-2016-1.png
+image::images/chicago-2016-1.png[]
 
 Given the scale of the ridership numbers, these results look particularly good for such a simple model. If this model were deployed, how well would it have done a few years later in June of 2020? The model successfully makes a prediction, as a predictive model almost always will when given input data:
 
@@ -343,15 +349,21 @@ Look at this terrible model performance visually in <<chicago-2020>>.
 
 [[chicago-2020]]
 .Two weeks of 2020 predictions for the Chicago data along with 95% prediction intervals.
-image::figures/chicago-2020-1.png
+image::images/chicago-2020-1.png[]
 
 Confidence and prediction intervals for linear regression expand as the data become more and more removed from the center of the training set. However, that effect is not dramatic enough to flag these predictions as being poor.
 
-Sometimes the statistics produced by models don’t measure the quality of predictions very well.
+[WARNING]
+====
+ Sometimes the statistics produced by models don’t measure the quality of predictions very well. 
+====
 
 This situation can be avoided by having a secondary methodology that can quantify how applicable the model is for any new prediction (i.e., the model’s _applicability domain_). There are a variety of methods to compute an applicability domain model, such as Jaworska, Nikolova-Jeliazkova, and Aldenberg (2005) or Netzeva et al. (2005). The approach used in this chapter is a fairly simple unsupervised method that attempts to measure how much (if any) a new data point is beyond the training data.footnote:[Bartley (2019) shows yet another method and applies it to ecological studies.]
 
-The idea is to accompany a prediction with a score that measures how similar the new point is to the training set.
+[NOTE]
+====
+ The idea is to accompany a prediction with a score that measures how similar the new point is to the training set. 
+====
 
 One method that works well uses principal component analysis (PCA) on the numeric predictor values. We’ll illustrate the process by using only two of the predictors that correspond to ridership at different stations (California and Austin stations). The training set are shown in panel (a) in <<pca-reference-dist>>. The ridership data for these stations are highly correlated and the two distributions shown in the scatter plot correspond to ridership on the weekends and week days.
 
@@ -359,7 +371,7 @@ The first step is to conduct PCA on the training data. The PCA scores for the tr
 
 [[pca-reference-dist]]
 .The PCA reference distribution based on the training set.
-image::figures/pca-reference-dist-1.png
+image::images/pca-reference-dist-1.png[]
 
 For a new sample, the PCA scores are computed along with the distance to the center of the training set.
 
@@ -367,13 +379,16 @@ However, what does it mean when a new sample has a distance of _X_? Since the PC
 
 One approach is to treat the distances from the training set data as ``normal''. For new samples, we can determine how the new distance compares to the range in the reference distribution (from the training set). A percentile can be computed for new samples that reflect how much of the training set is less extreme than the new samples.
 
-A percentile of 90% means that most of the training set data are closer to the data center than the new sample.
+[NOTE]
+====
+ A percentile of 90% means that most of the training set data are closer to the data center than the new sample. 
+====
 
 The plot in <<two-new-points>> overlays a testing set sample (triangle and dashed line) and a 2020 sample (circle and solid line) with the PCA distances from the training set.
 
 [[two-new-points]]
 .The reference distribution with two new points: one using the test set and one from the 2020 data.
-image::figures/two-new-points-1.png
+image::images/two-new-points-1.png[]
 
 The test set point has a distance of 1.28. It is in the 51.8% percentile of the training set distribution, indicating that it is snugly within the mainstream of the training set.
 
@@ -404,7 +419,7 @@ autoplot(pca_stat, distance) + labs(x = "distance")
 
 [[ap-autoplot]]
 .The results of using the `autoplot()` method on an applicable object.
-image::figures/ap-autoplot-1.png
+image::images/ap-autoplot-1.png[]
 
 The x-axis shows the values of the distance and the y-axis displays the distribution’s percentiles. For example, half of the training set samples had distances less than 3.7.
 
@@ -444,7 +459,10 @@ score(pca_stat, Chicago_2020) %>% select(starts_with("distance"))
 
 The 2020 distance values indicate that these predictor values are outside of the vast majority of data seen by the model at training time. These should be flagged so that the predictions are either not reported at all or taken with skepticism.
 
-One important aspect of this analysis concerns which predictors are used to develop the applicability domain model. In our analysis, we used the raw predictor columns. However, in building the model, PLS score features were used in their place. Which of these should `apd_pca()` use? The `apd_pca()` function can also take a recipe as the input (instead of a formula) so that the distances reflect the PLS scores instead of the individual predictor columns. You can evaluate both methods to understand which one gives more relevant results.
+[NOTE]
+====
+ One important aspect of this analysis concerns which predictors are used to develop the applicability domain model. In our analysis, we used the raw predictor columns. However, in building the model, PLS score features were used in their place. Which of these should `apd_pca()` use? The `apd_pca()` function can also take a recipe as the input (instead of a formula) so that the distances reflect the PLS scores instead of the individual predictor columns. You can evaluate both methods to understand which one gives more relevant results. 
+====
 
 [[trust-summary]]
 === Chapter Summary

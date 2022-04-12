@@ -118,7 +118,11 @@ linear_reg() %>% set_engine("stan") %>% translate()
 
 Note that `missing_arg()` is just a placeholder for the data that has yet to be provided.
 
-Note that we supplied a required `penalty` argument for the glmnet engine. Also, for the Stan and glmnet engines, the `family` argument was automatically added as a default. As will be shown later, this option can be changed.
+[NOTE]
+====
+ Note that we supplied a required `penalty` argument for the glmnet engine. Also, for the Stan and glmnet engines, the `family` argument was automatically added as a default. As will be shown later, this option can be changed. +
+
+====
 
 Let’s walk through how to predict the sale price of houses in the Ames data as a function of only longitude and latitude:footnote:[What are the differences between `fit()` and `fit_xy()`? The `fit_xy()` function always passes the data as-is to the underlying model function. It will not create dummy/indicator variables before doing so. When `fit()` is used with a model specification, this almost always means that dummy variables will be created from qualitative predictors. If the underlying function requires a matrix (like glmnet), it will make them. However, if the underlying function uses a formula, `fit()` just passes the formula to that function. We estimate that 99% of modeling functions using formulas make dummy variables. The other 1% include tree-based methods that do not require purely numeric predictors. See Section <<workflow-encoding>> for more about using formulas in tidymodels.]
 
@@ -267,7 +271,10 @@ lm_form_fit %>% extract_fit_engine() %>% vcov()
 #> Latitude         -1.424  -0.00060  0.03254
 ----
 
-Never pass the `fit` element of a [.pkg]#parsnip# model to a model prediction function, i.e., use `predict(lm_form_fit)` but _do not_ use `predict(lm_form_fit$fit)`. If the data were preprocessed in any way, incorrect predictions will be generated (sometimes, without errors). The underlying model’s prediction function has no idea if any transformations have been made to the data prior to running the model. See the next section for more on making predictions.
+[WARNING]
+====
+ Never pass the `fit` element of a [.pkg]#parsnip# model to a model prediction function, i.e., use `predict(lm_form_fit)` but _do not_ use `predict(lm_form_fit$fit)`. If the data were preprocessed in any way, incorrect predictions will be generated (sometimes, without errors). The underlying model’s prediction function has no idea if any transformations have been made to the data prior to running the model. See the next section for more on making predictions. 
+====
 
 One issue with some existing methods in base R is that the results are stored in a manner that may not be the most useful. For example, the `summary()` method for `lm` objects can be used to print the results of the model fit, including a table with parameter values, their uncertainty estimates, and p-values. These particular results can also be saved:
 
@@ -338,7 +345,10 @@ predict(lm_form_fit, new_data = ames_test_small)
 
 The row order of the predictions are always the same as the original data.
 
-Why are there leading dots in some of the column names? Some tidyverse and tidymodels arguments and return values contain periods. This is to protect against merging data with duplicate names. There are some data sets that contain predictors named `pred`!
+[NOTE]
+====
+ Why are there leading dots in some of the column names? Some tidyverse and tidymodels arguments and return values contain periods. This is to protect against merging data with duplicate names. There are some data sets that contain predictors named `pred`! 
+====
 
 These three rules make it easier to merge predictions with the original data:
 
