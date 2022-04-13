@@ -17,9 +17,10 @@ Models are mathematical tools that can describe a system and capture relationshi
 Since the beginning of the twenty-first century, mathematical models have become ubiquitous in our daily lives, in both obvious and subtle ways. A typical day for many people might involve checking the weather to see when might be a good time to walk the dog, ordering a product from a website, typing a text message to a friend and having it autocorrected, and checking email. In each of these instances, there is a good chance that some type of model was involved. In some cases, the contribution of the model might be easily perceived ("You might also be interested in purchasing product _X_") while in other cases, the impact could be the absence of something (e.g., spam email). Models are used to choose clothing that a customer might like, to identify a molecule that should be evaluated as a drug candidate, and might even be the mechanism that a nefarious company uses to avoid the discovery of cars that over-pollute.  For better or worse, models are here to stay.
 
 :::rmdnote
-There are two reasons that models permeate our lives today: 
-- an abundance of software exists to create models, and 
-- it has become easier to capture and store data, as well as make it accessible. 
+There are two reasons that models permeate our lives today:
+
+ * an abundance of software exists to create models, and 
+ * it has become easier to capture and store data, as well as make it accessible. 
 :::
 
 This book focuses largely on software. It is obviously critical that software produces the correct relationships to represent the data. For the most part, determining mathematical correctness is possible, but the reliable creation of appropriate models requires more. In this chapter, we outline considerations for building or choose modeling software, the purposes of models, and where modeling sits in the broader data analysis process.

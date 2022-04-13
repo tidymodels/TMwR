@@ -64,16 +64,14 @@ info_new <- tibble(
   name = map_chr(needed_json, "name", .default = NA),
   blog = map_chr(needed_json, "blog", .default = NA)
 )
-contribs_all <- bind_rows(
-  contribs_old, 
-  contribs_new %>% left_join(info_new, by = "login")
-)
+contribs_new <- contribs_new %>% left_join(info_new, by = "login")
+contribs_all <- bind_rows(contribs_old, contribs_new) %>% arrange(login)
 write_csv(contribs_all, "contributors.csv")
 ```
 
 We are so thankful for the contributions, help, and perspectives of people who have supported us in this project. There are several we would like to thank in particular.
 
-We would like to thank our RStudio colleagues on the `r pkg(tidymodels)` team (Davis Vaughan, Hannah Frick, and Emil Hvitfeldt) as well as the rest of our coworkers on the RStudio open-source team. Thank you to Desirée De Leon for the site design of the online work. We would also like to thank our technical reviewers, Chelsea Parlett-Pelleriti and Dan Simpson, for their detailed, insightful feedback that substantively improved this book, as well as our editor Nicole Tache for her perspective and guidance during the process of writing and publishing.
+We would like to thank our RStudio colleagues on the `r pkg(tidymodels)` team (Davis Vaughan, Hannah Frick, Emil Hvitfeldt, and Simon Couch) as well as the rest of our coworkers on the RStudio open-source team. Thank you to Desirée De Leon for the site design of the online work. We would also like to thank our technical reviewers, Chelsea Parlett-Pelleriti and Dan Simpson, for their detailed, insightful feedback that substantively improved this book, as well as our editors, Nicole Tache and Rita Fernando, for their perspective and guidance during the process of writing and publishing.
 
 
 ```{r, results = "asis", echo = FALSE, message = FALSE}
