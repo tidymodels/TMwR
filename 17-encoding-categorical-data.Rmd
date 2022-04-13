@@ -260,7 +260,7 @@ Feature hashing is fast and efficient but has a few downsides. For example, diff
 ```{r encoding-hash, echo=FALSE}
 hash_table <-
   prep(ames_hash) %>% 
-  bake(new_data = NULL, starts_with("Neighborhood_")) %>%
+  bake(new_data = NULL, starts_with("dummyhash_Neighborhood_")) %>%
   bind_cols(ames_train %>% select(Neighborhood)) %>%
   distinct() %>%
   select(-Neighborhood) %>%
