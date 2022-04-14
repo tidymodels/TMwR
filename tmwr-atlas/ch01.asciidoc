@@ -9,7 +9,10 @@ Since the beginning of the twenty-first century, mathematical models have become
 
 [NOTE]
 ====
- There are two reasons that models permeate our lives today: - an abundance of software exists to create models, and - it has become easier to capture and store data, as well as make it accessible. 
+ There are two reasons that models permeate our lives today:
+
+* an abundance of software exists to create models, and
+* it has become easier to capture and store data, as well as make it accessible. 
 ====
 
 This book focuses largely on software. It is obviously critical that software produces the correct relationships to represent the data. For the most part, determining mathematical correctness is possible, but the reliable creation of appropriate models requires more. In this chapter, we outline considerations for building or choose modeling software, the purposes of models, and where modeling sits in the broader data analysis process.

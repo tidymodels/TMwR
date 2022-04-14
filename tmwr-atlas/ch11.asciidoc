@@ -58,11 +58,11 @@ lm_models <-
                # Options to `fit_resamples()`: 
                resamples = ames_folds, control = keep_pred)
 #> i 1 of 3 resampling: basic_lm
-#> ✓ 1 of 3 resampling: basic_lm (768ms)
+#> ✓ 1 of 3 resampling: basic_lm (766ms)
 #> i 2 of 3 resampling: interact_lm
-#> ✓ 2 of 3 resampling: interact_lm (776ms)
+#> ✓ 2 of 3 resampling: interact_lm (825ms)
 #> i 3 of 3 resampling: splines_lm
-#> ✓ 3 of 3 resampling: splines_lm (901ms)
+#> ✓ 3 of 3 resampling: splines_lm (920ms)
 lm_models
 #> # A workflow set/tibble: 3 × 4
 #>   wflow_id    info             option    result   

@@ -339,31 +339,31 @@ full_results_time <-
                       control = grid_ctrl, verbose = TRUE)
    )
 #> i  1 of 12 tuning:     MARS
-#> ✓  1 of 12 tuning:     MARS (3s)
+#> ✓  1 of 12 tuning:     MARS (2.7s)
 #> i  2 of 12 tuning:     CART
-#> ✓  2 of 12 tuning:     CART (28.9s)
+#> ✓  2 of 12 tuning:     CART (27.6s)
 #> i    No tuning parameters. `fit_resamples()` will be attempted
 #> i  3 of 12 resampling: CART_bagged
-#> ✓  3 of 12 resampling: CART_bagged (19.5s)
+#> ✓  3 of 12 resampling: CART_bagged (18.5s)
 #> i  4 of 12 tuning:     RF
 #> i Creating pre-processing data to finalize unknown parameter: mtry
-#> ✓  4 of 12 tuning:     RF (1m 11.4s)
+#> ✓  4 of 12 tuning:     RF (1m 9.2s)
 #> i  5 of 12 tuning:     boosting
-#> ✓  5 of 12 tuning:     boosting (2m 11.1s)
+#> ✓  5 of 12 tuning:     boosting (2m 4.1s)
 #> i  6 of 12 tuning:     Cubist
-#> ✓  6 of 12 tuning:     Cubist (2m 11.5s)
+#> ✓  6 of 12 tuning:     Cubist (2m 0.7s)
 #> i  7 of 12 tuning:     SVM_radial
-#> ✓  7 of 12 tuning:     SVM_radial (43.2s)
+#> ✓  7 of 12 tuning:     SVM_radial (40.2s)
 #> i  8 of 12 tuning:     SVM_poly
-#> ✓  8 of 12 tuning:     SVM_poly (8m 18.4s)
+#> ✓  8 of 12 tuning:     SVM_poly (7m 46.4s)
 #> i  9 of 12 tuning:     KNN
-#> ✓  9 of 12 tuning:     KNN (49.3s)
+#> ✓  9 of 12 tuning:     KNN (43.2s)
 #> i 10 of 12 tuning:     neural_network
-#> ✓ 10 of 12 tuning:     neural_network (1m 29.6s)
+#> ✓ 10 of 12 tuning:     neural_network (1m 22s)
 #> i 11 of 12 tuning:     full_quad_linear_reg
-#> ✓ 11 of 12 tuning:     full_quad_linear_reg (1m 3.9s)
+#> ✓ 11 of 12 tuning:     full_quad_linear_reg (57.9s)
 #> i 12 of 12 tuning:     full_quad_KNN
-#> ✓ 12 of 12 tuning:     full_quad_KNN (3m 32.3s)
+#> ✓ 12 of 12 tuning:     full_quad_KNN (2m 59.8s)
 
 num_grid_models <- nrow(collect_metrics(grid_results, summarize = FALSE))
 ----
@@ -441,7 +441,7 @@ image::images/workflow-sets-autoplot-1.png[]
 
 There are also methods for `collect_predictions()` and `collect_metrics()`.
 
-The example model screening with our concrete mixture data fits a total of 25,200 models. Using 20 workers in parallel, the estimation process took 0.4 hours to complete.
+The example model screening with our concrete mixture data fits a total of 25,200 models. Using 20 workers in parallel, the estimation process took 0.3 hours to complete.
 
 [[racing-example]]
 === Efficiently Screening Models
