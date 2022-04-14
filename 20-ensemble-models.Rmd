@@ -172,6 +172,27 @@ ens
 ```
 ```{r ensembles-details, include = FALSE}
 res <- stacks:::top_coefs(ens)
+model_key <- 
+  tribble(
+    ~ type, ~ descr,
+    'bag_tree', "bagged tree",
+    'boost_tree', "boosted tree",
+    'cubist_rules', "Cubist",
+    'decision_tree', "decision tree",
+    'linear_reg', "linear regression",
+    'mars', "multivariate adaptive regression splines",
+    'mlp', "neural network",
+    'nearest_neighbor', "K-nearest neighbors",
+    'rand_forest', "random forest",
+    'svm_poly', "support vector machine (polynomial)",
+    'svm_rbf', "support vector machine (RBF)"
+  )
+
+res <- left_join(res, model_key, by = "type")
+top_two <- paste(res$descr[1:2], collapse = " and ")
+blending_alt <- 
+  glue::glue('fig.alt = "Blending coefficients for the stacking ensemble. The {top_two} models have the largest effects on the ensemble predictions."')
+
 num_coefs <- xfun::numbers_to_words(nrow(res))
 num_types <- xfun::numbers_to_words(length(unique(res$type)))
 ```
@@ -188,10 +209,10 @@ autoplot(ens, "weights") +
 ```{r blending-weights, ref.label = "ensembles-blending-weights"}
 #| echo = FALSE,
 #| fig.cap = "Blending coefficients for the stacking ensemble.",
-#| fig.alt = "Blending coefficients for the stacking ensemble. The boosted tree and Cubist models has the largest effects on the ensemble predictions."
+#| fig.alt = blending_alt
 ```
 
-The boosted tree and Cubist models have the largest contributions to the ensemble. For this ensemble, the outcome is predicted with the equation:
+The `r top_two` models have the largest contributions to the ensemble. For this ensemble, the outcome is predicted with the equation:
 
 ```{r ensembles-equation, echo = FALSE, results = "asis", message = FALSE, warning = FALSE}
 all_members <- 
