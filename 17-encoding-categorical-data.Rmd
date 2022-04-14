@@ -269,11 +269,10 @@ hash_table <-
   count(value)
 
 hash_table %>%
-  kable(col.names = c("Number of neighborhoods within a hash feature", 
-                      "Number of occurrences"),
-        caption = "The number of hash features at each number of neighborhoods.",
-        label = "encoding-hash") %>%
-  kable_styling(full_width = FALSE)
+  knitr::kable(col.names = c("Number of neighborhoods within a hash feature", 
+                             "Number of occurrences"),
+               caption = "The number of hash features at each number of neighborhoods.",
+               label = "encoding-hash")
 ```
 
 The number of neighborhoods mapped to each hash value varies between `r min(hash_table$value)` and `r max(hash_table$value)`. All of the hash values greater than one are examples of hash collisions.
