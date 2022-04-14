@@ -442,7 +442,7 @@ library(tidymodels)
 #> ✓ dials        0.1.1          ✓ rsample      0.1.1     
 #> ✓ dplyr        1.0.8          ✓ tibble       3.1.6     
 #> ✓ ggplot2      3.3.5          ✓ tidyr        1.2.0     
-#> ✓ infer        1.0.0          ✓ tune         0.2.0.9000
+#> ✓ infer        1.0.0          ✓ tune         0.2.0     
 #> ✓ modeldata    0.1.1          ✓ workflows    0.2.6     
 #> ✓ parsnip      0.2.1.9001     ✓ workflowsets 0.2.1     
 #> ✓ purrr        0.3.4          ✓ yardstick    0.0.9
@@ -451,7 +451,7 @@ library(tidymodels)
 #> x dplyr::filter()  masks stats::filter()
 #> x dplyr::lag()     masks stats::lag()
 #> x recipes::step()  masks stats::step()
-#> • Search for functions across packages at https://www.tidymodels.org/find/
+#> • Dig deeper into tidy modeling with R at https://www.tmwr.org
 ```
 
 If you have used the tidyverse, you'll notice some familiar names as a few tidyverse packages, such as <span class="pkg">dplyr</span> and <span class="pkg">ggplot2</span>, are loaded together with the tidymodels packages. We've already said that the tidymodels framework applies tidyverse principles to modeling, but the tidymodels framework also literally builds on some of the most fundamental tidyverse packages like these.

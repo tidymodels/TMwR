@@ -116,7 +116,7 @@ In these situations, the data set will have multiple rows per experimental unit.
 
 ## Other Considerations for a Data Budget
 
-When deciding how to spend the data available to you, keep a few more things in mind. First, it is critical to quarantine the test set from any model building activities. As your read this book, notice which data are exposed to the model at any given time.
+When deciding how to spend the data available to you, keep a few more things in mind. First, it is critical to quarantine the test set from any model building activities. As you read this book, notice which data are exposed to the model at any given time.
 
 :::rmdwarning
 The problem of _information leakage_ occurs when data outside of the training set are used in the modeling process. 

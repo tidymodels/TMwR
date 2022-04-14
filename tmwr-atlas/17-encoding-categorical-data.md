@@ -433,12 +433,29 @@ Feature hashing is fast and efficient but has a few downsides. For example, diff
  </thead>
 <tbody>
   <tr>
-
+   <td style="text-align:right;"> 0 </td>
+   <td style="text-align:right;"> 1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> 1 </td>
+   <td style="text-align:right;"> 7 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> 2 </td>
+   <td style="text-align:right;"> 4 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> 3 </td>
+   <td style="text-align:right;"> 3 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> 4 </td>
+   <td style="text-align:right;"> 1 </td>
   </tr>
 </tbody>
 </table>
 
-The number of neighborhoods mapped to each hash value varies between \infty{} and -\infty{}. All of the hash values greater than one are examples of hash collisions.
+The number of neighborhoods mapped to each hash value varies between 0 and 4. All of the hash values greater than one are examples of hash collisions.
 
 What are some things to consider when using feature hashing?
 

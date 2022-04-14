@@ -273,13 +273,7 @@ The regularized linear regression meta-learning model contained five blending co
 autoplot(ens, "weights") +
   geom_text(aes(x = weight + 0.01, label = model), hjust = 0) + 
   theme(legend.position = "none") +
-  lims(x = c(-0.01, 0.75))
-```
-
-
-```
-#> Warning: Removed 1 rows containing missing values (position_stack).
-#> Warning: Removed 1 rows containing missing values (geom_text).
+  lims(x = c(-0.01, 0.8))
 ```
 
 <div class="figure" style="text-align: center">
@@ -350,4 +344,4 @@ This is moderately better than our best single model. It is fairly common for st
 
 ## Chapter Summary {#ensembles-summary}
 
-This chapter demonstratee how to combine different models into an ensemble for better predictive performance. The process of creating the ensemble can automatically eliminate candidate models to find a small subset that improves performance. The <span class="pkg">stacks</span> package has a fluent interface for combining resampling and tuning results into a meta-model. 
+This chapter demonstrated how to combine different models into an ensemble for better predictive performance. The process of creating the ensemble can automatically eliminate candidate models to find a small subset that improves performance. The <span class="pkg">stacks</span> package has a fluent interface for combining resampling and tuning results into a meta-model. 

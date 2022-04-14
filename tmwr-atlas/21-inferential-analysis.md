@@ -373,8 +373,8 @@ where
 
 ```{=tex}
 \begin{align}
-\log(\lambda_{nz}) = \beta_0 + \beta_1x_1 + \ldots + \beta_px_ \notag \\
-\log\left(\frac{\pi}{1-\pi}\right) = \gamma_0 + \gamma_1z_1 + \ldots + \gamma_qz_q \notag
+\log(\lambda_{nz}) &= \beta_0 + \beta_1x_1 + \ldots + \beta_px_p \notag \\
+\log\left(\frac{\pi}{1-\pi}\right) &= \gamma_0 + \gamma_1z_1 + \ldots + \gamma_qz_q \notag 
 \end{align}
 ```
 
