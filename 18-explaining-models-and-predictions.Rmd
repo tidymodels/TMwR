@@ -106,7 +106,7 @@ Dealing with significant feature engineering transformations during model explai
 
 ## Local Explanations
 
-Local model explanations provide information about a prediction for a single observation. For example, let's consider an older duplex in the North Ames neighborhood (Section \@ref(exploring-important-features)):
+Local model explanations provide information about a prediction for a single observation. For example, let's consider an older duplex in the North Ames neighborhood (Section \@ref(exploring-features-of-homes-in-ames)):
 
 ```{r explain-duplex}
 duplex <- vip_train[120,]
