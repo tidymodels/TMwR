@@ -37,7 +37,7 @@ jobs:
           git config --local user.email "$GITHUB_ACTOR@users.noreply.github.com"
           
       - name: Build site
-        run: Rscript -e 'bookdown::render_book("index.Rmd", output_format = html_book(keep_md = TRUE), quiet = TRUE)'
+        run: Rscript -e 'bookdown::render_book("index.Rmd", output_format = bookdown::html_book(keep_md = TRUE), quiet = TRUE)'
 
       - name: Deploy to Netlify
         if: contains(env.isExtPR, 'false')
