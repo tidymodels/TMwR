@@ -52,7 +52,7 @@ Imports:
     mixOmics,
     modeldata,
     multilevelmod,
-    nlme,
+    nlme (>= 3.1-157),
     nnet,
     parsnip,
     patchwork,
