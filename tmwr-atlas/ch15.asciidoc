@@ -441,7 +441,7 @@ image::images/workflow-sets-autoplot-1.png[]
 
 There are also methods for `collect_predictions()` and `collect_metrics()`.
 
-The example model screening with our concrete mixture data fits a total of 25,200 models. Using 20 workers in parallel, the estimation process took 0.3 hours to complete.
+The example model screening with our concrete mixture data fits a total of 25,200 models. Using 2 workers in parallel, the estimation process took 1.9 hours to complete.
 
 [[racing-example]]
 === Efficiently Screening Models
@@ -506,7 +506,7 @@ autoplot(
 .Estimated RMSE (and approximate confidence intervals) for the best model configuration in each workflow in the racing results.
 image::images/workflow-set-racing-ranks-1.png[]
 
-Overall, the racing approach estimated a total of 4,594 models, 18.23% of the full set of 25,200 models in the full grid. As a result, the racing approach was 2.3-fold faster.
+Overall, the racing approach estimated a total of 4,652 models, 18.46% of the full set of 25,200 models in the full grid. As a result, the racing approach was 4.5-fold faster.
 
 Did we get similar results? For both objects, we rank the results, merge them together, and plot them against one another in <<racing-concordance>>.
 
@@ -538,7 +538,7 @@ matched_results %>%
 .Estimated RMSE for the full grid and racing results.
 image::images/racing-concordance-1.png[]
 
-While the racing approach selected the same candidate parameters as the complete grid for only 41.67% of the models, the performance metrics of the models selected by racing were nearly equal. The correlation of RMSE values was 0.971 and the rank correlation was 0.951. This indicates that, within a model, there were multiple tuning parameter combinations that had nearly identical results.
+While the racing approach selected the same candidate parameters as the complete grid for only 41.67% of the models, the performance metrics of the models selected by racing were nearly equal. The correlation of RMSE values was 0.968 and the rank correlation was 0.951. This indicates that, within a model, there were multiple tuning parameter combinations that had nearly identical results.
 
 === Finalizing a Model
 

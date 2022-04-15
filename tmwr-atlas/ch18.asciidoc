@@ -105,12 +105,12 @@ rf_breakdown <- predict_parts(explainer = explainer_rf, new_observation = duplex
 rf_breakdown
 #>                                       contribution
 #> random forest: intercept                     5.221
-#> random forest: Gr_Liv_Area = 1040           -0.076
-#> random forest: Year_Built = 1949            -0.075
-#> random forest: Bldg_Type = 3                -0.024
-#> random forest: Longitude = -93.608903       -0.040
-#> random forest: Latitude = 42.035841         -0.029
-#> random forest: Neighborhood = 1             -0.006
+#> random forest: Year_Built = 1949            -0.076
+#> random forest: Gr_Liv_Area = 1040           -0.075
+#> random forest: Bldg_Type = 3                -0.027
+#> random forest: Longitude = -93.608903       -0.043
+#> random forest: Latitude = 42.035841         -0.028
+#> random forest: Neighborhood = 1             -0.003
 #> random forest: prediction                    4.969
 ----
 
@@ -130,12 +130,12 @@ predict_parts(
 )
 #>                                       contribution
 #> random forest: intercept                     5.221
-#> random forest: Gr_Liv_Area = 1040           -0.076
-#> random forest: Bldg_Type = 3                -0.018
-#> random forest: Longitude = -93.608903       -0.021
-#> random forest: Year_Built = 1949            -0.100
-#> random forest: Latitude = 42.035841         -0.029
-#> random forest: Neighborhood = 1             -0.006
+#> random forest: Gr_Liv_Area = 1040           -0.075
+#> random forest: Bldg_Type = 3                -0.019
+#> random forest: Longitude = -93.608903       -0.023
+#> random forest: Year_Built = 1949            -0.104
+#> random forest: Latitude = 42.035841         -0.028
+#> random forest: Neighborhood = 1             -0.003
 #> random forest: prediction                    4.969
 ----
 

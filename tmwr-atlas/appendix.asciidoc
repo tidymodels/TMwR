@@ -16,36 +16,36 @@ This Appendix provides recommendations for baseline levels of preprocessing that
 * *normalize*: Should predictors be centered and scaled?
 * *transform*: Is it helpful to transform predictors to be more symmetric?
 
-The information in <<preprocessing>> is not exhaustive and somewhat depends on the implementation. For example, as noted below the table, some models may not require a particular preprocessing operation but the implementation may require it. In the table, ✓ indicates that the method is required for the model and × indicates that it is not. The ◌ symbol means that the model _may_ be helped by the technique but it is not required.
+The information in <<preprocessing>> is not exhaustive and somewhat depends on the implementation. For example, as noted below the table, some models may not require a particular preprocessing operation but the implementation may require it. In the table, ✔ indicates that the method is required for the model and × indicates that it is not. The ◌ symbol means that the model _may_ be helped by the technique but it is not required.
 
 [[preprocessing]]
 .Preprocessing methods for different models.
 [width="99%",cols="<40%,^8%,^4%,^9%,^15%,^12%,^12%",options="header",]
 |===
 |model |dummy |zv |impute |decorrelate |normalize |transform
-|bag_mars() |✓ |× |✓ |◌ |× |◌
+|bag_mars() |✔ |× |✔ |◌ |× |◌
 |bag_tree() |× |× |× |◌¹ |× |×
 |bart() |× |× |× |◌¹ |× |×
-|boost_tree() |×⁺ |◌ |✓⁺ |◌¹ |× |×
+|boost_tree() |×⁺ |◌ |✔⁺ |◌¹ |× |×
 |C5_rules() |× |× |× |× |× |×
 |cubist_rules() |× |× |× |× |× |×
 |decision_tree() |× |× |× |◌¹ |× |×
-|discrim_flexible() |✓ |× |✓ |✓ |× |◌
-|discrim_linear() |✓ |✓ |✓ |✓ |× |◌
-|discrim_regularized() |✓ |✓ |✓ |✓ |× |◌
-|gen_additive_mod() |✓ |✓ |✓ |✓ |× |◌
-|linear_reg() |✓ |✓ |✓ |✓ |× |◌
-|logistic_reg() |✓ |✓ |✓ |✓ |× |◌
-|mars() |✓ |× |✓ |◌ |× |◌
-|mlp() |✓ |✓ |✓ |✓ |✓ |✓
-|multinom_reg() |✓ |✓ |✓ |✓ |×⁺ |◌
-|naive_Bayes() |× |✓ |✓ |◌¹ |× |×
-|nearest_neighbor() |✓ |✓ |✓ |◌ |✓ |✓
-|pls() |✓ |✓ |✓ |× |✓ |✓
-|poisson_reg() |✓ |✓ |✓ |✓ |× |◌
-|rand_forest() |× |◌ |✓⁺ |◌¹ |× |×
-|rule_fit() |✓ |× |✓ |◌¹ |✓ |×
-|svm_*() |✓ |✓ |✓ |✓ |✓ |✓
+|discrim_flexible() |✔ |× |✔ |✔ |× |◌
+|discrim_linear() |✔ |✔ |✔ |✔ |× |◌
+|discrim_regularized() |✔ |✔ |✔ |✔ |× |◌
+|gen_additive_mod() |✔ |✔ |✔ |✔ |× |◌
+|linear_reg() |✔ |✔ |✔ |✔ |× |◌
+|logistic_reg() |✔ |✔ |✔ |✔ |× |◌
+|mars() |✔ |× |✔ |◌ |× |◌
+|mlp() |✔ |✔ |✔ |✔ |✔ |✔
+|multinom_reg() |✔ |✔ |✔ |✔ |×⁺ |◌
+|naive_Bayes() |× |✔ |✔ |◌¹ |× |×
+|nearest_neighbor() |✔ |✔ |✔ |◌ |✔ |✔
+|pls() |✔ |✔ |✔ |× |✔ |✔
+|poisson_reg() |✔ |✔ |✔ |✔ |× |◌
+|rand_forest() |× |◌ |✔⁺ |◌¹ |× |×
+|rule_fit() |✔ |× |✔ |◌¹ |✔ |×
+|svm_*() |✔ |✔ |✔ |✔ |✔ |✔
 |===
 
 Footnotes:

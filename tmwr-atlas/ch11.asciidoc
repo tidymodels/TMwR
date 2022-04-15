@@ -152,10 +152,10 @@ corrr::correlate(rsq_wider %>% select(-id), quiet = TRUE)
 #> # A tibble: 4 × 5
 #>   term          random_forest basic_lm interact_lm splines_lm
 #>   <chr>                 <dbl>    <dbl>       <dbl>      <dbl>
-#> 1 random_forest        NA        0.876       0.878      0.879
-#> 2 basic_lm              0.876   NA           0.993      0.997
-#> 3 interact_lm           0.878    0.993      NA          0.987
-#> 4 splines_lm            0.879    0.997       0.987     NA
+#> 1 random_forest        NA        0.887       0.888      0.889
+#> 2 basic_lm              0.887   NA           0.993      0.997
+#> 3 interact_lm           0.888    0.993      NA          0.987
+#> 4 splines_lm            0.889    0.997       0.987     NA
 ----
 
 These correlations are high, and indicate that, across models, there are large within-resample correlations. To see this visually in <<rsquared-resamples>>, the R2 statistics are shown for each model with lines connecting the resamples:
@@ -258,7 +258,7 @@ interact_lm
 
 Fold01
 
-0.8598
+0.8615
 
 random_forest
 
@@ -436,7 +436,7 @@ glimpse(model_post)
 #> Rows: 40,000
 #> Columns: 2
 #> $ model     <chr> "random_forest", "random_forest", "random_forest", "random_fores…
-#> $ posterior <dbl> 0.8493, 0.8476, 0.8484, 0.8451, 0.8402, 0.8417, 0.8399, 0.8394, …
+#> $ posterior <dbl> 0.8293, 0.8238, 0.8276, 0.8209, 0.8213, 0.8132, 0.8241, 0.8177, …
 ----
 
 The four posterior distributions are visualized in <<four-posteriors>>.
@@ -501,7 +501,7 @@ summary(rqs_diff) %>%
 #> # A tibble: 1 × 6
 #>   contrast               probability    mean   lower  upper  size
 #>   <chr>                        <dbl>   <dbl>   <dbl>  <dbl> <dbl>
-#> 1 splines_lm vs basic_lm        1.00 0.00910 0.00486 0.0134     0
+#> 1 splines_lm vs basic_lm           1 0.00913 0.00507 0.0131     0
 ----
 
 The `probability` column reflects the proportion of the posterior that is greater than zero. This is the probability that the positive difference is real. The value is not close to zero, providing a strong case for statistical significance, i.e., the idea that statistically the actual difference is not zero.

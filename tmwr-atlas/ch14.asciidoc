@@ -47,11 +47,11 @@ The default parameter ranges for the two tuning parameters `cost` and `rbf_sigma
 ----
 cost()
 #> Cost (quantitative)
-#> Transformer:  log-2 
+#> Transformer: log-2 [1e-100, Inf]
 #> Range (transformed scale): [-10, 5]
 rbf_sigma()
 #> Radial Basis Function sigma (quantitative)
-#> Transformer:  log-10 
+#> Transformer: log-10 [1e-100, Inf]
 #> Range (transformed scale): [-10, 0]
 ----
 
@@ -528,7 +528,7 @@ The output for last ten iterations was:
 #> 40 ◯ accept suboptimal  roc_auc=0.89606  (+/-0.008203)
 #> 41 ─ discard suboptimal roc_auc=0.87556  (+/-0.009272)
 #> 42 ─ discard suboptimal roc_auc=0.87198  (+/-0.009301)
-#> 43 x restart from best  roc_auc=0.89801  (+/-0.008224)
+#> 43 ✖ restart from best  roc_auc=0.89801  (+/-0.008224)
 #> 44 ◯ accept suboptimal  roc_auc=0.89006  (+/-0.008789)
 #> 45 + better suboptimal  roc_auc=0.89781  (+/-0.008104)
 #> 46 ◯ accept suboptimal  roc_auc=0.89563  (+/-0.008601)

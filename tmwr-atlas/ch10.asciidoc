@@ -73,8 +73,8 @@ estimate_perf(rf_fit, ames_train)
 #> # A tibble: 2 × 4
 #>   .metric .estimate object data 
 #>   <chr>       <dbl> <chr>  <chr>
-#> 1 rmse       0.0367 rf_fit train
-#> 2 rsq        0.959  rf_fit train
+#> 1 rmse       0.0365 rf_fit train
+#> 2 rsq        0.960  rf_fit train
 estimate_perf(lm_fit, ames_train)
 #> # A tibble: 2 × 4
 #>   .metric .estimate object data 
@@ -95,7 +95,7 @@ estimate_perf(rf_fit, ames_test)
 #> 2 rsq        0.852  rf_fit test
 ----
 
-The test set RMSE estimate, 0.0704, is _much worse than the training set_ value of 0.0367! Why did this happen?
+The test set RMSE estimate, 0.0704, is _much worse than the training set_ value of 0.0365! Why did this happen?
 
 Many predictive models are capable of learning complex trends from the data. In statistics, these are commonly referred to as _low bias models_.
 
@@ -114,7 +114,7 @@ For both models, <<rmse-results>> summarizes the RMSE estimate for the training 
 |===
 |object |train |test
 |lm_fit |0.0754 |0.0736
-|rf_fit |0.0367 |0.0704
+|rf_fit |0.0365 |0.0704
 |===
 
 Notice that the linear regression model is consistent between training and testing, because of its limited complexity.footnote:[It is possible for a linear model to nearly memorize the training set, like the random forest model did. In the `ames_rec` object, change the number of spline terms for `longitude` and `latitude` to a large number (say 1000). This would produce a model fit with a very small resubstitution RMSE and a test set RMSE that is much larger.]
@@ -450,8 +450,8 @@ collect_metrics(rf_res)
 #> # A tibble: 2 × 6
 #>   .metric .estimator   mean     n std_err .config             
 #>   <chr>   <chr>       <dbl> <int>   <dbl> <chr>               
-#> 1 rmse    standard   0.0721    10 0.00306 Preprocessor1_Model1
-#> 2 rsq     standard   0.832     10 0.0108  Preprocessor1_Model1
+#> 1 rmse    standard   0.0721    10 0.00305 Preprocessor1_Model1
+#> 2 rsq     standard   0.831     10 0.0108  Preprocessor1_Model1
 ----
 
 These are the resampling estimates averaged over the individual replicates. To get the metrics for each resample, use the option `summarize = FALSE`
@@ -469,7 +469,7 @@ assess_res
 #>   <chr>  <dbl> <int>      <dbl> <chr>               
 #> 1 Fold01  5.10    10       5.09 Preprocessor1_Model1
 #> 2 Fold01  4.92    27       4.90 Preprocessor1_Model1
-#> 3 Fold01  5.20    47       5.08 Preprocessor1_Model1
+#> 3 Fold01  5.21    47       5.08 Preprocessor1_Model1
 #> 4 Fold01  5.13    52       5.10 Preprocessor1_Model1
 #> 5 Fold01  5.13    59       5.10 Preprocessor1_Model1
 #> 6 Fold01  5.13    63       5.11 Preprocessor1_Model1
@@ -512,8 +512,8 @@ over_predicted
 #> # A tibble: 2 × 6
 #>   id     .pred  .row Sale_Price .config              residual
 #>   <chr>  <dbl> <int>      <dbl> <chr>                   <dbl>
-#> 1 Fold09  4.96    32       4.11 Preprocessor1_Model1   -0.857
-#> 2 Fold08  4.94   317       4.12 Preprocessor1_Model1   -0.819
+#> 1 Fold09  4.97    32       4.11 Preprocessor1_Model1   -0.858
+#> 2 Fold08  4.93   317       4.12 Preprocessor1_Model1   -0.815
 
 ames_train %>% 
   slice(over_predicted$.row) %>% 
@@ -544,7 +544,7 @@ collect_metrics(val_res)
 #> # A tibble: 2 × 6
 #>   .metric .estimator   mean     n std_err .config             
 #>   <chr>   <chr>       <dbl> <int>   <dbl> <chr>               
-#> 1 rmse    standard   0.0694     1      NA Preprocessor1_Model1
+#> 1 rmse    standard   0.0695     1      NA Preprocessor1_Model1
 #> 2 rsq     standard   0.843      1      NA Preprocessor1_Model1
 ----
 
@@ -566,12 +566,12 @@ For computations conducted on a single computer, the number of possible ``worker
 ----
 # The number of physical cores in the hardware:
 parallel::detectCores(logical = FALSE)
-#> [1] 10
+#> [1] 2
 
 # The number of possible independent processes that can 
 # be simultaneously used:  
 parallel::detectCores(logical = TRUE)
-#> [1] 20
+#> [1] 2
 ----
 
 The difference between these two values is related to the computer’s processor. For example, most Intel processors use hyper-threading which creates two virtual cores for each physical core. While these extra resources can improve performance, most of the speed-ups produced by parallel processing occur when processing uses fewer than the number of physical cores.

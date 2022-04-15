@@ -202,8 +202,8 @@ bean_rec_trained %>%
 #> oper 3 step normalize [pre-trained]
 #> oper 4 step dummy [training]
 #> Error in `chr_as_locations()`:
-#> ! Can't subset columns past the end.
-#> x Column `cornbread` doesn't exist.
+#> ! Can't subset columns that don't exist.
+#> ✖ Column `cornbread` doesn't exist.
 ----
 
 Another option that can help you understand what happens in the analysis is `log_changes`:
@@ -564,10 +564,10 @@ filter(rankings, rank <= 5) %>% dplyr::select(rank, mean, model, method)
 #> # A tibble: 5 × 4
 #>    rank  mean model               method
 #>   <int> <dbl> <chr>               <chr> 
-#> 1     1 0.995 discrim_regularized pls   
-#> 2     2 0.994 mlp                 pls   
-#> 3     3 0.994 naive_Bayes         pls   
-#> 4     4 0.994 mlp                 basic 
+#> 1     1 0.995 mlp                 basic 
+#> 2     2 0.995 discrim_regularized pls   
+#> 3     3 0.994 mlp                 pls   
+#> 4     4 0.994 naive_Bayes         pls   
 #> 5     5 0.994 discrim_flexible    basic
 ----
 

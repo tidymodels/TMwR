@@ -118,7 +118,7 @@ Cubist 25
 
 1.53
 
-0.14
+0.15
 
 3.60
 
@@ -175,7 +175,7 @@ concrete_stack <-
   add_candidates(race_results)
 
 concrete_stack
-#> # A data stack with 12 model definitions and 18 candidate members:
+#> # A data stack with 12 model definitions and 21 candidate members:
 #> #   MARS: 1 model configuration
 #> #   CART: 1 model configuration
 #> #   CART_bagged: 1 model configuration
@@ -185,7 +185,7 @@ concrete_stack
 #> #   SVM_radial: 1 model configuration
 #> #   SVM_poly: 1 model configuration
 #> #   KNN: 3 model configurations
-#> #   neural_network: 1 model configuration
+#> #   neural_network: 4 model configurations
 #> #   full_quad_linear_reg: 5 model configurations
 #> #   full_quad_KNN: 1 model configuration
 #> # Outcome: compressive_strength (numeric)
@@ -252,31 +252,33 @@ image::images/stacking-autoplot-redo-1.png[]
 
 It is common, when blending predictions using a regression model, to constrain the blending parameters to be non-negative. For these data, this constraint has the effect of eliminating many of the potential ensemble members; even at fairly low penalties, the ensemble is limited to a fraction of the original eighteen.
 
-The penalty value associated with the smallest RMSE was 0.062. Printing the object shows the details of the meta-learning model:
+The penalty value associated with the smallest RMSE was 0.051. Printing the object shows the details of the meta-learning model:
 
 [source,r]
 ----
 ens
 #> ── A stacked ensemble model ─────────────────────────────────────
 #> 
-#> Out of 18 possible candidate members, the ensemble retained 5.
-#> Penalty: 0.0615848211066026.
+#> Out of 21 possible candidate members, the ensemble retained 7.
+#> Penalty: 0.0513483290743755.
 #> Mixture: 1.
 #> 
-#> The 5 highest weighted members are:
-#> # A tibble: 5 × 3
-#>   member                    type         weight
-#>   <chr>                     <chr>         <dbl>
-#> 1 boosting_1_04             boost_tree   0.772 
-#> 2 Cubist_1_25               cubist_rules 0.160 
-#> 3 full_quad_linear_reg_1_16 linear_reg   0.0445
-#> 4 neural_network_1_16       mlp          0.0303
-#> 5 MARS_1_2                  mars         0.0134
+#> The 7 highest weighted members are:
+#> # A tibble: 7 × 3
+#>   member                    type          weight
+#>   <chr>                     <chr>          <dbl>
+#> 1 boosting_1_04             boost_tree   0.727  
+#> 2 neural_network_1_17       mlp          0.101  
+#> 3 Cubist_1_25               cubist_rules 0.0906 
+#> 4 neural_network_1_04       mlp          0.0820 
+#> 5 full_quad_linear_reg_1_16 linear_reg   0.0176 
+#> 6 full_quad_linear_reg_1_17 linear_reg   0.00284
+#> # … with 1 more row
 #> 
 #> Members have not yet been fitted with `fit_members()`.
 ----
 
-The regularized linear regression meta-learning model contained five blending coefficients across five types of models. The `autoplot()` method can be used again to show the contributions of each model type, to produce <<blending-weights>>.
+The regularized linear regression meta-learning model contained seven blending coefficients across four types of models. The `autoplot()` method can be used again to show the contributions of each model type, to produce <<blending-weights>>.
 
 [source,r]
 ----
@@ -290,22 +292,24 @@ autoplot(ens, "weights") +
 .Blending coefficients for the stacking ensemble.
 image::images/blending-weights-1.png[]
 
-The boosted tree and Cubist models have the largest contributions to the ensemble. For this ensemble, the outcome is predicted with the equation:
+The boosted tree and neural network models have the largest contributions to the ensemble. For this ensemble, the outcome is predicted with the equation:
 
 where the ``predictors'' in the equation are the predicted compressive strength values from those models.
 
 [[fit-members]]
 === Fit the Member Models
 
-The ensemble contains five candidate members and we now know how their predictions can be blended into a final prediction for the ensemble. However, these individual models fits have not yet been created. To be able to use the stacking model, five additional model fits are required. These use the entire training set with the original predictors.
+The ensemble contains seven candidate members and we now know how their predictions can be blended into a final prediction for the ensemble. However, these individual models fits have not yet been created. To be able to use the stacking model, seven additional model fits are required. These use the entire training set with the original predictors.
 
-The five models to be fit are:
+The seven models to be fit are:
 
 * boosting: number of trees = 1957, minimal node size = 8, tree depth = 7, learning rate = 0.0756, minimum loss reduction = 1.45e-07, and proportion of observations sampled = 0.679
 * Cubist: number of committees = 98 and number of nearest neighbors = 2
-* linear regression (quadratic features): amount of regularization = 6.28e-09 and proportion of lasso penalty = 0.636
-* MARS: degree of interaction = 1
-* neural network: number of hidden units = 11, amount of regularization = 0.704, and number of epochs = 692
+* linear regression (quadratic features): amount of regularization = 6.28e-09 and proportion of lasso penalty = 0.636 (config 1)
+* linear regression (quadratic features): amount of regularization = 2e-09 and proportion of lasso penalty = 0.668 (config 2)
+* neural network: number of hidden units = 14, amount of regularization = 0.0345, and number of epochs = 979 (config 1)
+* neural network: number of hidden units = 22, amount of regularization = 2.08e-10, and number of epochs = 92 (config 2)
+* neural network: number of hidden units = 26, amount of regularization = 0.0149, and number of epochs = 203 (config 3)
 
 The [.pkg]#stacks# package has a function, `fit_members()`, that trains and returns these models:
 
@@ -318,7 +322,7 @@ This updates the stacking object with the fitted workflow objects for each membe
 
 === Test Set Results
 
-Since the blending process used resampling, we can estimate that the ensemble with five members had an estimated RMSE of 4.14. Recall from <<workflow-sets>> that the best boosted tree had a test set RMSE of 3.33. How will the ensemble model compare on the test set? We can `predict()` to find out:
+Since the blending process used resampling, we can estimate that the ensemble with seven members had an estimated RMSE of 4.12. Recall from <<workflow-sets>> that the best boosted tree had a test set RMSE of 3.33. How will the ensemble model compare on the test set? We can `predict()` to find out:
 
 [source,r]
 ----
@@ -332,8 +336,8 @@ ens_test_pred %>%
 #> # A tibble: 2 × 3
 #>   .metric .estimator .estimate
 #>   <chr>   <chr>          <dbl>
-#> 1 rmse    standard       3.26 
-#> 2 rsq     standard       0.958
+#> 1 rmse    standard       3.33 
+#> 2 rsq     standard       0.957
 ----
 
 This is moderately better than our best single model. It is fairly common for stacking to produce incremental benefits when compared to the best single model.

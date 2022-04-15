@@ -438,20 +438,20 @@ The downside to this philosophy is that there are a lot of packages in the tidym
 ----
 library(tidymodels)
 #> ── Attaching packages ─────────────────────────────────────────── tidymodels 0.2.0 ──
-#> ✓ broom        0.7.12         ✓ recipes      0.2.0     
-#> ✓ dials        0.1.1          ✓ rsample      0.1.1     
-#> ✓ dplyr        1.0.8          ✓ tibble       3.1.6     
-#> ✓ ggplot2      3.3.5          ✓ tidyr        1.2.0     
-#> ✓ infer        1.0.0          ✓ tune         0.2.0.9000
-#> ✓ modeldata    0.1.1          ✓ workflows    0.2.6     
-#> ✓ parsnip      0.2.1.9001     ✓ workflowsets 0.2.1     
-#> ✓ purrr        0.3.4          ✓ yardstick    0.0.9
+#> ✔ broom        0.8.0          ✔ recipes      0.2.0     
+#> ✔ dials        0.1.1          ✔ rsample      0.1.1     
+#> ✔ dplyr        1.0.8          ✔ tibble       3.1.6     
+#> ✔ ggplot2      3.3.5          ✔ tidyr        1.2.0     
+#> ✔ infer        1.0.0          ✔ tune         0.2.0     
+#> ✔ modeldata    0.1.1          ✔ workflows    0.2.6     
+#> ✔ parsnip      0.2.1.9001     ✔ workflowsets 0.2.1     
+#> ✔ purrr        0.3.4          ✔ yardstick    0.0.9
 #> ── Conflicts ────────────────────────────────────────────── tidymodels_conflicts() ──
-#> x purrr::discard() masks scales::discard()
-#> x dplyr::filter()  masks stats::filter()
-#> x dplyr::lag()     masks stats::lag()
-#> x recipes::step()  masks stats::step()
-#> • Search for functions across packages at https://www.tidymodels.org/find/
+#> ✖ purrr::discard() masks scales::discard()
+#> ✖ dplyr::filter()  masks stats::filter()
+#> ✖ dplyr::lag()     masks stats::lag()
+#> ✖ recipes::step()  masks stats::step()
+#> • Learn how to get started at https://www.tidymodels.org/start/
 ----
 
 If you have used the tidyverse, you’ll notice some familiar names as a few tidyverse packages, such as [.pkg]#dplyr# and [.pkg]#ggplot2#, are loaded together with the tidymodels packages. We’ve already said that the tidymodels framework applies tidyverse principles to modeling, but the tidymodels framework also literally builds on some of the most fundamental tidyverse packages like these.

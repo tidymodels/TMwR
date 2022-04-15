@@ -240,7 +240,7 @@ We fit neural network classification models to the same two-class data from the 
 .Class boundaries for three models with increasing numbers of hidden units. The boundaries are fit on the training set and shown for the training and test sets.
 image::images/two-class-boundaries-1.png[]
 
-The single unit model does not adapt very flexibly to the data (since it is constrained to be linear). A model with four hidden units begins to show signs of overfitting with an unrealistic boundary for values away from the data mainstream. This is caused by a single data point from the first class in the upper right corner of the data. By 20 hidden units, the model is beginning to memorize the training set, creating small islands around those data to minimize the resubstitution error rate. These patterns do not repeat in the test set. This last panel is the best illustration of how tuning parameters that control complexity must be modulated so that the model is effective. For a 20 unit model, the training set ROC AUC is 0.944 but the test set value is 0.849.
+The single unit model does not adapt very flexibly to the data (since it is constrained to be linear). A model with four hidden units begins to show signs of overfitting with an unrealistic boundary for values away from the data mainstream. This is caused by a single data point from the first class in the upper right corner of the data. By 20 hidden units, the model is beginning to memorize the training set, creating small islands around those data to minimize the resubstitution error rate. These patterns do not repeat in the test set. This last panel is the best illustration of how tuning parameters that control complexity must be modulated so that the model is effective. For a 20 unit model, the training set ROC AUC is 0.944 but the test set value is 0.855.
 
 This occurrence of overfitting is obvious with two predictors that we can plot. However, in general, we must use a quantitative approach for detecting overfitting.
 
@@ -527,7 +527,7 @@ Finally, some tuning parameters are best associated with transformations. A good
 ----
 penalty()
 #> Amount of Regularization (quantitative)
-#> Transformer:  log-10 
+#> Transformer: log-10 [1e-100, Inf]
 #> Range (transformed scale): [-10, 0]
 ----
 
