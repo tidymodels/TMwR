@@ -3,7 +3,6 @@ knitr::opts_chunk$set(fig.path = "figures/")
 library(tidymodels)
 library(finetune)
 library(patchwork)
-library(kableExtra)
 library(av)
 library(doMC)
 registerDoMC(cores = parallel::detectCores(logical = TRUE))
@@ -134,12 +133,10 @@ collect_metrics(svm_initial) %>%
   select(ROC = mean, cost, rbf_sigma) %>% 
   as.data.frame() %>% 
   format(digits = 4, scientific = FALSE) %>% 
-  kable(
+  knitr::kable(
     caption = "Resampling statistics used as the initial substrate to the Gaussian process model.",
     label = "initial-gp-data"
-  ) %>% 
-  kableExtra::kable_styling(full_width = FALSE) %>% 
-  kableExtra::add_header_above(c("outcome" = 1, "predictors" = 2))
+  )
 ```
 
 Gaussian process models are specified by their mean and covariance functions, although the latter has the most effect on the nature of the GP model. The covariance function is often parameterized in terms of the input values (denoted as $x$). As an example, a commonly used covariance function is the squared exponential^[This equation is also the same as the _radial basis function_ used in kernel methods, such as the SVM model that is currently being used. This is a coincidence; this covariance function is unrelated to the SVM tuning parameter that we are using. ] function: 
@@ -169,12 +166,10 @@ tmp %>%
   mutate(variance = variance^2) %>% 
   as.data.frame() %>% 
   format(digits = 4, scientific = FALSE) %>% 
-  kable(
+  knitr::kable(
     caption = "Two example tuning parameters considered for further sampling.",
     label = "tuning-candidates"
-  ) %>% 
-  kableExtra::kable_styling(full_width = FALSE) %>% 
-  kableExtra::add_header_above(c(" " = 1, "GP Prediction of ROC AUC" = 2))
+  )
 ```
 
 :::rmdnote
@@ -331,12 +326,10 @@ small_pred %>%
   select(`Parameter Value` = x, Mean = .mean, `Std Dev` = .sd, `Expected Improvment` = exp_imp) %>% 
   as.data.frame() %>% 
   format(digits = 4, scientific = FALSE) %>% 
-  kable(
+  knitr::kable(
     caption = "Expected improvement for the two candidate tuning parameters.",
     label = "two-exp-improve"
-  ) %>% 
-  kableExtra::kable_styling(full_width = FALSE) %>% 
-  kableExtra::add_header_above(c(" " = 1, "Predictions" = 3))
+  )
 ```
 
 When expected improvement is computed across the range of the tuning parameter, the recommended point to sample is much closer to 0.25 than 0.10, as shown in Figure \@ref(fig:expected-improvement).

@@ -5,7 +5,6 @@ library(rules)
 library(baguette)
 library(stacks)
 library(patchwork)
-library(kableExtra)
 
 load("RData/concrete_results.RData")
 ```
@@ -71,10 +70,7 @@ stacks() %>%
                   "...", "Cubist 25", "..."),
     caption = "Predictions from candidate tuning parameter configurations.",
     label = "ensemble-candidate-preds"
-  ) %>% 
-  kable_styling("striped", full_width = TRUE) %>% 
-  add_header_above(c(" ", "Ensemble Candidate Predictions" = 7)) %>% 
-  row_spec(0, align = "c")
+  )
 ```
 
 There is a single column for the bagged tree model since it has no tuning parameters. Also, recall that MARS was tuned over a single parameter (the product degree) with two possible configurations, so this model is represented by two columns. Most of the other models have 25 corresponding columns, as shown for Cubist in this example. 

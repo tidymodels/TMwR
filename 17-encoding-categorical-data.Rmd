@@ -2,7 +2,6 @@
 library(tidymodels)
 library(embed)
 library(textrecipes)
-library(kableExtra)
 tidymodels_prefer()
 source("ames_snippets.R")
 
@@ -68,9 +67,8 @@ ord_contrasts <-
   setNames(c("Linear", "Quadratic", "Cubic", "Quartic"))
 
 bind_cols(ord_data, ord_contrasts) %>% 
-  kable(caption = "Polynominal expansions for encoding an ordered variable.",
-        label = "encoding-ordered-table") %>% 
-  kable_styling(full_width = FALSE)
+  knitr::kable(caption = "Polynominal expansions for encoding an ordered variable.",
+               label = "encoding-ordered-table")
 ```
 
 While this is not unreasonable, it is not an approach that people tend to find useful. For example, an 11-degree polynomial is probably not the most effective way of encoding an ordinal factor for the months of the year.  Instead, consider trying recipe steps related to ordered factors, such as `step_unorder()`, to convert to regular factors, and `step_ordinalscore()` which maps specific numeric values to each factor level. 
