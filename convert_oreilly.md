@@ -95,7 +95,6 @@ mv pre-proc-table.asciidoc appendix.asciidoc
 rm *.bak
 rm *.html
 rm *~
-rm premade/*.svg
 rm -r libs
 ren -v "*-*.asciidoc" "ch#1.asciidoc"
 ```
