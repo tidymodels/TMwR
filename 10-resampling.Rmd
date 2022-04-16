@@ -115,7 +115,6 @@ For both models, Table \@ref(tab:rmse-results) summarizes the RMSE estimate for 
 
 ```{r resampling-rmse-table, echo = FALSE, results = "asis"}
 all_res %>% 
-  mutate(object = paste0("<tt>", object, "</tt>")) %>% 
   knitr::kable(
     caption = "Performance statistics for training and test sets.",
     label = "rmse-results",

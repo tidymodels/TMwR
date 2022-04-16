@@ -142,7 +142,6 @@ arg_info <-
 
 arg_info %>%
   select(package, `Argument Type`, original) %>%
-  # mutate(original = paste0("<tt>", original, "</tt>")) %>% 
   pivot_wider(
     id_cols = c(`Argument Type`),
     values_from = c(original),
@@ -161,7 +160,6 @@ In an effort to make argument specification less painful, `r pkg(parsnip)` uses 
 arg_info %>%
   select(`Argument Type`, parsnip) %>%
   distinct() %>% 
-  # mutate(parsnip = paste0("<tt>", parsnip, "</tt>")) %>% 
   knitr::kable(
     caption = "Random forest argument names used by parsnip.",
     label = "parsnip-args",

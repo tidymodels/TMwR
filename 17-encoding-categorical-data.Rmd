@@ -29,9 +29,8 @@ recipe(~Bldg_Type, data = ames_train) %>%
   bake(ames_train) %>% 
   slice(show_rows) %>% 
   arrange(`Raw Data`) %>% 
-  kable(caption = "Dummy or indicator variable encodings for the building type predictor in the Ames training set.",
-        label = "encoding-dummies") %>% 
-  kable_styling(full_width = FALSE)
+  knitr::kable(caption = "Dummy or indicator variable encodings for the building type predictor in the Ames training set.",
+               label = "encoding-dummies")
 ```
 
 Many model implementations require such a transformation to a numeric representation for categorical data. 
