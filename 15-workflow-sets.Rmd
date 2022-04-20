@@ -311,7 +311,7 @@ autoplot(
    select_best = TRUE     # <- one point per workflow
 ) +
    geom_text(aes(y = mean - 1/2, label = wflow_id), angle = 90, hjust = 1) +
-   lims(y = c(3.5, 9.5)) +
+   lims(y = c(3.0, 9.5)) +
    theme(legend.position = "none")
 ```
 
