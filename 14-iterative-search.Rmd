@@ -566,15 +566,15 @@ autoplot(svm_bo, type = "performance")
 
 An additional type of plot uses `type = "parameters"`  which shows the parameter values over iterations.
 
-<<<<<<< HEAD
 ```{r iterative-bo-calcs, include = FALSE}
 bo_path <- 
   svm_bo %>% 
   collect_metrics() %>% 
   select(cost, rbf_sigma, .iter, mean)
-# These are based off of all the tuning grids used in the chapter
-x_rng <- c(4.546377230472e-08, 1.54534400806564)
+
+x_rng <- c(4.546377230472e-08, .2)
 y_rng <- c(0.000580667536622422, 53.8173705762377)
+
 initial <- 
   bo_path %>% 
   filter(.iter == 0)
@@ -724,6 +724,10 @@ surf_impr <-
     panel.grid.minor.y = element_blank(),
     axis.text.x = element_text(size = 8)
   )
+
+# These are based off of all the tuning grids used in the chapter
+x_rng <- c(4.546377230472e-08, 1.54534400806564)
+y_rng <- c(0.000580667536622422, 53.8173705762377)
 ```
 
 Figure \@ref(fig:bo-surfaces) shows the surfaces of the mean, variance, and expected improvement surfaces estimated by the GP after 11 iterations. The panel on the right shows a ridge of best estimated improvement along the right side of the candidate space.
