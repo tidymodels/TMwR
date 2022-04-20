@@ -203,7 +203,7 @@ The regularized linear regression meta-learning model contained five blending co
 autoplot(ens, "weights") +
   geom_text(aes(x = weight + 0.01, label = model), hjust = 0) + 
   theme(legend.position = "none") +
-  lims(x = c(-0.01, 0.8))
+  lims(x = c(-0.01, 0.9))
 ```
 
 <div class="figure" style="text-align: center">

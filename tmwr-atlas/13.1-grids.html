@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="13.1 Regular and Non-Regular Grids | Tidy Modeling with R" />
+<meta property="og:type" content="book" />
+<meta property="og:image" content="/images/cover.png" />
+<meta property="og:description" content="The tidymodels framework is a collection of R packages for modeling and machine learning using tidyverse principles. This book provides a thorough introduction to how to use tidymodels, and an outline of good methodology and statistical practice for phases of the modeling process." />
+<meta name="github-repo" content="tidymodels/TMwR" />
+
+<meta name="author" content="Max Kuhn and Julia Silge" />
+
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  TeX: { equationNumbers: { autoNumber: "AMS" } }
+});
+</script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<meta name="description" content="The tidymodels framework is a collection of R packages for modeling and machine learning using tidyverse principles. This book provides a thorough introduction to how to use tidymodels, and an outline of good methodology and statistical practice for phases of the modeling process.">
+
+<title>13.1 Regular and Non-Regular Grids | Tidy Modeling with R</title>
+
+<script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="libs/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+<script src="libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="libs/navigation-1.1/tabsets.js"></script>
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+
+
+<style type="text/css">
+/* Used with Pandoc 2.11+ new --citeproc when CSL is used */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}
+</style>
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+/* show arrow before summary tag as in bootstrap
+TODO: remove if boostrap in updated in html_document (rmarkdown#1485) */
+details > summary {
+  display: list-item;
+  cursor: pointer;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container-fluid main-container">
+
+
+<div class="row">
+<div class="col-sm-12">
+<div id="TOC">
+<ul>
+<li class="has-sub"><a href="index.html#hello-world">Hello World</a>
+<ul>
+<li><a href="acknowledgments.html#acknowledgments">Acknowledgments</a></li>
+<li><a href="using-code-examples.html#using-code-examples">Using Code Examples</a></li>
+</ul></li>
+<li class="part"><span><b>Introduction</b></span></li>
+<li class="has-sub"><a href="1-software-modeling.html#software-modeling"><span class="toc-section-number">1</span> Software for modeling</a>
+<ul>
+<li><a href="1.1-fundamentals-for-modeling-software.html#fundamentals-for-modeling-software"><span class="toc-section-number">1.1</span> Fundamentals for Modeling Software</a></li>
+<li class="has-sub"><a href="1.2-model-types.html#model-types"><span class="toc-section-number">1.2</span> Types of Models</a>
+<ul>
+<li><a href="1.2-model-types.html#descriptive-models">Descriptive models</a></li>
+<li><a href="1.2-model-types.html#inferential-models">Inferential models</a></li>
+<li><a href="1.2-model-types.html#predictive-models">Predictive models</a></li>
+</ul></li>
+<li><a href="1.3-connections-between-types-of-models.html#connections-between-types-of-models"><span class="toc-section-number">1.3</span> Connections Between Types of Models</a></li>
+<li><a href="1.4-model-terminology.html#model-terminology"><span class="toc-section-number">1.4</span> Some Terminology</a></li>
+<li><a href="1.5-model-phases.html#model-phases"><span class="toc-section-number">1.5</span> How Does Modeling Fit into the Data Analysis Process?</a></li>
+<li><a href="1.6-software-summary.html#software-summary"><span class="toc-section-number">1.6</span> Chapter Summary</a></li>
+</ul></li>
+<li class="has-sub"><a href="2-tidyverse.html#tidyverse"><span class="toc-section-number">2</span> A Tidyverse Primer</a>
+<ul>
+<li class="has-sub"><a href="2.1-tidyverse-principles.html#tidyverse-principles"><span class="toc-section-number">2.1</span> Tidyverse Principles</a>
+<ul>
+<li><a href="2.1-tidyverse-principles.html#design-for-humans"><span class="toc-section-number">2.1.1</span> Design for humans</a></li>
+<li><a href="2.1-tidyverse-principles.html#reuse-existing-data-structures"><span class="toc-section-number">2.1.2</span> Reuse existing data structures</a></li>
+<li><a href="2.1-tidyverse-principles.html#design-for-the-pipe-and-functional-programming"><span class="toc-section-number">2.1.3</span> Design for the pipe and functional programming</a></li>
+</ul></li>
+<li><a href="2.2-examples-of-tidyverse-syntax.html#examples-of-tidyverse-syntax"><span class="toc-section-number">2.2</span> Examples of Tidyverse Syntax</a></li>
+<li><a href="2.3-chapter-summary.html#chapter-summary"><span class="toc-section-number">2.3</span> Chapter Summary</a></li>
+</ul></li>
+<li class="has-sub"><a href="3-base-r.html#base-r"><span class="toc-section-number">3</span> A Review of R Modeling Fundamentals</a>
+<ul>
+<li><a href="3.1-an-example.html#an-example"><span class="toc-section-number">3.1</span> An Example</a></li>
+<li><a href="3.2-formula.html#formula"><span class="toc-section-number">3.2</span> What Does the R Formula Do?</a></li>
+<li><a href="3.3-tidiness-modeling.html#tidiness-modeling"><span class="toc-section-number">3.3</span> Why Tidiness is Important for Modeling</a></li>
+<li><a href="3.4-combining-base-r-models-and-the-tidyverse.html#combining-base-r-models-and-the-tidyverse"><span class="toc-section-number">3.4</span> Combining Base R Models and the Tidyverse</a></li>
+<li><a href="3.5-the-tidymodels-metapackage.html#the-tidymodels-metapackage"><span class="toc-section-number">3.5</span> The tidymodels Metapackage</a></li>
+<li><a href="3.6-chapter-summary-1.html#chapter-summary-1"><span class="toc-section-number">3.6</span> Chapter Summary</a></li>
+</ul></li>
+<li class="part"><span><b>Modeling Basics</b></span></li>
+<li class="has-sub"><a href="4-ames.html#ames"><span class="toc-section-number">4</span> The Ames Housing Data</a>
+<ul>
+<li><a href="4.1-exploring-features-of-homes-in-ames.html#exploring-features-of-homes-in-ames"><span class="toc-section-number">4.1</span> Exploring Features of Homes in Ames</a></li>
+<li><a href="4.2-ames-summary.html#ames-summary"><span class="toc-section-number">4.2</span> Chapter Summary</a></li>
+</ul></li>
+<li class="has-sub"><a href="5-splitting.html#splitting"><span class="toc-section-number">5</span> Spending our Data</a>
+<ul>
+<li><a href="5.1-splitting-methods.html#splitting-methods"><span class="toc-section-number">5.1</span> Common Methods for Splitting Data</a></li>
+<li><a href="5.2-what-about-a-validation-set.html#what-about-a-validation-set"><span class="toc-section-number">5.2</span> What About a Validation Set?</a></li>
+<li><a href="5.3-multi-level-data.html#multi-level-data"><span class="toc-section-number">5.3</span> Multi-Level Data</a></li>
+<li><a href="5.4-other-considerations-for-a-data-budget.html#other-considerations-for-a-data-budget"><span class="toc-section-number">5.4</span> Other Considerations for a Data Budget</a></li>
+<li><a href="5.5-splitting-summary.html#splitting-summary"><span class="toc-section-number">5.5</span> Chapter Summary</a></li>
+</ul></li>
+<li class="has-sub"><a href="6-models.html#models"><span class="toc-section-number">6</span> Fitting Models with parsnip</a>
+<ul>
+<li><a href="6.1-create-a-model.html#create-a-model"><span class="toc-section-number">6.1</span> Create a Model</a></li>
+<li><a href="6.2-use-the-model-results.html#use-the-model-results"><span class="toc-section-number">6.2</span> Use the Model Results</a></li>
+<li><a href="6.3-parsnip-predictions.html#parsnip-predictions"><span class="toc-section-number">6.3</span> Make Predictions</a></li>
+<li><a href="6.4-parsnip-extension-packages.html#parsnip-extension-packages"><span class="toc-section-number">6.4</span> parsnip-Extension Packages</a></li>
+<li><a href="6.5-parsnip-addin.html#parsnip-addin"><span class="toc-section-number">6.5</span> Creating Model Specifications</a></li>
+<li><a href="6.6-models-summary.html#models-summary"><span class="toc-section-number">6.6</span> Chapter Summary</a></li>
+</ul></li>
+<li class="has-sub"><a href="7-workflows.html#workflows"><span class="toc-section-number">7</span> A Model Workflow</a>
+<ul>
+<li><a href="7.1-begin-model-end.html#begin-model-end"><span class="toc-section-number">7.1</span> Where Does the Model Begin and End?</a></li>
+<li><a href="7.2-workflow-basics.html#workflow-basics"><span class="toc-section-number">7.2</span> Workflow Basics</a></li>
+<li><a href="7.3-adding-raw-variables-to-the-workflow.html#adding-raw-variables-to-the-workflow"><span class="toc-section-number">7.3</span> Adding Raw Variables to the <code>workflow()</code></a></li>
+<li class="has-sub"><a href="7.4-workflow-encoding.html#workflow-encoding"><span class="toc-section-number">7.4</span> How Does a <code>workflow()</code> Use the Formula?</a>
+<ul>
+<li><a href="7.4-workflow-encoding.html#tree-based-models">Tree-based models</a></li>
+<li><a href="7.4-workflow-encoding.html#special-model-formulas"><span class="toc-section-number">7.4.1</span> Special formulas and in-line functions</a></li>
+</ul></li>
+<li><a href="7.5-workflow-sets-intro.html#workflow-sets-intro"><span class="toc-section-number">7.5</span> Creating Multiple Workflows at Once</a></li>
+<li><a href="7.6-evaluating-the-test-set.html#evaluating-the-test-set"><span class="toc-section-number">7.6</span> Evaluating the Test Set</a></li>
+<li><a href="7.7-workflows-summary.html#workflows-summary"><span class="toc-section-number">7.7</span> Chapter Summary</a></li>
+</ul></li>
+<li class="has-sub"><a href="8-recipes.html#recipes"><span class="toc-section-number">8</span> Feature Engineering with recipes</a>
+<ul>
+<li><a href="8.1-a-simple-recipe-for-the-ames-housing-data.html#a-simple-recipe-for-the-ames-housing-data"><span class="toc-section-number">8.1</span> A Simple <code>recipe()</code> for the Ames Housing Data</a></li>
+<li><a href="8.2-using-recipes.html#using-recipes"><span class="toc-section-number">8.2</span> Using Recipes</a></li>
+<li><a href="8.3-how-data-are-used-by-the-recipe.html#how-data-are-used-by-the-recipe"><span class="toc-section-number">8.3</span> How Data are Used by the <code>recipe()</code></a></li>
+<li class="has-sub"><a href="8.4-example-steps.html#example-steps"><span class="toc-section-number">8.4</span> Examples of <code>recipe()</code> Steps</a>
+<ul>
+<li><a href="8.4-example-steps.html#dummies"><span class="toc-section-number">8.4.1</span> Encoding qualitative data in a numeric format</a></li>
+<li><a href="8.4-example-steps.html#interaction-terms"><span class="toc-section-number">8.4.2</span> Interaction terms</a></li>
+<li><a href="8.4-example-steps.html#spline-functions"><span class="toc-section-number">8.4.3</span> Spline functions</a></li>
+<li><a href="8.4-example-steps.html#feature-extraction"><span class="toc-section-number">8.4.4</span> Feature extraction</a></li>
+<li><a href="8.4-example-steps.html#row-sampling-steps"><span class="toc-section-number">8.4.5</span> Row sampling steps</a></li>
+<li><a href="8.4-example-steps.html#general-transformations"><span class="toc-section-number">8.4.6</span> General transformations</a></li>
+<li><a href="8.4-example-steps.html#natural-language-processing"><span class="toc-section-number">8.4.7</span> Natural language processing</a></li>
+</ul></li>
+<li><a href="8.5-skip-equals-true.html#skip-equals-true"><span class="toc-section-number">8.5</span> Skipping Steps for New Data</a></li>
+<li><a href="8.6-tidy-a-recipe.html#tidy-a-recipe"><span class="toc-section-number">8.6</span> Tidy a <code>recipe()</code></a></li>
+<li><a href="8.7-column-roles.html#column-roles"><span class="toc-section-number">8.7</span> Column Roles</a></li>
+<li><a href="8.8-recipes-summary.html#recipes-summary"><span class="toc-section-number">8.8</span> Chapter Summary</a></li>
+</ul></li>
+<li class="has-sub"><a href="9-performance.html#performance"><span class="toc-section-number">9</span> Judging Model Effectiveness</a>
+<ul>
+<li><a href="9.1-performance-metrics-and-inference.html#performance-metrics-and-inference"><span class="toc-section-number">9.1</span> Performance Metrics and Inference</a></li>
+<li><a href="9.2-regression-metrics.html#regression-metrics"><span class="toc-section-number">9.2</span> Regression Metrics</a></li>
+<li><a href="9.3-binary-classification-metrics.html#binary-classification-metrics"><span class="toc-section-number">9.3</span> Binary Classification Metrics</a></li>
+<li><a href="9.4-multi-class-classification-metrics.html#multi-class-classification-metrics"><span class="toc-section-number">9.4</span> Multi-Class Classification Metrics</a></li>
+<li><a href="9.5-performance-summary.html#performance-summary"><span class="toc-section-number">9.5</span> Chapter Summary</a></li>
+</ul></li>
+<li class="part"><span><b>Tools for Creating Effective Models</b></span></li>
+<li class="has-sub"><a href="10-resampling.html#resampling"><span class="toc-section-number">10</span> Resampling for Evaluating Performance</a>
+<ul>
+<li><a href="10.1-resampling-resubstition.html#resampling-resubstition"><span class="toc-section-number">10.1</span> The Resubstitution Approach</a></li>
+<li class="has-sub"><a href="10.2-resampling-methods.html#resampling-methods"><span class="toc-section-number">10.2</span> Resampling Methods</a>
+<ul>
+<li><a href="10.2-resampling-methods.html#cv"><span class="toc-section-number">10.2.1</span> Cross-validation</a></li>
+<li><a href="10.2-resampling-methods.html#repeated-cross-validation">Repeated cross-validation</a></li>
+<li><a href="10.2-resampling-methods.html#leave-one-out-cross-validation">Leave-one-out cross-validation</a></li>
+<li><a href="10.2-resampling-methods.html#monte-carlo-cross-validation">Monte Carlo cross-validation</a></li>
+<li><a href="10.2-resampling-methods.html#validation"><span class="toc-section-number">10.2.2</span> Validation sets</a></li>
+<li><a href="10.2-resampling-methods.html#bootstrap"><span class="toc-section-number">10.2.3</span> Bootstrapping</a></li>
+<li><a href="10.2-resampling-methods.html#rolling"><span class="toc-section-number">10.2.4</span> Rolling forecasting origin resampling</a></li>
+</ul></li>
+<li><a href="10.3-resampling-performance.html#resampling-performance"><span class="toc-section-number">10.3</span> Estimating Performance</a></li>
+<li><a href="10.4-parallel.html#parallel"><span class="toc-section-number">10.4</span> Parallel Processing</a></li>
+<li><a href="10.5-extract.html#extract"><span class="toc-section-number">10.5</span> Saving the Resampled Objects</a></li>
+<li><a href="10.6-resampling-summary.html#resampling-summary"><span class="toc-section-number">10.6</span> Chapter Summary</a></li>
+</ul></li>
+<li class="has-sub"><a href="11-compare.html#compare"><span class="toc-section-number">11</span> Comparing Models with Resampling</a>
+<ul>
+<li><a href="11.1-workflow-set.html#workflow-set"><span class="toc-section-number">11.1</span> Creating Multiple Models with Workflow Sets</a></li>
+<li><a href="11.2-resampled-stats.html#resampled-stats"><span class="toc-section-number">11.2</span> Comparing Resampled Performance Statistics</a></li>
+<li><a href="11.3-simple-hypothesis-testing-methods.html#simple-hypothesis-testing-methods"><span class="toc-section-number">11.3</span> Simple Hypothesis Testing Methods</a></li>
+<li class="has-sub"><a href="11.4-tidyposterior.html#tidyposterior"><span class="toc-section-number">11.4</span> Bayesian Methods</a>
+<ul>
+<li><a href="11.4-tidyposterior.html#the-effect-of-the-amount-of-resampling">The effect of the amount of resampling</a></li>
+</ul></li>
+<li><a href="11.5-compare-summary.html#compare-summary"><span class="toc-section-number">11.5</span> Chapter Summary</a></li>
+</ul></li>
+<li class="has-sub"><a href="12-tuning.html#tuning"><span class="toc-section-number">12</span> Model Tuning and the Dangers of Overfitting</a>
+<ul>
+<li><a href="12.1-model-parameters.html#model-parameters"><span class="toc-section-number">12.1</span> Model Parameters</a></li>
+<li><a href="12.2-tuning-parameter-examples.html#tuning-parameter-examples"><span class="toc-section-number">12.2</span> Tuning Parameters for Different Types of Models</a></li>
+<li><a href="12.3-what-to-optimize.html#what-to-optimize"><span class="toc-section-number">12.3</span> What do we Optimize?</a></li>
+<li><a href="12.4-overfitting-bad.html#overfitting-bad"><span class="toc-section-number">12.4</span> The consequences of poor parameter estimates</a></li>
+<li><a href="12.5-two-general-strategies-for-optimization.html#two-general-strategies-for-optimization"><span class="toc-section-number">12.5</span> Two general strategies for optimization</a></li>
+<li><a href="12.6-tuning-params-tidymodels.html#tuning-params-tidymodels"><span class="toc-section-number">12.6</span> Tuning Parameters in tidymodels</a></li>
+<li><a href="12.7-chapter-summary-2.html#chapter-summary-2"><span class="toc-section-number">12.7</span> Chapter Summary</a></li>
+</ul></li>
+<li class="has-sub"><a href="13-grid-search.html#grid-search"><span class="toc-section-number">13</span> Grid Search</a>
+<ul>
+<li class="has-sub"><a href="13.1-grids.html#grids"><span class="toc-section-number">13.1</span> Regular and Non-Regular Grids</a>
+<ul>
+<li><a href="13.1-grids.html#regular-grids">Regular grids</a></li>
+<li><a href="13.1-grids.html#irregular-grids">Irregular grids</a></li>
+</ul></li>
+<li><a href="13.2-evaluating-grid.html#evaluating-grid"><span class="toc-section-number">13.2</span> Evaluating the Grid</a></li>
+<li><a href="13.3-finalizing-the-model.html#finalizing-the-model"><span class="toc-section-number">13.3</span> Finalizing the Model</a></li>
+<li><a href="13.4-tuning-usemodels.html#tuning-usemodels"><span class="toc-section-number">13.4</span> Tools for Creating Tuning Specifications</a></li>
+<li class="has-sub"><a href="13.5-efficient-grids.html#efficient-grids"><span class="toc-section-number">13.5</span> Tools for Efficient Grid Search</a>
+<ul>
+<li><a href="13.5-efficient-grids.html#submodel-trick"><span class="toc-section-number">13.5.1</span> Submodel optimization</a></li>
+<li><a href="13.5-efficient-grids.html#parallel-processing"><span class="toc-section-number">13.5.2</span> Parallel processing</a></li>
+<li><a href="13.5-efficient-grids.html#benchmarking-boosted-trees"><span class="toc-section-number">13.5.3</span> Benchmarking boosted trees</a></li>
+<li><a href="13.5-efficient-grids.html#access-to-global-variables"><span class="toc-section-number">13.5.4</span> Access to global variables</a></li>
+<li><a href="13.5-efficient-grids.html#racing"><span class="toc-section-number">13.5.5</span> Racing methods</a></li>
+</ul></li>
+<li><a href="13.6-grid-summary.html#grid-summary"><span class="toc-section-number">13.6</span> Chapter Summary</a></li>
+</ul></li>
+<li class="has-sub"><a href="14-iterative-search.html#iterative-search"><span class="toc-section-number">14</span> Iterative Search</a>
+<ul>
+<li><a href="14.1-svm.html#svm"><span class="toc-section-number">14.1</span> A Support Vector Machine Model</a></li>
+<li class="has-sub"><a href="14.2-bayesian-optimization.html#bayesian-optimization"><span class="toc-section-number">14.2</span> Bayesian Optimization</a>
+<ul>
+<li><a href="14.2-bayesian-optimization.html#a-gaussian-process-model"><span class="toc-section-number">14.2.1</span> A Gaussian process model</a></li>
+<li><a href="14.2-bayesian-optimization.html#acquisition-functions"><span class="toc-section-number">14.2.2</span> Acquisition functions</a></li>
+<li><a href="14.2-bayesian-optimization.html#tune-bayes"><span class="toc-section-number">14.2.3</span> The <code>tune_bayes()</code> function</a></li>
+</ul></li>
+<li class="has-sub"><a href="14.3-simulated-annealing.html#simulated-annealing"><span class="toc-section-number">14.3</span> Simulated Annealing</a>
+<ul>
+<li><a href="14.3-simulated-annealing.html#simulated-annealing-search-process"><span class="toc-section-number">14.3.1</span> Simulated annealing search process</a></li>
+<li><a href="14.3-simulated-annealing.html#tune-sim-anneal"><span class="toc-section-number">14.3.2</span> The <code>tune_sim_anneal()</code> function</a></li>
+</ul></li>
+<li><a href="14.4-iterative-summary.html#iterative-summary"><span class="toc-section-number">14.4</span> Chapter Summary</a></li>
+</ul></li>
+<li class="has-sub"><a href="15-workflow-sets.html#workflow-sets"><span class="toc-section-number">15</span> Screening Many Models</a>
+<ul>
+<li><a href="15.1-modeling-concrete-mixture-strength.html#modeling-concrete-mixture-strength"><span class="toc-section-number">15.1</span> Modeling Concrete Mixture Strength</a></li>
+<li><a href="15.2-creating-the-workflow-set.html#creating-the-workflow-set"><span class="toc-section-number">15.2</span> Creating the Workflow Set</a></li>
+<li><a href="15.3-tuning-and-evaluating-the-models.html#tuning-and-evaluating-the-models"><span class="toc-section-number">15.3</span> Tuning and Evaluating the Models</a></li>
+<li><a href="15.4-racing-example.html#racing-example"><span class="toc-section-number">15.4</span> Efficiently Screening Models</a></li>
+<li><a href="15.5-finalizing-a-model.html#finalizing-a-model"><span class="toc-section-number">15.5</span> Finalizing a Model</a></li>
+<li><a href="15.6-workflow-sets-summary.html#workflow-sets-summary"><span class="toc-section-number">15.6</span> Chapter Summary</a></li>
+</ul></li>
+<li class="part"><span><b>Beyond the Basics</b></span></li>
+<li class="has-sub"><a href="16-dimensionality.html#dimensionality"><span class="toc-section-number">16</span> Dimensionality Reduction</a>
+<ul>
+<li><a href="16.1-when-problems-can-dimensionality-reduction-solve.html#when-problems-can-dimensionality-reduction-solve"><span class="toc-section-number">16.1</span> When Problems Can Dimensionality Reduction Solve?</a></li>
+<li><a href="16.2-beans.html#beans"><span class="toc-section-number">16.2</span> A Picture is Worth a Thousand… Beans</a></li>
+<li><a href="16.3-a-starter-recipe.html#a-starter-recipe"><span class="toc-section-number">16.3</span> A Starter Recipe</a></li>
+<li class="has-sub"><a href="16.4-recipe-functions.html#recipe-functions"><span class="toc-section-number">16.4</span> Recipes in the Wild</a>
+<ul>
+<li><a href="16.4-recipe-functions.html#prep"><span class="toc-section-number">16.4.1</span> Preparing a recipe</a></li>
+<li><a href="16.4-recipe-functions.html#bake"><span class="toc-section-number">16.4.2</span> Baking the recipe</a></li>
+</ul></li>
+<li class="has-sub"><a href="16.5-feature-extraction-techniques.html#feature-extraction-techniques"><span class="toc-section-number">16.5</span> Feature Extraction Techniques</a>
+<ul>
+<li><a href="16.5-feature-extraction-techniques.html#principal-component-analysis"><span class="toc-section-number">16.5.1</span> Principal component analysis</a></li>
+<li><a href="16.5-feature-extraction-techniques.html#partial-least-squares"><span class="toc-section-number">16.5.2</span> Partial least squares</a></li>
+<li><a href="16.5-feature-extraction-techniques.html#independent-component-analysis"><span class="toc-section-number">16.5.3</span> Independent component analysis</a></li>
+<li><a href="16.5-feature-extraction-techniques.html#uniform-manifold-approximation-and-projection"><span class="toc-section-number">16.5.4</span> Uniform manifold approximation and projection</a></li>
+</ul></li>
+<li><a href="16.6-bean-models.html#bean-models"><span class="toc-section-number">16.6</span> Modeling</a></li>
+<li><a href="16.7-dimensionality-summary.html#dimensionality-summary"><span class="toc-section-number">16.7</span> Chapter Summary</a></li>
+</ul></li>
+<li class="has-sub"><a href="17-categorical.html#categorical"><span class="toc-section-number">17</span> Encoding Categorical Data</a>
+<ul>
+<li><a href="17.1-is-an-encoding-necessary.html#is-an-encoding-necessary"><span class="toc-section-number">17.1</span> Is an Encoding Necessary?</a></li>
+<li><a href="17.2-encoding-ordinal-predictors.html#encoding-ordinal-predictors"><span class="toc-section-number">17.2</span> Encoding Ordinal Predictors</a></li>
+<li class="has-sub"><a href="17.3-using-the-outcome-for-encoding-predictors.html#using-the-outcome-for-encoding-predictors"><span class="toc-section-number">17.3</span> Using the Outcome for Encoding Predictors</a>
+<ul>
+<li><a href="17.3-using-the-outcome-for-encoding-predictors.html#effect-encodings-with-partial-pooling"><span class="toc-section-number">17.3.1</span> Effect encodings with partial pooling</a></li>
+</ul></li>
+<li><a href="17.4-feature-hashing.html#feature-hashing"><span class="toc-section-number">17.4</span> Feature Hashing</a></li>
+<li><a href="17.5-more-encoding-options.html#more-encoding-options"><span class="toc-section-number">17.5</span> More Encoding Options</a></li>
+<li><a href="17.6-categorical-summary.html#categorical-summary"><span class="toc-section-number">17.6</span> Chapter Summary</a></li>
+</ul></li>
+<li class="has-sub"><a href="18-explain.html#explain"><span class="toc-section-number">18</span> Explaining Models and Predictions</a>
+<ul>
+<li><a href="18.1-software-for-model-explanations.html#software-for-model-explanations"><span class="toc-section-number">18.1</span> Software for Model Explanations</a></li>
+<li><a href="18.2-local-explanations.html#local-explanations"><span class="toc-section-number">18.2</span> Local Explanations</a></li>
+<li><a href="18.3-global-explanations.html#global-explanations"><span class="toc-section-number">18.3</span> Global Explanations</a></li>
+<li><a href="18.4-building-global-explanations-from-local-explanations.html#building-global-explanations-from-local-explanations"><span class="toc-section-number">18.4</span> Building Global Explanations from Local Explanations</a></li>
+<li><a href="18.5-back-to-beans.html#back-to-beans"><span class="toc-section-number">18.5</span> Back to Beans!</a></li>
+<li><a href="18.6-explain-summary.html#explain-summary"><span class="toc-section-number">18.6</span> Chapter Summary</a></li>
+</ul></li>
+<li class="has-sub"><a href="19-trust.html#trust"><span class="toc-section-number">19</span> When Should You Trust Your Predictions?</a>
+<ul>
+<li><a href="19.1-equivocal-zones.html#equivocal-zones"><span class="toc-section-number">19.1</span> Equivocal Results</a></li>
+<li><a href="19.2-applicability-domains.html#applicability-domains"><span class="toc-section-number">19.2</span> Determining Model Applicability</a></li>
+<li><a href="19.3-trust-summary.html#trust-summary"><span class="toc-section-number">19.3</span> Chapter Summary</a></li>
+</ul></li>
+<li class="has-sub"><a href="20-ensembles.html#ensembles"><span class="toc-section-number">20</span> Ensembles of Models</a>
+<ul>
+<li><a href="20.1-data-stack.html#data-stack"><span class="toc-section-number">20.1</span> Creating the Training Set for Stacking</a></li>
+<li><a href="20.2-blend-predictions.html#blend-predictions"><span class="toc-section-number">20.2</span> Blend the Predictions</a></li>
+<li><a href="20.3-fit-members.html#fit-members"><span class="toc-section-number">20.3</span> Fit the Member Models</a></li>
+<li><a href="20.4-test-set-results.html#test-set-results"><span class="toc-section-number">20.4</span> Test Set Results</a></li>
+<li><a href="20.5-ensembles-summary.html#ensembles-summary"><span class="toc-section-number">20.5</span> Chapter Summary</a></li>
+</ul></li>
+<li class="has-sub"><a href="21-inferential.html#inferential"><span class="toc-section-number">21</span> Inferential Analysis</a>
+<ul>
+<li><a href="21.1-inference-for-count-data.html#inference-for-count-data"><span class="toc-section-number">21.1</span> Inference for Count Data</a></li>
+<li><a href="21.2-comparisons-with-two-sample-tests.html#comparisons-with-two-sample-tests"><span class="toc-section-number">21.2</span> Comparisons with Two-Sample Tests</a></li>
+<li><a href="21.3-log-linear-models.html#log-linear-models"><span class="toc-section-number">21.3</span> Log-Linear Models</a></li>
+<li><a href="21.4-a-more-complex-model.html#a-more-complex-model"><span class="toc-section-number">21.4</span> A More Complex Model</a></li>
+<li><a href="21.5-inference-options.html#inference-options"><span class="toc-section-number">21.5</span> More Inferential Analysis</a></li>
+<li><a href="21.6-inference-summary.html#inference-summary"><span class="toc-section-number">21.6</span> Chapter Summary</a></li>
+</ul></li>
+<li class="appendix"><span><b>Appendix</b></span></li>
+<li><a href="A-pre-proc-table.html#pre-proc-table"><span class="toc-section-number">A</span> Recommended Preprocessing</a></li>
+<li><a href="references.html#references">REFERENCES</a></li>
+</ul>
+</div>
+</div>
+</div>
+<div class="row">
+<div class="col-sm-12">
+<div id="grids" class="section level2" number="13.1">
+<h2><span class="header-section-number">13.1</span> Regular and Non-Regular Grids</h2>
+<p>There are two main types of grids. A regular grid combines each parameter (with its corresponding set of possible values) factorially, i.e., by using all combinations of the sets. Alternatively, a non-regular grid is one where the parameter combinations are not formed from a small set of points.</p>
+<p>Before we look at each type in more detail, let’s consider an example model: the multilayer perceptron model (a.k.a. single layer artificial neural network). The parameters marked for tuning are:</p>
+<ul>
+<li><p>the number of hidden units,</p></li>
+<li><p>the number of fitting epochs/iterations in model training, and</p></li>
+<li><p>the amount of weight decay penalization.</p></li>
+</ul>
+<div class="rmdnote">
+<p>Historically, the number of epochs was determined by early stopping; a separate validation set determined the length of training based on the error rate, since re-predicting the training set led to overfitting. In our case, the use of a weight decay penalty should prohibit overfitting, and there is little harm in tuning the penalty and the number of epochs.</p>
+</div>
+<p>Using <span class="pkg">parsnip</span>, the specification for a classification model fit using the <span class="pkg">nnet</span> package is:</p>
+<div class="sourceCode" id="cb198"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb198-1"><a href="13.1-grids.html#cb198-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidymodels)</span>
+<span id="cb198-2"><a href="13.1-grids.html#cb198-2" aria-hidden="true" tabindex="-1"></a><span class="fu">tidymodels_prefer</span>()</span>
+<span id="cb198-3"><a href="13.1-grids.html#cb198-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb198-4"><a href="13.1-grids.html#cb198-4" aria-hidden="true" tabindex="-1"></a>mlp_spec <span class="ot">&lt;-</span> </span>
+<span id="cb198-5"><a href="13.1-grids.html#cb198-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mlp</span>(<span class="at">hidden_units =</span> <span class="fu">tune</span>(), <span class="at">penalty =</span> <span class="fu">tune</span>(), <span class="at">epochs =</span> <span class="fu">tune</span>()) <span class="sc">%&gt;%</span> </span>
+<span id="cb198-6"><a href="13.1-grids.html#cb198-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_engine</span>(<span class="st">&quot;nnet&quot;</span>, <span class="at">trace =</span> <span class="dv">0</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb198-7"><a href="13.1-grids.html#cb198-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_mode</span>(<span class="st">&quot;classification&quot;</span>)</span></code></pre></div>
+<p>The argument <code>trace = 0</code> prevents extra logging of the training process. As shown in Chapter <a href="12-tuning.html#tuning">12</a>, the <code>extract_parameter_set_dials()</code> function can extract the set of arguments with unknown values and sets their <span class="pkg">dials</span> objects:</p>
+<div class="sourceCode" id="cb199"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb199-1"><a href="13.1-grids.html#cb199-1" aria-hidden="true" tabindex="-1"></a>mlp_param <span class="ot">&lt;-</span> <span class="fu">extract_parameter_set_dials</span>(mlp_spec)</span>
+<span id="cb199-2"><a href="13.1-grids.html#cb199-2" aria-hidden="true" tabindex="-1"></a>mlp_param <span class="sc">%&gt;%</span> <span class="fu">extract_parameter_dials</span>(<span class="st">&quot;hidden_units&quot;</span>)</span>
+<span id="cb199-3"><a href="13.1-grids.html#cb199-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; # Hidden Units (quantitative)</span></span>
+<span id="cb199-4"><a href="13.1-grids.html#cb199-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Range: [1, 10]</span></span>
+<span id="cb199-5"><a href="13.1-grids.html#cb199-5" aria-hidden="true" tabindex="-1"></a>mlp_param <span class="sc">%&gt;%</span> <span class="fu">extract_parameter_dials</span>(<span class="st">&quot;penalty&quot;</span>)</span>
+<span id="cb199-6"><a href="13.1-grids.html#cb199-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Amount of Regularization (quantitative)</span></span>
+<span id="cb199-7"><a href="13.1-grids.html#cb199-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Transformer:  log-10 </span></span>
+<span id="cb199-8"><a href="13.1-grids.html#cb199-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Range (transformed scale): [-10, 0]</span></span>
+<span id="cb199-9"><a href="13.1-grids.html#cb199-9" aria-hidden="true" tabindex="-1"></a>mlp_param <span class="sc">%&gt;%</span> <span class="fu">extract_parameter_dials</span>(<span class="st">&quot;epochs&quot;</span>)</span>
+<span id="cb199-10"><a href="13.1-grids.html#cb199-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; # Epochs (quantitative)</span></span>
+<span id="cb199-11"><a href="13.1-grids.html#cb199-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Range: [10, 1000]</span></span></code></pre></div>
+<p>This output indicates that the parameter objects are complete and prints their default ranges. These values will be used to demonstrate how to create different types of parameter grids.</p>
+<div id="regular-grids" class="section level3 unnumbered">
+<h3>Regular grids</h3>
+<p>Regular grids are combinations of separate sets of parameter values. First, the user creates a distinct set of values for each parameter. The number of possible values need not be the same for each parameter. The <span class="pkg">tidyr</span> function <code>crossing()</code> is one way to create a regular grid:</p>
+<div class="sourceCode" id="cb200"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb200-1"><a href="13.1-grids.html#cb200-1" aria-hidden="true" tabindex="-1"></a><span class="fu">crossing</span>(</span>
+<span id="cb200-2"><a href="13.1-grids.html#cb200-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">hidden_units =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>,</span>
+<span id="cb200-3"><a href="13.1-grids.html#cb200-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">penalty =</span> <span class="fu">c</span>(<span class="fl">0.0</span>, <span class="fl">0.1</span>),</span>
+<span id="cb200-4"><a href="13.1-grids.html#cb200-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">epochs =</span> <span class="fu">c</span>(<span class="dv">100</span>, <span class="dv">200</span>)</span>
+<span id="cb200-5"><a href="13.1-grids.html#cb200-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb200-6"><a href="13.1-grids.html#cb200-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; # A tibble: 12 × 3</span></span>
+<span id="cb200-7"><a href="13.1-grids.html#cb200-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   hidden_units penalty epochs</span></span>
+<span id="cb200-8"><a href="13.1-grids.html#cb200-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;          &lt;int&gt;   &lt;dbl&gt;  &lt;dbl&gt;</span></span>
+<span id="cb200-9"><a href="13.1-grids.html#cb200-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1            1     0      100</span></span>
+<span id="cb200-10"><a href="13.1-grids.html#cb200-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2            1     0      200</span></span>
+<span id="cb200-11"><a href="13.1-grids.html#cb200-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3            1     0.1    100</span></span>
+<span id="cb200-12"><a href="13.1-grids.html#cb200-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4            1     0.1    200</span></span>
+<span id="cb200-13"><a href="13.1-grids.html#cb200-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5            2     0      100</span></span>
+<span id="cb200-14"><a href="13.1-grids.html#cb200-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6            2     0      200</span></span>
+<span id="cb200-15"><a href="13.1-grids.html#cb200-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; # … with 6 more rows</span></span></code></pre></div>
+<p>The parameter object knows the ranges of the parameters. The <span class="pkg">dials</span> package contains a set of <code>grid_*()</code> functions that take the parameter object as input to produce different types of grids. For example:</p>
+<div class="sourceCode" id="cb201"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb201-1"><a href="13.1-grids.html#cb201-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grid_regular</span>(mlp_param, <span class="at">levels =</span> <span class="dv">2</span>)</span>
+<span id="cb201-2"><a href="13.1-grids.html#cb201-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; # A tibble: 8 × 3</span></span>
+<span id="cb201-3"><a href="13.1-grids.html#cb201-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   hidden_units      penalty epochs</span></span>
+<span id="cb201-4"><a href="13.1-grids.html#cb201-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;          &lt;int&gt;        &lt;dbl&gt;  &lt;int&gt;</span></span>
+<span id="cb201-5"><a href="13.1-grids.html#cb201-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1            1 0.0000000001     10</span></span>
+<span id="cb201-6"><a href="13.1-grids.html#cb201-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2           10 0.0000000001     10</span></span>
+<span id="cb201-7"><a href="13.1-grids.html#cb201-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3            1 1                10</span></span>
+<span id="cb201-8"><a href="13.1-grids.html#cb201-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4           10 1                10</span></span>
+<span id="cb201-9"><a href="13.1-grids.html#cb201-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5            1 0.0000000001   1000</span></span>
+<span id="cb201-10"><a href="13.1-grids.html#cb201-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6           10 0.0000000001   1000</span></span>
+<span id="cb201-11"><a href="13.1-grids.html#cb201-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; # … with 2 more rows</span></span></code></pre></div>
+<p>The <code>levels</code> argument is the number of levels per parameter to create. It can also take a named vector of values:</p>
+<div class="sourceCode" id="cb202"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb202-1"><a href="13.1-grids.html#cb202-1" aria-hidden="true" tabindex="-1"></a>mlp_param <span class="sc">%&gt;%</span> </span>
+<span id="cb202-2"><a href="13.1-grids.html#cb202-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">grid_regular</span>(<span class="at">levels =</span> <span class="fu">c</span>(<span class="at">hidden_units =</span> <span class="dv">3</span>, <span class="at">penalty =</span> <span class="dv">2</span>, <span class="at">epochs =</span> <span class="dv">2</span>))</span>
+<span id="cb202-3"><a href="13.1-grids.html#cb202-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; # A tibble: 12 × 3</span></span>
+<span id="cb202-4"><a href="13.1-grids.html#cb202-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   hidden_units      penalty epochs</span></span>
+<span id="cb202-5"><a href="13.1-grids.html#cb202-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;          &lt;int&gt;        &lt;dbl&gt;  &lt;int&gt;</span></span>
+<span id="cb202-6"><a href="13.1-grids.html#cb202-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1            1 0.0000000001     10</span></span>
+<span id="cb202-7"><a href="13.1-grids.html#cb202-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2            5 0.0000000001     10</span></span>
+<span id="cb202-8"><a href="13.1-grids.html#cb202-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3           10 0.0000000001     10</span></span>
+<span id="cb202-9"><a href="13.1-grids.html#cb202-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4            1 1                10</span></span>
+<span id="cb202-10"><a href="13.1-grids.html#cb202-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5            5 1                10</span></span>
+<span id="cb202-11"><a href="13.1-grids.html#cb202-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6           10 1                10</span></span>
+<span id="cb202-12"><a href="13.1-grids.html#cb202-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; # … with 6 more rows</span></span></code></pre></div>
+<p>There are techniques for creating regular grids that do not use all possible values of each parameter set. These <em>fractional factorial designs</em> <span class="citation">(<a href="#ref-BHH" role="doc-biblioref">Box, Hunter, and Hunter 2005</a>)</span> could also be used. To learn more, consult the CRAN Task View for experimental design.<a href="#fn26" class="footnote-ref" id="fnref26"><sup>26</sup></a></p>
+<div class="rmdwarning">
+<p>Regular grids can be computationally expensive to use, especially when there are a medium-to-large number of tuning parameters. This is true for many models but not all. As discussed further in this chapter, there are many models whose tuning time <em>decreases</em> with a regular grid!</p>
+</div>
+<p>One advantage to using a regular grid is that the relationships and patterns between the tuning parameters and the model metrics are easily understood. The factorial nature of these designs allows for examination of each parameter separately with little confounding between parameters.</p>
+</div>
+<div id="irregular-grids" class="section level3 unnumbered">
+<h3>Irregular grids</h3>
+<p>There are several options for creating non-regular grids. The first is to use random sampling across the range of parameters. The <code>grid_random()</code> function generates independent uniform random numbers across the parameter ranges. If the parameter object has an associated transformation (such as we have for <code>penalty</code>), the random numbers are generated on the transformed scale. Let’s create a random grid for the parameters from our example neural network:</p>
+<div class="sourceCode" id="cb203"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb203-1"><a href="13.1-grids.html#cb203-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1301</span>)</span>
+<span id="cb203-2"><a href="13.1-grids.html#cb203-2" aria-hidden="true" tabindex="-1"></a>mlp_param <span class="sc">%&gt;%</span> </span>
+<span id="cb203-3"><a href="13.1-grids.html#cb203-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">grid_random</span>(<span class="at">size =</span> <span class="dv">1000</span>) <span class="sc">%&gt;%</span> <span class="co"># &#39;size&#39; is the number of combinations</span></span>
+<span id="cb203-4"><a href="13.1-grids.html#cb203-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summary</span>()</span>
+<span id="cb203-5"><a href="13.1-grids.html#cb203-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   hidden_units      penalty           epochs   </span></span>
+<span id="cb203-6"><a href="13.1-grids.html#cb203-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  Min.   : 1.00   Min.   :0.0000   Min.   : 10  </span></span>
+<span id="cb203-7"><a href="13.1-grids.html#cb203-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  1st Qu.: 3.00   1st Qu.:0.0000   1st Qu.:266  </span></span>
+<span id="cb203-8"><a href="13.1-grids.html#cb203-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  Median : 5.00   Median :0.0000   Median :497  </span></span>
+<span id="cb203-9"><a href="13.1-grids.html#cb203-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  Mean   : 5.38   Mean   :0.0437   Mean   :510  </span></span>
+<span id="cb203-10"><a href="13.1-grids.html#cb203-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  3rd Qu.: 8.00   3rd Qu.:0.0027   3rd Qu.:761  </span></span>
+<span id="cb203-11"><a href="13.1-grids.html#cb203-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  Max.   :10.00   Max.   :0.9814   Max.   :999</span></span></code></pre></div>
+<p>For <code>penalty</code>, the random numbers are uniform on the log (base 10) scale but the values in the grid are in the natural units.</p>
+<p>The issue with random grids is that, with small-to-medium grids, random values can result in overlapping parameter combinations. Also, the random grid needs to cover the whole parameter space but the likelihood of good coverage increases with the number of grid values. Even for a sample of 15 candidate points, Figure <a href="13.1-grids.html#fig:random-grid">13.1</a> shows some overlap between points for our example multilayer perceptron.</p>
+<div class="sourceCode" id="cb204"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb204-1"><a href="13.1-grids.html#cb204-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggforce)</span>
+<span id="cb204-2"><a href="13.1-grids.html#cb204-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1302</span>)</span>
+<span id="cb204-3"><a href="13.1-grids.html#cb204-3" aria-hidden="true" tabindex="-1"></a>mlp_param <span class="sc">%&gt;%</span> </span>
+<span id="cb204-4"><a href="13.1-grids.html#cb204-4" aria-hidden="true" tabindex="-1"></a>  <span class="co"># The &#39;original = FALSE&#39; option keeps penalty in log10 units</span></span>
+<span id="cb204-5"><a href="13.1-grids.html#cb204-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">grid_random</span>(<span class="at">size =</span> <span class="dv">20</span>, <span class="at">original =</span> <span class="cn">FALSE</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb204-6"><a href="13.1-grids.html#cb204-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> .panel_x, <span class="at">y =</span> .panel_y)) <span class="sc">+</span> </span>
+<span id="cb204-7"><a href="13.1-grids.html#cb204-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb204-8"><a href="13.1-grids.html#cb204-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_blank</span>() <span class="sc">+</span></span>
+<span id="cb204-9"><a href="13.1-grids.html#cb204-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_matrix</span>(<span class="fu">vars</span>(hidden_units, penalty, epochs), <span class="at">layer.diag =</span> <span class="dv">2</span>) <span class="sc">+</span> </span>
+<span id="cb204-10"><a href="13.1-grids.html#cb204-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">&quot;Random design with 20 candidates&quot;</span>)</span></code></pre></div>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:random-grid"></span>
+<img src="figures/random-grid-1.png" alt="A scatter plot matrix for three tuning parameters with 20 points generated at random. There are significant gaps in the parameter space."  />
+<p class="caption">
+Figure 13.1: Three tuning parameters with 15 points generated at random.
+</p>
+</div>
+<p>A much better approach is to use a set of experimental designs called <em>space-filling designs</em>. While different design methods have slightly different goals, they generally find a configuration of points that cover the parameter space with the smallest chance of overlapping or redundant values. Examples of such designs are Latin hypercubes <span class="citation">(<a href="#ref-lhd" role="doc-biblioref">McKay, Beckman, and Conover 1979</a>)</span>, maximum entropy designs <span class="citation">(<a href="#ref-maxent" role="doc-biblioref">Shewry and Wynn 1987</a>)</span>, maximum projection designs <span class="citation">(<a href="#ref-maxproj" role="doc-biblioref">Joseph, Gul, and Ba 2015</a>)</span>, and others. See <span class="citation">Santner et al. (<a href="#ref-santner2003design" role="doc-biblioref">2003</a>)</span> for an overview.</p>
+<p>The <span class="pkg">dials</span> package contains functions for Latin hypercube and maximum entropy designs. As with <code>grid_random()</code>, the primary inputs are the number of parameter combinations and a parameter object. Let’s compare a random design with a Latin hypercube design for 15 candidate parameter values in Figure <a href="13.1-grids.html#fig:space-filling-design">13.2</a>.</p>
+<div class="sourceCode" id="cb205"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb205-1"><a href="13.1-grids.html#cb205-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1303</span>)</span>
+<span id="cb205-2"><a href="13.1-grids.html#cb205-2" aria-hidden="true" tabindex="-1"></a>mlp_param <span class="sc">%&gt;%</span> </span>
+<span id="cb205-3"><a href="13.1-grids.html#cb205-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">grid_latin_hypercube</span>(<span class="at">size =</span> <span class="dv">20</span>, <span class="at">original =</span> <span class="cn">FALSE</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb205-4"><a href="13.1-grids.html#cb205-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> .panel_x, <span class="at">y =</span> .panel_y)) <span class="sc">+</span> </span>
+<span id="cb205-5"><a href="13.1-grids.html#cb205-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb205-6"><a href="13.1-grids.html#cb205-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_blank</span>() <span class="sc">+</span></span>
+<span id="cb205-7"><a href="13.1-grids.html#cb205-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_matrix</span>(<span class="fu">vars</span>(hidden_units, penalty, epochs), <span class="at">layer.diag =</span> <span class="dv">2</span>) <span class="sc">+</span> </span>
+<span id="cb205-8"><a href="13.1-grids.html#cb205-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">&quot;Latin Hypercube design with 20 candidates&quot;</span>)</span></code></pre></div>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:space-filling-design"></span>
+<img src="figures/space-filling-design-1.png" alt="A scatter plot matrix for three tuning parameters with 15 points generated using a space-filling design. There are fewer gaps in the parameter space when compared to the random grid."  />
+<p class="caption">
+Figure 13.2: Three tuning parameters with 20 points generated using a space-filling design.
+</p>
+</div>
+<p>While not perfect, this Latin hypercube design spaces the points further away from one another and allows a better exploration of the hyperparameter space.</p>
+<p>Space-filling designs can be very effective at representing the parameter space. The default design used by the <span class="pkg">tune</span> package is the maximum entropy design. These tend to produce grids that cover the candidate space well and drastically increase the chances of finding good results.</p>
+</div>
+</div>
+<h3>REFERENCES</h3>
+<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="ref-BHH" class="csl-entry">
+Box, GEP, W Hunter, and J Hunter. 2005. <em>Statistics for Experimenters: An Introduction to Design, Data Analysis, and Model Building</em>. Wiley.
+</div>
+<div id="ref-maxproj" class="csl-entry">
+Joseph, V, E Gul, and S Ba. 2015. <span>“Maximum Projection Designs for Computer Experiments.”</span> <em>Biometrika</em> 102 (2): 371–80.
+</div>
+<div id="ref-lhd" class="csl-entry">
+McKay, M, R Beckman, and W Conover. 1979. <span>“A Comparison of Three Methods for Selecting Values of Input Variables in the Analysis of Output from a Computer Code.”</span> <em>Technometrics</em> 21 (2): 239–45.
+</div>
+<div id="ref-santner2003design" class="csl-entry">
+Santner, T, B Williams, W Notz, and B Williams. 2003. <em>The Design and Analysis of Computer Experiments</em>. Springer.
+</div>
+<div id="ref-maxent" class="csl-entry">
+Shewry, M, and H Wynn. 1987. <span>“Maximum Entropy Sampling.”</span> <em>Journal of Applied Statistics</em> 14 (2): 165–70.
+</div>
+</div>
+<div class="footnotes">
+<hr />
+<ol start="26">
+<li id="fn26"><p><a href="https://CRAN.R-project.org/view=ExperimentalDesign" class="uri">https://CRAN.R-project.org/view=ExperimentalDesign</a><a href="13.1-grids.html#fnref26" class="footnote-back">↩︎</a></p></li>
+</ol>
+</div>
+<p style="text-align: center;">
+<a href="13-grid-search.html"><button class="btn btn-default">Previous</button></a>
+<a href="13.2-evaluating-grid.html"><button class="btn btn-default">Next</button></a>
+</p>
+</div>
+</div>
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+$(document).ready(function () {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+});
+
+</script>
+
+</body>
+</html>

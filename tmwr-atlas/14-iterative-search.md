@@ -356,7 +356,6 @@ The `autoplot()` function has several options for iterative search methods. Figu
 
 An additional type of plot uses `type = "parameters"`  which shows the parameter values over iterations.
 
-<<<<<<< HEAD
 
 
 Figure \@ref(fig:bo-surfaces) shows the surfaces of the mean, variance, and expected improvement surfaces estimated by the GP after 11 iterations. The panel on the right shows a ridge of best estimated improvement along the right side of the candidate space.

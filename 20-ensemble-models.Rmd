@@ -199,7 +199,7 @@ The regularized linear regression meta-learning model contained `r num_coefs` bl
 autoplot(ens, "weights") +
   geom_text(aes(x = weight + 0.01, label = model), hjust = 0) + 
   theme(legend.position = "none") +
-  lims(x = c(-0.01, 0.82))
+  lims(x = c(-0.01, 0.9))
 ```
 
 ```{r blending-weights, ref.label = "ensembles-blending-weights"}

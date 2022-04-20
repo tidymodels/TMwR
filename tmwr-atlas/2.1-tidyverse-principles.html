@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="2.1 Tidyverse Principles | Tidy Modeling with R" />
+<meta property="og:type" content="book" />
+<meta property="og:image" content="/images/cover.png" />
+<meta property="og:description" content="The tidymodels framework is a collection of R packages for modeling and machine learning using tidyverse principles. This book provides a thorough introduction to how to use tidymodels, and an outline of good methodology and statistical practice for phases of the modeling process." />
+<meta name="github-repo" content="tidymodels/TMwR" />
+
+<meta name="author" content="Max Kuhn and Julia Silge" />
+
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  TeX: { equationNumbers: { autoNumber: "AMS" } }
+});
+</script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<meta name="description" content="The tidymodels framework is a collection of R packages for modeling and machine learning using tidyverse principles. This book provides a thorough introduction to how to use tidymodels, and an outline of good methodology and statistical practice for phases of the modeling process.">
+
+<title>2.1 Tidyverse Principles | Tidy Modeling with R</title>
+
+<script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="libs/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+<script src="libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="libs/navigation-1.1/tabsets.js"></script>
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+
+
+<style type="text/css">
+/* Used with Pandoc 2.11+ new --citeproc when CSL is used */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}
+</style>
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+/* show arrow before summary tag as in bootstrap
+TODO: remove if boostrap in updated in html_document (rmarkdown#1485) */
+details > summary {
+  display: list-item;
+  cursor: pointer;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container-fluid main-container">
+
+
+<div class="row">
+<div class="col-sm-12">
+<div id="TOC">
+<ul>
+<li class="has-sub"><a href="index.html#hello-world">Hello World</a>
+<ul>
+<li><a href="acknowledgments.html#acknowledgments">Acknowledgments</a></li>
+<li><a href="using-code-examples.html#using-code-examples">Using Code Examples</a></li>
+</ul></li>
+<li class="part"><span><b>Introduction</b></span></li>
+<li class="has-sub"><a href="1-software-modeling.html#software-modeling"><span class="toc-section-number">1</span> Software for modeling</a>
+<ul>
+<li><a href="1.1-fundamentals-for-modeling-software.html#fundamentals-for-modeling-software"><span class="toc-section-number">1.1</span> Fundamentals for Modeling Software</a></li>
+<li class="has-sub"><a href="1.2-model-types.html#model-types"><span class="toc-section-number">1.2</span> Types of Models</a>
+<ul>
+<li><a href="1.2-model-types.html#descriptive-models">Descriptive models</a></li>
+<li><a href="1.2-model-types.html#inferential-models">Inferential models</a></li>
+<li><a href="1.2-model-types.html#predictive-models">Predictive models</a></li>
+</ul></li>
+<li><a href="1.3-connections-between-types-of-models.html#connections-between-types-of-models"><span class="toc-section-number">1.3</span> Connections Between Types of Models</a></li>
+<li><a href="1.4-model-terminology.html#model-terminology"><span class="toc-section-number">1.4</span> Some Terminology</a></li>
+<li><a href="1.5-model-phases.html#model-phases"><span class="toc-section-number">1.5</span> How Does Modeling Fit into the Data Analysis Process?</a></li>
+<li><a href="1.6-software-summary.html#software-summary"><span class="toc-section-number">1.6</span> Chapter Summary</a></li>
+</ul></li>
+<li class="has-sub"><a href="2-tidyverse.html#tidyverse"><span class="toc-section-number">2</span> A Tidyverse Primer</a>
+<ul>
+<li class="has-sub"><a href="2.1-tidyverse-principles.html#tidyverse-principles"><span class="toc-section-number">2.1</span> Tidyverse Principles</a>
+<ul>
+<li><a href="2.1-tidyverse-principles.html#design-for-humans"><span class="toc-section-number">2.1.1</span> Design for humans</a></li>
+<li><a href="2.1-tidyverse-principles.html#reuse-existing-data-structures"><span class="toc-section-number">2.1.2</span> Reuse existing data structures</a></li>
+<li><a href="2.1-tidyverse-principles.html#design-for-the-pipe-and-functional-programming"><span class="toc-section-number">2.1.3</span> Design for the pipe and functional programming</a></li>
+</ul></li>
+<li><a href="2.2-examples-of-tidyverse-syntax.html#examples-of-tidyverse-syntax"><span class="toc-section-number">2.2</span> Examples of Tidyverse Syntax</a></li>
+<li><a href="2.3-chapter-summary.html#chapter-summary"><span class="toc-section-number">2.3</span> Chapter Summary</a></li>
+</ul></li>
+<li class="has-sub"><a href="3-base-r.html#base-r"><span class="toc-section-number">3</span> A Review of R Modeling Fundamentals</a>
+<ul>
+<li><a href="3.1-an-example.html#an-example"><span class="toc-section-number">3.1</span> An Example</a></li>
+<li><a href="3.2-formula.html#formula"><span class="toc-section-number">3.2</span> What Does the R Formula Do?</a></li>
+<li><a href="3.3-tidiness-modeling.html#tidiness-modeling"><span class="toc-section-number">3.3</span> Why Tidiness is Important for Modeling</a></li>
+<li><a href="3.4-combining-base-r-models-and-the-tidyverse.html#combining-base-r-models-and-the-tidyverse"><span class="toc-section-number">3.4</span> Combining Base R Models and the Tidyverse</a></li>
+<li><a href="3.5-the-tidymodels-metapackage.html#the-tidymodels-metapackage"><span class="toc-section-number">3.5</span> The tidymodels Metapackage</a></li>
+<li><a href="3.6-chapter-summary-1.html#chapter-summary-1"><span class="toc-section-number">3.6</span> Chapter Summary</a></li>
+</ul></li>
+<li class="part"><span><b>Modeling Basics</b></span></li>
+<li class="has-sub"><a href="4-ames.html#ames"><span class="toc-section-number">4</span> The Ames Housing Data</a>
+<ul>
+<li><a href="4.1-exploring-features-of-homes-in-ames.html#exploring-features-of-homes-in-ames"><span class="toc-section-number">4.1</span> Exploring Features of Homes in Ames</a></li>
+<li><a href="4.2-ames-summary.html#ames-summary"><span class="toc-section-number">4.2</span> Chapter Summary</a></li>
+</ul></li>
+<li class="has-sub"><a href="5-splitting.html#splitting"><span class="toc-section-number">5</span> Spending our Data</a>
+<ul>
+<li><a href="5.1-splitting-methods.html#splitting-methods"><span class="toc-section-number">5.1</span> Common Methods for Splitting Data</a></li>
+<li><a href="5.2-what-about-a-validation-set.html#what-about-a-validation-set"><span class="toc-section-number">5.2</span> What About a Validation Set?</a></li>
+<li><a href="5.3-multi-level-data.html#multi-level-data"><span class="toc-section-number">5.3</span> Multi-Level Data</a></li>
+<li><a href="5.4-other-considerations-for-a-data-budget.html#other-considerations-for-a-data-budget"><span class="toc-section-number">5.4</span> Other Considerations for a Data Budget</a></li>
+<li><a href="5.5-splitting-summary.html#splitting-summary"><span class="toc-section-number">5.5</span> Chapter Summary</a></li>
+</ul></li>
+<li class="has-sub"><a href="6-models.html#models"><span class="toc-section-number">6</span> Fitting Models with parsnip</a>
+<ul>
+<li><a href="6.1-create-a-model.html#create-a-model"><span class="toc-section-number">6.1</span> Create a Model</a></li>
+<li><a href="6.2-use-the-model-results.html#use-the-model-results"><span class="toc-section-number">6.2</span> Use the Model Results</a></li>
+<li><a href="6.3-parsnip-predictions.html#parsnip-predictions"><span class="toc-section-number">6.3</span> Make Predictions</a></li>
+<li><a href="6.4-parsnip-extension-packages.html#parsnip-extension-packages"><span class="toc-section-number">6.4</span> parsnip-Extension Packages</a></li>
+<li><a href="6.5-parsnip-addin.html#parsnip-addin"><span class="toc-section-number">6.5</span> Creating Model Specifications</a></li>
+<li><a href="6.6-models-summary.html#models-summary"><span class="toc-section-number">6.6</span> Chapter Summary</a></li>
+</ul></li>
+<li class="has-sub"><a href="7-workflows.html#workflows"><span class="toc-section-number">7</span> A Model Workflow</a>
+<ul>
+<li><a href="7.1-begin-model-end.html#begin-model-end"><span class="toc-section-number">7.1</span> Where Does the Model Begin and End?</a></li>
+<li><a href="7.2-workflow-basics.html#workflow-basics"><span class="toc-section-number">7.2</span> Workflow Basics</a></li>
+<li><a href="7.3-adding-raw-variables-to-the-workflow.html#adding-raw-variables-to-the-workflow"><span class="toc-section-number">7.3</span> Adding Raw Variables to the <code>workflow()</code></a></li>
+<li class="has-sub"><a href="7.4-workflow-encoding.html#workflow-encoding"><span class="toc-section-number">7.4</span> How Does a <code>workflow()</code> Use the Formula?</a>
+<ul>
+<li><a href="7.4-workflow-encoding.html#tree-based-models">Tree-based models</a></li>
+<li><a href="7.4-workflow-encoding.html#special-model-formulas"><span class="toc-section-number">7.4.1</span> Special formulas and in-line functions</a></li>
+</ul></li>
+<li><a href="7.5-workflow-sets-intro.html#workflow-sets-intro"><span class="toc-section-number">7.5</span> Creating Multiple Workflows at Once</a></li>
+<li><a href="7.6-evaluating-the-test-set.html#evaluating-the-test-set"><span class="toc-section-number">7.6</span> Evaluating the Test Set</a></li>
+<li><a href="7.7-workflows-summary.html#workflows-summary"><span class="toc-section-number">7.7</span> Chapter Summary</a></li>
+</ul></li>
+<li class="has-sub"><a href="8-recipes.html#recipes"><span class="toc-section-number">8</span> Feature Engineering with recipes</a>
+<ul>
+<li><a href="8.1-a-simple-recipe-for-the-ames-housing-data.html#a-simple-recipe-for-the-ames-housing-data"><span class="toc-section-number">8.1</span> A Simple <code>recipe()</code> for the Ames Housing Data</a></li>
+<li><a href="8.2-using-recipes.html#using-recipes"><span class="toc-section-number">8.2</span> Using Recipes</a></li>
+<li><a href="8.3-how-data-are-used-by-the-recipe.html#how-data-are-used-by-the-recipe"><span class="toc-section-number">8.3</span> How Data are Used by the <code>recipe()</code></a></li>
+<li class="has-sub"><a href="8.4-example-steps.html#example-steps"><span class="toc-section-number">8.4</span> Examples of <code>recipe()</code> Steps</a>
+<ul>
+<li><a href="8.4-example-steps.html#dummies"><span class="toc-section-number">8.4.1</span> Encoding qualitative data in a numeric format</a></li>
+<li><a href="8.4-example-steps.html#interaction-terms"><span class="toc-section-number">8.4.2</span> Interaction terms</a></li>
+<li><a href="8.4-example-steps.html#spline-functions"><span class="toc-section-number">8.4.3</span> Spline functions</a></li>
+<li><a href="8.4-example-steps.html#feature-extraction"><span class="toc-section-number">8.4.4</span> Feature extraction</a></li>
+<li><a href="8.4-example-steps.html#row-sampling-steps"><span class="toc-section-number">8.4.5</span> Row sampling steps</a></li>
+<li><a href="8.4-example-steps.html#general-transformations"><span class="toc-section-number">8.4.6</span> General transformations</a></li>
+<li><a href="8.4-example-steps.html#natural-language-processing"><span class="toc-section-number">8.4.7</span> Natural language processing</a></li>
+</ul></li>
+<li><a href="8.5-skip-equals-true.html#skip-equals-true"><span class="toc-section-number">8.5</span> Skipping Steps for New Data</a></li>
+<li><a href="8.6-tidy-a-recipe.html#tidy-a-recipe"><span class="toc-section-number">8.6</span> Tidy a <code>recipe()</code></a></li>
+<li><a href="8.7-column-roles.html#column-roles"><span class="toc-section-number">8.7</span> Column Roles</a></li>
+<li><a href="8.8-recipes-summary.html#recipes-summary"><span class="toc-section-number">8.8</span> Chapter Summary</a></li>
+</ul></li>
+<li class="has-sub"><a href="9-performance.html#performance"><span class="toc-section-number">9</span> Judging Model Effectiveness</a>
+<ul>
+<li><a href="9.1-performance-metrics-and-inference.html#performance-metrics-and-inference"><span class="toc-section-number">9.1</span> Performance Metrics and Inference</a></li>
+<li><a href="9.2-regression-metrics.html#regression-metrics"><span class="toc-section-number">9.2</span> Regression Metrics</a></li>
+<li><a href="9.3-binary-classification-metrics.html#binary-classification-metrics"><span class="toc-section-number">9.3</span> Binary Classification Metrics</a></li>
+<li><a href="9.4-multi-class-classification-metrics.html#multi-class-classification-metrics"><span class="toc-section-number">9.4</span> Multi-Class Classification Metrics</a></li>
+<li><a href="9.5-performance-summary.html#performance-summary"><span class="toc-section-number">9.5</span> Chapter Summary</a></li>
+</ul></li>
+<li class="part"><span><b>Tools for Creating Effective Models</b></span></li>
+<li class="has-sub"><a href="10-resampling.html#resampling"><span class="toc-section-number">10</span> Resampling for Evaluating Performance</a>
+<ul>
+<li><a href="10.1-resampling-resubstition.html#resampling-resubstition"><span class="toc-section-number">10.1</span> The Resubstitution Approach</a></li>
+<li class="has-sub"><a href="10.2-resampling-methods.html#resampling-methods"><span class="toc-section-number">10.2</span> Resampling Methods</a>
+<ul>
+<li><a href="10.2-resampling-methods.html#cv"><span class="toc-section-number">10.2.1</span> Cross-validation</a></li>
+<li><a href="10.2-resampling-methods.html#repeated-cross-validation">Repeated cross-validation</a></li>
+<li><a href="10.2-resampling-methods.html#leave-one-out-cross-validation">Leave-one-out cross-validation</a></li>
+<li><a href="10.2-resampling-methods.html#monte-carlo-cross-validation">Monte Carlo cross-validation</a></li>
+<li><a href="10.2-resampling-methods.html#validation"><span class="toc-section-number">10.2.2</span> Validation sets</a></li>
+<li><a href="10.2-resampling-methods.html#bootstrap"><span class="toc-section-number">10.2.3</span> Bootstrapping</a></li>
+<li><a href="10.2-resampling-methods.html#rolling"><span class="toc-section-number">10.2.4</span> Rolling forecasting origin resampling</a></li>
+</ul></li>
+<li><a href="10.3-resampling-performance.html#resampling-performance"><span class="toc-section-number">10.3</span> Estimating Performance</a></li>
+<li><a href="10.4-parallel.html#parallel"><span class="toc-section-number">10.4</span> Parallel Processing</a></li>
+<li><a href="10.5-extract.html#extract"><span class="toc-section-number">10.5</span> Saving the Resampled Objects</a></li>
+<li><a href="10.6-resampling-summary.html#resampling-summary"><span class="toc-section-number">10.6</span> Chapter Summary</a></li>
+</ul></li>
+<li class="has-sub"><a href="11-compare.html#compare"><span class="toc-section-number">11</span> Comparing Models with Resampling</a>
+<ul>
+<li><a href="11.1-workflow-set.html#workflow-set"><span class="toc-section-number">11.1</span> Creating Multiple Models with Workflow Sets</a></li>
+<li><a href="11.2-resampled-stats.html#resampled-stats"><span class="toc-section-number">11.2</span> Comparing Resampled Performance Statistics</a></li>
+<li><a href="11.3-simple-hypothesis-testing-methods.html#simple-hypothesis-testing-methods"><span class="toc-section-number">11.3</span> Simple Hypothesis Testing Methods</a></li>
+<li class="has-sub"><a href="11.4-tidyposterior.html#tidyposterior"><span class="toc-section-number">11.4</span> Bayesian Methods</a>
+<ul>
+<li><a href="11.4-tidyposterior.html#the-effect-of-the-amount-of-resampling">The effect of the amount of resampling</a></li>
+</ul></li>
+<li><a href="11.5-compare-summary.html#compare-summary"><span class="toc-section-number">11.5</span> Chapter Summary</a></li>
+</ul></li>
+<li class="has-sub"><a href="12-tuning.html#tuning"><span class="toc-section-number">12</span> Model Tuning and the Dangers of Overfitting</a>
+<ul>
+<li><a href="12.1-model-parameters.html#model-parameters"><span class="toc-section-number">12.1</span> Model Parameters</a></li>
+<li><a href="12.2-tuning-parameter-examples.html#tuning-parameter-examples"><span class="toc-section-number">12.2</span> Tuning Parameters for Different Types of Models</a></li>
+<li><a href="12.3-what-to-optimize.html#what-to-optimize"><span class="toc-section-number">12.3</span> What do we Optimize?</a></li>
+<li><a href="12.4-overfitting-bad.html#overfitting-bad"><span class="toc-section-number">12.4</span> The consequences of poor parameter estimates</a></li>
+<li><a href="12.5-two-general-strategies-for-optimization.html#two-general-strategies-for-optimization"><span class="toc-section-number">12.5</span> Two general strategies for optimization</a></li>
+<li><a href="12.6-tuning-params-tidymodels.html#tuning-params-tidymodels"><span class="toc-section-number">12.6</span> Tuning Parameters in tidymodels</a></li>
+<li><a href="12.7-chapter-summary-2.html#chapter-summary-2"><span class="toc-section-number">12.7</span> Chapter Summary</a></li>
+</ul></li>
+<li class="has-sub"><a href="13-grid-search.html#grid-search"><span class="toc-section-number">13</span> Grid Search</a>
+<ul>
+<li class="has-sub"><a href="13.1-grids.html#grids"><span class="toc-section-number">13.1</span> Regular and Non-Regular Grids</a>
+<ul>
+<li><a href="13.1-grids.html#regular-grids">Regular grids</a></li>
+<li><a href="13.1-grids.html#irregular-grids">Irregular grids</a></li>
+</ul></li>
+<li><a href="13.2-evaluating-grid.html#evaluating-grid"><span class="toc-section-number">13.2</span> Evaluating the Grid</a></li>
+<li><a href="13.3-finalizing-the-model.html#finalizing-the-model"><span class="toc-section-number">13.3</span> Finalizing the Model</a></li>
+<li><a href="13.4-tuning-usemodels.html#tuning-usemodels"><span class="toc-section-number">13.4</span> Tools for Creating Tuning Specifications</a></li>
+<li class="has-sub"><a href="13.5-efficient-grids.html#efficient-grids"><span class="toc-section-number">13.5</span> Tools for Efficient Grid Search</a>
+<ul>
+<li><a href="13.5-efficient-grids.html#submodel-trick"><span class="toc-section-number">13.5.1</span> Submodel optimization</a></li>
+<li><a href="13.5-efficient-grids.html#parallel-processing"><span class="toc-section-number">13.5.2</span> Parallel processing</a></li>
+<li><a href="13.5-efficient-grids.html#benchmarking-boosted-trees"><span class="toc-section-number">13.5.3</span> Benchmarking boosted trees</a></li>
+<li><a href="13.5-efficient-grids.html#access-to-global-variables"><span class="toc-section-number">13.5.4</span> Access to global variables</a></li>
+<li><a href="13.5-efficient-grids.html#racing"><span class="toc-section-number">13.5.5</span> Racing methods</a></li>
+</ul></li>
+<li><a href="13.6-grid-summary.html#grid-summary"><span class="toc-section-number">13.6</span> Chapter Summary</a></li>
+</ul></li>
+<li class="has-sub"><a href="14-iterative-search.html#iterative-search"><span class="toc-section-number">14</span> Iterative Search</a>
+<ul>
+<li><a href="14.1-svm.html#svm"><span class="toc-section-number">14.1</span> A Support Vector Machine Model</a></li>
+<li class="has-sub"><a href="14.2-bayesian-optimization.html#bayesian-optimization"><span class="toc-section-number">14.2</span> Bayesian Optimization</a>
+<ul>
+<li><a href="14.2-bayesian-optimization.html#a-gaussian-process-model"><span class="toc-section-number">14.2.1</span> A Gaussian process model</a></li>
+<li><a href="14.2-bayesian-optimization.html#acquisition-functions"><span class="toc-section-number">14.2.2</span> Acquisition functions</a></li>
+<li><a href="14.2-bayesian-optimization.html#tune-bayes"><span class="toc-section-number">14.2.3</span> The <code>tune_bayes()</code> function</a></li>
+</ul></li>
+<li class="has-sub"><a href="14.3-simulated-annealing.html#simulated-annealing"><span class="toc-section-number">14.3</span> Simulated Annealing</a>
+<ul>
+<li><a href="14.3-simulated-annealing.html#simulated-annealing-search-process"><span class="toc-section-number">14.3.1</span> Simulated annealing search process</a></li>
+<li><a href="14.3-simulated-annealing.html#tune-sim-anneal"><span class="toc-section-number">14.3.2</span> The <code>tune_sim_anneal()</code> function</a></li>
+</ul></li>
+<li><a href="14.4-iterative-summary.html#iterative-summary"><span class="toc-section-number">14.4</span> Chapter Summary</a></li>
+</ul></li>
+<li class="has-sub"><a href="15-workflow-sets.html#workflow-sets"><span class="toc-section-number">15</span> Screening Many Models</a>
+<ul>
+<li><a href="15.1-modeling-concrete-mixture-strength.html#modeling-concrete-mixture-strength"><span class="toc-section-number">15.1</span> Modeling Concrete Mixture Strength</a></li>
+<li><a href="15.2-creating-the-workflow-set.html#creating-the-workflow-set"><span class="toc-section-number">15.2</span> Creating the Workflow Set</a></li>
+<li><a href="15.3-tuning-and-evaluating-the-models.html#tuning-and-evaluating-the-models"><span class="toc-section-number">15.3</span> Tuning and Evaluating the Models</a></li>
+<li><a href="15.4-racing-example.html#racing-example"><span class="toc-section-number">15.4</span> Efficiently Screening Models</a></li>
+<li><a href="15.5-finalizing-a-model.html#finalizing-a-model"><span class="toc-section-number">15.5</span> Finalizing a Model</a></li>
+<li><a href="15.6-workflow-sets-summary.html#workflow-sets-summary"><span class="toc-section-number">15.6</span> Chapter Summary</a></li>
+</ul></li>
+<li class="part"><span><b>Beyond the Basics</b></span></li>
+<li class="has-sub"><a href="16-dimensionality.html#dimensionality"><span class="toc-section-number">16</span> Dimensionality Reduction</a>
+<ul>
+<li><a href="16.1-when-problems-can-dimensionality-reduction-solve.html#when-problems-can-dimensionality-reduction-solve"><span class="toc-section-number">16.1</span> When Problems Can Dimensionality Reduction Solve?</a></li>
+<li><a href="16.2-beans.html#beans"><span class="toc-section-number">16.2</span> A Picture is Worth a Thousand… Beans</a></li>
+<li><a href="16.3-a-starter-recipe.html#a-starter-recipe"><span class="toc-section-number">16.3</span> A Starter Recipe</a></li>
+<li class="has-sub"><a href="16.4-recipe-functions.html#recipe-functions"><span class="toc-section-number">16.4</span> Recipes in the Wild</a>
+<ul>
+<li><a href="16.4-recipe-functions.html#prep"><span class="toc-section-number">16.4.1</span> Preparing a recipe</a></li>
+<li><a href="16.4-recipe-functions.html#bake"><span class="toc-section-number">16.4.2</span> Baking the recipe</a></li>
+</ul></li>
+<li class="has-sub"><a href="16.5-feature-extraction-techniques.html#feature-extraction-techniques"><span class="toc-section-number">16.5</span> Feature Extraction Techniques</a>
+<ul>
+<li><a href="16.5-feature-extraction-techniques.html#principal-component-analysis"><span class="toc-section-number">16.5.1</span> Principal component analysis</a></li>
+<li><a href="16.5-feature-extraction-techniques.html#partial-least-squares"><span class="toc-section-number">16.5.2</span> Partial least squares</a></li>
+<li><a href="16.5-feature-extraction-techniques.html#independent-component-analysis"><span class="toc-section-number">16.5.3</span> Independent component analysis</a></li>
+<li><a href="16.5-feature-extraction-techniques.html#uniform-manifold-approximation-and-projection"><span class="toc-section-number">16.5.4</span> Uniform manifold approximation and projection</a></li>
+</ul></li>
+<li><a href="16.6-bean-models.html#bean-models"><span class="toc-section-number">16.6</span> Modeling</a></li>
+<li><a href="16.7-dimensionality-summary.html#dimensionality-summary"><span class="toc-section-number">16.7</span> Chapter Summary</a></li>
+</ul></li>
+<li class="has-sub"><a href="17-categorical.html#categorical"><span class="toc-section-number">17</span> Encoding Categorical Data</a>
+<ul>
+<li><a href="17.1-is-an-encoding-necessary.html#is-an-encoding-necessary"><span class="toc-section-number">17.1</span> Is an Encoding Necessary?</a></li>
+<li><a href="17.2-encoding-ordinal-predictors.html#encoding-ordinal-predictors"><span class="toc-section-number">17.2</span> Encoding Ordinal Predictors</a></li>
+<li class="has-sub"><a href="17.3-using-the-outcome-for-encoding-predictors.html#using-the-outcome-for-encoding-predictors"><span class="toc-section-number">17.3</span> Using the Outcome for Encoding Predictors</a>
+<ul>
+<li><a href="17.3-using-the-outcome-for-encoding-predictors.html#effect-encodings-with-partial-pooling"><span class="toc-section-number">17.3.1</span> Effect encodings with partial pooling</a></li>
+</ul></li>
+<li><a href="17.4-feature-hashing.html#feature-hashing"><span class="toc-section-number">17.4</span> Feature Hashing</a></li>
+<li><a href="17.5-more-encoding-options.html#more-encoding-options"><span class="toc-section-number">17.5</span> More Encoding Options</a></li>
+<li><a href="17.6-categorical-summary.html#categorical-summary"><span class="toc-section-number">17.6</span> Chapter Summary</a></li>
+</ul></li>
+<li class="has-sub"><a href="18-explain.html#explain"><span class="toc-section-number">18</span> Explaining Models and Predictions</a>
+<ul>
+<li><a href="18.1-software-for-model-explanations.html#software-for-model-explanations"><span class="toc-section-number">18.1</span> Software for Model Explanations</a></li>
+<li><a href="18.2-local-explanations.html#local-explanations"><span class="toc-section-number">18.2</span> Local Explanations</a></li>
+<li><a href="18.3-global-explanations.html#global-explanations"><span class="toc-section-number">18.3</span> Global Explanations</a></li>
+<li><a href="18.4-building-global-explanations-from-local-explanations.html#building-global-explanations-from-local-explanations"><span class="toc-section-number">18.4</span> Building Global Explanations from Local Explanations</a></li>
+<li><a href="18.5-back-to-beans.html#back-to-beans"><span class="toc-section-number">18.5</span> Back to Beans!</a></li>
+<li><a href="18.6-explain-summary.html#explain-summary"><span class="toc-section-number">18.6</span> Chapter Summary</a></li>
+</ul></li>
+<li class="has-sub"><a href="19-trust.html#trust"><span class="toc-section-number">19</span> When Should You Trust Your Predictions?</a>
+<ul>
+<li><a href="19.1-equivocal-zones.html#equivocal-zones"><span class="toc-section-number">19.1</span> Equivocal Results</a></li>
+<li><a href="19.2-applicability-domains.html#applicability-domains"><span class="toc-section-number">19.2</span> Determining Model Applicability</a></li>
+<li><a href="19.3-trust-summary.html#trust-summary"><span class="toc-section-number">19.3</span> Chapter Summary</a></li>
+</ul></li>
+<li class="has-sub"><a href="20-ensembles.html#ensembles"><span class="toc-section-number">20</span> Ensembles of Models</a>
+<ul>
+<li><a href="20.1-data-stack.html#data-stack"><span class="toc-section-number">20.1</span> Creating the Training Set for Stacking</a></li>
+<li><a href="20.2-blend-predictions.html#blend-predictions"><span class="toc-section-number">20.2</span> Blend the Predictions</a></li>
+<li><a href="20.3-fit-members.html#fit-members"><span class="toc-section-number">20.3</span> Fit the Member Models</a></li>
+<li><a href="20.4-test-set-results.html#test-set-results"><span class="toc-section-number">20.4</span> Test Set Results</a></li>
+<li><a href="20.5-ensembles-summary.html#ensembles-summary"><span class="toc-section-number">20.5</span> Chapter Summary</a></li>
+</ul></li>
+<li class="has-sub"><a href="21-inferential.html#inferential"><span class="toc-section-number">21</span> Inferential Analysis</a>
+<ul>
+<li><a href="21.1-inference-for-count-data.html#inference-for-count-data"><span class="toc-section-number">21.1</span> Inference for Count Data</a></li>
+<li><a href="21.2-comparisons-with-two-sample-tests.html#comparisons-with-two-sample-tests"><span class="toc-section-number">21.2</span> Comparisons with Two-Sample Tests</a></li>
+<li><a href="21.3-log-linear-models.html#log-linear-models"><span class="toc-section-number">21.3</span> Log-Linear Models</a></li>
+<li><a href="21.4-a-more-complex-model.html#a-more-complex-model"><span class="toc-section-number">21.4</span> A More Complex Model</a></li>
+<li><a href="21.5-inference-options.html#inference-options"><span class="toc-section-number">21.5</span> More Inferential Analysis</a></li>
+<li><a href="21.6-inference-summary.html#inference-summary"><span class="toc-section-number">21.6</span> Chapter Summary</a></li>
+</ul></li>
+<li class="appendix"><span><b>Appendix</b></span></li>
+<li><a href="A-pre-proc-table.html#pre-proc-table"><span class="toc-section-number">A</span> Recommended Preprocessing</a></li>
+<li><a href="references.html#references">REFERENCES</a></li>
+</ul>
+</div>
+</div>
+</div>
+<div class="row">
+<div class="col-sm-12">
+<div id="tidyverse-principles" class="section level2" number="2.1">
+<h2><span class="header-section-number">2.1</span> Tidyverse Principles</h2>
+<p>The full set of strategies and tactics for writing R code in the tidyverse style can be found at the website <a href="https://design.tidyverse.org" class="uri">https://design.tidyverse.org</a>. Here we can briefly describe several of the general tidyverse design principles, their motivation, and how we think about modeling as an application of these principles.</p>
+<div id="design-for-humans" class="section level3" number="2.1.1">
+<h3><span class="header-section-number">2.1.1</span> Design for humans</h3>
+<p>The tidyverse focuses on designing R packages and functions that can be easily understood and used by a broad range of people. Both historically and today, a substantial percentage of R users are not people who create software or tools but instead people who create analyses or models. As such, R users do not typically have (or need) computer science backgrounds, and many are not interested in writing their own R packages.</p>
+<p>For this reason, it is critical that R code be easy to work with to accomplish your goals. Documentation, training, accessibility, and other factors play an important part in achieving this. However, if the syntax itself is difficult for people to easily comprehend, documentation is a poor solution. The software itself must be intuitive.</p>
+<p>To contrast the tidyverse approach with more traditional R semantics, consider sorting a data frame. Data frames can represent different types of data in each column, and multiple values in each row. Using only the core language, we can sort a data frame using one or more columns by reordering the rows via R’s subscripting rules in conjunction with <code>order()</code>; you cannot successfully use a function you might be tempted to try in such a situation because of its name, <code>sort()</code>. To sort the <code>mtcars</code> data by two of its columns, the call might look like:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="2.1-tidyverse-principles.html#cb1-1" aria-hidden="true" tabindex="-1"></a>mtcars[<span class="fu">order</span>(mtcars<span class="sc">$</span>gear, mtcars<span class="sc">$</span>mpg), ]</span></code></pre></div>
+<p>While very computationally efficient, it would be difficult to argue that this is an intuitive user interface. In <span class="pkg">dplyr</span> by contrast, the tidyverse function <code>arrange()</code> takes a set of variable names as input arguments directly:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="2.1-tidyverse-principles.html#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb2-2"><a href="2.1-tidyverse-principles.html#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">arrange</span>(<span class="at">.data =</span> mtcars, gear, mpg)</span></code></pre></div>
+<div class="rmdnote">
+<p>The variable names used here are “unquoted”; many traditional R functions require a character string to specify variables, but tidyverse functions take unquoted names or <em>selector functions</em>. The selectors allow for one or more readable rules that are applied to the column names. For example, <code>ends_with("t")</code> would select the <code>drat</code> and <code>wt</code> columns of the <code>mtcars</code> data frame.</p>
+</div>
+<p>Additionally, naming is crucial. If you were new to R and were writing data analysis or modeling code involving linear algebra, you might be stymied when searching for a function that computes the matrix inverse. Using <code>apropos("inv")</code> yields no candidates. It turns out that the base R function for this task is <code>solve()</code>, for solving systems of linear equations. For a matrix <code>X</code>, you would use <code>solve(X)</code> to invert <code>X</code> (with no vector for the right-hand side of the equation). This is only documented in the description of one of the <em>arguments</em> in the help file. In essence, you need to know the name of the solution to be able to find the solution.</p>
+<p>The tidyverse approach is to use function names that are descriptive and explicit over those that are short and implicit. There is a focus on verbs (e.g. <code>fit</code>, <code>arrange</code>, etc.) for general methods. Verb-noun pairs are particularly effective; consider <code>invert_matrix()</code> as a hypothetical function name. In the context of modeling, it is also important to avoid highly technical jargon in names such as Greek letters or obscure terms. Names should be as self-documenting as possible.</p>
+<p>When there are similar functions in a package, function names are designed to be optimized for tab-completion. For example, the <span class="pkg">glue</span> package has a collection of functions starting with a common prefix (<code>glue_</code>) that enables users to quickly find the function they are looking for.</p>
+</div>
+<div id="reuse-existing-data-structures" class="section level3" number="2.1.2">
+<h3><span class="header-section-number">2.1.2</span> Reuse existing data structures</h3>
+<p>Whenever possible, functions should avoid returning a novel data structure. If the results are conducive to an existing data structure, it should be used. This reduces the cognitive load when using software; no additional syntax or methods are required.</p>
+<p>The data frame is the preferred data structure in tidyverse and tidymodels packages, because its structure is a good fit for such a broad swath of data science tasks. Specifically, the tidyverse and tidymodels favor the tibble, a modern reimagining of R’s data frame that we describe in the next section on example tidyverse syntax.</p>
+<p>As an example, the <span class="pkg">rsample</span> package can be used to create <em>resamples</em> of a data set, such as cross-validation or the bootstrap (described in Chapter <a href="10-resampling.html#resampling">10</a>). The resampling functions return a tibble with a column called <code>splits</code> of objects that define the resampled data sets. Three bootstrap samples of a data set might look like:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="2.1-tidyverse-principles.html#cb3-1" aria-hidden="true" tabindex="-1"></a>boot_samp <span class="ot">&lt;-</span> rsample<span class="sc">::</span><span class="fu">bootstraps</span>(mtcars, <span class="at">times =</span> <span class="dv">3</span>)</span>
+<span id="cb3-2"><a href="2.1-tidyverse-principles.html#cb3-2" aria-hidden="true" tabindex="-1"></a>boot_samp</span>
+<span id="cb3-3"><a href="2.1-tidyverse-principles.html#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; # Bootstrap sampling </span></span>
+<span id="cb3-4"><a href="2.1-tidyverse-principles.html#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; # A tibble: 3 × 2</span></span>
+<span id="cb3-5"><a href="2.1-tidyverse-principles.html#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   splits          id        </span></span>
+<span id="cb3-6"><a href="2.1-tidyverse-principles.html#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   &lt;list&gt;          &lt;chr&gt;     </span></span>
+<span id="cb3-7"><a href="2.1-tidyverse-principles.html#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 &lt;split [32/13]&gt; Bootstrap1</span></span>
+<span id="cb3-8"><a href="2.1-tidyverse-principles.html#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 &lt;split [32/10]&gt; Bootstrap2</span></span>
+<span id="cb3-9"><a href="2.1-tidyverse-principles.html#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3 &lt;split [32/13]&gt; Bootstrap3</span></span>
+<span id="cb3-10"><a href="2.1-tidyverse-principles.html#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(boot_samp)</span>
+<span id="cb3-11"><a href="2.1-tidyverse-principles.html#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] &quot;bootstraps&quot; &quot;rset&quot;       &quot;tbl_df&quot;     &quot;tbl&quot;        &quot;data.frame&quot;</span></span></code></pre></div>
+<p>With this approach, vector-based functions can be used with these columns, such as <code>vapply()</code> or <code>purrr::map()</code>.<a href="#fn3" class="footnote-ref" id="fnref3"><sup>3</sup></a> This <code>boot_samp</code> object has multiple classes but inherits methods for data frames (<code>"data.frame"</code>) and tibbles (<code>"tbl_df"</code>). Additionally, new columns can be added to the results without affecting the class of the data. This is much easier and more versatile for users to work with than a completely new object type that does not make its data structure obvious.</p>
+<p>One downside to relying on common data structures is the potential loss of computational performance. In some situations, data can be encoded in specialized formats that are more efficient representations of the data. For example:</p>
+<ul>
+<li><p>In computational chemistry, the structure-data file format (SDF) is a tool to take chemical structures and encode them in a format that is computationally efficient to work with.</p></li>
+<li><p>Data that have a large number of values that are the same (such as zeros for binary data) can be stored in a sparse matrix format. This format can reduce the size of the data as well as enable more efficient computational techniques.</p></li>
+</ul>
+<p>These formats are advantageous when the problem is well scoped and the potential data processing methods are both well defined and suited to such a format.<a href="#fn4" class="footnote-ref" id="fnref4"><sup>4</sup></a> However, once such constraints are violated, specialized data formats are less useful. For example, if we perform a transformation of the data that converts the data into fractional numbers, the output is no longer sparse; the sparse matrix representation is helpful for one specific algorithmic step in modeling but this is often not true before or after that specific step.</p>
+<div class="rmdwarning">
+<p>A specialized data structure is not flexible enough for an entire modeling workflow in the way that a common data structure is.</p>
+</div>
+<p>One important feature in the tibble produced by <span class="pkg">rsample</span> is that the <code>splits</code> column is a list. In this instance, each element of the list has the same type of object: an <code>rsplit</code> object that contains the information about which rows of <code>mtcars</code> belong in the bootstrap sample. <em>List columns</em> can be very useful in data analysis and, as will be seen throughout this book, are important to tidymodels.</p>
+</div>
+<div id="design-for-the-pipe-and-functional-programming" class="section level3" number="2.1.3">
+<h3><span class="header-section-number">2.1.3</span> Design for the pipe and functional programming</h3>
+<p>The <span class="pkg">magrittr</span> pipe operator (<code>%&gt;%</code>) is a tool for chaining together a sequence of R functions.<a href="#fn5" class="footnote-ref" id="fnref5"><sup>5</sup></a> To demonstrate, consider the following commands which sort a data frame and then retain the first 10 rows:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="2.1-tidyverse-principles.html#cb4-1" aria-hidden="true" tabindex="-1"></a>small_mtcars <span class="ot">&lt;-</span> <span class="fu">arrange</span>(mtcars, gear)</span>
+<span id="cb4-2"><a href="2.1-tidyverse-principles.html#cb4-2" aria-hidden="true" tabindex="-1"></a>small_mtcars <span class="ot">&lt;-</span> <span class="fu">slice</span>(small_mtcars, <span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>)</span>
+<span id="cb4-3"><a href="2.1-tidyverse-principles.html#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="2.1-tidyverse-principles.html#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co"># or more compactly: </span></span>
+<span id="cb4-5"><a href="2.1-tidyverse-principles.html#cb4-5" aria-hidden="true" tabindex="-1"></a>small_mtcars <span class="ot">&lt;-</span> <span class="fu">slice</span>(<span class="fu">arrange</span>(mtcars, gear), <span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>)</span></code></pre></div>
+<p>The pipe operator substitutes the value of the left-hand side of the operator as the first argument to the right-hand side, so we can implement the same result as before with:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="2.1-tidyverse-principles.html#cb5-1" aria-hidden="true" tabindex="-1"></a>small_mtcars <span class="ot">&lt;-</span> </span>
+<span id="cb5-2"><a href="2.1-tidyverse-principles.html#cb5-2" aria-hidden="true" tabindex="-1"></a>  mtcars <span class="sc">%&gt;%</span> </span>
+<span id="cb5-3"><a href="2.1-tidyverse-principles.html#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(gear) <span class="sc">%&gt;%</span> </span>
+<span id="cb5-4"><a href="2.1-tidyverse-principles.html#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>)</span></code></pre></div>
+<p>The piped version of this sequence is more readable; this readability increases as more operations are added to a sequence. This approach to programming works in this example because all of the functions we used return the same data structure (a data frame) that is then the first argument to the next function. This is by design. When possible, create functions that can be incorporated into a pipeline of operations.</p>
+<p>If you have used <span class="pkg">ggplot2</span>, this is not unlike the layering of plot components into a <code>ggplot</code> object with the <code>+</code> operator. To make a scatter plot with a regression line, the initial <code>ggplot()</code> call is augmented with two additional operations:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="2.1-tidyverse-principles.html#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb6-2"><a href="2.1-tidyverse-principles.html#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(mtcars, <span class="fu">aes</span>(<span class="at">x =</span> wt, <span class="at">y =</span> mpg)) <span class="sc">+</span></span>
+<span id="cb6-3"><a href="2.1-tidyverse-principles.html#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span> </span>
+<span id="cb6-4"><a href="2.1-tidyverse-principles.html#cb6-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> lm)</span></code></pre></div>
+<p>While similar to the <span class="pkg">dplyr</span> pipeline, note that the first argument to this pipeline is a data set (<code>mtcars</code>) and that each function call returns a <code>ggplot</code> object. Not all pipelines need to keep the returned values (plot objects) the same as the initial value (a data frame). Using the pipe operator with <span class="pkg">dplyr</span> operations has acclimated many R users to expect to return a data frame when pipelines are used; as shown with <span class="pkg">ggplot2</span>, this does not need to be the case. Pipelines are incredibly useful in modeling workflows but modeling pipelines can return, instead of a data frame, objects such as model components.</p>
+<p>R has excellent tools for creating, changing, and operating on functions, making it a great language for functional programming. This approach can replace iterative loops in many situations, such as when a function returns a value without other side effects.<a href="#fn6" class="footnote-ref" id="fnref6"><sup>6</sup></a></p>
+<p>Let’s look at an example. Suppose you are interested in the logarithm of the ratio of the fuel efficiency to the car weight. To those new to R and/or coming from other programming languages, a loop might seem like a good option:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="2.1-tidyverse-principles.html#cb7-1" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="fu">nrow</span>(mtcars)</span>
+<span id="cb7-2"><a href="2.1-tidyverse-principles.html#cb7-2" aria-hidden="true" tabindex="-1"></a>ratios <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="cn">NA_real_</span>, n)</span>
+<span id="cb7-3"><a href="2.1-tidyverse-principles.html#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (car <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n) {</span>
+<span id="cb7-4"><a href="2.1-tidyverse-principles.html#cb7-4" aria-hidden="true" tabindex="-1"></a>  ratios[car] <span class="ot">&lt;-</span> <span class="fu">log</span>(mtcars<span class="sc">$</span>mpg[car]<span class="sc">/</span>mtcars<span class="sc">$</span>wt[car])</span>
+<span id="cb7-5"><a href="2.1-tidyverse-principles.html#cb7-5" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb7-6"><a href="2.1-tidyverse-principles.html#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(ratios)</span>
+<span id="cb7-7"><a href="2.1-tidyverse-principles.html#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 2.081 1.988 2.285 1.896 1.693 1.655</span></span></code></pre></div>
+<p>Those with more experience in R may know that there is a much simpler and faster vectorized version that can be computed by:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="2.1-tidyverse-principles.html#cb8-1" aria-hidden="true" tabindex="-1"></a>ratios <span class="ot">&lt;-</span> <span class="fu">log</span>(mtcars<span class="sc">$</span>mpg<span class="sc">/</span>mtcars<span class="sc">$</span>wt)</span></code></pre></div>
+<p>However, in many real-world cases, the element-wise operation of interest is too complex for a vectorized solution. In such a case, a good approach is to write a function to do the computations. When we design for functional programming, it is important that the output only depends on the inputs and that the function has no side effects. Violations of these ideas in the following function are shown with comments:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="2.1-tidyverse-principles.html#cb9-1" aria-hidden="true" tabindex="-1"></a>compute_log_ratio <span class="ot">&lt;-</span> <span class="cf">function</span>(mpg, wt) {</span>
+<span id="cb9-2"><a href="2.1-tidyverse-principles.html#cb9-2" aria-hidden="true" tabindex="-1"></a>  log_base <span class="ot">&lt;-</span> <span class="fu">getOption</span>(<span class="st">&quot;log_base&quot;</span>, <span class="at">default =</span> <span class="fu">exp</span>(<span class="dv">1</span>)) <span class="co"># gets external data</span></span>
+<span id="cb9-3"><a href="2.1-tidyverse-principles.html#cb9-3" aria-hidden="true" tabindex="-1"></a>  results <span class="ot">&lt;-</span> <span class="fu">log</span>(mpg<span class="sc">/</span>wt, <span class="at">base =</span> log_base)</span>
+<span id="cb9-4"><a href="2.1-tidyverse-principles.html#cb9-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(<span class="fu">mean</span>(results))                                <span class="co"># prints to the console</span></span>
+<span id="cb9-5"><a href="2.1-tidyverse-principles.html#cb9-5" aria-hidden="true" tabindex="-1"></a>  done <span class="ot">&lt;&lt;-</span> <span class="cn">TRUE</span>                                       <span class="co"># sets external data</span></span>
+<span id="cb9-6"><a href="2.1-tidyverse-principles.html#cb9-6" aria-hidden="true" tabindex="-1"></a>  results</span>
+<span id="cb9-7"><a href="2.1-tidyverse-principles.html#cb9-7" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p>A better version would be:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="2.1-tidyverse-principles.html#cb10-1" aria-hidden="true" tabindex="-1"></a>compute_log_ratio <span class="ot">&lt;-</span> <span class="cf">function</span>(mpg, wt, <span class="at">log_base =</span> <span class="fu">exp</span>(<span class="dv">1</span>)) {</span>
+<span id="cb10-2"><a href="2.1-tidyverse-principles.html#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">log</span>(mpg<span class="sc">/</span>wt, <span class="at">base =</span> log_base)</span>
+<span id="cb10-3"><a href="2.1-tidyverse-principles.html#cb10-3" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p>The <span class="pkg">purrr</span> package contains tools for functional programming. Let’s focus on the <code>map()</code> family of functions, which operates on vectors and always returns the same type of output. The most basic function, <code>map()</code>, always returns a list and uses the basic syntax of <code>map(vector, function)</code>. For example, to take the square-root of our data, we could:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="2.1-tidyverse-principles.html#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">map</span>(<span class="fu">head</span>(mtcars<span class="sc">$</span>mpg, <span class="dv">3</span>), sqrt)</span>
+<span id="cb11-2"><a href="2.1-tidyverse-principles.html#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [[1]]</span></span>
+<span id="cb11-3"><a href="2.1-tidyverse-principles.html#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 4.583</span></span>
+<span id="cb11-4"><a href="2.1-tidyverse-principles.html#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb11-5"><a href="2.1-tidyverse-principles.html#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [[2]]</span></span>
+<span id="cb11-6"><a href="2.1-tidyverse-principles.html#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 4.583</span></span>
+<span id="cb11-7"><a href="2.1-tidyverse-principles.html#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb11-8"><a href="2.1-tidyverse-principles.html#cb11-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [[3]]</span></span>
+<span id="cb11-9"><a href="2.1-tidyverse-principles.html#cb11-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 4.775</span></span></code></pre></div>
+<p>There are specialized variants of <code>map()</code> that return values when we know or expect that the function will generate one of the basic vector types. For example, since the square-root returns a double-precision number:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="2.1-tidyverse-principles.html#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">map_dbl</span>(<span class="fu">head</span>(mtcars<span class="sc">$</span>mpg, <span class="dv">3</span>), sqrt)</span>
+<span id="cb12-2"><a href="2.1-tidyverse-principles.html#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 4.583 4.583 4.775</span></span></code></pre></div>
+<p>There are also mapping functions that operate across multiple vectors:</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="2.1-tidyverse-principles.html#cb13-1" aria-hidden="true" tabindex="-1"></a>log_ratios <span class="ot">&lt;-</span> <span class="fu">map2_dbl</span>(mtcars<span class="sc">$</span>mpg, mtcars<span class="sc">$</span>wt, compute_log_ratio)</span>
+<span id="cb13-2"><a href="2.1-tidyverse-principles.html#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(log_ratios)</span>
+<span id="cb13-3"><a href="2.1-tidyverse-principles.html#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 2.081 1.988 2.285 1.896 1.693 1.655</span></span></code></pre></div>
+<p>The <code>map()</code> functions also allow for temporary, anonymous functions defined using the tilde character. The argument values are <code>.x</code> and <code>.y</code> for <code>map2()</code>:</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="2.1-tidyverse-principles.html#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">map2_dbl</span>(mtcars<span class="sc">$</span>mpg, mtcars<span class="sc">$</span>wt, <span class="sc">~</span> <span class="fu">log</span>(.x<span class="sc">/</span>.y)) <span class="sc">%&gt;%</span> </span>
+<span id="cb14-2"><a href="2.1-tidyverse-principles.html#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">head</span>()</span>
+<span id="cb14-3"><a href="2.1-tidyverse-principles.html#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 2.081 1.988 2.285 1.896 1.693 1.655</span></span></code></pre></div>
+<p>These examples have been trivial but, in later sections, will be applied to more complex problems.</p>
+<div class="rmdnote">
+<p>For functional programming in tidy modeling, functions should be defined so that functions like <code>map()</code> can be used for iterative computations.</p>
+</div>
+</div>
+</div>
+<div class="footnotes">
+<hr />
+<ol start="3">
+<li id="fn3"><p>If you’ve never seen <code>::</code> in R code before, it is an explicit method for calling a function. The value of the left-hand side is the <em>namespace</em> where the function lives (usually a package name). The right-hand side is the function name. In cases where two packages use the same function name, this syntax ensures that the correct function is called.<a href="2.1-tidyverse-principles.html#fnref3" class="footnote-back">↩︎</a></p></li>
+<li id="fn4"><p>Not all algorithms can take advantage of sparse representations of data. In such cases, a sparse matrix must be converted to a more conventional format before proceeding.<a href="2.1-tidyverse-principles.html#fnref4" class="footnote-back">↩︎</a></p></li>
+<li id="fn5"><p>In R 4.1, a native pipe operator <code>|&gt;</code> was introduced as well. In this book, we use the <span class="pkg">magrittr</span> pipe since users on older versions of R will not have the new native pipe.<a href="2.1-tidyverse-principles.html#fnref5" class="footnote-back">↩︎</a></p></li>
+<li id="fn6"><p>Examples of function side effects could include changing global data or printing a value.<a href="2.1-tidyverse-principles.html#fnref6" class="footnote-back">↩︎</a></p></li>
+</ol>
+</div>
+<p style="text-align: center;">
+<a href="2-tidyverse.html"><button class="btn btn-default">Previous</button></a>
+<a href="2.2-examples-of-tidyverse-syntax.html"><button class="btn btn-default">Next</button></a>
+</p>
+</div>
+</div>
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+$(document).ready(function () {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+});
+
+</script>
+
+</body>
+</html>

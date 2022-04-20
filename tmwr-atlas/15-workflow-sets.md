@@ -337,31 +337,31 @@ full_results_time <-
                       control = grid_ctrl, verbose = TRUE)
    )
 #> i  1 of 12 tuning:     MARS
-#> ✓  1 of 12 tuning:     MARS (2.5s)
+#> ✓  1 of 12 tuning:     MARS (2.6s)
 #> i  2 of 12 tuning:     CART
-#> ✓  2 of 12 tuning:     CART (25.2s)
+#> ✓  2 of 12 tuning:     CART (25.5s)
 #> i	No tuning parameters. `fit_resamples()` will be attempted
 #> i  3 of 12 resampling: CART_bagged
 #> ✓  3 of 12 resampling: CART_bagged (17.1s)
 #> i  4 of 12 tuning:     RF
 #> i Creating pre-processing data to finalize unknown parameter: mtry
-#> ✓  4 of 12 tuning:     RF (1m 3.6s)
+#> ✓  4 of 12 tuning:     RF (1m 4.4s)
 #> i  5 of 12 tuning:     boosting
-#> ✓  5 of 12 tuning:     boosting (1m 56.3s)
+#> ✓  5 of 12 tuning:     boosting (1m 56.9s)
 #> i  6 of 12 tuning:     Cubist
-#> ✓  6 of 12 tuning:     Cubist (1m 52.7s)
+#> ✓  6 of 12 tuning:     Cubist (1m 51.4s)
 #> i  7 of 12 tuning:     SVM_radial
-#> ✓  7 of 12 tuning:     SVM_radial (36.4s)
+#> ✓  7 of 12 tuning:     SVM_radial (36.2s)
 #> i  8 of 12 tuning:     SVM_poly
-#> ✓  8 of 12 tuning:     SVM_poly (7m 19.5s)
+#> ✓  8 of 12 tuning:     SVM_poly (7m 15.6s)
 #> i  9 of 12 tuning:     KNN
-#> ✓  9 of 12 tuning:     KNN (38.9s)
+#> ✓  9 of 12 tuning:     KNN (39.1s)
 #> i 10 of 12 tuning:     neural_network
-#> ✓ 10 of 12 tuning:     neural_network (1m 13.6s)
+#> ✓ 10 of 12 tuning:     neural_network (1m 13.7s)
 #> i 11 of 12 tuning:     full_quad_linear_reg
-#> ✓ 11 of 12 tuning:     full_quad_linear_reg (52.2s)
+#> ✓ 11 of 12 tuning:     full_quad_linear_reg (52s)
 #> i 12 of 12 tuning:     full_quad_KNN
-#> ✓ 12 of 12 tuning:     full_quad_KNN (2m 37.5s)
+#> ✓ 12 of 12 tuning:     full_quad_KNN (2m 35.1s)
 
 num_grid_models <- nrow(collect_metrics(grid_results, summarize = FALSE))
 ```
@@ -418,7 +418,7 @@ autoplot(
    select_best = TRUE     # <- one point per workflow
 ) +
    geom_text(aes(y = mean - 1/2, label = wflow_id), angle = 90, hjust = 1) +
-   lims(y = c(3.5, 9.5)) +
+   lims(y = c(3.0, 9.5)) +
    theme(legend.position = "none")
 ```
 
@@ -513,7 +513,7 @@ autoplot(
 </div>
 
 
-Overall, the racing approach estimated a total of 4,594 models, 18.23% of the full set of 25,200 models in the full grid. As a result, the racing approach was 2.3-fold faster. 
+Overall, the racing approach estimated a total of 4,594 models, 18.23% of the full set of 25,200 models in the full grid. As a result, the racing approach was 2.2-fold faster. 
 
 Did we get similar results? For both objects, we rank the results, merge them together, and plot them against one another in Figure \@ref(fig:racing-concordance).
 

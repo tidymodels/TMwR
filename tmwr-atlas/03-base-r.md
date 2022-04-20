@@ -451,7 +451,7 @@ library(tidymodels)
 #> x dplyr::filter()  masks stats::filter()
 #> x dplyr::lag()     masks stats::lag()
 #> x recipes::step()  masks stats::step()
-#> • Use tidymodels_prefer() to resolve common conflicts.
+#> • Learn how to get started at https://www.tidymodels.org/start/
 ```
 
 If you have used the tidyverse, you'll notice some familiar names as a few tidyverse packages, such as <span class="pkg">dplyr</span> and <span class="pkg">ggplot2</span>, are loaded together with the tidymodels packages. We've already said that the tidymodels framework applies tidyverse principles to modeling, but the tidymodels framework also literally builds on some of the most fundamental tidyverse packages like these.

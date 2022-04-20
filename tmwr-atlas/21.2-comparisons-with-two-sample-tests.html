@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="21.2 Comparisons with Two-Sample Tests | Tidy Modeling with R" />
+<meta property="og:type" content="book" />
+<meta property="og:image" content="/images/cover.png" />
+<meta property="og:description" content="The tidymodels framework is a collection of R packages for modeling and machine learning using tidyverse principles. This book provides a thorough introduction to how to use tidymodels, and an outline of good methodology and statistical practice for phases of the modeling process." />
+<meta name="github-repo" content="tidymodels/TMwR" />
+
+<meta name="author" content="Max Kuhn and Julia Silge" />
+
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  TeX: { equationNumbers: { autoNumber: "AMS" } }
+});
+</script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<meta name="description" content="The tidymodels framework is a collection of R packages for modeling and machine learning using tidyverse principles. This book provides a thorough introduction to how to use tidymodels, and an outline of good methodology and statistical practice for phases of the modeling process.">
+
+<title>21.2 Comparisons with Two-Sample Tests | Tidy Modeling with R</title>
+
+<script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="libs/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+<script src="libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="libs/navigation-1.1/tabsets.js"></script>
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+
+
+<style type="text/css">
+/* Used with Pandoc 2.11+ new --citeproc when CSL is used */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}
+</style>
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+/* show arrow before summary tag as in bootstrap
+TODO: remove if boostrap in updated in html_document (rmarkdown#1485) */
+details > summary {
+  display: list-item;
+  cursor: pointer;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container-fluid main-container">
+
+
+<div class="row">
+<div class="col-sm-12">
+<div id="TOC">
+<ul>
+<li class="has-sub"><a href="index.html#hello-world">Hello World</a>
+<ul>
+<li><a href="acknowledgments.html#acknowledgments">Acknowledgments</a></li>
+<li><a href="using-code-examples.html#using-code-examples">Using Code Examples</a></li>
+</ul></li>
+<li class="part"><span><b>Introduction</b></span></li>
+<li class="has-sub"><a href="1-software-modeling.html#software-modeling"><span class="toc-section-number">1</span> Software for modeling</a>
+<ul>
+<li><a href="1.1-fundamentals-for-modeling-software.html#fundamentals-for-modeling-software"><span class="toc-section-number">1.1</span> Fundamentals for Modeling Software</a></li>
+<li class="has-sub"><a href="1.2-model-types.html#model-types"><span class="toc-section-number">1.2</span> Types of Models</a>
+<ul>
+<li><a href="1.2-model-types.html#descriptive-models">Descriptive models</a></li>
+<li><a href="1.2-model-types.html#inferential-models">Inferential models</a></li>
+<li><a href="1.2-model-types.html#predictive-models">Predictive models</a></li>
+</ul></li>
+<li><a href="1.3-connections-between-types-of-models.html#connections-between-types-of-models"><span class="toc-section-number">1.3</span> Connections Between Types of Models</a></li>
+<li><a href="1.4-model-terminology.html#model-terminology"><span class="toc-section-number">1.4</span> Some Terminology</a></li>
+<li><a href="1.5-model-phases.html#model-phases"><span class="toc-section-number">1.5</span> How Does Modeling Fit into the Data Analysis Process?</a></li>
+<li><a href="1.6-software-summary.html#software-summary"><span class="toc-section-number">1.6</span> Chapter Summary</a></li>
+</ul></li>
+<li class="has-sub"><a href="2-tidyverse.html#tidyverse"><span class="toc-section-number">2</span> A Tidyverse Primer</a>
+<ul>
+<li class="has-sub"><a href="2.1-tidyverse-principles.html#tidyverse-principles"><span class="toc-section-number">2.1</span> Tidyverse Principles</a>
+<ul>
+<li><a href="2.1-tidyverse-principles.html#design-for-humans"><span class="toc-section-number">2.1.1</span> Design for humans</a></li>
+<li><a href="2.1-tidyverse-principles.html#reuse-existing-data-structures"><span class="toc-section-number">2.1.2</span> Reuse existing data structures</a></li>
+<li><a href="2.1-tidyverse-principles.html#design-for-the-pipe-and-functional-programming"><span class="toc-section-number">2.1.3</span> Design for the pipe and functional programming</a></li>
+</ul></li>
+<li><a href="2.2-examples-of-tidyverse-syntax.html#examples-of-tidyverse-syntax"><span class="toc-section-number">2.2</span> Examples of Tidyverse Syntax</a></li>
+<li><a href="2.3-chapter-summary.html#chapter-summary"><span class="toc-section-number">2.3</span> Chapter Summary</a></li>
+</ul></li>
+<li class="has-sub"><a href="3-base-r.html#base-r"><span class="toc-section-number">3</span> A Review of R Modeling Fundamentals</a>
+<ul>
+<li><a href="3.1-an-example.html#an-example"><span class="toc-section-number">3.1</span> An Example</a></li>
+<li><a href="3.2-formula.html#formula"><span class="toc-section-number">3.2</span> What Does the R Formula Do?</a></li>
+<li><a href="3.3-tidiness-modeling.html#tidiness-modeling"><span class="toc-section-number">3.3</span> Why Tidiness is Important for Modeling</a></li>
+<li><a href="3.4-combining-base-r-models-and-the-tidyverse.html#combining-base-r-models-and-the-tidyverse"><span class="toc-section-number">3.4</span> Combining Base R Models and the Tidyverse</a></li>
+<li><a href="3.5-the-tidymodels-metapackage.html#the-tidymodels-metapackage"><span class="toc-section-number">3.5</span> The tidymodels Metapackage</a></li>
+<li><a href="3.6-chapter-summary-1.html#chapter-summary-1"><span class="toc-section-number">3.6</span> Chapter Summary</a></li>
+</ul></li>
+<li class="part"><span><b>Modeling Basics</b></span></li>
+<li class="has-sub"><a href="4-ames.html#ames"><span class="toc-section-number">4</span> The Ames Housing Data</a>
+<ul>
+<li><a href="4.1-exploring-features-of-homes-in-ames.html#exploring-features-of-homes-in-ames"><span class="toc-section-number">4.1</span> Exploring Features of Homes in Ames</a></li>
+<li><a href="4.2-ames-summary.html#ames-summary"><span class="toc-section-number">4.2</span> Chapter Summary</a></li>
+</ul></li>
+<li class="has-sub"><a href="5-splitting.html#splitting"><span class="toc-section-number">5</span> Spending our Data</a>
+<ul>
+<li><a href="5.1-splitting-methods.html#splitting-methods"><span class="toc-section-number">5.1</span> Common Methods for Splitting Data</a></li>
+<li><a href="5.2-what-about-a-validation-set.html#what-about-a-validation-set"><span class="toc-section-number">5.2</span> What About a Validation Set?</a></li>
+<li><a href="5.3-multi-level-data.html#multi-level-data"><span class="toc-section-number">5.3</span> Multi-Level Data</a></li>
+<li><a href="5.4-other-considerations-for-a-data-budget.html#other-considerations-for-a-data-budget"><span class="toc-section-number">5.4</span> Other Considerations for a Data Budget</a></li>
+<li><a href="5.5-splitting-summary.html#splitting-summary"><span class="toc-section-number">5.5</span> Chapter Summary</a></li>
+</ul></li>
+<li class="has-sub"><a href="6-models.html#models"><span class="toc-section-number">6</span> Fitting Models with parsnip</a>
+<ul>
+<li><a href="6.1-create-a-model.html#create-a-model"><span class="toc-section-number">6.1</span> Create a Model</a></li>
+<li><a href="6.2-use-the-model-results.html#use-the-model-results"><span class="toc-section-number">6.2</span> Use the Model Results</a></li>
+<li><a href="6.3-parsnip-predictions.html#parsnip-predictions"><span class="toc-section-number">6.3</span> Make Predictions</a></li>
+<li><a href="6.4-parsnip-extension-packages.html#parsnip-extension-packages"><span class="toc-section-number">6.4</span> parsnip-Extension Packages</a></li>
+<li><a href="6.5-parsnip-addin.html#parsnip-addin"><span class="toc-section-number">6.5</span> Creating Model Specifications</a></li>
+<li><a href="6.6-models-summary.html#models-summary"><span class="toc-section-number">6.6</span> Chapter Summary</a></li>
+</ul></li>
+<li class="has-sub"><a href="7-workflows.html#workflows"><span class="toc-section-number">7</span> A Model Workflow</a>
+<ul>
+<li><a href="7.1-begin-model-end.html#begin-model-end"><span class="toc-section-number">7.1</span> Where Does the Model Begin and End?</a></li>
+<li><a href="7.2-workflow-basics.html#workflow-basics"><span class="toc-section-number">7.2</span> Workflow Basics</a></li>
+<li><a href="7.3-adding-raw-variables-to-the-workflow.html#adding-raw-variables-to-the-workflow"><span class="toc-section-number">7.3</span> Adding Raw Variables to the <code>workflow()</code></a></li>
+<li class="has-sub"><a href="7.4-workflow-encoding.html#workflow-encoding"><span class="toc-section-number">7.4</span> How Does a <code>workflow()</code> Use the Formula?</a>
+<ul>
+<li><a href="7.4-workflow-encoding.html#tree-based-models">Tree-based models</a></li>
+<li><a href="7.4-workflow-encoding.html#special-model-formulas"><span class="toc-section-number">7.4.1</span> Special formulas and in-line functions</a></li>
+</ul></li>
+<li><a href="7.5-workflow-sets-intro.html#workflow-sets-intro"><span class="toc-section-number">7.5</span> Creating Multiple Workflows at Once</a></li>
+<li><a href="7.6-evaluating-the-test-set.html#evaluating-the-test-set"><span class="toc-section-number">7.6</span> Evaluating the Test Set</a></li>
+<li><a href="7.7-workflows-summary.html#workflows-summary"><span class="toc-section-number">7.7</span> Chapter Summary</a></li>
+</ul></li>
+<li class="has-sub"><a href="8-recipes.html#recipes"><span class="toc-section-number">8</span> Feature Engineering with recipes</a>
+<ul>
+<li><a href="8.1-a-simple-recipe-for-the-ames-housing-data.html#a-simple-recipe-for-the-ames-housing-data"><span class="toc-section-number">8.1</span> A Simple <code>recipe()</code> for the Ames Housing Data</a></li>
+<li><a href="8.2-using-recipes.html#using-recipes"><span class="toc-section-number">8.2</span> Using Recipes</a></li>
+<li><a href="8.3-how-data-are-used-by-the-recipe.html#how-data-are-used-by-the-recipe"><span class="toc-section-number">8.3</span> How Data are Used by the <code>recipe()</code></a></li>
+<li class="has-sub"><a href="8.4-example-steps.html#example-steps"><span class="toc-section-number">8.4</span> Examples of <code>recipe()</code> Steps</a>
+<ul>
+<li><a href="8.4-example-steps.html#dummies"><span class="toc-section-number">8.4.1</span> Encoding qualitative data in a numeric format</a></li>
+<li><a href="8.4-example-steps.html#interaction-terms"><span class="toc-section-number">8.4.2</span> Interaction terms</a></li>
+<li><a href="8.4-example-steps.html#spline-functions"><span class="toc-section-number">8.4.3</span> Spline functions</a></li>
+<li><a href="8.4-example-steps.html#feature-extraction"><span class="toc-section-number">8.4.4</span> Feature extraction</a></li>
+<li><a href="8.4-example-steps.html#row-sampling-steps"><span class="toc-section-number">8.4.5</span> Row sampling steps</a></li>
+<li><a href="8.4-example-steps.html#general-transformations"><span class="toc-section-number">8.4.6</span> General transformations</a></li>
+<li><a href="8.4-example-steps.html#natural-language-processing"><span class="toc-section-number">8.4.7</span> Natural language processing</a></li>
+</ul></li>
+<li><a href="8.5-skip-equals-true.html#skip-equals-true"><span class="toc-section-number">8.5</span> Skipping Steps for New Data</a></li>
+<li><a href="8.6-tidy-a-recipe.html#tidy-a-recipe"><span class="toc-section-number">8.6</span> Tidy a <code>recipe()</code></a></li>
+<li><a href="8.7-column-roles.html#column-roles"><span class="toc-section-number">8.7</span> Column Roles</a></li>
+<li><a href="8.8-recipes-summary.html#recipes-summary"><span class="toc-section-number">8.8</span> Chapter Summary</a></li>
+</ul></li>
+<li class="has-sub"><a href="9-performance.html#performance"><span class="toc-section-number">9</span> Judging Model Effectiveness</a>
+<ul>
+<li><a href="9.1-performance-metrics-and-inference.html#performance-metrics-and-inference"><span class="toc-section-number">9.1</span> Performance Metrics and Inference</a></li>
+<li><a href="9.2-regression-metrics.html#regression-metrics"><span class="toc-section-number">9.2</span> Regression Metrics</a></li>
+<li><a href="9.3-binary-classification-metrics.html#binary-classification-metrics"><span class="toc-section-number">9.3</span> Binary Classification Metrics</a></li>
+<li><a href="9.4-multi-class-classification-metrics.html#multi-class-classification-metrics"><span class="toc-section-number">9.4</span> Multi-Class Classification Metrics</a></li>
+<li><a href="9.5-performance-summary.html#performance-summary"><span class="toc-section-number">9.5</span> Chapter Summary</a></li>
+</ul></li>
+<li class="part"><span><b>Tools for Creating Effective Models</b></span></li>
+<li class="has-sub"><a href="10-resampling.html#resampling"><span class="toc-section-number">10</span> Resampling for Evaluating Performance</a>
+<ul>
+<li><a href="10.1-resampling-resubstition.html#resampling-resubstition"><span class="toc-section-number">10.1</span> The Resubstitution Approach</a></li>
+<li class="has-sub"><a href="10.2-resampling-methods.html#resampling-methods"><span class="toc-section-number">10.2</span> Resampling Methods</a>
+<ul>
+<li><a href="10.2-resampling-methods.html#cv"><span class="toc-section-number">10.2.1</span> Cross-validation</a></li>
+<li><a href="10.2-resampling-methods.html#repeated-cross-validation">Repeated cross-validation</a></li>
+<li><a href="10.2-resampling-methods.html#leave-one-out-cross-validation">Leave-one-out cross-validation</a></li>
+<li><a href="10.2-resampling-methods.html#monte-carlo-cross-validation">Monte Carlo cross-validation</a></li>
+<li><a href="10.2-resampling-methods.html#validation"><span class="toc-section-number">10.2.2</span> Validation sets</a></li>
+<li><a href="10.2-resampling-methods.html#bootstrap"><span class="toc-section-number">10.2.3</span> Bootstrapping</a></li>
+<li><a href="10.2-resampling-methods.html#rolling"><span class="toc-section-number">10.2.4</span> Rolling forecasting origin resampling</a></li>
+</ul></li>
+<li><a href="10.3-resampling-performance.html#resampling-performance"><span class="toc-section-number">10.3</span> Estimating Performance</a></li>
+<li><a href="10.4-parallel.html#parallel"><span class="toc-section-number">10.4</span> Parallel Processing</a></li>
+<li><a href="10.5-extract.html#extract"><span class="toc-section-number">10.5</span> Saving the Resampled Objects</a></li>
+<li><a href="10.6-resampling-summary.html#resampling-summary"><span class="toc-section-number">10.6</span> Chapter Summary</a></li>
+</ul></li>
+<li class="has-sub"><a href="11-compare.html#compare"><span class="toc-section-number">11</span> Comparing Models with Resampling</a>
+<ul>
+<li><a href="11.1-workflow-set.html#workflow-set"><span class="toc-section-number">11.1</span> Creating Multiple Models with Workflow Sets</a></li>
+<li><a href="11.2-resampled-stats.html#resampled-stats"><span class="toc-section-number">11.2</span> Comparing Resampled Performance Statistics</a></li>
+<li><a href="11.3-simple-hypothesis-testing-methods.html#simple-hypothesis-testing-methods"><span class="toc-section-number">11.3</span> Simple Hypothesis Testing Methods</a></li>
+<li class="has-sub"><a href="11.4-tidyposterior.html#tidyposterior"><span class="toc-section-number">11.4</span> Bayesian Methods</a>
+<ul>
+<li><a href="11.4-tidyposterior.html#the-effect-of-the-amount-of-resampling">The effect of the amount of resampling</a></li>
+</ul></li>
+<li><a href="11.5-compare-summary.html#compare-summary"><span class="toc-section-number">11.5</span> Chapter Summary</a></li>
+</ul></li>
+<li class="has-sub"><a href="12-tuning.html#tuning"><span class="toc-section-number">12</span> Model Tuning and the Dangers of Overfitting</a>
+<ul>
+<li><a href="12.1-model-parameters.html#model-parameters"><span class="toc-section-number">12.1</span> Model Parameters</a></li>
+<li><a href="12.2-tuning-parameter-examples.html#tuning-parameter-examples"><span class="toc-section-number">12.2</span> Tuning Parameters for Different Types of Models</a></li>
+<li><a href="12.3-what-to-optimize.html#what-to-optimize"><span class="toc-section-number">12.3</span> What do we Optimize?</a></li>
+<li><a href="12.4-overfitting-bad.html#overfitting-bad"><span class="toc-section-number">12.4</span> The consequences of poor parameter estimates</a></li>
+<li><a href="12.5-two-general-strategies-for-optimization.html#two-general-strategies-for-optimization"><span class="toc-section-number">12.5</span> Two general strategies for optimization</a></li>
+<li><a href="12.6-tuning-params-tidymodels.html#tuning-params-tidymodels"><span class="toc-section-number">12.6</span> Tuning Parameters in tidymodels</a></li>
+<li><a href="12.7-chapter-summary-2.html#chapter-summary-2"><span class="toc-section-number">12.7</span> Chapter Summary</a></li>
+</ul></li>
+<li class="has-sub"><a href="13-grid-search.html#grid-search"><span class="toc-section-number">13</span> Grid Search</a>
+<ul>
+<li class="has-sub"><a href="13.1-grids.html#grids"><span class="toc-section-number">13.1</span> Regular and Non-Regular Grids</a>
+<ul>
+<li><a href="13.1-grids.html#regular-grids">Regular grids</a></li>
+<li><a href="13.1-grids.html#irregular-grids">Irregular grids</a></li>
+</ul></li>
+<li><a href="13.2-evaluating-grid.html#evaluating-grid"><span class="toc-section-number">13.2</span> Evaluating the Grid</a></li>
+<li><a href="13.3-finalizing-the-model.html#finalizing-the-model"><span class="toc-section-number">13.3</span> Finalizing the Model</a></li>
+<li><a href="13.4-tuning-usemodels.html#tuning-usemodels"><span class="toc-section-number">13.4</span> Tools for Creating Tuning Specifications</a></li>
+<li class="has-sub"><a href="13.5-efficient-grids.html#efficient-grids"><span class="toc-section-number">13.5</span> Tools for Efficient Grid Search</a>
+<ul>
+<li><a href="13.5-efficient-grids.html#submodel-trick"><span class="toc-section-number">13.5.1</span> Submodel optimization</a></li>
+<li><a href="13.5-efficient-grids.html#parallel-processing"><span class="toc-section-number">13.5.2</span> Parallel processing</a></li>
+<li><a href="13.5-efficient-grids.html#benchmarking-boosted-trees"><span class="toc-section-number">13.5.3</span> Benchmarking boosted trees</a></li>
+<li><a href="13.5-efficient-grids.html#access-to-global-variables"><span class="toc-section-number">13.5.4</span> Access to global variables</a></li>
+<li><a href="13.5-efficient-grids.html#racing"><span class="toc-section-number">13.5.5</span> Racing methods</a></li>
+</ul></li>
+<li><a href="13.6-grid-summary.html#grid-summary"><span class="toc-section-number">13.6</span> Chapter Summary</a></li>
+</ul></li>
+<li class="has-sub"><a href="14-iterative-search.html#iterative-search"><span class="toc-section-number">14</span> Iterative Search</a>
+<ul>
+<li><a href="14.1-svm.html#svm"><span class="toc-section-number">14.1</span> A Support Vector Machine Model</a></li>
+<li class="has-sub"><a href="14.2-bayesian-optimization.html#bayesian-optimization"><span class="toc-section-number">14.2</span> Bayesian Optimization</a>
+<ul>
+<li><a href="14.2-bayesian-optimization.html#a-gaussian-process-model"><span class="toc-section-number">14.2.1</span> A Gaussian process model</a></li>
+<li><a href="14.2-bayesian-optimization.html#acquisition-functions"><span class="toc-section-number">14.2.2</span> Acquisition functions</a></li>
+<li><a href="14.2-bayesian-optimization.html#tune-bayes"><span class="toc-section-number">14.2.3</span> The <code>tune_bayes()</code> function</a></li>
+</ul></li>
+<li class="has-sub"><a href="14.3-simulated-annealing.html#simulated-annealing"><span class="toc-section-number">14.3</span> Simulated Annealing</a>
+<ul>
+<li><a href="14.3-simulated-annealing.html#simulated-annealing-search-process"><span class="toc-section-number">14.3.1</span> Simulated annealing search process</a></li>
+<li><a href="14.3-simulated-annealing.html#tune-sim-anneal"><span class="toc-section-number">14.3.2</span> The <code>tune_sim_anneal()</code> function</a></li>
+</ul></li>
+<li><a href="14.4-iterative-summary.html#iterative-summary"><span class="toc-section-number">14.4</span> Chapter Summary</a></li>
+</ul></li>
+<li class="has-sub"><a href="15-workflow-sets.html#workflow-sets"><span class="toc-section-number">15</span> Screening Many Models</a>
+<ul>
+<li><a href="15.1-modeling-concrete-mixture-strength.html#modeling-concrete-mixture-strength"><span class="toc-section-number">15.1</span> Modeling Concrete Mixture Strength</a></li>
+<li><a href="15.2-creating-the-workflow-set.html#creating-the-workflow-set"><span class="toc-section-number">15.2</span> Creating the Workflow Set</a></li>
+<li><a href="15.3-tuning-and-evaluating-the-models.html#tuning-and-evaluating-the-models"><span class="toc-section-number">15.3</span> Tuning and Evaluating the Models</a></li>
+<li><a href="15.4-racing-example.html#racing-example"><span class="toc-section-number">15.4</span> Efficiently Screening Models</a></li>
+<li><a href="15.5-finalizing-a-model.html#finalizing-a-model"><span class="toc-section-number">15.5</span> Finalizing a Model</a></li>
+<li><a href="15.6-workflow-sets-summary.html#workflow-sets-summary"><span class="toc-section-number">15.6</span> Chapter Summary</a></li>
+</ul></li>
+<li class="part"><span><b>Beyond the Basics</b></span></li>
+<li class="has-sub"><a href="16-dimensionality.html#dimensionality"><span class="toc-section-number">16</span> Dimensionality Reduction</a>
+<ul>
+<li><a href="16.1-when-problems-can-dimensionality-reduction-solve.html#when-problems-can-dimensionality-reduction-solve"><span class="toc-section-number">16.1</span> When Problems Can Dimensionality Reduction Solve?</a></li>
+<li><a href="16.2-beans.html#beans"><span class="toc-section-number">16.2</span> A Picture is Worth a Thousand… Beans</a></li>
+<li><a href="16.3-a-starter-recipe.html#a-starter-recipe"><span class="toc-section-number">16.3</span> A Starter Recipe</a></li>
+<li class="has-sub"><a href="16.4-recipe-functions.html#recipe-functions"><span class="toc-section-number">16.4</span> Recipes in the Wild</a>
+<ul>
+<li><a href="16.4-recipe-functions.html#prep"><span class="toc-section-number">16.4.1</span> Preparing a recipe</a></li>
+<li><a href="16.4-recipe-functions.html#bake"><span class="toc-section-number">16.4.2</span> Baking the recipe</a></li>
+</ul></li>
+<li class="has-sub"><a href="16.5-feature-extraction-techniques.html#feature-extraction-techniques"><span class="toc-section-number">16.5</span> Feature Extraction Techniques</a>
+<ul>
+<li><a href="16.5-feature-extraction-techniques.html#principal-component-analysis"><span class="toc-section-number">16.5.1</span> Principal component analysis</a></li>
+<li><a href="16.5-feature-extraction-techniques.html#partial-least-squares"><span class="toc-section-number">16.5.2</span> Partial least squares</a></li>
+<li><a href="16.5-feature-extraction-techniques.html#independent-component-analysis"><span class="toc-section-number">16.5.3</span> Independent component analysis</a></li>
+<li><a href="16.5-feature-extraction-techniques.html#uniform-manifold-approximation-and-projection"><span class="toc-section-number">16.5.4</span> Uniform manifold approximation and projection</a></li>
+</ul></li>
+<li><a href="16.6-bean-models.html#bean-models"><span class="toc-section-number">16.6</span> Modeling</a></li>
+<li><a href="16.7-dimensionality-summary.html#dimensionality-summary"><span class="toc-section-number">16.7</span> Chapter Summary</a></li>
+</ul></li>
+<li class="has-sub"><a href="17-categorical.html#categorical"><span class="toc-section-number">17</span> Encoding Categorical Data</a>
+<ul>
+<li><a href="17.1-is-an-encoding-necessary.html#is-an-encoding-necessary"><span class="toc-section-number">17.1</span> Is an Encoding Necessary?</a></li>
+<li><a href="17.2-encoding-ordinal-predictors.html#encoding-ordinal-predictors"><span class="toc-section-number">17.2</span> Encoding Ordinal Predictors</a></li>
+<li class="has-sub"><a href="17.3-using-the-outcome-for-encoding-predictors.html#using-the-outcome-for-encoding-predictors"><span class="toc-section-number">17.3</span> Using the Outcome for Encoding Predictors</a>
+<ul>
+<li><a href="17.3-using-the-outcome-for-encoding-predictors.html#effect-encodings-with-partial-pooling"><span class="toc-section-number">17.3.1</span> Effect encodings with partial pooling</a></li>
+</ul></li>
+<li><a href="17.4-feature-hashing.html#feature-hashing"><span class="toc-section-number">17.4</span> Feature Hashing</a></li>
+<li><a href="17.5-more-encoding-options.html#more-encoding-options"><span class="toc-section-number">17.5</span> More Encoding Options</a></li>
+<li><a href="17.6-categorical-summary.html#categorical-summary"><span class="toc-section-number">17.6</span> Chapter Summary</a></li>
+</ul></li>
+<li class="has-sub"><a href="18-explain.html#explain"><span class="toc-section-number">18</span> Explaining Models and Predictions</a>
+<ul>
+<li><a href="18.1-software-for-model-explanations.html#software-for-model-explanations"><span class="toc-section-number">18.1</span> Software for Model Explanations</a></li>
+<li><a href="18.2-local-explanations.html#local-explanations"><span class="toc-section-number">18.2</span> Local Explanations</a></li>
+<li><a href="18.3-global-explanations.html#global-explanations"><span class="toc-section-number">18.3</span> Global Explanations</a></li>
+<li><a href="18.4-building-global-explanations-from-local-explanations.html#building-global-explanations-from-local-explanations"><span class="toc-section-number">18.4</span> Building Global Explanations from Local Explanations</a></li>
+<li><a href="18.5-back-to-beans.html#back-to-beans"><span class="toc-section-number">18.5</span> Back to Beans!</a></li>
+<li><a href="18.6-explain-summary.html#explain-summary"><span class="toc-section-number">18.6</span> Chapter Summary</a></li>
+</ul></li>
+<li class="has-sub"><a href="19-trust.html#trust"><span class="toc-section-number">19</span> When Should You Trust Your Predictions?</a>
+<ul>
+<li><a href="19.1-equivocal-zones.html#equivocal-zones"><span class="toc-section-number">19.1</span> Equivocal Results</a></li>
+<li><a href="19.2-applicability-domains.html#applicability-domains"><span class="toc-section-number">19.2</span> Determining Model Applicability</a></li>
+<li><a href="19.3-trust-summary.html#trust-summary"><span class="toc-section-number">19.3</span> Chapter Summary</a></li>
+</ul></li>
+<li class="has-sub"><a href="20-ensembles.html#ensembles"><span class="toc-section-number">20</span> Ensembles of Models</a>
+<ul>
+<li><a href="20.1-data-stack.html#data-stack"><span class="toc-section-number">20.1</span> Creating the Training Set for Stacking</a></li>
+<li><a href="20.2-blend-predictions.html#blend-predictions"><span class="toc-section-number">20.2</span> Blend the Predictions</a></li>
+<li><a href="20.3-fit-members.html#fit-members"><span class="toc-section-number">20.3</span> Fit the Member Models</a></li>
+<li><a href="20.4-test-set-results.html#test-set-results"><span class="toc-section-number">20.4</span> Test Set Results</a></li>
+<li><a href="20.5-ensembles-summary.html#ensembles-summary"><span class="toc-section-number">20.5</span> Chapter Summary</a></li>
+</ul></li>
+<li class="has-sub"><a href="21-inferential.html#inferential"><span class="toc-section-number">21</span> Inferential Analysis</a>
+<ul>
+<li><a href="21.1-inference-for-count-data.html#inference-for-count-data"><span class="toc-section-number">21.1</span> Inference for Count Data</a></li>
+<li><a href="21.2-comparisons-with-two-sample-tests.html#comparisons-with-two-sample-tests"><span class="toc-section-number">21.2</span> Comparisons with Two-Sample Tests</a></li>
+<li><a href="21.3-log-linear-models.html#log-linear-models"><span class="toc-section-number">21.3</span> Log-Linear Models</a></li>
+<li><a href="21.4-a-more-complex-model.html#a-more-complex-model"><span class="toc-section-number">21.4</span> A More Complex Model</a></li>
+<li><a href="21.5-inference-options.html#inference-options"><span class="toc-section-number">21.5</span> More Inferential Analysis</a></li>
+<li><a href="21.6-inference-summary.html#inference-summary"><span class="toc-section-number">21.6</span> Chapter Summary</a></li>
+</ul></li>
+<li class="appendix"><span><b>Appendix</b></span></li>
+<li><a href="A-pre-proc-table.html#pre-proc-table"><span class="toc-section-number">A</span> Recommended Preprocessing</a></li>
+<li><a href="references.html#references">REFERENCES</a></li>
+</ul>
+</div>
+</div>
+</div>
+<div class="row">
+<div class="col-sm-12">
+<div id="comparisons-with-two-sample-tests" class="section level2" number="21.2">
+<h2><span class="header-section-number">21.2</span> Comparisons with Two-Sample Tests</h2>
+<p>We can start with hypothesis testing. The original author’s goal with this data set on biochemistry publication data was to determine if there is a difference in publications between men and women <span class="citation">(<a href="#ref-Long1992" role="doc-biblioref">Long 1992</a>)</span>. The data from the study show:</p>
+<div class="sourceCode" id="cb351"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb351-1"><a href="21.2-comparisons-with-two-sample-tests.html#cb351-1" aria-hidden="true" tabindex="-1"></a>bioChemists <span class="sc">%&gt;%</span> </span>
+<span id="cb351-2"><a href="21.2-comparisons-with-two-sample-tests.html#cb351-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(fem) <span class="sc">%&gt;%</span> </span>
+<span id="cb351-3"><a href="21.2-comparisons-with-two-sample-tests.html#cb351-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">counts =</span> <span class="fu">sum</span>(art), <span class="at">n =</span> <span class="fu">length</span>(art))</span>
+<span id="cb351-4"><a href="21.2-comparisons-with-two-sample-tests.html#cb351-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; # A tibble: 2 × 3</span></span>
+<span id="cb351-5"><a href="21.2-comparisons-with-two-sample-tests.html#cb351-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   fem   counts     n</span></span>
+<span id="cb351-6"><a href="21.2-comparisons-with-two-sample-tests.html#cb351-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   &lt;fct&gt;  &lt;int&gt; &lt;int&gt;</span></span>
+<span id="cb351-7"><a href="21.2-comparisons-with-two-sample-tests.html#cb351-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 Men      930   494</span></span>
+<span id="cb351-8"><a href="21.2-comparisons-with-two-sample-tests.html#cb351-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 Women    619   421</span></span></code></pre></div>
+<p>There were many more publications by men, although there were more men in the data. The simplest approach to analyzing these data would be to do a two-sample comparison using the <code>poisson.test()</code> function in the <span class="pkg">stats</span> package. It requires the counts for one or two groups.</p>
+<p>For our application, the hypotheses to compare the two sexes are:</p>
+<p><span class="math display">\[\begin{align}
+H_0&amp;: \lambda_m = \lambda_f \notag \\
+H_a&amp;: \lambda_m \ne \lambda_f \notag
+\end{align}\]</span></p>
+<p>where the <span class="math inline">\(\lambda\)</span> values are the rates of publications (over the same time period).</p>
+<p>A basic application of the test is:<a href="#fn35" class="footnote-ref" id="fnref35"><sup>35</sup></a></p>
+<div class="sourceCode" id="cb352"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb352-1"><a href="21.2-comparisons-with-two-sample-tests.html#cb352-1" aria-hidden="true" tabindex="-1"></a><span class="fu">poisson.test</span>(<span class="fu">c</span>(<span class="dv">930</span>, <span class="dv">619</span>), <span class="at">T =</span> <span class="dv">3</span>)</span>
+<span id="cb352-2"><a href="21.2-comparisons-with-two-sample-tests.html#cb352-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb352-3"><a href="21.2-comparisons-with-two-sample-tests.html#cb352-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  Comparison of Poisson rates</span></span>
+<span id="cb352-4"><a href="21.2-comparisons-with-two-sample-tests.html#cb352-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb352-5"><a href="21.2-comparisons-with-two-sample-tests.html#cb352-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; data:  c(930, 619) time base: 3</span></span>
+<span id="cb352-6"><a href="21.2-comparisons-with-two-sample-tests.html#cb352-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; count1 = 930, expected count1 = 774, p-value = 3e-15</span></span>
+<span id="cb352-7"><a href="21.2-comparisons-with-two-sample-tests.html#cb352-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; alternative hypothesis: true rate ratio is not equal to 1</span></span>
+<span id="cb352-8"><a href="21.2-comparisons-with-two-sample-tests.html#cb352-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 95 percent confidence interval:</span></span>
+<span id="cb352-9"><a href="21.2-comparisons-with-two-sample-tests.html#cb352-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  1.356 1.666</span></span>
+<span id="cb352-10"><a href="21.2-comparisons-with-two-sample-tests.html#cb352-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; sample estimates:</span></span>
+<span id="cb352-11"><a href="21.2-comparisons-with-two-sample-tests.html#cb352-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; rate ratio </span></span>
+<span id="cb352-12"><a href="21.2-comparisons-with-two-sample-tests.html#cb352-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      1.502</span></span></code></pre></div>
+<p>The function reports a p-value as well as a confidence interval for the ratio of the publication rates. The results indicate that the observed difference is greater than the experiential noise and favors <span class="math inline">\(H_a\)</span>.</p>
+<p>One issue with using this function is that the results come back as an <code>htest</code> object. While this type of object has a well defined structure, it can be difficult to consume for subsequent operations such as reporting or visualizations. The most impactful tool that tidymodels has to offer for inferential models is the <code>tidy()</code> functions in the <span class="pkg">broom</span> package. As previously seen, this function makes a well formed, predictably named tibble from the object. We can <code>tidy()</code> the results of our two-sample comparison test:</p>
+<div class="sourceCode" id="cb353"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb353-1"><a href="21.2-comparisons-with-two-sample-tests.html#cb353-1" aria-hidden="true" tabindex="-1"></a><span class="fu">poisson.test</span>(<span class="fu">c</span>(<span class="dv">930</span>, <span class="dv">619</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb353-2"><a href="21.2-comparisons-with-two-sample-tests.html#cb353-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tidy</span>()</span>
+<span id="cb353-3"><a href="21.2-comparisons-with-two-sample-tests.html#cb353-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; # A tibble: 1 × 8</span></span>
+<span id="cb353-4"><a href="21.2-comparisons-with-two-sample-tests.html#cb353-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   estimate statistic  p.value parameter conf.low conf.high method        alternative</span></span>
+<span id="cb353-5"><a href="21.2-comparisons-with-two-sample-tests.html#cb353-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt; &lt;chr&gt;         &lt;chr&gt;      </span></span>
+<span id="cb353-6"><a href="21.2-comparisons-with-two-sample-tests.html#cb353-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1     1.50       930 2.73e-15      774.     1.36      1.67 Comparison o… two.sided</span></span></code></pre></div>
+<div class="rmdnote">
+<p>Between the <a href="https://broom.tidymodels.org/"><span class="pkg">broom</span></a> and <a href="https://CRAN.R-project.org/package=broom.mixed"><span class="pkg">broom.mixed</span></a> packages, there are <code>tidy()</code> methods for more than 150 models.</p>
+</div>
+<p>While the Poisson distribution is reasonable, we might also want to make an assessment using fewer distributional assumptions. Two methods that might be helpful are the bootstrap and permutation tests <span class="citation">(<a href="#ref-davison1997bootstrap" role="doc-biblioref">Davison and Hinkley 1997</a>)</span>.</p>
+<p>The <span class="pkg">infer</span> package, which is part of the tidymodels framework, is a powerful and intuitive tool for hypothesis testing <span class="citation">(<a href="#ref-ModernDive" role="doc-biblioref">Ismay and Kim 2021</a>)</span>. Its syntax is concise and designed for non-statisticians.</p>
+<p>First, we <code>specify()</code> that we will use the difference in the mean number of articles between the sexes and then <code>calculate()</code> the statistic from the data. Recall that the maximum likelihood estimator for the Poisson mean is the sample mean. The hypotheses tested here are the same as the previous test (but are conducted using a different testing procedure).</p>
+<p>With <span class="pkg">infer</span>, we specify the outcome and covariate, then state the statistic of interest:</p>
+<div class="sourceCode" id="cb354"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb354-1"><a href="21.2-comparisons-with-two-sample-tests.html#cb354-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(infer)</span>
+<span id="cb354-2"><a href="21.2-comparisons-with-two-sample-tests.html#cb354-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb354-3"><a href="21.2-comparisons-with-two-sample-tests.html#cb354-3" aria-hidden="true" tabindex="-1"></a>observed <span class="ot">&lt;-</span> </span>
+<span id="cb354-4"><a href="21.2-comparisons-with-two-sample-tests.html#cb354-4" aria-hidden="true" tabindex="-1"></a>  bioChemists <span class="sc">%&gt;%</span></span>
+<span id="cb354-5"><a href="21.2-comparisons-with-two-sample-tests.html#cb354-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">specify</span>(art <span class="sc">~</span> fem) <span class="sc">%&gt;%</span></span>
+<span id="cb354-6"><a href="21.2-comparisons-with-two-sample-tests.html#cb354-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">calculate</span>(<span class="at">stat =</span> <span class="st">&quot;diff in means&quot;</span>, <span class="at">order =</span> <span class="fu">c</span>(<span class="st">&quot;Men&quot;</span>, <span class="st">&quot;Women&quot;</span>))</span>
+<span id="cb354-7"><a href="21.2-comparisons-with-two-sample-tests.html#cb354-7" aria-hidden="true" tabindex="-1"></a>observed</span>
+<span id="cb354-8"><a href="21.2-comparisons-with-two-sample-tests.html#cb354-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Response: art (numeric)</span></span>
+<span id="cb354-9"><a href="21.2-comparisons-with-two-sample-tests.html#cb354-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Explanatory: fem (factor)</span></span>
+<span id="cb354-10"><a href="21.2-comparisons-with-two-sample-tests.html#cb354-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; # A tibble: 1 × 1</span></span>
+<span id="cb354-11"><a href="21.2-comparisons-with-two-sample-tests.html#cb354-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    stat</span></span>
+<span id="cb354-12"><a href="21.2-comparisons-with-two-sample-tests.html#cb354-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   &lt;dbl&gt;</span></span>
+<span id="cb354-13"><a href="21.2-comparisons-with-two-sample-tests.html#cb354-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 0.412</span></span></code></pre></div>
+<p>From here, we compute a confidence interval for this mean by creating the bootstrap distribution via <code>generate()</code>; the same statistic is computed for each resampled version of the data:</p>
+<div class="sourceCode" id="cb355"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb355-1"><a href="21.2-comparisons-with-two-sample-tests.html#cb355-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2101</span>)</span>
+<span id="cb355-2"><a href="21.2-comparisons-with-two-sample-tests.html#cb355-2" aria-hidden="true" tabindex="-1"></a>bootstrapped <span class="ot">&lt;-</span> </span>
+<span id="cb355-3"><a href="21.2-comparisons-with-two-sample-tests.html#cb355-3" aria-hidden="true" tabindex="-1"></a>  bioChemists <span class="sc">%&gt;%</span></span>
+<span id="cb355-4"><a href="21.2-comparisons-with-two-sample-tests.html#cb355-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">specify</span>(art <span class="sc">~</span> fem)  <span class="sc">%&gt;%</span></span>
+<span id="cb355-5"><a href="21.2-comparisons-with-two-sample-tests.html#cb355-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">generate</span>(<span class="at">reps =</span> <span class="dv">2000</span>, <span class="at">type =</span> <span class="st">&quot;bootstrap&quot;</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb355-6"><a href="21.2-comparisons-with-two-sample-tests.html#cb355-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">calculate</span>(<span class="at">stat =</span> <span class="st">&quot;diff in means&quot;</span>, <span class="at">order =</span> <span class="fu">c</span>(<span class="st">&quot;Men&quot;</span>, <span class="st">&quot;Women&quot;</span>))</span>
+<span id="cb355-7"><a href="21.2-comparisons-with-two-sample-tests.html#cb355-7" aria-hidden="true" tabindex="-1"></a>bootstrapped</span>
+<span id="cb355-8"><a href="21.2-comparisons-with-two-sample-tests.html#cb355-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Response: art (numeric)</span></span>
+<span id="cb355-9"><a href="21.2-comparisons-with-two-sample-tests.html#cb355-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Explanatory: fem (factor)</span></span>
+<span id="cb355-10"><a href="21.2-comparisons-with-two-sample-tests.html#cb355-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; # A tibble: 2,000 × 2</span></span>
+<span id="cb355-11"><a href="21.2-comparisons-with-two-sample-tests.html#cb355-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   replicate  stat</span></span>
+<span id="cb355-12"><a href="21.2-comparisons-with-two-sample-tests.html#cb355-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       &lt;int&gt; &lt;dbl&gt;</span></span>
+<span id="cb355-13"><a href="21.2-comparisons-with-two-sample-tests.html#cb355-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1         1 0.467</span></span>
+<span id="cb355-14"><a href="21.2-comparisons-with-two-sample-tests.html#cb355-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2         2 0.107</span></span>
+<span id="cb355-15"><a href="21.2-comparisons-with-two-sample-tests.html#cb355-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3         3 0.467</span></span>
+<span id="cb355-16"><a href="21.2-comparisons-with-two-sample-tests.html#cb355-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4         4 0.308</span></span>
+<span id="cb355-17"><a href="21.2-comparisons-with-two-sample-tests.html#cb355-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5         5 0.369</span></span>
+<span id="cb355-18"><a href="21.2-comparisons-with-two-sample-tests.html#cb355-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6         6 0.428</span></span>
+<span id="cb355-19"><a href="21.2-comparisons-with-two-sample-tests.html#cb355-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; # … with 1,994 more rows</span></span></code></pre></div>
+<p>A percentile interval is calculated using:</p>
+<div class="sourceCode" id="cb356"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb356-1"><a href="21.2-comparisons-with-two-sample-tests.html#cb356-1" aria-hidden="true" tabindex="-1"></a>percentile_ci <span class="ot">&lt;-</span> <span class="fu">get_ci</span>(bootstrapped)</span>
+<span id="cb356-2"><a href="21.2-comparisons-with-two-sample-tests.html#cb356-2" aria-hidden="true" tabindex="-1"></a>percentile_ci</span>
+<span id="cb356-3"><a href="21.2-comparisons-with-two-sample-tests.html#cb356-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; # A tibble: 1 × 2</span></span>
+<span id="cb356-4"><a href="21.2-comparisons-with-two-sample-tests.html#cb356-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   lower_ci upper_ci</span></span>
+<span id="cb356-5"><a href="21.2-comparisons-with-two-sample-tests.html#cb356-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      &lt;dbl&gt;    &lt;dbl&gt;</span></span>
+<span id="cb356-6"><a href="21.2-comparisons-with-two-sample-tests.html#cb356-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1    0.158    0.653</span></span></code></pre></div>
+<p>The <span class="pkg">infer</span> package has a high-level API for showing the results of the analysis, as shown in Figure <a href="21.2-comparisons-with-two-sample-tests.html#fig:bootstrapped-mean">21.2</a>.</p>
+<div class="sourceCode" id="cb357"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb357-1"><a href="21.2-comparisons-with-two-sample-tests.html#cb357-1" aria-hidden="true" tabindex="-1"></a><span class="fu">visualize</span>(bootstrapped) <span class="sc">+</span></span>
+<span id="cb357-2"><a href="21.2-comparisons-with-two-sample-tests.html#cb357-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">shade_confidence_interval</span>(<span class="at">endpoints =</span> percentile_ci)</span></code></pre></div>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:bootstrapped-mean"></span>
+<img src="figures/bootstrapped-mean-1.png" alt="The bootstrap distribution of the difference in means. The highlighted region is the confidence interval, which does not include a value of zero." width="80%" />
+<p class="caption">
+Figure 21.2: The bootstrap distribution of the difference in means. The highlighted region is the confidence interval.
+</p>
+</div>
+<p>Since the interval visualized in in Figure <a href="21.2-comparisons-with-two-sample-tests.html#fig:bootstrapped-mean">21.2</a> does not include zero, these results indicate that men have published more articles than women.</p>
+<p>If we require a p-value, the <span class="pkg">infer</span> package can compute one via a permutation test, shown in the following code. The syntax is very similar to the bootstrapping code we used earlier. We add a <code>hypothesize()</code> verb to state the type of assumption to test and the <code>generate()</code> call contains an option to shuffle the data.</p>
+<div class="sourceCode" id="cb358"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb358-1"><a href="21.2-comparisons-with-two-sample-tests.html#cb358-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2102</span>)</span>
+<span id="cb358-2"><a href="21.2-comparisons-with-two-sample-tests.html#cb358-2" aria-hidden="true" tabindex="-1"></a>permuted <span class="ot">&lt;-</span> </span>
+<span id="cb358-3"><a href="21.2-comparisons-with-two-sample-tests.html#cb358-3" aria-hidden="true" tabindex="-1"></a>  bioChemists <span class="sc">%&gt;%</span></span>
+<span id="cb358-4"><a href="21.2-comparisons-with-two-sample-tests.html#cb358-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">specify</span>(art <span class="sc">~</span> fem)  <span class="sc">%&gt;%</span></span>
+<span id="cb358-5"><a href="21.2-comparisons-with-two-sample-tests.html#cb358-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">hypothesize</span>(<span class="at">null =</span> <span class="st">&quot;independence&quot;</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb358-6"><a href="21.2-comparisons-with-two-sample-tests.html#cb358-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">generate</span>(<span class="at">reps =</span> <span class="dv">2000</span>, <span class="at">type =</span> <span class="st">&quot;permute&quot;</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb358-7"><a href="21.2-comparisons-with-two-sample-tests.html#cb358-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">calculate</span>(<span class="at">stat =</span> <span class="st">&quot;diff in means&quot;</span>, <span class="at">order =</span> <span class="fu">c</span>(<span class="st">&quot;Men&quot;</span>, <span class="st">&quot;Women&quot;</span>))</span>
+<span id="cb358-8"><a href="21.2-comparisons-with-two-sample-tests.html#cb358-8" aria-hidden="true" tabindex="-1"></a>permuted</span>
+<span id="cb358-9"><a href="21.2-comparisons-with-two-sample-tests.html#cb358-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Response: art (numeric)</span></span>
+<span id="cb358-10"><a href="21.2-comparisons-with-two-sample-tests.html#cb358-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Explanatory: fem (factor)</span></span>
+<span id="cb358-11"><a href="21.2-comparisons-with-two-sample-tests.html#cb358-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Null Hypothesis: independence</span></span>
+<span id="cb358-12"><a href="21.2-comparisons-with-two-sample-tests.html#cb358-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; # A tibble: 2,000 × 2</span></span>
+<span id="cb358-13"><a href="21.2-comparisons-with-two-sample-tests.html#cb358-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   replicate     stat</span></span>
+<span id="cb358-14"><a href="21.2-comparisons-with-two-sample-tests.html#cb358-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       &lt;int&gt;    &lt;dbl&gt;</span></span>
+<span id="cb358-15"><a href="21.2-comparisons-with-two-sample-tests.html#cb358-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1         1  0.201  </span></span>
+<span id="cb358-16"><a href="21.2-comparisons-with-two-sample-tests.html#cb358-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2         2 -0.133  </span></span>
+<span id="cb358-17"><a href="21.2-comparisons-with-two-sample-tests.html#cb358-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3         3  0.109  </span></span>
+<span id="cb358-18"><a href="21.2-comparisons-with-two-sample-tests.html#cb358-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4         4 -0.195  </span></span>
+<span id="cb358-19"><a href="21.2-comparisons-with-two-sample-tests.html#cb358-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5         5 -0.00128</span></span>
+<span id="cb358-20"><a href="21.2-comparisons-with-two-sample-tests.html#cb358-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6         6 -0.102  </span></span>
+<span id="cb358-21"><a href="21.2-comparisons-with-two-sample-tests.html#cb358-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; # … with 1,994 more rows</span></span></code></pre></div>
+<p>The following visualization code is also very similar to the bootstrap approach. This code generates Figure <a href="21.2-comparisons-with-two-sample-tests.html#fig:permutation-dist">21.3</a> where the vertical line signifies the observed value:</p>
+<div class="sourceCode" id="cb359"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb359-1"><a href="21.2-comparisons-with-two-sample-tests.html#cb359-1" aria-hidden="true" tabindex="-1"></a><span class="fu">visualize</span>(permuted) <span class="sc">+</span></span>
+<span id="cb359-2"><a href="21.2-comparisons-with-two-sample-tests.html#cb359-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">shade_p_value</span>(<span class="at">obs_stat =</span> observed, <span class="at">direction =</span> <span class="st">&quot;two-sided&quot;</span>)</span></code></pre></div>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:permutation-dist"></span>
+<img src="figures/permutation-dist-1.png" alt="The empirical distribution of the test statistic under the null hypothesis. The vertical line indicates the observed test statistic and is far away form the mainstream of the distribution." width="80%" />
+<p class="caption">
+Figure 21.3: Empirical distribution of the test statistic under the null hypothesis. The vertical line indicates the observed test statistic.
+</p>
+</div>
+<p>The actual p-value is:</p>
+<div class="sourceCode" id="cb360"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb360-1"><a href="21.2-comparisons-with-two-sample-tests.html#cb360-1" aria-hidden="true" tabindex="-1"></a>permuted <span class="sc">%&gt;%</span></span>
+<span id="cb360-2"><a href="21.2-comparisons-with-two-sample-tests.html#cb360-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">get_p_value</span>(<span class="at">obs_stat =</span> observed, <span class="at">direction =</span> <span class="st">&quot;two-sided&quot;</span>)</span>
+<span id="cb360-3"><a href="21.2-comparisons-with-two-sample-tests.html#cb360-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; # A tibble: 1 × 1</span></span>
+<span id="cb360-4"><a href="21.2-comparisons-with-two-sample-tests.html#cb360-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   p_value</span></span>
+<span id="cb360-5"><a href="21.2-comparisons-with-two-sample-tests.html#cb360-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     &lt;dbl&gt;</span></span>
+<span id="cb360-6"><a href="21.2-comparisons-with-two-sample-tests.html#cb360-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1   0.002</span></span></code></pre></div>
+<p>Since the vertical line representing the null hypothesis in Figure <a href="21.2-comparisons-with-two-sample-tests.html#fig:permutation-dist">21.3</a> is far away from the permutation distribution (which represents the null hypothesis), the likelihood of observing data that is at least as extreme as what is at hand if in fact the null hypothesis were true is exceedingly small.</p>
+<p>The two-sample tests shown in this section are probably suboptimal because they do not take into account other factors that might explain the observed relationship between publication rate and sex. Let’s move on to a more complex model that can take into consideration additional covariates.</p>
+</div>
+<h3>REFERENCES</h3>
+<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="ref-davison1997bootstrap" class="csl-entry">
+Davison, A, and D Hinkley. 1997. <em>Bootstrap Methods and Their Application</em>. Vol. 1. Cambridge university press.
+</div>
+<div id="ref-ModernDive" class="csl-entry">
+Ismay, C, and A Kim. 2021. <em>Statistical Inference via Data Science: A ModernDive into r and the Tidyverse</em>. Chapman; Hall/CRC. <a href="https://moderndive.com/">https://moderndive.com/</a>.
+</div>
+<div id="ref-Long1992" class="csl-entry">
+Long, J. 1992. <span>“<span class="nocase">Measures of Sex Differences in Scientific Productivity*</span>.”</span> <em>Social Forces</em> 71 (1): 159–78.
+</div>
+</div>
+<div class="footnotes">
+<hr />
+<ol start="35">
+<li id="fn35"><p>The <code>T</code> argument allows us to account for the time during which the data were observed.<a href="21.2-comparisons-with-two-sample-tests.html#fnref35" class="footnote-back">↩︎</a></p></li>
+</ol>
+</div>
+<p style="text-align: center;">
+<a href="21.1-inference-for-count-data.html"><button class="btn btn-default">Previous</button></a>
+<a href="21.3-log-linear-models.html"><button class="btn btn-default">Next</button></a>
+</p>
+</div>
+</div>
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+$(document).ready(function () {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+});
+
+</script>
+
+</body>
+</html>

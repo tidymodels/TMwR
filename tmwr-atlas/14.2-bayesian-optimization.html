@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="14.2 Bayesian Optimization | Tidy Modeling with R" />
+<meta property="og:type" content="book" />
+<meta property="og:image" content="/images/cover.png" />
+<meta property="og:description" content="The tidymodels framework is a collection of R packages for modeling and machine learning using tidyverse principles. This book provides a thorough introduction to how to use tidymodels, and an outline of good methodology and statistical practice for phases of the modeling process." />
+<meta name="github-repo" content="tidymodels/TMwR" />
+
+<meta name="author" content="Max Kuhn and Julia Silge" />
+
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  TeX: { equationNumbers: { autoNumber: "AMS" } }
+});
+</script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<meta name="description" content="The tidymodels framework is a collection of R packages for modeling and machine learning using tidyverse principles. This book provides a thorough introduction to how to use tidymodels, and an outline of good methodology and statistical practice for phases of the modeling process.">
+
+<title>14.2 Bayesian Optimization | Tidy Modeling with R</title>
+
+<script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="libs/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+<script src="libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="libs/navigation-1.1/tabsets.js"></script>
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+
+
+<style type="text/css">
+/* Used with Pandoc 2.11+ new --citeproc when CSL is used */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}
+</style>
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+/* show arrow before summary tag as in bootstrap
+TODO: remove if boostrap in updated in html_document (rmarkdown#1485) */
+details > summary {
+  display: list-item;
+  cursor: pointer;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container-fluid main-container">
+
+
+<div class="row">
+<div class="col-sm-12">
+<div id="TOC">
+<ul>
+<li class="has-sub"><a href="index.html#hello-world">Hello World</a>
+<ul>
+<li><a href="acknowledgments.html#acknowledgments">Acknowledgments</a></li>
+<li><a href="using-code-examples.html#using-code-examples">Using Code Examples</a></li>
+</ul></li>
+<li class="part"><span><b>Introduction</b></span></li>
+<li class="has-sub"><a href="1-software-modeling.html#software-modeling"><span class="toc-section-number">1</span> Software for modeling</a>
+<ul>
+<li><a href="1.1-fundamentals-for-modeling-software.html#fundamentals-for-modeling-software"><span class="toc-section-number">1.1</span> Fundamentals for Modeling Software</a></li>
+<li class="has-sub"><a href="1.2-model-types.html#model-types"><span class="toc-section-number">1.2</span> Types of Models</a>
+<ul>
+<li><a href="1.2-model-types.html#descriptive-models">Descriptive models</a></li>
+<li><a href="1.2-model-types.html#inferential-models">Inferential models</a></li>
+<li><a href="1.2-model-types.html#predictive-models">Predictive models</a></li>
+</ul></li>
+<li><a href="1.3-connections-between-types-of-models.html#connections-between-types-of-models"><span class="toc-section-number">1.3</span> Connections Between Types of Models</a></li>
+<li><a href="1.4-model-terminology.html#model-terminology"><span class="toc-section-number">1.4</span> Some Terminology</a></li>
+<li><a href="1.5-model-phases.html#model-phases"><span class="toc-section-number">1.5</span> How Does Modeling Fit into the Data Analysis Process?</a></li>
+<li><a href="1.6-software-summary.html#software-summary"><span class="toc-section-number">1.6</span> Chapter Summary</a></li>
+</ul></li>
+<li class="has-sub"><a href="2-tidyverse.html#tidyverse"><span class="toc-section-number">2</span> A Tidyverse Primer</a>
+<ul>
+<li class="has-sub"><a href="2.1-tidyverse-principles.html#tidyverse-principles"><span class="toc-section-number">2.1</span> Tidyverse Principles</a>
+<ul>
+<li><a href="2.1-tidyverse-principles.html#design-for-humans"><span class="toc-section-number">2.1.1</span> Design for humans</a></li>
+<li><a href="2.1-tidyverse-principles.html#reuse-existing-data-structures"><span class="toc-section-number">2.1.2</span> Reuse existing data structures</a></li>
+<li><a href="2.1-tidyverse-principles.html#design-for-the-pipe-and-functional-programming"><span class="toc-section-number">2.1.3</span> Design for the pipe and functional programming</a></li>
+</ul></li>
+<li><a href="2.2-examples-of-tidyverse-syntax.html#examples-of-tidyverse-syntax"><span class="toc-section-number">2.2</span> Examples of Tidyverse Syntax</a></li>
+<li><a href="2.3-chapter-summary.html#chapter-summary"><span class="toc-section-number">2.3</span> Chapter Summary</a></li>
+</ul></li>
+<li class="has-sub"><a href="3-base-r.html#base-r"><span class="toc-section-number">3</span> A Review of R Modeling Fundamentals</a>
+<ul>
+<li><a href="3.1-an-example.html#an-example"><span class="toc-section-number">3.1</span> An Example</a></li>
+<li><a href="3.2-formula.html#formula"><span class="toc-section-number">3.2</span> What Does the R Formula Do?</a></li>
+<li><a href="3.3-tidiness-modeling.html#tidiness-modeling"><span class="toc-section-number">3.3</span> Why Tidiness is Important for Modeling</a></li>
+<li><a href="3.4-combining-base-r-models-and-the-tidyverse.html#combining-base-r-models-and-the-tidyverse"><span class="toc-section-number">3.4</span> Combining Base R Models and the Tidyverse</a></li>
+<li><a href="3.5-the-tidymodels-metapackage.html#the-tidymodels-metapackage"><span class="toc-section-number">3.5</span> The tidymodels Metapackage</a></li>
+<li><a href="3.6-chapter-summary-1.html#chapter-summary-1"><span class="toc-section-number">3.6</span> Chapter Summary</a></li>
+</ul></li>
+<li class="part"><span><b>Modeling Basics</b></span></li>
+<li class="has-sub"><a href="4-ames.html#ames"><span class="toc-section-number">4</span> The Ames Housing Data</a>
+<ul>
+<li><a href="4.1-exploring-features-of-homes-in-ames.html#exploring-features-of-homes-in-ames"><span class="toc-section-number">4.1</span> Exploring Features of Homes in Ames</a></li>
+<li><a href="4.2-ames-summary.html#ames-summary"><span class="toc-section-number">4.2</span> Chapter Summary</a></li>
+</ul></li>
+<li class="has-sub"><a href="5-splitting.html#splitting"><span class="toc-section-number">5</span> Spending our Data</a>
+<ul>
+<li><a href="5.1-splitting-methods.html#splitting-methods"><span class="toc-section-number">5.1</span> Common Methods for Splitting Data</a></li>
+<li><a href="5.2-what-about-a-validation-set.html#what-about-a-validation-set"><span class="toc-section-number">5.2</span> What About a Validation Set?</a></li>
+<li><a href="5.3-multi-level-data.html#multi-level-data"><span class="toc-section-number">5.3</span> Multi-Level Data</a></li>
+<li><a href="5.4-other-considerations-for-a-data-budget.html#other-considerations-for-a-data-budget"><span class="toc-section-number">5.4</span> Other Considerations for a Data Budget</a></li>
+<li><a href="5.5-splitting-summary.html#splitting-summary"><span class="toc-section-number">5.5</span> Chapter Summary</a></li>
+</ul></li>
+<li class="has-sub"><a href="6-models.html#models"><span class="toc-section-number">6</span> Fitting Models with parsnip</a>
+<ul>
+<li><a href="6.1-create-a-model.html#create-a-model"><span class="toc-section-number">6.1</span> Create a Model</a></li>
+<li><a href="6.2-use-the-model-results.html#use-the-model-results"><span class="toc-section-number">6.2</span> Use the Model Results</a></li>
+<li><a href="6.3-parsnip-predictions.html#parsnip-predictions"><span class="toc-section-number">6.3</span> Make Predictions</a></li>
+<li><a href="6.4-parsnip-extension-packages.html#parsnip-extension-packages"><span class="toc-section-number">6.4</span> parsnip-Extension Packages</a></li>
+<li><a href="6.5-parsnip-addin.html#parsnip-addin"><span class="toc-section-number">6.5</span> Creating Model Specifications</a></li>
+<li><a href="6.6-models-summary.html#models-summary"><span class="toc-section-number">6.6</span> Chapter Summary</a></li>
+</ul></li>
+<li class="has-sub"><a href="7-workflows.html#workflows"><span class="toc-section-number">7</span> A Model Workflow</a>
+<ul>
+<li><a href="7.1-begin-model-end.html#begin-model-end"><span class="toc-section-number">7.1</span> Where Does the Model Begin and End?</a></li>
+<li><a href="7.2-workflow-basics.html#workflow-basics"><span class="toc-section-number">7.2</span> Workflow Basics</a></li>
+<li><a href="7.3-adding-raw-variables-to-the-workflow.html#adding-raw-variables-to-the-workflow"><span class="toc-section-number">7.3</span> Adding Raw Variables to the <code>workflow()</code></a></li>
+<li class="has-sub"><a href="7.4-workflow-encoding.html#workflow-encoding"><span class="toc-section-number">7.4</span> How Does a <code>workflow()</code> Use the Formula?</a>
+<ul>
+<li><a href="7.4-workflow-encoding.html#tree-based-models">Tree-based models</a></li>
+<li><a href="7.4-workflow-encoding.html#special-model-formulas"><span class="toc-section-number">7.4.1</span> Special formulas and in-line functions</a></li>
+</ul></li>
+<li><a href="7.5-workflow-sets-intro.html#workflow-sets-intro"><span class="toc-section-number">7.5</span> Creating Multiple Workflows at Once</a></li>
+<li><a href="7.6-evaluating-the-test-set.html#evaluating-the-test-set"><span class="toc-section-number">7.6</span> Evaluating the Test Set</a></li>
+<li><a href="7.7-workflows-summary.html#workflows-summary"><span class="toc-section-number">7.7</span> Chapter Summary</a></li>
+</ul></li>
+<li class="has-sub"><a href="8-recipes.html#recipes"><span class="toc-section-number">8</span> Feature Engineering with recipes</a>
+<ul>
+<li><a href="8.1-a-simple-recipe-for-the-ames-housing-data.html#a-simple-recipe-for-the-ames-housing-data"><span class="toc-section-number">8.1</span> A Simple <code>recipe()</code> for the Ames Housing Data</a></li>
+<li><a href="8.2-using-recipes.html#using-recipes"><span class="toc-section-number">8.2</span> Using Recipes</a></li>
+<li><a href="8.3-how-data-are-used-by-the-recipe.html#how-data-are-used-by-the-recipe"><span class="toc-section-number">8.3</span> How Data are Used by the <code>recipe()</code></a></li>
+<li class="has-sub"><a href="8.4-example-steps.html#example-steps"><span class="toc-section-number">8.4</span> Examples of <code>recipe()</code> Steps</a>
+<ul>
+<li><a href="8.4-example-steps.html#dummies"><span class="toc-section-number">8.4.1</span> Encoding qualitative data in a numeric format</a></li>
+<li><a href="8.4-example-steps.html#interaction-terms"><span class="toc-section-number">8.4.2</span> Interaction terms</a></li>
+<li><a href="8.4-example-steps.html#spline-functions"><span class="toc-section-number">8.4.3</span> Spline functions</a></li>
+<li><a href="8.4-example-steps.html#feature-extraction"><span class="toc-section-number">8.4.4</span> Feature extraction</a></li>
+<li><a href="8.4-example-steps.html#row-sampling-steps"><span class="toc-section-number">8.4.5</span> Row sampling steps</a></li>
+<li><a href="8.4-example-steps.html#general-transformations"><span class="toc-section-number">8.4.6</span> General transformations</a></li>
+<li><a href="8.4-example-steps.html#natural-language-processing"><span class="toc-section-number">8.4.7</span> Natural language processing</a></li>
+</ul></li>
+<li><a href="8.5-skip-equals-true.html#skip-equals-true"><span class="toc-section-number">8.5</span> Skipping Steps for New Data</a></li>
+<li><a href="8.6-tidy-a-recipe.html#tidy-a-recipe"><span class="toc-section-number">8.6</span> Tidy a <code>recipe()</code></a></li>
+<li><a href="8.7-column-roles.html#column-roles"><span class="toc-section-number">8.7</span> Column Roles</a></li>
+<li><a href="8.8-recipes-summary.html#recipes-summary"><span class="toc-section-number">8.8</span> Chapter Summary</a></li>
+</ul></li>
+<li class="has-sub"><a href="9-performance.html#performance"><span class="toc-section-number">9</span> Judging Model Effectiveness</a>
+<ul>
+<li><a href="9.1-performance-metrics-and-inference.html#performance-metrics-and-inference"><span class="toc-section-number">9.1</span> Performance Metrics and Inference</a></li>
+<li><a href="9.2-regression-metrics.html#regression-metrics"><span class="toc-section-number">9.2</span> Regression Metrics</a></li>
+<li><a href="9.3-binary-classification-metrics.html#binary-classification-metrics"><span class="toc-section-number">9.3</span> Binary Classification Metrics</a></li>
+<li><a href="9.4-multi-class-classification-metrics.html#multi-class-classification-metrics"><span class="toc-section-number">9.4</span> Multi-Class Classification Metrics</a></li>
+<li><a href="9.5-performance-summary.html#performance-summary"><span class="toc-section-number">9.5</span> Chapter Summary</a></li>
+</ul></li>
+<li class="part"><span><b>Tools for Creating Effective Models</b></span></li>
+<li class="has-sub"><a href="10-resampling.html#resampling"><span class="toc-section-number">10</span> Resampling for Evaluating Performance</a>
+<ul>
+<li><a href="10.1-resampling-resubstition.html#resampling-resubstition"><span class="toc-section-number">10.1</span> The Resubstitution Approach</a></li>
+<li class="has-sub"><a href="10.2-resampling-methods.html#resampling-methods"><span class="toc-section-number">10.2</span> Resampling Methods</a>
+<ul>
+<li><a href="10.2-resampling-methods.html#cv"><span class="toc-section-number">10.2.1</span> Cross-validation</a></li>
+<li><a href="10.2-resampling-methods.html#repeated-cross-validation">Repeated cross-validation</a></li>
+<li><a href="10.2-resampling-methods.html#leave-one-out-cross-validation">Leave-one-out cross-validation</a></li>
+<li><a href="10.2-resampling-methods.html#monte-carlo-cross-validation">Monte Carlo cross-validation</a></li>
+<li><a href="10.2-resampling-methods.html#validation"><span class="toc-section-number">10.2.2</span> Validation sets</a></li>
+<li><a href="10.2-resampling-methods.html#bootstrap"><span class="toc-section-number">10.2.3</span> Bootstrapping</a></li>
+<li><a href="10.2-resampling-methods.html#rolling"><span class="toc-section-number">10.2.4</span> Rolling forecasting origin resampling</a></li>
+</ul></li>
+<li><a href="10.3-resampling-performance.html#resampling-performance"><span class="toc-section-number">10.3</span> Estimating Performance</a></li>
+<li><a href="10.4-parallel.html#parallel"><span class="toc-section-number">10.4</span> Parallel Processing</a></li>
+<li><a href="10.5-extract.html#extract"><span class="toc-section-number">10.5</span> Saving the Resampled Objects</a></li>
+<li><a href="10.6-resampling-summary.html#resampling-summary"><span class="toc-section-number">10.6</span> Chapter Summary</a></li>
+</ul></li>
+<li class="has-sub"><a href="11-compare.html#compare"><span class="toc-section-number">11</span> Comparing Models with Resampling</a>
+<ul>
+<li><a href="11.1-workflow-set.html#workflow-set"><span class="toc-section-number">11.1</span> Creating Multiple Models with Workflow Sets</a></li>
+<li><a href="11.2-resampled-stats.html#resampled-stats"><span class="toc-section-number">11.2</span> Comparing Resampled Performance Statistics</a></li>
+<li><a href="11.3-simple-hypothesis-testing-methods.html#simple-hypothesis-testing-methods"><span class="toc-section-number">11.3</span> Simple Hypothesis Testing Methods</a></li>
+<li class="has-sub"><a href="11.4-tidyposterior.html#tidyposterior"><span class="toc-section-number">11.4</span> Bayesian Methods</a>
+<ul>
+<li><a href="11.4-tidyposterior.html#the-effect-of-the-amount-of-resampling">The effect of the amount of resampling</a></li>
+</ul></li>
+<li><a href="11.5-compare-summary.html#compare-summary"><span class="toc-section-number">11.5</span> Chapter Summary</a></li>
+</ul></li>
+<li class="has-sub"><a href="12-tuning.html#tuning"><span class="toc-section-number">12</span> Model Tuning and the Dangers of Overfitting</a>
+<ul>
+<li><a href="12.1-model-parameters.html#model-parameters"><span class="toc-section-number">12.1</span> Model Parameters</a></li>
+<li><a href="12.2-tuning-parameter-examples.html#tuning-parameter-examples"><span class="toc-section-number">12.2</span> Tuning Parameters for Different Types of Models</a></li>
+<li><a href="12.3-what-to-optimize.html#what-to-optimize"><span class="toc-section-number">12.3</span> What do we Optimize?</a></li>
+<li><a href="12.4-overfitting-bad.html#overfitting-bad"><span class="toc-section-number">12.4</span> The consequences of poor parameter estimates</a></li>
+<li><a href="12.5-two-general-strategies-for-optimization.html#two-general-strategies-for-optimization"><span class="toc-section-number">12.5</span> Two general strategies for optimization</a></li>
+<li><a href="12.6-tuning-params-tidymodels.html#tuning-params-tidymodels"><span class="toc-section-number">12.6</span> Tuning Parameters in tidymodels</a></li>
+<li><a href="12.7-chapter-summary-2.html#chapter-summary-2"><span class="toc-section-number">12.7</span> Chapter Summary</a></li>
+</ul></li>
+<li class="has-sub"><a href="13-grid-search.html#grid-search"><span class="toc-section-number">13</span> Grid Search</a>
+<ul>
+<li class="has-sub"><a href="13.1-grids.html#grids"><span class="toc-section-number">13.1</span> Regular and Non-Regular Grids</a>
+<ul>
+<li><a href="13.1-grids.html#regular-grids">Regular grids</a></li>
+<li><a href="13.1-grids.html#irregular-grids">Irregular grids</a></li>
+</ul></li>
+<li><a href="13.2-evaluating-grid.html#evaluating-grid"><span class="toc-section-number">13.2</span> Evaluating the Grid</a></li>
+<li><a href="13.3-finalizing-the-model.html#finalizing-the-model"><span class="toc-section-number">13.3</span> Finalizing the Model</a></li>
+<li><a href="13.4-tuning-usemodels.html#tuning-usemodels"><span class="toc-section-number">13.4</span> Tools for Creating Tuning Specifications</a></li>
+<li class="has-sub"><a href="13.5-efficient-grids.html#efficient-grids"><span class="toc-section-number">13.5</span> Tools for Efficient Grid Search</a>
+<ul>
+<li><a href="13.5-efficient-grids.html#submodel-trick"><span class="toc-section-number">13.5.1</span> Submodel optimization</a></li>
+<li><a href="13.5-efficient-grids.html#parallel-processing"><span class="toc-section-number">13.5.2</span> Parallel processing</a></li>
+<li><a href="13.5-efficient-grids.html#benchmarking-boosted-trees"><span class="toc-section-number">13.5.3</span> Benchmarking boosted trees</a></li>
+<li><a href="13.5-efficient-grids.html#access-to-global-variables"><span class="toc-section-number">13.5.4</span> Access to global variables</a></li>
+<li><a href="13.5-efficient-grids.html#racing"><span class="toc-section-number">13.5.5</span> Racing methods</a></li>
+</ul></li>
+<li><a href="13.6-grid-summary.html#grid-summary"><span class="toc-section-number">13.6</span> Chapter Summary</a></li>
+</ul></li>
+<li class="has-sub"><a href="14-iterative-search.html#iterative-search"><span class="toc-section-number">14</span> Iterative Search</a>
+<ul>
+<li><a href="14.1-svm.html#svm"><span class="toc-section-number">14.1</span> A Support Vector Machine Model</a></li>
+<li class="has-sub"><a href="14.2-bayesian-optimization.html#bayesian-optimization"><span class="toc-section-number">14.2</span> Bayesian Optimization</a>
+<ul>
+<li><a href="14.2-bayesian-optimization.html#a-gaussian-process-model"><span class="toc-section-number">14.2.1</span> A Gaussian process model</a></li>
+<li><a href="14.2-bayesian-optimization.html#acquisition-functions"><span class="toc-section-number">14.2.2</span> Acquisition functions</a></li>
+<li><a href="14.2-bayesian-optimization.html#tune-bayes"><span class="toc-section-number">14.2.3</span> The <code>tune_bayes()</code> function</a></li>
+</ul></li>
+<li class="has-sub"><a href="14.3-simulated-annealing.html#simulated-annealing"><span class="toc-section-number">14.3</span> Simulated Annealing</a>
+<ul>
+<li><a href="14.3-simulated-annealing.html#simulated-annealing-search-process"><span class="toc-section-number">14.3.1</span> Simulated annealing search process</a></li>
+<li><a href="14.3-simulated-annealing.html#tune-sim-anneal"><span class="toc-section-number">14.3.2</span> The <code>tune_sim_anneal()</code> function</a></li>
+</ul></li>
+<li><a href="14.4-iterative-summary.html#iterative-summary"><span class="toc-section-number">14.4</span> Chapter Summary</a></li>
+</ul></li>
+<li class="has-sub"><a href="15-workflow-sets.html#workflow-sets"><span class="toc-section-number">15</span> Screening Many Models</a>
+<ul>
+<li><a href="15.1-modeling-concrete-mixture-strength.html#modeling-concrete-mixture-strength"><span class="toc-section-number">15.1</span> Modeling Concrete Mixture Strength</a></li>
+<li><a href="15.2-creating-the-workflow-set.html#creating-the-workflow-set"><span class="toc-section-number">15.2</span> Creating the Workflow Set</a></li>
+<li><a href="15.3-tuning-and-evaluating-the-models.html#tuning-and-evaluating-the-models"><span class="toc-section-number">15.3</span> Tuning and Evaluating the Models</a></li>
+<li><a href="15.4-racing-example.html#racing-example"><span class="toc-section-number">15.4</span> Efficiently Screening Models</a></li>
+<li><a href="15.5-finalizing-a-model.html#finalizing-a-model"><span class="toc-section-number">15.5</span> Finalizing a Model</a></li>
+<li><a href="15.6-workflow-sets-summary.html#workflow-sets-summary"><span class="toc-section-number">15.6</span> Chapter Summary</a></li>
+</ul></li>
+<li class="part"><span><b>Beyond the Basics</b></span></li>
+<li class="has-sub"><a href="16-dimensionality.html#dimensionality"><span class="toc-section-number">16</span> Dimensionality Reduction</a>
+<ul>
+<li><a href="16.1-when-problems-can-dimensionality-reduction-solve.html#when-problems-can-dimensionality-reduction-solve"><span class="toc-section-number">16.1</span> When Problems Can Dimensionality Reduction Solve?</a></li>
+<li><a href="16.2-beans.html#beans"><span class="toc-section-number">16.2</span> A Picture is Worth a Thousand… Beans</a></li>
+<li><a href="16.3-a-starter-recipe.html#a-starter-recipe"><span class="toc-section-number">16.3</span> A Starter Recipe</a></li>
+<li class="has-sub"><a href="16.4-recipe-functions.html#recipe-functions"><span class="toc-section-number">16.4</span> Recipes in the Wild</a>
+<ul>
+<li><a href="16.4-recipe-functions.html#prep"><span class="toc-section-number">16.4.1</span> Preparing a recipe</a></li>
+<li><a href="16.4-recipe-functions.html#bake"><span class="toc-section-number">16.4.2</span> Baking the recipe</a></li>
+</ul></li>
+<li class="has-sub"><a href="16.5-feature-extraction-techniques.html#feature-extraction-techniques"><span class="toc-section-number">16.5</span> Feature Extraction Techniques</a>
+<ul>
+<li><a href="16.5-feature-extraction-techniques.html#principal-component-analysis"><span class="toc-section-number">16.5.1</span> Principal component analysis</a></li>
+<li><a href="16.5-feature-extraction-techniques.html#partial-least-squares"><span class="toc-section-number">16.5.2</span> Partial least squares</a></li>
+<li><a href="16.5-feature-extraction-techniques.html#independent-component-analysis"><span class="toc-section-number">16.5.3</span> Independent component analysis</a></li>
+<li><a href="16.5-feature-extraction-techniques.html#uniform-manifold-approximation-and-projection"><span class="toc-section-number">16.5.4</span> Uniform manifold approximation and projection</a></li>
+</ul></li>
+<li><a href="16.6-bean-models.html#bean-models"><span class="toc-section-number">16.6</span> Modeling</a></li>
+<li><a href="16.7-dimensionality-summary.html#dimensionality-summary"><span class="toc-section-number">16.7</span> Chapter Summary</a></li>
+</ul></li>
+<li class="has-sub"><a href="17-categorical.html#categorical"><span class="toc-section-number">17</span> Encoding Categorical Data</a>
+<ul>
+<li><a href="17.1-is-an-encoding-necessary.html#is-an-encoding-necessary"><span class="toc-section-number">17.1</span> Is an Encoding Necessary?</a></li>
+<li><a href="17.2-encoding-ordinal-predictors.html#encoding-ordinal-predictors"><span class="toc-section-number">17.2</span> Encoding Ordinal Predictors</a></li>
+<li class="has-sub"><a href="17.3-using-the-outcome-for-encoding-predictors.html#using-the-outcome-for-encoding-predictors"><span class="toc-section-number">17.3</span> Using the Outcome for Encoding Predictors</a>
+<ul>
+<li><a href="17.3-using-the-outcome-for-encoding-predictors.html#effect-encodings-with-partial-pooling"><span class="toc-section-number">17.3.1</span> Effect encodings with partial pooling</a></li>
+</ul></li>
+<li><a href="17.4-feature-hashing.html#feature-hashing"><span class="toc-section-number">17.4</span> Feature Hashing</a></li>
+<li><a href="17.5-more-encoding-options.html#more-encoding-options"><span class="toc-section-number">17.5</span> More Encoding Options</a></li>
+<li><a href="17.6-categorical-summary.html#categorical-summary"><span class="toc-section-number">17.6</span> Chapter Summary</a></li>
+</ul></li>
+<li class="has-sub"><a href="18-explain.html#explain"><span class="toc-section-number">18</span> Explaining Models and Predictions</a>
+<ul>
+<li><a href="18.1-software-for-model-explanations.html#software-for-model-explanations"><span class="toc-section-number">18.1</span> Software for Model Explanations</a></li>
+<li><a href="18.2-local-explanations.html#local-explanations"><span class="toc-section-number">18.2</span> Local Explanations</a></li>
+<li><a href="18.3-global-explanations.html#global-explanations"><span class="toc-section-number">18.3</span> Global Explanations</a></li>
+<li><a href="18.4-building-global-explanations-from-local-explanations.html#building-global-explanations-from-local-explanations"><span class="toc-section-number">18.4</span> Building Global Explanations from Local Explanations</a></li>
+<li><a href="18.5-back-to-beans.html#back-to-beans"><span class="toc-section-number">18.5</span> Back to Beans!</a></li>
+<li><a href="18.6-explain-summary.html#explain-summary"><span class="toc-section-number">18.6</span> Chapter Summary</a></li>
+</ul></li>
+<li class="has-sub"><a href="19-trust.html#trust"><span class="toc-section-number">19</span> When Should You Trust Your Predictions?</a>
+<ul>
+<li><a href="19.1-equivocal-zones.html#equivocal-zones"><span class="toc-section-number">19.1</span> Equivocal Results</a></li>
+<li><a href="19.2-applicability-domains.html#applicability-domains"><span class="toc-section-number">19.2</span> Determining Model Applicability</a></li>
+<li><a href="19.3-trust-summary.html#trust-summary"><span class="toc-section-number">19.3</span> Chapter Summary</a></li>
+</ul></li>
+<li class="has-sub"><a href="20-ensembles.html#ensembles"><span class="toc-section-number">20</span> Ensembles of Models</a>
+<ul>
+<li><a href="20.1-data-stack.html#data-stack"><span class="toc-section-number">20.1</span> Creating the Training Set for Stacking</a></li>
+<li><a href="20.2-blend-predictions.html#blend-predictions"><span class="toc-section-number">20.2</span> Blend the Predictions</a></li>
+<li><a href="20.3-fit-members.html#fit-members"><span class="toc-section-number">20.3</span> Fit the Member Models</a></li>
+<li><a href="20.4-test-set-results.html#test-set-results"><span class="toc-section-number">20.4</span> Test Set Results</a></li>
+<li><a href="20.5-ensembles-summary.html#ensembles-summary"><span class="toc-section-number">20.5</span> Chapter Summary</a></li>
+</ul></li>
+<li class="has-sub"><a href="21-inferential.html#inferential"><span class="toc-section-number">21</span> Inferential Analysis</a>
+<ul>
+<li><a href="21.1-inference-for-count-data.html#inference-for-count-data"><span class="toc-section-number">21.1</span> Inference for Count Data</a></li>
+<li><a href="21.2-comparisons-with-two-sample-tests.html#comparisons-with-two-sample-tests"><span class="toc-section-number">21.2</span> Comparisons with Two-Sample Tests</a></li>
+<li><a href="21.3-log-linear-models.html#log-linear-models"><span class="toc-section-number">21.3</span> Log-Linear Models</a></li>
+<li><a href="21.4-a-more-complex-model.html#a-more-complex-model"><span class="toc-section-number">21.4</span> A More Complex Model</a></li>
+<li><a href="21.5-inference-options.html#inference-options"><span class="toc-section-number">21.5</span> More Inferential Analysis</a></li>
+<li><a href="21.6-inference-summary.html#inference-summary"><span class="toc-section-number">21.6</span> Chapter Summary</a></li>
+</ul></li>
+<li class="appendix"><span><b>Appendix</b></span></li>
+<li><a href="A-pre-proc-table.html#pre-proc-table"><span class="toc-section-number">A</span> Recommended Preprocessing</a></li>
+<li><a href="references.html#references">REFERENCES</a></li>
+</ul>
+</div>
+</div>
+</div>
+<div class="row">
+<div class="col-sm-12">
+<div id="bayesian-optimization" class="section level2" number="14.2">
+<h2><span class="header-section-number">14.2</span> Bayesian Optimization</h2>
+<p>Bayesian optimization techniques analyze the current resampling results and create a predictive model to suggest tuning parameter values that have yet to be evaluated. The suggested parameter combination is then resampled. These results are then used in another predictive model that recommends more candidate values for testing, and so on. The process proceeds for a set number of iterations or until no further improvements occur. <span class="citation">Shahriari et al. (<a href="#ref-Shahriari" role="doc-biblioref">2016</a>)</span> and <span class="citation">Frazier (<a href="#ref-frazier2018tutorial" role="doc-biblioref">2018</a>)</span> are good introductions to Bayesian optimization.</p>
+<p>When using Bayesian optimization, the primary concerns are how to create the model and how to select parameters recommended by that model. First, let’s consider the technique most commonly used for Bayesian optimization, the Gaussian process model.</p>
+<div id="a-gaussian-process-model" class="section level3" number="14.2.1">
+<h3><span class="header-section-number">14.2.1</span> A Gaussian process model</h3>
+<p>Gaussian process (GP) <span class="citation">(<a href="#ref-SCHULZ20181" role="doc-biblioref">Schulz, Speekenbrink, and Krause 2018</a>)</span> models are well-known statistical techniques that have a history in spatial statistics (under the name of <em>kriging methods</em>). They can be derived in multiple ways, including as a Bayesian model; see <span class="citation">Rasmussen and Williams (<a href="#ref-RaWi06" role="doc-biblioref">2006</a>)</span> for an excellent reference.</p>
+<p>Mathematically, a GP is a collection of random variables whose joint probability distribution is multivariate Gaussian. In the context of our application, this collection is the collection of performance metrics for the tuning parameter candidate values. For the previous initial grid of four samples, the realization of these four random variables were 0.8639, 0.8625, 0.8627, and 0.8659. These are assumed to be distributed as multivariate Gaussian. The inputs that define the independent variables/predictors for the GP model are the corresponding tuning parameter values (shown in Table <a href="14.2-bayesian-optimization.html#tab:initial-gp-data">14.1</a>).</p>
+<table>
+<caption><span id="tab:initial-gp-data">Table 14.1: </span>Resampling statistics used as the initial substrate to the Gaussian process model.</caption>
+<thead>
+<tr class="header">
+<th align="left">ROC</th>
+<th align="left">cost</th>
+<th align="left">rbf_sigma</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">0.8639</td>
+<td align="left">0.01562</td>
+<td align="left">0.000001</td>
+</tr>
+<tr class="even">
+<td align="left">0.8625</td>
+<td align="left">2.00000</td>
+<td align="left">0.000001</td>
+</tr>
+<tr class="odd">
+<td align="left">0.8627</td>
+<td align="left">0.01562</td>
+<td align="left">0.000100</td>
+</tr>
+<tr class="even">
+<td align="left">0.8659</td>
+<td align="left">2.00000</td>
+<td align="left">0.000100</td>
+</tr>
+</tbody>
+</table>
+<p>Gaussian process models are specified by their mean and covariance functions, although the latter has the most effect on the nature of the GP model. The covariance function is often parameterized in terms of the input values (denoted as <span class="math inline">\(x\)</span>). As an example, a commonly used covariance function is the squared exponential<a href="#fn28" class="footnote-ref" id="fnref28"><sup>28</sup></a> function:</p>
+<p><span class="math display">\[\operatorname{cov}(\boldsymbol{x}_i, \boldsymbol{x}_j) = \exp\left(-\frac{1}{2}|\boldsymbol{x}_i - \boldsymbol{x}_j|^2\right) + \sigma^2_{ij}\]</span>
+where <span class="math inline">\(\sigma^2_{ij}\)</span> is a constant error variance term that is zero when <span class="math inline">\(i=j\)</span>. This equation translates to:</p>
+<blockquote>
+<p>As the distance between two tuning parameter combinations increases, the covariance between the performance metrics increase exponentially.</p>
+</blockquote>
+<p>The nature of the equation also implies that the variation of the outcome metric is minimized at the points that have already been observed (i.e., when <span class="math inline">\(|\boldsymbol{x}_i - \boldsymbol{x}_j|^2\)</span> is zero).</p>
+<p>The nature of this covariance function allows the Gaussian process to represent highly nonlinear relationships between model performance and the tuning parameters even when only a small amount of data exists.</p>
+<div class="rmdwarning">
+<p>However, fitting these models can be difficult in some cases and the model becomes more computationally expensive as the number of tuning parameter combinations increases.</p>
+</div>
+<p>An important virtue of this model is that, since a full probability model is specified, the predictions for new inputs can reflect the entire distribution of the outcome. In other words, new performance statistics can be predicted in terms of both mean and variance.</p>
+<p>Suppose that two new tuning parameters were under consideration. In Table <a href="14.2-bayesian-optimization.html#tab:tuning-candidates">14.2</a>, candidate <em>A</em> has a slightly better mean ROC value than candidate <em>B</em> (the current best is 0.8659). However, its variance is four-fold larger than <em>B</em>. Is this good or bad? Choosing option <em>A</em> is riskier but has potentially higher return. The increase in variance also reflects that this new value is further away from the existing data than <em>B</em>. The next section considers these aspects of GP predictions for Bayesian optimization in more detail.</p>
+<table>
+<caption><span id="tab:tuning-candidates">Table 14.2: </span>Two example tuning parameters considered for further sampling.</caption>
+<thead>
+<tr class="header">
+<th align="left">candidate</th>
+<th align="left">mean</th>
+<th align="left">variance</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">A</td>
+<td align="left">0.90</td>
+<td align="left">0.000400</td>
+</tr>
+<tr class="even">
+<td align="left">B</td>
+<td align="left">0.89</td>
+<td align="left">0.000025</td>
+</tr>
+</tbody>
+</table>
+<div class="rmdnote">
+<p>Bayesian optimization is an iterative process.</p>
+</div>
+<p>Based on the initial grid of four results, the GP model is fit, candidates are predicted, and a fifth tuning parameter combination is selected. We compute performance estimates for the new configuration, the GP is refit with the five existing results (and so on).</p>
+</div>
+<div id="acquisition-functions" class="section level3" number="14.2.2">
+<h3><span class="header-section-number">14.2.2</span> Acquisition functions</h3>
+<p>Once the Gaussian process is fit to the current data, how is it used? Our goal is to choose the next tuning parameter combination that is most likely to have “better results” than the current best. One approach to do this is to create a large candidate set (perhaps using a space-filling design) and then make mean and variance predictions on each. Using this information, we choose the most advantageous tuning parameter value.</p>
+<p>A class of objective functions, called <em>acquisition functions</em>, facilitate the trade-off between mean and variance. Recall that the predicted variance of the GP models are mostly driven by how far away they are from the existing data. The trade-off between the predicted mean and variance for new candidates is frequently viewed through the lens of exploration and exploitation:</p>
+<ul>
+<li><p><em>Exploration</em> biases the selection towards regions where there are fewer (if any) observed candidate models. This tends to give more weight to candidates with higher variance and focuses on finding new results.</p></li>
+<li><p><em>Exploitation</em> principally relies on the mean prediction to find the best (mean) value. It focuses on existing results.</p></li>
+</ul>
+<p>To demonstrate, let’s look at a toy example with a single parameter that has values between [0, 1] and the performance metric is <span class="math inline">\(R^2\)</span>. The true function is shown in Figure <a href="14.2-bayesian-optimization.html#fig:performance-profile">14.2</a>, along with 5 candidate values that have existing results as points.</p>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:performance-profile"></span>
+<img src="figures/performance-profile-1.png" alt="A hypothetical true performance profile over an arbitrary tuning parameter. Five estimated points are also shown. The profile is highly nonlinear with a peak in-between two of the observed points."  />
+<p class="caption">
+Figure 14.2: Hypothetical true performance profile over an arbitrary tuning parameter, with five estimated points.
+</p>
+</div>
+<p>For these data, the GP model fit is shown in Figure <a href="14.2-bayesian-optimization.html#fig:estimated-profile">14.3</a>. The shaded region indicates the mean <span class="math inline">\(\pm\)</span> 1 standard error. The two vertical lines indicate two candidate points that are examined in more detail later.</p>
+<p>The shaded confidence region demonstrates the squared exponential variance function; it becomes very large between points and converges to zero at the existing data points.</p>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:estimated-profile"></span>
+<img src="figures/estimated-profile-1.png" alt="The estimated performance profile generated by the Gaussian process model. The shaded region shows one-standard error bounds. Two vertical lines show potential points to be sampled in the next iteration."  />
+<p class="caption">
+Figure 14.3: Estimated performance profile generated by the Gaussian process model. The shaded region shows one-standard error bounds.
+</p>
+</div>
+<p>This nonlinear trend passes through each observed point but the model is not perfect. There are no observed points near the true optimum setting and, in this region, the fit could be much better. Despite this, the GP model can effectively point us in the right direction.</p>
+<p>From a pure exploitation standpoint, the best choice would select the parameter value that has the best mean prediction. Here, this would be a value of 0.106, just to the right of the existing best observed point at 0.09.</p>
+<p>As a way to encourage exploration, a simple (but not often used) approach is to find the tuning parameter associated with the largest confidence interval. For example, by using a single standard deviation for the <span class="math inline">\(R^2\)</span> confidence bound, the next point to sample would be 0.236. This is slightly more into the region with no observed results. Increasing the number of standard deviations used in the upper bound would push the selection further into empty regions.</p>
+<p>One of the most commonly used acquisition functions is <em>expected improvement</em>. The notion of improvement requires a value for the current best results (unlike the confidence bound approach). Since the GP can describe a new candidate point using a distribution, we can weight the parts of the distribution that show improvement using the probability of the improvement occurring.</p>
+<p>For example, consider two candidate parameter values of 0.10 and 0.25 (indicated by the vertical lines in Figure <a href="14.2-bayesian-optimization.html#fig:estimated-profile">14.3</a>). Using the fitted GP model, their predicted <span class="math inline">\(R^2\)</span> distributions are shown in Figure <a href="14.2-bayesian-optimization.html#fig:two-candidates">14.4</a> along with a reference line for the current best results.</p>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:two-candidates"></span>
+<img src="figures/two-candidates-1.png" alt="Predicted performance distributions for two sampled tuning parameter values. For one, the distribution is slightly better than the current value with a small spread. The other parameter value is slightly worse but has a very wide spread." width="80%" />
+<p class="caption">
+Figure 14.4: Predicted performance distributions for two sampled tuning parameter values.
+</p>
+</div>
+<p>When only considering the mean <span class="math inline">\(R^2\)</span> prediction, a parameter value of 0.10 is the better choice (see Table <a href="14.2-bayesian-optimization.html#tab:two-exp-improve">14.3</a>). The tuning parameter recommendation for 0.25 is, on average, predicted to be worse than the current best. However, since it has higher variance, it has more overall probability area above the current best. As a result, it has a larger expected improvement of the two:</p>
+<table>
+<caption><span id="tab:two-exp-improve">Table 14.3: </span>Expected improvement for the two candidate tuning parameters.</caption>
+<thead>
+<tr class="header">
+<th align="left">Parameter Value</th>
+<th align="left">Mean</th>
+<th align="left">Std Dev</th>
+<th align="left">Expected Improvment</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">0.10</td>
+<td align="left">0.8679</td>
+<td align="left">0.0004317</td>
+<td align="left">0.000190</td>
+</tr>
+<tr class="even">
+<td align="left">0.25</td>
+<td align="left">0.8671</td>
+<td align="left">0.0039301</td>
+<td align="left">0.001216</td>
+</tr>
+</tbody>
+</table>
+<p>When expected improvement is computed across the range of the tuning parameter, the recommended point to sample is much closer to 0.25 than 0.10, as shown in Figure <a href="14.2-bayesian-optimization.html#fig:expected-improvement">14.5</a>.</p>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:expected-improvement"></span>
+<img src="figures/expected-improvement-1.png" alt="The estimated performance profile generated by the Gaussian process model (top panel) and the expected improvement (bottom panel). The vertical line indicates the point of maximum improvement where estimated performance is high and the predicted variation is also large."  />
+<p class="caption">
+Figure 14.5: The estimated performance profile generated by the Gaussian process model (top panel) and the expected improvement (bottom panel). The vertical line indicates the point of maximum improvement.
+</p>
+</div>
+<p>Numerous acquisition functions have been proposed and discussed; in tidymodels, expected improvement is the default.</p>
+</div>
+<div id="tune-bayes" class="section level3" number="14.2.3">
+<h3><span class="header-section-number">14.2.3</span> The <code>tune_bayes()</code> function</h3>
+<p>To implement iterative search via Bayesian optimization, use the <code>tune_bayes()</code> function. It has syntax that is very similar to <code>tune_grid()</code> but with several additional arguments:</p>
+<ul>
+<li><p><code>iter</code> is the maximum number of search iterations.</p></li>
+<li><p><code>initial</code> can be either an integer, an object produced using <code>tune_grid()</code>, or one of the racing functions. Using an integer specifies the size of a space-filling design that is sampled prior to the first GP model.</p></li>
+<li><p><code>objective</code> is an argument for which acquisition function should be used. The <span class="pkg">tune</span> package contains functions to pass here, such as <code>exp_improve()</code> or <code>conf_bound()</code>.</p></li>
+<li><p>The <code>param_info</code> argument, in this case, specifies the range of the parameters as well as any transformations that are used. These are used to define the search space. In situations where the default parameter objects are insufficient, <code>param_info</code> is used to override the defaults.</p></li>
+</ul>
+<p>The <code>control</code> argument now uses the results of <code>control_bayes()</code>. Some helpful arguments there are:</p>
+<ul>
+<li><p><code>no_improve</code> is an integer that will stop the search if improved parameters are not discovered within <code>no_improve</code> iterations.</p></li>
+<li><p><code>uncertain</code> is also an integer (or <code>Inf</code>) that will take an <em>uncertainty sample</em> if there is no improvement within <code>uncertain</code> iterations. This will select the next candidate that has large variation. It has the effect of pure exploration since it does not consider the mean prediction.</p></li>
+<li><p><code>verbose</code> is a logical that will print logging information as the search proceeds.</p></li>
+</ul>
+<p>Let’s use the first SVM results from the beginning of this chapter as the initial substrate for the Gaussian process model. Recall that, for this application, we want to maximize the area under the ROC curve. Our code is:</p>
+<div class="sourceCode" id="cb236"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb236-1"><a href="14.2-bayesian-optimization.html#cb236-1" aria-hidden="true" tabindex="-1"></a>ctrl <span class="ot">&lt;-</span> <span class="fu">control_bayes</span>(<span class="at">verbose =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb236-2"><a href="14.2-bayesian-optimization.html#cb236-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb236-3"><a href="14.2-bayesian-optimization.html#cb236-3" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1403</span>)</span>
+<span id="cb236-4"><a href="14.2-bayesian-optimization.html#cb236-4" aria-hidden="true" tabindex="-1"></a>svm_bo <span class="ot">&lt;-</span></span>
+<span id="cb236-5"><a href="14.2-bayesian-optimization.html#cb236-5" aria-hidden="true" tabindex="-1"></a>  svm_wflow <span class="sc">%&gt;%</span></span>
+<span id="cb236-6"><a href="14.2-bayesian-optimization.html#cb236-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tune_bayes</span>(</span>
+<span id="cb236-7"><a href="14.2-bayesian-optimization.html#cb236-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">resamples =</span> cell_folds,</span>
+<span id="cb236-8"><a href="14.2-bayesian-optimization.html#cb236-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">metrics =</span> roc_res,</span>
+<span id="cb236-9"><a href="14.2-bayesian-optimization.html#cb236-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">initial =</span> svm_initial,</span>
+<span id="cb236-10"><a href="14.2-bayesian-optimization.html#cb236-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">param_info =</span> svm_param,</span>
+<span id="cb236-11"><a href="14.2-bayesian-optimization.html#cb236-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">iter =</span> <span class="dv">25</span>,</span>
+<span id="cb236-12"><a href="14.2-bayesian-optimization.html#cb236-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">control =</span> ctrl</span>
+<span id="cb236-13"><a href="14.2-bayesian-optimization.html#cb236-13" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div>
+<p>The search process starts with an initial best value of 0.8659 for the area under the ROC curve. A Gaussian process model uses these 4 statistics to create a model. The large candidate set is automatically generated and scored using the expected improvement acquisition function. The first iteration failed to improve the outcome with an ROC value of 0.86315. After fitting another Gaussian process model with the new outcome value, the second iteration also failed to yield an improvement.</p>
+<p>The log of the first two iterations, produced by the <code>verbose</code> option, was:</p>
+<pre><code>#&gt; Optimizing roc_auc using the expected improvement
+#&gt; 
+#&gt; ── Iteration 1 ──────────────────────────────────────────────────────────────────────
+#&gt; 
+#&gt; i Current best:      roc_auc=0.8659 (@iter 0)
+#&gt; i Gaussian process model
+#&gt; ✓ Gaussian process model
+#&gt; i Generating 5000 candidates
+#&gt; i Predicted candidates
+#&gt; i cost=0.386, rbf_sigma=0.000266
+#&gt; i Estimating performance
+#&gt; ✓ Estimating performance
+#&gt; ⓧ Newest results:    roc_auc=0.8631 (+/-0.00866)
+#&gt; 
+#&gt; ── Iteration 2 ──────────────────────────────────────────────────────────────────────
+#&gt; 
+#&gt; i Current best:      roc_auc=0.8659 (@iter 0)
+#&gt; i Gaussian process model
+#&gt; ✓ Gaussian process model
+#&gt; i Generating 5000 candidates
+#&gt; i Predicted candidates
+#&gt; i cost=13.8, rbf_sigma=7.83e-07
+#&gt; i Estimating performance
+#&gt; ✓ Estimating performance
+#&gt; ⓧ Newest results:    roc_auc=0.8624 (+/-0.00865)</code></pre>
+<p>The search continues. There were a total of 9 improvements in the outcome along the way at iterations 3, 4, 5, 6, 8, 13, 22, 23, and 24. The best result occurred at iteration 24 with an area under the ROC curve of 0.8986.</p>
+<pre><code>#&gt; ── Iteration 24 ─────────────────────────────────────────────────────────────────────
+#&gt; 
+#&gt; i Current best:      roc_auc=0.8986 (@iter 23)
+#&gt; i Gaussian process model
+#&gt; ✓ Gaussian process model
+#&gt; i Generating 5000 candidates
+#&gt; i Predicted candidates
+#&gt; i cost=31.8, rbf_sigma=0.0016
+#&gt; i Estimating performance
+#&gt; ✓ Estimating performance
+#&gt; ♥ Newest results:    roc_auc=0.8986 (+/-0.00785)</code></pre>
+<p>The last step was:</p>
+<pre><code>#&gt; ── Iteration 25 ─────────────────────────────────────────────────────────────────────
+#&gt; 
+#&gt; i Current best:      roc_auc=0.8986 (@iter 24)
+#&gt; i Gaussian process model
+#&gt; ✓ Gaussian process model
+#&gt; i Generating 5000 candidates
+#&gt; i Predicted candidates
+#&gt; i cost=20, rbf_sigma=0.00188
+#&gt; i Estimating performance
+#&gt; ✓ Estimating performance
+#&gt; ⓧ Newest results:    roc_auc=0.8982 (+/-0.00781)</code></pre>
+<p>The functions that are used to interrogate the results are the same as those used for grid search (e.g., <code>collect_metrics()</code>, etc.). For example:</p>
+<div class="sourceCode" id="cb240"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb240-1"><a href="14.2-bayesian-optimization.html#cb240-1" aria-hidden="true" tabindex="-1"></a><span class="fu">show_best</span>(svm_bo)</span>
+<span id="cb240-2"><a href="14.2-bayesian-optimization.html#cb240-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; # A tibble: 5 × 9</span></span>
+<span id="cb240-3"><a href="14.2-bayesian-optimization.html#cb240-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    cost rbf_sigma .metric .estimator  mean     n std_err .config .iter</span></span>
+<span id="cb240-4"><a href="14.2-bayesian-optimization.html#cb240-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   &lt;dbl&gt;     &lt;dbl&gt; &lt;chr&gt;   &lt;chr&gt;      &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt; &lt;chr&gt;   &lt;int&gt;</span></span>
+<span id="cb240-5"><a href="14.2-bayesian-optimization.html#cb240-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1  31.8   0.00160 roc_auc binary     0.899    10 0.00785 Iter24     24</span></span>
+<span id="cb240-6"><a href="14.2-bayesian-optimization.html#cb240-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2  30.8   0.00191 roc_auc binary     0.899    10 0.00791 Iter23     23</span></span>
+<span id="cb240-7"><a href="14.2-bayesian-optimization.html#cb240-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3  31.4   0.00166 roc_auc binary     0.899    10 0.00784 Iter22     22</span></span>
+<span id="cb240-8"><a href="14.2-bayesian-optimization.html#cb240-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4  31.8   0.00153 roc_auc binary     0.899    10 0.00783 Iter13     13</span></span>
+<span id="cb240-9"><a href="14.2-bayesian-optimization.html#cb240-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5  30.8   0.00163 roc_auc binary     0.899    10 0.00782 Iter15     15</span></span></code></pre></div>
+<p>The <code>autoplot()</code> function has several options for iterative search methods. Figure <a href="14.2-bayesian-optimization.html#fig:progress-plot">14.6</a> shows how the outcome changed over the search by using <code>autoplot(svm_bo, type = "performance")</code>.</p>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:progress-plot"></span>
+<img src="figures/progress-plot-1.png" alt="The progress of the Bayesian optimization produced when the `autoplot()` method is used with `type = 'performance'`. The plot shows the estimated performance on the y axis versus the iteration number on the x axis. Confidence intervals are shown for the points."  />
+<p class="caption">
+Figure 14.6: The progress of the Bayesian optimization produced when the <code>autoplot()</code> method is used with <code>type = "performance"</code>.
+</p>
+</div>
+<p>An additional type of plot uses <code>type = "parameters"</code> which shows the parameter values over iterations.</p>
+<p>Figure <a href="14.2-bayesian-optimization.html#fig:bo-surfaces">14.7</a> shows the surfaces of the mean, variance, and expected improvement surfaces estimated by the GP after 11 iterations. The panel on the right shows a ridge of best estimated improvement along the right side of the candidate space.</p>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:bo-surfaces"></span>
+<img src="figures/bo-surfaces-1.png" alt="Heat maps of the predicted mean RMSE (left), variance of RMSE (middle), and the expected improvement (right) after 11 search iterations. The means surface correctly reflects that the best results are near the upper right of the parameter space. The variance patterns show low variance at existing parameter combinations. The expected improvement surface, at this point, is a narrow ridge going form high to low in the cost dimension along higher levels of the kernel function parameter." width="100%" />
+<p class="caption">
+Figure 14.7: Heat maps of the predicted mean RMSE (left), variance of RMSE (middle), and the expected improvement (right) after 11 search iterations.
+</p>
+</div>
+<p>Figure <a href="14.2-bayesian-optimization.html#fig:bo-search">14.8</a> shows the search process at three different points in the optimization.</p>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:bo-search"></span>
+<img src="figures/bo-search-1.png" alt="The Bayesian optimization search path after 1, 11, and 25 iterations. Initially the search goes in a poor direction before approaching the region of best results. By eleven iterations, the search has focused on the location of the truly optimal results and has probed more extremest directions. By the end, the search focuses on the best area or probes outlying areas, especially at the bounds of the parameter space." width="100%" />
+<p class="caption">
+Figure 14.8: The Bayesian optimization search path after 1, 11, and 25 iterations.
+</p>
+</div>
+<p>The first five iterations initially moved in a poor direction but quickly moved closer to better results. The middle panel shows the first eleven iterations where the process investigates the region of true optimal results with a short foray to the bottom right boundary of the candidate space. The remaining iterations shown in the panel on the left switch between the region of best results and the far borders of the search space.</p>
+<p>While the best tuning parameter combination is on the boundary of the parameter space, Bayesian optimization will often choose new points on other sides of the boundary. While we can adjust the ratio of exploration and exploitation, the search tends to sample boundary points early on.</p>
+<div class="rmdnote">
+<p>If the search is seeded with an initial grid, a space-filling design would probably be a better choice than a regular design. It samples more unique values of the parameter space and would improve the predictions of the standard deviation in the early iterations.</p>
+</div>
+<p>Finally, if the user interrupts the <code>tune_bayes()</code> computations, the function returns the current results (instead of resulting in an error).</p>
+</div>
+</div>
+<h3>REFERENCES</h3>
+<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="ref-frazier2018tutorial" class="csl-entry">
+Frazier, R. 2018. <span>“A Tutorial on Bayesian Optimization.”</span> <a href="https://arxiv.org/abs/1807.02811">https://arxiv.org/abs/1807.02811</a>.
+</div>
+<div id="ref-RaWi06" class="csl-entry">
+Rasmussen, C, and C Williams. 2006. <em>Gaussian Processes for Machine Learning</em>. <em>Gaussian Processes for Machine Learning</em>. MIT Press.
+</div>
+<div id="ref-SCHULZ20181" class="csl-entry">
+Schulz, E, M Speekenbrink, and A Krause. 2018. <span>“A Tutorial on Gaussian Process Regression: Modelling, Exploring, and Exploiting Functions.”</span> <em>Journal of Mathematical Psychology</em> 85: 1–16.
+</div>
+<div id="ref-Shahriari" class="csl-entry">
+Shahriari, B., K. Swersky, Z. Wang, R. P. Adams, and N. de Freitas. 2016. <span>“Taking the Human Out of the Loop: A Review of Bayesian Optimization.”</span> <em>Proceedings of the IEEE</em> 104 (1): 148–75.
+</div>
+</div>
+<div class="footnotes">
+<hr />
+<ol start="28">
+<li id="fn28"><p>This equation is also the same as the <em>radial basis function</em> used in kernel methods, such as the SVM model that is currently being used. This is a coincidence; this covariance function is unrelated to the SVM tuning parameter that we are using. <a href="14.2-bayesian-optimization.html#fnref28" class="footnote-back">↩︎</a></p></li>
+</ol>
+</div>
+<p style="text-align: center;">
+<a href="14.1-svm.html"><button class="btn btn-default">Previous</button></a>
+<a href="14.3-simulated-annealing.html"><button class="btn btn-default">Next</button></a>
+</p>
+</div>
+</div>
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+$(document).ready(function () {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+});
+
+</script>
+
+</body>
+</html>
