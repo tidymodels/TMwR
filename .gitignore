@@ -6,7 +6,7 @@
 _book
 _main.*
 libs
-figures
+^figures/*
 _bookdown_files
 figures/introduction-cricket-plot-1.svg
 figures/introduction-descr-examples-1.pdf

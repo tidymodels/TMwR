@@ -2,7 +2,7 @@
 knit: "bookdown::render_book"
 title: "Tidy Modeling with R"
 author: ["Max Kuhn and Julia Silge"]
-date: "Version 0.0.1.9010 (2022-04-14)"
+date: "Version 0.0.1.9010 (2022-04-19)"
 site: bookdown::bookdown_site
 description: "The tidymodels framework is a collection of R packages for modeling and machine learning using tidyverse principles. This book provides a thorough introduction to how to use tidymodels, and an outline of good methodology and statistical practice for phases of the modeling process."
 github-repo: tidymodels/TMwR

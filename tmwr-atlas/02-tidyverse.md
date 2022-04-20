@@ -60,8 +60,8 @@ boot_samp
 #> # A tibble: 3 × 2
 #>   splits          id        
 #>   <list>          <chr>     
-#> 1 <split [32/14]> Bootstrap1
-#> 2 <split [32/12]> Bootstrap2
+#> 1 <split [32/12]> Bootstrap1
+#> 2 <split [32/13]> Bootstrap2
 #> 3 <split [32/12]> Bootstrap3
 class(boot_samp)
 #> [1] "bootstraps" "rset"       "tbl_df"     "tbl"        "data.frame"

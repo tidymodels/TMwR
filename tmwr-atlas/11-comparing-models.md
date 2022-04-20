@@ -58,11 +58,11 @@ lm_models <-
                # Options to `fit_resamples()`: 
                resamples = ames_folds, control = keep_pred)
 #> i 1 of 3 resampling: basic_lm
-#> ✓ 1 of 3 resampling: basic_lm (766ms)
+#> ✓ 1 of 3 resampling: basic_lm (733ms)
 #> i 2 of 3 resampling: interact_lm
-#> ✓ 2 of 3 resampling: interact_lm (825ms)
+#> ✓ 2 of 3 resampling: interact_lm (775ms)
 #> i 3 of 3 resampling: splines_lm
-#> ✓ 3 of 3 resampling: splines_lm (920ms)
+#> ✓ 3 of 3 resampling: splines_lm (869ms)
 lm_models
 #> # A workflow set/tibble: 3 × 4
 #>   wflow_id    info             option    result   
@@ -214,69 +214,17 @@ This versatile model is used to create regression models as well as being the ba
 
 In our specific situation, the ANOVA can also make model comparisons. Suppose the individual resampled R<sup>2</sup> statistics serve as the _outcome data_ (i.e., the $y_{ij}$) and the models as the _predictors_ in the ANOVA model. A sampling of this data structure is shown in Table \@ref(tab:model-anova-data).
 
-<table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
-<caption>(\#tab:model-anova-data)Model performance statistics as a data set for analysis.</caption>
- <thead>
-  <tr>
-   <th style="text-align:right;"> Y = rsq </th>
-   <th style="text-align:left;"> model </th>
-   <th style="text-align:right;"> X1 </th>
-   <th style="text-align:right;"> X2 </th>
-   <th style="text-align:right;"> X3 </th>
-   <th style="text-align:left;"> id </th>
-  </tr>
- </thead>
-<tbody>
-  <tr>
-   <td style="text-align:right;"> 0.8108 </td>
-   <td style="text-align:left;"> basic_lm </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:left;"> Fold01 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> 0.8134 </td>
-   <td style="text-align:left;"> interact_lm </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:left;"> Fold01 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> 0.8598 </td>
-   <td style="text-align:left;"> random_forest </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:left;"> Fold01 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> 0.8217 </td>
-   <td style="text-align:left;"> splines_lm </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:left;"> Fold01 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> 0.8045 </td>
-   <td style="text-align:left;"> basic_lm </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:left;"> Fold02 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> 0.8103 </td>
-   <td style="text-align:left;"> interact_lm </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:left;"> Fold02 </td>
-  </tr>
-</tbody>
-</table>
+
+Table: (\#tab:model-anova-data)Model performance statistics as a data set for analysis.
+
+| Y = rsq|model         | X1| X2| X3|id     |
+|-------:|:-------------|--:|--:|--:|:------|
+|  0.8108|basic_lm      |  0|  0|  0|Fold01 |
+|  0.8134|interact_lm   |  1|  0|  0|Fold01 |
+|  0.8598|random_forest |  0|  1|  0|Fold01 |
+|  0.8217|splines_lm    |  0|  0|  1|Fold01 |
+|  0.8045|basic_lm      |  0|  0|  0|Fold02 |
+|  0.8103|interact_lm   |  1|  0|  0|Fold02 |
 
 The `X1`, `X2`, and `X3` columns in the table are indicators for the values in the `model` column. Their order was defined in the same way that R would define them, alphabetically ordered by `model`.  
 

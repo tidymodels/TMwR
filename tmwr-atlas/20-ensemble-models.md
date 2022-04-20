@@ -43,87 +43,17 @@ Simple validation sets can also be used with stacking since tidymodels considers
 
 For the concrete example, the training set used for model stacking has columns for all of the candidate tuning parameter results. Table \@ref(tab:ensemble-candidate-preds) presents the first six rows and selected columns.
 
-<table class="table table-striped" style="margin-left: auto; margin-right: auto;">
-<caption>(\#tab:ensemble-candidate-preds)Predictions from candidate tuning parameter configurations.</caption>
- <thead>
-<tr>
-<th style="empty-cells: hide;border-bottom:hidden;" colspan="1"></th>
-<th style="border-bottom:hidden;padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="7"><div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">Ensemble Candidate Predictions</div></th>
-</tr>
-  <tr>
-   <th style="text-align:center;text-align: center;"> Sample # </th>
-   <th style="text-align:center;text-align: center;"> Bagged Tree </th>
-   <th style="text-align:center;text-align: center;"> MARS 1 </th>
-   <th style="text-align:center;text-align: center;"> MARS 2 </th>
-   <th style="text-align:center;text-align: center;"> Cubist 1 </th>
-   <th style="text-align:center;text-align: center;"> ... </th>
-   <th style="text-align:center;text-align: center;"> Cubist 25 </th>
-   <th style="text-align:center;text-align: center;"> ... </th>
-  </tr>
- </thead>
-<tbody>
-  <tr>
-   <td style="text-align:center;"> 1 </td>
-   <td style="text-align:center;"> 25.18 </td>
-   <td style="text-align:center;"> 17.92 </td>
-   <td style="text-align:center;"> 17.21 </td>
-   <td style="text-align:center;"> 17.79 </td>
-   <td style="text-align:center;">  </td>
-   <td style="text-align:center;"> 17.82 </td>
-   <td style="text-align:center;">  </td>
-  </tr>
-  <tr>
-   <td style="text-align:center;"> 2 </td>
-   <td style="text-align:center;"> 5.18 </td>
-   <td style="text-align:center;"> -1.77 </td>
-   <td style="text-align:center;"> -0.74 </td>
-   <td style="text-align:center;"> 2.83 </td>
-   <td style="text-align:center;">  </td>
-   <td style="text-align:center;"> 3.87 </td>
-   <td style="text-align:center;">  </td>
-  </tr>
-  <tr>
-   <td style="text-align:center;"> 3 </td>
-   <td style="text-align:center;"> 9.71 </td>
-   <td style="text-align:center;"> 7.26 </td>
-   <td style="text-align:center;"> 5.91 </td>
-   <td style="text-align:center;"> 6.31 </td>
-   <td style="text-align:center;">  </td>
-   <td style="text-align:center;"> 8.60 </td>
-   <td style="text-align:center;">  </td>
-  </tr>
-  <tr>
-   <td style="text-align:center;"> 4 </td>
-   <td style="text-align:center;"> 25.21 </td>
-   <td style="text-align:center;"> 20.93 </td>
-   <td style="text-align:center;"> 21.52 </td>
-   <td style="text-align:center;"> 23.72 </td>
-   <td style="text-align:center;">  </td>
-   <td style="text-align:center;"> 21.61 </td>
-   <td style="text-align:center;">  </td>
-  </tr>
-  <tr>
-   <td style="text-align:center;"> 5 </td>
-   <td style="text-align:center;"> 6.33 </td>
-   <td style="text-align:center;"> 1.53 </td>
-   <td style="text-align:center;"> 0.14 </td>
-   <td style="text-align:center;"> 3.60 </td>
-   <td style="text-align:center;">  </td>
-   <td style="text-align:center;"> 4.57 </td>
-   <td style="text-align:center;">  </td>
-  </tr>
-  <tr>
-   <td style="text-align:center;"> 6 </td>
-   <td style="text-align:center;"> 7.88 </td>
-   <td style="text-align:center;"> 4.88 </td>
-   <td style="text-align:center;"> 1.74 </td>
-   <td style="text-align:center;"> 7.69 </td>
-   <td style="text-align:center;">  </td>
-   <td style="text-align:center;"> 7.55 </td>
-   <td style="text-align:center;">  </td>
-  </tr>
-</tbody>
-</table>
+
+Table: (\#tab:ensemble-candidate-preds)Predictions from candidate tuning parameter configurations.
+
+| Sample # | Bagged Tree | MARS 1 | MARS 2 | Cubist 1 | ... | Cubist 25 | ... |
+|:--------:|:-----------:|:------:|:------:|:--------:|:---:|:---------:|:---:|
+|    1     |    25.18    | 17.92  | 17.21  |  17.79   |     |   17.82   |     |
+|    2     |    5.18     | -1.77  | -0.74  |   2.83   |     |   3.87    |     |
+|    3     |    9.71     |  7.26  |  5.91  |   6.31   |     |   8.60    |     |
+|    4     |    25.21    | 20.93  | 21.52  |  23.72   |     |   21.61   |     |
+|    5     |    6.33     |  1.53  |  0.14  |   3.60   |     |   4.57    |     |
+|    6     |    7.88     |  4.88  |  1.74  |   7.69   |     |   7.55    |     |
 
 There is a single column for the bagged tree model since it has no tuning parameters. Also, recall that MARS was tuned over a single parameter (the product degree) with two possible configurations, so this model is represented by two columns. Most of the other models have 25 corresponding columns, as shown for Cubist in this example. 
 
@@ -277,7 +207,7 @@ autoplot(ens, "weights") +
 ```
 
 <div class="figure" style="text-align: center">
-<img src="figures/blending-weights-1.png" alt="Blending coefficients for the stacking ensemble. The boosted tree and Cubist models has the largest effects on the ensemble predictions."  />
+<img src="figures/blending-weights-1.png" alt="fig.alt = &quot;Blending coefficients for the stacking ensemble. The boosted tree and Cubist models have the largest effects on the ensemble predictions.&quot;"  />
 <p class="caption">(\#fig:blending-weights)Blending coefficients for the stacking ensemble.</p>
 </div>
 

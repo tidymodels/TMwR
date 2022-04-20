@@ -116,42 +116,15 @@ Gaussian process (GP) [@SCHULZ20181] models are well-known statistical technique
 
 Mathematically, a GP is a collection of random variables whose joint probability distribution is  multivariate Gaussian. In the  context of our application, this collection is the collection of performance metrics for the tuning parameter candidate values. For the previous initial grid of four samples, the realization of these four random variables were 0.8639, 0.8625, 0.8627, and 0.8659. These are assumed to be distributed as multivariate Gaussian. The inputs that  define the independent variables/predictors for the GP model are the corresponding tuning parameter values (shown in Table \@ref(tab:initial-gp-data)).
 
-<table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
-<caption>(\#tab:initial-gp-data)Resampling statistics used as the initial substrate to the Gaussian process model.</caption>
- <thead>
-<tr>
-<th style="border-bottom:hidden;padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="1"><div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">outcome</div></th>
-<th style="border-bottom:hidden;padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="2"><div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">predictors</div></th>
-</tr>
-  <tr>
-   <th style="text-align:left;"> ROC </th>
-   <th style="text-align:left;"> cost </th>
-   <th style="text-align:left;"> rbf_sigma </th>
-  </tr>
- </thead>
-<tbody>
-  <tr>
-   <td style="text-align:left;"> 0.8639 </td>
-   <td style="text-align:left;"> 0.01562 </td>
-   <td style="text-align:left;"> 0.000001 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> 0.8625 </td>
-   <td style="text-align:left;"> 2.00000 </td>
-   <td style="text-align:left;"> 0.000001 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> 0.8627 </td>
-   <td style="text-align:left;"> 0.01562 </td>
-   <td style="text-align:left;"> 0.000100 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> 0.8659 </td>
-   <td style="text-align:left;"> 2.00000 </td>
-   <td style="text-align:left;"> 0.000100 </td>
-  </tr>
-</tbody>
-</table>
+
+Table: (\#tab:initial-gp-data)Resampling statistics used as the initial substrate to the Gaussian process model.
+
+|ROC    |cost    |rbf_sigma |
+|:------|:-------|:---------|
+|0.8639 |0.01562 |0.000001  |
+|0.8625 |2.00000 |0.000001  |
+|0.8627 |0.01562 |0.000100  |
+|0.8659 |2.00000 |0.000100  |
 
 Gaussian process models are specified by their mean and covariance functions, although the latter has the most effect on the nature of the GP model. The covariance function is often parameterized in terms of the input values (denoted as $x$). As an example, a commonly used covariance function is the squared exponential^[This equation is also the same as the _radial basis function_ used in kernel methods, such as the SVM model that is currently being used. This is a coincidence; this covariance function is unrelated to the SVM tuning parameter that we are using. ] function: 
 
@@ -172,32 +145,13 @@ An important virtue of this model is that, since a full probability model is spe
 
 Suppose that two new tuning parameters were under consideration. In Table \@ref(tab:tuning-candidates), candidate _A_ has a slightly better mean ROC value than candidate _B_ (the current best is 0.8659). However, its variance is four-fold larger than _B_. Is this good or bad? Choosing option _A_ is riskier but has potentially higher return. The increase in variance also reflects that this new value is further away from the existing data than _B_. The next section considers these aspects of GP predictions for Bayesian optimization in more detail.
 
-<table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
-<caption>(\#tab:tuning-candidates)Two example tuning parameters considered for further sampling.</caption>
- <thead>
-<tr>
-<th style="empty-cells: hide;border-bottom:hidden;" colspan="1"></th>
-<th style="border-bottom:hidden;padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="2"><div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">GP Prediction of ROC AUC</div></th>
-</tr>
-  <tr>
-   <th style="text-align:left;"> candidate </th>
-   <th style="text-align:left;"> mean </th>
-   <th style="text-align:left;"> variance </th>
-  </tr>
- </thead>
-<tbody>
-  <tr>
-   <td style="text-align:left;"> A </td>
-   <td style="text-align:left;"> 0.90 </td>
-   <td style="text-align:left;"> 0.000400 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> B </td>
-   <td style="text-align:left;"> 0.89 </td>
-   <td style="text-align:left;"> 0.000025 </td>
-  </tr>
-</tbody>
-</table>
+
+Table: (\#tab:tuning-candidates)Two example tuning parameters considered for further sampling.
+
+|candidate |mean |variance |
+|:---------|:----|:--------|
+|A         |0.90 |0.000400 |
+|B         |0.89 |0.000025 |
 
 :::rmdnote
 Bayesian optimization is an iterative process. 
@@ -250,35 +204,13 @@ For example, consider two candidate parameter values of 0.10 and 0.25 (indicated
 
 When only considering the mean $R^2$ prediction, a parameter value of 0.10 is the better choice (see Table \@ref(tab:two-exp-improve)). The tuning parameter recommendation for 0.25 is, on average, predicted to be worse than the current best. However, since it has higher variance, it has more overall probability area above the current best. As a result, it has a larger expected improvement of the two:
 
-<table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
-<caption>(\#tab:two-exp-improve)Expected improvement for the two candidate tuning parameters.</caption>
- <thead>
-<tr>
-<th style="empty-cells: hide;border-bottom:hidden;" colspan="1"></th>
-<th style="border-bottom:hidden;padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="3"><div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">Predictions</div></th>
-</tr>
-  <tr>
-   <th style="text-align:left;"> Parameter Value </th>
-   <th style="text-align:left;"> Mean </th>
-   <th style="text-align:left;"> Std Dev </th>
-   <th style="text-align:left;"> Expected Improvment </th>
-  </tr>
- </thead>
-<tbody>
-  <tr>
-   <td style="text-align:left;"> 0.10 </td>
-   <td style="text-align:left;"> 0.8679 </td>
-   <td style="text-align:left;"> 0.0004317 </td>
-   <td style="text-align:left;"> 0.000190 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> 0.25 </td>
-   <td style="text-align:left;"> 0.8671 </td>
-   <td style="text-align:left;"> 0.0039301 </td>
-   <td style="text-align:left;"> 0.001216 </td>
-  </tr>
-</tbody>
-</table>
+
+Table: (\#tab:two-exp-improve)Expected improvement for the two candidate tuning parameters.
+
+|Parameter Value |Mean   |Std Dev   |Expected Improvment |
+|:---------------|:------|:---------|:-------------------|
+|0.10            |0.8679 |0.0004317 |0.000190            |
+|0.25            |0.8671 |0.0039301 |0.001216            |
 
 When expected improvement is computed across the range of the tuning parameter, the recommended point to sample is much closer to 0.25 than 0.10, as shown in Figure \@ref(fig:expected-improvement).
 

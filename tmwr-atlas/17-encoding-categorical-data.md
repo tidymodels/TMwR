@@ -6,55 +6,16 @@ For statistical modeling in R, the preferred representation for categorical or n
 
 [^python]: This is in contrast to statistical modeling in Python, where categorical variables are often directly represented by integers alone, such as `0, 1, 2` representing red, blue, and green.
 
-<table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
-<caption>(\#tab:encoding-dummies)Dummy or indicator variable encodings for the building type predictor in the Ames training set.</caption>
- <thead>
-  <tr>
-   <th style="text-align:left;"> Raw Data </th>
-   <th style="text-align:right;"> TwoFmCon </th>
-   <th style="text-align:right;"> Duplex </th>
-   <th style="text-align:right;"> Twnhs </th>
-   <th style="text-align:right;"> TwnhsE </th>
-  </tr>
- </thead>
-<tbody>
-  <tr>
-   <td style="text-align:left;"> OneFam </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 0 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> TwoFmCon </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 0 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Duplex </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 0 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Twnhs </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 0 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> TwnhsE </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 1 </td>
-  </tr>
-</tbody>
-</table>
+
+Table: (\#tab:encoding-dummies)Dummy or indicator variable encodings for the building type predictor in the Ames training set.
+
+|Raw Data | TwoFmCon| Duplex| Twnhs| TwnhsE|
+|:--------|--------:|------:|-----:|------:|
+|OneFam   |        0|      0|     0|      0|
+|TwoFmCon |        1|      0|     0|      0|
+|Duplex   |        0|      1|     0|      0|
+|Twnhs    |        0|      0|     1|      0|
+|TwnhsE   |        0|      0|     0|      1|
 
 Many model implementations require such a transformation to a numeric representation for categorical data. 
 
@@ -78,55 +39,16 @@ We advise starting with untransformed categorical variables when a model allows 
 
 Sometimes qualitative columns can be *ordered*, such as "low", "medium", and "high". In base R, the default encoding strategy is to make new numeric columns that are polynomial expansions of the data. For columns that have five ordinal values, like the example shown in Table \@ref(tab:encoding-ordered-table), the factor column is replaced with columns for linear, quadratic, cubic, and quartic terms: 
 
-<table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
-<caption>(\#tab:encoding-ordered-table)Polynominal expansions for encoding an ordered variable.</caption>
- <thead>
-  <tr>
-   <th style="text-align:left;"> Raw Data </th>
-   <th style="text-align:right;"> Linear </th>
-   <th style="text-align:right;"> Quadratic </th>
-   <th style="text-align:right;"> Cubic </th>
-   <th style="text-align:right;"> Quartic </th>
-  </tr>
- </thead>
-<tbody>
-  <tr>
-   <td style="text-align:left;"> none </td>
-   <td style="text-align:right;"> -0.63 </td>
-   <td style="text-align:right;"> 0.53 </td>
-   <td style="text-align:right;"> -0.32 </td>
-   <td style="text-align:right;"> 0.12 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> a little </td>
-   <td style="text-align:right;"> -0.32 </td>
-   <td style="text-align:right;"> -0.27 </td>
-   <td style="text-align:right;"> 0.63 </td>
-   <td style="text-align:right;"> -0.48 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> some </td>
-   <td style="text-align:right;"> 0.00 </td>
-   <td style="text-align:right;"> -0.53 </td>
-   <td style="text-align:right;"> 0.00 </td>
-   <td style="text-align:right;"> 0.72 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> a bunch </td>
-   <td style="text-align:right;"> 0.32 </td>
-   <td style="text-align:right;"> -0.27 </td>
-   <td style="text-align:right;"> -0.63 </td>
-   <td style="text-align:right;"> -0.48 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> copious amounts </td>
-   <td style="text-align:right;"> 0.63 </td>
-   <td style="text-align:right;"> 0.53 </td>
-   <td style="text-align:right;"> 0.32 </td>
-   <td style="text-align:right;"> 0.12 </td>
-  </tr>
-</tbody>
-</table>
+
+Table: (\#tab:encoding-ordered-table)Polynominal expansions for encoding an ordered variable.
+
+|Raw Data        | Linear| Quadratic| Cubic| Quartic|
+|:---------------|------:|---------:|-----:|-------:|
+|none            |  -0.63|      0.53| -0.32|    0.12|
+|a little        |  -0.32|     -0.27|  0.63|   -0.48|
+|some            |   0.00|     -0.53|  0.00|    0.72|
+|a bunch         |   0.32|     -0.27| -0.63|   -0.48|
+|copious amounts |   0.63|      0.53|  0.32|    0.12|
 
 While this is not unreasonable, it is not an approach that people tend to find useful. For example, an 11-degree polynomial is probably not the most effective way of encoding an ordinal factor for the months of the year.  Instead, consider trying recipe steps related to ordered factors, such as `step_unorder()`, to convert to regular factors, and `step_ordinalscore()` which maps specific numeric values to each factor level. 
 
@@ -423,37 +345,16 @@ ames_hash
 
 Feature hashing is fast and efficient but has a few downsides. For example, different category values often map to the same hash value. This is called a _collision_ or _aliasing_. How often did this happen with our neighborhoods in Ames? Table \@ref(tab:encoding-hash) presents the distribution of number of neighborhoods per hash value.
 
-<table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
-<caption>(\#tab:encoding-hash)The number of hash features at each number of neighborhoods.</caption>
- <thead>
-  <tr>
-   <th style="text-align:right;"> Number of neighborhoods within a hash feature </th>
-   <th style="text-align:right;"> Number of occurrences </th>
-  </tr>
- </thead>
-<tbody>
-  <tr>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 1 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 7 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> 2 </td>
-   <td style="text-align:right;"> 4 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> 3 </td>
-   <td style="text-align:right;"> 3 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> 4 </td>
-   <td style="text-align:right;"> 1 </td>
-  </tr>
-</tbody>
-</table>
+
+Table: (\#tab:encoding-hash)The number of hash features at each number of neighborhoods.
+
+| Number of neighborhoods within a hash feature| Number of occurrences|
+|---------------------------------------------:|---------------------:|
+|                                             0|                     1|
+|                                             1|                     7|
+|                                             2|                     4|
+|                                             3|                     3|
+|                                             4|                     1|
 
 The number of neighborhoods mapped to each hash value varies between 0 and 4. All of the hash values greater than one are examples of hash collisions.
 

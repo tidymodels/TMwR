@@ -111,10 +111,10 @@ For both models, Table \@ref(tab:rmse-results) summarizes the RMSE estimate for 
 
 Table: (\#tab:rmse-results)Performance statistics for training and test sets.
 
-|object          |  train|   test|
-|:---------------|------:|------:|
-|<tt>lm_fit</tt> | 0.0754| 0.0736|
-|<tt>rf_fit</tt> | 0.0367| 0.0704|
+|object |  train|   test|
+|:------|------:|------:|
+|lm_fit | 0.0754| 0.0736|
+|rf_fit | 0.0367| 0.0704|
 
 Notice that the linear regression model is consistent between training and testing, because of its limited complexity.^[It is possible for a linear model to nearly memorize the training set, like the random forest model did. In the `ames_rec` object, change the number of spline terms for `longitude` and `latitude` to a large number (say 1000). This would produce a model fit with a very small resubstitution RMSE and a test set RMSE that is much larger.] 
 
