@@ -82,7 +82,7 @@ quart_plot
 As previously discussed, the sale price distribution is right-skewed, with proportionally more inexpensive houses than expensive houses on either side of the center of the distribution. The worry here with simple splitting is that the more expensive houses would not be well represented in the training set; this would increase the risk that our model would be ineffective at predicting the price for such properties.  The dotted vertical lines in Figure \@ref(fig:ames-sale-price) indicate the four quartiles for these data. A stratified random sample would conduct the 80/20 split within each of these data subsets and then pool the results together. In `r pkg(rsample)`, this is achieved using the `strata` argument: 
 
 ```{r ames-strata-split}
-set.seed(502)
+set.seed(123)
 ames_split <- initial_split(ames, prop = 0.80, strata = Sale_Price)
 ames_train <- training(ames_split)
 ames_test  <-  testing(ames_split)
@@ -157,7 +157,7 @@ library(tidymodels)
 data(ames)
 ames <- ames %>% mutate(Sale_Price = log10(Sale_Price))
 
-set.seed(502)
+set.seed(123)
 ames_split <- initial_split(ames, prop = 0.80, strata = Sale_Price)
 ames_train <- training(ames_split)
 ames_test  <-  testing(ames_split)
