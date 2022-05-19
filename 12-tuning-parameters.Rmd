@@ -31,7 +31,7 @@ load("RData/search_examples.RData")
 
 # Model Tuning and the Dangers of Overfitting {#tuning}
 
-In order to use a model for prediction, the parameters for that model must be estimated. Some of these parameters can be estimated directly from the training data, but other parameters, called _tuning parameters_ or _hyperparameters_, must be specified ahead of time and can't be directly found from training data. These are unknown structural or other kind of values that have significant impact on the model but cannot be directly estimated from the data. This chapter will provide examples of tuning parameters and show how we use tidymodels function to create and handle tuning parameters. We'll also demonstrate how poor choices of these values lead to overfitting and introduce several tactics for finding optimal tuning parameters values. Chapters \@ref(grid-search) and \@ref(iterative-search) go into more detail on specific optimization methods for tuning.
+In order to use a model for prediction, the parameters for that model must be estimated. Some of these parameters can be estimated directly from the training data, but other parameters, called _tuning parameters_ or _hyperparameters_, must be specified ahead of time and can't be directly found from training data. These are unknown structural or other kind of values that have significant impact on the model but cannot be directly estimated from the data. This chapter will provide examples of tuning parameters and show how we use tidymodels functions to create and handle tuning parameters. We'll also demonstrate how poor choices of these values lead to overfitting and introduce several tactics for finding optimal tuning parameters values. Chapters \@ref(grid-search) and \@ref(iterative-search) go into more detail on specific optimization methods for tuning.
 
 ## Model Parameters
 
@@ -53,7 +53,7 @@ We can directly estimate these values from the data for this example model becau
 There are many situations where a model has parameters that _can't_ be directly estimated from the data.
 :::
 
-For the $K$-nearest neighbors model, the prediction equation for a new value $x_0$ is
+For the KNN model, the prediction equation for a new value $x_0$ is
 
 $$\hat y = \frac{1}{K}\sum_{\ell = 1}^K x_\ell^*$$
 
@@ -68,7 +68,7 @@ There are many examples of tuning parameters or hyperparameters in different sta
 
 * Boosting is an ensemble method that combines a series of base models, each of which is created sequentially and depends on the previous models. The number of boosting iterations is an important tuning parameter that usually requires optimization.  
 
-* In the classic single-layer artificial neural network (a.k.a. the multilayer perceptron), the predictors are combined using two or more hidden units. The hidden units are linear combinations of the predictors that are captured in an _activation function_ (typically a nonlinear function, such as a sigmoid). The hidden units are then connected to the outcome units; one outcome unit is used for regression models and multiple outcome units are required for classification. The number of hidden units and the type of activation function are important structural tuning parameters. 
+* In the classic single-layer artificial neural network (a.k.a. the multilayer perceptron), the predictors are combined using two or more hidden units. The hidden units are linear combinations of the predictors that are captured in an _activation function_ (typically a nonlinear function, such as a sigmoid). The hidden units are then connected to the outcome units; one outcome unit is used for regression models, and multiple outcome units are required for classification. The number of hidden units and the type of activation function are important structural tuning parameters. 
 
 * Modern gradient descent methods are improved by finding the right optimization parameters. Examples of such hyperparameters are learning rates, momentum, and the number of optimization iterations/epochs [@Goodfellow]. Neural networks and some ensemble models use gradient descent to estimate the model parameters. While the tuning parameters associated with gradient descent are not structural parameters, they often require tuning. 
 
@@ -84,7 +84,7 @@ Some classical statistical models also have structural parameters:
 
  * Non-Bayesian longitudinal and repeated measures models require a specification for the covariance or correlation structure of the data. Options include compound symmetric (a.k.a. exchangeable), autoregressive, Toeplitz, and others [@littell2000modelling]. 
 
-A counterexample where it is inappropriate to tune a parameter is the prior distribution required for Bayesian analysis. The prior encapsulates the analyst's belief about the distribution of a quantity before evidence or data are taken into account. For example, in Section \@ref(tidyposterior), we used a Bayesian ANOVA model and we were unclear about what the prior should be for the regression parameters (beyond being a symmetric distribution). We chose a t-distribution with one degree of freedom for the prior since it has heavier tails; this reflects our added uncertainty. Our prior beliefs should not be subject to optimization. Tuning parameters are typically optimized for performance whereas priors should not be tweaked to get "the right results." 
+A counterexample where it is inappropriate to tune a parameter is the prior distribution required for Bayesian analysis. The prior encapsulates the analyst's belief about the distribution of a quantity before evidence or data are taken into account. For example, in Section \@ref(tidyposterior), we used a Bayesian ANOVA model, and we were unclear about what the prior should be for the regression parameters (beyond being a symmetric distribution). We chose a t-distribution with one degree of freedom for the prior since it has heavier tails; this reflects our added uncertainty. Our prior beliefs should not be subject to optimization. Tuning parameters are typically optimized for performance whereas priors should not be tweaked to get "the right results." 
 
 :::rmdwarning
 Another (perhaps more debatable) counterexample of a parameter that does _not_ need to be tuned is the number of trees in a random forest or bagging model. This value should instead be chosen to be large enough to ensure numerical stability in the results; tuning it cannot improve performance as long as the value is large enough to produce reliable results. For random forests, this value is typically in the thousands while the number of trees needed for bagging is around 50 to 100. 
@@ -102,7 +102,7 @@ To demonstrate, consider the classification data shown in Figure \@ref(fig:two-c
 
 ```{r two-class-dat}
 #| echo = FALSE,
-#| fig.cap = "An example two-class classification data set with two predictors.",
+#| fig.cap = "An example two-class classification data set with two predictors",
 #| fig.alt = "An example two-class classification data set with two predictors. The two predictors have a moderate correlation and there is some locations of separation between the classes."
 ggplot(training_set, aes(x = A, y = B, color = Class, pch = Class)) + 
   geom_point(alpha = 0.7) + 
@@ -119,11 +119,11 @@ In the context of generalized linear models, the logit function is the _link fun
 
 $$\Phi^{-1}(\pi) = \beta_0 + \beta_1x_1 + \ldots + \beta_px_p$$
 
-were $\Phi$ is the cumulative standard normal function, as well as the _complementary log-log_ model:
+where $\Phi$ is the cumulative standard normal function, as well as the _complementary log-log_ model:
 
 $$\log(-\log(1-\pi)) = \beta_0 + \beta_1x_1 + \ldots + \beta_px_p$$
 
-Each of these models result in linear class boundaries. Which one should be we use? Since, for these data, the number of model parameters does not vary, the statistical approach is to compute the (log) likelihood for each model and determine the model with the largest value. Traditionally, the likelihood is computed using the same data that were used to estimate the parameters, not using approaches like data splitting or resampling from Chapters \@ref(splitting) and \@ref(resampling).
+Each of these models results in linear class boundaries. Which one should we use? Since, for these data, the number of model parameters does not vary, the statistical approach is to compute the (log) likelihood for each model and determine the model with the largest value. Traditionally, the likelihood is computed using the same data that were used to estimate the parameters, not using approaches like data splitting or resampling from Chapters \@ref(splitting) and \@ref(resampling).
 
 For a data frame `training_set`, let's create a function to compute the different models and extract the likelihood statistics for the training set (using `broom::glance()`): 
 
@@ -195,7 +195,7 @@ resampled_res %>%
 ```{r resampled-log-lhood, ref.label = "tuning-resampled-log-lhood"}
 #| echo = FALSE,
 #| fig.height = 3,
-#| fig.cap = "Means and approximate 90% confidence intervals for the resampled binomial log-likelihood with three different link functions.",
+#| fig.cap = "Means and approximate 90% confidence intervals for the resampled binomial log-likelihood with three different link functions",
 #| fig.alt = "Means and approximate 90% confidence intervals for the resampled binomial log-likelihood with three different link functions. The logit link has the largest value, followed by the probit link. The complementary log log link has far lower values."
 ```
 
@@ -210,7 +210,7 @@ What about a different metric? We also calculated the area under the ROC curve f
 ```{r resampled-roc}
 #| echo = FALSE,
 #| fig.height = 3,
-#| fig.cap = "Means and approximate 90% confidence intervals for the resampled area under the ROC curve with three different link functions.",
+#| fig.cap = "Means and approximate 90% confidence intervals for the resampled area under the ROC curve with three different link functions",
 #| fig.alt = "Means and approximate 90% confidence intervals for the resampled area under the ROC curve with three different link functions. The logit link has the largest value, followed by the probit link. The confidence intervals show a large amount of overlap between the two methods."
 resampled_res %>% 
   filter(.metric == "roc_auc") %>% 
@@ -225,7 +225,7 @@ Given the overlap of the intervals, as well as the scale of the x-axis, any of t
 
 ```{r three-link-fits}
 #| echo = FALSE,
-#| fig.cap = "The linear class boundary fits for three link functions.",
+#| fig.cap = "The linear class boundary fits for three link functions",
 #| fig.alt = "The linear class boundary fits for three link functions. The lines have very similar slopes with the complementary log log having a slightly different intercept than the other two links."
 
 logit_pred <- 
@@ -278,7 +278,7 @@ Metric optimization is thoroughly discussed by @thomas2020problem who explore se
 
 ## The consequences of poor parameter estimates {#overfitting-bad}
 
-Many tuning parameters modulate the amount of model complexity. More complexity often implies more malleability in the patterns that a model can emulate. For example, as shown in Section \@ref(spline-functions), adding degrees of freedom in a spline function increases the intricacy of the prediction equation. While this is an advantage when the underlying motifs in the data are complex, it can also lead to over-interpretation of chance patterns that would not reproduce in new data. _Overfitting_ is the situation where a model adapts too much to the training data; it performs well on the data used to build the model but poorly for new data. 
+Many tuning parameters modulate the amount of model complexity. More complexity often implies more malleability in the patterns that a model can emulate. For example, as shown in Section \@ref(spline-functions), adding degrees of freedom in a spline function increases the intricacy of the prediction equation. While this is an advantage when the underlying motifs in the data are complex, it can also lead to overinterpretation of chance patterns that would not reproduce in new data. _Overfitting_ is the situation where a model adapts too much to the training data; it performs well for the data used to build the model but poorly for new data. 
 
 :::rmdwarning
 Since tuning model parameters can increase model complexity, poor choices can lead to overfitting. 
@@ -288,7 +288,7 @@ Recall the single layer neural network model described in Section \@ref(tuning-p
 
 We fit neural network classification models to the same two-class data from the previous section, varying the number of hidden units. Using the area under the ROC curve as a performance metric, the effectiveness of the model on the training set increases as more hidden units are added. The network model thoroughly and meticulously learns the training set. If the model judges itself on the training set ROC value, it prefers many hidden units so that it can nearly eliminate errors. 
 
-Chapters \@ref(splitting) and \@ref(resampling) demonstrated that simply repredicting the training set is a poor approach to model evaluation. Here, the neural networks very quickly begin to overinterpret patterns that it sees in the training set. Compare these three example class boundaries (developed with the training set) overlaid on training and test sets in Figure \@ref(fig:two-class-boundaries).
+Chapters \@ref(splitting) and \@ref(resampling) demonstrated that simply repredicting the training set is a poor approach to model evaluation. Here, the neural network very quickly begins to overinterpret patterns that it sees in the training set. Compare these three example class boundaries (developed with the training set) overlaid on training and test sets in Figure \@ref(fig:two-class-boundaries).
 
 ```{r tuning-two-class-comps, include = FALSE}
 two_class_rec <-
@@ -380,7 +380,7 @@ tr_plot / te_plot
 
 ```
 
-The single unit model does not adapt very flexibly to the data (since it is constrained to be linear). A model with four hidden units begins to show signs of overfitting with an unrealistic boundary for values away from the data mainstream. This is caused by a single data point from the first class in the upper right corner of the data.  By 20 hidden units, the model is beginning to memorize the training set, creating small islands around those data to minimize the resubstitution error rate. These patterns do not repeat in the test set. This last panel is the best illustration of how tuning parameters that control complexity must be modulated so that the model is effective. For a 20 unit model, the training set ROC AUC is `r round(mlp_res$train[20], 3)` but the test set value is `r round(mlp_res$test[20], 3)`. 
+The single unit model does not adapt very flexibly to the data (since it is constrained to be linear). A model with four hidden units begins to show signs of overfitting with an unrealistic boundary for values away from the data mainstream. This is caused by a single data point from the first class in the upper-right corner of the data.  By 20 hidden units, the model is beginning to memorize the training set, creating small islands around those data to minimize the resubstitution error rate. These patterns do not repeat in the test set. This last panel is the best illustration of how tuning parameters that control complexity must be modulated so that the model is effective. For a 20-unit model, the training set ROC AUC is `r round(mlp_res$train[20], 3)` but the test set value is `r round(mlp_res$test[20], 3)`. 
 
 This occurrence of overfitting is obvious with two predictors that we can plot. However, in general, we must use a quantitative approach for detecting overfitting.
 
@@ -392,18 +392,18 @@ Rather than using the test set, some form of resampling is required. This could 
 
 ## Two general strategies for optimization
 
-Tuning parameter optimization usually falls into one of two categories, grid search and iterative search. 
+Tuning parameter optimization usually falls into one of two categories: grid search and iterative search. 
 
-_Grid search_ is when pre-define a set of parameter values to evaluate. The main choices involved in grid search are how to make the grid and how many parameter combinations to evaluate. Grid search is often judged as inefficient since the number of grid points required to cover the parameter space can grow unmanageable with the curse of dimensionality. There is truth to this concern, but it is most true when the process is not optimized. This is discussed more in Chapter \@ref(grid-search).
+_Grid search_ is when we predefine a set of parameter values to evaluate. The main choices involved in grid search are how to make the grid and how many parameter combinations to evaluate. Grid search is often judged as inefficient since the number of grid points required to cover the parameter space can become unmanageable with the curse of dimensionality. There is truth to this concern, but it is most true when the process is not optimized. This is discussed more in Chapter \@ref(grid-search).
 
 _Iterative search_ or sequential search is when we sequentially discover new parameter combinations based on previous results. Almost any nonlinear optimization method is appropriate, although some are more efficient than others. In some cases, an initial set of results for one or more parameter combinations is required to start the optimization process. Iterative search is discussed more in Chapter \@ref(iterative-search).
 
-Figure \@ref(fig:tuning-strategies) shows two panels to demonstrate these two approaches for a situation with two tuning parameters that range between zero and one. In each, a set of contours shows the true (simulated) relationship between the parameters and the outcome. The optimal results are in the upper right-hand corners. 
+Figure \@ref(fig:tuning-strategies) shows two panels that demonstrate these two approaches for a situation with two tuning parameters that range between zero and one. In each, a set of contours shows the true (simulated) relationship between the parameters and the outcome. The optimal results are in the upper-right-hand corners. 
 
 ```{r tuning-strategies}
 #| echo = FALSE,
-#| fig.cap = "Examples of pre-defined grid tuning and an iterative search method. The lines represent contours of a performance metric; it is best in the upper right-hand side of the plot.",
-#| fig.alt = "Examples of pre-defined grid tuning and an iterative search method. The lines represent contours of some performance metric that is best in the upper right-hand side of the plot. The grid search shows points that cover the space well and has one point near the optimum. The iterative search method has many more points and meanders to the optimum where many points zero in on the best value."
+#| fig.cap = "Examples of pre-defined grid tuning and an iterative search method. The lines represent contours of a performance metric; it is best in the upper-right-hand side of the plot.",
+#| fig.alt = "Examples of pre-defined grid tuning and an iterative search method. The lines represent contours of some performance metric that is best in the upper-right-hand side of the plot. The grid search shows points that cover the space well and has one point near the optimum. The iterative search method has many more points and meanders to the optimum where many points zero in on the best value."
 grid_plot <-
   ggplot(sfd_grid, aes(x = x, y = y)) +
   geom_point() +
@@ -437,7 +437,7 @@ grid_plot + search_plot
 
 The left-hand panel of Figure \@ref(fig:tuning-strategies) shows a type of grid called a space-filling design. This is a type of experimental design devised for covering the parameter space such that tuning parameter combinations are not close to one another. The results for this design do not place any points exactly at the truly optimal location. However, one point is in the general vicinity and would probably have performance metric results that are within the noise of the most optimal value. 
 
-The right-hand panel of Figure \@ref(fig:tuning-strategies) illustrates the results of a global search method: the Nelder-Mead simplex method [@Olsson:1975p3609]. The starting point is in the lower-left part of the parameter space. The search meanders across the space until it reaches the optimum location, where it strives to come as close as possible to the numerically best value. This particular search method, while effective, is not known for its efficiency; it requires many function evaluations, especially near the optimal values. In Chapter \@ref(iterative-search), more efficient search algorithms are discussed. 
+The right-hand panel of Figure \@ref(fig:tuning-strategies) illustrates the results of a global search method: the Nelder-Mead simplex method [@Olsson:1975p3609]. The starting point is in the lower-left part of the parameter space. The search meanders across the space until it reaches the optimum location, where it strives to come as close as possible to the numerically best value. This particular search method, while effective, is not known for its efficiency; it requires many function evaluations, especially near the optimal values. Chapter \@ref(iterative-search) discusses more efficient search algorithms. 
 
 :::rmdnote
 Hybrid strategies are also an option and can work well. After an initial grid search, a sequential optimization can start from the best grid combination.
@@ -449,17 +449,17 @@ Examples of these strategies are discussed in detail in the next two chapters. B
 
 We've already dealt with quite a number of arguments that correspond to tuning parameters for recipe and model specifications in previous chapters. It is possible to tune:
 
-* the threshold for combining neighborhoods into an "other" category (with argument name `threshold`) discussed in Section \@ref(dummies), 
+* the threshold for combining neighborhoods into an "other" category (with argument name `threshold`) discussed in Section \@ref(dummies)
 
-* the number of degrees of freedom in a natural spline (`deg_free`, Section \@ref(spline-functions)), 
+* the number of degrees of freedom in a natural spline (`deg_free`, Section \@ref(spline-functions))
 
-* the number of data points required to execute a split in a tree-based model (`min_n`, Section \@ref(create-a-model)), and 
+* the number of data points required to execute a split in a tree-based model (`min_n`, Section \@ref(create-a-model))
 
-* the amount of regularization in penalized models (`penalty`, Section \@ref(create-a-model)).  
+* the amount of regularization in penalized models (`penalty`, Section \@ref(create-a-model))
 
 For `r pkg(parsnip)` model specifications, there are two kinds of parameter arguments. *Main arguments* are those that are most often optimized for performance and are available in multiple engines. The main tuning parameters are top-level arguments to the model specification function. For example, the `rand_forest()` function has main arguments `trees`, `min_n`, and `mtry` since these are most frequently specified or optimized. 
 
-A secondary set of tuning parameters are *engine-specific*. These are either infrequently optimized or are only specific to certain engines. Again using random forests as an example, the `r pkg(ranger)` package contains some arguments that are not used by other packages. One example is gain penalization, which regularizes the predictor selection in the tree induction process. This parameter can help modulate the trade-off between the number of predictors used in the ensemble and performance [@wundervald2020generalizing]. The name of this argument in  `ranger()` is `regularization.factor`. To specify a value via a `r pkg(parsnip)` model specification, it is added as a supplemental argument to `set_engine()`: 
+A secondary set of tuning parameters are *engine specific*. These are either infrequently optimized or are specific only to certain engines. Again using random forests as an example, the `r pkg(ranger)` package contains some arguments that are not used by other packages. One example is gain penalization, which regularizes the predictor selection in the tree induction process. This parameter can help modulate the trade-off between the number of predictors used in the ensemble and performance [@wundervald2020generalizing]. The name of this argument in  `ranger()` is `regularization.factor`. To specify a value via a `r pkg(parsnip)` model specification, it is added as a supplemental argument to `set_engine()`: 
 
 ```{r tuning-args, eval = FALSE}
 rand_forest(trees = 2000, min_n = 10) %>%                   # <- main arguments
@@ -484,7 +484,7 @@ The `tune()` function doesn't execute any particular parameter value; it only re
 tune()
 ```
 
-Embedding this `tune()` value in an argument will tag the parameter for optimization. The model tuning functions shown in the next two chapters parse the model specification and/or recipe to discover the tagged parameters. These functions can automatically configure and process these parameters since they understand their characteristics (e.g. the range of possible values, etc.). 
+Embedding this `tune()` value in an argument will tag the parameter for optimization. The model tuning functions shown in the next two chapters parse the model specification and/or recipe to discover the tagged parameters. These functions can automatically configure and process these parameters since they understand their characteristics (e.g., the range of possible values, etc.). 
 
 To enumerate the tuning parameters for an object, use the `extract_parameter_set_dials()` function: 
 
@@ -548,7 +548,7 @@ The `r pkg(dials)` package also has a convenience function for extracting a part
 wflow_param %>% extract_parameter_dials("threshold")
 ```
 
-Inside the parameter set, the range of the parameters can also be updated in-place: 
+Inside the parameter set, the range of the parameters can also be updated in place: 
 
 ```{r tuning-update}
 extract_parameter_set_dials(ames_rec) %>% 
@@ -561,7 +561,7 @@ The _parameter sets_ created by `extract_parameter_set_dials()` are consumed by 
 Some tuning parameters depend on the dimensions of the data. For example, the number of nearest neighbors must be between one and the number of rows in the data.
 :::
 
-In some cases, it is easy to have reasonable defaults for the range of possible values. In other cases, the parameter range is critical and cannot be assumed. The primary tuning parameter for random forest models is the number of predictor columns that are randomly sampled for each split in the tree, usually denoted as `mtry()`. Without knowing the number of predictors, this parameter range cannot be pre-configured and requires finalization. 
+In some cases, it is easy to have reasonable defaults for the range of possible values. In other cases, the parameter range is critical and cannot be assumed. The primary tuning parameter for random forest models is the number of predictor columns that are randomly sampled for each split in the tree, usually denoted as `mtry()`. Without knowing the number of predictors, this parameter range cannot be preconfigured and requires finalization. 
 
 ```{r tuning-rf}
 rf_spec <- 
@@ -572,7 +572,7 @@ rf_param <- extract_parameter_set_dials(rf_spec)
 rf_param
 ```
  
-Complete parameter objects have `[+]` in their summary; a value of `[?]` indicates that at least one end of the possible range is missing. There are two methods for handling this. The first is to use `update()` to add a range based on what you know about the data dimensions:
+Complete parameter objects have `[+]` in their summary; a value of `[?]` indicates that at least one end of the possible range is missing. There are two methods for handling this. The first is to use `update()`, to add a range based on what you know about the data dimensions:
 
 ```{r tuning-rfupdate}
 rf_param %>% 
@@ -609,7 +609,7 @@ rf_param
 regularization_factor()
 ```
 
-Finally, some tuning parameters are best associated with transformations. A good example of this is the penalty parameter associated with many regularized regression models. This parameter is non-negative and it is common to vary its values in log units. The primary `r pkg(dials)` parameter object indicates that a transformation is used by default: 
+Finally, some tuning parameters are best associated with transformations. A good example of this is the penalty parameter associated with many regularized regression models. This parameter is nonnegative and it is common to vary its values in log units. The primary `r pkg(dials)` parameter object indicates that a transformation is used by default: 
 
 ```{r tuning-penalty}
 penalty()
@@ -625,7 +625,7 @@ penalty(c(-1, 0)) %>% value_sample(1000) %>% summary()
 penalty(c(0.1, 1.0)) %>% value_sample(1000) %>% summary()
 ```
 
-The scale can be changed if desired with the `trans` argument. To use natural units but the same range: 
+The scale can be changed if desired with the `trans` argument. You can use natural units but the same range: 
 
 ```{r tuning-penalty-natural}
 penalty(trans = NULL, range = 10^c(-10, 0))
@@ -633,5 +633,5 @@ penalty(trans = NULL, range = 10^c(-10, 0))
 
 ## Chapter Summary
 
-This chapter introduced the process of tuning model hyperparameters that cannot be directly estimated from the data. Tuning such parameters can lead to overfitting, often by allowing a model to grow overly complex, so using resampled datasets together with appropriate metrics for evaluation is important. There are two general strategies for determining the right values, grid search and iterative search, which we will explore in depth in the next two chapters. In tidymodels, the `tune()` function is used to identify parameters for optimization, and functions from the `r pkg(dials)` package can extract and interact with tuning parameters objects.  
+This chapter introduced the process of tuning model hyperparameters that cannot be directly estimated from the data. Tuning such parameters can lead to overfitting, often by allowing a model to grow overly complex, so using resampled data sets together with appropriate metrics for evaluation is important. There are two general strategies for determining the right values, grid search and iterative search, which we will explore in depth in the next two chapters. In tidymodels, the `tune()` function is used to identify parameters for optimization, and functions from the `r pkg(dials)` package can extract and interact with tuning parameters objects.  
 
