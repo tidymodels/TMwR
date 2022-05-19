@@ -25,7 +25,7 @@ Feature engineering entails reformatting predictor values to make them easier fo
 
 Take the location of a house in Ames as a more involved example. There are a variety of ways that this spatial information can be exposed to a model, including neighborhood (a qualitative measure), longitude/latitude, distance to the nearest school or Iowa State University, and so on. When choosing how to encode these data in modeling, we might choose an option we believe is most associated with the outcome. The original format of the data, for example numeric (e.g., distance) versus categorical (e.g., neighborhood), is also a driving factor in feature engineering choices. 
 
-There are many other examples of preprocessing to build better features for modeling: 
+Other examples of preprocessing to build better features for modeling include: 
 
  * Correlation between predictors can be reduced via feature extraction or the removal of some predictors. 
  
@@ -39,7 +39,7 @@ Feature engineering and data preprocessing can also involve reformatting that ma
 Different models have different preprocessing requirements and some, such as tree-based models, require very little preprocessing at all. Appendix \@ref(pre-proc-table) contains a small table of recommended preprocessing techniques for different models. 
 :::
 
-In this chapter, we introduce the [`r pkg(recipes)`](https://recipes.tidymodels.org/) package which you can use to combine different feature engineering and preprocessing tasks into a single object and then apply these transformations to different data sets. The `r pkg(recipes)` package is, like `r pkg(parsnip)` for models, one of the core tidymodels packages.
+In this chapter, we introduce the [`r pkg(recipes)`](https://recipes.tidymodels.org/) package that you can use to combine different feature engineering and preprocessing tasks into a single object and then apply these transformations to different data sets. The `r pkg(recipes)` package is, like `r pkg(parsnip)` for models, one of the core tidymodels packages.
 
 This chapter uses the Ames housing data and the R objects created in the book so far, as summarized in Section \@ref(workflows-summary).
 
@@ -91,9 +91,9 @@ Let's break this down:
 
 1. `step_log()` declares that `Gr_Liv_Area` should be log transformed. 
 
-1. `step_dummy()` is used to specify which variables should be converted from a qualitative format to a quantitative format, in this case, using dummy or indicator variables. An indicator or dummy variable is a binary numeric variable (a column of ones and zeroes) that encodes qualitative information; we will dig deeper into these kinds of variables in Section \@ref(dummies). 
+1. `step_dummy()` specifies which variables should be converted from a qualitative format to a quantitative format, in this case, using dummy or indicator variables. An indicator or dummy variable is a binary numeric variable (a column of ones and zeroes) that encodes qualitative information; we will dig deeper into these kinds of variables in Section \@ref(dummies). 
 
-The function `all_nominal_predictors()` captures the names of any predictor columns that are currently factor or character (i.e., nominal) in nature. This is a `r pkg(dplyr)`-like selector function similar to `starts_with()` or `matches()` but can only be used inside of a recipe. 
+The function `all_nominal_predictors()` captures the names of any predictor columns that are currently factor or character (i.e., nominal) in nature. This is a `r pkg(dplyr)`-like selector function similar to `starts_with()` or `matches()` but that can only be used inside of a recipe. 
 
 :::rmdnote
 Other selectors specific to the `r pkg(recipes)` package are: `all_numeric_predictors()`, `all_numeric()`, `all_predictors()`, and `all_outcomes()`. As with `r pkg(dplyr)`, one or more unquoted expressions, separated by commas, can be used to select which columns are affected by each step.
@@ -113,7 +113,7 @@ What is the advantage to using a recipe, over a formula or raw predictors? There
 
 ## Using Recipes
 
-As we discussed in Chapter \@ref(workflows), preprocessing choices and feature engineering should typically be considered part of a modeling workflow, not as a separate task. The `r pkg(workflows)` package contains high level functions to handle different types of preprocessors. Our previous workflow (`lm_wflow`) used a simple set of `r pkg(dplyr)` selectors. To improve on that approach with more complex feature engineering, let's use the `simple_ames` recipe to preprocess data for modeling.
+As we discussed in Chapter \@ref(workflows), preprocessing choices and feature engineering should typically be considered part of a modeling workflow, not a separate task. The `r pkg(workflows)` package contains high level functions to handle different types of preprocessors. Our previous workflow (`lm_wflow`) used a simple set of `r pkg(dplyr)` selectors. To improve on that approach with more complex feature engineering, let's use the `simple_ames` recipe to preprocess data for modeling.
 
 This object can be attached to the workflow:
 
@@ -122,7 +122,7 @@ lm_wflow %>%
   add_recipe(simple_ames)
 ```
 
-That did not work! We can only have one preprocessing method at a time, so we need to remove the existing preprocessor before adding the recipe. 
+That did not work! We can have only one preprocessing method at a time, so we need to remove the existing preprocessor before adding the recipe. 
 
 ```{r workflows-add-recipe}
 lm_wflow <- 
@@ -140,7 +140,7 @@ lm_fit <- fit(lm_wflow, ames_train)
 
 The `predict()` method applies the same preprocessing that was used on the training set to the new data before passing them along to the model's `predict()` method: 
 
-```{r workflows-recipe-pred}
+```{r workflows-recipe-pred, message = FALSE, warning = FALSE}
 predict(lm_fit, ames_test %>% slice(1:3))
 ```
 
@@ -161,10 +161,10 @@ lm_fit %>%
 ```
 
 :::rmdnote
-There are tools for using (and debugging) recipes outside of workflow objects. These are described in Section \@ref(recipe-functions). 
+Tools for using (and debugging) recipes outside of workflow objects are described in Section \@ref(recipe-functions). 
 :::
 
-## How Data are Used by the `recipe()`
+## How Data Are Used by the `recipe()`
 
 Data are passed to recipes at different stages. 
 
@@ -173,31 +173,31 @@ First, when calling `recipe(..., data)`, the data set is used to determine the d
 Second, when preparing the data using `fit(workflow, data)`, the training data are used for all estimation operations including a recipe that may be part of the `workflow`, from determining factor levels to computing PCA components and everything in between. 
 
 :::rmdwarning
-It is important to realize that all preprocessing and feature engineering steps *only* utilize the training data. Otherwise, information leakage can negatively impact the model's performance when used with new data. 
+All preprocessing and feature engineering steps use *only* the training data. Otherwise, information leakage can negatively impact the model's performance when used with new data. 
 :::
 
 Finally, when using `predict(workflow, new_data)`, no model or preprocessor parameters like those from recipes are re-estimated using the values in `new_data`. Take centering and scaling using `step_normalize()` as an example. Using this step, the means and standard deviations from the appropriate columns are determined from the training set; new samples at prediction time are standardized using these values from training when `predict()` is invoked. 
 
 
-## Examples of `recipe()` Steps {#example-steps}
+## Examples of Recipe Steps {#example-steps}
 
-Before proceeding, let's take an extended tour of the capabilities of `r pkg(recipes)` and explore some of the most important `step_*()` functions. These recipe step functions each specify a specific possible "step" in a feature engineering process, and different recipe steps can have different effects on columns of data.
+Before proceeding, let's take an extended tour of the capabilities of `r pkg(recipes)` and explore some of the most important `step_*()` functions. These recipe step functions each specify a specific possible step in a feature engineering process, and different recipe steps can have different effects on columns of data.
 
 ### Encoding qualitative data in a numeric format  {#dummies}
 
 One of the most common feature engineering tasks is transforming nominal or qualitative data (factors or characters) so that they can be encoded or represented numerically. Sometimes we can alter the factor levels of a qualitative column in helpful ways prior to such a transformation. For example, `step_unknown()` can be used to change missing values to a dedicated factor level. Similarly, if we anticipate that a new factor level may be encountered in future data, `step_novel()` can allot a new level for this purpose. 
 
-Additionally, `step_other()` can be used to analyze the frequencies of the factor levels in the training set and convert infrequently occurring values to a catch-all level of "other", with a specific threshold that can be specified. A good example is the `Neighborhood` predictor in our data, shown in Figure \@ref(fig:ames-neighborhoods).
+Additionally, `step_other()` can be used to analyze the frequencies of the factor levels in the training set and convert infrequently occurring values to a catch-all level of "other," with a threshold that can be specified. A good example is the `Neighborhood` predictor in our data, shown in Figure \@ref(fig:ames-neighborhoods).
 
 ```{r ames-neighborhoods, echo = FALSE}
-#| fig.cap = "Frequencies of neighborhoods in the Ames training set.",
+#| fig.cap = "Frequencies of neighborhoods in the Ames training set",
 #| fig.alt = "A bar chart of the frequencies of neighborhoods in the Ames training set. The most homes are in North Ames while the Greens, Green Hills, and Landmark neighborhood have very few instances."
 ggplot(ames_train, aes(y = Neighborhood)) + 
   geom_bar() + 
   labs(y = NULL)
 ```
 
-Here we see there are two neighborhoods that have less than five properties in the training data (Landmark and Green Hills); in this case, no houses at all in the Landmark neighborhood were included in the training set. For some models, it may be problematic to have dummy variables with a single non-zero entry in the column. At a minimum, it is highly improbable that these features would be important to a model. If we add `step_other(Neighborhood, threshold = 0.01)` to our recipe, the bottom 1% of the neighborhoods will be lumped into a new level called "other". In this training set, this will catch `r sum(table(ames_train$Neighborhood)/nrow(ames_train) <= .01)` neighborhoods.  
+Here we see that two neighborhoods have less than five properties in the training data (Landmark and Green Hills); in this case, no houses at all in the Landmark neighborhood were included in the training set. For some models, it may be problematic to have dummy variables with a single nonzero entry in the column. At a minimum, it is highly improbable that these features would be important to a model. If we add `step_other(Neighborhood, threshold = 0.01)` to our recipe, the bottom 1% of the neighborhoods will be lumped into a new level called "other." In this training set, this will catch `r xfun::numbers_to_words(sum(table(ames_train$Neighborhood)/nrow(ames_train) <= .01))` neighborhoods.  
 
 For the Ames data, we can amend the recipe to use:
 
@@ -214,7 +214,7 @@ simple_ames <-
 Many, but not all, underlying model calculations require predictor values to be encoded as numbers. Notable exceptions include tree-based models, rule-based models, and naive Bayes models. 
 :::
 
-There are a few strategies for converting a factor predictor to a numeric format. The most common method is to create "dummy" or indicator variables. Let's take the predictor in the Ames data for the building type, which is a factor variable with five levels (see Table \@ref(tab:dummy-vars). For dummy variables, the single `Bldg_Type` column would be replaced with four numeric columns whose values are either zero or one. These binary variables represent specific factor level values. In R, the convention is to exclude a column for the first factor level (`OneFam`, in this case). The `Bldg_Type` column would be replaced with a column called `TwoFmCon` that is one when the row has that value and zero otherwise. Three other columns are similarly created: 
+The most common method for converting a factor predictor to a numeric format is to create dummy or indicator variables. Let's take the predictor in the Ames data for the building type, which is a factor variable with five levels (see Table \@ref(tab:dummy-vars)). For dummy variables, the single `Bldg_Type` column would be replaced with four numeric columns whose values are either zero or one. These binary variables represent specific factor level values. In R, the convention is to exclude a column for the first factor level (`OneFam`, in this case). The `Bldg_Type` column would be replaced with a column called `TwoFmCon` that is one when the row has that value and zero otherwise. Three other columns are similarly created: 
 
 ```{r engineering-all-dummies, echo = FALSE, results = 'asis'}
 show_rows <- 
@@ -231,7 +231,7 @@ recipe(~Bldg_Type, data = ames_train) %>%
   slice(show_rows) %>% 
   arrange(`Raw Data`) %>% 
   kable(
-    caption = 'Illustration of binary encodings (i.e., "dummy variables") for a qualitative predictor.',
+    caption = 'Illustration of binary encodings (i.e., dummy variables) for a qualitative predictor.',
     label = "dummy-vars"
   ) %>% 
   kable_styling(full_width = FALSE)
@@ -240,19 +240,19 @@ recipe(~Bldg_Type, data = ames_train) %>%
 
 Why not all five? The most basic reason is simplicity; if you know the value for these four columns, you can determine the last value because these are mutually exclusive categories. More technically, the classical justification is that a number of models, including ordinary linear regression, have numerical issues when there are linear dependencies between columns. If all five building type indicator columns are included, they would add up to the intercept column (if there is one). This would cause an issue, or perhaps an outright error, in the underlying matrix algebra.  
 
-The full set of encodings can be used for some models. This is traditionally called the "one-hot" encoding and can be achieved using the `one_hot` argument of `step_dummy()`. 
+The full set of encodings can be used for some models. This is traditionally called the one-hot encoding and can be achieved using the `one_hot` argument of `step_dummy()`. 
 
 One helpful feature of `step_dummy()` is that there is more control over how the resulting dummy variables are named. In base R, dummy variable names mash the variable name with the level, resulting in names like `NeighborhoodVeenker`. Recipes, by default, use an underscore as the separator between the name and level (e.g., `Neighborhood_Veenker`) and there is an option to use custom formatting for the names. The default naming convention in `r pkg(recipes)` makes it easier to capture those new columns in future steps using a selector, such as `starts_with("Neighborhood_")`. 
 
-Traditional dummy variables require that all of the possible categories be known to create a full set of numeric features. There are other methods for doing this transformation to a numeric format. _Feature hashing_ methods only consider the value of the category to assign it to a predefined pool of dummy variables. _Effect_ or _likelihood encodings_ replace the original data with a single numeric column that measures the _effect_ of those data. Both feature hashing and effect encoding methods can seamlessly handle situations where a novel factor level is encountered in the data. Chapter \@ref(categorical) explores these and other methods for encoding categorical data, beyond straightforward dummy or indicator variables.
+Traditional dummy variables require that all of the possible categories be known to create a full set of numeric features. There are other methods for doing this transformation to a numeric format. _Feature hashing_ methods only consider the value of the category to assign it to a predefined pool of dummy variables. _Effect_ or _likelihood encodings_ replace the original data with a single numeric column that measures the _effect_ of those data. Both feature hashing and effect encoding can seamlessly handle situations where a novel factor level is encountered in the data. Chapter \@ref(categorical) explores these and other methods for encoding categorical data, beyond straightforward dummy or indicator variables.
 
 :::rmdnote
-Different recipe steps behave differently when applied to variables in the data. For example, `step_log()` modifies a column in-place without changing the name. Other steps, such as `step_dummy()`, eliminate the original data column and replace it with one or more columns with different names. The effect of a recipe step depends on the type of feature engineering transformation being done. 
+Different recipe steps behave differently when applied to variables in the data. For example, `step_log()` modifies a column in place without changing the name. Other steps, such as `step_dummy()`, eliminate the original data column and replace it with one or more columns with different names. The effect of a recipe step depends on the type of feature engineering transformation being done. 
 :::
 
 ### Interaction terms
 
-Interaction effects involve two or more predictors. Such an effect occurs when one predictor has an effect on the outcome that is contingent on one or more other predictors. For example, if you were trying to predict how much traffic there will be during your commute, two potential predictors could be the specific time of day you commute and the weather. However, the relationship between the amount of traffic and bad weather is different for different times of day. In this case, you could add an interaction term between the two predictors to the model along with the original two predictors (which are called the "main effects"). Numerically, an interaction term between predictors is encoded as their product. Interactions are only defined in terms of their effect on the outcome and can be combinations of different types of data (e.g., numeric, categorical, etc). [Chapter 7](https://bookdown.org/max/FES/detecting-interaction-effects.html) of @fes discusses interactions and how to detect them in greater detail. 
+Interaction effects involve two or more predictors. Such an effect occurs when one predictor has an effect on the outcome that is contingent on one or more other predictors. For example, if you were trying to predict how much traffic there will be during your commute, two potential predictors could be the specific time of day you commute and the weather. However, the relationship between the amount of traffic and bad weather is different for different times of day. In this case, you could add an interaction term between the two predictors to the model along with the original two predictors (which are called the main effects). Numerically, an interaction term between predictors is encoded as their product. Interactions are defined in terms of their effect on the outcome and can be combinations of different types of data (e.g., numeric, categorical, etc). [Chapter 7](https://bookdown.org/max/FES/detecting-interaction-effects.html) of @fes discusses interactions and how to detect them in greater detail. 
 
 After exploring the Ames training set, we might find that the regression slopes for the gross living area differ for different building types, as shown in Figure \@ref(fig:building-type-interactions).
 
@@ -268,7 +268,7 @@ ggplot(ames_train, aes(x = Gr_Liv_Area, y = 10^Sale_Price)) +
 
 ```{r building-type-interactions, ref.label = "engineering-ames-feature-plots"}
 #| echo = FALSE,
-#| fig.cap = "Gross living area (in log-10 units) versus sale price (also in log-10 units) for five different building types.",
+#| fig.cap = "Gross living area (in log-10 units) versus sale price (also in log-10 units) for five different building types",
 #| fig.alt = "Scatter plots of gross living area (in log-10 units) versus sale price (also in log-10 units) for five different building types. All trends are linear but appear to have different slopes and intercepts for the different building types."
 ```
 
@@ -283,7 +283,7 @@ Sale_Price ~ Neighborhood + log10(Gr_Liv_Area) * Bldg_Type
 
 where `*` expands those columns to the main effects and interaction term. Again, the formula method does many things simultaneously and understands that a factor variable (such as `Bldg_Type`) should be expanded into dummy variables first and that the interaction should involve all of the resulting binary columns. 
 
-Recipes are more explicit and sequential, and give you more control. With the current recipe, `step_dummy()` has already created dummy variables. How would we combine these for an interaction? The additional step would look like `step_interact(~ interaction terms)` where the terms on the right-hand side of the tilde are the interactions. These can include selectors, so it would be appropriate to use:
+Recipes are more explicit and sequential, and they give you more control. With the current recipe, `step_dummy()` has already created dummy variables. How would we combine these for an interaction? The additional step would look like `step_interact(~ interaction terms)` where the terms on the right-hand side of the tilde are the interactions. These can include selectors, so it would be appropriate to use:
 
 ```{r engineering-ames-interact-recipe}
 simple_ames <- 
@@ -296,7 +296,7 @@ simple_ames <-
   step_interact( ~ Gr_Liv_Area:starts_with("Bldg_Type_") )
 ```
 
-Additional interactions can be specified in this formula by separating them by `+`. Also note that the recipe will only utilize interactions between different variables; if the formula uses `var_1:var_1`, this term will be ignored. 
+Additional interactions can be specified in this formula by separating them by `+`. Also note that the recipe will only use interactions between different variables; if the formula uses `var_1:var_1`, this term will be ignored. 
 
 Suppose that, in a recipe, we had not yet made dummy variables for building types. It would be inappropriate to include a factor column in this step, such as:
 
@@ -307,7 +307,7 @@ Suppose that, in a recipe, we had not yet made dummy variables for building type
 This is telling the underlying (base R) code used by `step_interact()` to make dummy variables and then form the interactions. In fact, if this occurs, a warning states that this might generate unexpected results.
 
 ```{block, type = "rmdwarning"}
-This behavior gives you more control, but is different from R's standard model formula. 
+This behavior gives you more control, but it is different from R's standard model formula. 
 ```
 
 As with naming dummy variables, `r pkg(recipes)` provides more coherent names for interaction terms. In this case, the interaction is named `Gr_Liv_Area_x_Bldg_Type_Duplex` instead of  `Gr_Liv_Area:Bldg_TypeDuplex` (which is not a valid column name for a data frame).
@@ -320,7 +320,7 @@ _Remember that order matters_.  The gross living area is log transformed prior t
 
 ### Spline functions
 
-When a predictor has a non-linear relationship with the outcome, some types of predictive models can adaptively approximate this relationship during training. However, simpler is usually better and it is not uncommon to try to use a simple model, such as a linear fit, and add in specific non-linear features for predictors that may need them, such as longitude and latitude for the Ames housing data. One common method for doing this is to use _spline_ functions to represent the data. Splines replace the existing numeric predictor with a set of columns that allow a model to emulate a flexible, non-linear relationship. As more spline terms are added to the data, the capacity to non-linearly represent the relationship increases. Unfortunately, it may also increase the likelihood of picking up on data trends that occur by chance (i.e., over-fitting). 
+When a predictor has a nonlinear relationship with the outcome, some types of predictive models can adaptively approximate this relationship during training. However, simpler is usually better and it is not uncommon to try to use a simple model, such as a linear fit, and add in specific nonlinear features for predictors that may need them, such as longitude and latitude for the Ames housing data. One common method for doing this is to use _spline_ functions to represent the data. Splines replace the existing numeric predictor with a set of columns that allow a model to emulate a flexible, nonlinear relationship. As more spline terms are added to the data, the capacity to nonlinearly represent the relationship increases. Unfortunately, it may also increase the likelihood of picking up on data trends that occur by chance (i.e., overfitting). 
 
 If you have ever used `geom_smooth()` within a `ggplot`, you have probably used a spline representation of the data. For example, each panel in Figure \@ref(fig:ames-latitude-splines) uses a different number of smooth splines for the latitude predictor:
 
@@ -347,15 +347,15 @@ plot_smoother <- function(deg_free) {
 
 ```{r ames-latitude-splines, ref.label = "engineering-ames-splines"}
 #| echo = FALSE,
-#| fig.cap = "Sale price versus latitude, with trend lines using natural splines with different degrees of freedom.",
+#| fig.cap = "Sale price versus latitude, with trend lines using natural splines with different degrees of freedom",
 #| fig.alt = "Scatter plots of sale price versus latitude with trend lines using natural splines with different degrees of freedom. As the degrees of freedom increase, the lines are more responsive to trends in the data but begin to become excessively complex with 100 spline terms."
 ```
 
 The `ns()` function in the `r pkg(splines)` package generates feature columns using functions called _natural splines_.
 
-Some panels in Figure \@ref(fig:ames-latitude-splines) clearly fit poorly; two terms _under-fit_ the data while 100 terms _over-fit_. The panels with five and 20 terms seem like reasonably smooth fits that catch the main patterns of the data. This indicates that the proper amount of "non-linear-ness" matters. The number of spline terms could then be considered a _tuning parameter_ for this model. These types of parameters are explored in Chapter \@ref(tuning). 
+Some panels in Figure \@ref(fig:ames-latitude-splines) clearly fit poorly; two terms _underfit_ the data while 100 terms _overfit_. The panels with five and twenty terms seem like reasonably smooth fits that catch the main patterns of the data. This indicates that the proper amount of "nonlinear-ness" matters. The number of spline terms could then be considered a _tuning parameter_ for this model. These types of parameters are explored in Chapter \@ref(tuning). 
 
-In `r pkg(recipes)`, there are multiple steps that can create these types of terms. To add a natural spline representation for this predictor:
+In `r pkg(recipes)`, multiple steps can create these types of terms. To add a natural spline representation for this predictor:
 
 ```{r engineering-spline-rec, eval = FALSE}
 recipe(Sale_Price ~ Neighborhood + Gr_Liv_Area + Year_Built + Bldg_Type + Latitude,
@@ -373,7 +373,7 @@ The user would need to determine if both neighborhood and latitude should be in 
 
 Another common method for representing multiple features at once is called _feature extraction_. Most of these techniques create new features from the predictors that capture the information in the broader set as a whole. For example, principal component analysis (PCA) tries to extract as much of the original information in the predictor set as possible using a smaller number of features. PCA is a linear extraction method, meaning that each new feature is a linear combination of the original predictors. One nice aspect of PCA is that each of the new features, called the principal components or PCA scores, are uncorrelated with one another. Because of this, PCA can be very effective at reducing the correlation between predictors. Note that PCA is only aware of the predictors; the new PCA features might not be associated with the outcome. 
 
-In the Ames data, there are several predictors that measure size of the property, such as the total basement size (`Total_Bsmt_SF`), size of the first floor (`First_Flr_SF`), the gross living area (`Gr_Liv_Area`), and so on. PCA might be an option to represent these potentially redundant variables as a smaller feature set. Apart from the gross living area, these predictors have the suffix `SF` in their names (for square feet) so a recipe step for PCA might look like:
+In the Ames data, several predictors measure size of the property, such as the total basement size (`Total_Bsmt_SF`), size of the first floor (`First_Flr_SF`), the gross living area (`Gr_Liv_Area`), and so on. PCA might be an option to represent these potentially redundant variables as a smaller feature set. Apart from the gross living area, these predictors have the suffix `SF` in their names (for square feet) so a recipe step for PCA might look like:
 
 ```r
   # Use a regular expression to capture house size predictors: 
@@ -386,7 +386,7 @@ There are existing recipe steps for other extraction methods, such as: independe
 
 ### Row sampling steps
 
-Recipe steps can affect the rows of a data set as well. For example, _subsampling_ techniques for class imbalances change the class proportions in the data being given to the model; these techniques often don't improve overall performance but can generate better behaved distributions of the predicted class probabilities. There are several possible approaches to try when subsampling your data with class imbalance:
+Recipe steps can affect the rows of a data set as well. For example, _subsampling_ techniques for class imbalances change the class proportions in the data being given to the model; these techniques often don't improve overall performance but can generate better behaved distributions of the predicted class probabilities. These are approaches to try when subsampling your data with class imbalance:
 
  * _Downsampling_ the data keeps the minority class and takes a random sample of the majority class so that class frequencies are balanced. 
 
@@ -404,7 +404,7 @@ The [`r pkg(themis)`](https://themis.tidymodels.org/) package has recipe steps t
 Only the training set should be affected by these techniques. The test set or other holdout samples should be left as-is when processed using the recipe. For this reason, all of the subsampling steps default the `skip` argument to have a value of `TRUE` (Section \@ref(skip-equals-true)).
 :::
 
-There are other step functions that are row-based as well: `step_filter()`, `step_sample()`, `step_slice()`, and `step_arrange()`. In almost all uses of these steps, the `skip` argument should be set to `TRUE`. 
+Other step functions are row-based as well: `step_filter()`, `step_sample()`, `step_slice()`, and `step_arrange()`. In almost all uses of these steps, the `skip` argument should be set to `TRUE`. 
 
 ### General transformations
 
@@ -417,26 +417,26 @@ When using this flexible step, use extra care to avoid data leakage in your prep
 
 ### Natural language processing
 
-Recipes can also handle data that are not in the traditional structure where the columns are features. For example, the [`r pkg(textrecipes)`](https://textrecipes.tidymodels.org/) package can apply natural language processing methods to the data. The input column is typically a string of text and different steps can be used to tokenize the data (e.g., split the text into separate words), filter out tokens, and create new features appropriate for modeling. 
+Recipes can also handle data that are not in the traditional structure where the columns are features. For example, the [`r pkg(textrecipes)`](https://textrecipes.tidymodels.org/) package can apply natural language processing methods to the data. The input column is typically a string of text, and different steps can be used to tokenize the data (e.g., split the text into separate words), filter out tokens, and create new features appropriate for modeling. 
 
 
 ## Skipping Steps for New Data {#skip-equals-true}
 
-The sale price data are already log transformed in the `ames` data frame. Why not use:
+The sale price data are already log-transformed in the `ames` data frame. Why not use:
 
 ```r
  step_log(Sale_Price, base = 10)
 ```
 
-This will cause a failure when the recipe is applied to new properties with an unknown sale price. Since price is what we are trying to predict, there probably won't be a column in the data for this variable. In fact, to avoid _information leakage_, many tidymodels packages isolate the data being used when making any predictions. This means that the training set and any outcome columns are not available for use at prediction time. 
+This will cause a failure when the recipe is applied to new properties with an unknown sale price. Since price is what we are trying to predict, there probably won't be a column in the data for this variable. In fact, to avoid information leakage, many tidymodels packages isolate the data being used when making any predictions. This means that the training set and any outcome columns are not available for use at prediction time. 
 
 :::rmdnote
 For simple transformations of the outcome column(s), we strongly suggest that those operations be _conducted outside of the recipe_.
 :::
 
-However, there are other circumstances where this is not an adequate solution. For example, in classification models where there is a severe class imbalance, it is common to conduct _subsampling_ of the data that are given to the modeling function, as previously mentioned. For example, suppose that there were two classes and a 10% event rate. A simple, albeit controversial, approach would be to _down-sample_ the data so that the model is provided with all of the events and a random 10% of the non-event samples. 
+However, there are other circumstances where this is not an adequate solution. For example, in classification models where there is a severe class imbalance, it is common to conduct _subsampling_ of the data that are given to the modeling function. For example, suppose that there were two classes and a 10% event rate. A simple, albeit controversial, approach would be to _downsample_ the data so that the model is provided with all of the events and a random 10% of the nonevent samples. 
 
-The problem is that the same subsampling process should not be applied to the data being predicted. As a result, when using a recipe, we need a mechanism to ensure that some operations are only applied to the data that are given to the model. Each step function has an option called `skip` that, when set to `TRUE`, will be ignored by the `predict()` function. In this way, you can isolate the steps that affect the modeling data without causing errors when applied to new samples. However, all steps are applied when using `fit()`. 
+The problem is that the same subsampling process should not be applied to the data being predicted. As a result, when using a recipe, we need a mechanism to ensure that some operations are applied only to the data that are given to the model. Each step function has an option called `skip` that, when set to `TRUE`, will be ignored by the `predict()` function. In this way, you can isolate the steps that affect the modeling data without causing errors when applied to new samples. However, all steps are applied when using `fit()`. 
 
 ```{r engineering-skips, include = FALSE}
 library(recipes)
@@ -499,7 +499,7 @@ ames_rec <-
   step_ns(Latitude, Longitude, deg_free = 20)
 ```
 
-We'll re-fit the workflow with this new recipe:
+We'll refit the workflow with this new recipe:
 
 ```{r engineering-lm-extended-recipe-fit}
 lm_wflow <- 
@@ -532,7 +532,7 @@ Each `tidy()` method returns the relevant information about that step. For examp
 
 ## Column Roles
 
-When a formula is used with the initial call to `recipe()` it assigns _roles_ to each of the columns depending on which side of the tilde that they are on. Those roles are either `"predictor"` or `"outcome"`. However, other roles can be assigned as needed. 
+When a formula is used with the initial call to `recipe()` it assigns _roles_ to each of the columns, depending on which side of the tilde they are on. Those roles are either `"predictor"` or `"outcome"`. However, other roles can be assigned as needed. 
 
 For example, in our Ames data set, the original raw data contained a column for address.^[Our version of these data does not contain that column.] It may be useful to keep that column in the data so that, after predictions are made, problematic results can be investigated in detail. In other words, the column could be important even when it isn't a predictor or outcome. 
 
