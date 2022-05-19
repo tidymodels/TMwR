@@ -23,7 +23,7 @@ keep_pred <- control_resamples(save_pred = TRUE)
 
 Once we create two or more models, the next step is to compare them to understand which one is best. In some cases, comparisons might be _within-model_, where the same model might be evaluated with different features or preprocessing methods. Alternatively, _between-model_ comparisons, such as when we compared linear regression and random forest models in Chapter \@ref(resampling), are the more common scenario.
 
-In either case, the result is a collection of resampled summary statistics (e.g. RMSE, accuracy, etc.) for each model. In this chapter, we'll first demonstrate how workflow sets can be used to fit multiple models. Then, we'll discuss important aspects of resampling statistics. Finally, we'll look at how to formally compare models (using either hypothesis testing or a Bayesian approach).
+In either case, the result is a collection of resampled summary statistics (e.g., RMSE, accuracy, etc.) for each model. In this chapter, we'll first demonstrate how workflow sets can be used to fit multiple models. Then, we'll discuss important aspects of resampling statistics. Finally, we'll look at how to formally compare models (using either hypothesis testing or a Bayesian approach).
 
 ## Creating Multiple Models with Workflow Sets {#workflow-set}
 
@@ -71,9 +71,9 @@ lm_models <-
 lm_models
 ```
 
-Notice that the `option` and `result` columns are now populated. The former includes the options to `fit_resamples()` that were given (for reproducibility) and the latter column contains the results produced by `fit_resamples()`.  
+Notice that the `option` and `result` columns are now populated. The former includes the options to `fit_resamples()` that were given (for reproducibility), and the latter column contains the results produced by `fit_resamples()`.  
 
-There are few convenience functions for workflow sets, including `collect_metrics()` to collate the performance statistics. We can `filter()` to any specific metric we are interested in:
+There are a few convenience functions for workflow sets, including `collect_metrics()` to collate the performance statistics. We can `filter()` to any specific metric we are interested in:
 
 ```{r compare-workflow-set-collect}
 collect_metrics(lm_models) %>% 
@@ -90,7 +90,7 @@ four_models
 ```
 
 
-The `autoplot()` method, with output in Figure \@ref(fig:workflow-set-r-squared), shows confidence intervals for each model in order of best-to-worst. In this chapter, we'll focus on the coefficient of determination (a.k.a. R<sup>2</sup>) and use `metric = "rsq"` in the call to set up our plot: 
+The `autoplot()` method, with output in Figure \@ref(fig:workflow-set-r-squared), shows confidence intervals for each model in order of best to worst. In this chapter, we'll focus on the coefficient of determination (a.k.a. $R^2$) and use `metric = "rsq"` in the call to set up our plot: 
 
 ```{r compare-workflow-set-rsq, eval=FALSE}
 library(ggrepel)
@@ -101,17 +101,17 @@ autoplot(four_models, metric = "rsq") +
 
 ```{r workflow-set-r-squared, ref.label = "compare-workflow-set-rsq"}
 #| echo = FALSE,
-#| fig.cap = "Confidence intervals for the coefficient of determination using four different models.",
+#| fig.cap = "Confidence intervals for the coefficient of determination using four different models",
 #| fig.alt = "Confidence intervals for the coefficient of determination using four different models. The random forest model has the best results and its intervals do not overlap with the intervals of the other models. "
 ```
 
-From this plot of R<sup>2</sup> confidence intervals, we can see that the random forest method is doing the best job and there are minor improvements in the linear models as we add more recipe steps.
+From this plot of $R^2$ confidence intervals, we can see that the random forest method is doing the best job and there are minor improvements in the linear models as we add more recipe steps.
 
-Now that we have 10 resampled performance estimates for each of four models, these summary statistics can be used to make between-model comparisons.
+Now that we have 10 resampled performance estimates for each of the four models, these summary statistics can be used to make between-model comparisons.
 
 ## Comparing Resampled Performance Statistics {#resampled-stats}
 
-Considering the preceding results for the three linear models, it appears that the additional terms do not profoundly improve the mean RMSE or R<sup>2</sup> statistics for the linear models. The difference is small, but it might be larger than the experimental noise in the system, i.e., considered statistically significant. We can formally test the hypothesis that the additional terms increase R<sup>2</sup>. 
+Considering the preceding results for the three linear models, it appears that the additional terms do not profoundly improve the mean RMSE or $R^2$ statistics for the linear models. The difference is small, but it might be larger than the experimental noise in the system, i.e., considered statistically significant. We can formally test the hypothesis that the additional terms increase $R^2$. 
 
 :::rmdnote
 Before making between-model comparisons, it is important for us to discuss the within-resample correlation for resampling statistics. Each model was measured with the same cross-validation folds, and results for the same resample tend to be similar. 
@@ -119,7 +119,7 @@ Before making between-model comparisons, it is important for us to discuss the w
 
 In other words, there are some resamples where performance across models tends to be low and others where it tends to be high. In statistics, this is called a _resample-to-resample_ component of variation. 
 
-To illustrate, let's gather the individual resampling statistics for the linear models and the random forest. We will focus on the R<sup>2</sup> statistic for each model, which measures correlation between the observed and predicted sale prices for each house. Let's `filter()` to keep only the R<sup>2</sup> metrics, reshape the results, and compute how the metrics are correlated with each other.
+To illustrate, let's gather the individual resampling statistics for the linear models and the random forest. We will focus on the $R^2$ statistic for each model, which measures correlation between the observed and predicted sale prices for each house. Let's `filter()` to keep only the $R^2$ metrics, reshape the results, and compute how the metrics are correlated with each other.
 
 ```{r compare-collect}
 rsq_indiv_estimates <- 
@@ -134,7 +134,7 @@ rsq_wider <-
 corrr::correlate(rsq_wider %>% select(-id), quiet = TRUE)
 ```
 
-These correlations are high, and indicate that, across models, there are large within-resample correlations. To see this visually in Figure \@ref(fig:rsquared-resamples), the R<sup>2</sup> statistics are shown for each model with lines connecting the resamples: 
+These correlations are high, and indicate that, across models, there are large within-resample correlations. To see this visually in Figure \@ref(fig:rsquared-resamples), the $R^2$ statistics are shown for each model with lines connecting the resamples: 
 
 ```{r compare-rsq-plot, eval=FALSE}
 rsq_indiv_estimates %>% 
@@ -147,7 +147,7 @@ rsq_indiv_estimates %>%
 ```{r rsquared-resamples}
 #| fig.height = 4,
 #| echo = FALSE,
-#| fig.cap = "Resample statistics across models.",
+#| fig.cap = "Resample statistics across models",
 #| fig.alt = "A plot connecting the resample statistics across models. The plot connects the results for each model with the same line. The performance metrics tend to be relatively similar across all model results. "
 
 y_lab <- expression(R^2 ~ statistics)
@@ -181,7 +181,7 @@ The last term is the covariance between two items. If there is a significant pos
 This characteristic of resampling statistics will come into play in the next two sections. 
 :::
 
-Before making model comparisons or looking at the resampling results, it can be helpful to define a relevant _practical effect size_. Since these analyses focus on the R<sup>2</sup> statistics, the practical effect size is the change in R<sup>2</sup> that we would consider to be a realistic difference that matters. For example, we might think that two models are not practically different if their R<sup>2</sup> values are within $\pm 2$%. If this were the case, differences smaller than 2% are not deemed important even if they are statistically significant. 
+Before making model comparisons or looking at the resampling results, it can be helpful to define a relevant _practical effect size_. Since these analyses focus on the $R^2$ statistics, the practical effect size is the change in $R^2$ that we would consider to be a realistic difference that matters. For example, we might think that two models are not practically different if their $R^2$ values are within $\pm 2$%. If this were the case, differences smaller than 2% are not deemed important even if they are statistically significant. 
 
 Practical significance is subjective; two people can have very different ideas on the threshold for importance. However, we'll show later that this consideration can be very helpful when deciding between models.  
 
@@ -193,7 +193,7 @@ $$y_{ij} = \beta_0 + \beta_1x_{i1} + \ldots + \beta_px_{ip} + \epsilon_{ij}$$
 
 This versatile model is used to create regression models as well as being the basis for the popular analysis of variance (ANOVA) technique for comparing groups. With the ANOVA model, the predictors ($x_{ij}$) are binary dummy variables for different groups. From this, the $\beta$ parameters estimate whether two or more groups are different from one another using hypothesis testing techniques.  
 
-In our specific situation, the ANOVA can also make model comparisons. Suppose the individual resampled R<sup>2</sup> statistics serve as the _outcome data_ (i.e., the $y_{ij}$) and the models as the _predictors_ in the ANOVA model. A sampling of this data structure is shown in Table \@ref(tab:model-anova-data).
+In our specific situation, the ANOVA can also make model comparisons. Suppose the individual resampled $R^2$ statistics serve as the _outcome data_ (i.e., the $y_{ij}$) and the models as the _predictors_ in the ANOVA model. A sampling of this data structure is shown in Table \@ref(tab:model-anova-data).
 
 ```{r compare-data-config, echo = FALSE, results = "asis"}
 rsq_indiv_estimates %>% 
@@ -223,19 +223,19 @@ $$y_{ij} = \beta_0 + \beta_1x_{i1} + \beta_2x_{i2} + \beta_3x_{i3} + \epsilon_{i
 
 where
 
- * $\beta_0$ is the estimate of the mean R<sup>2</sup> statistic for the basic linear models (i.e., without splines or interactions),
+ * $\beta_0$ is the estimate of the mean $R^2$ statistic for the basic linear models (i.e., without splines or interactions),
  
- * $\beta_1$ is the change in mean R<sup>2</sup> when interactions are added to the basic linear model,
+ * $\beta_1$ is the change in mean $R^2$ when interactions are added to the basic linear model,
  
- * $\beta_2$ is the change in mean R<sup>2</sup> between the basic linear model and the random forest model. 
+ * $\beta_2$ is the change in mean $R^2$ between the basic linear model and the random forest model. 
 
- * $\beta_3$ is the change in mean R<sup>2</sup> between the basic linear model and one with interactions and splines. 
+ * $\beta_3$ is the change in mean $R^2$ between the basic linear model and one with interactions and splines. 
 
 From these model parameters, hypothesis tests and p-values are generated to statistically compare models, but we must contend with how to handle the resample-to-resample effect. Historically, the resample groups would be considered a _block effect_ and an appropriate term was added to the model. Alternatively, the resample effect could be considered a _random effect_ where these particular resamples were drawn at random from a larger population of possible resamples. However, we aren't really interested in these effects; we only want to adjust for them in the model so that the variances of the interesting differences are properly estimated. 
 
 Treating the resamples as random effects is theoretically appealing. Methods for fitting an ANOVA model with this type of random effect could include the linear mixed model [@faraway2016extending] or a Bayesian hierarchical model (shown in the next section). 
 
-A simple and fast method for comparing two models at a time is to use the differences in R<sup>2</sup> values as the outcome data in the ANOVA model. Since the outcomes are matched by resample, the differences do not contain the resample-to-resample effect and, for this reason, the standard ANOVA model is appropriate. To illustrate, this call to `lm()` tests the difference between two of the linear regression models: 
+A simple and fast method for comparing two models at a time is to use the differences in $R^2$ values as the outcome data in the ANOVA model. Since the outcomes are matched by resample, the differences do not contain the resample-to-resample effect and, for this reason, the standard ANOVA model is appropriate. To illustrate, this call to `lm()` tests the difference between two of the linear regression models: 
 
 ```{r compare-t-test}
 compare_lm <- 
@@ -263,7 +263,7 @@ lm_t <-
 ```
 
 
-We could evaluate each pair-wise difference in this way. Note that the p-value indicates a _statistically significant_ signal; the collection of spline terms for longitude and latitude do appear to have an effect. However, the difference in R<sup>2</sup> is estimated at `r round(lm_t$estimate * 100, 2)`%. If our practical effect size were 2%, we might not consider these terms worth including in the model.
+We could evaluate each pair-wise difference in this way. Note that the p-value indicates a _statistically significant_ signal; the collection of spline terms for longitude and latitude do appear to have an effect. However, the difference in $R^2$ is estimated at `r round(lm_t$estimate * 100, 2)`%. If our practical effect size were 2%, we might not consider these terms worth including in the model.
 
 :::rmdnote
 We've briefly mentioned p-values already, but what actually are they? From @pvalue: "Informally, a p-value is the probability under a specified statistical model that a statistical summary of the data (e.g., the sample mean difference between two compared groups) would be equal to or more extreme than its observed value." 
@@ -309,11 +309,11 @@ The `r pkg(tidyposterior)` package has functions to fit such Bayesian models for
  
  * For objects that contain a single model that has been tuned using resampling, `perf_mod()` makes _within-model comparisons_. In this situation, the grouping variables tested in the Bayesian ANOVA model are the submodels defined by the tuning parameters. 
 
- * The `perf_mod()` function can also take a data frame produced by `r pkg(rsample)` that has columns of performance metrics associated with two or more model/workflow results. These could have been generated by non-standard means.
+ * The `perf_mod()` function can also take a data frame produced by `r pkg(rsample)` that has columns of performance metrics associated with two or more model/workflow results. These could have been generated by nonstandard means.
 
-From any of these types of objects, the `perf_mod()` function determines an appropriate Bayesian model and fits it with the resampling statistics. For our example, it will model the four sets of R<sup>2</sup> statistics associated with the workflows. 
+From any of these types of objects, the `perf_mod()` function determines an appropriate Bayesian model and fits it with the resampling statistics. For our example, it will model the four sets of $R^2$ statistics associated with the workflows. 
 
-The `r pkg(tidyposterior)` package uses the [Stan software](https://mc-stan.org/) for specifying and fitting the models via the `r pkg(rstanarm)` package. The functions within that package have default priors (see `?priors` for more details). The following model uses the default priors for all parameters except for the random intercepts (which follow a  _t_-distribution). The estimation process uses random numbers so the seed is set within the function call. The estimation process is iterative and is replicated several times in collections called _chains_. The `iter` parameter tells the function how long to run the estimation process in each chain. When several chains are used, their results are combined (assume that this is validated by diagnostic assessments).  
+The `r pkg(tidyposterior)` package uses the [Stan software](https://mc-stan.org/) for specifying and fitting the models via the `r pkg(rstanarm)` package. The functions within that package have default priors (see `?priors` for more details). The following model uses the default priors for all parameters except for the random intercepts (which follow a  _t_-distribution). The estimation process uses random numbers so the seed is set within the function call. The estimation process is iterative and replicated several times in collections called _chains_. The `iter` parameter tells the function how long to run the estimation process in each chain. When several chains are used, their results are combined (assume that this is validated by diagnostic assessments).  
 
 ```{r compare-fit-stan, results = "hide"}
 library(tidyposterior)
@@ -357,10 +357,10 @@ model_post %>%
 
 ```{r four-posteriors}
 #| echo = FALSE,
-#| fig.cap = "Posterior distributions for the coefficient of determination using four different models.",
+#| fig.cap = "Posterior distributions for the coefficient of determination using four different models",
 #| fig.alt = "Posterior distributions for the coefficient of determination using four different models. The distribution corresponding to random forest is largest and has little overlap with the other model's posteriors."
 
-x_lab <- expression(Posterior ~ "for" ~ mean ~ R^2)
+x_lab <- expression(Posterior ~ "for" ~ mean ~ italic(R^2))
 
 model_post %>% 
   mutate(model = forcats::fct_inorder(model)) %>%
@@ -370,7 +370,7 @@ model_post %>%
   labs(x = x_lab)
 ```
 
-These histograms describe the estimated probability distributions of the mean R<sup>2</sup> value for each model. There is some overlap, especially for the three linear models. 
+These histograms describe the estimated probability distributions of the mean $R^2$ value for each model. There is some overlap, especially for the three linear models. 
 
 There is also a basic `autoplot()` method for the model results, shown in Figure \@ref(fig:credible-intervals), as well as the tidied object that shows overlaid density plots.
 
@@ -382,7 +382,7 @@ autoplot(rsq_anova) +
 
 ```{r credible-intervals, ref.label = "compare-autoplot-intervals"}
 #| echo = FALSE,
-#| fig.cap = "Credible intervals derived from the model posterior distributions.",
+#| fig.cap = "Credible intervals derived from the model posterior distributions",
 #| fig.alt = "Credible intervals derived from the model posterior distributions. Random forest shows the best results with no overlap with the other credible intervals. "
 ```
 
@@ -407,7 +407,7 @@ rqs_diff %>%
 ```{r posterior-difference}
 #| echo = FALSE,
 #| fig.height = 3,
-#| fig.cap = "Posterior distribution for the difference in the coefficient of determination.",
+#| fig.cap = "Posterior distribution for the difference in the coefficient of determination",
 #| fig.alt = "The posterior distribution for the difference in the coefficient of determination. The distribution has almost no overlap with zero. "
 
 rqs_diff <-
@@ -416,7 +416,7 @@ rqs_diff <-
                   list_2 = "basic_lm",
                   seed = 1104)
 
-x_lab <- expression(Posterior ~ "for" ~ mean ~ difference ~ "in" ~ R^2 ~ (splines + interaction - basic))
+x_lab <- expression(Posterior ~ "for" ~ mean ~ difference ~ "in" ~ italic(R^2) ~ (splines + interaction - basic))
 
 rqs_diff %>% 
   as_tibble() %>% 
@@ -435,14 +435,14 @@ summary(rqs_diff) %>%
 
 The `probability` column reflects the proportion of the posterior that is greater than zero. This is the probability that the positive difference is real. The value is not close to zero, providing a strong case for statistical significance, i.e., the idea that statistically the actual difference is not zero. 
 
-However, the estimate of the mean difference is fairly close to zero. Recall that the practical effect size we suggested previously is 2%. With a posterior distribution, we can also compute the probability of being practically significant. In Bayesian analysis, this is a "ROPE estimate" (for Region Of Practical Equivalence, @kruschke2018bayesian). To estimate this, the `size` option to the summary function is used: 
+However, the estimate of the mean difference is fairly close to zero. Recall that the practical effect size we suggested previously is 2%. With a posterior distribution, we can also compute the probability of being practically significant. In Bayesian analysis, this is a *ROPE estimate* (for Region Of Practical Equivalence, @kruschke2018bayesian). To estimate this, the `size` option to the summary function is used: 
 
 ```{r compare-lm-pract}
 summary(rqs_diff, size = 0.02) %>% 
   select(contrast, starts_with("pract"))
 ```
 
-The `pract_equiv` column is the proportion of the posterior that is within `[-size, size]` (the columns `pract_neg` and `pract_pos` are the proportions that are below and above this interval). This large value indicates that, for our effect size, there is an overwhelming probability that the two models are practically the same. Even though the previous plot showed that our difference is likely non-zero, the equivalence test suggests that it is small enough to not be practical meaningful.
+The `pract_equiv` column is the proportion of the posterior that is within `[-size, size]` (the columns `pract_neg` and `pract_pos` are the proportions that are below and above this interval). This large value indicates that, for our effect size, there is an overwhelming probability that the two models are practically the same. Even though the previous plot showed that our difference is likely nonzero, the equivalence test suggests that it is small enough to not be practically meaningful.
 
 The same process could be used to compare the random forest model to one or both of the linear regressions that were resampled. In fact, when `perf_mod()` is used with a workflow set, the `autoplot()` method can show the `pract_equiv`  results that compare each workflow to the current best (the random forest model, in this case). 
 
@@ -454,11 +454,11 @@ autoplot(rsq_anova, type = "ROPE", size = 0.02) +
 
 ```{r practical-equivalence, ref.label = "compare-rope-plot"}
 #| echo = FALSE,
-#| fig.cap = "Probability of practical equivalence for an effect size of 2%.",
-#| fig.alt = "Probability of practical equivalence for an effect size of 2%. No other models have a non-zero change of matching the random forest results."
+#| fig.cap = "Probability of practical equivalence for an effect size of 2%",
+#| fig.alt = "Probability of practical equivalence for an effect size of 2%. No other models have a nonzero change of matching the random forest results."
 ```
 
-Figure \@ref(fig:practical-equivalence) shows us that none of the linear models come close to the random forest model when a 2% practical effect size is used. 
+Figure \@ref(fig:practical-equivalence) shows us that none of the linear models comes close to the random forest model when a 2% practical effect size is used. 
 
 ### The effect of the amount of resampling {-}
 
@@ -475,10 +475,10 @@ ggplot(intervals,
 ```{r intervals-over-replicates}
 #| fig.height = 3, 
 #| echo = FALSE,
-#| fig.cap = "Probability of practical equivalence to the random forest model.",
+#| fig.cap = "Probability of practical equivalence to the random forest model",
 #| fig.alt = "The probability of practical equivalence to the random forest model."
 
-y_lab <- expression(Mean ~ difference ~ "in" ~ R^2)
+y_lab <- expression(Mean ~ difference ~ "in" ~ italic(R^2))
 
 ggplot(intervals,
        aes(x = resamples, y = mean)) +
@@ -492,6 +492,6 @@ The width of the intervals decreases as more resamples are added. Clearly, going
 
 ## Chapter Summary {#compare-summary}
 
-This chapter describes formal statistical methods for testing differences in performance between models. We demonstrated the within-resample effect, where results for the same resample tend to be similar; this aspect of resampled summary statistics requires appropriate analysis in order for valid model comparisons. Further, although statistical significance and practical significance are both important concepts for model comparisons, they are different. 
+This chapter described formal statistical methods for testing differences in performance between models. We demonstrated the within-resample effect, where results for the same resample tend to be similar; this aspect of resampled summary statistics requires appropriate analysis in order for valid model comparisons. Further, although statistical significance and practical significance are both important concepts for model comparisons, they are different. 
 
 
