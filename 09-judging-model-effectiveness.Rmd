@@ -22,7 +22,7 @@ The best approach to empirical validation involves using _resampling_ methods th
 When judging model effectiveness, your decision about which metrics to examine can be critical. In later chapters, certain model parameters will be empirically optimized and a primary performance metric will be used to choose the best sub-model. Choosing the wrong metric can easily result in unintended consequences. For example, two common metrics for regression models are the root mean squared error (RMSE) and the coefficient of determination (a.k.a. $R^2$). The former measures _accuracy_ while the latter measures _correlation_. These are not necessarily the same thing. Figure \@ref(fig:performance-reg-metrics) demonstrates the difference between the two. 
 
 ```{r performance-reg-metrics, echo = FALSE}
-#| fig.cap = "Observed versus predicted values for models that are optimized using the RMSE compared to the coefficient of determination.",
+#| fig.cap = "Observed versus predicted values for models that are optimized using the RMSE compared to the coefficient of determination",
 #| fig.alt = "Scatter plots of numeric observed versus predicted values for models that are optimized using the RMSE and the coefficient of determination. The former results in results that are close to the 45 degree line of identity while the latter shows results with a tight linear correlation but falls well off of the line of identity."
 set.seed(234)
 n <- 200
@@ -37,7 +37,7 @@ reg_ex <-
   mutate(approach = factor(
     approach, 
     levels = c("RMSE optimized", "R^2 optimized"),
-    labels = c(expression(RMSE ~ optimized), expression(R^2 ~ optimized)))
+    labels = c(expression(RMSE ~ optimized), expression(italic(R^2) ~ optimized)))
   )
 
 ggplot(reg_ex, aes(x = observed, y = predicted)) + 
@@ -99,7 +99,7 @@ A longstanding issue with the practice of inferential statistics is that, with a
 
 A superficial, but not uncommon, approach to this analysis would be to fit a large model with main effects and interactions, then use statistical tests to find the minimal set of model terms that are statistically significant at some pre-defined level. If a full model with the three factors and their two- and three-way interactions were used, an initial phase would be to test the interactions using sequential likelihood ratio tests [@HosmerLemeshow]. Let's step through this kind of approach for the example Alzheimer's disease data:
 
-* When comparing the model with all two-way interactions to one with the additional three-way interaction, the likelihood ratio tests produces a p-value of `r three_factor_test[2, "Pr(>Chi)"]`. This implies that there is no evidence that the `r abs(three_factor_test[2, "Df"])` additional model terms associated with the three-way interaction explain enough of the variation in the data to keep them in the model. 
+* When comparing the model with all two-way interactions to one with the additional three-way interaction, the likelihood ratio tests produces a p-value of `r three_factor_test[2, "Pr(>Chi)"]`. This implies that there is no evidence that the `r xfun::numbers_to_words(abs(three_factor_test[2, "Df"]))` additional model terms associated with the three-way interaction explain enough of the variation in the data to keep them in the model. 
 
 * Next, the two-way interactions are similarly evaluated against the model with no interactions. The p-value here is `r two_factor_test[2, "Pr(>Chi)"]`. This is somewhat borderline, but, given the small sample size, it would be prudent to conclude that there is evidence that some of the `r abs(two_factor_test[2, "Df"])` possible two-way interactions are important to the model. 
 
@@ -107,7 +107,7 @@ A superficial, but not uncommon, approach to this analysis would be to fit a lar
 
 While shallow, this analysis strategy is common in practice as well as in the literature. This is especially true if the practitioner has limited formal training in data analysis. 
 
-One missing piece of information in this approach is how closely this model fits the actual data. Using resampling methods, discussed in Chapter \@ref(resampling), we can estimate the accuracy of this model to be about `r round(two_factor_res * 100, 1)`%. Accuracy is often a poor measure of model performance; we use it here because it is commonly understood. If the model has `r round(two_factor_res * 100, 1)`% fidelity to the data, should we trust conclusions it produces? We might think so until we realize that the baseline rate of non-impaired patients in the data is `r round(mean(ad_data$Class == "Control") * 100, 1)`%. This means that, despite our statistical analysis, the two-factor model appears to be only `r round((two_factor_res - mean(ad_data$Class == "Control")) * 100, 1)`% better than a simple heuristic that always predicts patients to be unimpaired, irregardless of the observed data. 
+One missing piece of information in this approach is how closely this model fits the actual data. Using resampling methods, discussed in Chapter \@ref(resampling), we can estimate the accuracy of this model to be about `r round(two_factor_res * 100, 1)`%. Accuracy is often a poor measure of model performance; we use it here because it is commonly understood. If the model has `r round(two_factor_res * 100, 1)`% fidelity to the data, should we trust conclusions it produces? We might think so until we realize that the baseline rate of nonimpaired patients in the data is `r round(mean(ad_data$Class == "Control") * 100, 1)`%. This means that, despite our statistical analysis, the two-factor model appears to be only `r round((two_factor_res - mean(ad_data$Class == "Control")) * 100, 1)`% better than a simple heuristic that always predicts patients to be unimpaired, regardless of the observed data. 
 
 :::rmdnote
 The point of this analysis is to demonstrate the idea that optimization of statistical characteristics of the model does not imply that the model fits the data well. Even for purely inferential models, some measure of fidelity to the data should accompany the inferential results. Using this, the consumers of the analyses can calibrate their expectations of the results. 
@@ -141,7 +141,7 @@ ames_test_res <- bind_cols(ames_test_res, ames_test %>% select(Sale_Price))
 ames_test_res
 ```
 
-We see that these values mostly look close but we don't yet have a quantitative understanding of how the model is doing because we haven't computed any performance metrics. Note that both the predicted and observed outcomes are in log10 units. It is best practice to analyze the predictions on the transformed scale (if one were used) even if the predictions are reported using the original units. 
+We see that these values mostly look close, but we don't yet have a quantitative understanding of how the model is doing because we haven't computed any performance metrics. Note that both the predicted and observed outcomes are in log-10 units. It is best practice to analyze the predictions on the transformed scale (if one were used) even if the predictions are reported using the original units. 
 
 Let's plot the data in Figure \@ref(fig:ames-performance-plot) before computing metrics: 
 
@@ -157,7 +157,7 @@ ggplot(ames_test_res, aes(x = Sale_Price, y = .pred)) +
 
 ```{r ames-performance-plot, ref.label = "performance-ames-plot"}
 #| echo = FALSE,
-#| fig.cap = "Observed versus predicted values for an Ames regression model, with log-10 units on both axes.",
+#| fig.cap = "Observed versus predicted values for an Ames regression model, with log-10 units on both axes",
 #| fig.alt = "Scatter plots of numeric observed versus predicted values for an Ames regression model. Both axes use log-10 units. The model shows good concordance with some poorly fitting points at high and low prices."
 ```
 
@@ -195,7 +195,7 @@ tibble(two_class_example)
 
 The second and third columns are the predicted class probabilities for the test set while `predicted` are the discrete predictions. 
 
-For the hard class predictions, there are a variety of `r pkg(yardstick)` functions that are helpful: 
+For the hard class predictions, a variety of `r pkg(yardstick)` functions are helpful: 
 
 ```{r performance-class-metrics}
 # A confusion matrix: 
@@ -215,10 +215,10 @@ classification_metrics <- metric_set(accuracy, mcc, f_meas)
 classification_metrics(two_class_example, truth = truth, estimate = predicted)
 ```
 
-The Matthews correlation coefficient and F1 score both summarize the confusion matrix, but compared to `mcc()` which measures the quality of both positive and negative examples, the `f_meas()` metric emphasizes the positive class, i.e., the event of interest. For binary classification data sets like this example, `r pkg(yardstick)` functions have a standard argument called `event_level` to distinguish positive and negative levels. The default (which we used in this code) is that the *first* level of the outcome factor is the event of interest.
+The Matthews correlation coefficient and F1 score both summarize the confusion matrix, but compared to `mcc()`, which measures the quality of both positive and negative examples, the `f_meas()` metric emphasizes the positive class, i.e., the event of interest. For binary classification data sets like this example, `r pkg(yardstick)` functions have a standard argument called `event_level` to distinguish positive and negative levels. The default (which we used in this code) is that the *first* level of the outcome factor is the event of interest.
 
 :::rmdnote
-There is some heterogeneity in R functions in this regard; some use the first level and others the second to denote the event of interest. We consider it more intuitive that the first level is the most important. The second level logic is borne of encoding the outcome as 0/1 (in which case the second value is the event) and unfortunately remains in some packages. However, tidymodels (along with many other R packages) require_a categorical outcome to be encoded as a factor and, for this reason, the legacy justification for the second level as the event becomes irrelevant.  
+There is some heterogeneity in R functions in this regard; some use the first level and others the second to denote the event of interest. We consider it more intuitive that the first level is the most important. The second level logic is borne of encoding the outcome as 0/1 (in which case the second value is the event) and unfortunately remains in some packages. However, tidymodels (along with many other R packages) require a categorical outcome to be encoded as a factor and, for this reason, the legacy justification for the second level as the event becomes irrelevant.  
 :::
 
 As an example where the second level is the event: 
@@ -248,7 +248,7 @@ autoplot(two_class_curve)
 
 ```{r example-roc-curve, ref.label = "performance-2class-roc-curve"}
 #| echo = FALSE,
-#| fig.cap = "Example ROC curve.",
+#| fig.cap = "Example ROC curve",
 #| fig.alt = "An example ROC curve. The x-axis is one minus specificity and the y-axis is sensitivity. The curve bows towards the upper left-hand side of the plot area."
 ```
 
@@ -256,7 +256,7 @@ If the curve was close to the diagonal line, then the model’s predictions woul
 
 There are a number of other functions that use probability estimates, including `gain_curve()`, `lift_curve()`, and `pr_curve()`. 
 
-## Multi-Class Classification Metrics 
+## Multiclass Classification Metrics 
 
 What about data with three or more classes? To demonstrate, let's explore a different example data set that has four classes: 
 
@@ -275,9 +275,9 @@ accuracy(hpc_cv, obs, pred)
 mcc(hpc_cv, obs, pred)
 ```
 
-Note that, in these results, a "multiclass" `.estimator` is listed. Like "binary", this indicates that the formula for outcomes with three or more class levels was used. The Matthews correlation coefficient was originally designed for two classes but has been extended to cases with more class levels. 
+Note that, in these results, a "multiclass" `.estimator` is listed. Like "binary," this indicates that the formula for outcomes with three or more class levels was used. The Matthews correlation coefficient was originally designed for two classes but has been extended to cases with more class levels. 
 
-There are methods for taking metrics designed to handle outcomes with only two classes and extend them for outcomes with more than two classes. For example, a metric such as sensitivity measures the true positive rate which, by definition, is specific to two classes (i.e., "event" and "non-event"). How can this metric be used in our example data? 
+There are methods for taking metrics designed to handle outcomes with only two classes and extend them for outcomes with more than two classes. For example, a metric such as sensitivity measures the true positive rate which, by definition, is specific to two classes (i.e., "event" and "nonevent"). How can this metric be used in our example data? 
 
 There are wrapper methods that can be used to apply sensitivity to our four-class outcome. These options are macro-averaging, macro-weighted averaging, and micro-averaging: 
 
@@ -289,7 +289,7 @@ There are wrapper methods that can be used to apply sensitivity to our four-clas
 
 See @wu2017unified and @OpitzBurst for more on extending classification metrics to outcomes with more than two classes. 
 
-Using sensitivity as an example, the usual two-class calculation is the ratio of the number of correctly predicted events divided by the number of true events. The "manual" calculations for these averaging methods are: 
+Using sensitivity as an example, the usual two-class calculation is the ratio of the number of correctly predicted events divided by the number of true events. The manual calculations for these averaging methods are: 
 
 ```{r performance-sens-manual}
 class_totals <- 
@@ -320,7 +320,7 @@ one_versus_all %>%
   )
 ```
 
-Thankfully, there is no need to manually implement these averaging methods. Instead, `r pkg(yardstick)` functions can automatically apply these method via the `estimator` argument: 
+Thankfully, there is no need to manually implement these averaging methods. Instead, `r pkg(yardstick)` functions can automatically apply these methods via the `estimator` argument: 
 
 ```{r performance-sens}
 sensitivity(hpc_cv, obs, pred, estimator = "macro")
@@ -328,13 +328,13 @@ sensitivity(hpc_cv, obs, pred, estimator = "macro_weighted")
 sensitivity(hpc_cv, obs, pred, estimator = "micro")
 ```
 
-When dealing with probability estimates, there are some metrics with multi-class analogs. For example, @HandTill determined a multi-class technique for ROC curves. In this case, _all_ of the class probability columns must be given to the function:
+When dealing with probability estimates, there are some metrics with multiclass analogs. For example, @HandTill determined a multiclass technique for ROC curves. In this case, _all_ of the class probability columns must be given to the function:
 
 ```{r performance-multi-class-roc}
 roc_auc(hpc_cv, obs, VF, F, M, L)
 ```
 
-Macro-weighted averaging is also available as an option for applying this metric to a multi-class outcome:
+Macro-weighted averaging is also available as an option for applying this metric to a multiclass outcome:
 
 ```{r performance-multi-class-roc-macro}
 roc_auc(hpc_cv, obs, VF, F, M, L, estimator = "macro_weighted")
@@ -348,7 +348,7 @@ hpc_cv %>%
   accuracy(obs, pred)
 ```
 
-The groupings also translate to the `autoplot()` methods, with results in in Figure \@ref(fig:grouped-roc-curves).
+The groupings also translate to the `autoplot()` methods, with results shown in Figure \@ref(fig:grouped-roc-curves).
 
 ```{r performance-multi-class-roc-grouped, eval=FALSE}
 # Four 1-vs-all ROC curves for each fold
@@ -360,12 +360,12 @@ hpc_cv %>%
 
 ```{r grouped-roc-curves, ref.label = "performance-multi-class-roc-grouped"}
 #| echo = FALSE,
-#| fig.cap = "Resampled ROC curves for each of the four outcome classes.",
+#| fig.cap = "Resampled ROC curves for each of the four outcome classes",
 #| fig.alt = "Resampled ROC curves for each of the four outcome classes. There are four panels for classes VF, F, M, and L. Each panel contains ten ROC curves for each of the resampled data sets."
 ```
 
-This visualization shows us that the different groups all perform about the same, but that the `VF` class is predicted better than the `F` or `M` classes, since the `VF` ROC curves are up in the top left corner more. This example uses resamples as the groups, but any grouping in your data can be used. This `autoplot()` method can be a quick visualization method for model effectiveness across outcome classes and/or groups. 
+This visualization shows us that the different groups all perform about the same, but that the `VF` class is predicted better than the `F` or `M` classes, since the `VF` ROC curves are more in the top-left corner. This example uses resamples as the groups, but any grouping in your data can be used. This `autoplot()` method can be a quick visualization method for model effectiveness across outcome classes and/or groups. 
 
 ## Chapter Summary {#performance-summary}
 
-Different metrics measure different aspects of a model fit, e.g., RMSE measures accuracy while the R^2 measures correlation. Measuring model performance is important even when a given model will not be used primarily for prediction; predictive power is also important for inferential or descriptive models. Functions from the `r pkg(yardstick)` package measure the effectiveness of a model using data. The primary tidymodels interface uses tidyverse principles and data frames (as opposed to having vector arguments). Different metrics are appropriate for regression and classification metrics and, within these, there are sometimes different ways to estimate the statistics, such as for multi-class outcomes.
+Different metrics measure different aspects of a model fit, e.g., RMSE measures accuracy while the $R^2$ measures correlation. Measuring model performance is important even when a given model will not be used primarily for prediction; predictive power is also important for inferential or descriptive models. Functions from the `r pkg(yardstick)` package measure the effectiveness of a model using data. The primary tidymodels interface uses tidyverse principles and data frames (as opposed to having vector arguments). Different metrics are appropriate for regression and classification metrics and, within these, there are sometimes different ways to estimate the statistics, such as for multiclass outcomes.
