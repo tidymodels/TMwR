@@ -11,7 +11,7 @@ neighborhood_counts <- count(ames_train, Neighborhood)
 
 # Encoding Categorical Data  {#categorical}
 
-For statistical modeling in R, the preferred representation for categorical or nominal data is a _factor_, which is a variable which can take on a limited number of different values; internally, factors are stored as a vector of integer values together with a set of text labels.[^python] In Section \@ref(dummies) we introduced feature engineering approaches to encode or transform qualitative or nominal data into a representation better suited for most model algorithms. We discussed how to transform a categorical variable, such as the `Bldg_Type` in our Ames housing data (with levels `r knitr::combine_words(glue::backtick(levels(ames_train$Bldg_Type)))`), to a set of dummy or indicator variables like those shown in Table \@ref(tab:encoding-dummies).
+For statistical modeling in R, the preferred representation for categorical or nominal data is a _factor_, which is a variable that can take on a limited number of different values; internally, factors are stored as a vector of integer values together with a set of text labels.[^python] In Section \@ref(dummies) we introduced feature engineering approaches to encode or transform qualitative or nominal data into a representation better suited for most model algorithms. We discussed how to transform a categorical variable, such as the `Bldg_Type` in our Ames housing data (with levels `r knitr::combine_words(glue::backtick(levels(ames_train$Bldg_Type)))`), to a set of dummy or indicator variables like those shown in Table \@ref(tab:encoding-dummies).
 
 [^python]: This is in contrast to statistical modeling in Python, where categorical variables are often directly represented by integers alone, such as `0, 1, 2` representing red, blue, and green.
 
@@ -47,15 +47,15 @@ However, for some realistic data sets, straightforward dummy variables are not a
 
 A minority of models, such as those based on trees or rules, can handle categorical data natively and do not require encoding or transformation of these kinds of features. A tree-based model can natively partition a variable like `Bldg_Type` into groups of factor levels, perhaps `OneFam` alone in one group and `Duplex` and `Twnhs` together in another group. Naive Bayes models are another example where the structure of the model can deal with categorical variables natively; distributions are computed within each level, for example, for all the different kinds of `Bldg_Type` in the data set.
 
-These models that can handle categorical features natively can _also_ deal with numeric, continuous features, making the transformation or encoding of such variables optional. Does this help in some way, perhaps perhaps with model performance or time to train models? Typically no, as Section 5.7 of @fes shows using benchmark data sets with untransformed factor variables compared with transformed dummy variables for those same features. In short, using dummy encodings did not typically result in better model performance but often required more time to train the models. 
+These models that can handle categorical features natively can _also_ deal with numeric, continuous features, making the transformation or encoding of such variables optional. Does this help in some way, perhaps with model performance or time to train models? Typically no, as Section 5.7 of @fes shows using benchmark data sets with untransformed factor variables compared with transformed dummy variables for those same features. In short, using dummy encodings did not typically result in better model performance but often required more time to train the models. 
 
 :::rmdnote
-We advise starting with untransformed categorical variables when a model allows it, and point out that more complex encodings often do not result in better performance for such models.
+We advise starting with untransformed categorical variables when a model allows it; note that more complex encodings often do not result in better performance for such models.
 :::
 
 ## Encoding Ordinal Predictors
 
-Sometimes qualitative columns can be *ordered*, such as "low", "medium", and "high". In base R, the default encoding strategy is to make new numeric columns that are polynomial expansions of the data. For columns that have five ordinal values, like the example shown in Table \@ref(tab:encoding-ordered-table), the factor column is replaced with columns for linear, quadratic, cubic, and quartic terms: 
+Sometimes qualitative columns can be *ordered*, such as "low," "medium," and "high". In base R, the default encoding strategy is to make new numeric columns that are polynomial expansions of the data. For columns that have five ordinal values, like the example shown in Table \@ref(tab:encoding-ordered-table), the factor column is replaced with columns for linear, quadratic, cubic, and quartic terms: 
 
 ```{r encoding-ordered-table, echo = FALSE, results = 'asis'}
 ord_vals <- c("none", "a little", "some", "a bunch", "copious amounts")
@@ -73,14 +73,14 @@ bind_cols(ord_data, ord_contrasts) %>%
   kable_styling(full_width = FALSE)
 ```
 
-While this is not unreasonable, it is not an approach that people tend to find useful. For example, an 11-degree polynomial is probably not the most effective way of encoding an ordinal factor for the months of the year.  Instead, consider trying recipe steps related to ordered factors, such as `step_unorder()`, to convert to regular factors, and `step_ordinalscore()` which maps specific numeric values to each factor level. 
+While this is not unreasonable, it is not an approach that people tend to find useful. For example, an 11-degree polynomial is probably not the most effective way of encoding an ordinal factor for the months of the year.  Instead, consider trying recipe steps related to ordered factors, such as `step_unorder()`, to convert to regular factors, and `step_ordinalscore()`, which maps specific numeric values to each factor level. 
 
 ## Using the Outcome for Encoding Predictors
 
 There are multiple options for encodings more complex than dummy or indicator variables. One method called _effect_ or _likelihood encodings_ replaces the original categorical variables with a single numeric column that measures the effect of those data [@MicciBarreca2001; @Zumel2019]. For example, for the neighborhood predictor in the Ames housing data, we can compute the mean or median sale price for each neighborhood (as shown in Figure \@ref(fig:encoding-mean-price)) and substitute these means for the original data values:
 
 ```{r encoding-mean-price}
-#| fig.cap = "Mean home price for neighborhoods in the Ames training set, which can be used as an effect encoding for this categorical variable.",
+#| fig.cap = "Mean home price for neighborhoods in the Ames training set, which can be used as an effect encoding for this categorical variable",
 #| fig.alt = "A chart with points and error bars for the mean home price for neighborhoods in the Ames training set. The most expensive neighborhoods are Northridge and Stone Brook, while the least expensive are Iowa DOT and Railroad and Meadow Village."
 ames_train %>%
   group_by(Neighborhood) %>%
@@ -139,7 +139,7 @@ When you create an effect encoding for your categorical variable, you are effect
 
 ### Effect encodings with partial pooling
 
-Creating an effect encoding with `step_lencode_glm()` estimates the effect separately for each factor level (in this example, neighborhood). However, some of these neighborhoods have many houses in them and some have only a few. There is much more uncertainty in our measurement of price for the single training set home in the `r neighborhood_counts %>% slice_min(n) %>% pull(Neighborhood) %>% as.character()` neighborhood than the `r neighborhood_counts %>% slice_max(n) %>% pull(n)` training set homes in North Ames. We can use *partial pooling* to adjust these estimates so that levels with small sample sizes are shrunken toward the overall mean. The effects for each level are modeled all at once using a mixed or hierarchical generalized linear model:
+Creating an effect encoding with `step_lencode_glm()` estimates the effect separately for each factor level (in this example, neighborhood). However, some of these neighborhoods have many houses in them, and some have only a few. There is much more uncertainty in our measurement of price for the single training set home in the `r neighborhood_counts %>% slice_min(n) %>% pull(Neighborhood) %>% as.character()` neighborhood than the `r neighborhood_counts %>% slice_max(n) %>% pull(n)` training set homes in North Ames. We can use *partial pooling* to adjust these estimates so that levels with small sample sizes are shrunken toward the overall mean. The effects for each level are modeled all at once using a mixed or hierarchical generalized linear model:
 
 
 ```{r}
@@ -179,7 +179,7 @@ You can use a fully Bayesian hierarchical model for the effects in the same way 
 Let's visually compare the effects using partial pooling vs. no pooling in Figure \@ref(fig:encoding-compare-pooling):
 
 ```{r encoding-compare-pooling, message=FALSE}
-#| fig.cap = "Comparing the effect encodings for neighborhood estimated without pooling to those with partial pooling.",
+#| fig.cap = "Comparing the effect encodings for neighborhood estimated without pooling to those with partial pooling",
 #| fig.alt = "A scatter chart comparing the effect encodings for neighborhood estimated without pooling to those with partial pooling. Almost all neighborhoods are very close to the slope = 1 line, but the neighborhoods with the fewest homes are further away."
 glm_estimates %>%
   rename(`no pooling` = value) %>%
@@ -215,7 +215,7 @@ ames_hashed %>%
   select(Neighborhood, Hash)
 ```
 
-If we input Briardale to this hashing function, we will always get the same output. The neighborhoods in this case are called the "keys", while the outputs are the "hashes".
+If we input Briardale to this hashing function, we will always get the same output. The neighborhoods in this case are called the "keys," while the outputs are the "hashes."
 
 :::rmdnote
 A hashing function takes an input of variable size and maps it to an output of fixed size. Hashing functions are commonly used in cryptography and databases.
@@ -276,7 +276,7 @@ hash_table %>%
   kable_styling(full_width = FALSE)
 ```
 
-The number of neighborhoods mapped to each hash value varies between `r min(hash_table$value)` and `r max(hash_table$value)`. All of the hash values greater than one are examples of hash collisions.
+The number of neighborhoods mapped to each hash value varies between `r xfun::numbers_to_words(min(hash_table$value))` and `r xfun::numbers_to_words(max(hash_table$value))`. All of the hash values greater than one are examples of hash collisions.
 
 What are some things to consider when using feature hashing?
 
@@ -289,14 +289,14 @@ What are some things to consider when using feature hashing?
 - You can reduce hash collisions with a _signed_ hash by using `signed = TRUE`. This expands the values from only 1 to either +1 or -1, depending on the sign of the hash.
 
 :::rmdwarn
-It is likely that some hash columns will contain all zeros, as we see in this example. We recommend a zero-variance filter via `step_zv()` to filter such columns out.
+It is likely that some hash columns will contain all zeros, as we see in this example. We recommend a zero-variance filter via `step_zv()` to filter out such columns.
 :::
 
 ## More Encoding Options
 
-There are even more options available for transforming factors to a numeric representation.
+Even more options are available for transforming factors to a numeric representation.
 
-We can build a full set of *entity embeddings* [@Guo2016] to transform a categorical variable with many levels to a set of lower-dimensional vectors. This approach is best suited to a nominal variable with many category levels, many more than the example we've used in the chapter with neighborhoods in Ames.
+We can build a full set of *entity embeddings* [@Guo2016] to transform a categorical variable with many levels to a set of lower-dimensional vectors. This approach is best suited to a nominal variable with many category levels, many more than the example we've used with neighborhoods in Ames.
 
 :::rmdnote
 The idea of entity embeddings comes from the methods used to create word embeddings from text data. See Chapter 5 of @Hvitfeldt2021 for more on word embeddings.
@@ -304,11 +304,11 @@ The idea of entity embeddings comes from the methods used to create word embeddi
 
 Embeddings for a categorical variable can be learned via a TensorFlow neural network with the `step_embed()` function in `r pkg(embed)`. We can use the outcome alone or optionally the outcome plus a set of additional predictors. Like in feature hashing, the number of new encoding columns to create is a hyperparameter of the feature engineering. We also must make decisions about the neural network structure (the number of hidden units) and how to fit the neural network (how many epochs to train, how much of the data to use for validation in measuring metrics).
 
-Yet one more option available when we are dealing with a binary outcome is to transform a set of category levels based on their association with the binary outcome. This *weight of evidence* transformation [@Good1985] uses the logarithm of the "Bayes factor" (the ratio of the posterior odds to the prior odds) and creates a dictionary mapping each category level to a WoE value. WoE encodings can be determined with the `step_woe()` function in `r pkg(embed)`.
+Yet one more option available for dealing with a binary outcome is to transform a set of category levels based on their association with the binary outcome. This *weight of evidence* (WoE) transformation [@Good1985] uses the logarithm of the "Bayes factor" (the ratio of the posterior odds to the prior odds) and creates a dictionary mapping each category level to a WoE value. WoE encodings can be determined with the `step_woe()` function in `r pkg(embed)`.
 
 ## Chapter Summary {#categorical-summary}
 
-In this chapter, you learned about using preprocessing recipes for encoding categorical predictors. The most straightforward option for transforming a categorical variable to a numeric representation is to create dummy variables from the levels, but this option does not work well when you have a variable with high cardinality (too many levels) or when you may see novel values at prediction time (new levels). One option in such a situation is to create _effect encodings_, a supervised encoding method that uses the outcome. Effect encodings can be learned with or without pooling the categories together. Another option uses a _hashing_ function to map category levels to a new, smaller set of dummy variables. Feature hashing is fast and has a low-memory footprint. Other options include entity embeddings (learned via a neural network) and weight of evidence transformation.
+In this chapter, you learned about using preprocessing recipes for encoding categorical predictors. The most straightforward option for transforming a categorical variable to a numeric representation is to create dummy variables from the levels, but this option does not work well when you have a variable with high cardinality (too many levels) or when you may see novel values at prediction time (new levels). One option in such a situation is to create _effect encodings_, a supervised encoding method that uses the outcome. Effect encodings can be learned with or without pooling the categories. Another option uses a _hashing_ function to map category levels to a new, smaller set of dummy variables. Feature hashing is fast and has a low-memory footprint. Other options include entity embeddings (learned via a neural network) and weight of evidence transformation.
 
 Most model algorithms require some kind of transformation or encoding of this type for categorical variables. A minority of models, including those based on trees and rules, can handle categorical variables natively and do not require such encodings.
 
