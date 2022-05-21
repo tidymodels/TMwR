@@ -13,7 +13,7 @@ load("RData/concrete_results.RData")
 # Ensembles of Models {#ensembles}
 
 
-A model ensemble, where the predictions of multiple single learners are aggregated together to make one prediction, can produce a high-performance final model. The most popular methods for creating ensemble models are bagging [@breiman1996bagging], random forest [@ho1995random; @breiman2001random], and boosting [@freund1997decision]. Each of these methods combines the predictions from multiple versions of the same type of model (e.g., classifications trees). However, one of the earliest methods for creating ensembles is *model stacking* [@wolpert1992stacked; @breiman1996stacked]. 
+A model ensemble, where the predictions of multiple single learners are aggregated to make one prediction, can produce a high-performance final model. The most popular methods for creating ensemble models are bagging [@breiman1996bagging], random forest [@ho1995random; @breiman2001random], and boosting [@freund1997decision]. Each of these methods combines the predictions from multiple versions of the same type of model (e.g., classifications trees). However, one of the earliest methods for creating ensembles is *model stacking* [@wolpert1992stacked; @breiman1996stacked]. 
 
 :::rmdnote
 Model stacking combines the predictions for multiple models of any type. For example, a logistic regression, classification tree, and support vector machine can be included in a stacking ensemble. 
@@ -28,14 +28,14 @@ The process of building a stacked ensemble is:
 2.  Create a model to blend these predictions.
 3.  For each member of the ensemble, fit the model on the original training set.
 
-In subsequent sections, we'll describe this process. However, before proceeding, there is some nomenclature to clarify around the different variations of what we can mean by "the model". This can quickly become an overloaded term when we are working on a complex modeling analysis! Let's consider the multilayer perceptron model (MLP, a.k.a. neural network) created in Chapter \@ref(workflow-sets).
+In subsequent sections, we'll describe this process. However, before proceeding, we'll clarify some nomenclature for the variations of what "the model" can mean. This can quickly become an overloaded term when we are working on a complex modeling analysis! Let's consider the multilayer perceptron (MLP) model (a.k.a. neural network) created in Chapter \@ref(workflow-sets).
 
-In general, we'll talk about a "multilayer perceptron model" as the *type* of model. Linear regression and support vector machines are other model types.
+In general, we'll talk about an MLP model as the *type* of model. Linear regression and support vector machines are other model types.
 
-One important aspect of a model are its tuning parameters. Back in Chapter \@ref(workflow-sets), the MLP model was tuned over 25 tuning parameter values. In the previous chapters, we've called these *candidate tuning parameter* values or *model configurations*. In literature on ensembling these have also been called the "base models". 
+Tuning parameters are an important aspect of a model. Back in Chapter \@ref(workflow-sets), the MLP model was tuned over 25 tuning parameter values. In the previous chapters, we've called these *candidate tuning parameter* values or *model configurations*. In literature on ensembling these have also been called the base models. 
 
 :::rmdnote
-We'll use the term "candidate members" to describe the possible model configurations (of all model types) that might be included in the stacking ensemble.
+We'll use the term *candidate members* to describe the possible model configurations (of all model types) that might be included in the stacking ensemble.
 :::
 
 This means that a stacking model can include different types of models (e.g., trees and neural networks) as well as different configurations of the same model (e.g., trees with different depths). 
@@ -43,9 +43,9 @@ This means that a stacking model can include different types of models (e.g., tr
 
 ## Creating the Training Set for Stacking {#data-stack}
 
-The first step to building a stacked ensemble relies on the assessment set predictions from a resampling scheme with multiple splits. For each data point in the training set, stacking requires an out-of-sample prediction of some sort. For regression models, this is the predicted outcome. For classification models, the predicted classes or probabilities are available for use, although the latter contains more information than the hard class predictions. For a set of models, a data set is assembled where rows are the training set samples and columns are the out-of-sample predictions from the set of multiple models.
+The first step for building a stacked ensemble relies on the assessment set predictions from a resampling scheme with multiple splits. For each data point in the training set, stacking requires an out-of-sample prediction of some sort. For regression models, this is the predicted outcome. For classification models, the predicted classes or probabilities are available for use, although the latter contains more information than the hard class predictions. For a set of models, a data set is assembled where rows are the training set samples and columns are the out-of-sample predictions from the set of multiple models.
 
-Back in Chapter \@ref(workflow-sets), we used five repeats of 10-fold cross-validation to resample the data. This resampling scheme generates five assessment set predictions for each training set sample. Multiple out-of-sample predictions can occur in several other resampling techniques (e.g. bootstrapping). For the purpose of stacking, any replicate predictions for a data point in the training set are averaged so that there is a single prediction per training set sample per candidate member.
+Back in Chapter \@ref(workflow-sets), we used five repeats of 10-fold cross-validation to resample the data. This resampling scheme generates five assessment set predictions for each training set sample. Multiple out-of-sample predictions can occur in several other resampling techniques (e.g., bootstrapping). For the purpose of stacking, any replicate predictions for a data point in the training set are averaged so that there is a single prediction per training set sample per candidate member.
 
 :::rmdnote
 Simple validation sets can also be used with stacking since tidymodels considers this to be a single resample. 
@@ -105,7 +105,7 @@ concrete_stack <-
 concrete_stack
 ```
 
-Recall that racing methods (Section \@ref(racing)) are more efficient since they might not evaluate all configurations on all resamples. Stacking requires that all candidate members have the complete set of resamples. `add_candidates()` only includes the model configurations that have complete results. 
+Recall that racing methods (Section \@ref(racing)) are more efficient since they might not evaluate all configurations on all resamples. Stacking requires that all candidate members have the complete set of resamples. `add_candidates()` includes only the model configurations that have complete results. 
 
 :::rmdnote
 Why use the racing results instead of the full set of candidate models contained in `grid_results`? Either can be used. We found better performance for these data using the racing results. This might be due to the racing method pre-selecting the best model(s) from the larger grid. 
@@ -118,18 +118,18 @@ If we had not used the `r pkg(workflowsets)` package, objects from the `r pkg(tu
 The training set predictions and the corresponding observed outcome data are used to create a *meta-learning model* where the assessment set predictions are the predictors of the observed outcome data. Meta-learning can be accomplished using any model. The most commonly used model is a regularized generalized linear model, which encompasses linear, logistic, and multinomial models. Specifically, regularization via the lasso penalty [@lasso], which uses shrinkage to pull points toward a central value, has several advantages: 
 
 - Using the lasso penalty can remove candidates (and sometimes whole model types) from the ensemble. 
-- The correlation between ensemble candidates tends to be very high and regularization helps alleviate this issue. 
+- The correlation between ensemble candidates tends to be very high, and regularization helps alleviate this issue. 
 
-@breiman1996stacked also suggested that, when a linear model is used to blend the predictions, it might be helpful to constrain the blending coefficients to be non-negative. We have generally found this to be good advice and is the default for the `r pkg(stacks)` package (but can be changed via an optional argument). 
+@breiman1996stacked also suggested that, when a linear model is used to blend the predictions, it might be helpful to constrain the blending coefficients to be nonnegative. We have generally found this to be good advice and it is the default for the `r pkg(stacks)` package (but it can be changed via an optional argument). 
 
-Since our outcome is numeric, linear regression is used for the meta-model. Fitting the meta-model is as straightforward as using: 
+Since our outcome is numeric, linear regression is used for the metamodel. Fitting the metamodel is as straightforward as using: 
 
 ```{r ensembles-initial-blend}
 set.seed(2001)
 ens <- blend_predictions(concrete_stack)
 ```
 
-This evaluates the meta-learning model over a pre-defined grid of lasso penalty values and uses an internal resampling method to determine the best value. The `autoplot()` method, shown in Figure \@ref(fig:stacking-autoplot), helps us understand if the default penalization method was sufficient: 
+This evaluates the meta-learning model over a predefined grid of lasso penalty values and uses an internal resampling method to determine the best value. The `autoplot()` method, shown in Figure \@ref(fig:stacking-autoplot), helps us understand if the default penalization method was sufficient: 
 
 ```{r ensembles-initial-blend-plot, eval=FALSE}
 autoplot(ens)
@@ -137,7 +137,7 @@ autoplot(ens)
 
 ```{r stacking-autoplot, ref.label = "ensembles-initial-blend-plot"}
 #| echo = FALSE,
-#| fig.cap = "Results of using the `autoplot()` method on the blended stacks object.",
+#| fig.cap = "Results of using the `autoplot()` method on the blended stacks object",
 #| fig.alt = "The results of using the `autoplot()` method on the blended stacks object."
 ```
 
@@ -150,7 +150,7 @@ set.seed(2002)
 ens <- blend_predictions(concrete_stack, penalty = 10^seq(-2, -0.5, length = 20))
 ```
 
-Now, in Figure \@ref(fig:stacking-autoplot-redo), we see a range where the ensemble model becomes worse than with our first blend (but not by much). The R<sup>2</sup> values increase with more members and larger penalties.
+Now, in Figure \@ref(fig:stacking-autoplot-redo), we see a range where the ensemble model becomes worse than with our first blend (but not by much). The $R^2$ values increase with more members and larger penalties.
 
 ```{r ensembles-autoplot-calc, eval = FALSE}
 autoplot(ens)
@@ -158,12 +158,12 @@ autoplot(ens)
 
 ```{r stacking-autoplot-redo, ref.label = "ensembles-autoplot-calc"}
 #| echo = FALSE,
-#| fig.cap = "The results of using the `autoplot()` method on the updated blended stacks object.",
+#| fig.cap = "The results of using the `autoplot()` method on the updated blended stacks object",
 #| fig.alt = "The results of using the `autoplot()` method on the updated blended stacks object."
 ```
 
 
-It is common, when blending predictions using a regression model, to constrain the blending parameters to be non-negative. For these data, this constraint has the effect of eliminating many of the potential ensemble members; even at fairly low penalties, the ensemble is limited to a fraction of the original eighteen.
+When blending predictions using a regression model, it is common to constrain the blending parameters to be nonnegative. For these data, this constraint has the effect of eliminating many of the potential ensemble members; even at fairly low penalties, the ensemble is limited to a fraction of the original eighteen.
 
 The penalty value associated with the smallest RMSE was `r signif(ens$penalty$penalty, 2)`. Printing the object shows the details of the meta-learning model: 
 
@@ -208,7 +208,7 @@ autoplot(ens, "weights") +
 
 ```{r blending-weights, ref.label = "ensembles-blending-weights"}
 #| echo = FALSE,
-#| fig.cap = "Blending coefficients for the stacking ensemble.",
+#| fig.cap = "Blending coefficients for the stacking ensemble",
 #| fig.alt = blending_alt
 ```
 
@@ -254,11 +254,11 @@ eqn <- paste0("\n\\begin{align}\n \\text{ensemble prediction} &=", eqn, "\n\\end
 cat(eqn)
 ```
 
-where the "predictors" in the equation are the predicted compressive strength values from those models. 
+where the predictors in the equation are the predicted compressive strength values from those models. 
 
 ## Fit the Member Models {#fit-members}
 
-The ensemble contains `r num_coefs` candidate members and we now know how their predictions can be blended into a final prediction for the ensemble. However, these individual models fits have not yet been created. To be able to use the stacking model, `r num_coefs` additional model fits are required. These use the entire training set with the original predictors. 
+The ensemble contains `r num_coefs` candidate members, and we now know how their predictions can be blended into a final prediction for the ensemble. However, these individual models fits have not yet been created. To be able to use the stacking model, `r num_coefs` additional model fits are required. These use the entire training set with the original predictors. 
 
 The `r num_coefs`  models to be fit are:
 
