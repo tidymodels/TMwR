@@ -308,6 +308,7 @@ bean_rec_trained %>%
 
 ```{r bean-pca, ref.label = "dimensionality-pca"}
 #| dev = "png", 
+#| echo = FALSE,
 #| fig.height = 7,
 #| fig.cap = "Principal component scores for the bean validation set, colored by class",
 #| fig.alt = "Principal component scores for the bean validation set, colored by class. The classes separate when the first two components are plotted against one another."
@@ -351,6 +352,7 @@ bean_rec_trained %>%
 ```{r bean-pls, ref.label = "dimensionality-pls"}
 #| dev = "png", 
 #| fig.height = 7,
+#| echo = FALSE
 #| fig.cap = "PLS component scores for the bean validation set, colored by class",
 #| fig.alt = "PLS component scores for the bean validation set, colored by class. The first two PLS components are nearly identical to the first two PCA components."
 ```
@@ -387,6 +389,7 @@ bean_rec_trained %>%
 
 ```{r bean-ica, ref.label = "dimensionality-ica"}
 #| dev = "png", 
+#| echo = FALSE,
 #| fig.height = 7,
 #| fig.cap = "ICA component scores for the bean validation set, colored by class",
 #| fig.alt = "ICA component scores for the bean validation set, colored by class. There is significant overlap in the first two ICA components."
@@ -412,6 +415,7 @@ bean_rec_trained %>%
 
 ```{r bean-umap, ref.label = "dimensionality-umap"}
 #| dev = "png", 
+#| echo = FALSE,
 #| fig.height = 7,
 #| fig.cap = "UMAP component scores for the bean validation set, colored by class",
 #| fig.alt = "UMAP component scores for the bean validation set, colored by class. There is significant overlap in the first two ICA components."
@@ -430,6 +434,7 @@ bean_rec_trained %>%
 
 ```{r bean-umap-supervised, ref.label = "dimensionality-umap-supervised"}
 #| dev = "png", 
+#| echo = FALSE,
 #| fig.height = 7,
 #| fig.cap = "Supervised UMAP component scores for the bean validation set, colored by class",
 #| fig.alt = "Supervised UMAP component scores for the bean validation set, colored by class. There is significant overlap in the first two ICA components."
