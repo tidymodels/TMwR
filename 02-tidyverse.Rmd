@@ -257,7 +257,7 @@ The tidyverse code for these steps is:
 library(tidyverse)
 library(lubridate)
 
-url <- "http://bit.ly/raw-train-data-csv"
+url <- "https://data.cityofchicago.org/api/views/5neh-572f/rows.csv?accessType=DOWNLOAD&bom=true&format=true"
 
 all_stations <- 
   # Step 1: Read in the data.
