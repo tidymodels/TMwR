@@ -28,17 +28,17 @@ In Chapter \@ref(tuning) we demonstrated how users can mark or tag arguments in 
 
 Let's start by looking at two main approaches for assembling a grid. 
 
-## Regular and Non-Regular Grids {#grids}
+## Regular and Nonregular Grids {#grids}
 
-There are two main types of grids. A regular grid combines each parameter (with its corresponding set of possible values) factorially, i.e., by using all combinations of the sets. Alternatively, a non-regular grid is one where the parameter combinations are not formed from a small set of points. 
+There are two main types of grids. A regular grid combines each parameter (with its corresponding set of possible values) factorially, i.e., by using all combinations of the sets. Alternatively, a nonregular grid is one where the parameter combinations are not formed from a small set of points. 
 
 Before we look at each type in more detail, let's consider an example model: the  multilayer perceptron model (a.k.a. single layer artificial neural network).  The parameters marked for tuning are: 
 
-* the number of hidden units, 
+* the number of hidden units
 
-* the number of fitting epochs/iterations in model training, and  
+* the number of fitting epochs/iterations in model training
 
-* the amount of weight decay penalization. 
+* the amount of weight decay penalization
 
 :::rmdnote
 Historically, the number of epochs was determined by early stopping; a separate validation set determined the length of training based on the error rate, since re-predicting the training set led to overfitting. In our case, the use of a weight decay penalty should prohibit overfitting, and there is little harm in tuning the penalty and the number of epochs. 
@@ -111,9 +111,9 @@ mlp_param %>%
   summary()
 ```
 
-For `penalty`, the random numbers are uniform on the log (base 10) scale but the values in the grid are in the natural units. 
+For `penalty`, the random numbers are uniform on the log (base-10) scale but the values in the grid are in the natural units. 
 
-The issue with random grids is that, with small-to-medium grids, random values can result in overlapping parameter combinations. Also, the random grid needs to cover the whole parameter space but the likelihood of good coverage increases with the number of grid values.  Even for a sample of 15 candidate points, Figure \@ref(fig:random-grid) shows some overlap between points for our example multilayer perceptron. 
+The issue with random grids is that, with small-to-medium grids, random values can result in overlapping parameter combinations. Also, the random grid needs to cover the whole parameter space, but the likelihood of good coverage increases with the number of grid values.  Even for a sample of 15 candidate points, Figure \@ref(fig:random-grid) shows some overlap between points for our example multilayer perceptron. 
 
 ```{r grid-random-matrix, eval = FALSE}
 library(ggforce)
@@ -132,7 +132,7 @@ mlp_param %>%
 #| fig.height = 6, 
 #| fig.width = 6,
 #| echo = FALSE,
-#| fig.cap = "Three tuning parameters with 15 points generated at random.",
+#| fig.cap = "Three tuning parameters with 15 points generated at random",
 #| fig.alt = "A scatter plot matrix for three tuning parameters with 20 points generated at random. There are significant gaps in the parameter space."
 ```
 
@@ -155,11 +155,11 @@ mlp_param %>%
 #| fig.height = 6, 
 #| fig.width = 6,
 #| echo = FALSE,
-#| fig.cap = "Three tuning parameters with 20 points generated using a space-filling design.",
+#| fig.cap = "Three tuning parameters with 20 points generated using a space-filling design",
 #| fig.alt = "A scatter plot matrix for three tuning parameters with 15 points generated using a space-filling design. There are fewer gaps in the parameter space when compared to the random grid."
 ```
 
-While not perfect, this Latin hypercube design spaces the points further away from one another and allows a better exploration of the hyperparameter space.  
+While not perfect, this Latin hypercube design spaces the points farther away from one another and allows a better exploration of the hyperparameter space.  
 
 Space-filling designs can be very effective at representing the parameter space. The default design used by the `r pkg(tune)` package is the maximum entropy design. These tend to produce grids that cover the candidate space well and drastically increase the chances of finding good results. 
 
@@ -260,7 +260,7 @@ autoplot(mlp_reg_tune) +
 ```{r regular-grid-plot, ref.label = "grid-cells-reg-plot"}
 #| fig.height = 7,
 #| echo = FALSE,
-#| fig.cap = "The regular grid results.",
+#| fig.cap = "The regular grid results",
 #| fig.alt = "A line plot of the regular grid results. The x axis shows the number of hidden units and the y axis is the resampled ROC AUC. There are separate lines for the amount of regularization. There are nine panels for three values for the number of PCA components and the number of epochs. On average, the amount of regularization is important where more is better. Also, on average, the increasing the number of hidden units decreases model effectiveness."
 ```
 
@@ -292,7 +292,7 @@ The `autoplot()` method will also work with these designs, although the format o
 
 ```{r sfd-plot}
 #| echo = FALSE,
-#| fig.cap = "The `autoplot()` method results when used with a space-filling design.",
+#| fig.cap = "The `autoplot()` method results when used with a space-filling design",
 #| fig.alt = "The `autoplot()` method results when used with a space-filling design. The trends show decreasing performance with the number of PCA components as well as the number of hidden units."
 autoplot(mlp_sfd_tune)
 ```
@@ -300,7 +300,7 @@ autoplot(mlp_sfd_tune)
 This marginal effects plot (Figure \@ref(fig:sfd-plot)) shows the relationship of each parameter with the performance metric. 
 
 :::rmdwarning
-Care should be taken when examining this plot; since a regular grid is not used, the values of the other tuning parameters can affect each panel. 
+Take care when examining this plot; since a regular grid is not used, the values of the other tuning parameters can affect each panel. 
 :::
 
 The penalty parameter appears to result in better performance with smaller amounts of weight decay. This is the opposite of the results from the regular grid. Since each point in each panel is shared with the other three tuning parameters, the trends in one panel can be affected by the others. Using a regular grid, each point in each panel is equally averaged over the other parameters. For this reason, the effect of each parameter is better isolated with regular grids.  
@@ -410,7 +410,7 @@ xgboost_tune <-
             grid = stop("add number of candidate points"))
 ```
 
-This code is, based on what `r pkg(usemodels)` understands about the data, the minimal preprocessing required. For other models, operations like `step_normalize()` are added to fulfill the basic needs of the model. Notice that it is our responsibility, as the modeling practitioner, to choose what `resamples` to use for tuning, as well as what kind of `grid`.
+Based on what `r pkg(usemodels)` understands about the data, this code is the minimal preprocessing required. For other models, operations like `step_normalize()` are added to fulfill the basic needs of the model. Notice that it is our responsibility, as the modeling practitioner, to choose what `resamples` to use for tuning, as well as what kind of `grid`.
 
 :::rmdnote
 The `r pkg(usemodels)` package can also be used to create model fitting code with no tuning by setting the argument `tune = FALSE`.
@@ -427,13 +427,13 @@ There are types of models where, from a single model fit, multiple tuning parame
 
 For example, partial least squares (PLS) is a supervised version of principal component analysis [@Geladi:1986]. It creates components that maximize the variation in the predictors (like PCA) but simultaneously tries to maximize the correlation between these predictors and the outcome. We'll explore PLS more in Chapter \@ref(dimensionality). One tuning parameter is the number of PLS components to retain. Suppose that a data set with 100 predictors is fit using PLS. The number of possible components to retain can range from one to fifty. However, in many implementations, a single model fit can compute predicted values across many values of `num_comp`. As a result, a PLS model created with 100 components can also make predictions for any `num_comp <= 100`. This saves time since, instead of creating redundant model fits, a single fit can be used to evaluate many submodels.
 
-While not all models can exploit this feature, many broadly used ones do: 
+While not all models can exploit this feature, many broadly used ones do. 
 
 * Boosting models can typically make predictions across multiple values for the number of boosting iterations. 
 
 * Regularization methods, such as the `r pkg(glmnet)` model, can make simultaneous predictions across the amount of regularization used to fit the model. 
 
-* Multivariate adaptive regression splines (MARS) adds a set of nonlinear features to linear regression models [@Friedman:1991p109]. The number of terms to retain is a tuning parameter and it is computationally fast to make predictions across many values of this parameter from a single model fit. 
+* Multivariate adaptive regression splines (MARS) adds a set of nonlinear features to linear regression models [@Friedman:1991p109]. The number of terms to retain is a tuning parameter, and it is computationally fast to make predictions across many values of this parameter from a single model fit. 
 
 The `r pkg(tune)` package automatically applies this type of optimization whenever an applicable model is tuned. 
 
@@ -455,7 +455,7 @@ c5_spec %>%
   )
 ```
 
-Without the submodel optimization, the call to `tune_grid()` used `r round(3734.249/60, 1)` minutes to resample 100 submodels. With the optimization, the same call took 100 _seconds_ (a speedup of `r round(3734.249/100.147, 0)`-fold). The reduced time is the difference in `tune_grid()` fitting 1000 models versus 10 models. 
+Without the submodel optimization, the call to `tune_grid()` used `r round(3734.249/60, 1)` minutes to resample 100 submodels. With the optimization, the same call took 100 _seconds_ (a `r round(3734.249/100.147, 0)`-fold speed-up). The reduced time is the difference in `tune_grid()` fitting 1000 models versus 10 models. 
 
 :::rmdnote
 Even though we fit the model with and without the submodel prediction trick, this optimization is automatically applied by `r pkg(parsnip)`. 
@@ -480,13 +480,13 @@ for (rs in resamples) {
 }
 ```
 
-By default, the `r pkg(tune)` package only parallelizes over resamples (the outer loop), as opposed to both the outer and inner loops.
+By default, the `r pkg(tune)` package parallelizes only over resamples (the outer loop), as opposed to both the outer and inner loops.
 
 This is the optimal scenario when the preprocessing method is expensive. However, there are two potential downsides to this approach: 
 
 * It limits the achievable speed-ups when the preprocessing is not expensive.    
 
-* The number of parallel workers is limited by the number of resamples. For example, with 10-fold cross-validation you can only use 10 parallel workers even when the computer has more than 10 cores. 
+* The number of parallel workers is limited by the number of resamples. For example, with 10-fold cross-validation you can use only 10 parallel workers even when the computer has more than 10 cores. 
 
 To illustrate how the parallel processing works, we'll use a case where there are 7 model tuning parameter values, with 5-fold cross-validation. Figure \@ref(fig:one-resample-per-worker) shows how the tasks are allocated to the worker processes.
 
@@ -496,7 +496,7 @@ To illustrate how the parallel processing works, we'll use a case where there ar
 #| fig.width = 5, 
 #| fig.height = 4, 
 #| out.width = "50%",
-#| fig.cap = "Worker processes when parallel processing matches resamples to a specific worker process.",
+#| fig.cap = "Worker processes when parallel processing matches resamples to a specific worker process",
 #| fig.alt = "A diagram of the worker processes when parallel processing matches resamples to a specific worker process. After the preprocess operations are finished, each model fit is executed on the same worker process."
 load("extras/parallel_times/resamples_times.RData")
 
@@ -509,7 +509,7 @@ resamples_times %>%
   theme(legend.position = "top")
 ```
 
-Note that each fold is assigned to its own worker process and, since only model parameters are being tuned, the preprocessing is conducted once per fold/worker. If fewer than 5 worker processes were used, some workers would receive multiple folds. 
+Note that each fold is assigned to its own worker process and, since only model parameters are being tuned, the preprocessing is conducted once per fold/worker. If fewer than five worker processes were used, some workers would receive multiple folds. 
 
 In the control functions for the `tune_*()` functions, the argument `parallel_over` controls how the process is executed. To use the previous parallelization strategy, the argument is `parallel_over = "resamples"`. 
 
@@ -530,14 +530,14 @@ In this case, parallelization now occurs over the single loop. For example, if w
 
 In tidymodels, validation sets are treated as a single resample. In these cases, this parallelization scheme would be best. 
 
-Figure \@ref(fig:distributed-tasks) illustrates the delegation of tasks to the workers in this scheme, the same example is used but with 10 workers.
+Figure \@ref(fig:distributed-tasks) illustrates the delegation of tasks to the workers in this scheme; the same example is used but with 10 workers.
 
 ```{r distributed-tasks, echo = FALSE, message = FALSE, fig.height = 7}
 #| echo = FALSE, 
 #| message = FALSE, 
 #| fig.height = 7, 
 #| out.width = "70%",
-#| fig.cap = "Worker processes when preprocessing and modeling tasks are distributed to many workers.",
+#| fig.cap = "Worker processes when preprocessing and modeling tasks are distributed to many workers",
 #| fig.alt = "A diagram of the worker processes when preprocessing and modeling tasks are distributed to many workers. In this instance, more comprehensive parallelization is used but some preprocessing tasks are repeated across worker processes."
 
 load("extras/parallel_times/everything_times.RData")
@@ -627,7 +627,7 @@ start_stop_dat %>%
  theme(legend.position = "top", panel.grid.minor = element_blank())
 ```
 
-Here, each worker process handles multiple folds and the preprocessing is needlessly repeated. For example, for the first fold, the preprocessing was computed `r repeats` times instead of once. 
+Here, each worker process handles multiple folds, and the preprocessing is needlessly repeated. For example, for the first fold, the preprocessing was computed `r xfun::numbers_to_words(repeats)` times instead of once. 
 
 For this scheme, the control function argument is `parallel_over = "everything"`. 
 
@@ -684,7 +684,7 @@ We can also view these data in terms of speed-ups in Figure \@ref(fig:parallel-s
 #| message = FALSE, 
 #| fig.height = 4, 
 #| out.width = "70%",
-#| fig.cap = "Speed-ups for model tuning versus the number of workers using different delegation schemes.",
+#| fig.cap = "Speed-ups for model tuning versus the number of workers using different delegation schemes",
 #| fig.alt = "Speed-ups for model tuning versus the number of workers using different delegation schemes."
 
 ggplot(times, aes(x = num_cores, y = speed_up, color = parallel_over, shape = parallel_over)) + 
@@ -700,10 +700,10 @@ ggplot(times, aes(x = num_cores, y = speed_up, color = parallel_over, shape = pa
 
 The best speed-ups, for these data, occur when `parallel_over = "resamples"` and when the computations are expensive. However, in the latter case, remember that the previous analysis indicates that the overall model fits are slower.  
 
-What is the benefit of using the submodel optimization method in conjunction with parallel processing?  The C5.0 classification model shown in Chapter \@ref(grid-search) was also run in parallel with ten workers. The parallel computations took 13.3 seconds for a speed-up of `r round(100.147/13.265, 1)`-fold (both runs used the submodel optimization trick). Between the submodel optimization trick and parallel processing, there was a total speed-up of `r round(3734.249/13.265, 0)`-fold over the most basic grid search code. 
+What is the benefit of using the submodel optimization method in conjunction with parallel processing?  The C5.0 classification model shown in Chapter \@ref(grid-search) was also run in parallel with ten workers. The parallel computations took 13.3 seconds for a `r round(100.147/13.265, 1)`-fold speed-up (both runs used the submodel optimization trick). Between the submodel optimization trick and parallel processing, there was a total `r round(3734.249/13.265, 0)`-fold speed-up over the most basic grid search code. 
 
 :::rmdwarning
-Overall, note that the increased computational savings will vary from model-to-model and are also affected by the size of the grid, the number of resamples, etc. A very computationally efficient model may not benefit as much from parallel processing. 
+Overall, note that the increased computational savings will vary from model to model and are also affected by the size of the grid, the number of resamples, etc. A very computationally efficient model may not benefit as much from parallel processing. 
 :::
 
 ### Access to global variables
@@ -805,7 +805,7 @@ As an example, in the multilayer perceptron tuning process with a regular grid e
 #| warning = FALSE,
 #| fig.height = 5, 
 #| out.width = "80%",
-#| fig.cap = "The racing process for 20 tuning parameters and 10 resamples.",
+#| fig.cap = "The racing process for 20 tuning parameters and 10 resamples",
 #| fig.alt = "The racing process for 20 tuning parameters and 10 resamples. The analysis is conducted at the first, third, and last resample. As the number of resamples increases, the confidence intervals show some model configurations that do not have confidence intervals that overlap with zero. These are excluded from subsequent resamples."
 
 full_att <- attributes(mlp_sfd_race)
@@ -869,7 +869,7 @@ The process continues to resample configurations that remain and the statistical
 Racing methods can be more efficient than basic grid search as long as the interim analysis is fast and some parameter settings have poor performance. It also is most helpful when the model does _not_ have the ability to exploit submodel predictions. 
 :::
 
-The `r pkg(finetune)` package contains functions for racing. The `tune_race_anova()` function conducts an Analysis of Variance (ANOVA) model to test for statistical significance of the different model configurations. The syntax to reproduce the filtering shown previously is:
+The `r pkg(finetune)` package contains functions for racing. The `tune_race_anova()` function conducts an ANOVA model to test for statistical significance of the different model configurations. The syntax to reproduce the filtering shown previously is:
 
 
 ```{r grid-cells-race-code, eval = FALSE}
@@ -889,7 +889,7 @@ mlp_sfd_race <-
 
 The arguments mirror those of `tune_grid()`. The function `control_race()` has options for the elimination procedure. 
 
-As shown in the animation above, there were `r nrow(remaining)` tuning parameter combinations under consideration once the full set of resamples were evaluated. `show_best()` returns the best models (ranked by performance) but only returns the configurations that were never eliminated: 
+As shown in the animation above, there were `r xfun::numbers_to_words(nrow(remaining))` tuning parameter combinations under consideration once the full set of resamples were evaluated. `show_best()` returns the best models (ranked by performance) but returns only the configurations that were never eliminated: 
 
 ```{r grid-race-best}
 show_best(mlp_sfd_race, n = 10)

@@ -15,24 +15,24 @@ data("bioChemists", package = "pscl")
 In Chapter \@ref(software-modeling), we outlined a taxonomy of models and said that most models can be categorized as descriptive, inferential, and/or predictive. 
 :::
 
-Most of the chapters in this book have focused on models from the perspective of the accuracy of predicted values, an important quality of models for all purposes but most relevant for predictive models. Inferential models are not usually created only for their predictions, but to make inferences or judgments about some component of the model, such as a coefficient value or other parameter. These results are often used to answer some (hopefully) pre-defined questions or hypotheses. In predictive models, predictions on hold-out data are used to validate or characterize the quality of the model. Inferential methods focus on validating the probabilistic or structural assumptions that are made prior to fitting the model.
+Most of the chapters in this book have focused on models from the perspective of the accuracy of predicted values, an important quality of models for all purposes but most relevant for predictive models. Inferential models are usually created not only for their predictions, but also to make inferences or judgments about some component of the model, such as a coefficient value or other parameter. These results are often used to answer some (hopefully) pre-defined questions or hypotheses. In predictive models, predictions on hold-out data are used to validate or characterize the quality of the model. Inferential methods focus on validating the probabilistic or structural assumptions that are made prior to fitting the model.
 
 For example, in ordinary linear regression, the common assumption is that the residual values are independent and follow a Gaussian distribution with a constant variance. While you may have scientific or domain knowledge to lend credence to this assumption for your model analysis, the residuals from the fitted model are usually examined to determine if the assumption was a good idea. As a result, the methods for determining if the model's assumptions have been met are not as simple as looking at holdout predictions, although that can be very useful as well.
 
 We will use p-values in this chapter. However, the tidymodels framework tends to promote confidence intervals over p-values as a method for quantifying the evidence for an alternative hypothesis. As previously shown in Chapter \@ref(compare), Bayesian methods are often superior to both p-values and confidence intervals in terms of ease of interpretation (but they can be more computationally expensive).
 
 :::rmdwarning
-There has been a push in recent years to move away from p-values in favor of other methods [@pvalue]. See the Volume 73 of [*The American Statistician*](https://www.tandfonline.com/toc/utas20/73/) for more information and discussion.
+There has been a push in recent years to move away from p-values in favor of other methods [@pvalue]. See Volume 73 of [*The American Statistician*](https://www.tandfonline.com/toc/utas20/73/) for more information and discussion.
 :::
 
-In this chapter, we describe how to use `r pkg(tidymodels)` for fitting and assessing inferential models. In some cases, the tidymodels framework can help users work with the objects produced by their models. In others, it can help make assessments of the quality of a given model.
+In this chapter, we describe how to use `r pkg(tidymodels)` for fitting and assessing inferential models. In some cases, the tidymodels framework can help users work with the objects produced by their models. In others, it can help assess the quality of a given model.
 
 ## Inference for Count Data
 
 To understand how tidymodels packages can be used for inferential modeling, let's focus on an example with count data. We'll use biochemistry publication data from the `r pkg(pscl)` package. These data consist of information on 915 Ph.D. biochemistry graduates and tries to explain factors that impact their academic productivity (measured via number or count of articles published within three years). The predictors include the gender of the graduate, their marital status, the number of children of the graduate that are at least five years old, the prestige of their department, and the number of articles produced by their mentor in the same time period. The data reflect biochemistry doctorates who finished their education between 1956 and 1963. The data are a somewhat biased sample of all of the biochemistry doctorates given during this period (based on completeness of information).
 
 :::rmdnote
-Recall that in Chapter \@ref(trust) we asked the question "Is our model applicable for predicting a specific data point?". It is very important to define what populations an inferential analysis apply to. For these data, the results would likely apply to biochemistry doctorates given around the time frame that the data were collected. Does it also apply to other chemistry doctorate types (e.g., medicinal chemistry, etc)? These are important questions to address (and document) when conducting inferential analyses. 
+Recall that in Chapter \@ref(trust) we asked the question "Is our model applicable for predicting a specific data point?" It is very important to define what populations an inferential analysis applies to. For these data, the results would likely apply to biochemistry doctorates given around the time frame that the data were collected. Does it also apply to other chemistry doctorate types (e.g., medicinal chemistry, etc)? These are important questions to address (and document) when conducting inferential analyses. 
 :::
 
 A plot of the data shown in Figure \@ref(fig:counts) indicates that many graduates did not publish any articles in this time and that the outcome follows a right-skewed distribution:
@@ -51,7 +51,7 @@ ggplot(bioChemists, aes(x = art)) +
 ```{r counts, ref.label = "inferential-count-dist"}
 #| echo = FALSE,
 #| out.width = "80%",
-#| fig.cap = "Distribution of the number of articles written within 3 years of graduation.",
+#| fig.cap = "Distribution of the number of articles written within 3 years of graduation",
 #| fig.alt = "The distribution of the number of articles written within 3 years of graduation. The distribution is right-skewed and most of the data have counts of zero or one."
 ```
 
@@ -67,7 +67,7 @@ bioChemists %>%
   summarize(counts = sum(art), n = length(art))
 ```
 
-There were many more publications by men, although there were more men in the data. The simplest approach to analyzing these data would be to do a two-sample comparison using the `poisson.test()` function in the `r pkg(stats)` package. It requires the counts for one or two groups. 
+There were many more publications by men, although there were also more men in the data. The simplest approach to analyzing these data would be to do a two-sample comparison using the `poisson.test()` function in the `r pkg(stats)` package. It requires the counts for one or two groups. 
 
 For our application, the hypotheses to compare the two sexes are:
 
@@ -86,7 +86,7 @@ poisson.test(c(930, 619), T = 3)
 
 The function reports a p-value as well as a confidence interval for the ratio of the publication rates. The results indicate that the observed difference is greater than the experiential noise and favors $H_a$. 
 
-One issue with using this function is that the results come back as an `htest` object. While this type of object has a well defined structure, it can be difficult to consume for subsequent operations such as reporting or visualizations. The most impactful tool that tidymodels has to offer for inferential models is the `tidy()` functions in the `r pkg(broom)` package. As previously seen, this function makes a well formed, predictably named tibble from the object. We can `tidy()` the results of our two-sample comparison test:
+One issue with using this function is that the results come back as an `htest` object. While this type of object has a well-defined structure, it can be difficult to consume for subsequent operations such as reporting or visualizations. The most impactful tool that tidymodels offers for inferential models is the `tidy()` functions in the `r pkg(broom)` package. As previously seen, this function makes a well-formed, predictably named tibble from the object. We can `tidy()` the results of our two-sample comparison test:
 
 ```{r inferential-test-tidy}
 poisson.test(c(930, 619)) %>% 
@@ -97,9 +97,9 @@ poisson.test(c(930, 619)) %>%
 Between the [`r pkg(broom)`](https://broom.tidymodels.org/) and [`r pkg(broom.mixed)`](https://CRAN.R-project.org/package=broom.mixed) packages, there are `tidy()` methods for more than 150 models.
 :::
 
-While the Poisson distribution is reasonable, we might also want to make an assessment using fewer distributional assumptions. Two methods that might be helpful are the bootstrap and permutation tests [@davison1997bootstrap].
+While the Poisson distribution is reasonable, we might also want to assess using fewer distributional assumptions. Two methods that might be helpful are the bootstrap and permutation tests [@davison1997bootstrap].
 
-The `r pkg(infer)` package, which is part of the tidymodels framework, is a powerful and intuitive tool for hypothesis testing [@ModernDive]. Its syntax is concise and designed for non-statisticians.
+The `r pkg(infer)` package, part of the tidymodels framework, is a powerful and intuitive tool for hypothesis testing [@ModernDive]. Its syntax is concise and designed for nonstatisticians.
 
 First, we `specify()` that we will use the difference in the mean number of articles between the sexes and then `calculate()` the statistic from the data. Recall that the maximum likelihood estimator for the Poisson mean is the sample mean. The hypotheses tested here are the same as the previous test (but are conducted using a different testing procedure).  
 
@@ -134,7 +134,7 @@ percentile_ci <- get_ci(bootstrapped)
 percentile_ci
 ```
 
-The `r pkg(infer)` package has a high-level API for showing the results of the analysis, as shown in Figure \@ref(fig:bootstrapped-mean).
+The `r pkg(infer)` package has a high-level API for showing the analysis results, as shown in Figure \@ref(fig:bootstrapped-mean).
 
 ```{r inferential-mean-diff-boot, eval = FALSE}
 visualize(bootstrapped) +
@@ -150,7 +150,7 @@ visualize(bootstrapped) +
 
 Since the interval visualized in in Figure \@ref(fig:bootstrapped-mean) does not include zero, these results indicate that men have published more articles than women.
 
-If we require a p-value, the `r pkg(infer)` package can compute one via a permutation test, shown in the following code. The syntax is very similar to the bootstrapping code we used earlier. We add a `hypothesize()` verb to state the type of assumption to test and the `generate()` call contains an option to shuffle the data.
+If we require a p-value, the `r pkg(infer)` package can compute the value via a permutation test, shown in the following code. The syntax is very similar to the bootstrapping code we used earlier. We add a `hypothesize()` verb to state the type of assumption to test and the `generate()` call contains an option to shuffle the data.
 
 ```{r inferential-mean-diff-perm-gen}
 set.seed(2102)
@@ -184,9 +184,9 @@ permuted %>%
   get_p_value(obs_stat = observed, direction = "two-sided")
 ```
 
-Since the vertical line representing the null hypothesis in Figure \@ref(fig:permutation-dist) is far away from the permutation distribution (which represents the null hypothesis), the likelihood of observing data that is at least as extreme as what is at hand if in fact the null hypothesis were true is exceedingly small.
+The vertical line representing the null hypothesis in Figure \@ref(fig:permutation-dist) is far away from the permutation distribution. This means, if in fact the null hypothesis were true, the likelihood is exceedingly small of observing data at least as extreme as what is at hand.
 
-The two-sample tests shown in this section are probably suboptimal because they do not take into account other factors that might explain the observed relationship between publication rate and sex. Let's move on to a more complex model that can take into consideration additional covariates.
+The two-sample tests shown in this section are probably suboptimal because they do not account for other factors that might explain the observed relationship between publication rate and sex. Let's move to a more complex model that can consider additional covariates.
 
 ## Log-Linear Models
 
@@ -228,7 +228,7 @@ H_a&: \beta_j \ne 0 \notag
 ```
 for each of the model parameters. Looking at these results, `phd` (the prestige of their department) may not have any relationship with the outcome.
 
-While the Poisson distribution is the routine assumption for data like these, it may be beneficial to conduct a rough check of the model assumptions by fitting the models without using the Poisson likelihood to calculate the confidence intervals. The `r pkg(rsample)` package has a convenience function to compute bootstrap confidence intervals for `lm()` and `glm()` models. We can use this function, while explicitly declaring `family = poisson`, to compute a large number of model fits. By default, we compute a 90% confidence bootstrap-t interval (percentile and BCa intervals are also available):
+While the Poisson distribution is the routine assumption for data like these, it may be beneficial to conduct a rough check of the model assumptions by fitting the models without using the Poisson likelihood to calculate the confidence intervals. The `r pkg(rsample)` package has a convenience function to compute bootstrap confidence intervals for `lm()` and `glm()` models. We can use this function, while explicitly declaring `family = poisson`, to compute a large number of model fits. By default, we compute a 90% confidence bootstrap-t interval (percentile intervals are also available):
 
 ```{r inferential-glm-ci}
 set.seed(2103)
@@ -243,7 +243,7 @@ When we compare these results (in Figure \@ref(fig:glm-intervals)) to the purely
 
 ```{r glm-intervals}
 #| echo = FALSE,
-#| fig.cap = "Two types of confidence intervals for the Poisson regression model.",
+#| fig.cap = "Two types of confidence intervals for the Poisson regression model",
 #| fig.alt = "Two types of confidence intervals for the Poisson regression model. the interval for the PhD model is the only interval overlapping zero. The parametric intervals tend to be wider than the bootstrap intervals. "
 
 glm_boot %>% 
@@ -271,7 +271,7 @@ H_0&: \beta_{phd} = 0 \notag \\
 H_a&: \beta_{phd} \ne 0 \notag
 \end{align}
 
-This hypothesis was previously tested when we showed the tidied results for `log_lin_fit`. That particular approach used results from a single model fit via a Wald statistic (i.e. the parameter divided by its standard error). For that approach, the p-value was `r tidy(log_lin_fit) %>% filter(term == "phd") %>% pluck("p.value") %>% format.pval()`. We can tidy the results for the LRT to get the p-value: 
+This hypothesis was previously tested when we showed the tidied results for `log_lin_fit`. That particular approach used results from a single model fit via a Wald statistic (i.e., the parameter divided by its standard error). For that approach, the p-value was `r tidy(log_lin_fit) %>% filter(term == "phd") %>% pluck("p.value") %>% format.pval()`. We can tidy the results for the LRT to get the p-value: 
 
 ```{r inferential-reduced, warning = FALSE}
 log_lin_reduced <- 
@@ -290,7 +290,7 @@ The results are the same and, based on these and the confidence interval for thi
 
 ## A More Complex Model
 
-We can move into even more complex models within our tidymodels approach. For count data, there are occasions where the number of zero counts is larger than what a simple Poisson distribution would prescribe. A more complex model appropriate in this situation is the zero-inflated Poisson (ZIP) model; see @Mullahy, @Lambert1992, and @JSSv027i08. Here, there are two sets of covariates: one for the count data and others that affect the probability (denoted as $\pi$) of zeros. The equation for the mean $\lambda$ is:
+We can move into even more complex models within our tidymodels approach. For count data, there are occasions where the number of zero counts is larger than what a simple Poisson distribution would prescribe. A more complex model appropriate for this situation is the zero-inflated Poisson (ZIP) model; see @Mullahy, @Lambert1992, and @JSSv027i08. Here, there are two sets of covariates: one for the count data and others that affect the probability (denoted as $\pi$) of zeros. The equation for the mean $\lambda$ is:
 
 $$\lambda = 0 \pi + (1 - \pi) \lambda_{nz}$$
 
@@ -415,9 +415,9 @@ bootstrap_models %>%
 #| fig.alt = "Bootstrap distributions of the ZIP model coefficients. The vertical lines indicate the observed estimates. The ment predictor that appears to be important to the model."
 ```
 
-From visual inspection, one of the covariates (`ment`) that appears to be important has a very skewed distribution. The extra space in some of the facets indicates that there are some outliers in the estimates. This *might* occur when models did not converge; those results should probably be excluded from the resamples. For the results visualized in Figure \@ref(fig:zip-bootstrap), the outliers are only due to extreme parameter estimates; all of the models converged.
+One of the covariates (`ment`) that appears to be important has a very skewed distribution. The extra space in some of the facets indicates there are some outliers in the estimates. This *might* occur when models did not converge; those results probably should be excluded from the resamples. For the results visualized in Figure \@ref(fig:zip-bootstrap), the outliers are due only to extreme parameter estimates; all of the models converged.
 
-The `r pkg(rsample)` package contains a set of functions named `int_*()` that compute different types of bootstrap intervals. Since the `tidy()` method contains standard error estimates, the bootstrap-t intervals can be computed. We'll also compute the standard percentile intervals too. By default, 90% confidence intervals are computed.
+The `r pkg(rsample)` package contains a set of functions named `int_*()` that compute different types of bootstrap intervals. Since the `tidy()` method contains standard error estimates, the bootstrap-t intervals can be computed. We'll also compute the standard percentile intervals. By default, 90% confidence intervals are computed.
 
 ```{r inference-zip-intervals}
 bootstrap_models %>% int_pctl(zero_coefs)
