@@ -217,7 +217,7 @@ Using the standard error as a measure to preclude samples from being predicted c
 
 Equivocal zones try to measure the reliability of a prediction based on the model outputs. It may be that model statistics, such as the standard error of prediction, cannot measure the impact of extrapolation, and so we need another way to assess whether to trust a prediction and answer, "Is our model applicable for predicting a specific data point?" Let's take the Chicago train data used extensively in [Kuhn and Johnson (2019)](https://bookdown.org/max/FES/chicago-intro.html) and first shown in Section \@ref(examples-of-tidyverse-syntax). The goal is to predict the number of customers entering the Clark and Lake train station each day. 
 
-The data set in the `r pkg(modeldata)` package (a tidymodels package with example data sets) has daily values between `r format(min(Chicago$date), "%B %d, %Y")` and `r format(max(Chicago$date), "%B %d, %Y")`. Let's create a small test set using the last two weeks of the data: 
+The `Chicago` data set in the `r pkg(modeldata)` package (a tidymodels package with example data sets) has daily values between `r format(min(Chicago$date), "%B %d, %Y")` and `r format(max(Chicago$date), "%B %d, %Y")`. Let's create a small test set using the last two weeks of the data: 
 
 ```{r trust-chicago-data}
 ## loads both `Chicago` data set as well as `stations`
