@@ -247,6 +247,7 @@ base_recipe <-
   step_dummy(all_nominal()) %>%
   # Remove any columns with a single unique value
   step_zv(all_predictors()) %>%
+  # Could you please explain what "!!!" does here? 
   step_normalize(!!!stations)%>%
   step_pls(!!!stations, num_comp = 10, outcome = vars(ridership))
 
