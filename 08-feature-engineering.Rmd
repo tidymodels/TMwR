@@ -484,7 +484,7 @@ The `tidy()` method, when called with the recipe object, gives a summary of the 
 tidy(ames_rec)
 ```
 
-This result can be helpful for identifying individual steps, perhaps to then be able to execute the `tidy()` method on one specific steps.  
+This result can be helpful for identifying individual steps, perhaps to then be able to execute the `tidy()` method on one specific step.  
 
 We can specify the `id` argument in any step function call; otherwise it is generated using a random suffix. Setting this value can be helpful if the same type of step is added to the recipe more than once. Let's specify the `id` ahead of time for `step_other()`, since we'll want to `tidy()` it:
 
