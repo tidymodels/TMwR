@@ -227,7 +227,7 @@ where
  
  * $\beta_1$ is the change in mean $R^2$ when interactions are added to the basic linear model,
  
- * $\beta_2$ is the change in mean $R^2$ between the basic linear model and the random forest model. 
+ * $\beta_2$ is the change in mean $R^2$ between the basic linear model and the random forest model, and 
 
  * $\beta_3$ is the change in mean $R^2$ between the basic linear model and one with interactions and splines. 
 
