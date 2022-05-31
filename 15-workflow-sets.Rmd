@@ -217,7 +217,7 @@ no_pre_proc <-
 no_pre_proc
 ```
 
-Finally, the set that uses nonlinear terms and interactions with the appropriate models are assembled: 
+Finally, we assemble the set that uses nonlinear terms and interactions with the appropriate models: 
 
 ```{r workflow-sets-quad}
 with_features <- 
