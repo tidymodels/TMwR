@@ -89,7 +89,8 @@ Imports:
     yardstick
 Remotes:
     tidymodels/censored,
-    tidymodels/learntidymodels
+    tidymodels/learntidymodels,
+    tidymodels/hardhat
 biocViews: mixOmics
 Encoding: UTF-8
 SystemRequirements: FFmpeg (>= 3.2); with at least libx264 and lame (mp3)
