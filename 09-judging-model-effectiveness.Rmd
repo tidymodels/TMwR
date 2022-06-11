@@ -57,7 +57,7 @@ This chapter will demonstrate the `r pkg(yardstick)` package, a core tidymodels 
 ad_mod <- logistic_reg() %>% set_engine("glm") 
 full_model_fit <-
   ad_mod %>% 
-  fit(Class ~ (Genotype + male + age)^3, , data = ad_data)
+  fit(Class ~ (Genotype + male + age)^3, data = ad_data)
 
 full_model_fit %>% extract_fit_engine() 
 
