@@ -54,9 +54,7 @@ preproc <-
        splines = spline_rec
   )
 
-lm_model <- linear_reg() |> set_engine("lm")
-
-lm_models <- workflow_set(preproc, list(lm = lm_model), cross = FALSE)
+lm_models <- workflow_set(preproc, list(lm = linear_reg()), cross = FALSE)
 lm_models
 ```
 
