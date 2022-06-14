@@ -376,7 +376,7 @@ bootstrap_models <-
   bootstrap_models %>%
   mutate(
     glm_aic = map_dbl(glm, ~ extract_fit_engine(.x) %>% AIC()),
-    zip_aic = map_dbl(zip, ~ extract_fit_engine(.x) %>% AIC()),
+    zip_aic = map_dbl(zip, ~ extract_fit_engine(.x) %>% AIC())
   )
 mean(bootstrap_models$zip_aic < bootstrap_models$glm_aic)
 ```
