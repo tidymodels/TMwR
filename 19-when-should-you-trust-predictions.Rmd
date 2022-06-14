@@ -240,9 +240,7 @@ base_recipe <-
   recipe(ridership ~ ., data = Chicago_train) %>%
   # Create date features
   step_date(date) %>%
-  step_holiday(date) %>%
-  # Change date to be an id column instead of a predictor
-  update_role(date, new_role = "id") %>%
+  step_holiday(date, keep_original_cols = FALSE) %>%
   # Create dummy variables from factor columns
   step_dummy(all_nominal()) %>%
   # Remove any columns with a single unique value
