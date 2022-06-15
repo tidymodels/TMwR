@@ -78,7 +78,7 @@ H_a&: \lambda_m \ne \lambda_f \notag
 
 where the $\lambda$ values are the rates of publications (over the same time period). 
 
-A basic application of the test is:^[The `T` argument allows us to account for the time during which the data were observed.]
+A basic application of the test is:^[The `T` argument allows us to account for the time when the events (publications) were counted, which was three years for both men and women. There are more men than women in these data, but `poisson.test()` has limited functionality so more sophisticated analysis can be used to account for this difference.]
 
 ```{r inferential-test-basic}
 poisson.test(c(930, 619), T = 3)
