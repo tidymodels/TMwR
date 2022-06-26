@@ -317,7 +317,6 @@ bean_rec_trained %>%
 ```
 
 ```{r bean-pca, ref.label = "dimensionality-pca"}
-#| dev = "png", 
 #| echo = FALSE,
 #| fig.height = 7,
 #| fig.cap = "First two principal component scores for the bean validation set, colored by class",
@@ -360,7 +359,6 @@ bean_rec_trained %>%
 ```
 
 ```{r bean-pls, ref.label = "dimensionality-pls"}
-#| dev = "png", 
 #| fig.height = 7,
 #| echo = FALSE,
 #| fig.cap = "First two PLS component scores for the bean validation set, colored by class",
@@ -398,7 +396,6 @@ bean_rec_trained %>%
 ```
 
 ```{r bean-ica, ref.label = "dimensionality-ica"}
-#| dev = "png", 
 #| echo = FALSE,
 #| fig.height = 7,
 #| fig.cap = "First two ICA component scores for the bean validation set, colored by class",
@@ -436,7 +433,6 @@ bean_rec_trained %>%
 
 ```{r bean-umap}
 #| echo = FALSE,
-#| dev = "png",
 #| fig.height = 5,
 #| fig.width = 10.1,
 #| fig.cap = "The first two UMAP component scores for the bean validation set, colored by class. Results are shown for supervised and unsupervised versions.",

@@ -120,8 +120,7 @@ plain_ames <-
   ggplot() +
   xlim(ames_x) +
   ylim(ames_y) + 
-  theme_vo
-<id() + 
+  theme_void() + 
   theme(legend.position = "none") +
   geom_sf(data = ia_roads, aes(geometry = geometry), alpha = .1) +
   geom_point(
@@ -251,7 +250,7 @@ mitchell <-
 # mitchell_box +  plot_spacer() + mitchell +  plot_layout(widths = c(2, 0.1, 3))
 
 # guide inset in plot
-agg_png("mitchell.png", width = 480 * mitchell_ratio * 2, height = 480 * 2, res = 200)
+agg_png("mitchell.png", width = 480 * mitchell_ratio * 3, height = 480 * 3, res = 300, scaling = 1)
 print(mitchell)
 print(mitchell_box, vp = viewport(0.8, 0.27, width = 0.3 * ames_ratio, height = 0.3))
 dev.off()
@@ -317,7 +316,7 @@ timberland <-
   scale_shape_manual(values = ames_pch)
 
 # guide inset in plot
-agg_png("timberland.png", width = 480 * timberland_ratio)
+agg_png("timberland.png", width = 480 * timberland_ratio, res = 300, scaling = 1/3)
 print(timberland)
 print(timberland_box, vp = viewport(0.85, 0.2, width = 0.3 * ames_ratio, height = 0.3))
 dev.off()
@@ -378,7 +377,7 @@ dot_rr <-
   ) 
 
 # guide inset in plot
-agg_png("dot_rr.png", width = 480 * dot_rr_ratio)
+agg_png("dot_rr.png", width = 480 * dot_rr_ratio, res = 300, scaling = 1/3)
 print(dot_rr)
 print(dot_rr_box, vp = viewport(0.5, 0.26, width = 0.45 * ames_ratio, height = 0.45))
 dev.off()
@@ -440,7 +439,7 @@ crawford <-
   ) 
 
 # guide inset in plot
-agg_png("crawford.png", width = 480 * crawford_ratio)
+agg_png("crawford.png", width = 480 * crawford_ratio, res = 300, scaling = 1/3)
 print(crawford)
 print(crawford_box, vp = viewport(0.5, 0.2, width = 0.35 * ames_ratio, height = 0.35))
 dev.off()
@@ -523,7 +522,7 @@ northridge <-
 # northridge_box +  plot_spacer() + northridge +  plot_layout(widths = c(2, 0.1, 3))
 
 # guide inset in plot
-agg_png("northridge.png", width = 480 * northridge_ratio)
+agg_png("northridge.png", width = 480 * northridge_ratio, res = 300, scaling = 1/3)
 print(northridge)
 print(northridge_box, vp = viewport(0.85, 0.21, width = 0.35 * ames_ratio, height = 0.35))
 dev.off()

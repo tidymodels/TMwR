@@ -3,11 +3,17 @@ options(dplyr.print_min = 6, dplyr.print_max = 6)
 options(cli.width = 85)
 options(crayon.enabled = FALSE)
 
+library(ragg)
+
 knitr::opts_chunk$set(
   comment = "#>",
   collapse = TRUE,
   fig.align = 'center',
-  tidy = FALSE
+  tidy = FALSE,
+  # see https://www.tidyverse.org/blog/2020/08/taking-control-of-plot-scaling/#the-solution
+  dev = "agg_png",
+  dev.args = list(res = 300, units = "in"),
+  fig.ext = "png"
 )
 
 
