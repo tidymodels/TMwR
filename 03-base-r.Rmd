@@ -4,7 +4,6 @@
 knitr::opts_chunk$set(fig.path = "figures/")
 data(crickets, package = "modeldata")
 library(tidyverse)
-library(kableExtra)
 ```
 
 Before describing how to use tidymodels for applying tidy data principles to building models with R, let's review how models are created, trained, and used in the core R language (often called "base R"). This chapter is a brief illustration of core language conventions that are important to be aware of even if you never use base R for models at all. This chapter is not exhaustive, but it provides readers (especially those new to R) the basic, most commonly used motifs. 
@@ -75,7 +74,7 @@ rate ~ temp + species
 Species is not a quantitative variable; in the data frame, it is represented as a factor column with levels `"O. exclamationis"` and `"O. niveus"`. The vast majority of model functions cannot operate on nonnumeric data. For species, the model needs to encode the species data in a numeric format. The most common approach is to use indicator variables (also known as dummy variables) in place of the original qualitative values. In this instance, since species has two possible values, the model formula will automatically encode this column as numeric by adding a new column that has a value of zero when the species is `"O. exclamationis"` and a value of one when the data correspond to `"O. niveus"`. The underlying formula machinery automatically converts these values for the data set used to create the model, as well as for any new data points (for example, when the model is used for prediction). 
 
 :::rmdnote
-Suppose there were five species instead of two. The model formula would automatically add four additional binary columns that are binary indicators for four of the species. The _reference level_ of the factor (i.e., the first level) is always left out of the predictor set. The idea is that, if you know the values of the four indicator variables, the value of the species can be determined. We discuss binary indicator variables in more detail in Section \@ref(dummies).
+Suppose there were five species instead of two. The model formula would automatically add four additional binary columns that are binary indicators for four of the species. The _reference level_ of the factor (i.e., the first level) is always left out of the predictor set. The idea is that, if you know the values of the four indicator variables, the value of the species can be determined. We discuss binary indicator variables in more detail in Chapter \@ref(recipes).
 :::
 
 The model formula `rate ~ temp + species` creates a model with different y-intercepts for each species; the slopes of the regression lines could be different for each species as well. To accommodate this structure, an interaction term can be added to the model. This can be specified in a few different ways, and the most basic uses the colon:
@@ -199,7 +198,7 @@ For the most part, practitioners' understanding of what the formula does is domi
 (temp + species)^2
 ```
 
-Our focus, when seeing this, is that there are two predictors and the model should contain their main effects and the two-way interactions.  However, this formula also implies that, since `species` is a factor, it should also create indicator variable columns for this predictor (see Section \@ref(dummies)) and multiply those columns by the `temp` column to create the interactions. This transformation represents our second bullet point on encoding; the formula also defines how each column is encoded and can create additional columns that are not in the original data. 
+Our focus, when seeing this, is that there are two predictors and the model should contain their main effects and the two-way interactions.  However, this formula also implies that, since `species` is a factor, it should also create indicator variable columns for this predictor (see Chapter \@ref(recipes)) and multiply those columns by the `temp` column to create the interactions. This transformation represents our second bullet point on encoding; the formula also defines how each column is encoded and can create additional columns that are not in the original data. 
 
 :::rmdwarning
 This is an important point that will come up multiple times in this text, especially when we discuss more complex feature engineering in Chapter \@ref(recipes) and beyond. The formula in R has some limitations, and our approaches to overcoming them contend with all three aspects. 
@@ -246,14 +245,11 @@ prob_tbl <-
   ) 
 
 prob_tbl %>% 
-  kable(
+  knitr::kable(
     caption = "Heterogeneous argument names for different modeling functions.",
     label = "probability-args",
     escape = FALSE
-  ) %>%
-  kable_styling(full_width = FALSE) %>%
-  column_spec(1, monospace = ifelse(prob_tbl$Function == "various", FALSE, TRUE)) %>%
-  column_spec(3, monospace = TRUE)
+  ) 
 ```
 
 Note that the last example has a custom function to make predictions instead of using the more common `predict()` interface (the generic `predict()` method). This lack of consistency is a barrier to day-to-day usage of R for modeling.
@@ -396,7 +392,7 @@ conflict_prefer("filter", winner = "dplyr")
 
 For convenience, `r pkg(tidymodels)` contains a function that captures most of the common naming conflicts that we might encounter:
 
-```{r base-r-clonflicts}
+```{r base-r-conflicts}
 tidymodels_prefer(quiet = FALSE)
 ```
 

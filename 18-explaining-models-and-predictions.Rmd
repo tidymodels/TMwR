@@ -29,7 +29,7 @@ lm_fit <- lm_wflow %>% fit(data = ames_train)
 
 # Explaining Models and Predictions {#explain}
 
-In Section \@ref(model-types), we outlined a taxonomy of models and suggested that models typically are built as one or more of descriptive, inferential, or predictive. We suggested that model performance, as measured by appropriate metrics (like RMSE for regression or area under the ROC curve for classification), can be important for all modeling applications. Similarly, model explanations, answering _why_ a model makes the predictions it does, can be important whether the purpose of your model is largely descriptive, to test a hypothesis, or to make a prediction. Answering the question "why?" allows modeling practitioners to understand which features were important in predictions and even how model predictions would change under different values for the features. This chapter covers how to ask a model why it makes the predictions it does.
+In Chapter \@ref(software-modeling), we outlined a taxonomy of models and suggested that models typically are built as one or more of descriptive, inferential, or predictive. We suggested that model performance, as measured by appropriate metrics (like RMSE for regression or area under the ROC curve for classification), can be important for all modeling applications. Similarly, model explanations, answering _why_ a model makes the predictions it does, can be important whether the purpose of your model is largely descriptive, to test a hypothesis, or to make a prediction. Answering the question "why?" allows modeling practitioners to understand which features were important in predictions and even how model predictions would change under different values for the features. This chapter covers how to ask a model why it makes the predictions it does.
 
 For some models, like linear regression, it is usually clear how to explain why the model makes its predictions. The structure of a linear model contains coefficients for each predictor that are typically straightforward to interpret. For other models, like random forests that can capture nonlinear behavior by design, it is less transparent how to explain the model's predictions from only the structure of the model itself. Instead, we can apply model explainer algorithms to generate understanding of predictions.
 
@@ -106,7 +106,7 @@ Dealing with significant feature engineering transformations during model explai
 
 ## Local Explanations
 
-Local model explanations provide information about a prediction for a single observation. For example, let's consider an older duplex in the North Ames neighborhood (Section \@ref(exploring-features-of-homes-in-ames)):
+Local model explanations provide information about a prediction for a single observation. For example, let's consider an older duplex in the North Ames neighborhood (Chapter \@ref(ames)).
 
 ```{r explain-duplex}
 duplex <- vip_train[120,]
@@ -335,7 +335,7 @@ ggplot_pdp <- function(obj, x) {
   num_colors <- n_distinct(obj$agr_profiles$`_label_`)
   
   if (num_colors > 1) {
-    p <- p + geom_line(aes(color = `_label_`), size = 1.2, alpha = 0.8)
+    p <- p + geom_line(aes(color = `_label_`, lty = `_label_`), size = 1.2)
   } else {
     p <- p + geom_line(color = "midnightblue", size = 1.2, alpha = 0.8)
   }
@@ -372,7 +372,7 @@ ggplot_pdp(pdp_liv, Gr_Liv_Area) +
   scale_color_brewer(palette = "Dark2") +
   labs(x = "Gross living area", 
        y = "Sale Price (log)", 
-       color = NULL)
+       color = NULL, lty = NULL)
 ```
 
 This code produces Figure \@ref(fig:building-type-profiles), where we see that sale price increases the most between about 1,000 and 3,000 square feet of living area, and that different home types (like single family homes or different types of townhouses) mostly exhibit similar increasing trends in price with more living space.

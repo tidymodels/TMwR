@@ -2,7 +2,6 @@
 knitr::opts_chunk$set(fig.path = "figures/")
 library(tidymodels)
 library(kknn)
-library(kableExtra)
 library(tidyr)
 
 tidymodels_prefer()
@@ -123,7 +122,6 @@ lm_xy_fit
 
 [^fitxy]: What are the differences between `fit()` and `fit_xy()`? The `fit_xy()` function always passes the data as is to the underlying model function. It will not create dummy/indicator variables before doing so. When `fit()` is used with a model specification, this almost always means that dummy variables will be created from qualitative predictors. If the underlying function requires a matrix (like glmnet), it will make them. However, if the underlying function uses a formula, `fit()` just passes the formula to that function. We estimate that 99% of modeling functions using formulas make dummy variables. The other 1% include tree-based methods that do not require purely numeric predictors. See Section \@ref(workflow-encoding) for more about using formulas in tidymodels. 
 
-
 Not only does `r pkg(parsnip)` enable a consistent model interface for different packages, it also provides consistency in the model arguments. It is common for different functions that fit the same model to have different argument names. Random forest model functions are a good example. Three commonly used arguments are the number of trees in the ensemble, the number of predictors to randomly sample with each split within a tree, and the number of data points required to make a split. For three different R packages implementing this algorithm, those arguments are shown in Table \@ref(tab:rand-forest-args).
 
 ```{r, models-rf-arg-names, echo = FALSE, results = "asis"}
@@ -139,23 +137,21 @@ arg_info <-
   get_from_env("rand_forest_args") %>% 
   select(engine, parsnip, original) %>% 
   full_join(arg_info, by = "parsnip") %>% 
-  mutate(package = ifelse(engine == "spark", "sparklyr", engine))
+  mutate(package = ifelse(engine == "spark", "sparklyr", engine)) %>%
+  mutate_at(c("parsnip", "original"), glue::backtick) 
 
 arg_info %>%
   select(package, `Argument Type`, original) %>%
-  # mutate(original = paste0("<tt>", original, "</tt>")) %>% 
   pivot_wider(
     id_cols = c(`Argument Type`),
     values_from = c(original),
     names_from = c(package)
   ) %>% 
-  kable(
+  knitr::kable(
     caption = "Example argument names for different random forest functions.",
     label = "rand-forest-args",
     escape = FALSE
-  ) %>%
-  kable_styling() %>%
-  column_spec(2:4, monospace = TRUE)
+  )
 ```
 
 In an effort to make argument specification less painful, `r pkg(parsnip)` uses common argument names within and between packages. Table \@ref(tab:parsnip-args) shows, for random forests, what `r pkg(parsnip)` models use.
@@ -164,14 +160,11 @@ In an effort to make argument specification less painful, `r pkg(parsnip)` uses 
 arg_info %>%
   select(`Argument Type`, parsnip) %>%
   distinct() %>% 
-  # mutate(parsnip = paste0("<tt>", parsnip, "</tt>")) %>% 
-  kable(
+  knitr::kable(
     caption = "Random forest argument names used by parsnip.",
     label = "parsnip-args",
     escape = FALSE
-  ) %>% 
-  kable_styling(full_width = FALSE) %>%
-  column_spec(2, monospace = TRUE)
+  ) 
 ```
 
 Admittedly, this is one more set of arguments to memorize. However, when other types of models have the same argument types, these names still apply. For example, boosted tree ensembles also create a large number of tree-based models, so `trees` is also used there, as is `min_n`, and so on. 
@@ -219,7 +212,7 @@ lm_form_fit %>% extract_fit_engine() %>% vcov()
 ```
 
 :::rmdwarning
-Never pass the `fit` element of a `r pkg(parsnip)` model to a model prediction function, i.e., use `predict(lm_form_fit)` but *do not* use `predict(lm_form_fit$fit)`. If the data were preprocessed in any way, incorrect predictions will be generated (sometimes, without errors). The underlying model's prediction function has no idea if any transformations have been made to the data prior to running the model. See Section \@ref(parsnip-predictions) for more on making predictions. 
+Never pass the `fit` element of a `r pkg(parsnip)` model to a model prediction function, i.e., use `predict(lm_form_fit)` but *do not* use `predict(lm_form_fit$fit)`. If the data were preprocessed in any way, incorrect predictions will be generated (sometimes, without errors). The underlying model's prediction function has no idea if any transformations have been made to the data prior to running the model. See the next section for more on making predictions. 
 :::
 
 One issue with some existing methods in base R is that the results are stored in a manner that may not be the most useful. For example, the `summary()` method for `lm` objects can be used to print the results of the model fit, including a table with parameter values, their uncertainty estimates, and p-values. These particular results can also be saved:
@@ -293,11 +286,10 @@ tribble(
   "probability (2 classes)", "numeric matrix (2nd level only)",
   "probability (3+ classes)", "3D numeric array (all levels)", 
 ) %>% 
-  kable(
+  knitr::kable(
     caption = "Different return values for glmnet prediction types.",
     label = "predict-types"
-  ) %>% 
-  kable_styling(full_width = FALSE)
+  ) 
 ```
 
 Additionally, the column names of the results contain coded values that map to a vector called `lambda` within the glmnet model object. This excellent statistical method can be discouraging to use in practice because of all of the special cases an analyst might encounter that require additional code to be useful.
@@ -313,12 +305,11 @@ tribble(
   "conf_int", ".pred_lower, .pred_upper",
   "pred_int", ".pred_lower, .pred_upper"
 ) %>% 
-  kable(
+  mutate_all(glue::backtick) %>%
+  knitr::kable(
     caption = "The tidymodels mapping of prediction types and column names.",
     label = "predictable-column-names",
-  ) %>% 
-  kable_styling(full_width = FALSE)  %>%
-  column_spec(1:2, monospace = TRUE)
+  ) 
 ```
 
 The third rule regarding the number of rows in the output is critical. For example, if any rows of the new data contain missing values, the output will be padded with missing results for those rows. 

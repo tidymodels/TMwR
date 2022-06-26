@@ -44,9 +44,9 @@ This book is not intended to be a comprehensive reference on modeling techniques
 ```{r, eval = FALSE, echo = FALSE}
 library(tidyverse)
 contribs_all_json <- gh::gh("/repos/:owner/:repo/contributors",
-  owner = "tidymodels",
-  repo = "TMwR",
-  .limit = Inf
+                            owner = "tidymodels",
+                            repo = "TMwR",
+                            .limit = Inf
 )
 contribs_all <- tibble(
   login = contribs_all_json %>% map_chr("login"),
@@ -103,7 +103,7 @@ df <- tibble::tibble(
     source = stringr::str_split(source, " "),
     source = purrr::map_chr(source, ~ .x[1]),
     info = paste0(package, " (", version, ", ", source, ")")
-    )
+  )
 pkg_info <- knitr::combine_words(df$info)
 ```
 

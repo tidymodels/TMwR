@@ -12,14 +12,14 @@ data("bioChemists", package = "pscl")
 # Inferential Analysis {#inferential}
 
 :::rmdnote
-In Section \@ref(model-types), we outlined a taxonomy of models and said that most models can be categorized as descriptive, inferential, and/or predictive. 
+In Chapter \@ref(software-modeling), we outlined a taxonomy of models and said that most models can be categorized as descriptive, inferential, and/or predictive. 
 :::
 
 Most of the chapters in this book have focused on models from the perspective of the accuracy of predicted values, an important quality of models for all purposes but most relevant for predictive models. Inferential models are usually created not only for their predictions, but also to make inferences or judgments about some component of the model, such as a coefficient value or other parameter. These results are often used to answer some (hopefully) pre-defined questions or hypotheses. In predictive models, predictions on hold-out data are used to validate or characterize the quality of the model. Inferential methods focus on validating the probabilistic or structural assumptions that are made prior to fitting the model.
 
 For example, in ordinary linear regression, the common assumption is that the residual values are independent and follow a Gaussian distribution with a constant variance. While you may have scientific or domain knowledge to lend credence to this assumption for your model analysis, the residuals from the fitted model are usually examined to determine if the assumption was a good idea. As a result, the methods for determining if the model's assumptions have been met are not as simple as looking at holdout predictions, although that can be very useful as well.
 
-We will use p-values in this chapter. However, the tidymodels framework tends to promote confidence intervals over p-values as a method for quantifying the evidence for an alternative hypothesis. As previously shown in Section \@ref(tidyposterior), Bayesian methods are often superior to both p-values and confidence intervals in terms of ease of interpretation (but they can be more computationally expensive).
+We will use p-values in this chapter. However, the tidymodels framework tends to promote confidence intervals over p-values as a method for quantifying the evidence for an alternative hypothesis. As previously shown in Chapter \@ref(compare), Bayesian methods are often superior to both p-values and confidence intervals in terms of ease of interpretation (but they can be more computationally expensive).
 
 :::rmdwarning
 There has been a push in recent years to move away from p-values in favor of other methods [@pvalue]. See Volume 73 of [*The American Statistician*](https://www.tandfonline.com/toc/utas20/73/) for more information and discussion.

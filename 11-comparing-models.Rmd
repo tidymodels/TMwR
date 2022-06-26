@@ -5,7 +5,6 @@ library(corrr)
 library(doMC)
 library(tidyposterior)
 library(rstanarm)
-library(kableExtra)
 library(tidyr)
 library(forcats)
 registerDoMC(cores = parallel::detectCores())
@@ -27,7 +26,7 @@ In either case, the result is a collection of resampled summary statistics (e.g.
 
 ## Creating Multiple Models with Workflow Sets {#workflow-set}
 
-In Section \@ref(workflow-sets-intro) we described the idea of a workflow set where different preprocessors and/or models can be combinatorially generated. In Chapter \@ref(resampling), we used a recipe for the Ames data that included an interaction term as well as spline functions for longitude and latitude. To demonstrate more with workflow sets, let's create three different linear models that add these preprocessing steps incrementally; we can test whether these additional terms improve the model results. We'll create three recipes then combine them into a workflow set: 
+In Chapter \@ref(workflows) we described the idea of a workflow set where different preprocessors and/or models can be combinatorially generated. In Chapter \@ref(resampling), we used a recipe for the Ames data that included an interaction term as well as spline functions for longitude and latitude. To demonstrate more with workflow sets, let's create three different linear models that add these preprocessing steps incrementally; we can test whether these additional terms improve the model results. We'll create three recipes then combine them into a workflow set: 
 
 ```{r compare-workflow-set}
 library(tidymodels)
@@ -139,8 +138,8 @@ These correlations are high, and indicate that, across models, there are large w
 ```{r compare-rsq-plot, eval=FALSE}
 rsq_indiv_estimates %>% 
   mutate(wflow_id = reorder(wflow_id, .estimate)) %>% 
-  ggplot(aes(x = wflow_id, y = .estimate, group = id, color = id)) + 
-  geom_line(alpha = .5, lwd = 1.25) + 
+  ggplot(aes(x = wflow_id, y = .estimate, group = id, color = id, lty = id)) + 
+  geom_line(alpha = .8, lwd = 1.25) + 
   theme(legend.position = "none")
 ```
 
@@ -207,12 +206,11 @@ rsq_indiv_estimates %>%
     ) %>% 
   select(`Y = rsq` = rsq, model, X1, X2, X3, id) %>% 
   slice(1:6) %>% 
-  kable(
+  knitr::kable(
     caption = "Model performance statistics as a data set for analysis.",
     label = "model-anova-data",
     escape = FALSE
-    ) %>% 
-  kable_styling(full_width = FALSE) 
+    )
 ```
 
 The `X1`, `X2`, and `X3` columns in the table are indicators for the values in the `model` column. Their order was defined in the same way that R would define them, alphabetically ordered by `model`.  

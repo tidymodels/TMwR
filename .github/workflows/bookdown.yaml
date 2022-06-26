@@ -34,7 +34,7 @@ jobs:
       - uses: r-lib/actions/setup-r-dependencies@v2
 
       - name: Build site
-        run: Rscript -e 'bookdown::render_book("index.Rmd", quiet = TRUE)'
+        run: Rscript -e 'bookdown::render_book("index.Rmd", output_format = bookdown::html_book(keep_md = TRUE), quiet = TRUE)'
 
       - name: Deploy to Netlify
         if: contains(env.isExtPR, 'false')
@@ -52,3 +52,8 @@ jobs:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
         timeout-minutes: 1
+        
+      - uses: actions/upload-artifact@v1
+        with:
+          name: _book
+          path: _book/

@@ -56,7 +56,7 @@ mlp_spec <-
   set_mode("classification")
 ```
 
-The argument `trace = 0` prevents extra logging of the training process. As shown in Section \@ref(tuning-params-tidymodels), the `extract_parameter_set_dials()` function can extract the set of arguments with unknown values and sets their `r pkg(dials)` objects: 
+The argument `trace = 0` prevents extra logging of the training process. As shown in Chapter \@ref(tuning), the `extract_parameter_set_dials()` function can extract the set of arguments with unknown values and sets their `r pkg(dials)` objects: 
 
 ```{r grid-mlp-param}
 mlp_param <- extract_parameter_set_dials(mlp_spec)
@@ -95,7 +95,7 @@ mlp_param %>%
 There are techniques for creating regular grids that do not use all possible values of each parameter set. These _fractional factorial designs_ [@BHH] could also be used. To learn more, consult the CRAN Task View for experimental design.^[<https://CRAN.R-project.org/view=ExperimentalDesign>] 
 
 :::rmdwarning
-Regular grids can be computationally expensive to use, especially when there are a medium-to-large number of tuning parameters. This is true for many models but not all. As discussed in Section \@ref(efficient-grids) below, there are many models whose tuning time _decreases_ with a regular grid!
+Regular grids can be computationally expensive to use, especially when there are a medium-to-large number of tuning parameters. This is true for many models but not all. As discussed further in this chapter, there are many models whose tuning time _decreases_ with a regular grid!
 :::
 
 One advantage to using a regular grid is that the relationships and patterns between the tuning parameters and the model metrics are easily understood. The factorial nature of these designs allows for examination of each parameter separately with little confounding between parameters.   
@@ -165,7 +165,7 @@ Space-filling designs can be very effective at representing the parameter space.
 
 ## Evaluating the Grid {#evaluating-grid}
 
-To choose the best tuning parameter combination, each candidate set is assessed using data that were not used to train that model. Resampling methods or a single validation set work well for this purpose. The process (and syntax) closely resembles the approach in Section \@ref(resampling-performance) that used the `fit_resamples()` function from the `r pkg(tune)` package. 
+To choose the best tuning parameter combination, each candidate set is assessed using data that were not used to train that model. Resampling methods or a single validation set work well for this purpose. The process (and syntax) closely resembles the approach in Chapter \@ref(resampling) that used the `fit_resamples()` function from the `r pkg(tune)` package. 
 
 After resampling, the user selects the most appropriate candidate parameter set. It might make sense to choose the empirically best parameter combination or bias the choice towards other aspects of the model fit, such as simplicity. 
 
@@ -226,7 +226,7 @@ mlp_param <-
 In `step_pca()`, using zero PCA components is a shortcut to skip the feature extraction. In this way, the original predictors can be directly compared to the results that include PCA components. 
 :::
 
-The `tune_grid()` function is the primary function for conducting grid search. Its functionality is very similar to `fit_resamples()` from Section \@ref(resampling-performance), although it has additional arguments related to the grid: 
+The `tune_grid()` function is the primary function for conducting grid search. Its functionality is very similar to `fit_resamples()`, although it has additional arguments related to the grid: 
 
 * `grid`: An integer or data frame. When an integer is used, the function creates a space-filling design with `grid` number of candidate parameter combinations. If specific parameter combinations exist, the `grid` parameter is used to pass them to the function. 
 
@@ -463,7 +463,7 @@ Even though we fit the model with and without the submodel prediction trick, thi
 
 ### Parallel processing
 
-As previously mentioned in Section \@ref(parallel), parallel processing is an effective method for decreasing execution time when resampling models. This advantage conveys to model tuning via grid search, although there are additional considerations. 
+As previously mentioned in Chapter \@ref(resampling), parallel processing is an effective method for decreasing execution time when resampling models. This advantage conveys to model tuning via grid search, although there are additional considerations. 
 
 Let's consider two different parallel processing schemes. 
 
@@ -655,6 +655,7 @@ First, let's consider the raw execution times in Figure \@ref(fig:parallel-times
 #| fig.alt = "Execution times for model tuning versus the number of workers using different delegation schemes. The diagonal black line indicates a linear speedup where the addition of a new worker process has maximal effect. The 'everything' scheme shows that the benefits decrease after three or four workers, especially when there is expensive preprocessing. The 'resamples' scheme has almost linear speedups across all tasks."
 
 load("extras/parallel_times/xgb_times.RData")
+
 ggplot(times, aes(x = num_cores, y = elapsed, color = parallel_over, shape = parallel_over)) + 
   geom_point(size = 2) + 
   geom_line() +
@@ -699,7 +700,7 @@ ggplot(times, aes(x = num_cores, y = speed_up, color = parallel_over, shape = pa
 
 The best speed-ups, for these data, occur when `parallel_over = "resamples"` and when the computations are expensive. However, in the latter case, remember that the previous analysis indicates that the overall model fits are slower.  
 
-What is the benefit of using the submodel optimization method in conjunction with parallel processing?  The C5.0 classification model shown in Section \@ref(submodel-trick) was also run in parallel with ten workers. The parallel computations took 13.3 seconds for a `r round(100.147/13.265, 1)`-fold speed-up (both runs used the submodel optimization trick). Between the submodel optimization trick and parallel processing, there was a total `r round(3734.249/13.265, 0)`-fold speed-up over the most basic grid search code. 
+What is the benefit of using the submodel optimization method in conjunction with parallel processing?  The C5.0 classification model shown in Chapter \@ref(grid-search) was also run in parallel with ten workers. The parallel computations took 13.3 seconds for a `r round(100.147/13.265, 1)`-fold speed-up (both runs used the submodel optimization trick). Between the submodel optimization trick and parallel processing, there was a total `r round(3734.249/13.265, 0)`-fold speed-up over the most basic grid search code. 
 
 :::rmdwarning
 Overall, note that the increased computational savings will vary from model to model and are also affected by the size of the grid, the number of resamples, etc. A very computationally efficient model may not benefit as much from parallel processing. 
@@ -791,10 +792,12 @@ remaining <-
   mlp_sfd_race %>% 
   collect_metrics() %>% 
   dplyr::filter(n == 10)
+
+remaining_text <- cli::pluralize("{nrow(remaining)} remain{?s/}.")
 ```
 
 
-As an example, in the multilayer perceptron tuning process with a regular grid explored in this chapter, what would the results look like after only the first three folds? Using techniques similar to those shown in Chapter \@ref(compare), we can fit a model where the outcome is the resampled area under the ROC curve and the predictor is an indicator for the parameter combination. The model takes the resample-to-resample effect into account and produces point and interval estimates for each parameter setting. The results of the model are one-sided 95% confidence intervals that measure the loss of the ROC value relative to the currently best performing parameters, as shown in Figure \@ref(fig:racing-process).
+As an example, in the multilayer perceptron tuning process with a regular grid explored in this chapter, what would the results look like after only the first three folds? Using techniques similar to those shown in Chapter \@ref(compare), we can fit a model where the outcome is the resampled area under the ROC curve and the predictor is an indicator for the parameter combination. The model takes the resample-to-resample effect into account and produces point and interval estimates for each parameter setting. The results of the model are one-sided 95% confidence intervals that measure the loss of the ROC value relative to the currently best performing parameters.
 
 ```{r racing-process}
 #| echo = FALSE, 
@@ -803,10 +806,9 @@ As an example, in the multilayer perceptron tuning process with a regular grid e
 #| fig.height = 5, 
 #| out.width = "80%",
 #| fig.cap = "The racing process for 20 tuning parameters and 10 resamples",
-#| fig.alt = "An illustration of the racing process for 20 tuning parameters and 10 resamples. The analysis is conducted at the first, third, and last resample. As the number of resamples increases, the confidence intervals show some model configurations that do not have confidence intervals that overlap with zero. These are excluded from subsequent resamples."
+#| fig.alt = "The racing process for 20 tuning parameters and 10 resamples. The analysis is conducted at the first, third, and last resample. As the number of resamples increases, the confidence intervals show some model configurations that do not have confidence intervals that overlap with zero. These are excluded from subsequent resamples."
 
 full_att <- attributes(mlp_sfd_race)
-
 race_details <- NULL
 for(iter in 1:10) {
   
@@ -824,7 +826,6 @@ for(iter in 1:10) {
       race_details,
       finetune:::test_parameters_gls(tmp) %>% mutate(iter = iter))
 }
-
 race_details <-
   race_details %>%
   mutate(
@@ -836,72 +837,33 @@ race_details <-
   )  %>%
   mutate(
     .config = factor(.config),
+    .config = format(as.integer(.config)),
+    .config = paste("config", .config),
+    .config = factor(.config),
     .config = reorder(.config, estimate),
     decision = factor(decision, levels = c("best", "retain", "discard"))
   ) 
 race_cols <- c(best = "blue", retain = "black", discard = "grey")
-
 iter_three <- race_details %>% dplyr::filter(iter == 3) 
-
-iter_three %>% 
+race_details %>% 
+  filter(iter %in% c(1, 3, 10)) %>% 
+  mutate(iter = paste("resamples:", format(iter))) %>% 
   ggplot(aes(x = -estimate, y = .config)) + 
-  geom_vline(xintercept = 0, lty = 2, color = "green") +
-  geom_point(size = 2, aes(color = decision)) +
-  geom_errorbarh(aes(xmin = -estimate, xmax = -upper, color = decision), height = .3, show.legend = FALSE) + 
+  geom_vline(xintercept = 0, lty = 2, col = "green") +
+  geom_point(size = 2, aes(col = decision, pch = decision)) + 
+  geom_errorbarh(aes(xmin = -estimate, xmax = -upper, col = decision), height = .3, show.legend = FALSE) + 
   labs(x = "Loss of ROC AUC", y = NULL) + 
-  scale_colour_manual(values = race_cols)
+  scale_colour_manual(values = race_cols) + 
+  facet_wrap(~iter) +
+  theme(legend.position = "top")
 ```
 
-Any parameter set whose confidence interval includes zero would lack evidence that its performance is not statistically different from the best results. We retain `r sum(iter_three$upper >= 0)` settings; these are resampled more. The remaining `r sum(iter_three$upper < 0)` submodels are no longer considered. 
+Figure \@ref(fig:racing-process) shows the results at several iterations in the process. The points shown in the panel with the first iteration show single ROC AUC values. As iterations progress, the points are averages of the resampled ROC statistics.
 
-```{r grid-mlp-racing-anim, include = FALSE, dev = 'png'}
-race_ci_plots <- function(x, iters = max(x$iter)) {
-  
-  x_rng <- extendrange(c(-x$estimate, -x$upper))
-  
-  for (i in 1:iters) {
-    if (i < 3) {
-      ttl <- paste0("Iteration ", i, ": burn-in")
-    } else {
-      ttl <- paste0("Iteration ", i, ": testing")
-    }
-    p <-
-      x %>% 
-      dplyr::filter(iter == i) %>% 
-      ggplot(aes(x = -estimate, y = .config, color = decision)) +
-      geom_vline(xintercept = 0, color = "green", lty = 2) +
-      geom_point(size = 2) +
-      labs(title = ttl, y = "", x = "Loss of ROC AUC") +
-      scale_color_manual(values = c(best = "blue", retain = "black", discard = "grey"), 
-                         drop = FALSE) +
-      scale_y_discrete(drop = FALSE) +
-      xlim(x_rng) + 
-      theme_bw() +
-      theme(legend.position = "top")
-    
-    if (i >= 3) {
-      p <- p  + geom_errorbar(aes(xmin = -estimate, xmax = -upper), width = .3)
-    }
-    
-    print(p)
-  }
-  invisible(NULL)
-}
-av_capture_graphics(
-  race_ci_plots(race_details),
-  output = "race_results.mp4",
-  width = 720,
-  height = 720,
-  res = 120,
-  framerate = 1/3
-)
-```
+On the third iteration, the leading model configuration has changed and the algorithm computes one-sided confidence intervals. Any parameter set whose confidence interval includes zero would lack evidence that its performance is not statistically different from the best results. We retain `r sum(iter_three$upper < 0)` settings; these are resampled more. The remaining `r sum(iter_three$upper >= 0)` submodels are no longer considered. 
 
-<video width="720" height="720" controls>
-  <source src="race_results.mp4" type="video/mp4">
-</video>
+The process continues to resample configurations that remain and the statistical analysis repeats with the current results. More submodels may be removed from consideration. Prior to the final resample, almost all submodels are eliminated and, at the last iteration, only `r remaining_text`^[See @kuhn2014futility for more details on the computational aspects of this approach.] 
 
-The process continues for each resample; after the next set of performance metrics, a new model is fit to these statistics, and more  submodels are potentially discarded.^[See @kuhn2014futility for more details on the computational aspects of this approach.] 
 
 :::rmdwarning
 Racing methods can be more efficient than basic grid search as long as the interim analysis is fast and some parameter settings have poor performance. It also is most helpful when the model does _not_ have the ability to exploit submodel predictions. 

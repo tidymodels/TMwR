@@ -215,7 +215,7 @@ Using the standard error as a measure to preclude samples from being predicted c
 
 ## Determining Model Applicability {#applicability-domains}
 
-Equivocal zones try to measure the reliability of a prediction based on the model outputs. It may be that model statistics, such as the standard error of prediction, cannot measure the impact of extrapolation, and so we need another way to assess whether to trust a prediction and answer, "Is our model applicable for predicting a specific data point?" Let's take the Chicago train data used extensively in [Kuhn and Johnson (2019)](https://bookdown.org/max/FES/chicago-intro.html) and first shown in Section \@ref(examples-of-tidyverse-syntax). The goal is to predict the number of customers entering the Clark and Lake train station each day. 
+Equivocal zones try to measure the reliability of a prediction based on the model outputs. It may be that model statistics, such as the standard error of prediction, cannot measure the impact of extrapolation, and so we need another way to assess whether to trust a prediction and answer, "Is our model applicable for predicting a specific data point?" Let's take the Chicago train data used extensively in [Kuhn and Johnson (2019)](https://bookdown.org/max/FES/chicago-intro.html) and first shown in Chapter \@ref(tidyverse). The goal is to predict the number of customers entering the Clark and Lake train station each day. 
 
 The data set in the `r pkg(modeldata)` package (a tidymodels package with example data sets) has daily values between `r format(min(Chicago$date), "%B %d, %Y")` and `r format(max(Chicago$date), "%B %d, %Y")`. Let's create a small test set using the last two weeks of the data: 
 
@@ -231,7 +231,7 @@ Chicago_train <- Chicago %>% slice(1:(n - 14))
 Chicago_test  <- Chicago %>% slice((n - 13):n)
 ```
 
-The main predictors are lagged ridership data at different train stations, including Clark and Lake, as well as the date. The ridership predictors are highly correlated with one another. In the following recipe, the date column is expanded into several new features, and the ridership predictors are represented using partial least squares (PLS) components. PLS [@Geladi:1986], as we discussed in Section \@ref(partial-least-squares), is a supervised version of principal component analysis where the new features have been decorrelated but are predictive of the outcome data. 
+The main predictors are lagged ridership data at different train stations, including Clark and Lake, as well as the date. The ridership predictors are highly correlated with one another. In the following recipe, the date column is expanded into several new features, and the ridership predictors are represented using partial least squares (PLS) components. PLS [@Geladi:1986], as we discussed in Chapter \@ref(dimensionality), is a supervised version of principal component analysis where the new features have been decorrelated but are predictive of the outcome data. 
 
 Using the preprocessed data, we fit a standard linear model:
 

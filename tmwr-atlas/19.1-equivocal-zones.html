@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="19.1 Equivocal Results | Tidy Modeling with R" />
+<meta property="og:type" content="book" />
+<meta property="og:image" content="/images/cover.png" />
+<meta property="og:description" content="The tidymodels framework is a collection of R packages for modeling and machine learning using tidyverse principles. This book provides a thorough introduction to how to use tidymodels, and an outline of good methodology and statistical practice for phases of the modeling process." />
+<meta name="github-repo" content="tidymodels/TMwR" />
+
+<meta name="author" content="Max Kuhn and Julia Silge" />
+
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  TeX: { equationNumbers: { autoNumber: "AMS" } }
+});
+</script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<meta name="description" content="The tidymodels framework is a collection of R packages for modeling and machine learning using tidyverse principles. This book provides a thorough introduction to how to use tidymodels, and an outline of good methodology and statistical practice for phases of the modeling process.">
+
+<title>19.1 Equivocal Results | Tidy Modeling with R</title>
+
+<script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="libs/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+<script src="libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="libs/navigation-1.1/tabsets.js"></script>
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+
+
+<style type="text/css">
+/* Used with Pandoc 2.11+ new --citeproc when CSL is used */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}
+</style>
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+/* show arrow before summary tag as in bootstrap
+TODO: remove if boostrap in updated in html_document (rmarkdown#1485) */
+details > summary {
+  display: list-item;
+  cursor: pointer;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container-fluid main-container">
+
+
+<div class="row">
+<div class="col-sm-12">
+<div id="TOC">
+<ul>
+<li class="has-sub"><a href="index.html#hello-world">Hello World</a>
+<ul>
+<li><a href="acknowledgments.html#acknowledgments">Acknowledgments</a></li>
+<li><a href="using-code-examples.html#using-code-examples">Using Code Examples</a></li>
+</ul></li>
+<li class="part"><span><b>Introduction</b></span></li>
+<li class="has-sub"><a href="1-software-modeling.html#software-modeling"><span class="toc-section-number">1</span> Software for modeling</a>
+<ul>
+<li><a href="1.1-fundamentals-for-modeling-software.html#fundamentals-for-modeling-software"><span class="toc-section-number">1.1</span> Fundamentals for Modeling Software</a></li>
+<li class="has-sub"><a href="1.2-model-types.html#model-types"><span class="toc-section-number">1.2</span> Types of Models</a>
+<ul>
+<li><a href="1.2-model-types.html#descriptive-models">Descriptive models</a></li>
+<li><a href="1.2-model-types.html#inferential-models">Inferential models</a></li>
+<li><a href="1.2-model-types.html#predictive-models">Predictive models</a></li>
+</ul></li>
+<li><a href="1.3-connections-between-types-of-models.html#connections-between-types-of-models"><span class="toc-section-number">1.3</span> Connections Between Types of Models</a></li>
+<li><a href="1.4-model-terminology.html#model-terminology"><span class="toc-section-number">1.4</span> Some Terminology</a></li>
+<li><a href="1.5-model-phases.html#model-phases"><span class="toc-section-number">1.5</span> How Does Modeling Fit into the Data Analysis Process?</a></li>
+<li><a href="1.6-software-summary.html#software-summary"><span class="toc-section-number">1.6</span> Chapter Summary</a></li>
+</ul></li>
+<li class="has-sub"><a href="2-tidyverse.html#tidyverse"><span class="toc-section-number">2</span> A Tidyverse Primer</a>
+<ul>
+<li class="has-sub"><a href="2.1-tidyverse-principles.html#tidyverse-principles"><span class="toc-section-number">2.1</span> Tidyverse Principles</a>
+<ul>
+<li><a href="2.1-tidyverse-principles.html#design-for-humans"><span class="toc-section-number">2.1.1</span> Design for humans</a></li>
+<li><a href="2.1-tidyverse-principles.html#reuse-existing-data-structures"><span class="toc-section-number">2.1.2</span> Reuse existing data structures</a></li>
+<li><a href="2.1-tidyverse-principles.html#design-for-the-pipe-and-functional-programming"><span class="toc-section-number">2.1.3</span> Design for the pipe and functional programming</a></li>
+</ul></li>
+<li><a href="2.2-examples-of-tidyverse-syntax.html#examples-of-tidyverse-syntax"><span class="toc-section-number">2.2</span> Examples of Tidyverse Syntax</a></li>
+<li><a href="2.3-chapter-summary.html#chapter-summary"><span class="toc-section-number">2.3</span> Chapter Summary</a></li>
+</ul></li>
+<li class="has-sub"><a href="3-base-r.html#base-r"><span class="toc-section-number">3</span> A Review of R Modeling Fundamentals</a>
+<ul>
+<li><a href="3.1-an-example.html#an-example"><span class="toc-section-number">3.1</span> An Example</a></li>
+<li><a href="3.2-formula.html#formula"><span class="toc-section-number">3.2</span> What Does the R Formula Do?</a></li>
+<li><a href="3.3-tidiness-modeling.html#tidiness-modeling"><span class="toc-section-number">3.3</span> Why Tidiness is Important for Modeling</a></li>
+<li><a href="3.4-combining-base-r-models-and-the-tidyverse.html#combining-base-r-models-and-the-tidyverse"><span class="toc-section-number">3.4</span> Combining Base R Models and the Tidyverse</a></li>
+<li><a href="3.5-the-tidymodels-metapackage.html#the-tidymodels-metapackage"><span class="toc-section-number">3.5</span> The tidymodels Metapackage</a></li>
+<li><a href="3.6-chapter-summary-1.html#chapter-summary-1"><span class="toc-section-number">3.6</span> Chapter Summary</a></li>
+</ul></li>
+<li class="part"><span><b>Modeling Basics</b></span></li>
+<li class="has-sub"><a href="4-ames.html#ames"><span class="toc-section-number">4</span> The Ames Housing Data</a>
+<ul>
+<li><a href="4.1-exploring-features-of-homes-in-ames.html#exploring-features-of-homes-in-ames"><span class="toc-section-number">4.1</span> Exploring Features of Homes in Ames</a></li>
+<li><a href="4.2-ames-summary.html#ames-summary"><span class="toc-section-number">4.2</span> Chapter Summary</a></li>
+</ul></li>
+<li class="has-sub"><a href="5-splitting.html#splitting"><span class="toc-section-number">5</span> Spending our Data</a>
+<ul>
+<li><a href="5.1-splitting-methods.html#splitting-methods"><span class="toc-section-number">5.1</span> Common Methods for Splitting Data</a></li>
+<li><a href="5.2-what-about-a-validation-set.html#what-about-a-validation-set"><span class="toc-section-number">5.2</span> What About a Validation Set?</a></li>
+<li><a href="5.3-multi-level-data.html#multi-level-data"><span class="toc-section-number">5.3</span> Multi-Level Data</a></li>
+<li><a href="5.4-other-considerations-for-a-data-budget.html#other-considerations-for-a-data-budget"><span class="toc-section-number">5.4</span> Other Considerations for a Data Budget</a></li>
+<li><a href="5.5-splitting-summary.html#splitting-summary"><span class="toc-section-number">5.5</span> Chapter Summary</a></li>
+</ul></li>
+<li class="has-sub"><a href="6-models.html#models"><span class="toc-section-number">6</span> Fitting Models with parsnip</a>
+<ul>
+<li><a href="6.1-create-a-model.html#create-a-model"><span class="toc-section-number">6.1</span> Create a Model</a></li>
+<li><a href="6.2-use-the-model-results.html#use-the-model-results"><span class="toc-section-number">6.2</span> Use the Model Results</a></li>
+<li><a href="6.3-parsnip-predictions.html#parsnip-predictions"><span class="toc-section-number">6.3</span> Make Predictions</a></li>
+<li><a href="6.4-parsnip-extension-packages.html#parsnip-extension-packages"><span class="toc-section-number">6.4</span> parsnip-Extension Packages</a></li>
+<li><a href="6.5-parsnip-addin.html#parsnip-addin"><span class="toc-section-number">6.5</span> Creating Model Specifications</a></li>
+<li><a href="6.6-models-summary.html#models-summary"><span class="toc-section-number">6.6</span> Chapter Summary</a></li>
+</ul></li>
+<li class="has-sub"><a href="7-workflows.html#workflows"><span class="toc-section-number">7</span> A Model Workflow</a>
+<ul>
+<li><a href="7.1-begin-model-end.html#begin-model-end"><span class="toc-section-number">7.1</span> Where Does the Model Begin and End?</a></li>
+<li><a href="7.2-workflow-basics.html#workflow-basics"><span class="toc-section-number">7.2</span> Workflow Basics</a></li>
+<li><a href="7.3-adding-raw-variables-to-the-workflow.html#adding-raw-variables-to-the-workflow"><span class="toc-section-number">7.3</span> Adding Raw Variables to the <code>workflow()</code></a></li>
+<li class="has-sub"><a href="7.4-workflow-encoding.html#workflow-encoding"><span class="toc-section-number">7.4</span> How Does a <code>workflow()</code> Use the Formula?</a>
+<ul>
+<li><a href="7.4-workflow-encoding.html#tree-based-models">Tree-based models</a></li>
+<li><a href="7.4-workflow-encoding.html#special-model-formulas"><span class="toc-section-number">7.4.1</span> Special formulas and in-line functions</a></li>
+</ul></li>
+<li><a href="7.5-workflow-sets-intro.html#workflow-sets-intro"><span class="toc-section-number">7.5</span> Creating Multiple Workflows at Once</a></li>
+<li><a href="7.6-evaluating-the-test-set.html#evaluating-the-test-set"><span class="toc-section-number">7.6</span> Evaluating the Test Set</a></li>
+<li><a href="7.7-workflows-summary.html#workflows-summary"><span class="toc-section-number">7.7</span> Chapter Summary</a></li>
+</ul></li>
+<li class="has-sub"><a href="8-recipes.html#recipes"><span class="toc-section-number">8</span> Feature Engineering with recipes</a>
+<ul>
+<li><a href="8.1-a-simple-recipe-for-the-ames-housing-data.html#a-simple-recipe-for-the-ames-housing-data"><span class="toc-section-number">8.1</span> A Simple <code>recipe()</code> for the Ames Housing Data</a></li>
+<li><a href="8.2-using-recipes.html#using-recipes"><span class="toc-section-number">8.2</span> Using Recipes</a></li>
+<li><a href="8.3-how-data-are-used-by-the-recipe.html#how-data-are-used-by-the-recipe"><span class="toc-section-number">8.3</span> How Data are Used by the <code>recipe()</code></a></li>
+<li class="has-sub"><a href="8.4-example-steps.html#example-steps"><span class="toc-section-number">8.4</span> Examples of <code>recipe()</code> Steps</a>
+<ul>
+<li><a href="8.4-example-steps.html#dummies"><span class="toc-section-number">8.4.1</span> Encoding qualitative data in a numeric format</a></li>
+<li><a href="8.4-example-steps.html#interaction-terms"><span class="toc-section-number">8.4.2</span> Interaction terms</a></li>
+<li><a href="8.4-example-steps.html#spline-functions"><span class="toc-section-number">8.4.3</span> Spline functions</a></li>
+<li><a href="8.4-example-steps.html#feature-extraction"><span class="toc-section-number">8.4.4</span> Feature extraction</a></li>
+<li><a href="8.4-example-steps.html#row-sampling-steps"><span class="toc-section-number">8.4.5</span> Row sampling steps</a></li>
+<li><a href="8.4-example-steps.html#general-transformations"><span class="toc-section-number">8.4.6</span> General transformations</a></li>
+<li><a href="8.4-example-steps.html#natural-language-processing"><span class="toc-section-number">8.4.7</span> Natural language processing</a></li>
+</ul></li>
+<li><a href="8.5-skip-equals-true.html#skip-equals-true"><span class="toc-section-number">8.5</span> Skipping Steps for New Data</a></li>
+<li><a href="8.6-tidy-a-recipe.html#tidy-a-recipe"><span class="toc-section-number">8.6</span> Tidy a <code>recipe()</code></a></li>
+<li><a href="8.7-column-roles.html#column-roles"><span class="toc-section-number">8.7</span> Column Roles</a></li>
+<li><a href="8.8-recipes-summary.html#recipes-summary"><span class="toc-section-number">8.8</span> Chapter Summary</a></li>
+</ul></li>
+<li class="has-sub"><a href="9-performance.html#performance"><span class="toc-section-number">9</span> Judging Model Effectiveness</a>
+<ul>
+<li><a href="9.1-performance-metrics-and-inference.html#performance-metrics-and-inference"><span class="toc-section-number">9.1</span> Performance Metrics and Inference</a></li>
+<li><a href="9.2-regression-metrics.html#regression-metrics"><span class="toc-section-number">9.2</span> Regression Metrics</a></li>
+<li><a href="9.3-binary-classification-metrics.html#binary-classification-metrics"><span class="toc-section-number">9.3</span> Binary Classification Metrics</a></li>
+<li><a href="9.4-multi-class-classification-metrics.html#multi-class-classification-metrics"><span class="toc-section-number">9.4</span> Multi-Class Classification Metrics</a></li>
+<li><a href="9.5-performance-summary.html#performance-summary"><span class="toc-section-number">9.5</span> Chapter Summary</a></li>
+</ul></li>
+<li class="part"><span><b>Tools for Creating Effective Models</b></span></li>
+<li class="has-sub"><a href="10-resampling.html#resampling"><span class="toc-section-number">10</span> Resampling for Evaluating Performance</a>
+<ul>
+<li><a href="10.1-resampling-resubstition.html#resampling-resubstition"><span class="toc-section-number">10.1</span> The Resubstitution Approach</a></li>
+<li class="has-sub"><a href="10.2-resampling-methods.html#resampling-methods"><span class="toc-section-number">10.2</span> Resampling Methods</a>
+<ul>
+<li><a href="10.2-resampling-methods.html#cv"><span class="toc-section-number">10.2.1</span> Cross-validation</a></li>
+<li><a href="10.2-resampling-methods.html#repeated-cross-validation">Repeated cross-validation</a></li>
+<li><a href="10.2-resampling-methods.html#leave-one-out-cross-validation">Leave-one-out cross-validation</a></li>
+<li><a href="10.2-resampling-methods.html#monte-carlo-cross-validation">Monte Carlo cross-validation</a></li>
+<li><a href="10.2-resampling-methods.html#validation"><span class="toc-section-number">10.2.2</span> Validation sets</a></li>
+<li><a href="10.2-resampling-methods.html#bootstrap"><span class="toc-section-number">10.2.3</span> Bootstrapping</a></li>
+<li><a href="10.2-resampling-methods.html#rolling"><span class="toc-section-number">10.2.4</span> Rolling forecasting origin resampling</a></li>
+</ul></li>
+<li><a href="10.3-resampling-performance.html#resampling-performance"><span class="toc-section-number">10.3</span> Estimating Performance</a></li>
+<li><a href="10.4-parallel.html#parallel"><span class="toc-section-number">10.4</span> Parallel Processing</a></li>
+<li><a href="10.5-extract.html#extract"><span class="toc-section-number">10.5</span> Saving the Resampled Objects</a></li>
+<li><a href="10.6-resampling-summary.html#resampling-summary"><span class="toc-section-number">10.6</span> Chapter Summary</a></li>
+</ul></li>
+<li class="has-sub"><a href="11-compare.html#compare"><span class="toc-section-number">11</span> Comparing Models with Resampling</a>
+<ul>
+<li><a href="11.1-workflow-set.html#workflow-set"><span class="toc-section-number">11.1</span> Creating Multiple Models with Workflow Sets</a></li>
+<li><a href="11.2-resampled-stats.html#resampled-stats"><span class="toc-section-number">11.2</span> Comparing Resampled Performance Statistics</a></li>
+<li><a href="11.3-simple-hypothesis-testing-methods.html#simple-hypothesis-testing-methods"><span class="toc-section-number">11.3</span> Simple Hypothesis Testing Methods</a></li>
+<li class="has-sub"><a href="11.4-tidyposterior.html#tidyposterior"><span class="toc-section-number">11.4</span> Bayesian Methods</a>
+<ul>
+<li><a href="11.4-tidyposterior.html#the-effect-of-the-amount-of-resampling">The effect of the amount of resampling</a></li>
+</ul></li>
+<li><a href="11.5-compare-summary.html#compare-summary"><span class="toc-section-number">11.5</span> Chapter Summary</a></li>
+</ul></li>
+<li class="has-sub"><a href="12-tuning.html#tuning"><span class="toc-section-number">12</span> Model Tuning and the Dangers of Overfitting</a>
+<ul>
+<li><a href="12.1-model-parameters.html#model-parameters"><span class="toc-section-number">12.1</span> Model Parameters</a></li>
+<li><a href="12.2-tuning-parameter-examples.html#tuning-parameter-examples"><span class="toc-section-number">12.2</span> Tuning Parameters for Different Types of Models</a></li>
+<li><a href="12.3-what-to-optimize.html#what-to-optimize"><span class="toc-section-number">12.3</span> What do we Optimize?</a></li>
+<li><a href="12.4-overfitting-bad.html#overfitting-bad"><span class="toc-section-number">12.4</span> The consequences of poor parameter estimates</a></li>
+<li><a href="12.5-two-general-strategies-for-optimization.html#two-general-strategies-for-optimization"><span class="toc-section-number">12.5</span> Two general strategies for optimization</a></li>
+<li><a href="12.6-tuning-params-tidymodels.html#tuning-params-tidymodels"><span class="toc-section-number">12.6</span> Tuning Parameters in tidymodels</a></li>
+<li><a href="12.7-chapter-summary-2.html#chapter-summary-2"><span class="toc-section-number">12.7</span> Chapter Summary</a></li>
+</ul></li>
+<li class="has-sub"><a href="13-grid-search.html#grid-search"><span class="toc-section-number">13</span> Grid Search</a>
+<ul>
+<li class="has-sub"><a href="13.1-grids.html#grids"><span class="toc-section-number">13.1</span> Regular and Non-Regular Grids</a>
+<ul>
+<li><a href="13.1-grids.html#regular-grids">Regular grids</a></li>
+<li><a href="13.1-grids.html#irregular-grids">Irregular grids</a></li>
+</ul></li>
+<li><a href="13.2-evaluating-grid.html#evaluating-grid"><span class="toc-section-number">13.2</span> Evaluating the Grid</a></li>
+<li><a href="13.3-finalizing-the-model.html#finalizing-the-model"><span class="toc-section-number">13.3</span> Finalizing the Model</a></li>
+<li><a href="13.4-tuning-usemodels.html#tuning-usemodels"><span class="toc-section-number">13.4</span> Tools for Creating Tuning Specifications</a></li>
+<li class="has-sub"><a href="13.5-efficient-grids.html#efficient-grids"><span class="toc-section-number">13.5</span> Tools for Efficient Grid Search</a>
+<ul>
+<li><a href="13.5-efficient-grids.html#submodel-trick"><span class="toc-section-number">13.5.1</span> Submodel optimization</a></li>
+<li><a href="13.5-efficient-grids.html#parallel-processing"><span class="toc-section-number">13.5.2</span> Parallel processing</a></li>
+<li><a href="13.5-efficient-grids.html#benchmarking-boosted-trees"><span class="toc-section-number">13.5.3</span> Benchmarking boosted trees</a></li>
+<li><a href="13.5-efficient-grids.html#access-to-global-variables"><span class="toc-section-number">13.5.4</span> Access to global variables</a></li>
+<li><a href="13.5-efficient-grids.html#racing"><span class="toc-section-number">13.5.5</span> Racing methods</a></li>
+</ul></li>
+<li><a href="13.6-grid-summary.html#grid-summary"><span class="toc-section-number">13.6</span> Chapter Summary</a></li>
+</ul></li>
+<li class="has-sub"><a href="14-iterative-search.html#iterative-search"><span class="toc-section-number">14</span> Iterative Search</a>
+<ul>
+<li><a href="14.1-svm.html#svm"><span class="toc-section-number">14.1</span> A Support Vector Machine Model</a></li>
+<li class="has-sub"><a href="14.2-bayesian-optimization.html#bayesian-optimization"><span class="toc-section-number">14.2</span> Bayesian Optimization</a>
+<ul>
+<li><a href="14.2-bayesian-optimization.html#a-gaussian-process-model"><span class="toc-section-number">14.2.1</span> A Gaussian process model</a></li>
+<li><a href="14.2-bayesian-optimization.html#acquisition-functions"><span class="toc-section-number">14.2.2</span> Acquisition functions</a></li>
+<li><a href="14.2-bayesian-optimization.html#tune-bayes"><span class="toc-section-number">14.2.3</span> The <code>tune_bayes()</code> function</a></li>
+</ul></li>
+<li class="has-sub"><a href="14.3-simulated-annealing.html#simulated-annealing"><span class="toc-section-number">14.3</span> Simulated Annealing</a>
+<ul>
+<li><a href="14.3-simulated-annealing.html#simulated-annealing-search-process"><span class="toc-section-number">14.3.1</span> Simulated annealing search process</a></li>
+<li><a href="14.3-simulated-annealing.html#tune-sim-anneal"><span class="toc-section-number">14.3.2</span> The <code>tune_sim_anneal()</code> function</a></li>
+</ul></li>
+<li><a href="14.4-iterative-summary.html#iterative-summary"><span class="toc-section-number">14.4</span> Chapter Summary</a></li>
+</ul></li>
+<li class="has-sub"><a href="15-workflow-sets.html#workflow-sets"><span class="toc-section-number">15</span> Screening Many Models</a>
+<ul>
+<li><a href="15.1-modeling-concrete-mixture-strength.html#modeling-concrete-mixture-strength"><span class="toc-section-number">15.1</span> Modeling Concrete Mixture Strength</a></li>
+<li><a href="15.2-creating-the-workflow-set.html#creating-the-workflow-set"><span class="toc-section-number">15.2</span> Creating the Workflow Set</a></li>
+<li><a href="15.3-tuning-and-evaluating-the-models.html#tuning-and-evaluating-the-models"><span class="toc-section-number">15.3</span> Tuning and Evaluating the Models</a></li>
+<li><a href="15.4-racing-example.html#racing-example"><span class="toc-section-number">15.4</span> Efficiently Screening Models</a></li>
+<li><a href="15.5-finalizing-a-model.html#finalizing-a-model"><span class="toc-section-number">15.5</span> Finalizing a Model</a></li>
+<li><a href="15.6-workflow-sets-summary.html#workflow-sets-summary"><span class="toc-section-number">15.6</span> Chapter Summary</a></li>
+</ul></li>
+<li class="part"><span><b>Beyond the Basics</b></span></li>
+<li class="has-sub"><a href="16-dimensionality.html#dimensionality"><span class="toc-section-number">16</span> Dimensionality Reduction</a>
+<ul>
+<li><a href="16.1-when-problems-can-dimensionality-reduction-solve.html#when-problems-can-dimensionality-reduction-solve"><span class="toc-section-number">16.1</span> When Problems Can Dimensionality Reduction Solve?</a></li>
+<li><a href="16.2-beans.html#beans"><span class="toc-section-number">16.2</span> A Picture is Worth a Thousand… Beans</a></li>
+<li><a href="16.3-a-starter-recipe.html#a-starter-recipe"><span class="toc-section-number">16.3</span> A Starter Recipe</a></li>
+<li class="has-sub"><a href="16.4-recipe-functions.html#recipe-functions"><span class="toc-section-number">16.4</span> Recipes in the Wild</a>
+<ul>
+<li><a href="16.4-recipe-functions.html#prep"><span class="toc-section-number">16.4.1</span> Preparing a recipe</a></li>
+<li><a href="16.4-recipe-functions.html#bake"><span class="toc-section-number">16.4.2</span> Baking the recipe</a></li>
+</ul></li>
+<li class="has-sub"><a href="16.5-feature-extraction-techniques.html#feature-extraction-techniques"><span class="toc-section-number">16.5</span> Feature Extraction Techniques</a>
+<ul>
+<li><a href="16.5-feature-extraction-techniques.html#principal-component-analysis"><span class="toc-section-number">16.5.1</span> Principal component analysis</a></li>
+<li><a href="16.5-feature-extraction-techniques.html#partial-least-squares"><span class="toc-section-number">16.5.2</span> Partial least squares</a></li>
+<li><a href="16.5-feature-extraction-techniques.html#independent-component-analysis"><span class="toc-section-number">16.5.3</span> Independent component analysis</a></li>
+<li><a href="16.5-feature-extraction-techniques.html#uniform-manifold-approximation-and-projection"><span class="toc-section-number">16.5.4</span> Uniform manifold approximation and projection</a></li>
+</ul></li>
+<li><a href="16.6-bean-models.html#bean-models"><span class="toc-section-number">16.6</span> Modeling</a></li>
+<li><a href="16.7-dimensionality-summary.html#dimensionality-summary"><span class="toc-section-number">16.7</span> Chapter Summary</a></li>
+</ul></li>
+<li class="has-sub"><a href="17-categorical.html#categorical"><span class="toc-section-number">17</span> Encoding Categorical Data</a>
+<ul>
+<li><a href="17.1-is-an-encoding-necessary.html#is-an-encoding-necessary"><span class="toc-section-number">17.1</span> Is an Encoding Necessary?</a></li>
+<li><a href="17.2-encoding-ordinal-predictors.html#encoding-ordinal-predictors"><span class="toc-section-number">17.2</span> Encoding Ordinal Predictors</a></li>
+<li class="has-sub"><a href="17.3-using-the-outcome-for-encoding-predictors.html#using-the-outcome-for-encoding-predictors"><span class="toc-section-number">17.3</span> Using the Outcome for Encoding Predictors</a>
+<ul>
+<li><a href="17.3-using-the-outcome-for-encoding-predictors.html#effect-encodings-with-partial-pooling"><span class="toc-section-number">17.3.1</span> Effect encodings with partial pooling</a></li>
+</ul></li>
+<li><a href="17.4-feature-hashing.html#feature-hashing"><span class="toc-section-number">17.4</span> Feature Hashing</a></li>
+<li><a href="17.5-more-encoding-options.html#more-encoding-options"><span class="toc-section-number">17.5</span> More Encoding Options</a></li>
+<li><a href="17.6-categorical-summary.html#categorical-summary"><span class="toc-section-number">17.6</span> Chapter Summary</a></li>
+</ul></li>
+<li class="has-sub"><a href="18-explain.html#explain"><span class="toc-section-number">18</span> Explaining Models and Predictions</a>
+<ul>
+<li><a href="18.1-software-for-model-explanations.html#software-for-model-explanations"><span class="toc-section-number">18.1</span> Software for Model Explanations</a></li>
+<li><a href="18.2-local-explanations.html#local-explanations"><span class="toc-section-number">18.2</span> Local Explanations</a></li>
+<li><a href="18.3-global-explanations.html#global-explanations"><span class="toc-section-number">18.3</span> Global Explanations</a></li>
+<li><a href="18.4-building-global-explanations-from-local-explanations.html#building-global-explanations-from-local-explanations"><span class="toc-section-number">18.4</span> Building Global Explanations from Local Explanations</a></li>
+<li><a href="18.5-back-to-beans.html#back-to-beans"><span class="toc-section-number">18.5</span> Back to Beans!</a></li>
+<li><a href="18.6-explain-summary.html#explain-summary"><span class="toc-section-number">18.6</span> Chapter Summary</a></li>
+</ul></li>
+<li class="has-sub"><a href="19-trust.html#trust"><span class="toc-section-number">19</span> When Should You Trust Your Predictions?</a>
+<ul>
+<li><a href="19.1-equivocal-zones.html#equivocal-zones"><span class="toc-section-number">19.1</span> Equivocal Results</a></li>
+<li><a href="19.2-applicability-domains.html#applicability-domains"><span class="toc-section-number">19.2</span> Determining Model Applicability</a></li>
+<li><a href="19.3-trust-summary.html#trust-summary"><span class="toc-section-number">19.3</span> Chapter Summary</a></li>
+</ul></li>
+<li class="has-sub"><a href="20-ensembles.html#ensembles"><span class="toc-section-number">20</span> Ensembles of Models</a>
+<ul>
+<li><a href="20.1-data-stack.html#data-stack"><span class="toc-section-number">20.1</span> Creating the Training Set for Stacking</a></li>
+<li><a href="20.2-blend-predictions.html#blend-predictions"><span class="toc-section-number">20.2</span> Blend the Predictions</a></li>
+<li><a href="20.3-fit-members.html#fit-members"><span class="toc-section-number">20.3</span> Fit the Member Models</a></li>
+<li><a href="20.4-test-set-results.html#test-set-results"><span class="toc-section-number">20.4</span> Test Set Results</a></li>
+<li><a href="20.5-ensembles-summary.html#ensembles-summary"><span class="toc-section-number">20.5</span> Chapter Summary</a></li>
+</ul></li>
+<li class="has-sub"><a href="21-inferential.html#inferential"><span class="toc-section-number">21</span> Inferential Analysis</a>
+<ul>
+<li><a href="21.1-inference-for-count-data.html#inference-for-count-data"><span class="toc-section-number">21.1</span> Inference for Count Data</a></li>
+<li><a href="21.2-comparisons-with-two-sample-tests.html#comparisons-with-two-sample-tests"><span class="toc-section-number">21.2</span> Comparisons with Two-Sample Tests</a></li>
+<li><a href="21.3-log-linear-models.html#log-linear-models"><span class="toc-section-number">21.3</span> Log-Linear Models</a></li>
+<li><a href="21.4-a-more-complex-model.html#a-more-complex-model"><span class="toc-section-number">21.4</span> A More Complex Model</a></li>
+<li><a href="21.5-inference-options.html#inference-options"><span class="toc-section-number">21.5</span> More Inferential Analysis</a></li>
+<li><a href="21.6-inference-summary.html#inference-summary"><span class="toc-section-number">21.6</span> Chapter Summary</a></li>
+</ul></li>
+<li class="appendix"><span><b>Appendix</b></span></li>
+<li><a href="A-pre-proc-table.html#pre-proc-table"><span class="toc-section-number">A</span> Recommended Preprocessing</a></li>
+<li><a href="references.html#references">REFERENCES</a></li>
+</ul>
+</div>
+</div>
+</div>
+<div class="row">
+<div class="col-sm-12">
+<div id="equivocal-zones" class="section level2" number="19.1">
+<h2><span class="header-section-number">19.1</span> Equivocal Results</h2>
+<div class="rmdwarning">
+<p>In some cases, the amount of uncertainty associated with a prediction is too high to be trusted.</p>
+</div>
+<p>If you had a model result indicating that you had a 51% chance of having contracted COVID-19, it would be natural to view the diagnosis with some skepticism. In fact, regulatory bodies often require many medical diagnostics to have an <em>equivocal zone</em>. This zone is a range of results where the prediction should not be reported to patients, such as some range of COVID-19 test results that are too uncertain to be reported to a patient. See <span class="citation">Danowski et al. (<a href="#ref-Danowski524" role="doc-biblioref">1970</a>)</span> and <span class="citation">Kerleguer et al. (<a href="#ref-Kerleguer1783" role="doc-biblioref">2003</a>)</span> for examples. The same notion can be applied to models created outside of medical diagnostics.</p>
+<p>Let’s use a function that can simulate classification data with two classes and two predictors (<code>x</code> and <code>y</code>). The true model is a logistic regression model with the equation:</p>
+<p><span class="math display">\[
+\mathrm{logit}(p) = -1 - 2x - \frac{x^2}{5} + 2y^2
+\]</span></p>
+<p>The two predictors follow a bivariate normal distribution with a correlation of 0.70. We’ll create a training set of 200 samples and a test set of 50:</p>
+<div class="sourceCode" id="cb324"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb324-1"><a href="19.1-equivocal-zones.html#cb324-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidymodels)</span>
+<span id="cb324-2"><a href="19.1-equivocal-zones.html#cb324-2" aria-hidden="true" tabindex="-1"></a><span class="fu">tidymodels_prefer</span>()</span>
+<span id="cb324-3"><a href="19.1-equivocal-zones.html#cb324-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb324-4"><a href="19.1-equivocal-zones.html#cb324-4" aria-hidden="true" tabindex="-1"></a>simulate_two_classes <span class="ot">&lt;-</span> </span>
+<span id="cb324-5"><a href="19.1-equivocal-zones.html#cb324-5" aria-hidden="true" tabindex="-1"></a>  <span class="cf">function</span> (n, <span class="at">error =</span> <span class="fl">0.1</span>, <span class="at">eqn =</span> <span class="fu">quote</span>(<span class="sc">-</span><span class="dv">1</span> <span class="sc">-</span> <span class="dv">2</span> <span class="sc">*</span> x <span class="sc">-</span> <span class="fl">0.2</span> <span class="sc">*</span> x<span class="sc">^</span><span class="dv">2</span> <span class="sc">+</span> <span class="dv">2</span> <span class="sc">*</span> y<span class="sc">^</span><span class="dv">2</span>))  {</span>
+<span id="cb324-6"><a href="19.1-equivocal-zones.html#cb324-6" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Slightly correlated predictors</span></span>
+<span id="cb324-7"><a href="19.1-equivocal-zones.html#cb324-7" aria-hidden="true" tabindex="-1"></a>    sigma <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="fl">0.7</span>, <span class="fl">0.7</span>, <span class="dv">1</span>), <span class="at">nrow =</span> <span class="dv">2</span>, <span class="at">ncol =</span> <span class="dv">2</span>)</span>
+<span id="cb324-8"><a href="19.1-equivocal-zones.html#cb324-8" aria-hidden="true" tabindex="-1"></a>    dat <span class="ot">&lt;-</span> MASS<span class="sc">::</span><span class="fu">mvrnorm</span>(<span class="at">n =</span> n, <span class="at">mu =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>), <span class="at">Sigma =</span> sigma)</span>
+<span id="cb324-9"><a href="19.1-equivocal-zones.html#cb324-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">colnames</span>(dat) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;x&quot;</span>, <span class="st">&quot;y&quot;</span>)</span>
+<span id="cb324-10"><a href="19.1-equivocal-zones.html#cb324-10" aria-hidden="true" tabindex="-1"></a>    cls <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">&quot;class_&quot;</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>)</span>
+<span id="cb324-11"><a href="19.1-equivocal-zones.html#cb324-11" aria-hidden="true" tabindex="-1"></a>    dat <span class="ot">&lt;-</span> </span>
+<span id="cb324-12"><a href="19.1-equivocal-zones.html#cb324-12" aria-hidden="true" tabindex="-1"></a>      <span class="fu">as_tibble</span>(dat) <span class="sc">%&gt;%</span> </span>
+<span id="cb324-13"><a href="19.1-equivocal-zones.html#cb324-13" aria-hidden="true" tabindex="-1"></a>      <span class="fu">mutate</span>(</span>
+<span id="cb324-14"><a href="19.1-equivocal-zones.html#cb324-14" aria-hidden="true" tabindex="-1"></a>        <span class="at">linear_pred =</span> <span class="sc">!!</span>eqn,</span>
+<span id="cb324-15"><a href="19.1-equivocal-zones.html#cb324-15" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Add some misclassification noise</span></span>
+<span id="cb324-16"><a href="19.1-equivocal-zones.html#cb324-16" aria-hidden="true" tabindex="-1"></a>        <span class="at">linear_pred =</span> linear_pred <span class="sc">+</span> <span class="fu">rnorm</span>(n, <span class="at">sd =</span> error),</span>
+<span id="cb324-17"><a href="19.1-equivocal-zones.html#cb324-17" aria-hidden="true" tabindex="-1"></a>        <span class="at">prob =</span> <span class="fu">binomial</span>()<span class="sc">$</span><span class="fu">linkinv</span>(linear_pred),</span>
+<span id="cb324-18"><a href="19.1-equivocal-zones.html#cb324-18" aria-hidden="true" tabindex="-1"></a>        <span class="at">class =</span> <span class="fu">ifelse</span>(prob <span class="sc">&gt;</span> <span class="fu">runif</span>(n), cls[<span class="dv">1</span>], cls[<span class="dv">2</span>]),</span>
+<span id="cb324-19"><a href="19.1-equivocal-zones.html#cb324-19" aria-hidden="true" tabindex="-1"></a>        <span class="at">class =</span> <span class="fu">factor</span>(class, <span class="at">levels =</span> cls)</span>
+<span id="cb324-20"><a href="19.1-equivocal-zones.html#cb324-20" aria-hidden="true" tabindex="-1"></a>      )</span>
+<span id="cb324-21"><a href="19.1-equivocal-zones.html#cb324-21" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">select</span>(dat, x, y, class)</span>
+<span id="cb324-22"><a href="19.1-equivocal-zones.html#cb324-22" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb324-23"><a href="19.1-equivocal-zones.html#cb324-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb324-24"><a href="19.1-equivocal-zones.html#cb324-24" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1901</span>)</span>
+<span id="cb324-25"><a href="19.1-equivocal-zones.html#cb324-25" aria-hidden="true" tabindex="-1"></a>training_set <span class="ot">&lt;-</span> <span class="fu">simulate_two_classes</span>(<span class="dv">200</span>)</span>
+<span id="cb324-26"><a href="19.1-equivocal-zones.html#cb324-26" aria-hidden="true" tabindex="-1"></a>testing_set  <span class="ot">&lt;-</span> <span class="fu">simulate_two_classes</span>(<span class="dv">50</span>)</span></code></pre></div>
+<p>We estimate a logistic regression model using Bayesian methods (using the default Gaussian prior distributions for the parameters):</p>
+<div class="sourceCode" id="cb325"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb325-1"><a href="19.1-equivocal-zones.html#cb325-1" aria-hidden="true" tabindex="-1"></a>two_class_mod <span class="ot">&lt;-</span> </span>
+<span id="cb325-2"><a href="19.1-equivocal-zones.html#cb325-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">logistic_reg</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb325-3"><a href="19.1-equivocal-zones.html#cb325-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_engine</span>(<span class="st">&quot;stan&quot;</span>, <span class="at">seed =</span> <span class="dv">1902</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb325-4"><a href="19.1-equivocal-zones.html#cb325-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">fit</span>(class <span class="sc">~</span> . <span class="sc">+</span> <span class="fu">I</span>(x<span class="sc">^</span><span class="dv">2</span>)<span class="sc">+</span> <span class="fu">I</span>(y<span class="sc">^</span><span class="dv">2</span>), <span class="at">data =</span> training_set)</span>
+<span id="cb325-5"><a href="19.1-equivocal-zones.html#cb325-5" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(two_class_mod, <span class="at">digits =</span> <span class="dv">3</span>)</span>
+<span id="cb325-6"><a href="19.1-equivocal-zones.html#cb325-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; parsnip model object</span></span>
+<span id="cb325-7"><a href="19.1-equivocal-zones.html#cb325-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb325-8"><a href="19.1-equivocal-zones.html#cb325-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; stan_glm</span></span>
+<span id="cb325-9"><a href="19.1-equivocal-zones.html#cb325-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  family:       binomial [logit]</span></span>
+<span id="cb325-10"><a href="19.1-equivocal-zones.html#cb325-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  formula:      class ~ . + I(x^2) + I(y^2)</span></span>
+<span id="cb325-11"><a href="19.1-equivocal-zones.html#cb325-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  observations: 200</span></span>
+<span id="cb325-12"><a href="19.1-equivocal-zones.html#cb325-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  predictors:   5</span></span>
+<span id="cb325-13"><a href="19.1-equivocal-zones.html#cb325-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ------</span></span>
+<span id="cb325-14"><a href="19.1-equivocal-zones.html#cb325-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;             Median MAD_SD</span></span>
+<span id="cb325-15"><a href="19.1-equivocal-zones.html#cb325-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; (Intercept)  1.092  0.287</span></span>
+<span id="cb325-16"><a href="19.1-equivocal-zones.html#cb325-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; x            2.290  0.423</span></span>
+<span id="cb325-17"><a href="19.1-equivocal-zones.html#cb325-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; y            0.314  0.354</span></span>
+<span id="cb325-18"><a href="19.1-equivocal-zones.html#cb325-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; I(x^2)       0.077  0.307</span></span>
+<span id="cb325-19"><a href="19.1-equivocal-zones.html#cb325-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; I(y^2)      -2.465  0.424</span></span>
+<span id="cb325-20"><a href="19.1-equivocal-zones.html#cb325-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb325-21"><a href="19.1-equivocal-zones.html#cb325-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ------</span></span>
+<span id="cb325-22"><a href="19.1-equivocal-zones.html#cb325-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; * For help interpreting the printed output see ?print.stanreg</span></span>
+<span id="cb325-23"><a href="19.1-equivocal-zones.html#cb325-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; * For info on the priors used see ?prior_summary.stanreg</span></span></code></pre></div>
+<p>The fitted class boundary is overlaid onto the test set in Figure <a href="19.1-equivocal-zones.html#fig:glm-boundaries">19.1</a>. The data points closest to the class boundary are the most uncertain. If their values changed slightly, their predicted class might change. One simple method for disqualifying some results is to call them “equivocal” if the values are within some range around 50% (or whatever the appropriate probability cutoff might be for a certain situation). Depending on the problem that the model is being applied to, this might indicate that another measurement should be collected or that we require more information before a trustworthy prediction is possible.</p>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:glm-boundaries"></span>
+<img src="figures/glm-boundaries-1.png" alt="Simulated two class data set with a logistic regression fit and decision boundary. The scatter plot of the two classes shows fairly correlated data. The decision boundary is a parabola in the x axis that does a good job of separating the classes." width="70%" />
+<p class="caption">
+Figure 19.1: Simulated two class data set with a logistic regression fit and decision boundary.
+</p>
+</div>
+<p>We could base the width of the band around the cutoff on how performance improves when the uncertain results are removed. However, we should also estimate the reportable rate (the expected proportion of usable results). For example, it would not be useful in real-world situations to have perfect performance but only release predictions on 2% of the samples passed to the model.</p>
+<p>Let’s use the test set to determine the balance between improving performance and having enough reportable results. The predictions are created using:</p>
+<div class="sourceCode" id="cb326"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb326-1"><a href="19.1-equivocal-zones.html#cb326-1" aria-hidden="true" tabindex="-1"></a>test_pred <span class="ot">&lt;-</span> <span class="fu">augment</span>(two_class_mod, testing_set)</span>
+<span id="cb326-2"><a href="19.1-equivocal-zones.html#cb326-2" aria-hidden="true" tabindex="-1"></a>test_pred <span class="sc">%&gt;%</span> <span class="fu">head</span>()</span>
+<span id="cb326-3"><a href="19.1-equivocal-zones.html#cb326-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; # A tibble: 6 × 6</span></span>
+<span id="cb326-4"><a href="19.1-equivocal-zones.html#cb326-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;        x      y class   .pred_class .pred_class_1 .pred_class_2</span></span>
+<span id="cb326-5"><a href="19.1-equivocal-zones.html#cb326-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    &lt;dbl&gt;  &lt;dbl&gt; &lt;fct&gt;   &lt;fct&gt;               &lt;dbl&gt;         &lt;dbl&gt;</span></span>
+<span id="cb326-6"><a href="19.1-equivocal-zones.html#cb326-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1  1.12  -0.176 class_2 class_2           0.0256          0.974</span></span>
+<span id="cb326-7"><a href="19.1-equivocal-zones.html#cb326-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 -0.126 -0.582 class_2 class_1           0.555           0.445</span></span>
+<span id="cb326-8"><a href="19.1-equivocal-zones.html#cb326-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3  1.92   0.615 class_2 class_2           0.00620         0.994</span></span>
+<span id="cb326-9"><a href="19.1-equivocal-zones.html#cb326-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4 -0.400  0.252 class_2 class_2           0.472           0.528</span></span>
+<span id="cb326-10"><a href="19.1-equivocal-zones.html#cb326-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5  1.30   1.09  class_1 class_2           0.163           0.837</span></span>
+<span id="cb326-11"><a href="19.1-equivocal-zones.html#cb326-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6  2.59   1.36  class_2 class_2           0.0317          0.968</span></span></code></pre></div>
+<p>With tidymodels, the <span class="pkg">probably</span> package contains functions for equivocal zones. For cases with two classes, the <code>make_two_class_pred()</code> function creates a factor-like column that has the predicted classes with an equivocal zone:</p>
+<div class="sourceCode" id="cb327"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb327-1"><a href="19.1-equivocal-zones.html#cb327-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(probably)</span>
+<span id="cb327-2"><a href="19.1-equivocal-zones.html#cb327-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb327-3"><a href="19.1-equivocal-zones.html#cb327-3" aria-hidden="true" tabindex="-1"></a>lvls <span class="ot">&lt;-</span> <span class="fu">levels</span>(training_set<span class="sc">$</span>class)</span>
+<span id="cb327-4"><a href="19.1-equivocal-zones.html#cb327-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb327-5"><a href="19.1-equivocal-zones.html#cb327-5" aria-hidden="true" tabindex="-1"></a>test_pred <span class="ot">&lt;-</span> </span>
+<span id="cb327-6"><a href="19.1-equivocal-zones.html#cb327-6" aria-hidden="true" tabindex="-1"></a>  test_pred <span class="sc">%&gt;%</span> </span>
+<span id="cb327-7"><a href="19.1-equivocal-zones.html#cb327-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">.pred_with_eqz =</span> <span class="fu">make_two_class_pred</span>(.pred_class_1, lvls, <span class="at">buffer =</span> <span class="fl">0.15</span>))</span>
+<span id="cb327-8"><a href="19.1-equivocal-zones.html#cb327-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb327-9"><a href="19.1-equivocal-zones.html#cb327-9" aria-hidden="true" tabindex="-1"></a>test_pred <span class="sc">%&gt;%</span> <span class="fu">count</span>(.pred_with_eqz)</span>
+<span id="cb327-10"><a href="19.1-equivocal-zones.html#cb327-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; # A tibble: 3 × 2</span></span>
+<span id="cb327-11"><a href="19.1-equivocal-zones.html#cb327-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   .pred_with_eqz     n</span></span>
+<span id="cb327-12"><a href="19.1-equivocal-zones.html#cb327-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       &lt;clss_prd&gt; &lt;int&gt;</span></span>
+<span id="cb327-13"><a href="19.1-equivocal-zones.html#cb327-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1           [EQ]     9</span></span>
+<span id="cb327-14"><a href="19.1-equivocal-zones.html#cb327-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2        class_1    20</span></span>
+<span id="cb327-15"><a href="19.1-equivocal-zones.html#cb327-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3        class_2    21</span></span></code></pre></div>
+<p>Rows that are within <span class="math inline">\(0.50\pm0.15\)</span> are given a value of <code>[EQ]</code>.</p>
+<div class="rmdnote">
+<p>It is important to realize that <code>[EQ]</code> in this example is not a factor level, but an attribute of that column.</p>
+</div>
+<p>Since the factor levels are the same as the original data, confusion matrices and other statistics can be computed without error. When using standard functions from the <span class="pkg">yardstick</span> package, the equivocal results are converted to <code>NA</code> and are not used in the calculations that use the hard class predictions. Notice the differences in these confusion matrices:</p>
+<div class="sourceCode" id="cb328"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb328-1"><a href="19.1-equivocal-zones.html#cb328-1" aria-hidden="true" tabindex="-1"></a><span class="co"># All data</span></span>
+<span id="cb328-2"><a href="19.1-equivocal-zones.html#cb328-2" aria-hidden="true" tabindex="-1"></a>test_pred <span class="sc">%&gt;%</span> <span class="fu">conf_mat</span>(class, .pred_class)</span>
+<span id="cb328-3"><a href="19.1-equivocal-zones.html#cb328-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;           Truth</span></span>
+<span id="cb328-4"><a href="19.1-equivocal-zones.html#cb328-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Prediction class_1 class_2</span></span>
+<span id="cb328-5"><a href="19.1-equivocal-zones.html#cb328-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    class_1      20       6</span></span>
+<span id="cb328-6"><a href="19.1-equivocal-zones.html#cb328-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    class_2       5      19</span></span>
+<span id="cb328-7"><a href="19.1-equivocal-zones.html#cb328-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb328-8"><a href="19.1-equivocal-zones.html#cb328-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Reportable results only: </span></span>
+<span id="cb328-9"><a href="19.1-equivocal-zones.html#cb328-9" aria-hidden="true" tabindex="-1"></a>test_pred <span class="sc">%&gt;%</span> <span class="fu">conf_mat</span>(class, .pred_with_eqz)</span>
+<span id="cb328-10"><a href="19.1-equivocal-zones.html#cb328-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;           Truth</span></span>
+<span id="cb328-11"><a href="19.1-equivocal-zones.html#cb328-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Prediction class_1 class_2</span></span>
+<span id="cb328-12"><a href="19.1-equivocal-zones.html#cb328-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    class_1      17       3</span></span>
+<span id="cb328-13"><a href="19.1-equivocal-zones.html#cb328-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    class_2       5      16</span></span></code></pre></div>
+<p>There is also an <code>is_equivocal()</code> function available for filtering these rows from the data.</p>
+<p>Does the equivocal zone help improve accuracy? Let’s look over different buffer sizes, as shown in Figure <a href="19.1-equivocal-zones.html#fig:equivocal-zone-results">19.2</a>:</p>
+<div class="sourceCode" id="cb329"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb329-1"><a href="19.1-equivocal-zones.html#cb329-1" aria-hidden="true" tabindex="-1"></a><span class="co"># A function to change the buffer then compute performance.</span></span>
+<span id="cb329-2"><a href="19.1-equivocal-zones.html#cb329-2" aria-hidden="true" tabindex="-1"></a>eq_zone_results <span class="ot">&lt;-</span> <span class="cf">function</span>(buffer) {</span>
+<span id="cb329-3"><a href="19.1-equivocal-zones.html#cb329-3" aria-hidden="true" tabindex="-1"></a>  test_pred <span class="ot">&lt;-</span> </span>
+<span id="cb329-4"><a href="19.1-equivocal-zones.html#cb329-4" aria-hidden="true" tabindex="-1"></a>    test_pred <span class="sc">%&gt;%</span> </span>
+<span id="cb329-5"><a href="19.1-equivocal-zones.html#cb329-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">.pred_with_eqz =</span> <span class="fu">make_two_class_pred</span>(.pred_class_1, lvls, <span class="at">buffer =</span> buffer))</span>
+<span id="cb329-6"><a href="19.1-equivocal-zones.html#cb329-6" aria-hidden="true" tabindex="-1"></a>  acc <span class="ot">&lt;-</span> test_pred <span class="sc">%&gt;%</span> <span class="fu">accuracy</span>(class, .pred_with_eqz)</span>
+<span id="cb329-7"><a href="19.1-equivocal-zones.html#cb329-7" aria-hidden="true" tabindex="-1"></a>  rep_rate <span class="ot">&lt;-</span> <span class="fu">reportable_rate</span>(test_pred<span class="sc">$</span>.pred_with_eqz)</span>
+<span id="cb329-8"><a href="19.1-equivocal-zones.html#cb329-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tibble</span>(<span class="at">accuracy =</span> acc<span class="sc">$</span>.estimate, <span class="at">reportable =</span> rep_rate, <span class="at">buffer =</span> buffer)</span>
+<span id="cb329-9"><a href="19.1-equivocal-zones.html#cb329-9" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb329-10"><a href="19.1-equivocal-zones.html#cb329-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb329-11"><a href="19.1-equivocal-zones.html#cb329-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Evaluate a sequence of buffers and plot the results. </span></span>
+<span id="cb329-12"><a href="19.1-equivocal-zones.html#cb329-12" aria-hidden="true" tabindex="-1"></a><span class="fu">map_dfr</span>(<span class="fu">seq</span>(<span class="dv">0</span>, .<span class="dv">1</span>, <span class="at">length.out =</span> <span class="dv">40</span>), eq_zone_results) <span class="sc">%&gt;%</span> </span>
+<span id="cb329-13"><a href="19.1-equivocal-zones.html#cb329-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="fu">c</span>(<span class="sc">-</span>buffer), <span class="at">names_to =</span> <span class="st">&quot;statistic&quot;</span>, <span class="at">values_to =</span> <span class="st">&quot;value&quot;</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb329-14"><a href="19.1-equivocal-zones.html#cb329-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> buffer, <span class="at">y =</span> value, <span class="at">lty =</span> statistic)) <span class="sc">+</span> </span>
+<span id="cb329-15"><a href="19.1-equivocal-zones.html#cb329-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_step</span>(<span class="at">size =</span> <span class="fl">1.2</span>, <span class="at">alpha =</span> <span class="fl">0.8</span>) <span class="sc">+</span> </span>
+<span id="cb329-16"><a href="19.1-equivocal-zones.html#cb329-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">y =</span> <span class="cn">NULL</span>, <span class="at">lty =</span> <span class="cn">NULL</span>)</span></code></pre></div>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:equivocal-zone-results"></span>
+<img src="figures/equivocal-zone-results-1.png" alt="The effect of equivocal zones on model performance. There is a slight increase in accuracy at the expense of a falling reportable rate." width="80%" />
+<p class="caption">
+Figure 19.2: The effect of equivocal zones on model performance.
+</p>
+</div>
+<p>Figure <a href="19.1-equivocal-zones.html#fig:equivocal-zone-results">19.2</a> shows us that accuracy improves by a few percentage points but at the cost of nearly 10% of predictions being unusable! The value of such a compromise depends on how the model predictions will be used.</p>
+<p>This analysis focused on using the predicted class probability to disqualify points, since this is a fundamental measure of uncertainty in classification models. A slightly better approach would be to use the standard error of the class probability. Since we used a Bayesian model, the probability estimates we found are actually the mean of the posterior predictive distribution. In other words, the Bayesian model gives us a distribution for the class probability. Measuring the standard deviation of this distribution gives us a <em>standard error of prediction</em> of the probability. In most cases, this value is directly related to the mean class probability. You might recall that, for a Bernoulli random variable with probability <span class="math inline">\(p\)</span>, the variance is <span class="math inline">\(p(1-p)\)</span>. Because of this relationship, the standard error is largest when the probability is 50%. Instead of assigning an equivocal result using the class probability, we could instead use a cutoff on the standard error of prediction.</p>
+<p>One important aspect of the standard error of prediction is that it takes into account more than just the class probability. In cases where there is significant extrapolation or aberrant predictor values, the standard error might increase. The benefit of using the standard error of prediction is that it might also flag predictions that are problematic (as opposed to simply uncertain). One reason that we used the Bayesian model is that it naturally estimates the standard error of prediction; not many models can calculate this. For our test set, using <code>type = "pred_int"</code> will produce upper and lower limits and the <code>std_error</code> adds a column for that quantity. For 80% intervals:</p>
+<div class="sourceCode" id="cb330"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb330-1"><a href="19.1-equivocal-zones.html#cb330-1" aria-hidden="true" tabindex="-1"></a>test_pred <span class="ot">&lt;-</span> </span>
+<span id="cb330-2"><a href="19.1-equivocal-zones.html#cb330-2" aria-hidden="true" tabindex="-1"></a>  test_pred <span class="sc">%&gt;%</span> </span>
+<span id="cb330-3"><a href="19.1-equivocal-zones.html#cb330-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bind_cols</span>(</span>
+<span id="cb330-4"><a href="19.1-equivocal-zones.html#cb330-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">predict</span>(two_class_mod, testing_set, <span class="at">type =</span> <span class="st">&quot;pred_int&quot;</span>, <span class="at">std_error =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb330-5"><a href="19.1-equivocal-zones.html#cb330-5" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div>
+<p>For our example where the model and data are well-behaved, Figure <a href="19.1-equivocal-zones.html#fig:std-errors">19.3</a> shows the standard error of prediction across the space:</p>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:std-errors"></span>
+<img src="figures/std-errors-1.png" alt="The effect of the standard error of prediction overlaid with the test set data. The region of large variation is very similar to the class boundary space. Additionally, there is a large amount of variation to the west of the inflection point of the boundary curve." width="70%" />
+<p class="caption">
+Figure 19.3: The effect of the standard error of prediction overlaid with the test set data.
+</p>
+</div>
+<p>Using the standard error as a measure to preclude samples from being predicted can also be applied to models with numeric outcomes. However, as shown in the next section, this may not always work.</p>
+</div>
+<h3>REFERENCES</h3>
+<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="ref-Danowski524" class="csl-entry">
+Danowski, T, J Aarons, J Hydovitz, and J Wingert. 1970. <span>“Utility of Equivocal Glucose Tolerances.”</span> <em>Diabetes</em> 19 (7): 524–26.
+</div>
+<div id="ref-Kerleguer1783" class="csl-entry">
+Kerleguer, A., J.-L. Koeck, M. Fabre, P. Gérôme, R. Teyssou, and V. Hervé. 2003. <span>“Use of Equivocal Zone in Interpretation of Results of the Amplified <span>Mycobacterium Tuberculosis</span> Direct Test for Diagnosis of Tuberculosis.”</span> <em>Journal of Clinical Microbiology</em> 41 (4): 1783–84.
+</div>
+</div>
+<p style="text-align: center;">
+<a href="19-trust.html"><button class="btn btn-default">Previous</button></a>
+<a href="19.2-applicability-domains.html"><button class="btn btn-default">Next</button></a>
+</p>
+</div>
+</div>
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+$(document).ready(function () {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+});
+
+</script>
+
+</body>
+</html>

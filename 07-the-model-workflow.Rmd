@@ -2,17 +2,14 @@
 knitr::opts_chunk$set(fig.path = "figures/")
 library(tidymodels)
 library(workflowsets)
-library(kableExtra)
 library(censored)
-library(survival)
 tidymodels_prefer()
 source("ames_snippets.R")
 ```
 
 # A Model Workflow {#workflows}
 
-In the previous chapter, we discussed the `r pkg(parsnip)` package, which can be used to define and fit the model. This chapter introduces a new concept called a _model workflow_. The purpose of this concept (and the corresponding tidymodels `workflow()` object) is to encapsulate the major pieces of the modeling process (discussed in Section \@ref(model-phases)). The workflow is important in two ways. First, using a workflow concept encourages good methodology since it is a single point of entry to the estimation components of a data analysis. Second, it enables the user to better organize projects. These two points are discussed in the following sections.  
-
+In the previous chapter, we discussed the `r pkg(parsnip)` package, which can be used to define and fit the model. This chapter introduces a new concept called a _model workflow_. The purpose of this concept (and the corresponding tidymodels `workflow()` object) is to encapsulate the major pieces of the modeling process (previously discussed in Chapter \@ref(software-modeling)). The workflow is important in two ways. First, using a workflow concept encourages good methodology since it is a single point of entry to the estimation components of a data analysis. Second, it enables the user to better organize their projects. These two points are discussed in the following sections.  
 
 ## Where Does the Model Begin and End? {#begin-model-end}
 
@@ -42,7 +39,7 @@ In other software, such as Python or Spark, similar collections of steps are cal
 
 Binding together the analytical components of data analysis is important for another reason. Future chapters will demonstrate how to accurately measure performance, as well as how to optimize structural parameters (i.e., model tuning). To correctly quantify model performance on the training set, Chapter \@ref(resampling) advocates using resampling methods. To do this properly, no data-driven parts of the analysis should be excluded from validation. To this end, the workflow must include all significant estimation steps.
 
-To illustrate, consider principal component analysis (PCA) signal extraction. We'll talk about this more in Section \@ref(example-steps) as well as Chapter \@ref(dimensionality); PCA is a way to replace correlated predictors with new artificial features that are uncorrelated and capture most of the information in the original set. The new features could be used as the predictors, and least squares regression could be used to estimate the model parameters. 
+To illustrate, consider principal component analysis (PCA) signal extraction. We'll talk about this more in Chapter \@ref(recipes) as well as Chapter \@ref(dimensionality); PCA is a way to replace correlated predictors with new artificial features that are uncorrelated and capture most of the information in the original set. The new features could be used as the predictors and least squares regression could be used to estimate the model parameters. 
 
 There are two ways of thinking about the model workflow. Figure \@ref(fig:bad-workflow) illustrates the _incorrect_ method: to think of the PCA preprocessing step, as _not being part of the modeling workflow_.
 
@@ -99,7 +96,7 @@ lm_wflow <-
 lm_wflow
 ```
 
-Workflows have a `fit()` method that can be used to create the model. Using the objects created in Section \@ref(models-summary):
+Workflows have a `fit()` method that can be used to create the model. Using the objects created in the summary at the end of Chapter \@ref(models):
 
 ```{r workflows-form-fit}
 lm_fit <- fit(lm_wflow, ames_train)
@@ -112,7 +109,7 @@ We can also `predict()` on the fitted workflow:
 predict(lm_fit, ames_test %>% slice(1:3))
 ```
 
-The `predict()` method follows all of the same rules and naming conventions that we described for the `r pkg(parsnip)` package in Section \@ref(parsnip-predictions). 
+The `predict()` method follows all of the same rules and naming conventions that we described for the `r pkg(parsnip)` package in Chapter \@ref(models). 
 
 Both the model and preprocessor can be removed or updated:
 
@@ -153,13 +150,13 @@ When the model is fit, the specification assembles these data, unaltered, into a
 fit(lm_wflow, ames_train)
 ```
 
-If you would like the underlying modeling method to do what it would normally do with the data, `add_variables()` can be a helpful interface. As we will see in Section \@ref(special-model-formulas), it also facilitates more complex modeling specifications. However, as we mention in the next section, models such as `glmnet` and `xgboost` expect the user to make indicator variables from factor predictors. In these cases, a recipe or formula interface will typically be a better choice. 
+If you would like the underlying modeling method to do what it would normally do with the data, `add_variables()` can be a helpful interface. As we will see in an upcoming section in this chapter, it also facilitates more complex modeling specifications. However, as we mention in the next section, models such as `glmnet` and `xgboost` expect the user to make indicator variables from factor predictors. In these cases, a recipe or formula interface will typically be a better choice. 
 
 In the next chapter, we will look at a more powerful preprocessor (called a _recipe_) that can also be added to a workflow. 
 
 ## How Does a `workflow()` Use the Formula? {#workflow-encoding}
 
-Recall from Section \@ref(formula) that the formula method in R has multiple purposes (we will discuss this further in Chapter \@ref(recipes)). One of these is to properly encode the original data into an analysis-ready format. This can involve executing inline transformations (e.g., `log(x)`), creating dummy variable columns, creating interactions or other column expansions, and so on. However, many statistical methods require different types of encodings: 
+Recall from Chapter \@ref(base-r) that the formula method in R has multiple purposes (we will discuss this further in Chapter \@ref(recipes)). One of these is to properly encode the original data into an analysis ready format. This can involve executing in-line transformations (e.g., `log(x)`), creating dummy variable columns, creating interactions or other column expansions, and so on. However, there are many statistical methods that require different types of encodings: 
 
  * Most packages for tree-based models use the formula interface but *do not* encode the categorical predictors as dummy variables. 
  
@@ -287,7 +284,7 @@ location_models
 location_models$fit[[1]]
 ```
 
-We use a `r pkg(purrr)` function here to map through our models, but there is an easier, better approach to fit workflow sets that will be introduced in Section \@ref(workflow-set). 
+We use a `r pkg(purrr)` function here to map through our models, but there is an easier, better approach to fit workflow sets that will be introduced in Chapter \@ref(compare). 
 
 :::rmdnote
 In general, there's a lot more to workflow sets! While we've covered the basics here, the nuances and advantages of workflow sets won't be illustrated until Chapter \@ref(workflow-sets). 
@@ -321,7 +318,7 @@ collect_metrics(final_lm_res)
 collect_predictions(final_lm_res) %>% slice(1:5)
 ```
 
-We'll see more about `last_fit()` in action and how to use it again in Section \@ref(bean-models).
+We'll see more about `last_fit()` in action and how to use it again in Chapter \@ref(dimensionality).
 
 ## Chapter Summary {#workflows-summary}
 

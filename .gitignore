@@ -6,7 +6,7 @@
 _book
 _main.*
 libs
-figures
+^figures/*
 _bookdown_files
 figures/introduction-cricket-plot-1.svg
 figures/introduction-descr-examples-1.pdf
@@ -19,3 +19,6 @@ figures/tidyverse-interaction-plots-1.svg
 extras/iowa_highway.shx
 extras/iowa_highway.shp
 files_for_print*
+tmwr-to-ch9*
+extras/iowa_highway.zip
+extras/iowa_highway/iowa_highway.shp

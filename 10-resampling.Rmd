@@ -2,7 +2,6 @@
 knitr::opts_chunk$set(fig.path = "figures/")
 library(tidymodels)
 library(doMC)
-library(kableExtra)
 library(tidyr)
 tidymodels_prefer()
 registerDoMC(cores = parallel::detectCores())
@@ -27,7 +26,7 @@ In order to fully appreciate the value of resampling, let's first take a look th
 
 ## The Resubstitution Approach {#resampling-resubstition}
 
-When we measure performance on the same data that we used for training (as opposed to new data or testing data), we say we have *resubstituted* the data. Let's again use the Ames housing data to demonstrate these concepts. Section \@ref(recipes-summary) summarizes the current state of our Ames analysis. It includes a recipe object named `ames_rec`, a linear model, and a workflow using that recipe and model called `lm_wflow`. This workflow was fit on the training set, resulting in `lm_fit`. 
+When we measure performance on the same data that we used for training (as opposed to new data or testing data), we say we have *resubstituted* the data. Let's again use the Ames housing data to demonstrate these concepts. The end of Chapter \@ref(recipes) summarizes the current state of our Ames analysis. It includes a recipe object named `ames_rec`, a linear model, and a workflow using that recipe and model called `lm_wflow`. This workflow was fit on the training set, resulting in `lm_fit`. 
 
 For a comparison to this linear model, we can also fit a different type of model. _Random forests_ are a tree ensemble method that operates by creating a large number of decision trees from slightly different versions of the training set [@breiman2001random]. This collection of trees makes up the ensemble. When predicting a new sample, each ensemble member makes a separate prediction. These are averaged to create the final ensemble prediction for the new data point. 
 
@@ -116,14 +115,11 @@ For both models, Table \@ref(tab:rmse-results) summarizes the RMSE estimate for 
 
 ```{r resampling-rmse-table, echo = FALSE, results = "asis"}
 all_res %>% 
-  mutate(object = paste0("<tt>", object, "</tt>")) %>% 
-  kable(
+  knitr::kable(
     caption = "Performance statistics for training and test sets.",
     label = "rmse-results",
     escape = FALSE
-  ) %>% 
-  kable_styling(full_width = FALSE) %>% 
-  add_header_above(c(" ", "RMSE Estimates" = 2))
+  ) 
 ```
 
 Notice that the linear regression model is consistent between training and testing, because of its limited complexity.^[It is possible for a linear model to nearly memorize the training set, like the random forest model did. In the `ames_rec` object, change the number of spline terms for `longitude` and `latitude` to a large number (say 1,000). This would produce a model fit with a very small resubstitution RMSE and a test set RMSE that is much larger.] 
@@ -173,7 +169,7 @@ Cross-validation is a well established resampling method. While there are a numb
 knitr::include_graphics("premade/three-CV.svg")
 ```
 
-The color of the symbols in Figure \@ref(fig:cross-validation-allocation) represents their randomly assigned folds. Stratified sampling is also an option for assigning folds (previously discussed in Section \@ref(splitting-methods)). 
+The color of the symbols in Figure \@ref(fig:cross-validation-allocation) represents their randomly assigned folds. Stratified sampling is also an option for assigning folds (previously discussed in Chapter \@ref(splitting)). 
 
 For three-fold cross-validation, the three iterations of resampling are illustrated in Figure \@ref(fig:cross-validation). For each iteration, one fold is held out for assessment statistics and the remaining folds are substrate for the model. This process continues for each fold so that three models produce three sets of performance statistics. 
 
@@ -213,8 +209,7 @@ To manually retrieve the partitioned data, the `analysis()` and `assessment()` f
 ames_folds$splits[[1]] %>% analysis() %>% dim()
 ```
 
-The `r pkg(tidymodels)` packages, such as [`r pkg(tune)`](https://tune.tidymodels.org/), contain high-level user interfaces so that functions like `analysis()` are not generally needed for day-to-day work. Section \@ref(resampling-performance) demonstrates a function to fit a model over these resamples. 
-
+The `r pkg(tidymodels)` packages, such as [`r pkg(tune)`](https://tune.tidymodels.org/), contain high-level user interfaces so that functions like `analysis()` are not generally needed for day-to-day work. Chapter \@ref(resampling) demonstrates functions to fit a model over these resamples. 
 
 There are a variety of cross-validation variations; we'll go through the most important ones.
 
@@ -273,7 +268,7 @@ mc_cv(ames_train, prop = 9/10, times = 20)
 
 ### Validation sets {#validation}
 
-In Section \@ref(what-about-a-validation-set), we briefly discussed the use of a validation set, a single partition that is set aside to estimate performance separate from the test set. When using a validation set, the initial available data set is split into a training set, a validation set, and a test set (see Figure \@ref(fig:three-way-split)).
+In Chapter \@ref(splitting), we briefly discussed the use of a validation set, a single partition that is set aside to estimate performance separate from the test set. When using a validation set, the initial available data set is split into a training set, a validation set, and a test set (see Figure \@ref(fig:three-way-split)).
 
 ```{r three-way-split}
 #| echo = FALSE,
@@ -449,7 +444,7 @@ collect_metrics(rf_res)
 
 These are the resampling estimates averaged over the individual replicates. To get the metrics for each resample, use the option `summarize = FALSE`. 
 
-Notice how much more realistic the performance estimates are than the resubstitution estimates from Section \@ref(resampling-resubstition)!
+Notice how much more realistic the performance estimates are than the resubstitution estimates from earlier in the chapter!
 
 To obtain the assessment set predictions: 
 

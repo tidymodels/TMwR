@@ -2,7 +2,6 @@
 knitr::opts_chunk$set(fig.path = "figures/")
 library(tidymodels)
 library(cli)
-library(kableExtra)
 
 tk <- symbol$tick
 x  <- symbol$times
@@ -69,13 +68,12 @@ tab <-
 tab %>% 
   arrange(model) %>% 
   mutate(model = paste0("<tt>", model, "</tt>")) %>% 
-  kable(
+  knitr::kable(
     caption = "Preprocessing methods for different models.",
     label = "preprocessing",
     escape = FALSE,
     align = c("l", rep("c", ncol(tab) - 1))
-  ) %>% 
-  kable_styling(full_width = FALSE)
+  ) 
 ```
 
 Footnotes: 

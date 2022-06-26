@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns="http://www.w3.org/2000/svg" xmlns:xl="http://www.w3.org/1999/xlink" version="1.1" viewBox="-444 3124.75 498 295" width="498" height="295">
+  <defs>
+    <filter id="Shadow" filterUnits="userSpaceOnUse" x="-444" y="3124.75">
+      <feGaussianBlur in="SourceAlpha" result="blur" stdDeviation="1.308"/>
+      <feOffset in="blur" result="offset" dx="0" dy="2"/>
+      <feFlood flood-color="black" flood-opacity=".5" result="flood"/>
+      <feComposite in="flood" in2="offset" operator="in" result="color"/>
+      <feMerge>
+        <feMergeNode in="color"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <font-face font-family="Helvetica Neue" font-size="16" panose-1="2 0 5 3 0 0 0 2 0 4" units-per-em="1000" underline-position="-100" underline-thickness="50" slope="0" x-height="517" cap-height="714" ascent="951.9958" descent="-212.99744" font-weight="400">
+      <font-face-src>
+        <font-face-name name="HelveticaNeue"/>
+      </font-face-src>
+    </font-face>
+    <marker orient="auto" overflow="visible" markerUnits="strokeWidth" id="FilledArrow_Marker" stroke-linejoin="miter" stroke-miterlimit="10" viewBox="-1 -4 10 8" markerWidth="10" markerHeight="8" color="black">
+      <g>
+        <path d="M 8 0 L 0 -3 L 0 3 Z" fill="currentColor" stroke="currentColor" stroke-width="1"/>
+      </g>
+    </marker>
+    <marker orient="auto" overflow="visible" markerUnits="strokeWidth" id="FilledArrow_Marker_2" stroke-linejoin="miter" stroke-miterlimit="10" viewBox="-1 -4 10 8" markerWidth="10" markerHeight="8" color="black">
+      <g>
+        <path d="M 8 0 L 0 -3 L 0 3 Z" fill="currentColor" stroke="currentColor" stroke-width="1"/>
+      </g>
+    </marker>
+  </defs>
+  <metadata> Produced by OmniGraffle 7.13.1 
+    <dc:date>2020-03-15 01:10:19 +0000</dc:date>
+  </metadata>
+  <g id="Canvas_1" fill-opacity="1" stroke="none" stroke-opacity="1" fill="none" stroke-dasharray="none">
+    <title>Canvas 1</title>
+    <g id="Canvas_1: Layer 1">
+      <title>Layer 1</title>
+      <g id="Graphic_751" filter="url(#Shadow)">
+        <ellipse cx="-201.5" cy="3185" rx="57.7500922788345" ry="58.7500938767364" fill="white"/>
+        <ellipse cx="-201.5" cy="3185" rx="57.7500922788345" ry="58.7500938767364" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+        <text transform="translate(-242.7 3175.776)" fill="black">
+          <tspan font-family="Helvetica Neue" font-size="16" font-weight="400" fill="black" x="13.496" y="15">All Data</tspan>
+        </text>
+      </g>
+      <g id="Graphic_750" filter="url(#Shadow)">
+        <path d="M -379.25 3296.75 L -320.99782 3337.3453 L -343.2481 3403.0297 L -415.2519 3403.0297 L -437.5022 3337.3453 Z" fill="#ffeabb"/>
+        <path d="M -379.25 3296.75 L -320.99782 3337.3453 L -343.2481 3403.0297 L -415.2519 3403.0297 L -437.5022 3337.3453 Z" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+        <text transform="translate(-423.25 3352.151)" fill="black">
+          <tspan font-family="Helvetica Neue" font-size="16" font-weight="400" fill="black" x="16.144" y="15">Training</tspan>
+        </text>
+      </g>
+      <g id="Graphic_749" filter="url(#Shadow)">
+        <path d="M -10.75 3296.75 L 47.50218 3337.3453 L 25.251893 3403.0297 L -46.75189 3403.0297 L -69.00218 3337.3453 Z" fill="#e5e6ff"/>
+        <path d="M -10.75 3296.75 L 47.50218 3337.3453 L 25.251893 3403.0297 L -46.75189 3403.0297 L -69.00218 3337.3453 Z" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+        <text transform="translate(-54.75 3352.151)" fill="black">
+          <tspan font-family="Helvetica Neue" font-size="16" font-weight="400" fill="black" x="18.664" y="15">Testing</tspan>
+        </text>
+      </g>
+      <g id="Line_748">
+        <line x1="-243.518" y1="3225.304" x2="-336.63058" y2="3314.619" marker-end="url(#FilledArrow_Marker)" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+      </g>
+      <g id="Line_747">
+        <line x1="-158.11524" y1="3223.779" x2="-55.063924" y2="3315.8904" marker-end="url(#FilledArrow_Marker)" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+      </g>
+      <g id="Graphic_752" filter="url(#Shadow)">
+        <ellipse cx="-203" cy="3355.5" rx="64.0001022657214" ry="35.5000567255173" fill="#e5e6ff"/>
+        <ellipse cx="-203" cy="3355.5" rx="64.0001022657214" ry="35.5000567255173" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+        <text transform="translate(-249.2 3346.276)" fill="black">
+          <tspan font-family="Helvetica Neue" font-size="16" font-weight="400" fill="black" x="11.528001" y="15">Validation</tspan>
+        </text>
+      </g>
+      <g id="Line_753">
+        <line x1="-202.01684" y1="3243.7477" x2="-202.6006" y2="3310.1008" marker-end="url(#FilledArrow_Marker_2)" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+      </g>
+    </g>
+  </g>
+</svg>

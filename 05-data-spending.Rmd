@@ -28,7 +28,7 @@ The other portion of the data is placed into the _test set_. This is held in res
 How should we conduct this split of the data? The answer depends on the context. 
 :::
 
-Suppose we allocate 80% of the data to the training set and the remaining 20% for testing.  The most common method is to use simple random sampling. The [`r pkg(rsample)`](https://rsample.tidymodels.org/) package has tools for making data splits such as this; the function `initial_split()` was created for this purpose. It takes the data frame as an argument as well as the proportion to be placed into training. Using the data frame produced by the code snippet from the summary in Section \@ref(ames-summary) that prepared the Ames data set: 
+Suppose we allocate 80% of the data to the training set and the remaining 20% for testing.  The most common method is to use simple random sampling. The [`r pkg(rsample)`](https://rsample.tidymodels.org/) package has tools for making data splits such as this; the function `initial_split()` was created for this purpose. It takes the data frame as an argument as well as the proportion to be placed into training. Using the data frame produced by the code snippet from the summary at the end of Chapter \@ref(ames): 
 
 ```{r ames-split, message = FALSE, warning = FALSE}
 library(tidymodels)
@@ -106,13 +106,13 @@ The proportion of data that should be allocated for splitting is highly dependen
 
 When describing the goals of data splitting, we singled out the test set as the data that should be used to properly evaluate of model performance on the final model(s). This begs the question: "How can we tell what is best if we don't measure performance until the test set?" 
 
-It is common to hear about _validation sets_ as an answer to this question, especially in the neural network and deep learning literature. During the early days of neural networks, researchers realized that measuring performance by re-predicting the training set samples led to results that were overly optimistic (significantly, unrealistically so). This led to models that overfit, meaning that they performed very well on the training set but poorly on the test set.^[This is discussed in much greater detail in Section \@ref(overfitting-bad).] To combat this issue, a small validation set of data were held back and used to measure performance as the network was trained. Once the validation set error rate began to rise, the training would be halted. In other words, the validation set was a means to get a rough sense of how well the model performed prior to the test set. 
+It is common to hear about _validation sets_ as an answer to this question, especially in the neural network and deep learning literature. During the early days of neural networks, researchers realized that measuring performance by re-predicting the training set samples led to results that were overly optimistic (significantly, unrealistically so). This led to models that overfit, meaning that they performed very well on the training set but poorly on the test set.^[This is discussed in much greater detail in Chapter \@ref(tuning).] To combat this issue, a small validation set of data were held back and used to measure performance as the network was trained. Once the validation set error rate began to rise, the training would be halted. In other words, the validation set was a means to get a rough sense of how well the model performed prior to the test set. 
 
 :::rmdnote
 Whether validation sets are a subset of the training set or a third allocation in the initial split of the data largely comes down to semantics.
 :::
 
-Validation sets are discussed more in Section \@ref(validation) as a special case of _resampling_ methods that are used on the training set.
+Validation sets are discussed more in Chapter \@ref(resampling) as a special case of _resampling_ methods that are used on the training set.
 
 ## Multilevel Data
 

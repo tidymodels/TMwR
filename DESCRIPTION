@@ -62,6 +62,7 @@ Imports:
     probably,
     pscl,
     purrr,
+    ragg,
     ranger,
     recipes (>= 0.1.16),
     rlang,
@@ -88,7 +89,6 @@ Imports:
     xgboost,
     yardstick
 Remotes:
-    tidymodels/censored,
     tidymodels/learntidymodels
 biocViews: mixOmics
 Encoding: UTF-8

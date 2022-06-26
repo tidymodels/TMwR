@@ -5,7 +5,6 @@ library(rules)
 library(baguette)
 library(stacks)
 library(patchwork)
-library(kableExtra)
 
 load("RData/concrete_results.RData")
 ```
@@ -71,10 +70,7 @@ stacks() %>%
                   "...", "Cubist 25", "..."),
     caption = "Predictions from candidate tuning parameter configurations.",
     label = "ensemble-candidate-preds"
-  ) %>% 
-  kable_styling("striped", full_width = TRUE) %>% 
-  add_header_above(c(" ", "Ensemble Candidate Predictions" = 7)) %>% 
-  row_spec(0, align = "c")
+  )
 ```
 
 There is a single column for the bagged tree model since it has no tuning parameters. Also, recall that MARS was tuned over a single parameter (the product degree) with two possible configurations, so this model is represented by two columns. Most of the other models have 25 corresponding columns, as shown for Cubist in this example. 
@@ -105,7 +101,7 @@ concrete_stack <-
 concrete_stack
 ```
 
-Recall that racing methods (Section \@ref(racing)) are more efficient since they might not evaluate all configurations on all resamples. Stacking requires that all candidate members have the complete set of resamples. `add_candidates()` includes only the model configurations that have complete results. 
+Recall that racing methods (introduced in Chapter \@ref(grid-search)) are more efficient since they might not evaluate all configurations on all resamples. Stacking requires that all candidate members have the complete set of resamples. `add_candidates()` includes only the model configurations that have complete results. 
 
 :::rmdnote
 Why use the racing results instead of the full set of candidate models contained in `grid_results`? Either can be used. We found better performance for these data using the racing results. This might be due to the racing method pre-selecting the best model(s) from the larger grid. 
@@ -203,7 +199,7 @@ The regularized linear regression meta-learning model contained `r num_coefs` bl
 autoplot(ens, "weights") +
   geom_text(aes(x = weight + 0.01, label = model), hjust = 0) + 
   theme(legend.position = "none") +
-  lims(x = c(-0.01, 0.8))
+  lims(x = c(-0.01, 0.9))
 ```
 
 ```{r blending-weights, ref.label = "ensembles-blending-weights"}

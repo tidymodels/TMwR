@@ -1,7 +1,6 @@
 ```{r performance-setup, include = FALSE}
 knitr::opts_chunk$set(fig.path = "figures/")
 library(tidymodels)
-library(kableExtra)
 tidymodels_prefer()
 source("ames_snippets.R")
 load("RData/lm_fit.RData")
@@ -16,7 +15,7 @@ ad_folds <- vfold_cv(ad_data, repeats = 5)
 Once we have a model, we need to know how well it works. A quantitative approach for estimating effectiveness allows us to understand the model, to compare different models, or to tweak the model to improve performance. Our focus in tidymodels is on empirical validation; this usually means using data that were not used to create the model as the substrate to measure effectiveness. 
 
 :::rmdwarning
-The best approach to empirical validation involves using _resampling_ methods that will be introduced in Chapter \@ref(resampling). In this chapter, we will motivate the need for empirical validation by using the test set. Keep in mind that the test set can only be used once, as explained in Section \@ref(splitting-methods).
+The best approach to empirical validation involves using _resampling_ methods that will be introduced in Chapter \@ref(resampling). In this chapter, we will motivate the need for empirical validation by using the test set. Keep in mind that the test set can only be used once, as explained in Chapter \@ref(splitting).
 :::
 
 When judging model effectiveness, your decision about which metrics to examine can be critical. In later chapters, certain model parameters will be empirically optimized and a primary performance metric will be used to choose the best sub-model. Choosing the wrong metric can easily result in unintended consequences. For example, two common metrics for regression models are the root mean squared error (RMSE) and the coefficient of determination (a.k.a. $R^2$). The former measures _accuracy_ while the latter measures _correlation_. These are not necessarily the same thing. Figure \@ref(fig:performance-reg-metrics) demonstrates the difference between the two. 
@@ -117,7 +116,7 @@ In the remainder of this chapter, we will discuss general approaches for evaluat
 
 ## Regression Metrics 
 
-Recall from Section \@ref(parsnip-predictions) that tidymodels prediction functions produce tibbles with columns for the predicted values. These columns have consistent names, and the functions in the `r pkg(yardstick)` package that produce performance metrics have consistent interfaces. The functions are data frame-based, as opposed to vector-based, with the general syntax of: 
+Recall from Chapter \@ref(models) that tidymodels prediction functions produce tibbles with columns for the predicted values. These columns have consistent names, and the functions in the `r pkg(yardstick)` package that produce performance metrics have consistent interfaces. The functions are data frame-based, as opposed to vector-based, with the general syntax of: 
 
 ```r
 function(data, truth, ...)
@@ -126,7 +125,7 @@ function(data, truth, ...)
 where `data` is a data frame or tibble and `truth` is the column with the observed outcome values. The ellipses or other arguments are used to specify the column(s) containing the predictions. 
 
 
-To illustrate, let's take the model from Section \@ref(recipes-summary). This model `lm_wflow_fit` combines a linear regression model with a predictor set supplemented with an interaction and spline functions for longitude and latitude. It was created from a training set (named `ames_train`). Although we do not advise using the test set at this juncture of the modeling process, it will be used here to illustrate functionality and syntax. The data frame `ames_test` consists of `r nrow(ames_test)` properties. To start, let's produce predictions: 
+To illustrate, let's take the model from the very end of Chapter \@ref(recipes). This model `lm_wflow_fit` combines a linear regression model with a predictor set supplemented with an interaction and spline functions for longitude and latitude. It was created from a training set (named `ames_train`). Although we do not advise using the test set at this juncture of the modeling process, it will be used here to illustrate functionality and syntax. The data frame `ames_test` consists of `r nrow(ames_test)` properties. To start, let's produce predictions: 
 
 
 ```{r performance-predict-ames}
@@ -355,7 +354,8 @@ The groupings also translate to the `autoplot()` methods, with results shown in 
 hpc_cv %>% 
   group_by(Resample) %>% 
   roc_curve(obs, VF, F, M, L) %>% 
-  autoplot()
+  autoplot() +
+  theme(legend.position = "none")
 ```
 
 ```{r grouped-roc-curves, ref.label = "performance-multi-class-roc-grouped"}
