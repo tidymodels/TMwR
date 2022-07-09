@@ -15,7 +15,7 @@ source("ames_snippets.R")
 
 lm_wflow <- 
   lm_wflow %>% 
-  remove_formula() %>% 
+  remove_recipe() %>% 
   add_variables(outcome = Sale_Price, predictors = c(Longitude, Latitude))
 ```
 
