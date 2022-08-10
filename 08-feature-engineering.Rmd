@@ -197,7 +197,7 @@ ggplot(ames_train, aes(y = Neighborhood)) +
   labs(y = NULL)
 ```
 
-Here we see that two neighborhoods have less than five properties in the training data (Landmark and Green Hills); in this case, no houses at all in the Landmark neighborhood were included in the training set. For some models, it may be problematic to have dummy variables with a single nonzero entry in the column. At a minimum, it is highly improbable that these features would be important to a model. If we add `step_other(Neighborhood, threshold = 0.01)` to our recipe, the bottom 1% of the neighborhoods will be lumped into a new level called "other." In this training set, this will catch `r xfun::numbers_to_words(sum(table(ames_train$Neighborhood)/nrow(ames_train) <= .01))` neighborhoods.  
+Here we see that two neighborhoods have less than five properties in the training data (Landmark and Green Hills); in this case, no houses at all in the Landmark neighborhood were included in the testing set. For some models, it may be problematic to have dummy variables with a single nonzero entry in the column. At a minimum, it is highly improbable that these features would be important to a model. If we add `step_other(Neighborhood, threshold = 0.01)` to our recipe, the bottom 1% of the neighborhoods will be lumped into a new level called "other." In this training set, this will catch `r xfun::numbers_to_words(sum(table(ames_train$Neighborhood)/nrow(ames_train) <= .01))` neighborhoods.  
 
 For the Ames data, we can amend the recipe to use:
 
