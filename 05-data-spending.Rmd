@@ -75,7 +75,7 @@ quart_plot <-
   geom_segment(data = quartiles,
                aes(x = value, xend = value, y = 0, yend = y),
                lty = 2) +
-  labs("x = Sale Price (log-10 USD)", y = NULL)
+  labs(x = "Sale Price (log-10 USD)", y = NULL)
 quart_plot
 ```
 
