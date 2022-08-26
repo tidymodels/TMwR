@@ -651,8 +651,8 @@ First, let's consider the raw execution times in Figure \@ref(fig:parallel-times
 #| message = FALSE, 
 #| fig.height =4, 
 #| out.width = "70%",
-#| fig.cap = "Execution times for model tuning versus the number of workers using different delegation schemes. The diagonal black line indicates a linear speedup where the addition of a new worker process has maximal effect.",
-#| fig.alt = "Execution times for model tuning versus the number of workers using different delegation schemes. The diagonal black line indicates a linear speedup where the addition of a new worker process has maximal effect. The 'everything' scheme shows that the benefits decrease after three or four workers, especially when there is expensive preprocessing. The 'resamples' scheme has almost linear speedups across all tasks."
+#| fig.cap = "Execution times for model tuning versus the number of workers using different delegation schemes",
+#| fig.alt = "Execution times for model tuning versus the number of workers using different delegation schemes."
 
 load("extras/parallel_times/xgb_times.RData")
 ggplot(times, aes(x = num_cores, y = elapsed, color = parallel_over, shape = parallel_over)) + 
@@ -683,8 +683,8 @@ We can also view these data in terms of speed-ups in Figure \@ref(fig:parallel-s
 #| message = FALSE, 
 #| fig.height = 4, 
 #| out.width = "70%",
-#| fig.cap = "Speed-ups for model tuning versus the number of workers using different delegation schemes",
-#| fig.alt = "Speed-ups for model tuning versus the number of workers using different delegation schemes."
+#| fig.cap = "Speed-ups for model tuning versus the number of workers using different delegation schemes. The diagonal black line indicates a linear speedup where the addition of a new worker process has maximal effect.",
+#| fig.alt = "Speed-ups for model tuning versus the number of workers using different delegation schemes. The diagonal black line indicates a linear speedup where the addition of a new worker process has maximal effect. The 'everything' scheme shows that the benefits decrease after three or four workers, especially when there is expensive preprocessing. The 'resamples' scheme has almost linear speedups across all tasks."
 
 ggplot(times, aes(x = num_cores, y = speed_up, color = parallel_over, shape = parallel_over)) + 
   geom_abline(lty = 1) + 
