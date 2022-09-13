@@ -79,7 +79,7 @@ One important feature in the tibble produced by `r pkg(rsample)` is that the `sp
 
 ### Design for the pipe and functional programming
 
-The `r pkg(magrittr)` pipe operator (`%>%`) is a tool for chaining together a sequence of R functions.^[In R 4.1, a native pipe operator `|>` was introduced as well. In this book, we use the `r pkg(magrittr)` pipe since users on older versions of R will not have the new native pipe.] To demonstrate, consider the following commands that sort a data frame and then retain the first 10 rows:
+The `r pkg(magrittr)` pipe operator (`%>%`) is a tool for chaining together a sequence of R functions.^[In R 4.1.0, a native pipe operator `|>` was introduced as well. In this book, we use the `r pkg(magrittr)` pipe since users on older versions of R will not have the new native pipe.] To demonstrate, consider the following commands that sort a data frame and then retain the first 10 rows:
 
 ```{r tidyverse-no-pipe, eval = FALSE}
 small_mtcars <- arrange(mtcars, gear)
