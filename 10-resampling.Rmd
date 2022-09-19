@@ -259,7 +259,7 @@ vfold_cv(ames_train, v = 10, repeats = 5)
 
 ### Leave-one-out cross-validation {-}
 
-One variation of cross-validation is leave-one-out (LOO) cross-validation, where _V_ is the number of data points in the training set. If there are $n$ training set samples, $n$ models are fit using $n-1$ rows of the training set. Each model predicts the single excluded data point. At the end of resampling, the $n$ predictions are pooled to produce a single performance statistic. 
+One variation of cross-validation is leave-one-out (LOO) cross-validation. If there are $n$ training set samples, $n$ models are fit using $n-1$ rows of the training set. Each model predicts the single excluded data point. At the end of resampling, the $n$ predictions are pooled to produce a single performance statistic. 
 
 Leave-one-out methods are deficient compared to almost any other method. For anything but pathologically small samples, LOO is computationally excessive, and it may not have good statistical properties. Although the `r pkg(rsample)` package contains a `loo_cv()` function, these objects are not generally integrated into the broader tidymodels frameworks.  
 
