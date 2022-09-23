@@ -279,7 +279,7 @@ full_results_time <-
                       control = grid_ctrl, verbose = TRUE)
    )
 
-num_grid_models <- nrow(collect_metrics(grid_results, summarize = FALSE))
+num_grid_models <- nrow(collect_metrics(grid_results, summarize = FALSE)) / 2
 ```
 
 What do our `grid_results` look like?
