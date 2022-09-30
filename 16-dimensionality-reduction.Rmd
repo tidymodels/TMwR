@@ -418,7 +418,7 @@ bean_rec_trained %>%
 #| echo = FALSE,
 #| fig.height = 7,
 #| fig.cap = "UMAP component scores for the bean validation set, colored by class",
-#| fig.alt = "UMAP component scores for the bean validation set, colored by class. There is significant overlap in the first two ICA components."
+#| fig.alt = "UMAP component scores for the bean validation set, colored by class. There is a very high degree of separation between clusters, but several of the clusters contain more than one class."
 ```
 
 While the between-cluster space is pronounced, the clusters can contain a heterogeneous mixture of classes.
@@ -437,7 +437,7 @@ bean_rec_trained %>%
 #| echo = FALSE,
 #| fig.height = 7,
 #| fig.cap = "Supervised UMAP component scores for the bean validation set, colored by class",
-#| fig.alt = "Supervised UMAP component scores for the bean validation set, colored by class. There is significant overlap in the first two ICA components."
+#| fig.alt = "Supervised UMAP component scores for the bean validation set, colored by class. There is again a very high degree of separation between clusters, and there are now fewer instances of one cluster containing multiple classes."
 ```
 
 The supervised method shown in Figure \@ref(fig:bean-umap-supervised) looks promising for modeling the data.
