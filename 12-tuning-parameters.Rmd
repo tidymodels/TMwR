@@ -474,7 +474,8 @@ How can we signal to tidymodels functions which arguments should be optimized?  
 
 ```{r tuning-mlp-units}
 neural_net_spec <- 
-  mlp(hidden_units = tune()) %>% 
+  mlp(hidden_units = tune()) %>%
+  set_mode("regression") %>%
   set_engine("keras")
 ```
 
@@ -566,7 +567,8 @@ In some cases, it is easy to have reasonable defaults for the range of possible 
 ```{r tuning-rf}
 rf_spec <- 
   rand_forest(mtry = tune()) %>% 
-  set_engine("ranger", regularization.factor = tune("regularization"))
+  set_engine("ranger", regularization.factor = tune("regularization")) %>%
+  set_mode("regression")
 
 rf_param <- extract_parameter_set_dials(rf_spec)
 rf_param
