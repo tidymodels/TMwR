@@ -44,7 +44,7 @@ As our models have become more powerful and complex, it has also become easier t
 
 This same principle also applies to programming. Whenever possible, the software should be able to protect users from committing mistakes. Software should make it easy for users to do the right thing. 
 
-These two aspects of model development -- ease of proper use and good methodological practice -- are crucial. Since tools for creating models are easily accessible and models can have such a profound impact, many more people are creating them. In terms of technical expertise and training, creators' backgrounds will vary. It is important that their tools be robust to the user's experience. Tools should be powerful enough to create high-performance models, but, on the other hand, should be easy to use in appropriately.  This book describes a suite of software for modeling that has been designed with these characteristics in mind.
+These two aspects of model development -- ease of proper use and good methodological practice -- are crucial. Since tools for creating models are easily accessible and models can have such a profound impact, many more people are creating them. In terms of technical expertise and training, creators' backgrounds will vary. It is important that their tools be robust to the user's experience. Tools should be powerful enough to create high-performance models, but, on the other hand, should be easy to use appropriately.  This book describes a suite of software for modeling that has been designed with these characteristics in mind.
 
 The software is based on the R programming language [@baseR]. R has been designed especially for data analysis and modeling. It is an implementation of the S language (with lexical scoping rules adapted from Scheme and Lisp) which was created in the 1970s to
 
@@ -253,7 +253,7 @@ monolog <-
     "Feature Engineering", "2", 
     "We need to encode holiday features to improve predictions on (and around) those dates.",
     "Model Evaluation", "2",
-    "Let’s drop K-NN from the model list. "
+    "Let’s drop KNN from the model list. "
   )
 if (knitr::is_html_output()) {
   tab <- 
