@@ -241,7 +241,7 @@ To demonstrate, let's look at a toy example with a single parameter that has val
 y_lab <- expression(Estimated ~ italic(R^2))
 
 ggplot(grid, aes(x = x, y = y)) + 
-  geom_line(color = "red", alpha = .5, lwd = 1.25) + 
+  geom_line(color = "red", alpha = .5, linewidth = 1.25) + 
   labs(y = y_lab, x = "Tuning Parameter") +
   geom_point(data = current_iter)
 ```
