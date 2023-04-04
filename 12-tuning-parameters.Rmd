@@ -385,7 +385,7 @@ The single unit model does not adapt very flexibly to the data (since it is cons
 This occurrence of overfitting is obvious with two predictors that we can plot. However, in general, we must use a quantitative approach for detecting overfitting.
 
 :::rmdnote
-The solutions for detecting when a model is overemphasizing the training set is using out-of-sample data.
+The solution for detecting when a model is overemphasizing the training set is using out-of-sample data.
 :::
 
 Rather than using the test set, some form of resampling is required. This could mean an iterative approach (e.g., 10-fold cross-validation) or a single data source (e.g., a validation set). 
