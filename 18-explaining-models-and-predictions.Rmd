@@ -274,12 +274,12 @@ ggplot_imp <- function(...) {
     p <- p + 
       facet_wrap(vars(label)) +
       geom_vline(data = perm_vals, aes(xintercept = dropout_loss, color = label),
-                 size = 1.4, lty = 2, alpha = 0.7) +
+                 linewidth = 1.4, lty = 2, alpha = 0.7) +
       geom_boxplot(aes(color = label, fill = label), alpha = 0.2)
   } else {
     p <- p + 
       geom_vline(data = perm_vals, aes(xintercept = dropout_loss),
-                 size = 1.4, lty = 2, alpha = 0.7) +
+                 linewidth = 1.4, lty = 2, alpha = 0.7) +
       geom_boxplot(fill = "#91CBD765", alpha = 0.4)
     
   }
@@ -330,14 +330,14 @@ ggplot_pdp <- function(obj, x) {
     ggplot(aes(`_x_`, `_yhat_`)) +
     geom_line(data = as_tibble(obj$cp_profiles),
               aes(x = {{ x }}, group = `_ids_`),
-              size = 0.5, alpha = 0.05, color = "gray50")
+              linewidth = 0.5, alpha = 0.05, color = "gray50")
   
   num_colors <- n_distinct(obj$agr_profiles$`_label_`)
   
   if (num_colors > 1) {
-    p <- p + geom_line(aes(color = `_label_`), size = 1.2, alpha = 0.8)
+    p <- p + geom_line(aes(color = `_label_`), linewidth = 1.2, alpha = 0.8)
   } else {
-    p <- p + geom_line(color = "midnightblue", size = 1.2, alpha = 0.8)
+    p <- p + geom_line(color = "midnightblue", linewidth = 1.2, alpha = 0.8)
   }
   
   p
@@ -391,8 +391,8 @@ as_tibble(pdp_liv$agr_profiles) %>%
   ggplot(aes(`_x_`, `_yhat_`, color = Bldg_Type)) +
   geom_line(data = as_tibble(pdp_liv$cp_profiles),
             aes(x = Gr_Liv_Area, group = `_ids_`),
-            size = 0.5, alpha = 0.1, color = "gray50") +
-  geom_line(size = 1.2, alpha = 0.8, show.legend = FALSE) +
+            linewidth = 0.5, alpha = 0.1, color = "gray50") +
+  geom_line(linewidth = 1.2, alpha = 0.8, show.legend = FALSE) +
   scale_x_log10() +
   facet_wrap(~Bldg_Type) +
   scale_color_brewer(palette = "Dark2") +

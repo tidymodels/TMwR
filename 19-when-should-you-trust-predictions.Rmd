@@ -165,7 +165,7 @@ eq_zone_results <- function(buffer) {
 map_dfr(seq(0, .1, length.out = 40), eq_zone_results) %>% 
   pivot_longer(c(-buffer), names_to = "statistic", values_to = "value") %>% 
   ggplot(aes(x = buffer, y = value, lty = statistic)) + 
-  geom_step(size = 1.2, alpha = 0.8) + 
+  geom_step(linewidth = 1.2, alpha = 0.8) + 
   labs(y = NULL, lty = NULL)
 ```
 

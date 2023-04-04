@@ -140,7 +140,7 @@ These correlations are high, and indicate that, across models, there are large w
 rsq_indiv_estimates %>% 
   mutate(wflow_id = reorder(wflow_id, .estimate)) %>% 
   ggplot(aes(x = wflow_id, y = .estimate, group = id, color = id)) + 
-  geom_line(alpha = .5, lwd = 1.25) + 
+  geom_line(alpha = .5, linewidth = 1.25) + 
   theme(legend.position = "none")
 ```
 
