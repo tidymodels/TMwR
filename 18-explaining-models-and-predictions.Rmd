@@ -407,7 +407,7 @@ as_tibble(pdp_liv$agr_profiles) %>%
 #| fig.alt = "Partial dependence profiles for the random forest model focusing on building types and gross living area using facets. The building type profiles are, for the most part, parallel over gross living area."
 ```
 
-There is no one correct approach for building model explanations, and the options outlined in this chapter are not exhaustive. We have highlighted good options for explanations at both the individual and global level, as well as how to bridge from one to the other, and we point you to @Biecek2021 and @Molnar2021 for further reading
+There is no one correct approach for building model explanations, and the options outlined in this chapter are not exhaustive. We have highlighted good options for explanations at both the individual and global level, as well as how to bridge from one to the other, and we point you to @Biecek2021 and @Molnar2021 for further reading.
 
 ## Back to Beans!
 
