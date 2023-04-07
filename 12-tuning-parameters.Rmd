@@ -178,7 +178,7 @@ resampled_res <-
   group_by(model, .metric) %>% 
   summarize(
     mean = mean(.estimate, na.rm = TRUE),
-    std_err = sd(.estimate, na.rm = TRUE) / sum(!is.na(.estimate)), 
+    std_err = sd(.estimate, na.rm = TRUE) / sqrt(n()), 
     .groups = "drop"
   )
 
@@ -203,7 +203,7 @@ resampled_res %>%
 The scale of these values is different than the previous values since they are computed on a smaller data set; the value produced by `broom::glance()` is a sum while `yardstick::mn_log_loss()` is an average.  
 :::
 
-These results show that there is considerable evidence that the choice of the link function matters and that the logistic model is superior. 
+These results exhibit evidence that the choice of the link function matters somewhat. Although there is an overlap in the confidence intervals, the logistic model has the best results.
 
 What about a different metric? We also calculated the area under the ROC curve for each resample. These results, which reflect the discriminative ability of the models across numerous probability thresholds, show a lack of difference in Figure \@ref(fig:resampled-roc).
 
@@ -268,7 +268,7 @@ link_grids %>%
 
 
 :::rmdwarning
-This exercise emphasizes that different metrics might lead to different decisions about the choice of tuning parameter values. In this case, one metric appears to clearly sort the models while another metric shows no difference.  
+This exercise emphasizes that different metrics might lead to different decisions about the choice of tuning parameter values. In this case, one metric indicates the models are somewhat different while another metric shows no difference at all.  
 :::
 
 Metric optimization is thoroughly discussed by @thomas2020problem who explore several issues, including the gaming of metrics. They warn that: 
