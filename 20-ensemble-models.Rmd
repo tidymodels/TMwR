@@ -258,7 +258,7 @@ where the predictors in the equation are the predicted compressive strength valu
 
 ## Fit the Member Models {#fit-members}
 
-The ensemble contains `r num_coefs` candidate members, and we now know how their predictions can be blended into a final prediction for the ensemble. However, these individual models fits have not yet been created. To be able to use the stacking model, `r num_coefs` additional model fits are required. These use the entire training set with the original predictors. 
+The ensemble contains `r num_coefs` candidate members, and we now know how their predictions can be blended into a final prediction for the ensemble. However, these individual model fits have not yet been created. To be able to use the stacking model, `r num_coefs` additional model fits are required. These use the entire training set with the original predictors. 
 
 The `r num_coefs`  models to be fit are:
 
