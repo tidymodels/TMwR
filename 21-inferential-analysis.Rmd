@@ -198,7 +198,7 @@ $$
 
 where $\lambda$ is the expected value of the counts.
 
-Let's fit a simple model that contains all of the predictor columns. The `r pkg(poissonreg)` package, a `r pkg(parsnip)` extension package in tidymodels, will create this model specification:
+Let's fit a simple model that contains all of the predictor columns. The `r pkg(poissonreg)` package, a `r pkg(parsnip)` extension package in tidymodels, will fit this model specification:
 
 ```{r inferential-glm}
 library(poissonreg)
