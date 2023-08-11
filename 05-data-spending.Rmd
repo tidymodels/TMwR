@@ -112,7 +112,26 @@ It is common to hear about _validation sets_ as an answer to this question, espe
 Whether validation sets are a subset of the training set or a third allocation in the initial split of the data largely comes down to semantics.
 :::
 
-Validation sets are discussed more in Section \@ref(validation) as a special case of _resampling_ methods that are used on the training set.
+Validation sets are discussed more in Section \@ref(validation) as a special case of _resampling_ methods that are used on the training set. If you are going to use a validation set, you can start with a different splitting function^[This interface is available as of rsample version 1.2.0 (circa September 2023).]: 
+
+```{r ames-val-split, message = FALSE, warning = FALSE}
+set.seed(52)
+# To put 60% into training, 20% in validation, and 20% in testing:
+ames_val_split <- initial_validation_split(ames, prop = c(0.6, 0.2))
+ames_val_split
+```
+
+Printing the split now shows the size of the training set (`r format(nrow(training(ames_val_split)), big.mark = ",")`), validation set (`r format(nrow(validation(ames_val_split)), big.mark = ",")`), and test set ((`r format(nrow(testing(ames_val_split)), big.mark = ",")`). 
+
+To get the training and testing data, the same syntax is used: 
+
+```{r ames-val-data, eval = FALSE}
+ames_train <- training(ames_val_split)
+ames_test <- testing(ames_val_split)
+ames_val <- validation(ames_val_split)
+```
+
+Section \@ref(validation) will demonstrate how to use the `ames_val_split` for resampling and model optimization
 
 ## Multilevel Data
 

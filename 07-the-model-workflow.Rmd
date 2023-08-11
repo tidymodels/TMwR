@@ -323,6 +323,10 @@ collect_predictions(final_lm_res) %>% slice(1:5)
 
 We'll see more about `last_fit()` in action and how to use it again in Section \@ref(bean-models).
 
+:::rmdnote
+When using validation sets, `last_fit()` has an option called `add_validation_set` to specify if we should train the final model solely on the training set (the default) or the combination of the training and validation sets. 
+:::
+
 ## Chapter Summary {#workflows-summary}
 
 In this chapter, you learned that the modeling process encompasses more than just estimating the parameters of an algorithm that connects predictors to an outcome. This process also includes preprocessing steps and operations taken after a model is fit. We introduced a concept called a *model workflow* that can capture the important components of the modeling process. Multiple workflows can also be created inside of a *workflow set*. The `last_fit()` function is convenient for fitting a final model to the training set and evaluating with the test set. 
