@@ -89,7 +89,7 @@ Figure \@ref(fig:roc-surface) shows the results of evaluating this grid, with li
 #| out.width = "80%", 
 #| echo = FALSE,
 #| warning = FALSE,
-#| fig.cap = "Heatmap of the mean area under the ROC curve for a high density grid of tuning parameter values. The best point is a solid dot in the upper0right corner. ",
+#| fig.cap = "Heatmap of the mean area under the ROC curve for a high density grid of tuning parameter values. The best point is a solid dot in the upper-right corner. ",
 #| fig.alt = "A heatmap of the mean area under the ROC curve for a high density grid of tuning parameter values. The best point is a solid dot in the upper-right corner. The surface has a ridge of high performance moving to the lower right. "
 # See file extras/cells_svm_large.R
 knitr::include_graphics("premade/roc_surface.png")
