@@ -63,7 +63,7 @@ Imports:
     pscl,
     purrr,
     ranger,
-    recipes (>= 0.1.16),
+    recipes (>= 1.0.8),
     rlang,
     rmarkdown,
     rpart,
