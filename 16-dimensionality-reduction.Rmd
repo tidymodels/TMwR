@@ -106,11 +106,14 @@ set.seed(1601)
 bean_split <- initial_validation_split(beans, strata = class, prop = c(0.75, 0.125))
 bean_split
 
+# Return data frames:
 bean_train <- training(bean_split)
-bean_test  <- testing(bean_split)
+bean_test <- testing(bean_split)
 bean_validation <- validation(bean_split)
 
+
 set.seed(1602)
+# Return an 'rset' object to use with the tune functions:
 bean_val <- validation_set(bean_split)
 bean_val$splits[[1]]
 ```
