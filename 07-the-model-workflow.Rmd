@@ -324,7 +324,7 @@ collect_predictions(final_lm_res) %>% slice(1:5)
 We'll see more about `last_fit()` in action and how to use it again in Section \@ref(bean-models).
 
 :::rmdnote
-When using validation sets, `last_fit()` has an option called `add_validation_set` to specify if we should train the final model solely on the training set (the default) or the combination of the training and validation sets. 
+When using validation sets, `last_fit()` has an argument called `add_validation_set` to specify if we should train the final model solely on the training set (the default) or the combination of the training and validation sets. 
 :::
 
 ## Chapter Summary {#workflows-summary}

@@ -123,7 +123,7 @@ ames_val_split
 
 Printing the split now shows the size of the training set (`r format(nrow(training(ames_val_split)), big.mark = ",")`), validation set (`r format(nrow(validation(ames_val_split)), big.mark = ",")`), and test set ((`r format(nrow(testing(ames_val_split)), big.mark = ",")`). 
 
-To get the training and testing data, the same syntax is used: 
+To get the training, validation, and testing data, the same syntax is used: 
 
 ```{r ames-val-data, eval = FALSE}
 ames_train <- training(ames_val_split)
@@ -131,7 +131,7 @@ ames_test <- testing(ames_val_split)
 ames_val <- validation(ames_val_split)
 ```
 
-Section \@ref(validation) will demonstrate how to use the `ames_val_split` for resampling and model optimization
+Section \@ref(validation) will demonstrate how to use the `ames_val_split` object for resampling and model optimization.
 
 ## Multilevel Data
 
