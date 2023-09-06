@@ -103,17 +103,22 @@ For our analyses, we start by holding back a testing set with `initial_split()`.
 
 ```{r dimensionality-split}
 set.seed(1601)
-bean_split <- initial_split(beans, strata = class, prop = 3/4)
+bean_split <- initial_validation_split(beans, strata = class, prop = c(0.75, 0.125))
+bean_split
 
+# Return data frames:
 bean_train <- training(bean_split)
-bean_test  <- testing(bean_split)
+bean_test <- testing(bean_split)
+bean_validation <- validation(bean_split)
+
 
 set.seed(1602)
-bean_val <- validation_split(bean_train, strata = class, prop = 4/5)
+# Return an 'rset' object to use with the tune functions:
+bean_val <- validation_set(bean_split)
 bean_val$splits[[1]]
 ```
 
-To visually assess how well different methods perform, we can estimate the methods on the training set (n = `r analysis(bean_val$splits[[1]]) %>% nrow()` beans) and display the results using the validation set (n = `r assessment(bean_val$splits[[1]]) %>% nrow()`).
+To visually assess how well different methods perform, we can estimate the methods on the training set (n = `r format(nrow(bean_train), big.mark = ",")` beans) and display the results using the validation set (n = `r format(nrow(bean_validation), big.mark = ",")`).
 
 Before beginning any dimensionality reduction, we can spend some time investigating our data. Since we know that many of these shape features are probably measuring similar concepts, let's take a look at the correlation structure of the data in Figure \@ref(fig:beans-corr-plot) using this code.
 
@@ -145,7 +150,7 @@ It's time to look at the beans data in a smaller space. We can start with a basi
 library(bestNormalize)
 bean_rec <-
   # Use the training data from the bean_val split object
-  recipe(class ~ ., data = analysis(bean_val$splits[[1]])) %>%
+  recipe(class ~ ., data = bean_train) %>%
   step_zv(all_numeric_predictors()) %>%
   step_orderNorm(all_numeric_predictors()) %>% 
   step_normalize(all_numeric_predictors())
@@ -224,7 +229,6 @@ Using `bake()` with a recipe is much like using `predict()` with a model; the op
 For example, the validation set samples can be processed: 
 
 ```{r dimensionality-bake}
-bean_validation <- bean_val$splits %>% pluck(1) %>% assessment()
 bean_val_processed <- bake(bean_rec_trained, new_data = bean_validation)
 ```
 
@@ -260,7 +264,7 @@ First, as previously mentioned, using `prep(recipe, retain = TRUE)` keeps the ex
 
 ```{r dimensionality-new-data-null}
 bake(bean_rec_trained, new_data = NULL) %>% nrow()
-bean_val$splits %>% pluck(1) %>% analysis() %>% nrow()
+bean_train %>% nrow()
 ```
 
 If the training set is not pathologically large, using this value of `retain` can save a lot of computational time. 
@@ -275,7 +279,7 @@ Since recipes are the primary option in tidymodels for dimensionality reduction,
 
 ```{r dimensionality-function}
 library(ggforce)
-plot_validation_results <- function(recipe, dat = assessment(bean_val$splits[[1]])) {
+plot_validation_results <- function(recipe, dat = bean_validation) {
   recipe %>%
     # Estimate any additional steps
     prep() %>%

@@ -67,7 +67,7 @@ Imports:
     rlang,
     rmarkdown,
     rpart,
-    rsample (>= 0.0.9),
+    rsample (>= 1.2.0),
     rstanarm,
     rules,
     sessioninfo,

@@ -302,15 +302,22 @@ With the `r pkg(rsample)` package, a validation set is like any other resampling
 knitr::include_graphics("premade/validation-alt.svg")
 ```
 
-To create a validation set object that uses 3/4 of the data for model fitting: 
-
+To build on the code from Section \@ref(what-about-a-validation-set), the function `validation_set()` can take the results of `initial_validation_split()` and convert it to an rset object that is similar to the ones produced by functions such as `vfold_cv()`: 
 
 ```{r resampling-validation-split}
-set.seed(1002)
-val_set <- validation_split(ames_train, prop = 3/4)
+# Previously:
+
+set.seed(52)
+# To put 60% into training, 20% in validation, and 20% in testing:
+ames_val_split <- initial_validation_split(ames, prop = c(0.6, 0.2))
+ames_val_split
+
+# Object used for resampling: 
+val_set <- validation_set(ames_val_split)
 val_set
 ```
 
+As you'll see in Section \@ref(resampling-performance), the `fit_resamples()` function will be used to compute correct estimates of performance using resampling. The `val_set` object can be used in in this and other functions even though it is a single "resample" of the data. 
 
 ### Bootstrapping {#bootstrap}
 
