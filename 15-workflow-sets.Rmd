@@ -56,7 +56,7 @@ To address this, we will use the mean compressive strength per concrete mixture 
 ```{r workflow-sets-means}
 concrete <- 
    concrete %>% 
-   group_by(across(-compressive_strength)) %>% 
+   group_by(pick(-compressive_strength)) %>% 
    summarize(compressive_strength = mean(compressive_strength),
              .groups = "drop")
 nrow(concrete)
