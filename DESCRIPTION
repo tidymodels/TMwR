@@ -24,7 +24,7 @@ Imports:
     corrr,
     Cubist,
     DALEXtra,
-    dials (>= 0.0.9),
+    dials (>= 1.3.0),
     dimRed,
     discrim,
     doMC,
