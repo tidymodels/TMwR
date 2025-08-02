@@ -1,11 +1,11 @@
 ```{r resampling-setup, include = FALSE}
 knitr::opts_chunk$set(fig.path = "figures/")
 library(tidymodels)
-library(doMC)
+library(mirai)
 library(kableExtra)
 library(tidyr)
 tidymodels_prefer()
-registerDoMC(cores = parallel::detectCores())
+cores <- daemons(parallel::detectCores())
 
 source("ames_snippets.R")
 load("RData/lm_fit.RData")
@@ -547,8 +547,8 @@ For `fit_resamples()` and other functions in `r pkg(tune)`, parallel processing 
 
 ```{r resampling-mc, eval = FALSE}
 # Unix and macOS only
-library(doMC)
-registerDoMC(cores = 2)
+library(mirai)
+daemons(2)
 
 # Now run fit_resamples()...
 ```
@@ -556,7 +556,7 @@ registerDoMC(cores = 2)
 This instructs `fit_resamples()` to run half of the computations on each of two cores. To reset the computations to  sequential processing: 
 
 ```{r resampling-seq, eval = FALSE}
-registerDoSEQ()
+daemons(0)
 ```
 
 Alternatively, a different approach to parallelizing computations uses network sockets. The `r pkg(doParallel)` package enables this method (usable by all operating systems): 
@@ -617,6 +617,8 @@ We can save the linear model coefficients for a fitted model object from a workf
 
 ```{r resampling-extract-func}
 get_model <- function(x) {
+  # load any extra packages that are used in this function:
+  library(broom)
   extract_fit_parsnip(x) %>% tidy()
 }
 

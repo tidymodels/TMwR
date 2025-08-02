@@ -3,8 +3,8 @@ knitr::opts_chunk$set(fig.path = "figures/")
 library(tidymodels)
 library(patchwork)
 library(ggforce)
-library(doMC)
-registerDoMC(cores = parallel::detectCores())
+library(mirai)
+cores <- daemons(parallel::detectCores())
 
 tidymodels_prefer()
 
