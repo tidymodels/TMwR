@@ -5,8 +5,8 @@ library(finetune)
 library(patchwork)
 library(kableExtra)
 library(av)
-library(doMC)
-registerDoMC(cores = parallel::detectCores(logical = TRUE))
+library(mirai)
+mirai::daemons(parallel::detectCores())
 tidymodels_prefer()
 
 ## -----------------------------------------------------------------------------
@@ -377,7 +377,7 @@ p1/p2
 
 Numerous acquisition functions have been proposed and discussed; in tidymodels, expected improvement is the default. 
 
-```{r iterative-cells-bo-calcs, echo = FALSE}
+```{r iterative-cells-bo-calcs, echo = FALSE, eval = FALSE}
 # We will do the calculations here but use some nonstandard options. First, 
 # purrr is used to capture the output in a vector so that we can show the 
 # results piecemeal. Also, a hidden option is used to save the grid of candidate 
@@ -409,7 +409,7 @@ svm_bo_sshh <-
 #   svm_bo_metrics <- collect_metrics(svm_bo_sshh$result)
 #   save(svm_bo_metrics, file = "RData/svm_bo_metrics.RData")
 # Check with:
-verify_consistent_bo(collect_metrics(svm_bo_sshh$result))
+# verify_consistent_bo(collect_metrics(svm_bo_sshh$result))
 
 svm_bo <- svm_bo_sshh$result
 svm_bo_output <- svm_bo_sshh$messages
@@ -439,7 +439,7 @@ The `control` argument now uses the results of `control_bayes()`. Some helpful a
 
 Let's use the first SVM results from Section \@ref(svm) as the initial substrate for the Gaussian process model. Recall that, for this application, we want to maximize the area under the ROC curve. Our code is: 
 
-```{r iterative-cells-bo, eval = FALSE}
+```{r iterative-cells-bo, eval = TRUE}
 ctrl <- control_bayes(verbose = TRUE)
 
 set.seed(1403)
@@ -767,7 +767,7 @@ To implement iterative search via simulated annealing, use the `tune_sim_anneal(
 
 For the cell segmentation data, the syntax is very consistent with the previously used functions: 
 
-```{r iterative-cells-sa-calcs, include = FALSE}
+```{r iterative-cells-sa-calcs, include = FALSE, eval = FALSE}
 # As we did above, this chunk executes the code with some extra options that
 # capture the output and save some internal objects for plotting. 
 
@@ -794,7 +794,7 @@ svm_sa_sshh <-
   # svm_sa_metrics <- collect_metrics(svm_sa_sshh$result)
   # save(svm_sa_metrics, file = "RData/svm_sa_metrics.RData")
 # Check with:
-verify_consistent_sa(collect_metrics(svm_sa_sshh$result))
+# verify_consistent_sa(collect_metrics(svm_sa_sshh$result))
 
 svm_sa <- svm_sa_sshh$result
 svm_sa_output <- svm_sa_sshh$messages
@@ -806,7 +806,7 @@ file.copy(
   overwrite = TRUE
 )
 ```
-```{r iterative-cells-sa, eval = FALSE}
+```{r iterative-cells-sa, eval = TRUE}
 ctrl_sa <- control_sim_anneal(verbose = TRUE, no_improve = 10L)
 
 set.seed(1404)
