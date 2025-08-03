@@ -28,7 +28,7 @@ collect_gp_results <- function(res, aqf = exp_improve(), num_vals = 100) {
     } else {
       current_best <- min(perf_res$mean[perf_res$.iter < i])
     }
-    gp_pred <- predict(x, grid_scaled)
+    gp_pred <- predict(gp_fit, grid_scaled)
     candidates <- 
       grid %>% 
       bind_cols(tibble::tibble(.mean = gp_pred$Y_hat, .sd = sqrt(gp_pred$MSE)))
