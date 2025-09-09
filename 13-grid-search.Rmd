@@ -32,7 +32,7 @@ Let's start by looking at two main approaches for assembling a grid.
 
 There are two main types of grids. A regular grid combines each parameter (with its corresponding set of possible values) factorially, i.e., by using all combinations of the sets. Alternatively, a nonregular grid is one where the parameter combinations are not formed from a small set of points. 
 
-Before we look at each type in more detail, let's consider an example model: the  multilayer perceptron model (a.k.a. single layer artificial neural network).  The parameters marked for tuning are: 
+Before we look at each type in more detail, let's consider an example model: the multilayer perceptron model (a.k.a. single layer artificial neural network).  The parameters marked for tuning are: 
 
 * the number of hidden units
 
@@ -261,7 +261,7 @@ autoplot(mlp_reg_tune) +
 #| fig.height = 7,
 #| echo = FALSE,
 #| fig.cap = "The regular grid results",
-#| fig.alt = "A line plot of the regular grid results. The x axis shows the number of hidden units and the y axis is the resampled ROC AUC. There are separate lines for the amount of regularization. There are nine panels for three values for the number of PCA components and the number of epochs. On average, the amount of regularization is important where more is better. Also, on average, the increasing the number of hidden units decreases model effectiveness."
+#| fig.alt = "A line plot of the regular grid results. The x axis shows the number of hidden units and the y axis is the resampled ROC AUC. There are separate lines for the amount of regularization. There are nine panels for three values for the number of PCA components and the number of epochs. On average, the amount of regularization is important where more is better. Also, on average, increasing the number of hidden units decreases model effectiveness."
 ```
 
 For these data, the amount of penalization has the largest impact on the area under the ROC curve. The number of epochs doesn't appear to have a pronounced effect on performance. The change in the number of hidden units appears to matter most when the amount of regularization is low (and harms performance). There are several parameter configurations that have roughly equivalent performance, as seen using the function `show_best()`: 
