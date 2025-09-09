@@ -88,7 +88,7 @@ poly_recipe <-
    step_interact(~ all_predictors():all_predictors())
 ```
 
-For the models, we use the the `r pkg(parsnip)` addin to create a set of model specifications: 
+For the models, we use the `r pkg(parsnip)` addin to create a set of model specifications: 
 
 ```{r workflow-sets-models}
 library(rules)
@@ -334,7 +334,7 @@ autoplot(grid_results, id = "Cubist", metric = "rmse")
 #| fig.width = 8, 
 #| fig.height = 4.5,
 #| fig.cap = "The `autoplot()` results for the Cubist model contained in the workflow set.",
-#| fig.alt = "The `autoplot()` results for the Cubist model contained in the workflow set. The visalization has a panel for each tuning pameter and shows performance versus the parameter values."
+#| fig.alt = "The `autoplot()` results for the Cubist model contained in the workflow set. The visualization has a panel for each tuning parameter and shows performance versus the parameter values."
 ```
 
 There are also methods for `collect_predictions()` and `collect_metrics()`. 
