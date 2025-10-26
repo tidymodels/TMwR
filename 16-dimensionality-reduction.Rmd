@@ -7,11 +7,10 @@ library(learntidymodels)
 library(baguette)
 library(discrim)
 library(uwot)
-library(doMC)
 library(patchwork)
 library(beans)
-
-registerDoMC(cores = parallel::detectCores())
+cores <- parallel::detectCores()
+mirai::daemons(cores)
 tidymodels_prefer()
 ```
 

@@ -7,17 +7,10 @@ library(baguette)
 library(rules)
 library(finetune)
 tidymodels_prefer()
-caching <- FALSE
+caching <- TRUE
 
 cores <- parallel::detectCores()
-if (!grepl("mingw32", R.Version()$platform)) {
-   library(doMC)
-   registerDoMC(cores = cores)
-} else {
-   library(doParallel)
-   cl <- makePSOCKcluster(cores)
-   registerDoParallel(cl)
-}
+mirai::daemons(cores)
 ```
 
 # Screening Many Models  {#workflow-sets}

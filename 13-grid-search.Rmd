@@ -8,9 +8,8 @@ library(av)
 library(lme4)
 data(cells)
 theme_set(theme_bw())
-
-library(doMC)
-registerDoMC(cores = parallel::detectCores(logical = TRUE))
+cores <- parallel::detectCores()
+mirai::daemons(cores)
 
 library(kableExtra)
 
@@ -532,7 +531,7 @@ In tidymodels, validation sets are treated as a single resample. In these cases,
 
 Figure \@ref(fig:distributed-tasks) illustrates the delegation of tasks to the workers in this scheme; the same example is used but with 10 workers.
 
-```{r distributed-tasks, echo = FALSE, message = FALSE, fig.height = 7}
+```{r distributed-tasks}
 #| echo = FALSE, 
 #| message = FALSE, 
 #| fig.height = 7, 

@@ -2,13 +2,13 @@
 knitr::opts_chunk$set(fig.path = "figures/")
 library(tidymodels)
 library(corrr)
-library(doMC)
 library(tidyposterior)
 library(rstanarm)
 library(kableExtra)
 library(tidyr)
 library(forcats)
-registerDoMC(cores = parallel::detectCores())
+cores <- parallel::detectCores()
+mirai::daemons(cores)
 
 tidymodels_prefer()
 

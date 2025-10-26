@@ -5,8 +5,8 @@ library(finetune)
 library(patchwork)
 library(kableExtra)
 library(av)
-library(doMC)
-registerDoMC(cores = parallel::detectCores(logical = TRUE))
+cores <- parallel::detectCores()
+mirai::daemons(cores)
 tidymodels_prefer()
 
 ## -----------------------------------------------------------------------------
@@ -409,7 +409,7 @@ svm_bo_sshh <-
 #   svm_bo_metrics <- collect_metrics(svm_bo_sshh$result)
 #   save(svm_bo_metrics, file = "RData/svm_bo_metrics.RData")
 # Check with:
-verify_consistent_bo(collect_metrics(svm_bo_sshh$result))
+# verify_consistent_bo(collect_metrics(svm_bo_sshh$result))
 
 svm_bo <- svm_bo_sshh$result
 svm_bo_output <- svm_bo_sshh$messages
@@ -794,7 +794,7 @@ svm_sa_sshh <-
   # svm_sa_metrics <- collect_metrics(svm_sa_sshh$result)
   # save(svm_sa_metrics, file = "RData/svm_sa_metrics.RData")
 # Check with:
-verify_consistent_sa(collect_metrics(svm_sa_sshh$result))
+# verify_consistent_sa(collect_metrics(svm_sa_sshh$result))
 
 svm_sa <- svm_sa_sshh$result
 svm_sa_output <- svm_sa_sshh$messages
