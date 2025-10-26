@@ -62,8 +62,8 @@ stacks() %>%
     buffer_1 = "",
     buffer_2 = "") %>% 
   slice_head(n = 6) %>% 
-  select(sample_num, CART_bagged_1_1, starts_with("MARS"), Cubist_1_01,
-         buffer_1, Cubist_1_18, buffer_2) %>% 
+select(sample_num, contains("_bagged"), starts_with("MARS"), Cubistpre0_mod01_post0,
+         buffer_1, Cubistpre0_mod25_post0, buffer_2) %>% 
   knitr::kable(
     digits = 2,
     align = rep("c", 8),

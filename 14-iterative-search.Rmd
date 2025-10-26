@@ -387,7 +387,7 @@ Numerous acquisition functions have been proposed and discussed; in tidymodels, 
 # This means that any changes to this chunk have to be made to the next chunk 
 # (where the code is shown and not executed).
 
-ctrl <- control_bayes(verbose = TRUE)
+ctrl <- control_bayes(verbose_iter = TRUE)
 ctrl$save_gp_scoring <- TRUE
 
 tune_bayes_sssshhh <- purrr::quietly(tune_bayes)
@@ -491,7 +491,7 @@ iter_2_text <-
     iter_1_imp &  !iter_2_imp ~ 
       paste0("the second iteration did not continue the trend with a suboptimal ROC value of ",
              round(iter_2_roc, 5), "."),
-    iter_1_imp &  !iter_2_imp ~ 
+    iter_1_imp &  iter_2_imp ~ 
       paste0("the second iteration further increased the outcome value (ROC = ",
              round(iter_2_roc, 5), ").") 
   )
@@ -529,29 +529,21 @@ The search process starts with an initial best value of `r round(best_init, 5)` 
 The log of the first two iterations, produced by the `verbose` option, was: 
 
 ```{r iterative-cells-bo-print-first, echo = FALSE}
-so_stop_index <- grep("Iteration 3", svm_bo_output) 
-if (length(so_stop_index) > 0) {
-  cat(svm_bo_output[1:(so_stop_index - 2)], sep = "")
+bo_stop_index <- grep("Iteration 3", svm_bo_output) 
+if (length(bo_stop_index) > 0) {
+  cat(svm_bo_output[1:(bo_stop_index - 2)], sep = "")
 }
 ```
 
 The search continues. `r improve_text` The best result occurred at iteration `r max(new_best_iter)` with an area under the ROC curve of `r round(best_bo, 5)`. 
 
-```{r iterative-cells-bo-print-impr, echo = FALSE}
-all_imp_index <- grep("♥", svm_bo_output)
-so_stop_index <- all_imp_index[length(all_imp_index)]
-if (length(all_imp_index) > 0) {
-  so_start_index <- so_stop_index - 10
-  cat(svm_bo_output[so_start_index:(so_stop_index + 1)], sep = "")
-}
-```
 `r last_bo_text` 
 
 ```{r iterative-cells-bo-print-last, echo = FALSE}
-so_start <- paste("Iteration", last_iter)
-so_start_index <- grep(so_start, svm_bo_output)
-if (length(so_start_index) > 0) {
-  cat(svm_bo_output[so_start_index:length(svm_bo_output)], sep = "")
+bo_start <- paste("Iteration", last_iter)
+bo_start_index <- grep(bo_start, svm_bo_output)
+if (length(bo_start_index) > 0) {
+  cat(svm_bo_output[bo_start_index:length(svm_bo_output)], sep = "")
 }
 ```
 
@@ -670,7 +662,7 @@ To illustrate, we'll use the two main `r pkg(glmnet)` tuning parameters:
 
 * The proportion of the lasso penalty (`mixture`). This is bounded at zero and one with no transformation.
 
-```{r iterative-neighborhood-calcs, echo = FALSE}
+```{r iterative-neighborhood-calcs}
 #| echo = FALSE, 
 #| message = FALSE, 
 #| warning = FALSE,
@@ -774,7 +766,7 @@ For the cell segmentation data, the syntax is very consistent with the previousl
 # This means that any changes to this chunk have to be made to the next chunk 
 # (where the code is shown and not executed).
 
-ctrl_sa <- control_sim_anneal(no_improve = 10L, verbose = TRUE, save_history = TRUE)
+ctrl_sa <- control_sim_anneal(no_improve = 10L, verbose_iter = TRUE, save_history = TRUE)
 
 tune_sim_anneal_sssshhh <- purrr::quietly(tune_sim_anneal)
 
@@ -886,9 +878,9 @@ The simulated annealing process discovered `r best_txt` `r restart_txt`
 The `verbose` option prints details of the search process. The output for the first five iterations was: 
 
 ```{r iterative-cells-sa-print-start, echo = FALSE}
-so_stop_index <- grep("^ 5", svm_sa_output)
+so_stop_index <- grep("^5", svm_sa_output)
 if (length(so_stop_index) > 0) {
-  cat(svm_sa_output[1:so_stop_index], sep = "\n")
+  cat(svm_sa_output[1:so_stop_index])
 }
 ```
 
@@ -900,7 +892,7 @@ last_sa_iter <- max(result_history$.iter)
 so_start_index <- grep(paste0("^", last_sa_iter - 10), svm_sa_output)
 so_stop_index  <- grep(paste0("^", last_sa_iter), svm_sa_output)
 if (length(so_stop_index) > 0) {
-  cat(svm_sa_output[so_start_index:so_stop_index], sep = "\n")
+  cat(svm_sa_output[so_start_index:so_stop_index], sep = "")
 }
 ```
 

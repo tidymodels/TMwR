@@ -17,6 +17,8 @@ lm_wflow <-
   lm_wflow %>% 
   remove_recipe() %>% 
   add_variables(outcome = Sale_Price, predictors = c(Longitude, Latitude))
+
+is_new_version <- function(x, ...) TRUE
 ```
 
 # Feature Engineering with recipes {#recipes}

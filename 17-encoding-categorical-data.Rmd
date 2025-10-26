@@ -265,7 +265,7 @@ hash_table <-
   distinct() %>%
   select(-Neighborhood) %>%
   map_dbl(sum) %>%
-  enframe() %>%
+  tibble::enframe() %>%
   count(value)
 
 hash_table %>%
