@@ -8,9 +8,6 @@ conflicted::conflict_prefer("explain", "lime")
 
 source("ames_snippets.R")
 
-ames_train <- ames_train %>%
-  mutate_if(is.integer, as.numeric)
-
 rf_model <- 
   rand_forest(trees = 1000) %>% 
   set_engine("ranger") %>% 
