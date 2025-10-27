@@ -495,7 +495,7 @@ extract_parameter_set_dials(neural_net_spec)
 
 The results show a value of `nparam[+]`, indicating that the number of hidden units is a numeric parameter. 
 
-There is an optional identification argument that associates a name with the parameters. This can come in handy when the same kind of parameter is being tuned in different places. For example, with the Ames housing data from Section \@ref(resampling-summary), the recipe encoded both longitude and latitude with spline functions. If we want to tune the two spline functions to potentially have different levels of smoothness, we call `step_ns()` twice, once for each predictor. To make the parameters identifiable, the identification argument can take any character string: 
+There is an optional identification argument that associates a name with the parameters. This can come in handy when the same kind of parameter is being tuned in different places. For example, with the Ames housing data from Section \@ref(resampling-summary), the recipe encoded both longitude and latitude with spline functions. If we want to tune the two spline functions to potentially have different levels of smoothness, we call `step_spline_natural()` twice, once for each predictor. To make the parameters identifiable, the identification argument can take any character string: 
 
 ```{r tuning-id}
 ames_rec <- 
@@ -505,8 +505,8 @@ ames_rec <-
   step_other(Neighborhood, threshold = tune()) %>% 
   step_dummy(all_nominal_predictors()) %>% 
   step_interact( ~ Gr_Liv_Area:starts_with("Bldg_Type_") ) %>% 
-  step_ns(Longitude, deg_free = tune("longitude df")) %>% 
-  step_ns(Latitude,  deg_free = tune("latitude df"))
+  step_spline_natural(Longitude, deg_free = tune("longitude df")) %>% 
+  step_spline_natural(Latitude,  deg_free = tune("latitude df"))
 
 recipes_param <- extract_parameter_set_dials(ames_rec)
 recipes_param

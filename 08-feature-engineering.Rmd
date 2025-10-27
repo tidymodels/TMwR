@@ -366,7 +366,7 @@ recipe(Sale_Price ~ Neighborhood + Gr_Liv_Area + Year_Built + Bldg_Type + Latitu
   step_other(Neighborhood, threshold = 0.01) %>% 
   step_dummy(all_nominal_predictors()) %>% 
   step_interact( ~ Gr_Liv_Area:starts_with("Bldg_Type_") ) %>% 
-  step_ns(Latitude, deg_free = 20)
+  step_spline_natural(Latitude, deg_free = 20)
 ```
 
 The user would need to determine if both neighborhood and latitude should be in the model since they both represent the same underlying data in different ways.
@@ -477,7 +477,7 @@ ames_rec <-
   step_other(Neighborhood, threshold = 0.01) %>% 
   step_dummy(all_nominal_predictors()) %>% 
   step_interact( ~ Gr_Liv_Area:starts_with("Bldg_Type_") ) %>% 
-  step_ns(Latitude, Longitude, deg_free = 20)
+  step_spline_natural(Latitude, Longitude, deg_free = 20)
 ```
 
 The `tidy()` method, when called with the recipe object, gives a summary of the recipe steps:
@@ -498,7 +498,7 @@ ames_rec <-
   step_other(Neighborhood, threshold = 0.01, id = "my_id") %>% 
   step_dummy(all_nominal_predictors()) %>% 
   step_interact( ~ Gr_Liv_Area:starts_with("Bldg_Type_") ) %>% 
-  step_ns(Latitude, Longitude, deg_free = 20)
+  step_spline_natural(Latitude, Longitude, deg_free = 20)
 ```
 
 We'll refit the workflow with this new recipe:
@@ -576,7 +576,7 @@ ames_rec <-
   step_other(Neighborhood, threshold = 0.01) %>% 
   step_dummy(all_nominal_predictors()) %>% 
   step_interact( ~ Gr_Liv_Area:starts_with("Bldg_Type_") ) %>% 
-  step_ns(Latitude, Longitude, deg_free = 20)
+  step_spline_natural(Latitude, Longitude, deg_free = 20)
   
 lm_model <- linear_reg() %>% set_engine("lm")
 

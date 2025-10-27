@@ -105,7 +105,7 @@ ames_glm <-
   step_lencode_glm(Neighborhood, outcome = vars(Sale_Price)) %>%
   step_dummy(all_nominal_predictors()) %>% 
   step_interact( ~ Gr_Liv_Area:starts_with("Bldg_Type_") ) %>% 
-  step_ns(Latitude, Longitude, deg_free = 20)
+  step_spline_natural(Latitude, Longitude, deg_free = 20)
 
 ames_glm
 ```
@@ -150,7 +150,7 @@ ames_mixed <-
   step_lencode_mixed(Neighborhood, outcome = vars(Sale_Price)) %>%
   step_dummy(all_nominal_predictors()) %>% 
   step_interact( ~ Gr_Liv_Area:starts_with("Bldg_Type_") ) %>% 
-  step_ns(Latitude, Longitude, deg_free = 20)
+  step_spline_natural(Latitude, Longitude, deg_free = 20)
 
 ames_mixed
 ```
@@ -250,7 +250,7 @@ ames_hash <-
   step_dummy_hash(Neighborhood, signed = FALSE, num_terms = 16L) %>%
   step_dummy(all_nominal_predictors()) %>% 
   step_interact( ~ Gr_Liv_Area:starts_with("Bldg_Type_") ) %>% 
-  step_ns(Latitude, Longitude, deg_free = 20)
+  step_spline_natural(Latitude, Longitude, deg_free = 20)
 
 ames_hash
 ```

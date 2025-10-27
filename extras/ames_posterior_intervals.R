@@ -53,7 +53,7 @@ interaction_rec <-
 
 spline_rec <-
   interaction_rec %>%
-  step_ns(Latitude, Longitude, deg_free = 50)
+  step_spline_natural(Latitude, Longitude, deg_free = 50)
 
 preproc <-
   list(

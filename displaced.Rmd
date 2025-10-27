@@ -74,7 +74,7 @@ ames_rec <-
   step_other(Neighborhood, threshold = 0.01) %>% 
   step_dummy(all_nominal_predictors()) %>% 
   step_interact( ~ Gr_Liv_Area:starts_with("Bldg_Type_") ) %>% 
-  step_ns(Latitude, Longitude, deg_free = 20)
+  step_spline_natural(Latitude, Longitude, deg_free = 20)
 ```
 
 To get the recipe ready, we prepare it, and then extract the training set using `bake()` with `new_data = NULL`. When calling `prep()`, if the `training` argument is not given, it uses the data that was initially given to the `recipe()` function call.
