@@ -1,6 +1,9 @@
 library(tidymodels)
 library(tictoc)
-library(doMC)
+library(mirai)
+
+cores <- parallel::detectCores()
+
 
 ## -----------------------------------------------------------------------------
 
@@ -12,9 +15,9 @@ roc_res <- metric_set(roc_auc)
 
 ## -----------------------------------------------------------------------------
 
-c5_spec <- 
-  boost_tree(trees = tune()) %>% 
-  set_engine("C5.0") %>% 
+c5_spec <-
+  boost_tree(trees = tune()) %>%
+  set_engine("C5.0") %>%
   set_mode("classification")
 
 tic()
@@ -30,7 +33,7 @@ toc()
 
 ## -----------------------------------------------------------------------------
 
-registerDoMC(cores = 10)
+daemons(cores)
 
 tic()
 set.seed(2)
@@ -48,4 +51,3 @@ toc()
 sessioninfo::session_info()
 
 q("no")
-

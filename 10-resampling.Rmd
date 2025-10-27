@@ -546,41 +546,10 @@ parallel::detectCores(logical = TRUE)
 
 The difference between these two values is related to the computer's processor. For example, most Intel processors use hyperthreading, which creates two virtual cores for each physical core. While these extra resources can improve performance, most of the speed-ups produced by parallel processing occur when processing uses fewer than the number of physical cores. 
 
-For `fit_resamples()` and other functions in `r pkg(tune)`, parallel processing occurs when the user registers a parallel backend package. These R packages define how to execute parallel processing. On Unix and macOS operating systems, one method of splitting computations is by forking threads. To enable this, load the `r pkg(doMC)` package and register the number of parallel cores with `r pkg(foreach)`: 
-
-```{r resampling-mc, eval = FALSE}
-# Unix and macOS only
-library(doMC)
-registerDoMC(cores = 2)
-
-# Now run fit_resamples()...
-```
-
-This instructs `fit_resamples()` to run half of the computations on each of two cores. To reset the computations to  sequential processing: 
-
-```{r resampling-seq, eval = FALSE}
-registerDoSEQ()
-```
-
-Alternatively, a different approach to parallelizing computations uses network sockets. The `r pkg(doParallel)` package enables this method (usable by all operating systems): 
-
-```{r resampling-psock, eval = FALSE}
-# All operating systems
-library(doParallel)
-
-# Create a cluster object and then register: 
-cl <- makePSOCKcluster(2)
-registerDoParallel(cl)
-
-# Now run fit_resamples()`...
-
-stopCluster(cl)
-```
-
-Another R package that facilitates parallel processing is the [`r pkg(future)`](https://future.futureverse.org/) package. Like `r pkg(foreach)`, it provides a framework for parallelism. This package is used in conjunction with `r pkg(foreach)` via the `r pkg(doFuture)` package. 
+For `fit_resamples()` and other functions in `r pkg(tune)`, parallel processing occurs using one of two R frameworks for parallel processing. The `r pkg(future)`  package can be used via its `plan()` function. For example, to use your computer with a local "cluster", running `plan(multisession, workers = X)` will automatically tell the tidymodels packages to use this framework to process work simultaneously (using `X` subprocesses). Revert to sequential processing by using `plan(sequential)`. Alternatively, the  `r pkg(mirai)` package can do the same, with a different syntax. Here, using the `daemons(n = X)` will enable parallel processing, and `daemons(0)` turns it off. Each of these frameworks can be used in conjunction with more complex schemes, such as utilizing an external high-performance computing platform or other setups. 
 
 :::rmdnote
-The R packages with parallel backends for `r pkg(foreach)` start with the prefix `"do"`. 
+Note that _hyperthreading_ is available for most Intel CPUs. This means that, even though your computer has `X` CPU cores, it is designed to do `2X` computations at once. While the speed-ups are larger for the first `X` cores, using the extra capacity can also decrease computational time. To determine how many physical cores are available, use `parallel::detectCores()`. To determine if there are extra "virtual" or "logical" cores to be used, there is an extra argument: `detectCores(logical = TRUE)`. 
 :::
 
 Parallel processing with the `r pkg(tune)` package tends to provide linear speed-ups for the first few cores. This means that, with two cores, the computations are twice as fast. Depending on the data and model type, the linear speed-up deteriorates after four to five cores. Using more cores will still reduce the time it takes to complete the task; there are just diminishing returns for the additional cores. 
