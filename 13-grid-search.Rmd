@@ -131,23 +131,23 @@ mlp_param %>%
 #| fig.height = 6, 
 #| fig.width = 6,
 #| echo = FALSE,
-#| fig.cap = "Three tuning parameters with 15 points generated at random",
+#| fig.cap = "Three tuning parameters with 20 points generated at random",
 #| fig.alt = "A scatter plot matrix for three tuning parameters with 20 points generated at random. There are significant gaps in the parameter space."
 ```
 
-A much better approach is to use a set of experimental designs called _space-filling designs_. While different design methods have slightly different goals, they generally find a configuration of points that cover the parameter space with the smallest chance of overlapping or redundant values. Examples of such designs are Latin hypercubes [@lhd], maximum entropy designs [@maxent], maximum projection designs [@maxproj], and others. See @santner2003design for an overview. 
+A much better approach is to use a set of experimental designs called _space-filling designs_ (SFDs). While different design methods have slightly different goals, they generally find a configuration of points that cover the parameter space with the smallest chance of overlapping or redundant values. Examples of such designs are Latin hypercubes [@lhd], maximum entropy designs [@maxent], maximum projection designs [@maxproj], and others. See @santner2003design for an overview. 
 
-The `r pkg(dials)` package contains functions for Latin hypercube and maximum entropy designs. As with `grid_random()`, the primary inputs are the number of parameter combinations and a parameter object. Let's compare a random design with a Latin hypercube design for 20 candidate parameter values in Figure \@ref(fig:space-filling-design). 
+The `r pkg(dials)` package contains functions for Latin hypercube and other SFDs. As with `grid_random()`, the primary inputs are the number of parameter combinations and a parameter object. Let's compare a random design with a uniform design for 20 candidate parameter values in Figure \@ref(fig:space-filling-design). 
 
 ```{r grid-sfd-compare, eval = FALSE}
 set.seed(1303)
 mlp_param %>% 
-  grid_latin_hypercube(size = 20, original = FALSE) %>% 
+  grid_space_filling(size = 20, type = "uniform", original = FALSE) %>% 
   ggplot(aes(x = .panel_x, y = .panel_y)) + 
   geom_point() +
   geom_blank() +
   facet_matrix(vars(hidden_units, penalty, epochs), layer.diag = 2) + 
-  labs(title = "Latin Hypercube design with 20 candidates")
+  labs(title = "Uniform design with 20 candidates")
 ```
 
 ```{r space-filling-design, ref.label = "grid-sfd-compare"}
@@ -155,12 +155,12 @@ mlp_param %>%
 #| fig.width = 6,
 #| echo = FALSE,
 #| fig.cap = "Three tuning parameters with 20 points generated using a space-filling design",
-#| fig.alt = "A scatter plot matrix for three tuning parameters with 15 points generated using a space-filling design. There are fewer gaps in the parameter space when compared to the random grid."
+#| fig.alt = "A scatter plot matrix for three tuning parameters with 20 points generated using a space-filling design. There are fewer gaps in the parameter space when compared to the random grid."
 ```
 
-While not perfect, this Latin hypercube design spaces the points farther away from one another and allows a better exploration of the hyperparameter space.  
+This Uniform design spaces the points farther away from one another and allows a better exploration of the hyperparameter space.  
 
-Space-filling designs can be very effective at representing the parameter space. The default design used by the `r pkg(tune)` package is the maximum entropy design. These tend to produce grids that cover the candidate space well and drastically increase the chances of finding good results. 
+Space-filling designs can be very effective at representing the parameter space. The default designs used by the `r pkg(tune)` package are non-random designs (like the Uniform) and Latin hypercube are the fallback in case no other optimized design is available. These tend to produce grids that cover the candidate space well and drastically increase the chances of finding good results. 
 
 ## Evaluating the Grid {#evaluating-grid}
 
