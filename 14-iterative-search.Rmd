@@ -328,7 +328,7 @@ When only considering the mean $R^2$ prediction, a parameter value of 0.10 is th
 
 ```{r iterative-gp-data-table-2, echo = FALSE, results = "asis"}
 small_pred %>% 
-  select(`Parameter Value` = x, Mean = .mean, `Std Dev` = .sd, `Expected Improvment` = exp_imp) %>% 
+  select(`Parameter Value` = x, Mean = .mean, `Std Dev` = .sd, `Expected Improvement` = exp_imp) %>% 
   as.data.frame() %>% 
   format(digits = 4, scientific = FALSE) %>% 
   kable(
