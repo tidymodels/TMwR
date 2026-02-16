@@ -672,7 +672,7 @@ To illustrate, we'll use the two main `r pkg(glmnet)` tuning parameters:
 
 * The proportion of the lasso penalty (`mixture`). This is bounded at zero and one with no transformation.
 
-```{r iterative-neighborhood-calcs, echo = FALSE}
+```{r iterative-neighborhood-calcs}
 #| echo = FALSE, 
 #| message = FALSE, 
 #| warning = FALSE,
