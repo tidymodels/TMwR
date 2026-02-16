@@ -3,10 +3,10 @@ knitr::opts_chunk$set(fig.path = "figures/")
 library(tidymodels)
 library(patchwork)
 library(ggforce)
-library(doMC)
-registerDoMC(cores = parallel::detectCores())
+library(mirai)
 
 tidymodels_prefer()
+daemons(parallel::detectCores())
 
 ## -----------------------------------------------------------------------------
 
@@ -132,10 +132,10 @@ library(tidymodels)
 tidymodels_prefer()
 
 llhood <- function(...) {
-  logistic_reg() %>% 
-    set_engine("glm", ...) %>% 
-    fit(Class ~ ., data = training_set) %>% 
-    glance() %>% 
+  logistic_reg() |> 
+    set_engine("glm", ...) |> 
+    fit(Class ~ ., data = training_set) |> 
+    glance() |> 
     select(logLik)
 }
 
@@ -143,8 +143,8 @@ bind_rows(
   llhood(),
   llhood(family = binomial(link = "probit")),
   llhood(family = binomial(link = "cloglog"))
-) %>% 
-  mutate(link = c("logit", "probit", "c-log-log"))  %>% 
+) |> 
+  mutate(link = c("logit", "probit", "c-log-log"))  |> 
   arrange(desc(logLik))
 ```
 
@@ -160,30 +160,30 @@ rs <- vfold_cv(training_set, repeats = 10)
 lloss <- function(...) {
   perf_meas <- metric_set(roc_auc, mn_log_loss)
     
-  logistic_reg() %>% 
-    set_engine("glm", ...) %>% 
-    fit_resamples(Class ~ A + B, rs, metrics = perf_meas) %>% 
-    collect_metrics(summarize = FALSE) %>%
+  logistic_reg() |> 
+    set_engine("glm", ...) |> 
+    fit_resamples(Class ~ A + B, rs, metrics = perf_meas) |> 
+    collect_metrics(summarize = FALSE) |>
     select(id, id2, .metric, .estimate)
 }
 
 resampled_res <- 
   bind_rows(
-    lloss()                                    %>% mutate(model = "logistic"),
-    lloss(family = binomial(link = "probit"))  %>% mutate(model = "probit"),
-    lloss(family = binomial(link = "cloglog")) %>% mutate(model = "c-log-log")     
-  ) %>%
+    lloss()                                    |> mutate(model = "logistic"),
+    lloss(family = binomial(link = "probit"))  |> mutate(model = "probit"),
+    lloss(family = binomial(link = "cloglog")) |> mutate(model = "c-log-log")     
+  ) |>
   # Convert log-loss to log-likelihood:
-  mutate(.estimate = ifelse(.metric == "mn_log_loss", -.estimate, .estimate)) %>% 
-  group_by(model, .metric) %>% 
+  mutate(.estimate = ifelse(.metric == "mn_log_loss", -.estimate, .estimate)) |> 
+  group_by(model, .metric) |> 
   summarize(
     mean = mean(.estimate, na.rm = TRUE),
     std_err = sd(.estimate, na.rm = TRUE) / sqrt(n()), 
     .groups = "drop"
   )
 
-resampled_res %>% 
-  filter(.metric == "mn_log_loss") %>% 
+resampled_res |> 
+  filter(.metric == "mn_log_loss") |> 
   ggplot(aes(x = mean, y = model)) + 
   geom_point() + 
   geom_errorbar(aes(xmin = mean - 1.64 * std_err, xmax = mean + 1.64 * std_err),
@@ -212,8 +212,8 @@ What about a different metric? We also calculated the area under the ROC curve f
 #| fig.height = 3,
 #| fig.cap = "Means and approximate 90% confidence intervals for the resampled area under the ROC curve with three different link functions",
 #| fig.alt = "Means and approximate 90% confidence intervals for the resampled area under the ROC curve with three different link functions. The logit link has the largest value, followed by the probit link. The confidence intervals show a large amount of overlap between the two methods."
-resampled_res %>% 
-  filter(.metric == "roc_auc") %>% 
+resampled_res |> 
+  filter(.metric == "roc_auc") |> 
   ggplot(aes(x = mean, y = model)) + 
   geom_point() + 
   geom_errorbar(aes(xmin = mean - 1.64 * std_err, xmax = mean+ 1.64 * std_err),
@@ -229,34 +229,34 @@ Given the overlap of the intervals, as well as the scale of the x-axis, any of t
 #| fig.alt = "The linear class boundary fits for three link functions. The lines have very similar slopes with the complementary log log having a slightly different intercept than the other two links."
 
 logit_pred <- 
-  logistic_reg() %>% 
-  set_engine("glm") %>% 
-  fit(Class ~ A + B, data = training_set) %>% 
-  predict(data_grid, type = "prob") %>% 
-  bind_cols(data_grid) %>% 
+  logistic_reg() |> 
+  set_engine("glm") |> 
+  fit(Class ~ A + B, data = training_set) |> 
+  predict(data_grid, type = "prob") |> 
+  bind_cols(data_grid) |> 
   mutate(link = "logit")
 
 probit_pred <- 
-  logistic_reg() %>% 
-  set_engine("glm", family = binomial(link = "probit")) %>% 
-  fit(Class ~ A + B, data = training_set) %>% 
-  predict(data_grid, type = "prob") %>% 
-  bind_cols(data_grid) %>% 
+  logistic_reg() |> 
+  set_engine("glm", family = binomial(link = "probit")) |> 
+  fit(Class ~ A + B, data = training_set) |> 
+  predict(data_grid, type = "prob") |> 
+  bind_cols(data_grid) |> 
   mutate(link = "probit")
 
 cloglog_pred <- 
-  logistic_reg() %>% 
-  set_engine("glm", family = binomial(link = "cloglog")) %>% 
-  fit(Class ~ A + B, data = training_set) %>% 
-  predict(data_grid, type = "prob") %>% 
-  bind_cols(data_grid) %>% 
+  logistic_reg() |> 
+  set_engine("glm", family = binomial(link = "cloglog")) |> 
+  fit(Class ~ A + B, data = training_set) |> 
+  predict(data_grid, type = "prob") |> 
+  bind_cols(data_grid) |> 
   mutate(link = "c-log-log")
 
 link_grids <- 
-  bind_rows(logit_pred, probit_pred, cloglog_pred) %>% 
+  bind_rows(logit_pred, probit_pred, cloglog_pred) |> 
   mutate(link = factor(link, levels = c("logit", "probit", "c-log-log")))
 
-link_grids %>% 
+link_grids |> 
   ggplot(aes(x = A, y = B)) + 
   geom_point(data = testing_set, aes(color = Class, pch = Class), 
              alpha = 0.7, show.legend = FALSE) + 
@@ -292,17 +292,17 @@ Chapters \@ref(splitting) and \@ref(resampling) demonstrated that simply repredi
 
 ```{r tuning-two-class-comps, include = FALSE}
 two_class_rec <-
- recipe(Class ~ ., data = two_class_dat) %>% 
+ recipe(Class ~ ., data = two_class_dat) |> 
  step_normalize(all_numeric_predictors()) 
 
 mlp_mod <- 
- mlp(hidden_units = tune(), epochs = 1000) %>% 
- set_engine("nnet") %>%
+ mlp(hidden_units = tune(), epochs = 1000) |> 
+ set_engine("nnet") |>
  set_mode("classification")
 
 mlp_wflow <- 
- workflow() %>% 
- add_recipe(two_class_rec) %>% 
+ workflow() |> 
+ add_recipe(two_class_rec) |> 
  add_model(mlp_mod)
 
 mlp_res <-
@@ -316,7 +316,7 @@ mlp_res <-
 for(i in 1:nrow(mlp_res)) {
   set.seed(27)
  tmp_mod <-
-  mlp_wflow %>% finalize_workflow(mlp_res %>% slice(i) %>% select(hidden_units)) %>%
+  mlp_wflow |> finalize_workflow(mlp_res |> slice(i) |> select(hidden_units)) |>
   fit(training_set)
  mlp_res$train[i] <-
   roc_auc_vec(training_set$Class, predict(tmp_mod, training_set, type = "prob")$.pred_Class1)
@@ -332,17 +332,17 @@ for(i in 1:nrow(mlp_res)) {
 #| fig.cap = "Class boundaries for three models with increasing numbers of hidden units. The boundaries are fit on the training set and shown for the training and test sets.",
 #| fig.alt = "Class boundaries for three models with increasing numbers of hidden units. The boundaries are fit on the training set and shown for the training and test sets. After a single hidden unit, the boundaries become wildly complex. The test set plots show that the more complex models do not conform to the data that was not used to fit the model."
 te_plot <- 
-  mlp_res %>% 
-  slice(c(1, 4, 20)) %>% 
+  mlp_res |> 
+  slice(c(1, 4, 20)) |> 
   mutate(
     probs = map(model, ~ bind_cols(data_grid, predict(.x, data_grid, type = "prob")))
-  ) %>% 
-  dplyr::select(hidden_units, probs) %>% 
-  unnest(cols = c(probs)) %>% 
+  ) |> 
+  dplyr::select(hidden_units, probs) |> 
+  unnest(cols = c(probs)) |> 
   mutate(
     label = paste(format(hidden_units), "units"),
     label = ifelse(label == " 1 units", " 1 unit", label)
-  ) %>% 
+  ) |> 
   ggplot(aes(x = A, y = B)) + 
   geom_point(data = testing_set, aes(color = Class, pch = Class), 
              alpha = 0.5, show.legend = FALSE) + 
@@ -354,17 +354,17 @@ te_plot <-
   labs(x = "Predictor A", y = "Predictor B")
 
 tr_plot <- 
-  mlp_res %>% 
-  slice(c(1, 4, 20)) %>% 
+  mlp_res |> 
+  slice(c(1, 4, 20)) |> 
   mutate(
     probs = map(model, ~ bind_cols(data_grid, predict(.x, data_grid, type = "prob")))
-  ) %>% 
-  dplyr::select(hidden_units, probs) %>% 
-  unnest(cols = c(probs)) %>% 
+  ) |> 
+  dplyr::select(hidden_units, probs) |> 
+  unnest(cols = c(probs)) |> 
   mutate(
     label = paste(format(hidden_units), "units"),
     label = ifelse(label == " 1 units", " 1 unit", label)
-  ) %>% 
+  ) |> 
   ggplot(aes(x = A, y = B)) +
   geom_point(data = training_set, aes(color = Class, pch = Class), 
              alpha = 0.5, show.legend = FALSE) + 
@@ -462,7 +462,7 @@ For `r pkg(parsnip)` model specifications, there are two kinds of parameter argu
 A secondary set of tuning parameters are *engine specific*. These are either infrequently optimized or are specific only to certain engines. Again using random forests as an example, the `r pkg(ranger)` package contains some arguments that are not used by other packages. One example is gain penalization, which regularizes the predictor selection in the tree induction process. This parameter can help modulate the trade-off between the number of predictors used in the ensemble and performance [@wundervald2020generalizing]. The name of this argument in  `ranger()` is `regularization.factor`. To specify a value via a `r pkg(parsnip)` model specification, it is added as a supplemental argument to `set_engine()`: 
 
 ```{r tuning-args, eval = FALSE}
-rand_forest(trees = 2000, min_n = 10) %>%                   # <- main arguments
+rand_forest(trees = 2000, min_n = 10) |>                   # <- main arguments
   set_engine("ranger", regularization.factor = 0.5)         # <- engine-specific
 ```
 
@@ -474,8 +474,8 @@ How can we signal to tidymodels functions which arguments should be optimized?  
 
 ```{r tuning-mlp-units}
 neural_net_spec <- 
-  mlp(hidden_units = tune()) %>%
-  set_mode("regression") %>%
+  mlp(hidden_units = tune()) |>
+  set_mode("regression") |>
   set_engine("keras")
 ```
 
@@ -500,12 +500,12 @@ There is an optional identification argument that associates a name with the par
 ```{r tuning-id}
 ames_rec <- 
   recipe(Sale_Price ~ Neighborhood + Gr_Liv_Area + Year_Built + Bldg_Type + 
-           Latitude + Longitude, data = ames_train)  %>%
-  step_log(Gr_Liv_Area, base = 10) %>% 
-  step_other(Neighborhood, threshold = tune()) %>% 
-  step_dummy(all_nominal_predictors()) %>% 
-  step_interact( ~ Gr_Liv_Area:starts_with("Bldg_Type_") ) %>% 
-  step_ns(Longitude, deg_free = tune("longitude df")) %>% 
+           Latitude + Longitude, data = ames_train)  |>
+  step_log(Gr_Liv_Area, base = 10) |> 
+  step_other(Neighborhood, threshold = tune()) |> 
+  step_dummy(all_nominal_predictors()) |> 
+  step_interact( ~ Gr_Liv_Area:starts_with("Bldg_Type_") ) |> 
+  step_ns(Longitude, deg_free = tune("longitude df")) |> 
   step_ns(Latitude,  deg_free = tune("latitude df"))
 
 recipes_param <- extract_parameter_set_dials(ames_rec)
@@ -518,9 +518,9 @@ When a recipe and model specification are combined using a workflow, both sets o
 
 ```{r tuning-mlp-rec}
 wflow_param <- 
-  workflow() %>% 
-  add_recipe(ames_rec) %>% 
-  add_model(neural_net_spec) %>% 
+  workflow() |> 
+  add_recipe(ames_rec) |> 
+  add_model(neural_net_spec) |> 
   extract_parameter_set_dials()
 wflow_param
 ```
@@ -546,13 +546,13 @@ The `r pkg(dials)` package also has a convenience function for extracting a part
 
 ```{r tuning-extract}
 # identify the parameter using the id value:
-wflow_param %>% extract_parameter_dials("threshold")
+wflow_param |> extract_parameter_dials("threshold")
 ```
 
 Inside the parameter set, the range of the parameters can also be updated in place: 
 
 ```{r tuning-update}
-extract_parameter_set_dials(ames_rec) %>% 
+extract_parameter_set_dials(ames_rec) |> 
   update(threshold = threshold(c(0.8, 1.0)))
 ```
 
@@ -566,8 +566,8 @@ In some cases, it is easy to have reasonable defaults for the range of possible 
 
 ```{r tuning-rf}
 rf_spec <- 
-  rand_forest(mtry = tune()) %>% 
-  set_engine("ranger", regularization.factor = tune("regularization")) %>%
+  rand_forest(mtry = tune()) |> 
+  set_engine("ranger", regularization.factor = tune("regularization")) |>
   set_mode("regression")
 
 rf_param <- extract_parameter_set_dials(rf_spec)
@@ -577,7 +577,7 @@ rf_param
 Complete parameter objects have `[+]` in their summary; a value of `[?]` indicates that at least one end of the possible range is missing. There are two methods for handling this. The first is to use `update()`, to add a range based on what you know about the data dimensions:
 
 ```{r tuning-rfupdate}
-rf_param %>% 
+rf_param |> 
   update(mtry = mtry(c(1, 70)))
 ```
 
@@ -585,24 +585,24 @@ However, this approach might not work if a recipe is attached to a workflow that
 
 ```{r tuning-finalize}
 pca_rec <- 
-  recipe(Sale_Price ~ ., data = ames_train) %>% 
+  recipe(Sale_Price ~ ., data = ames_train) |> 
   # Select the square-footage predictors and extract their PCA components:
-  step_normalize(contains("SF")) %>% 
+  step_normalize(contains("SF")) |> 
   # Select the number of components needed to capture 95% of
   # the variance in the predictors. 
   step_pca(contains("SF"), threshold = .95)
   
 updated_param <- 
-  workflow() %>% 
-  add_model(rf_spec) %>% 
-  add_recipe(pca_rec) %>% 
-  extract_parameter_set_dials() %>% 
+  workflow() |> 
+  add_model(rf_spec) |> 
+  add_recipe(pca_rec) |> 
+  extract_parameter_set_dials() |> 
   finalize(ames_train)
 updated_param
-updated_param %>% extract_parameter_dials("mtry")
+updated_param |> extract_parameter_dials("mtry")
 ```
 
-When the recipe is prepared, the `finalize()` function learns to set the upper range of `mtry` to  `r updated_param %>% extract_parameter_dials("mtry") %>% range_get() %>% pluck("upper")` predictors. 
+When the recipe is prepared, the `finalize()` function learns to set the upper range of `mtry` to  `r updated_param |> extract_parameter_dials("mtry") |> range_get() |> pluck("upper")` predictors. 
 
 Additionally, the results of `extract_parameter_set_dials()` will include engine-specific parameters (if any). They are discovered in the same way as the main arguments and included in the parameter set. The `r pkg(dials)` package contains parameter functions for all potentially tunable engine-specific parameters: 
 
@@ -621,10 +621,10 @@ This is important to know, especially when altering the range. New range values 
 
 ```{r tuning-penalty-set}
 # correct method to have penalty values between 0.1 and 1.0
-penalty(c(-1, 0)) %>% value_sample(1000) %>% summary()
+penalty(c(-1, 0)) |> value_sample(1000) |> summary()
 
 # incorrect:
-penalty(c(0.1, 1.0)) %>% value_sample(1000) %>% summary()
+penalty(c(0.1, 1.0)) |> value_sample(1000) |> summary()
 ```
 
 The scale can be changed if desired with the `trans` argument. You can use natural units but the same range: 

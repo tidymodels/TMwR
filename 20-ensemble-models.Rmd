@@ -54,16 +54,16 @@ Simple validation sets can also be used with stacking since tidymodels considers
 For the concrete example, the training set used for model stacking has columns for all of the candidate tuning parameter results. Table \@ref(tab:ensemble-candidate-preds) presents the first six rows and selected columns.
 
 ```{r ensembles-data-example, echo = FALSE, results = "asis", warning = FALSE, message = FALSE}
-stacks() %>% 
-  add_candidates(grid_results) %>% 
-  as_tibble() %>% 
+stacks() |> 
+  add_candidates(grid_results) |> 
+  as_tibble() |> 
   mutate(
     sample_num = row_number(),
     buffer_1 = "",
-    buffer_2 = "") %>% 
-  slice_head(n = 6) %>% 
-  select(sample_num, CART_bagged_1_1, starts_with("MARS"), Cubist_1_01,
-         buffer_1, Cubist_1_18, buffer_2) %>% 
+    buffer_2 = "") |> 
+  slice_head(n = 6) |> 
+  select(sample_num, CART_bagged_0_0_0, starts_with("MARS"), Cubist_0_02_0,
+         buffer_1, Cubist_0_25_0, buffer_2) |> 
   knitr::kable(
     digits = 2,
     align = rep("c", 8),
@@ -71,9 +71,9 @@ stacks() %>%
                   "...", "Cubist 25", "..."),
     caption = "Predictions from candidate tuning parameter configurations.",
     label = "ensemble-candidate-preds"
-  ) %>% 
-  kable_styling("striped", full_width = TRUE) %>% 
-  add_header_above(c(" ", "Ensemble Candidate Predictions" = 7)) %>% 
+  ) |> 
+  kable_styling("striped", full_width = TRUE) |> 
+  add_header_above(c(" ", "Ensemble Candidate Predictions" = 7)) |> 
   row_spec(0, align = "c")
 ```
 
@@ -99,7 +99,7 @@ library(stacks)
 tidymodels_prefer()
 
 concrete_stack <- 
-  stacks() %>% 
+  stacks() |> 
   add_candidates(race_results)
 
 concrete_stack
@@ -219,13 +219,13 @@ all_members <-
   tibble(
     member = unname(unlist(ens$cols_map)), 
     obj = rep(names(ens$cols_map), map_int(ens$cols_map, length))
-  ) %>% 
-  inner_join(res, by = "member") %>% 
+  ) |> 
+  inner_join(res, by = "member") |> 
   arrange(type, member)
 
 glmn_int <- 
-  tidy(ens$coefs) %>% 
-  filter(term == "(Intercept)") %>% 
+  tidy(ens$coefs) |> 
+  filter(term == "(Intercept)") |> 
   mutate(estimate = format(estimate, digits = 2))
 
 config_label <- function(x) {
@@ -242,10 +242,10 @@ config_label <- function(x) {
   select(x, term, weight)
 }
 tmp <- 
-  all_members %>% 
-  group_nest(obj, keep = TRUE) %>% 
-  mutate(data = map(data, ~ config_label(.x))) %>% 
-  unnest(cols = "data") %>% 
+  all_members |> 
+  group_nest(obj, keep = TRUE) |> 
+  mutate(data = map(data, ~ config_label(.x))) |> 
+  unnest(cols = "data") |> 
   arrange(desc(weight))
 
 eqn <- paste(c(glmn_int$estimate, tmp$term), collapse = " \\\\\n\t+&")
@@ -265,11 +265,11 @@ The `r num_coefs`  models to be fit are:
 ```{r ensembles-show-members, echo = FALSE, results = "asis"}
 param_filter <- function(object, config, stack_obj) {
   res <- 
-    collect_parameters(stack_obj, candidates = object) %>% 
-    dplyr::filter(member == config) %>% 
+    collect_parameters(stack_obj, candidates = object) |> 
+    dplyr::filter(member == config) |> 
     dplyr::select(-coef)
   
-  params <- res %>% dplyr::select(-member)
+  params <- res |> dplyr::select(-member)
   param_labs <- map_chr(names(params), name_to_label)
   if (length(param_labs) > 0) {
     names(params) <- param_labs
@@ -304,10 +304,10 @@ config_text <- function(x) {
   res
 }
 get_configs <- function(x) {
-  dplyr::group_nest(x, type) %>% 
-    dplyr::mutate(confg = purrr::map(data, config_text)) %>% 
-    dplyr::select(confg) %>% 
-    tidyr::unnest(cols = c(confg)) %>% 
+  dplyr::group_nest(x, type) |> 
+    dplyr::mutate(confg = purrr::map(data, config_text)) |> 
+    dplyr::select(confg) |> 
+    tidyr::unnest(cols = c(confg)) |> 
     purrr::pluck("confg")
 }
 
@@ -318,7 +318,7 @@ param <- gsub("number of observations sampled", "proportion of observations samp
 cat(param, sep = "")
 
 ens_rmse <- dplyr::filter(ens$metrics, penalty == ens$penalty$penalty & .metric == "rmse")$mean
-boost_rmse <- collect_metrics(boosting_test_results) %>% dplyr::filter(.metric == "rmse")
+boost_rmse <- collect_metrics(boosting_test_results) |> dplyr::filter(.metric == "rmse")
 ```
 
 The `r pkg(stacks)` package has a function, `fit_members()`, that trains and returns these models: 
@@ -336,10 +336,10 @@ Since the blending process used resampling, we can estimate that the ensemble wi
 ```{r ensembles-test-set}
 reg_metrics <- metric_set(rmse, rsq)
 ens_test_pred <- 
-  predict(ens, concrete_test) %>% 
+  predict(ens, concrete_test) |> 
   bind_cols(concrete_test)
 
-ens_test_pred %>% 
+ens_test_pred |> 
   reg_metrics(compressive_strength, .pred)
 ```
 

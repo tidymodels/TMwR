@@ -8,20 +8,20 @@ registerDoParallel(cl)
 options(width = 120)
 
 data(cells)
-cells <- cells %>% select(-case)
+cells <- cells |> select(-case)
 
 set.seed(6735)
 folds <- vfold_cv(cells, v = 5)
 
 
 cell_rec <-
-  recipe(class ~ ., data = cells) %>%
-  step_normalize(all_numeric_predictors()) %>%
+  recipe(class ~ ., data = cells) |>
+  step_normalize(all_numeric_predictors()) |>
   step_ica(all_numeric_predictors(), num_comp = 30)
 
 rf_mod <-
-  rand_forest(mtry = tune(), min_n = tune(), trees = 50) %>%
-  set_engine("ranger") %>%
+  rand_forest(mtry = tune(), min_n = tune(), trees = 50) |>
+  set_engine("ranger") |>
   set_mode("classification")
 
 # Use a space-filling design with 7 points
@@ -40,14 +40,14 @@ for (i in f_names) {
 
 
 resamples_times <-
-  timings %>%
+  timings |>
   mutate(
     label = ifelse(mod_iter == 0, "preprocess", "model"),
     label = factor(label, levels = rev(c("preprocess", "model"))),
     pid = factor(format(pid)),
     pid = paste("worker", format(as.numeric(pid))),
     id_alt = paste(id, "/", pid)
-  ) %>%
+  ) |>
   arrange(pid, id, label)
 
 

@@ -79,7 +79,7 @@ One important feature in the tibble produced by `r pkg(rsample)` is that the `sp
 
 ### Design for the pipe and functional programming
 
-The `r pkg(magrittr)` pipe operator (`%>%`) is a tool for chaining together a sequence of R functions.^[In R 4.1.0, a native pipe operator `|>` was introduced as well. In this book, we use the `r pkg(magrittr)` pipe since users on older versions of R will not have the new native pipe.] To demonstrate, consider the following commands that sort a data frame and then retain the first 10 rows:
+The `r pkg(magrittr)` pipe operator (`|>`) is a tool for chaining together a sequence of R functions.^[In R 4.1.0, a native pipe operator `|>` was introduced as well. In this book, we use the `r pkg(magrittr)` pipe since users on older versions of R will not have the new native pipe.] To demonstrate, consider the following commands that sort a data frame and then retain the first 10 rows:
 
 ```{r tidyverse-no-pipe, eval = FALSE}
 small_mtcars <- arrange(mtcars, gear)
@@ -93,8 +93,8 @@ The pipe operator substitutes the value of the left-hand side of the operator as
 
 ```{r tidyverse-pipe, eval = FALSE}
 small_mtcars <- 
-  mtcars %>% 
-  arrange(gear) %>% 
+  mtcars |> 
+  arrange(gear) |> 
   slice(1:10)
 ```
 
@@ -172,7 +172,7 @@ head(log_ratios)
 The `map()` functions also allow for temporary, anonymous functions defined using the tilde character. The argument values are `.x` and `.y` for `map2()`:
 
 ```{r map2-inline}
-map2_dbl(mtcars$mpg, mtcars$wt, ~ log(.x/.y)) %>% 
+map2_dbl(mtcars$mpg, mtcars$wt, ~ log(.x/.y)) |> 
   head()
 ```
 
@@ -228,8 +228,8 @@ train_cols <-
     rides = col_double()
   )
 num_combos <- 
-  read_delim(url, delim = ",", col_types = train_cols) %>% 
-  distinct(date, stationname) %>% 
+  read_delim(url, delim = ",", col_types = train_cols) |> 
+  distinct(date, stationname) |> 
   nrow()
 ```
 
@@ -261,14 +261,14 @@ url <- "https://data.cityofchicago.org/api/views/5neh-572f/rows.csv?accessType=D
 
 all_stations <- 
   # Step 1: Read in the data.
-  read_csv(url) %>% 
+  read_csv(url) |> 
   # Step 2: filter columns and rename stationname
-  dplyr::select(station = stationname, date, rides) %>% 
+  dplyr::select(station = stationname, date, rides) |> 
   # Step 3: Convert the character date field to a date encoding.
   # Also, put the data in units of 1K rides
-  mutate(date = mdy(date), rides = rides / 1000) %>% 
+  mutate(date = mdy(date), rides = rides / 1000) |> 
   # Step 4: Summarize the multiple records using the maximum.
-  group_by(date, station) %>% 
+  group_by(date, station) |> 
   summarize(rides = max(rides), .groups = "drop")
 ```
 
@@ -276,4 +276,4 @@ This pipeline of operations illustrates why the tidyverse is popular. A series o
 
 ## Chapter Summary 
 
-This chapter introduced the tidyverse, with a focus on applications for modeling and how tidyverse design principles inform the tidymodels framework. Think of the tidymodels framework as applying tidyverse principles to the domain of building models. We described differences in conventions between the tidyverse and base R, and introduced two important components of the tidyverse system, tibbles and the pipe operator `%>%`. Data cleaning and processing can feel mundane at times, but these tasks are important for modeling in the real world; we illustrated how to use tibbles, the pipe, and tidyverse functions in an example data import and processing exercise.  
+This chapter introduced the tidyverse, with a focus on applications for modeling and how tidyverse design principles inform the tidymodels framework. Think of the tidymodels framework as applying tidyverse principles to the domain of building models. We described differences in conventions between the tidyverse and base R, and introduced two important components of the tidyverse system, tibbles and the pipe operator `|>`. Data cleaning and processing can feel mundane at times, but these tasks are important for modeling in the real world; we illustrated how to use tibbles, the pipe, and tidyverse functions in an example data import and processing exercise.  

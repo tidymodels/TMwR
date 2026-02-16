@@ -32,7 +32,7 @@ The third phase of recipe usage is to apply the preprocessing operations to a da
 
 ```{r engineering-ames-test-bake}
 test_ex <- bake(simple_ames, new_data = ames_test)
-names(test_ex) %>% head()
+names(test_ex) |> head()
 ```
 
 Note the dummy variable columns starting with `Neighborhood_`. The `bake()` function can also take selectors so that, if we only wanted the neighborhood results, we could use:
@@ -44,8 +44,8 @@ bake(simple_ames, ames_test, starts_with("Neighborhood_"))
 To get the processed version of the training set, we could use `bake()` and pass in the argument `ames_train` but, as previously mentioned, this would repeat calculations that have already been executed. Instead, we can use `new_data = NULL` to quickly return the training set (if `retain = TRUE` was used). It accesses the data component of the prepared recipe. 
 
 ```{r engineering-ames-null}
-bake(simple_ames, new_data = NULL) %>% nrow()
-ames_train %>% nrow()
+bake(simple_ames, new_data = NULL) |> nrow()
+ames_train |> nrow()
 ```
 
 To reiterate, using a recipe is a three phase process summarized as:
@@ -69,11 +69,11 @@ Let's use a slightly augmented version of the last recipe, now including longitu
 ```{r engineering-lm-recipe-manual}
 ames_rec <- 
   recipe(Sale_Price ~ Neighborhood + Gr_Liv_Area + Year_Built + Bldg_Type + 
-           Latitude + Longitude, data = ames_train) %>%
-  step_log(Gr_Liv_Area, base = 10) %>% 
-  step_other(Neighborhood, threshold = 0.01) %>% 
-  step_dummy(all_nominal_predictors()) %>% 
-  step_interact( ~ Gr_Liv_Area:starts_with("Bldg_Type_") ) %>% 
+           Latitude + Longitude, data = ames_train) |>
+  step_log(Gr_Liv_Area, base = 10) |> 
+  step_other(Neighborhood, threshold = 0.01) |> 
+  step_dummy(all_nominal_predictors()) |> 
+  step_interact( ~ Gr_Liv_Area:starts_with("Bldg_Type_") ) |> 
   step_ns(Latitude, Longitude, deg_free = 20)
 ```
 
@@ -104,7 +104,7 @@ tidy(lm_fit)
 To make predictions on the test set, we use the standard syntax:
 
 ```{r engineering-lm-ames-pred}
-predict(lm_fit, ames_test_prepped %>% head())
+predict(lm_fit, ames_test_prepped |> head())
 ```
 
 

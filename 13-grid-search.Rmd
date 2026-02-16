@@ -6,14 +6,12 @@ library(ggforce)
 library(stringr)
 library(av)
 library(lme4)
-data(cells)
-theme_set(theme_bw())
-
-library(doMC)
-registerDoMC(cores = parallel::detectCores(logical = TRUE))
-
+library(mirai)
 library(kableExtra)
 
+data(cells)
+theme_set(theme_bw())
+daemons(parallel::detectCores())
 tidymodels_prefer()
 
 ## -----------------------------------------------------------------------------
@@ -51,8 +49,8 @@ library(tidymodels)
 tidymodels_prefer()
 
 mlp_spec <- 
-  mlp(hidden_units = tune(), penalty = tune(), epochs = tune()) %>% 
-  set_engine("nnet", trace = 0) %>% 
+  mlp(hidden_units = tune(), penalty = tune(), epochs = tune()) |> 
+  set_engine("nnet", trace = 0) |> 
   set_mode("classification")
 ```
 
@@ -60,9 +58,9 @@ The argument `trace = 0` prevents extra logging of the training process. As show
 
 ```{r grid-mlp-param}
 mlp_param <- extract_parameter_set_dials(mlp_spec)
-mlp_param %>% extract_parameter_dials("hidden_units")
-mlp_param %>% extract_parameter_dials("penalty")
-mlp_param %>% extract_parameter_dials("epochs")
+mlp_param |> extract_parameter_dials("hidden_units")
+mlp_param |> extract_parameter_dials("penalty")
+mlp_param |> extract_parameter_dials("epochs")
 ```
 
 This output indicates that the parameter objects are complete and prints their default ranges. These values will be used to demonstrate how to create different types of parameter grids. 
@@ -88,7 +86,7 @@ grid_regular(mlp_param, levels = 2)
 The `levels` argument is the number of levels per parameter to create. It can also take a named vector of values: 
 
 ```{r grid-reg-lvls}
-mlp_param %>% 
+mlp_param |> 
   grid_regular(levels = c(hidden_units = 3, penalty = 2, epochs = 2))
 ```
 
@@ -106,8 +104,8 @@ There are several options for creating non-regular grids. The first is to use ra
 
 ```{r grid-rand}
 set.seed(1301)
-mlp_param %>% 
-  grid_random(size = 1000) %>% # 'size' is the number of combinations
+mlp_param |> 
+  grid_random(size = 1000) |> # 'size' is the number of combinations
   summary()
 ```
 
@@ -118,9 +116,9 @@ The issue with random grids is that, with small-to-medium grids, random values c
 ```{r grid-random-matrix, eval = FALSE}
 library(ggforce)
 set.seed(1302)
-mlp_param %>% 
+mlp_param |> 
   # The 'original = FALSE' option keeps penalty in log10 units
-  grid_random(size = 20, original = FALSE) %>% 
+  grid_random(size = 20, original = FALSE) |> 
   ggplot(aes(x = .panel_x, y = .panel_y)) + 
   geom_point() +
   geom_blank() +
@@ -142,8 +140,8 @@ The `r pkg(dials)` package contains functions for Latin hypercube and maximum en
 
 ```{r grid-sfd-compare, eval = FALSE}
 set.seed(1303)
-mlp_param %>% 
-  grid_space_filling(type = "latin_hypercube", size = 20, original = FALSE) %>% 
+mlp_param |> 
+  grid_space_filling(type = "latin_hypercube", size = 20, original = FALSE) |> 
   ggplot(aes(x = .panel_x, y = .panel_y)) + 
   geom_point() +
   geom_blank() +
@@ -178,7 +176,7 @@ The data are included in the `r pkg(modeldata)` package. Let's remove one column
 ```{r grid-cells}
 library(tidymodels)
 data(cells)
-cells <- cells %>% select(-case)
+cells <- cells |> select(-case)
 ```
 
 Given the dimensions of the data, we can compute performance metrics using 10-fold cross-validation:
@@ -198,15 +196,15 @@ Many of the predictors have skewed distributions. Since PCA is variance based, e
 
 ```{r grid-cells-objects}
 mlp_rec <-
-  recipe(class ~ ., data = cells) %>%
-  step_YeoJohnson(all_numeric_predictors()) %>% 
-  step_normalize(all_numeric_predictors()) %>% 
-  step_pca(all_numeric_predictors(), num_comp = tune()) %>% 
+  recipe(class ~ ., data = cells) |>
+  step_YeoJohnson(all_numeric_predictors()) |> 
+  step_normalize(all_numeric_predictors()) |> 
+  step_pca(all_numeric_predictors(), num_comp = tune()) |> 
   step_normalize(all_numeric_predictors())
 
 mlp_wflow <- 
-  workflow() %>% 
-  add_model(mlp_spec) %>% 
+  workflow() |> 
+  add_model(mlp_spec) |> 
   add_recipe(mlp_rec)
 ```
 
@@ -214,8 +212,8 @@ Let's create a parameter object `mlp_param` to adjust a few of the default range
 
 ```{r grid-cells-workflow}
 mlp_param <- 
-  mlp_wflow %>% 
-  extract_parameter_set_dials() %>% 
+  mlp_wflow |> 
+  extract_parameter_set_dials() |> 
   update(
     epochs = epochs(c(50, 200)),
     num_comp = num_comp(c(0, 40))
@@ -240,10 +238,10 @@ To start, let's evaluate a regular grid with three levels across the resamples:
 roc_res <- metric_set(roc_auc)
 set.seed(1305)
 mlp_reg_tune <-
-  mlp_wflow %>%
+  mlp_wflow |>
   tune_grid(
     cell_folds,
-    grid = mlp_param %>% grid_regular(levels = 3),
+    grid = mlp_param |> grid_regular(levels = 3),
     metrics = roc_res
   )
 mlp_reg_tune
@@ -267,7 +265,7 @@ autoplot(mlp_reg_tune) +
 For these data, the amount of penalization has the largest impact on the area under the ROC curve. The number of epochs doesn't appear to have a pronounced effect on performance. The change in the number of hidden units appears to matter most when the amount of regularization is low (and harms performance). There are several parameter configurations that have roughly equivalent performance, as seen using the function `show_best()`: 
 
 ```{r grid-cells-reg-best}
-show_best(mlp_reg_tune) %>% select(-.estimator)
+show_best(mlp_reg_tune) |> select(-.estimator)
 ```
 
 Based on these results, it would make sense to conduct another run of grid search with larger values of the weight decay penalty. 
@@ -277,7 +275,7 @@ To use a space-filling design, either the `grid` argument can be given an intege
 ```{r grid-cells-sdf}
 set.seed(1306)
 mlp_sfd_tune <-
-  mlp_wflow %>%
+  mlp_wflow |>
   tune_grid(
     cell_folds,
     grid = 20,
@@ -308,7 +306,7 @@ The penalty parameter appears to result in better performance with smaller amoun
 As with the regular grid, `show_best()` can report on the numerically best results: 
 
 ```{r grid-cells-sdf-best}
-show_best(mlp_sfd_tune) %>% select(-.estimator)
+show_best(mlp_sfd_tune) |> select(-.estimator)
 ```
 
 Generally, it is a good idea to evaluate the models over multiple metrics so that different aspects of the model fit are taken into account. Also, it often makes sense to choose a slightly suboptimal parameter combination that is associated with a simpler model. For this model, simplicity corresponds to larger penalty values and/or fewer hidden units.  
@@ -342,7 +340,7 @@ logistic_param <-
   )
 
 final_mlp_wflow <- 
-  mlp_wflow %>% 
+  mlp_wflow |> 
   finalize_workflow(logistic_param)
 final_mlp_wflow
 ```
@@ -351,7 +349,7 @@ No more values of `tune()` are included in this finalized workflow. Now the mode
 
 ```{r grid-final-model}
 final_mlp_fit <- 
-  final_mlp_wflow %>% 
+  final_mlp_wflow |> 
   fit(cells)
 ```
 
@@ -381,26 +379,26 @@ The resulting code is as follows:
 ```{r models-use-models-res, eval = FALSE}
 xgboost_recipe <- 
   recipe(formula = Sale_Price ~ Neighborhood + Gr_Liv_Area + Year_Built + Bldg_Type + 
-    Latitude + Longitude, data = ames_train) %>% 
-  step_novel(all_nominal_predictors()) %>% 
+    Latitude + Longitude, data = ames_train) |> 
+  step_novel(all_nominal_predictors()) |> 
   ## This model requires the predictors to be numeric. The most common 
   ## method to convert qualitative predictors to numeric is to create 
   ## binary indicator variables (aka dummy variables) from these 
   ## predictors. However, for this model, binary indicator variables can be 
   ## made for each of the levels of the factors (known as 'one-hot 
   ## encoding'). 
-  step_dummy(all_nominal_predictors(), one_hot = TRUE) %>% 
+  step_dummy(all_nominal_predictors(), one_hot = TRUE) |> 
   step_zv(all_predictors()) 
 
 xgboost_spec <- 
   boost_tree(trees = tune(), min_n = tune(), tree_depth = tune(), learn_rate = tune(), 
-    loss_reduction = tune(), sample_size = tune()) %>% 
-  set_mode("regression") %>% 
+    loss_reduction = tune(), sample_size = tune()) |> 
+  set_mode("regression") |> 
   set_engine("xgboost") 
 
 xgboost_workflow <- 
-  workflow() %>% 
-  add_recipe(xgboost_recipe) %>% 
+  workflow() |> 
+  add_recipe(xgboost_recipe) |> 
   add_model(xgboost_spec) 
 
 set.seed(69305)
@@ -441,12 +439,12 @@ For example, if a boosted C5.0 classification model [@apm] was fit to the cell d
 
 ```{r grid-c5, eval = FALSE}
 c5_spec <- 
-  boost_tree(trees = tune()) %>% 
-  set_engine("C5.0") %>% 
+  boost_tree(trees = tune()) |> 
+  set_engine("C5.0") |> 
   set_mode("classification")
 
 set.seed(1307)
-c5_spec %>%
+c5_spec |>
   tune_grid(
     class ~ .,
     resamples = cell_folds,
@@ -500,8 +498,8 @@ To illustrate how the parallel processing works, we'll use a case where there ar
 #| fig.alt = "A diagram of the worker processes when parallel processing matches resamples to a specific worker process. After the preprocess operations are finished, each model fit is executed on the same worker process."
 load("extras/parallel_times/resamples_times.RData")
 
-resamples_times %>%
-  dplyr::rename(operation = label) %>% 
+resamples_times |>
+  dplyr::rename(operation = label) |> 
   ggplot(aes(y = id_alt, x = duration, fill = operation)) +
   geom_bar(stat = "identity", color = "black") +
   labs(y = NULL, x = "Elapsed Time") + 
@@ -543,25 +541,25 @@ Figure \@ref(fig:distributed-tasks) illustrates the delegation of tasks to the w
 load("extras/parallel_times/everything_times.RData")
 
 repeats <- 
-  everything_times %>% 
-  dplyr::filter(id == "Fold1" & event == "preproc") %>% 
+  everything_times |> 
+  dplyr::filter(id == "Fold1" & event == "preproc") |> 
   nrow()
 
 everything_times <- 
- everything_times %>%
- dplyr::rename(operation = label) %>% 
- mutate(operation = as.character(operation)) %>% 
- arrange(pid, id, operation) %>% 
+ everything_times |>
+ dplyr::rename(operation = label) |> 
+ mutate(operation = as.character(operation)) |> 
+ arrange(pid, id, operation) |> 
  select(pid, id, operation, duration)
 
 start_stop <- 
- everything_times %>%
+ everything_times |>
  pivot_wider(
   id_cols = c(pid, id),
   names_from = "operation",
   values_from = "duration"
- ) %>% 
- group_by(pid) %>% 
+ ) |> 
+ group_by(pid) |> 
  mutate(
   total = model + preprocess,
   .stop_mod = cumsum(total),
@@ -570,44 +568,44 @@ start_stop <-
   .start_pre = cumsum(prev),
   .stop_pre = .start_pre + preprocess,
   .start_mod = .stop_pre
- ) %>% 
- ungroup()  %>% 
+ ) |> 
+ ungroup()  |> 
  select(pid, id, .start_pre, .stop_pre, .start_mod, .stop_mod) 
 
 starts <- 
- start_stop %>% 
- select(pid, id, contains("start")) %>% 
+ start_stop |> 
+ select(pid, id, contains("start")) |> 
  pivot_longer(
   cols = c(.start_pre, .start_mod),
   values_to = ".start"
- ) %>% 
+ ) |> 
  mutate(
   operation = ifelse(grepl("mod$", name), "model", "preprocess")
- ) %>% 
+ ) |> 
  select(-name)
 
 stops <- 
- start_stop %>% 
- select(pid, id, contains("stop")) %>% 
+ start_stop |> 
+ select(pid, id, contains("stop")) |> 
  pivot_longer(
   cols = c(.stop_pre, .stop_mod),
   values_to = ".stop"
- ) %>% 
+ ) |> 
  mutate(
   operation = ifelse(grepl("mod$", name), "model", "preprocess")
- ) %>% 
+ ) |> 
  select(-name)
 
 id_offset <- 0.4
 start_stop_dat <- 
- full_join(starts, stops, by = c("pid", "id", "operation")) %>% 
+ full_join(starts, stops, by = c("pid", "id", "operation")) |> 
  mutate(
   id_num = as.numeric(factor(id)),
   id_start = id_num - id_offset,
   id_stop  = id_num + id_offset
   )
 
-start_stop_dat %>% 
+start_stop_dat |> 
  ggplot(aes(y = id_num, x = .start)) +
  geom_rect(
   aes(
@@ -717,7 +715,7 @@ If we define a variable to use as a model parameter and then pass it to a functi
 
 ```{r grid-spec-global}
 coef_penalty <- 0.1
-spec <- linear_reg(penalty = coef_penalty) %>% set_engine("glmnet")
+spec <- linear_reg(penalty = coef_penalty) |> set_engine("glmnet")
 spec
 ```
 
@@ -736,7 +734,7 @@ When such a model is evaluated with parallel workers, it may fail. Depending on 
 When writing code that will be run in parallel, it is a good idea to insert the actual data into the objects rather than the reference to the object. The `r pkg(rlang)` and `r pkg(dplyr)` packages can be very helpful for this. For example, the `!!` operator can splice a single value into an object: 
 
 ```{r grid-spec-bang-bang}
-spec <- linear_reg(penalty = !!coef_penalty) %>% set_engine("glmnet")
+spec <- linear_reg(penalty = !!coef_penalty) |> set_engine("glmnet")
 spec$args$penalty
 ```
 
@@ -745,7 +743,7 @@ Now the output is `^0.1`, indicating that the value is there instead of the refe
 ```{r grid-spec-bang-bang-bang}
 mcmc_args <- list(chains = 3, iter = 1000, cores = 3)
 
-linear_reg() %>% set_engine("stan", !!!mcmc_args)
+linear_reg() |> set_engine("stan", !!!mcmc_args)
 ```
 
 Recipe selectors are another place where you might want access to global variables. Suppose you have a recipe step that should use all of the predictors in the cell data that were measured using the second optical channel. We can create a vector of these column names: 
@@ -760,11 +758,11 @@ We could hard-code these into a recipe step but it would be better to reference 
 
 ```{r grid-ch-2-rec}
 # Still uses a reference to global data (~_~;)
-recipe(class ~ ., data = cells) %>% 
+recipe(class ~ ., data = cells) |> 
   step_spatialsign(all_of(ch_2_vars))
 
 # Inserts the values into the step ヽ(•‿•)ノ
-recipe(class ~ ., data = cells) %>% 
+recipe(class ~ ., data = cells) |> 
   step_spatialsign(!!!ch_2_vars)
 ```
 
@@ -779,7 +777,7 @@ In machine learning, the set of techniques called _racing methods_ provide a sim
 ```{r grid-cells-race, include = FALSE}
 set.seed(1308)
 mlp_sfd_race <-
-  mlp_wflow %>%
+  mlp_wflow |>
   tune_race_anova(
     cell_folds,
     grid = 20,
@@ -788,8 +786,8 @@ mlp_sfd_race <-
     metrics = roc_res
   )
 remaining <-
-  mlp_sfd_race %>% 
-  collect_metrics() %>% 
+  mlp_sfd_race |> 
+  collect_metrics() |> 
   dplyr::filter(n == 10)
 ```
 
@@ -810,7 +808,7 @@ full_att <- attributes(mlp_sfd_race)
 race_details <- NULL
 for(iter in 1:10) {
   
-  tmp <- mlp_sfd_race %>% filter(.order <= iter)
+  tmp <- mlp_sfd_race |> filter(.order <= iter)
   
   tmp_att <- full_att
   tmp_att$row.names <- attr(tmp, "row.names")
@@ -822,18 +820,18 @@ for(iter in 1:10) {
   race_details <-
     bind_rows(
       race_details,
-      finetune:::test_parameters_gls(tmp) %>% mutate(iter = iter))
+      finetune:::test_parameters_gls(tmp) |> mutate(iter = iter))
 }
 
 race_details <-
-  race_details %>%
+  race_details |>
   mutate(
     lower = ifelse(iter < 3, NA, lower),
     upper = ifelse(iter < 3, NA, upper),
     pass = ifelse(iter < 3, TRUE, pass),
     decision = ifelse(pass, "retain", "discard"),
     decision = ifelse(pass & estimate == 0, "best", decision)
-  )  %>%
+  )  |>
   mutate(
     .config = factor(.config),
     .config = reorder(.config, estimate),
@@ -841,9 +839,9 @@ race_details <-
   ) 
 race_cols <- c(best = "blue", retain = "black", discard = "grey")
 
-iter_three <- race_details %>% dplyr::filter(iter == 3) 
+iter_three <- race_details |> dplyr::filter(iter == 3) 
 
-iter_three %>% 
+iter_three |> 
   ggplot(aes(x = -estimate, y = .config)) + 
   geom_vline(xintercept = 0, lty = 2, color = "green") +
   geom_point(size = 2, aes(color = decision)) +
@@ -866,8 +864,8 @@ race_ci_plots <- function(x, iters = max(x$iter)) {
       ttl <- paste0("Iteration ", i, ": testing")
     }
     p <-
-      x %>% 
-      dplyr::filter(iter == i) %>% 
+      x |> 
+      dplyr::filter(iter == i) |> 
       ggplot(aes(x = -estimate, y = .config, color = decision)) +
       geom_vline(xintercept = 0, color = "green", lty = 2) +
       geom_point(size = 2) +
@@ -915,7 +913,7 @@ library(finetune)
 
 set.seed(1308)
 mlp_sfd_race <-
-  mlp_wflow %>%
+  mlp_wflow |>
   tune_race_anova(
     cell_folds,
     grid = 20,
@@ -947,7 +945,7 @@ The data analysis code that will be reused in the next chapter is:
 library(tidymodels)
 
 data(cells)
-cells <- cells %>% select(-case)
+cells <- cells |> select(-case)
 
 set.seed(1304)
 cell_folds <- vfold_cv(cells)

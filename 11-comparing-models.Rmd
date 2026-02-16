@@ -2,15 +2,15 @@
 knitr::opts_chunk$set(fig.path = "figures/")
 library(tidymodels)
 library(corrr)
-library(doMC)
 library(tidyposterior)
 library(rstanarm)
 library(kableExtra)
 library(tidyr)
 library(forcats)
-registerDoMC(cores = parallel::detectCores())
+library(mirai)
 
 tidymodels_prefer()
+daemons(parallel::detectCores())
 
 source("ames_snippets.R")
 load("RData/resampling.RData")
@@ -35,17 +35,17 @@ tidymodels_prefer()
 
 basic_rec <- 
   recipe(Sale_Price ~ Neighborhood + Gr_Liv_Area + Year_Built + Bldg_Type + 
-           Latitude + Longitude, data = ames_train) %>%
-  step_log(Gr_Liv_Area, base = 10) %>% 
-  step_other(Neighborhood, threshold = 0.01) %>% 
+           Latitude + Longitude, data = ames_train) |>
+  step_log(Gr_Liv_Area, base = 10) |> 
+  step_other(Neighborhood, threshold = 0.01) |> 
   step_dummy(all_nominal_predictors())
 
 interaction_rec <- 
-  basic_rec %>% 
+  basic_rec |> 
   step_interact( ~ Gr_Liv_Area:starts_with("Bldg_Type_") ) 
 
 spline_rec <- 
-  interaction_rec %>% 
+  interaction_rec |> 
   step_ns(Latitude, Longitude, deg_free = 50)
 
 preproc <- 
@@ -62,7 +62,7 @@ We'd like to resample each of these models in turn. To do so, we will use a `r p
 
 ```{r compare-workflow-set-resample}
 lm_models <- 
-  lm_models %>% 
+  lm_models |> 
   workflow_map("fit_resamples", 
                # Options to `workflow_map()`: 
                seed = 1101, verbose = TRUE,
@@ -76,7 +76,7 @@ Notice that the `option` and `result` columns are now populated. The former incl
 There are a few convenience functions for workflow sets, including `collect_metrics()` to collate the performance statistics. We can `filter()` to any specific metric we are interested in:
 
 ```{r compare-workflow-set-collect}
-collect_metrics(lm_models) %>% 
+collect_metrics(lm_models) |> 
   filter(.metric == "rmse")
 ```
 
@@ -84,7 +84,7 @@ What about the random forest model from the previous chapter? We can add it to t
 
 ```{r compare-workflow-set-four-models}
 four_models <- 
-  as_workflow_set(random_forest = rf_res) %>% 
+  as_workflow_set(random_forest = rf_res) |> 
   bind_rows(lm_models)
 four_models
 ```
@@ -123,22 +123,22 @@ To illustrate, let's gather the individual resampling statistics for the linear 
 
 ```{r compare-collect}
 rsq_indiv_estimates <- 
-  collect_metrics(four_models, summarize = FALSE) %>% 
+  collect_metrics(four_models, summarize = FALSE) |> 
   filter(.metric == "rsq") 
 
 rsq_wider <- 
-  rsq_indiv_estimates %>% 
-  select(wflow_id, .estimate, id) %>% 
+  rsq_indiv_estimates |> 
+  select(wflow_id, .estimate, id) |> 
   pivot_wider(id_cols = "id", names_from = "wflow_id", values_from = ".estimate")
 
-corrr::correlate(rsq_wider %>% select(-id), quiet = TRUE)
+corrr::correlate(rsq_wider |> select(-id), quiet = TRUE)
 ```
 
 These correlations are high, and indicate that, across models, there are large within-resample correlations. To see this visually in Figure \@ref(fig:rsquared-resamples), the $R^2$ statistics are shown for each model with lines connecting the resamples: 
 
 ```{r compare-rsq-plot, eval=FALSE}
-rsq_indiv_estimates %>% 
-  mutate(wflow_id = reorder(wflow_id, .estimate)) %>% 
+rsq_indiv_estimates |> 
+  mutate(wflow_id = reorder(wflow_id, .estimate)) |> 
   ggplot(aes(x = wflow_id, y = .estimate, group = id, color = id)) + 
   geom_line(alpha = .5, linewidth = 1.25) + 
   theme(legend.position = "none")
@@ -152,8 +152,8 @@ rsq_indiv_estimates %>%
 
 y_lab <- expression(R^2 ~ statistics)
 
-rsq_indiv_estimates %>% 
-  mutate(wflow_id = reorder(wflow_id, .estimate)) %>% 
+rsq_indiv_estimates |> 
+  mutate(wflow_id = reorder(wflow_id, .estimate)) |> 
   ggplot(aes(x = wflow_id, y = .estimate, group = id, color = id)) + 
   geom_line(alpha = .5, lwd = 1.25) + 
   theme(legend.position = "none") + 
@@ -163,9 +163,9 @@ rsq_indiv_estimates %>%
 If the resample-to-resample effect was not real, there would not be any parallel lines. A statistical test for the correlations evaluates whether the magnitudes of these correlations are not simply noise. For the linear models: 
 
 ```{r compare-resample-cor}
-rsq_wider %>% 
-  with( cor.test(basic_lm, splines_lm) ) %>% 
-  tidy() %>% 
+rsq_wider |> 
+  with( cor.test(basic_lm, splines_lm) ) |> 
+  tidy() |> 
   select(estimate, starts_with("conf"))
 ```
 
@@ -196,22 +196,22 @@ This versatile model is used to create regression models as well as being the ba
 In our specific situation, the ANOVA can also make model comparisons. Suppose the individual resampled $R^2$ statistics serve as the _outcome data_ (i.e., the $y_{ij}$) and the models as the _predictors_ in the ANOVA model. A sampling of this data structure is shown in Table \@ref(tab:model-anova-data).
 
 ```{r compare-data-config, echo = FALSE, results = "asis"}
-rsq_indiv_estimates %>% 
-  select(id, rsq = .estimate, model = wflow_id) %>% 
-  # pivot_longer(cols = c(-id), names_to = "model", values_to = "rsq") %>% 
-  arrange(id, model) %>% 
+rsq_indiv_estimates |> 
+  select(id, rsq = .estimate, model = wflow_id) |> 
+  # pivot_longer(cols = c(-id), names_to = "model", values_to = "rsq") |> 
+  arrange(id, model) |> 
   mutate(
     X1 = ifelse(model == "interact_lm", 1, 0),
     X2 = ifelse(model == "random_forest", 1, 0),
     X3 = ifelse(model == "splines_lm", 1, 0)
-    ) %>% 
-  select(`Y = rsq` = rsq, model, X1, X2, X3, id) %>% 
-  slice(1:6) %>% 
+    ) |> 
+  select(`Y = rsq` = rsq, model, X1, X2, X3, id) |> 
+  slice(1:6) |> 
   kable(
     caption = "Model performance statistics as a data set for analysis.",
     label = "model-anova-data",
     escape = FALSE
-    ) %>% 
+    ) |> 
   kable_styling(full_width = FALSE) 
 ```
 
@@ -239,17 +239,17 @@ A simple and fast method for comparing two models at a time is to use the differ
 
 ```{r compare-t-test}
 compare_lm <- 
-  rsq_wider %>% 
+  rsq_wider |> 
   mutate(difference = splines_lm - basic_lm)
 
-lm(difference ~ 1, data = compare_lm) %>% 
-  tidy(conf.int = TRUE) %>% 
+lm(difference ~ 1, data = compare_lm) |> 
+  tidy(conf.int = TRUE) |> 
   select(estimate, p.value, starts_with("conf"))
 
 # Alternatively, a paired t-test could also be used: 
-rsq_wider %>% 
-  with( t.test(splines_lm, basic_lm, paired = TRUE) ) %>%
-  tidy() %>% 
+rsq_wider |> 
+  with( t.test(splines_lm, basic_lm, paired = TRUE) ) |>
+  tidy() |> 
   select(estimate, p.value, starts_with("conf"))
 ```
 ```{r compare-hidden-t, include = FALSE}
@@ -258,7 +258,7 @@ lm_t <-
     rsq_wider$splines_lm, 
     rsq_wider$basic_lm, 
     paired = TRUE
-  ) %>%
+  ) |>
   tidy()
 ```
 
@@ -339,7 +339,7 @@ The resulting object has information on the resampling process as well as the St
 
 ```{r compare-group-posteriors-tidy}
 model_post <- 
-  rsq_anova %>% 
+  rsq_anova |> 
   # Take a random sample from the posterior distribution
   # so set the seed again to be reproducible. 
   tidy(seed = 1103) 
@@ -350,8 +350,8 @@ glimpse(model_post)
 The four posterior distributions are visualized in Figure \@ref(fig:four-posteriors).
 
 ```{r compare-group-posteriors-res, eval=FALSE}
-model_post %>% 
-  mutate(model = forcats::fct_inorder(model)) %>%
+model_post |> 
+  mutate(model = forcats::fct_inorder(model)) |>
   ggplot(aes(x = posterior)) + 
   geom_histogram(bins = 50, color = "white", fill = "blue", alpha = 0.4) + 
   facet_wrap(~ model, ncol = 1)
@@ -364,8 +364,8 @@ model_post %>%
 
 x_lab <- expression(Posterior ~ "for" ~ mean ~ italic(R^2))
 
-model_post %>% 
-  mutate(model = forcats::fct_inorder(model)) %>%
+model_post |> 
+  mutate(model = forcats::fct_inorder(model)) |>
   ggplot(aes(x = posterior)) + 
   geom_histogram(bins = 50, color = "white", fill = "blue", alpha = 0.4) + 
   facet_wrap(~ model, ncol = 1) + 
@@ -399,8 +399,8 @@ rqs_diff <-
                   list_2 = "basic_lm",
                   seed = 1104)
 
-rqs_diff %>% 
-  as_tibble() %>% 
+rqs_diff |> 
+  as_tibble() |> 
   ggplot(aes(x = difference)) + 
   geom_vline(xintercept = 0, lty = 2) + 
   geom_histogram(bins = 50, color = "white", fill = "red", alpha = 0.4)
@@ -420,8 +420,8 @@ rqs_diff <-
 
 x_lab <- expression(Posterior ~ "for" ~ mean ~ difference ~ "in" ~ italic(R^2) ~ (splines + interaction - basic))
 
-rqs_diff %>% 
-  as_tibble() %>% 
+rqs_diff |> 
+  as_tibble() |> 
   ggplot(aes(x = difference)) + 
   geom_vline(xintercept = 0, lty = 2) + 
   geom_histogram(bins = 50, color = "white", fill = "red", alpha = 0.4) + 
@@ -431,7 +431,7 @@ rqs_diff %>%
 The posterior shows that the center of the distribution is greater than zero (indicating that the model with splines typically had larger values) but does overlap with zero to a degree. The `summary()` method for this object computes the mean of the distribution as well as credible intervals, the Bayesian analog to confidence intervals. 
 
 ```{r compare-lm-summary}
-summary(rqs_diff) %>% 
+summary(rqs_diff) |> 
   select(-starts_with("pract"))
 ```
 
@@ -440,7 +440,7 @@ The `probability` column reflects the proportion of the posterior that is greate
 However, the estimate of the mean difference is fairly close to zero. Recall that the practical effect size we suggested previously is 2%. With a posterior distribution, we can also compute the probability of being practically significant. In Bayesian analysis, this is a *ROPE estimate* (for Region Of Practical Equivalence, @kruschke2018bayesian). To estimate this, the `size` option to the summary function is used: 
 
 ```{r compare-lm-pract}
-summary(rqs_diff, size = 0.02) %>% 
+summary(rqs_diff, size = 0.02) |> 
   select(contrast, starts_with("pract"))
 ```
 

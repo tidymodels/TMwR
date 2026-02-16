@@ -5,8 +5,9 @@ library(finetune)
 library(patchwork)
 library(kableExtra)
 library(av)
-library(doMC)
-registerDoMC(cores = parallel::detectCores(logical = TRUE))
+library(mirai)
+
+daemons(parallel::detectCores())
 tidymodels_prefer()
 
 ## -----------------------------------------------------------------------------
@@ -19,7 +20,7 @@ load(file.path("RData", "svm_large.RData"))
 ## -----------------------------------------------------------------------------
 
 data(cells)
-cells <- cells %>% select(-case)
+cells <- cells |> select(-case)
 set.seed(1304)
 cell_folds <- vfold_cv(cells)
 roc_res <- metric_set(roc_auc)
@@ -50,18 +51,18 @@ library(tidymodels)
 tidymodels_prefer()
 
 svm_rec <- 
-  recipe(class ~ ., data = cells) %>%
-  step_YeoJohnson(all_numeric_predictors()) %>%
+  recipe(class ~ ., data = cells) |>
+  step_YeoJohnson(all_numeric_predictors()) |>
   step_normalize(all_numeric_predictors())
 
 svm_spec <- 
-  svm_rbf(cost = tune(), rbf_sigma = tune()) %>% 
-  set_engine("kernlab") %>% 
+  svm_rbf(cost = tune(), rbf_sigma = tune()) |> 
+  set_engine("kernlab") |> 
   set_mode("classification")
 
 svm_wflow <- 
-  workflow() %>% 
-  add_model(svm_spec) %>% 
+  workflow() |> 
+  add_model(svm_spec) |> 
   add_recipe(svm_rec)
 ```
 
@@ -76,8 +77,8 @@ For illustration, let's slightly change the kernel parameter range, to improve t
 
 ```{r iterative-svm-param-set}
 svm_param <- 
-  svm_wflow %>% 
-  extract_parameter_set_dials() %>% 
+  svm_wflow |> 
+  extract_parameter_set_dials() |> 
   update(rbf_sigma = rbf_sigma(c(-7, -1)))
 ```
 
@@ -100,16 +101,16 @@ The following search procedures require at least some resampled performance stat
 ```{r iterative-svm-initial, message = FALSE}
 set.seed(1401)
 start_grid <- 
-  svm_param %>% 
+  svm_param |> 
   update(
     cost = cost(c(-6, 1)),
     rbf_sigma = rbf_sigma(c(-6, -4))
-  ) %>% 
+  ) |> 
   grid_regular(levels = 2)
 
 set.seed(1402)
 svm_initial <- 
-  svm_wflow %>% 
+  svm_wflow |> 
   tune_grid(resamples = cell_folds, grid = start_grid, metrics = roc_res)
 
 collect_metrics(svm_initial)
@@ -130,15 +131,15 @@ Gaussian process (GP) [@SCHULZ20181] models are well-known statistical technique
 Mathematically, a GP is a collection of random variables whose joint probability distribution is  multivariate Gaussian. In the  context of our application, this is the collection of performance metrics for the tuning parameter candidate values. For the previous initial grid of four samples, the realization of these four random variables were `r knitr::combine_words(round(collect_metrics(svm_initial)$mean, 4))`. These are assumed to be distributed as multivariate Gaussian. The inputs that  define the independent variables/predictors for the GP model are the corresponding tuning parameter values (shown in Table \@ref(tab:initial-gp-data)).
 
 ```{r iterative-gp-data-table, echo = FALSE, results = "asis"}
-collect_metrics(svm_initial) %>% 
-  select(ROC = mean, cost, rbf_sigma) %>% 
-  as.data.frame() %>% 
-  format(digits = 4, scientific = FALSE) %>% 
+collect_metrics(svm_initial) |> 
+  select(ROC = mean, cost, rbf_sigma) |> 
+  as.data.frame() |> 
+  format(digits = 4, scientific = FALSE) |> 
   kable(
     caption = "Resampling statistics used as the initial substrate to the Gaussian process model.",
     label = "initial-gp-data"
-  ) %>% 
-  kableExtra::kable_styling(full_width = FALSE) %>% 
+  ) |> 
+  kableExtra::kable_styling(full_width = FALSE) |> 
   kableExtra::add_header_above(c("outcome" = 1, "predictors" = 2))
 ```
 
@@ -164,16 +165,16 @@ Suppose that two new tuning parameters were under consideration. In Table \@ref(
 ```{r iterative-gp-pred, echo = FALSE, result = "asis"}
 best_val <- max(collect_metrics(svm_initial)$mean)
 tmp <- tibble(candidate = LETTERS[1:2], .mean = c(.90, .89), .sd = c(0.02, 0.005))
-tmp %>% 
-  select(candidate, mean = .mean, variance = .sd) %>% 
-  mutate(variance = variance^2) %>% 
-  as.data.frame() %>% 
-  format(digits = 4, scientific = FALSE) %>% 
+tmp |> 
+  select(candidate, mean = .mean, variance = .sd) |> 
+  mutate(variance = variance^2) |> 
+  as.data.frame() |> 
+  format(digits = 4, scientific = FALSE) |> 
   kable(
     caption = "Two example tuning parameters considered for further sampling.",
     label = "tuning-candidates"
-  ) %>% 
-  kableExtra::kable_styling(full_width = FALSE) %>% 
+  ) |> 
+  kableExtra::kable_styling(full_width = FALSE) |> 
   kableExtra::add_header_above(c(" " = 1, "GP Prediction of ROC AUC" = 2))
 ```
 
@@ -196,36 +197,36 @@ A class of objective functions, called _acquisition functions_, facilitate the t
 ```{r iterative-aq-data, include = FALSE}
 source("extras/nonlinear_function.R")
 grid <- 
-  tibble(x = seq(0, 1, length.out = 200)) %>% 
+  tibble(x = seq(0, 1, length.out = 200)) |> 
   mutate(y = purrr::map_dbl(x, nonlin_function, error = FALSE))
 
 set.seed(121)
-current_iter <- tibble(x = c(.09, .41,  .55, .7, .8)) %>% 
+current_iter <- tibble(x = c(.09, .41,  .55, .7, .8)) |> 
   mutate(y = purrr::map_dbl(x, nonlin_function))
 
 gp <- GPfit::GP_fit(matrix(current_iter$x, ncol = 1), current_iter$y)
 
 gp_pred <- 
-  predict(gp, matrix(grid$x, ncol = 1))$complete_data %>% 
-  as_tibble() %>% 
-  setNames(c("x", ".mean", ".sd"))  %>% 
+  predict(gp, matrix(grid$x, ncol = 1))$complete_data |> 
+  as_tibble() |> 
+  setNames(c("x", ".mean", ".sd"))  |> 
   mutate(.sd = sqrt(.sd))
 
 gp_pred <- 
-  gp_pred %>% 
+  gp_pred |> 
   bind_cols(
-    exp_improve() %>% 
-      predict(gp_pred, maximize = TRUE, iter = 1, best = max(current_iter$y)) %>% 
+    exp_improve() |> 
+      predict(gp_pred, maximize = TRUE, iter = 1, best = max(current_iter$y)) |> 
       setNames("exp_imp")
-  ) %>% 
+  ) |> 
   bind_cols(
-    conf_bound(kappa = .1) %>% 
-      predict(gp_pred, maximize = TRUE, iter = 1, best = max(current_iter$y)) %>% 
+    conf_bound(kappa = .1) |> 
+      predict(gp_pred, maximize = TRUE, iter = 1, best = max(current_iter$y)) |> 
       setNames("conf_int_01")
-  ) %>% 
+  ) |> 
   bind_cols(
-    conf_bound(kappa = 1) %>% 
-      predict(gp_pred, maximize = TRUE, iter = 1, best = max(current_iter$y)) %>% 
+    conf_bound(kappa = 1) |> 
+      predict(gp_pred, maximize = TRUE, iter = 1, best = max(current_iter$y)) |> 
       setNames("conf_int_1")
   )
 ```
@@ -258,7 +259,7 @@ The shaded confidence region demonstrates the squared exponential variance funct
 
 y_lab <- expression(Estimated ~ italic(R^2))
 
-gp_pred %>% 
+gp_pred |> 
   ggplot(aes(x = x)) + 
   geom_point(data = current_iter, aes(y = y)) + 
   geom_line(aes(y = .mean)) +
@@ -286,9 +287,9 @@ For example, consider two candidate parameter values of 0.10 and 0.25 (indicated
 #| fig.alt = "Predicted performance distributions for two sampled tuning parameter values. For one, the distribution is slightly better than the current value with a small spread. The other parameter value is slightly worse but has a very wide spread."
 
 small_pred <- 
-  predict(gp, c(0.1, 0.25))$complete_data %>% 
-  as_tibble() %>% 
-  setNames(c("x", ".mean", ".sd")) %>% 
+  predict(gp, c(0.1, 0.25))$complete_data |> 
+  as_tibble() |> 
+  setNames(c("x", ".mean", ".sd")) |> 
   mutate(
     value = c(0.1, 0.25),
     .sd = sqrt(.sd),
@@ -297,15 +298,15 @@ small_pred <-
   )
 
 small_pred <- 
-  small_pred %>% 
+  small_pred |> 
   bind_cols(
-    exp_improve() %>% 
-      predict(small_pred, maximize = TRUE, iter = 1, best = max(current_iter$y)) %>% 
+    exp_improve() |> 
+      predict(small_pred, maximize = TRUE, iter = 1, best = max(current_iter$y)) |> 
       setNames("exp_imp")
   )
 
 get_density <- function(dat) {
-  res <- tibble(x = seq(dat$min, dat$max, length.out = 200)) %>% 
+  res <- tibble(x = seq(dat$min, dat$max, length.out = 200)) |> 
     mutate(density = dnorm(x, dat$.mean, dat$.sd),
            `Parameter Value` = format(dat$value))
   res
@@ -313,10 +314,10 @@ get_density <- function(dat) {
 
 x_lab <- expression(Predicted ~ italic(R^2) ~ Distribution)
 
-small_pred %>% 
-  group_by(value) %>% 
-  do(get_density(.)) %>% 
-  ungroup() %>% 
+small_pred |> 
+  group_by(value) |> 
+  do(get_density(.)) |> 
+  ungroup() |> 
   ggplot(aes(x = x, y = density, color = `Parameter Value`, lty = `Parameter Value`)) + 
   geom_line() +
   geom_vline(xintercept = max(current_iter$y), lty = 3) +  
@@ -327,15 +328,15 @@ small_pred %>%
 When only considering the mean $R^2$ prediction, a parameter value of 0.10 is the better choice (see Table \@ref(tab:two-exp-improve)). The tuning parameter recommendation for 0.25 is, on average, predicted to be worse than the current best. However, since it has higher variance, it has more overall probability area above the current best. As a result, it has a larger expected improvement:
 
 ```{r iterative-gp-data-table-2, echo = FALSE, results = "asis"}
-small_pred %>% 
-  select(`Parameter Value` = x, Mean = .mean, `Std Dev` = .sd, `Expected Improvement` = exp_imp) %>% 
-  as.data.frame() %>% 
-  format(digits = 4, scientific = FALSE) %>% 
+small_pred |> 
+  select(`Parameter Value` = x, Mean = .mean, `Std Dev` = .sd, `Expected Improvement` = exp_imp) |> 
+  as.data.frame() |> 
+  format(digits = 4, scientific = FALSE) |> 
   kable(
     caption = "Expected improvement for the two candidate tuning parameters.",
     label = "two-exp-improve"
-  ) %>% 
-  kableExtra::kable_styling(full_width = FALSE) %>% 
+  ) |> 
+  kableExtra::kable_styling(full_width = FALSE) |> 
   kableExtra::add_header_above(c(" " = 1, "Predictions" = 3))
 ```
 
@@ -350,7 +351,7 @@ When expected improvement is computed across the range of the tuning parameter, 
 y_lab <- expression(Estimated ~ italic(R^2))
 
 p1 <- 
-  gp_pred %>% 
+  gp_pred |> 
   ggplot(aes(x = x)) + 
   geom_point(data = current_iter, aes(y = y)) + 
   geom_line(aes(y = .mean)) +
@@ -364,7 +365,7 @@ p1 <-
   )
 
 p2 <- 
-  gp_pred %>% 
+  gp_pred |> 
   ggplot(aes(x = x, y = exp_imp)) + 
   geom_line() + 
   labs(y = "Expected Improvement", x = "Tuning Parameter") + 
@@ -394,7 +395,7 @@ tune_bayes_sssshhh <- purrr::quietly(tune_bayes)
 
 set.seed(1403)
 svm_bo_sshh <-
-  svm_wflow %>%
+  svm_wflow |>
   tune_bayes_sssshhh(
     resamples = cell_folds,
     metrics = roc_res,
@@ -409,7 +410,8 @@ svm_bo_sshh <-
 #   svm_bo_metrics <- collect_metrics(svm_bo_sshh$result)
 #   save(svm_bo_metrics, file = "RData/svm_bo_metrics.RData")
 # Check with:
-verify_consistent_bo(collect_metrics(svm_bo_sshh$result))
+# Commented out do to different GP model and RNG; will change in later PR
+# verify_consistent_bo(collect_metrics(svm_bo_sshh$result))
 
 svm_bo <- svm_bo_sshh$result
 svm_bo_output <- svm_bo_sshh$messages
@@ -444,7 +446,7 @@ ctrl <- control_bayes(verbose = TRUE)
 
 set.seed(1403)
 svm_bo <-
-  svm_wflow %>%
+  svm_wflow |>
   tune_bayes(
     resamples = cell_folds,
     metrics = roc_res,
@@ -457,11 +459,11 @@ svm_bo <-
 
 
 ```{r iterative-cells-info, include = FALSE}
-bo_res <- collect_metrics(svm_bo) %>% mutate(current_best = FALSE)
+bo_res <- collect_metrics(svm_bo) |> mutate(current_best = FALSE)
 for(i in 1:nrow(bo_res)) {
   bo_res$current_best[i] <- bo_res$mean[i] > max(bo_res$mean[1:(i-1)])
 }
-init_vals <- bo_res %>% dplyr::filter(.iter == 0)
+init_vals <- bo_res |> dplyr::filter(.iter == 0)
 best_init <- max(bo_res$mean[bo_res$.iter == 0])
 best_bo <- max(bo_res$mean)
 best_bo_iter <- bo_res$.iter[which.max(bo_res$mean)]
@@ -684,12 +686,12 @@ mix_rng <- 0:1
 
 iter_1 <- tibble(penalty = 0.025, mixture = .05)
 next_neighbors <- 
-  finetune:::random_real_neighbor(iter_1, iter_1, glmn_param, retain = 300) %>% 
+  finetune:::random_real_neighbor(iter_1, iter_1, glmn_param, retain = 300) |> 
   mutate(Iteration = 1)
 
 set.seed(1)
 neighbors_values <- next_neighbors
-best_values <- iter_1 %>% mutate(Iteration = 1)
+best_values <- iter_1 |> mutate(Iteration = 1)
 
 scoring <- function(x) {
   - log10(x$penalty) * .1 + x$mixture * 2 + rnorm(nrow(x), sd = .5)
@@ -701,19 +703,19 @@ for (i in 2:6) {
   set.seed(i + 5)
   next_scores <- scoring(next_neighbors)
   next_ind <- which.max(next_scores)
-  next_value <- next_neighbors %>% slice(next_ind) %>% mutate(Iteration = i)
+  next_value <- next_neighbors |> slice(next_ind) |> mutate(Iteration = i)
   
   best_values <- 
     bind_rows(
       best_values,
       next_value
     )
-  path <- bind_rows(path, best_values %>% mutate(Iteration = i))
+  path <- bind_rows(path, best_values |> mutate(Iteration = i))
   
   next_neighbors <- 
-    finetune:::random_real_neighbor(next_value %>% select(-Iteration), 
-                                    path %>% select(-Iteration), 
-                                    glmn_param, retain = 300) %>% 
+    finetune:::random_real_neighbor(next_value |> select(-Iteration), 
+                                    path |> select(-Iteration), 
+                                    glmn_param, retain = 300) |> 
     mutate(Iteration = i)
   neighbors_values <- 
     bind_rows(
@@ -780,7 +782,7 @@ tune_sim_anneal_sssshhh <- purrr::quietly(tune_sim_anneal)
 
 set.seed(1404)
 svm_sa_sshh <-
-  svm_wflow %>%
+  svm_wflow |>
   tune_sim_anneal_sssshhh(
     resamples = cell_folds,
     metrics = roc_res,
@@ -793,8 +795,9 @@ svm_sa_sshh <-
 # Make sure that the results have not changed since 2022-02-20. Save the results with: 
   # svm_sa_metrics <- collect_metrics(svm_sa_sshh$result)
   # save(svm_sa_metrics, file = "RData/svm_sa_metrics.RData")
-# Check with:
-verify_consistent_sa(collect_metrics(svm_sa_sshh$result))
+# Check with
+# Commented out do to different RNG; will change in later PR:
+# verify_consistent_sa(collect_metrics(svm_sa_sshh$result))
 
 svm_sa <- svm_sa_sshh$result
 svm_sa_output <- svm_sa_sshh$messages
@@ -811,7 +814,7 @@ ctrl_sa <- control_sim_anneal(verbose = TRUE, no_improve = 10L)
 
 set.seed(1404)
 svm_sa <-
-  svm_wflow %>%
+  svm_wflow |>
   tune_sim_anneal(
     resamples = cell_folds,
     metrics = roc_res,

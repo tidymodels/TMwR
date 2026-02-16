@@ -66,15 +66,15 @@ tab <-
     "bart()",                 x,      x,        x,           cl1,           x,           x
   ) 
 
-tab %>% 
-  arrange(model) %>% 
-  mutate(model = paste0("<tt>", model, "</tt>")) %>% 
+tab |> 
+  arrange(model) |> 
+  mutate(model = paste0("<tt>", model, "</tt>")) |> 
   kable(
     caption = "Preprocessing methods for different models.",
     label = "preprocessing",
     escape = FALSE,
     align = c("l", rep("c", ncol(tab) - 1))
-  ) %>% 
+  ) |> 
   kable_styling(full_width = FALSE)
 ```
 

@@ -89,7 +89,7 @@ The units of the model coefficients might be more difficult to interpret, as wil
 Despite these drawbacks, the models used in this book use the log transformation for this outcome. _From this point on_, the outcome column is prelogged in the `ames` data frame: 
 
 ```{r ames-log}
-ames <- ames %>% mutate(Sale_Price = log10(Sale_Price))
+ames <- ames |> mutate(Sale_Price = log10(Sale_Price))
 ```
 
 Another important aspect of these data for our modeling is their geographic locations. This spatial information is contained in the data in two ways: a qualitative `Neighborhood` label as well as quantitative longitude and latitude data. To visualize the spatial information, let's use both together to plot the data on a map in Figure \@ref(fig:ames-map).
@@ -184,5 +184,5 @@ The important code for preparing the Ames data set that we will carry forward in
 ```{r ames-summary, eval = FALSE}
 library(tidymodels)
 data(ames)
-ames <- ames %>% mutate(Sale_Price = log10(Sale_Price))
+ames <- ames |> mutate(Sale_Price = log10(Sale_Price))
 ``` 

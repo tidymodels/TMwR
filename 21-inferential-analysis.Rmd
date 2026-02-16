@@ -62,8 +62,8 @@ Since the outcome data are counts, the most common distribution assumption to ma
 We can start with hypothesis testing. The original author's goal with this data set on biochemistry publication data was to determine if there is a difference in publications between men and women [@Long1992]. The data from the study show:
 
 ```{r inferential-counts}
-bioChemists %>% 
-  group_by(fem) %>% 
+bioChemists |> 
+  group_by(fem) |> 
   summarize(counts = sum(art), n = length(art))
 ```
 
@@ -89,7 +89,7 @@ The function reports a p-value as well as a confidence interval for the ratio of
 One issue with using this function is that the results come back as an `htest` object. While this type of object has a well-defined structure, it can be difficult to consume for subsequent operations such as reporting or visualizations. The most impactful tool that tidymodels offers for inferential models is the `tidy()` functions in the `r pkg(broom)` package. As previously seen, this function makes a well-formed, predictably named tibble from the object. We can `tidy()` the results of our two-sample comparison test:
 
 ```{r inferential-test-tidy}
-poisson.test(c(930, 619)) %>% 
+poisson.test(c(930, 619)) |> 
   tidy()
 ```
 
@@ -109,8 +109,8 @@ With `r pkg(infer)`, we specify the outcome and covariate, then state the statis
 library(infer)
 
 observed <- 
-  bioChemists %>%
-  specify(art ~ fem) %>%
+  bioChemists |>
+  specify(art ~ fem) |>
   calculate(stat = "diff in means", order = c("Men", "Women"))
 observed
 ```
@@ -120,9 +120,9 @@ From here, we compute a confidence interval for this mean by creating the bootst
 ```{r inferential-mean-diff-boot-gen}
 set.seed(2101)
 bootstrapped <- 
-  bioChemists %>%
-  specify(art ~ fem)  %>%
-  generate(reps = 2000, type = "bootstrap") %>%
+  bioChemists |>
+  specify(art ~ fem)  |>
+  generate(reps = 2000, type = "bootstrap") |>
   calculate(stat = "diff in means", order = c("Men", "Women"))
 bootstrapped
 ```
@@ -155,10 +155,10 @@ If we require a p-value, the `r pkg(infer)` package can compute the value via a 
 ```{r inferential-mean-diff-perm-gen}
 set.seed(2102)
 permuted <- 
-  bioChemists %>%
-  specify(art ~ fem)  %>%
-  hypothesize(null = "independence") %>%
-  generate(reps = 2000, type = "permute") %>%
+  bioChemists |>
+  specify(art ~ fem)  |>
+  hypothesize(null = "independence") |>
+  generate(reps = 2000, type = "permute") |>
   calculate(stat = "diff in means", order = c("Men", "Women"))
 permuted
 ```
@@ -180,7 +180,7 @@ visualize(permuted) +
 The actual p-value is:
 
 ```{r inferential-mean-diff-perm-pvalue}
-permuted %>%
+permuted |>
   get_p_value(obs_stat = observed, direction = "two-sided")
 ```
 
@@ -207,7 +207,7 @@ library(poissonreg)
 log_lin_spec <- poisson_reg()
 
 log_lin_fit <- 
-  log_lin_spec %>% 
+  log_lin_spec |> 
   fit(art ~ ., data = bioChemists)
 log_lin_fit
 ```
@@ -246,14 +246,14 @@ When we compare these results (in Figure \@ref(fig:glm-intervals)) to the purely
 #| fig.cap = "Two types of confidence intervals for the Poisson regression model",
 #| fig.alt = "Two types of confidence intervals for the Poisson regression model. the interval for the PhD model is the only interval overlapping zero. The parametric intervals tend to be wider than the bootstrap intervals. "
 
-glm_boot %>% 
-  select(term, method = .method, .estimate, .lower, .upper) %>% 
+glm_boot |> 
+  select(term, method = .method, .estimate, .lower, .upper) |> 
   bind_rows(
-    tidy(log_lin_fit, conf.int = TRUE, conf.level = 0.90) %>% 
-      filter(term != "(Intercept)") %>% 
-      mutate(method = "parametric") %>% 
+    tidy(log_lin_fit, conf.int = TRUE, conf.level = 0.90) |> 
+      filter(term != "(Intercept)") |> 
+      mutate(method = "parametric") |> 
       select(term, method, .estimate = estimate, .lower = conf.low, .upper = conf.high)
-  )%>%
+  )|>
   ggplot(aes(x = .estimate, y = term, color = method, pch = method)) +
   geom_vline(xintercept = 0, lty = 3) +
   geom_point(size = 2.5, position = position_dodge(width = 1 / 2)) +
@@ -271,18 +271,18 @@ H_0&: \beta_{phd} = 0 \notag \\
 H_a&: \beta_{phd} \ne 0 \notag
 \end{align}
 
-This hypothesis was previously tested when we showed the tidied results for `log_lin_fit`. That particular approach used results from a single model fit via a Wald statistic (i.e., the parameter divided by its standard error). For that approach, the p-value was `r tidy(log_lin_fit) %>% filter(term == "phd") %>% pluck("p.value") %>% format.pval()`. We can tidy the results for the LRT to get the p-value: 
+This hypothesis was previously tested when we showed the tidied results for `log_lin_fit`. That particular approach used results from a single model fit via a Wald statistic (i.e., the parameter divided by its standard error). For that approach, the p-value was `r tidy(log_lin_fit) |> filter(term == "phd") |> pluck("p.value") |> format.pval()`. We can tidy the results for the LRT to get the p-value: 
 
 ```{r inferential-reduced, warning = FALSE}
 log_lin_reduced <- 
-  log_lin_spec %>% 
+  log_lin_spec |> 
   fit(art ~ ment + kid5 + fem + mar, data = bioChemists)
 
 anova(
   extract_fit_engine(log_lin_reduced),
   extract_fit_engine(log_lin_fit),
   test = "LRT"
-) %>%
+) |>
   tidy()
 ```
 
@@ -308,10 +308,10 @@ and the $x$ covariates affect the count values while the $z$ covariates influenc
 We'll fit a model with a full set of $z$ covariates:
 
 ```{r inference-zip-model}
-zero_inflated_spec <- poisson_reg() %>% set_engine("zeroinfl")
+zero_inflated_spec <- poisson_reg() |> set_engine("zeroinfl")
 
 zero_inflated_fit <- 
-  zero_inflated_spec %>% 
+  zero_inflated_spec |> 
   fit(art ~ fem + mar + kid5 + ment | fem + mar + kid5 + phd + ment,
       data = bioChemists)
 
@@ -334,7 +334,7 @@ anova(
   extract_fit_engine(zero_inflated_fit),
   extract_fit_engine(log_lin_reduced),
   test = "LRT"
-) %>%
+) |>
   tidy()
 ```
 
@@ -345,8 +345,8 @@ An alternative is to use an *information criterion statistic*, such as the Akaik
 The results indicate that the ZIP model is preferable:
 
 ```{r inference-zip-aic}
-zero_inflated_fit %>% extract_fit_engine() %>% AIC()
-log_lin_reduced   %>% extract_fit_engine() %>% AIC()
+zero_inflated_fit |> extract_fit_engine() |> AIC()
+log_lin_reduced   |> extract_fit_engine() |> AIC()
 ```
 
 However, it's hard to contextualize this pair of single values and assess *how* different they actually are. To solve this problem, we'll resample a large number of each of these two models. From these, we can compute the AIC values for each and determine how often the results favor the ZIP model. Basically, we will be characterizing the uncertainty of the AIC statistics to gauge their difference relative to the noise in the data.
@@ -361,7 +361,7 @@ glm_form <- art ~ fem + mar + kid5 + ment
 
 set.seed(2104)
 bootstrap_models <-
-  bootstraps(bioChemists, times = 2000, apparent = TRUE) %>%
+  bootstraps(bioChemists, times = 2000, apparent = TRUE) |>
   mutate(
     glm = map(splits, ~ fit(log_lin_spec,       glm_form, data = analysis(.x))),
     zip = map(splits, ~ fit(zero_inflated_spec, zip_form, data = analysis(.x)))
@@ -373,10 +373,10 @@ Now we can extract the model fits and their corresponding AIC values:
 
 ```{r inference-zip-aic-resampled}
 bootstrap_models <-
-  bootstrap_models %>%
+  bootstrap_models |>
   mutate(
-    glm_aic = map_dbl(glm, ~ extract_fit_engine(.x) %>% AIC()),
-    zip_aic = map_dbl(zip, ~ extract_fit_engine(.x) %>% AIC())
+    glm_aic = map_dbl(glm, ~ extract_fit_engine(.x) |> AIC()),
+    zip_aic = map_dbl(zip, ~ extract_fit_engine(.x) |> AIC())
   )
 mean(bootstrap_models$zip_aic < bootstrap_models$glm_aic)
 ```
@@ -391,7 +391,7 @@ Since we have computed the resampled model fits, let's create bootstrap interval
 
 ```{r inference-zip-coefs}
 bootstrap_models <-
-  bootstrap_models %>%
+  bootstrap_models |>
   mutate(zero_coefs  = map(zip, ~ tidy(.x, type = "zero")))
 
 # One example:
@@ -401,8 +401,8 @@ bootstrap_models$zero_coefs[[1]]
 It's a good idea to visualize the bootstrap distributions of the coefficients, as in Figure \@ref(fig:zip-bootstrap).
 
 ```{r inference-zip-bootstrap, eval=FALSE}
-bootstrap_models %>% 
-  unnest(zero_coefs) %>% 
+bootstrap_models |> 
+  unnest(zero_coefs) |> 
   ggplot(aes(x = estimate)) +
   geom_histogram(bins = 25, color = "white") + 
   facet_wrap(~ term, scales = "free_x") + 
@@ -420,8 +420,8 @@ One of the covariates (`ment`) that appears to be important has a very skewed di
 The `r pkg(rsample)` package contains a set of functions named `int_*()` that compute different types of bootstrap intervals. Since the `tidy()` method contains standard error estimates, the bootstrap-t intervals can be computed. We'll also compute the standard percentile intervals. By default, 90% confidence intervals are computed.
 
 ```{r inference-zip-intervals}
-bootstrap_models %>% int_pctl(zero_coefs)
-bootstrap_models %>% int_t(zero_coefs)
+bootstrap_models |> int_pctl(zero_coefs)
+bootstrap_models |> int_t(zero_coefs)
 ```
 
 From these results, we can get a good idea of which predictor(s) to include in the zero count probability model. It may be sensible to refit a smaller model to assess if the bootstrap distribution for `ment` is still skewed.

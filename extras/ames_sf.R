@@ -128,7 +128,7 @@ mitchell_box <-
         plot.background = element_rect(linetype = 'solid', colour = 'black', size = 1)) +
   geom_sf(data = ia_roads, aes(geometry = geometry), alpha = .1) +
   geom_point(
-    data = ames %>% filter(Neighborhood %in% c("Meadow_Village", "Mitchell")),
+    data = ames |> filter(Neighborhood %in% c("Meadow_Village", "Mitchell")),
     aes(
       x = Longitude,
       y = Latitude,
@@ -173,7 +173,7 @@ mitchell <-
   ) +
   geom_sf(data = ia_roads, aes(geometry = geometry), alpha = .3) +
   geom_point(
-    data = ames %>% filter(Neighborhood %in% c("Meadow_Village", "Mitchell")),
+    data = ames |> filter(Neighborhood %in% c("Meadow_Village", "Mitchell")),
     aes(
       x = Longitude,
       y = Latitude,
@@ -280,7 +280,7 @@ dot_rr_box <-
         plot.background = element_rect(linetype = 'solid', colour = 'black', size = 1)) +
   geom_sf(data = ia_roads, aes(geometry = geometry), alpha = .1) +
   geom_point(
-    data = ames %>% filter(Neighborhood %in% c("Iowa_DOT_and_Rail_Road")),
+    data = ames |> filter(Neighborhood %in% c("Iowa_DOT_and_Rail_Road")),
     aes(
       x = Longitude,
       y = Latitude,
@@ -316,7 +316,7 @@ dot_rr <-
   theme(legend.position = "none") +
   geom_sf(data = ia_roads, aes(geometry = geometry), alpha = .3) +
   geom_point(
-    data = ames %>% filter(Neighborhood %in% c("Iowa_DOT_and_Rail_Road")),
+    data = ames |> filter(Neighborhood %in% c("Iowa_DOT_and_Rail_Road")),
     aes(
       x = Longitude,
       y = Latitude,
@@ -350,7 +350,7 @@ crawford_box <-
         plot.background = element_rect(linetype = 'solid', colour = 'black', size = 1)) +
   geom_sf(data = ia_roads, aes(geometry = geometry), alpha = .1) +
   geom_point(
-    data = ames %>% filter(Neighborhood %in% c("Crawford")),
+    data = ames |> filter(Neighborhood %in% c("Crawford")),
     aes(
       x = Longitude,
       y = Latitude,
@@ -386,7 +386,7 @@ crawford <-
   theme(legend.position = "none") +
   geom_sf(data = ia_roads, aes(geometry = geometry), alpha = .3) +
   geom_point(
-    data = ames %>% filter(Neighborhood %in% c("Crawford")),
+    data = ames |> filter(Neighborhood %in% c("Crawford")),
     aes(
       x = Longitude,
       y = Latitude,
@@ -420,7 +420,7 @@ northridge_box <-
         plot.background = element_rect(linetype = 'solid', colour = 'black', size = 1)) +
   geom_sf(data = ia_roads, aes(geometry = geometry), alpha = .1) +
   geom_point(
-    data = ames %>% filter(Neighborhood %in% c("Northridge", "Somerset")),
+    data = ames |> filter(Neighborhood %in% c("Northridge", "Somerset")),
     aes(
       x = Longitude,
       y = Latitude,
@@ -465,7 +465,7 @@ northridge <-
   ) +
   geom_sf(data = ia_roads, aes(geometry = geometry), alpha = .3) +
   geom_point(
-    data = ames %>% filter(Neighborhood %in% c("Northridge", "Somerset")),
+    data = ames |> filter(Neighborhood %in% c("Northridge", "Somerset")),
     aes(
       x = Longitude,
       y = Latitude,

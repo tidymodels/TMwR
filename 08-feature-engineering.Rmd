@@ -14,8 +14,8 @@ val_list <- function(x) {
 source("ames_snippets.R")
 
 lm_wflow <- 
-  lm_wflow %>% 
-  remove_recipe() %>% 
+  lm_wflow |> 
+  remove_recipe() |> 
   add_variables(outcome = Sale_Price, predictors = c(Longitude, Latitude))
 ```
 
@@ -79,8 +79,8 @@ tidymodels_prefer()
 
 simple_ames <- 
   recipe(Sale_Price ~ Neighborhood + Gr_Liv_Area + Year_Built + Bldg_Type,
-         data = ames_train) %>%
-  step_log(Gr_Liv_Area, base = 10) %>% 
+         data = ames_train) |>
+  step_log(Gr_Liv_Area, base = 10) |> 
   step_dummy(all_nominal_predictors())
 simple_ames
 ```
@@ -118,7 +118,7 @@ As we discussed in Chapter \@ref(workflows), preprocessing choices and feature e
 This object can be attached to the workflow:
 
 ```{r workflows-fail, error = TRUE}
-lm_wflow %>% 
+lm_wflow |> 
   add_recipe(simple_ames)
 ```
 
@@ -126,8 +126,8 @@ That did not work! We can have only one preprocessing method at a time, so we ne
 
 ```{r workflows-add-recipe}
 lm_wflow <- 
-  lm_wflow %>% 
-  remove_variables() %>% 
+  lm_wflow |> 
+  remove_variables() |> 
   add_recipe(simple_ames)
 lm_wflow
 ```
@@ -141,22 +141,22 @@ lm_fit <- fit(lm_wflow, ames_train)
 The `predict()` method applies the same preprocessing that was used on the training set to the new data before passing them along to the model's `predict()` method: 
 
 ```{r workflows-recipe-pred, message = FALSE, warning = FALSE}
-predict(lm_fit, ames_test %>% slice(1:3))
+predict(lm_fit, ames_test |> slice(1:3))
 ```
 
 If we need the bare model object or recipe, there are `extract_*` functions that can retrieve them: 
 
 ```{r workflows-pull}
 # Get the recipe after it has been estimated:
-lm_fit %>% 
+lm_fit |> 
   extract_recipe(estimated = TRUE)
 
 # To tidy the model fit: 
-lm_fit %>% 
+lm_fit |> 
   # This returns the parsnip object:
-  extract_fit_parsnip() %>% 
+  extract_fit_parsnip() |> 
   # Now tidy the linear model object:
-  tidy() %>% 
+  tidy() |> 
   slice(1:5)
 ```
 
@@ -204,9 +204,9 @@ For the Ames data, we can amend the recipe to use:
 ```{r engineering-ames-recipe-other}
 simple_ames <- 
   recipe(Sale_Price ~ Neighborhood + Gr_Liv_Area + Year_Built + Bldg_Type,
-         data = ames_train) %>%
-  step_log(Gr_Liv_Area, base = 10) %>% 
-  step_other(Neighborhood, threshold = 0.01) %>% 
+         data = ames_train) |>
+  step_log(Gr_Liv_Area, base = 10) |> 
+  step_other(Neighborhood, threshold = 0.01) |> 
   step_dummy(all_nominal_predictors())
 ```
 
@@ -218,22 +218,22 @@ The most common method for converting a factor predictor to a numeric format is 
 
 ```{r engineering-all-dummies, echo = FALSE, results = 'asis'}
 show_rows <- 
-  ames_train %>% 
-  mutate(.row = row_number()) %>% 
-  group_by(Bldg_Type) %>% dplyr::select(Bldg_Type, .row) %>% 
-  slice(1) %>% 
+  ames_train |> 
+  mutate(.row = row_number()) |> 
+  group_by(Bldg_Type) |> dplyr::select(Bldg_Type, .row) |> 
+  slice(1) |> 
   pull(.row)
-recipe(~Bldg_Type, data = ames_train) %>% 
-  step_mutate(`Raw Data` = Bldg_Type) %>% 
-  step_dummy(Bldg_Type, naming = function(var, lvl, ordinal = FALSE, sep = "_") lvl) %>% 
-  prep() %>% 
-  bake(ames_train) %>% 
-  slice(show_rows) %>% 
-  arrange(`Raw Data`) %>% 
+recipe(~Bldg_Type, data = ames_train) |> 
+  step_mutate(`Raw Data` = Bldg_Type) |> 
+  step_dummy(Bldg_Type, naming = function(var, lvl, ordinal = FALSE, sep = "_") lvl) |> 
+  prep() |> 
+  bake(ames_train) |> 
+  slice(show_rows) |> 
+  arrange(`Raw Data`) |> 
   kable(
     caption = 'Illustration of binary encodings (i.e., dummy variables) for a qualitative predictor.',
     label = "dummy-vars"
-  ) %>% 
+  ) |> 
   kable_styling(full_width = FALSE)
 ```
 
@@ -288,10 +288,10 @@ Recipes are more explicit and sequential, and they give you more control. With t
 ```{r engineering-ames-interact-recipe}
 simple_ames <- 
   recipe(Sale_Price ~ Neighborhood + Gr_Liv_Area + Year_Built + Bldg_Type,
-         data = ames_train) %>%
-  step_log(Gr_Liv_Area, base = 10) %>% 
-  step_other(Neighborhood, threshold = 0.01) %>% 
-  step_dummy(all_nominal_predictors()) %>% 
+         data = ames_train) |>
+  step_log(Gr_Liv_Area, base = 10) |> 
+  step_other(Neighborhood, threshold = 0.01) |> 
+  step_dummy(all_nominal_predictors()) |> 
   # Gr_Liv_Area is on the log scale from a previous step
   step_interact( ~ Gr_Liv_Area:starts_with("Bldg_Type_") )
 ```
@@ -359,11 +359,11 @@ In `r pkg(recipes)`, multiple steps can create these types of terms. To add a na
 
 ```{r engineering-spline-rec, eval = FALSE}
 recipe(Sale_Price ~ Neighborhood + Gr_Liv_Area + Year_Built + Bldg_Type + Latitude,
-         data = ames_train) %>%
-  step_log(Gr_Liv_Area, base = 10) %>% 
-  step_other(Neighborhood, threshold = 0.01) %>% 
-  step_dummy(all_nominal_predictors()) %>% 
-  step_interact( ~ Gr_Liv_Area:starts_with("Bldg_Type_") ) %>% 
+         data = ames_train) |>
+  step_log(Gr_Liv_Area, base = 10) |> 
+  step_other(Neighborhood, threshold = 0.01) |> 
+  step_dummy(all_nominal_predictors()) |> 
+  step_interact( ~ Gr_Liv_Area:starts_with("Bldg_Type_") ) |> 
   step_ns(Latitude, deg_free = 20)
 ```
 
@@ -470,11 +470,11 @@ In Section \@ref(tidiness-modeling), we introduced the `tidy()` verb for statist
 ```{r engineering-lm-extended-recipe}
 ames_rec <- 
   recipe(Sale_Price ~ Neighborhood + Gr_Liv_Area + Year_Built + Bldg_Type + 
-           Latitude + Longitude, data = ames_train) %>%
-  step_log(Gr_Liv_Area, base = 10) %>% 
-  step_other(Neighborhood, threshold = 0.01) %>% 
-  step_dummy(all_nominal_predictors()) %>% 
-  step_interact( ~ Gr_Liv_Area:starts_with("Bldg_Type_") ) %>% 
+           Latitude + Longitude, data = ames_train) |>
+  step_log(Gr_Liv_Area, base = 10) |> 
+  step_other(Neighborhood, threshold = 0.01) |> 
+  step_dummy(all_nominal_predictors()) |> 
+  step_interact( ~ Gr_Liv_Area:starts_with("Bldg_Type_") ) |> 
   step_ns(Latitude, Longitude, deg_free = 20)
 ```
 
@@ -491,11 +491,11 @@ We can specify the `id` argument in any step function call; otherwise it is gene
 ```{r engineering-lm-recipe-id}
 ames_rec <- 
   recipe(Sale_Price ~ Neighborhood + Gr_Liv_Area + Year_Built + Bldg_Type + 
-           Latitude + Longitude, data = ames_train) %>%
-  step_log(Gr_Liv_Area, base = 10) %>% 
-  step_other(Neighborhood, threshold = 0.01, id = "my_id") %>% 
-  step_dummy(all_nominal_predictors()) %>% 
-  step_interact( ~ Gr_Liv_Area:starts_with("Bldg_Type_") ) %>% 
+           Latitude + Longitude, data = ames_train) |>
+  step_log(Gr_Liv_Area, base = 10) |> 
+  step_other(Neighborhood, threshold = 0.01, id = "my_id") |> 
+  step_dummy(all_nominal_predictors()) |> 
+  step_interact( ~ Gr_Liv_Area:starts_with("Bldg_Type_") ) |> 
   step_ns(Latitude, Longitude, deg_free = 20)
 ```
 
@@ -503,8 +503,8 @@ We'll refit the workflow with this new recipe:
 
 ```{r engineering-lm-extended-recipe-fit}
 lm_wflow <- 
-  workflow() %>% 
-  add_model(lm_model) %>% 
+  workflow() |> 
+  add_model(lm_model) |> 
   add_recipe(ames_rec)
 
 lm_fit <- fit(lm_wflow, ames_train)
@@ -514,7 +514,7 @@ The `tidy()` method can be called again along with the `id` identifier we specif
 
 ```{r engineering-lm-tidy-other}
 estimated_recipe <- 
-  lm_fit %>% 
+  lm_fit |> 
   extract_recipe(estimated = TRUE)
 
 tidy(estimated_recipe, id = "my_id")
@@ -539,7 +539,7 @@ For example, in our Ames data set, the original raw data contained a column for 
 To solve this, the `add_role()`, `remove_role()`, and `update_role()` functions can be helpful. For example, for the house price data, the role of the street address column could be modified using:
 
 ```r
-ames_rec %>% update_role(address, new_role = "street address")
+ames_rec |> update_role(address, new_role = "street address")
 ```
 
 After this change, the `address` column in the dataframe will no longer be a predictor but instead will be a `"street address"` according to the recipe. Any character string can be used as a role. Also, columns can have multiple roles (additional roles are added via `add_role()`) so that they can be selected under more than one context. 
@@ -569,18 +569,18 @@ ames_test  <-  testing(ames_split)
 
 ames_rec <- 
   recipe(Sale_Price ~ Neighborhood + Gr_Liv_Area + Year_Built + Bldg_Type + 
-           Latitude + Longitude, data = ames_train) %>%
-  step_log(Gr_Liv_Area, base = 10) %>% 
-  step_other(Neighborhood, threshold = 0.01) %>% 
-  step_dummy(all_nominal_predictors()) %>% 
-  step_interact( ~ Gr_Liv_Area:starts_with("Bldg_Type_") ) %>% 
+           Latitude + Longitude, data = ames_train) |>
+  step_log(Gr_Liv_Area, base = 10) |> 
+  step_other(Neighborhood, threshold = 0.01) |> 
+  step_dummy(all_nominal_predictors()) |> 
+  step_interact( ~ Gr_Liv_Area:starts_with("Bldg_Type_") ) |> 
   step_ns(Latitude, Longitude, deg_free = 20)
   
-lm_model <- linear_reg() %>% set_engine("lm")
+lm_model <- linear_reg() |> set_engine("lm")
 
 lm_wflow <- 
-  workflow() %>% 
-  add_model(lm_model) %>% 
+  workflow() |> 
+  add_model(lm_model) |> 
   add_recipe(ames_rec)
 
 lm_fit <- fit(lm_wflow, ames_train)
@@ -588,7 +588,7 @@ lm_fit <- fit(lm_wflow, ames_train)
 
 
 ```{r engineering-save, include = FALSE}
-if(is_new_version(lm_fit, "RData/lm_fit.RData")) {
+if (!file.exists("RData/lm_fit.RData")) {
   save(lm_fit, file = "RData/lm_fit.RData", version = 2, compress = "xz")
 }
 ```

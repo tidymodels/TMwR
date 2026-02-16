@@ -1,11 +1,12 @@
 ```{r resampling-setup, include = FALSE}
 knitr::opts_chunk$set(fig.path = "figures/")
 library(tidymodels)
-library(doMC)
+library(mirai)
 library(kableExtra)
 library(tidyr)
+
 tidymodels_prefer()
-registerDoMC(cores = parallel::detectCores())
+daemons(parallel::detectCores())
 
 source("ames_snippets.R")
 load("RData/lm_fit.RData")
@@ -37,18 +38,18 @@ Using the same predictor set as the linear model (without the extra preprocessin
 
 ```{r resampling-rand-forest-spec}
 rf_model <- 
-  rand_forest(trees = 1000) %>% 
-  set_engine("ranger") %>% 
+  rand_forest(trees = 1000) |> 
+  set_engine("ranger") |> 
   set_mode("regression")
 
 rf_wflow <- 
-  workflow() %>% 
+  workflow() |> 
   add_formula(
     Sale_Price ~ Neighborhood + Gr_Liv_Area + Year_Built + Bldg_Type + 
-      Latitude + Longitude) %>% 
+      Latitude + Longitude) |> 
   add_model(rf_model) 
 
-rf_fit <- rf_wflow %>% fit(data = ames_train)
+rf_fit <- rf_wflow |> fit(data = ames_train)
 ```
 
 How should we compare the linear and random forest models? For demonstration, we will predict the training set to produce what is known as an *apparent metric* or *resubstitution metric*. This function creates predictions and formats the results: 
@@ -64,11 +65,11 @@ estimate_perf <- function(model, dat) {
   # Estimate these metrics:
   reg_metrics <- metric_set(rmse, rsq)
   
-  model %>%
-    predict(dat) %>%
-    bind_cols(dat %>% select(Sale_Price)) %>%
-    reg_metrics(Sale_Price, .pred) %>%
-    select(-.estimator) %>%
+  model |>
+    predict(dat) |>
+    bind_cols(dat |> select(Sale_Price)) |>
+    reg_metrics(Sale_Price, .pred) |>
+    select(-.estimator) |>
     mutate(object = obj_name, data = data_name)
 }
 ```
@@ -87,8 +88,8 @@ all_res <-
     estimate_perf(rf_fit, ames_train),
     estimate_perf(lm_fit, ames_test),
     estimate_perf(rf_fit, ames_test)
-  ) %>% filter(.metric == "rmse") %>% 
-  select(-.metric) %>% 
+  ) |> filter(.metric == "rmse") |> 
+  select(-.metric) |> 
   pivot_wider(id_cols = object,
               values_from = ".estimate",
               names_from = "data")
@@ -102,7 +103,7 @@ Based on these results, the random forest is much more capable of predicting the
 estimate_perf(rf_fit, ames_test)
 ```
 
-The test set RMSE estimate, `r all_res %>% filter(object == "rf_fit") %>% pull("test")`, is *much worse than the training set*  value of `r all_res %>% filter(object == "rf_fit") %>% pull("train")`! Why did this happen? 
+The test set RMSE estimate, `r all_res |> filter(object == "rf_fit") |> pull("test")`, is *much worse than the training set*  value of `r all_res |> filter(object == "rf_fit") |> pull("train")`! Why did this happen? 
 
 Many predictive models are capable of learning complex trends from the data. In statistics, these are commonly referred to as _low bias models_. 
 
@@ -115,14 +116,14 @@ For a low bias model, the high degree of predictive capacity can sometimes resul
 For both models, Table \@ref(tab:rmse-results) summarizes the RMSE estimate for the training and test sets: 
 
 ```{r resampling-rmse-table, echo = FALSE, results = "asis"}
-all_res %>% 
-  mutate(object = paste0("<tt>", object, "</tt>")) %>% 
+all_res |> 
+  mutate(object = paste0("<tt>", object, "</tt>")) |> 
   kable(
     caption = "Performance statistics for training and test sets.",
     label = "rmse-results",
     escape = FALSE
-  ) %>% 
-  kable_styling(full_width = FALSE) %>% 
+  ) |> 
+  kable_styling(full_width = FALSE) |> 
   add_header_above(c(" ", "RMSE Estimates" = 2))
 ```
 
@@ -206,7 +207,7 @@ ames_folds
 ames_first_split <- ames_folds$splits[[1]]
 ```
 
-The column named `splits` contains the information on how to split the data (similar to the object used to create the initial training/test partition). While each row of `splits` has an embedded copy of the entire training set, R is smart enough not to make copies of the data in memory.^[To see this for yourself, try executing `lobstr::obj_size(ames_folds)` and `lobstr::obj_size(ames_train)`. The size of the resample object is much less than ten times the size of the original data.] The print method inside of the tibble shows the frequency of each: `r glue::backtick(gsub("split ", "", obj_sum(ames_folds$splits[[1]])))` indicates that about two thousand samples are in the analysis set and `r nrow(assessment(ames_first_split))` are in that particular assessment set. 
+The column named `splits` contains the information on how to split the data (similar to the object used to create the initial training/test partition). While each row of `splits` has an embedded copy of the entire training set, R is smart enough not to make copies of the data in memory.^[To see this for yourself, try executing `lobstr::obj_size(ames_folds)` and `lobstr::obj_size(ames_train)`. The size of the resample object is much less than ten times the size of the original data.] The print method inside of the tibble shows the frequency of each: `r glue::backtick(gsub("split ", "", pillar::obj_sum(ames_folds$splits[[1]])))` indicates that about two thousand samples are in the analysis set and `r nrow(assessment(ames_first_split))` are in that particular assessment set. 
 
 These objects also always contain a character column called `id` that labels the partition.^[Some resampling methods require multiple `id` fields.]  
 
@@ -214,7 +215,7 @@ To manually retrieve the partitioned data, the `analysis()` and `assessment()` f
 
 ```{r resampling-analysis}
 # For the first fold:
-ames_folds$splits[[1]] %>% analysis() %>% dim()
+ames_folds$splits[[1]] |> analysis() |> dim()
 ```
 
 The `r pkg(tidymodels)` packages, such as [`r pkg(tune)`](https://tune.tidymodels.org/), contain high-level user interfaces so that functions like `analysis()` are not generally needed for day-to-day work. Section \@ref(resampling-performance) demonstrates a function to fit a model over these resamples. 
@@ -239,7 +240,7 @@ Consider the Ames data. On average, 10-fold cross-validation uses assessment set
 y_lab <- expression(Multiplier ~ on ~ sigma)
 
 cv_info <- 
-  tibble(replicates = rep(1:10, 2), V = 10) %>% 
+  tibble(replicates = rep(1:10, 2), V = 10) |> 
   mutate(B = V * replicates, reduction = 1/B, V = format(V))
 
 ggplot(cv_info, aes(x = replicates, y = reduction)) + 
@@ -375,15 +376,15 @@ For a year's worth of data, suppose that six sets of 30-day blocks define the an
 
 ```{r resampling-rolling-forcast}
 time_slices <- 
-  tibble(x = 1:365) %>% 
+  tibble(x = 1:365) |> 
   rolling_origin(initial = 6 * 30, assess = 30, skip = 29, cumulative = FALSE)
 
 data_range <- function(x) {
   summarize(x, first = min(x), last = max(x))
 }
 
-map_dfr(time_slices$splits, ~   analysis(.x) %>% data_range())
-map_dfr(time_slices$splits, ~ assessment(.x) %>% data_range())
+map_dfr(time_slices$splits, ~   analysis(.x) |> data_range())
+map_dfr(time_slices$splits, ~ assessment(.x) |> data_range())
 ```
 
 
@@ -401,9 +402,9 @@ This sequence repeats for every resample. If there are _B_ resamples, there are 
 Let's reconsider the previous random forest model contained in the `rf_wflow` object. The `fit_resamples()` function is analogous to `fit()`, but instead of having a `data` argument, `fit_resamples()` has `resamples`, which expects an `rset` object like the ones shown in this chapter. The possible interfaces to the function are:  
 
 ```{r resampling-usage, eval = FALSE}
-model_spec %>% fit_resamples(formula,  resamples, ...)
-model_spec %>% fit_resamples(recipe,   resamples, ...)
-workflow   %>% fit_resamples(          resamples, ...)
+model_spec |> fit_resamples(formula,  resamples, ...)
+model_spec |> fit_resamples(recipe,   resamples, ...)
+workflow   |> fit_resamples(          resamples, ...)
 ```
 
 There are a number of other optional arguments, such as: 
@@ -427,19 +428,19 @@ keep_pred <- control_resamples(save_pred = TRUE, save_workflow = TRUE)
 
 set.seed(1003)
 rf_res <- 
-  rf_wflow %>% 
+  rf_wflow |> 
   fit_resamples(resamples = ames_folds, control = keep_pred)
 rf_res
 ```
 ```{r resampling-checkpoint, include = FALSE}
 lm_wflow <- 
-  workflow() %>% 
-  add_recipe(ames_rec) %>% 
-  add_model(linear_reg() %>% set_engine("lm"))
+  workflow() |> 
+  add_recipe(ames_rec) |> 
+  add_model(linear_reg() |> set_engine("lm"))
 
-if (is_new_version(rf_res,   "RData/resampling.RData") |
-    is_new_version(lm_wflow, "RData/resampling.RData") |
-    is_new_version(rf_wflow, "RData/resampling.RData")) {
+if (!file.exists("RData/resampling.RData") |
+    !file.exists("RData/resampling.RData") |
+    !file.exists("RData/resampling.RData")) {
   save(rf_res, lm_wflow, rf_wflow, file = "RData/resampling.RData", version = 2, compress = "xz")
 }
 ```
@@ -478,7 +479,7 @@ For some resampling methods, such as the bootstrap or repeated cross-validation,
 Since this analysis used 10-fold cross-validation, there is one unique prediction for each training set sample. These data can generate helpful plots of the model to understand where it potentially failed. For example, Figure \@ref(fig:ames-resampled-performance) compares the observed and held-out predicted values (analogous to Figure \@ref(fig:ames-performance-plot)):
 
 ```{r resampling-cv-pred-plot, eval=FALSE}
-assess_res %>% 
+assess_res |> 
   ggplot(aes(x = Sale_Price, y = .pred)) + 
   geom_point(alpha = .15) +
   geom_abline(color = "red") + 
@@ -498,14 +499,14 @@ There are two houses in the training set with a low observed sale price that are
 
 ```{r resampling-investigate}
 over_predicted <- 
-  assess_res %>% 
-  mutate(residual = Sale_Price - .pred) %>% 
-  arrange(desc(abs(residual))) %>% 
+  assess_res |> 
+  mutate(residual = Sale_Price - .pred) |> 
+  arrange(desc(abs(residual))) |> 
   slice(1:2)
 over_predicted
 
-ames_train %>% 
-  slice(over_predicted$.row) %>% 
+ames_train |> 
+  slice(over_predicted$.row) |> 
   select(Gr_Liv_Area, Neighborhood, Year_Built, Bedroom_AbvGr, Full_Bath)
 ```
 
@@ -514,7 +515,7 @@ Identifying examples like these with especially poor performance can help us fol
 Let's move back to the homes overall. How can we use a validation set instead of cross-validation? From our previous `r pkg(rsample)` object:
 
 ```{r resampling-val-ames}
-val_res <- rf_wflow %>% fit_resamples(resamples = val_set)
+val_res <- rf_wflow |> fit_resamples(resamples = val_set)
 val_res
 
 collect_metrics(val_res)
@@ -596,18 +597,18 @@ Let's fit a linear regression model using the recipe we developed in Chapter \@r
 ```{r resampling-lm-ames}
 ames_rec <- 
   recipe(Sale_Price ~ Neighborhood + Gr_Liv_Area + Year_Built + Bldg_Type + 
-           Latitude + Longitude, data = ames_train) %>%
-  step_other(Neighborhood, threshold = 0.01) %>% 
-  step_dummy(all_nominal_predictors()) %>% 
-  step_interact( ~ Gr_Liv_Area:starts_with("Bldg_Type_") ) %>% 
+           Latitude + Longitude, data = ames_train) |>
+  step_other(Neighborhood, threshold = 0.01) |> 
+  step_dummy(all_nominal_predictors()) |> 
+  step_interact( ~ Gr_Liv_Area:starts_with("Bldg_Type_") ) |> 
   step_ns(Latitude, Longitude, deg_free = 20)
 
 lm_wflow <-  
-  workflow() %>% 
-  add_recipe(ames_rec) %>% 
-  add_model(linear_reg() %>% set_engine("lm")) 
+  workflow() |> 
+  add_recipe(ames_rec) |> 
+  add_model(linear_reg() |> set_engine("lm")) 
 
-lm_fit <- lm_wflow %>% fit(data = ames_train)
+lm_fit <- lm_wflow |> fit(data = ames_train)
 
 # Select the recipe: 
 extract_recipe(lm_fit, estimated = TRUE)
@@ -617,7 +618,8 @@ We can save the linear model coefficients for a fitted model object from a workf
 
 ```{r resampling-extract-func}
 get_model <- function(x) {
-  extract_fit_parsnip(x) %>% tidy()
+  library(broom) # Required for `tidy()` method
+  extract_fit_parsnip(x) |> tidy()
 }
 
 # Test it using: 
@@ -629,7 +631,7 @@ Now let's apply this function to the ten resampled fits. The results of the extr
 ```{r resampling-extract-all}
 ctrl <- control_resamples(extract = get_model)
 
-lm_res <- lm_wflow %>%  fit_resamples(resamples = ames_folds, control = ctrl)
+lm_res <- lm_wflow |>  fit_resamples(resamples = ames_folds, control = ctrl)
 lm_res
 ```  
 
@@ -674,32 +676,32 @@ ames_test  <-  testing(ames_split)
 
 ames_rec <- 
   recipe(Sale_Price ~ Neighborhood + Gr_Liv_Area + Year_Built + Bldg_Type + 
-           Latitude + Longitude, data = ames_train) %>%
-  step_log(Gr_Liv_Area, base = 10) %>% 
-  step_other(Neighborhood, threshold = 0.01) %>% 
-  step_dummy(all_nominal_predictors()) %>% 
-  step_interact( ~ Gr_Liv_Area:starts_with("Bldg_Type_") ) %>% 
+           Latitude + Longitude, data = ames_train) |>
+  step_log(Gr_Liv_Area, base = 10) |> 
+  step_other(Neighborhood, threshold = 0.01) |> 
+  step_dummy(all_nominal_predictors()) |> 
+  step_interact( ~ Gr_Liv_Area:starts_with("Bldg_Type_") ) |> 
   step_ns(Latitude, Longitude, deg_free = 20)
 
-lm_model <- linear_reg() %>% set_engine("lm")
+lm_model <- linear_reg() |> set_engine("lm")
 
 lm_wflow <- 
-  workflow() %>% 
-  add_model(lm_model) %>% 
+  workflow() |> 
+  add_model(lm_model) |> 
   add_recipe(ames_rec)
 
 lm_fit <- fit(lm_wflow, ames_train)
 
 rf_model <- 
-  rand_forest(trees = 1000) %>% 
-  set_engine("ranger") %>% 
+  rand_forest(trees = 1000) |> 
+  set_engine("ranger") |> 
   set_mode("regression")
 
 rf_wflow <- 
-  workflow() %>% 
+  workflow() |> 
   add_formula(
     Sale_Price ~ Neighborhood + Gr_Liv_Area + Year_Built + Bldg_Type + 
-      Latitude + Longitude) %>% 
+      Latitude + Longitude) |> 
   add_model(rf_model) 
 
 set.seed(1001)
@@ -708,6 +710,6 @@ ames_folds <- vfold_cv(ames_train, v = 10)
 keep_pred <- control_resamples(save_pred = TRUE, save_workflow = TRUE)
 
 set.seed(1003)
-rf_res <- rf_wflow %>% fit_resamples(resamples = ames_folds, control = keep_pred)
+rf_res <- rf_wflow |> fit_resamples(resamples = ames_folds, control = keep_pred)
 ```
 

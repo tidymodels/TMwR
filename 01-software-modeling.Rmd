@@ -73,8 +73,8 @@ resid_cols <- RColorBrewer::brewer.pal(8, "Set1")[1:2]
 
 # Red is where intensity is higher than expected
 plm_plot <- 
-  plm_resids %>% 
-  mutate(sign = ifelse(Intensity < 0, "low", "high")) %>% 
+  plm_resids |> 
+  mutate(sign = ifelse(Intensity < 0, "low", "high")) |> 
   ggplot(aes(x = x, y = y, fill = sign))  + 
   geom_tile(show.legend = FALSE) + 
   facet_wrap(~Sample) + 
@@ -257,23 +257,23 @@ monolog <-
   )
 if (knitr::is_html_output()) {
   tab <- 
-    monolog %>% 
-    dplyr::select(Thoughts, Activity) %>% 
+    monolog |> 
+    dplyr::select(Thoughts, Activity) |> 
     kable(
       caption = "Hypothetical inner monologue of a model developer.",
       label = "inner-monologue"
-    ) %>%
-    kable_styling() %>% 
-    column_spec(2, width = "25%") %>%
+    ) |>
+    kable_styling() |> 
+    column_spec(2, width = "25%") |>
     column_spec(1, width = "75%", italic = TRUE)
 } else {
   tab <- 
-    monolog %>% 
-    dplyr::select(Thoughts, Activity) %>% 
+    monolog |> 
+    dplyr::select(Thoughts, Activity) |> 
     kable(
       caption = "Hypothetical inner monologue of a model developer.",
       label = "inner-monologue"
-    ) %>%
+    ) |>
     kable_styling()
 }
 tab

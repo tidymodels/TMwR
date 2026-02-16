@@ -33,7 +33,7 @@ reg_ex <-
     observed = c(obs, obs),
     predicted = c(obs + rnorm(n, sd = 1.5), 5 + .5 * obs + rnorm(n, sd = .5)),
     approach = rep(c("RMSE optimized", "R^2 optimized"), each = n)
-  ) %>% 
+  ) |> 
   mutate(approach = factor(
     approach, 
     levels = c("RMSE optimized", "R^2 optimized"),
@@ -54,42 +54,42 @@ This chapter will demonstrate the `r pkg(yardstick)` package, a core tidymodels 
 ## Performance Metrics and Inference
 
 ```{r performance ad-model, include = FALSE}
-ad_mod <- logistic_reg() %>% set_engine("glm") 
+ad_mod <- logistic_reg() |> set_engine("glm") 
 full_model_fit <-
-  ad_mod %>% 
+  ad_mod |> 
   fit(Class ~ (Genotype + male + age)^3, data = ad_data)
 
-full_model_fit %>% extract_fit_engine() 
+full_model_fit |> extract_fit_engine() 
 
 two_way_fit <-
-  ad_mod %>% 
+  ad_mod |> 
   fit(Class ~ (Genotype + male + age)^2, data = ad_data)
 
 three_factor_test <- 
   anova(
-    full_model_fit %>% extract_fit_engine(), 
-    two_way_fit %>% extract_fit_engine(),
+    full_model_fit |> extract_fit_engine(), 
+    two_way_fit |> extract_fit_engine(),
     test = "LRT"
   )
 
 main_effects_fit <-
-  ad_mod %>% 
+  ad_mod |> 
   fit(Class ~ Genotype + male + age, data = ad_data)
 
 two_factor_test <- 
   anova(
-    two_way_fit %>% extract_fit_engine(), 
-    main_effects_fit %>% extract_fit_engine(),
+    two_way_fit |> extract_fit_engine(), 
+    main_effects_fit |> extract_fit_engine(),
     test = "LRT"
   )
 
 two_factor_rs <- 
-  ad_mod %>% 
+  ad_mod |> 
   fit_resamples(Class ~ (Genotype + male + age)^2, ad_folds)
 
 two_factor_res <- 
-  collect_metrics(two_factor_rs) %>% 
-  filter(.metric == "accuracy") %>% 
+  collect_metrics(two_factor_rs) |> 
+  filter(.metric == "accuracy") |> 
   pull(mean)
 ```
 
@@ -130,14 +130,14 @@ To illustrate, let's take the model from Section \@ref(recipes-summary). This mo
 
 
 ```{r performance-predict-ames}
-ames_test_res <- predict(lm_fit, new_data = ames_test %>% select(-Sale_Price))
+ames_test_res <- predict(lm_fit, new_data = ames_test |> select(-Sale_Price))
 ames_test_res
 ```
 
 The predicted numeric outcome from the regression model is named `.pred`. Let's match the predicted values with their corresponding observed outcome values: 
 
 ```{r performance-ames-outcome}
-ames_test_res <- bind_cols(ames_test_res, ames_test %>% select(Sale_Price))
+ames_test_res <- bind_cols(ames_test_res, ames_test |> select(Sale_Price))
 ames_test_res
 ```
 
@@ -293,26 +293,26 @@ Using sensitivity as an example, the usual two-class calculation is the ratio of
 
 ```{r performance-sens-manual}
 class_totals <- 
-  count(hpc_cv, obs, name = "totals") %>% 
+  count(hpc_cv, obs, name = "totals") |> 
   mutate(class_wts = totals / sum(totals))
 class_totals
 
 cell_counts <- 
-  hpc_cv %>% 
-  group_by(obs, pred) %>% 
-  count() %>% 
+  hpc_cv |> 
+  group_by(obs, pred) |> 
+  count() |> 
   ungroup()
 
 # Compute the four sensitivities using 1-vs-all
 one_versus_all <- 
-  cell_counts %>% 
-  filter(obs == pred) %>% 
-  full_join(class_totals, by = "obs") %>% 
+  cell_counts |> 
+  filter(obs == pred) |> 
+  full_join(class_totals, by = "obs") |> 
   mutate(sens = n / totals)
 one_versus_all
 
 # Three different estimates:
-one_versus_all %>% 
+one_versus_all |> 
   summarize(
     macro = mean(sens), 
     macro_wts = weighted.mean(sens, class_wts),
@@ -343,8 +343,8 @@ roc_auc(hpc_cv, obs, VF, F, M, L, estimator = "macro_weighted")
 Finally, all of these performance metrics can be computed using `r pkg(dplyr)` groupings. Recall that these data have a column for the resampling groups. We haven't yet discussed resampling in detail, but notice how we can pass a grouped data frame to the metric function to compute the metrics for each group: 
 
 ```{r performance-multi-class-acc-grouped}
-hpc_cv %>% 
-  group_by(Resample) %>% 
+hpc_cv |> 
+  group_by(Resample) |> 
   accuracy(obs, pred)
 ```
 
@@ -352,9 +352,9 @@ The groupings also translate to the `autoplot()` methods, with results shown in 
 
 ```{r performance-multi-class-roc-grouped, eval=FALSE}
 # Four 1-vs-all ROC curves for each fold
-hpc_cv %>% 
-  group_by(Resample) %>% 
-  roc_curve(obs, VF, F, M, L) %>% 
+hpc_cv |> 
+  group_by(Resample) |> 
+  roc_curve(obs, VF, F, M, L) |> 
   autoplot()
 ```
 
