@@ -414,9 +414,8 @@ svm_bo_sshh <-
 # verify_consistent_bo(collect_metrics(svm_bo_sshh$result))
 
 svm_bo <- svm_bo_sshh$result
+print(svm_bo)
 svm_bo_output <- svm_bo_sshh$messages
-
-gp_candidates <- collect_gp_results(svm_bo)
 ```
 
 ### The `tune_bayes()` function {#tune-bayes}
@@ -578,15 +577,17 @@ An additional type of plot uses `type = "parameters"`  that shows the parameter 
 The animation below visualizes the results of the search. The black $\times$ values show the starting values contained in `svm_initial`. The top-left blue panel shows the predicted mean value of the area under the ROC curve. The red panel on the top-right displays the predicted variation in the ROC values while the bottom plot visualizes the expected improvement. In each panel, darker colors indicate less attractive values (e.g., small mean values, large variation, and small improvements).  
 
 ```{r iterative-bo-progress, include = FALSE}
-av_capture_graphics(
-  make_bo_animation(gp_candidates, svm_bo),
-  output = "bo_search.mp4",
-  width = 760,
-  height = 760,
-  res = 100,
-  vfilter = 'framerate=fps=10', 
-  framerate = 1/3
-)
+gp_candidates <- collect_gp_results(svm_bo)
+print(gp_candidates)
+# av_capture_graphics(
+#   make_bo_animation(gp_candidates, svm_bo),
+#   output = "bo_search.mp4",
+#   width = 760,
+#   height = 760,
+#   res = 100,
+#   vfilter = 'framerate=fps=10', 
+#   framerate = 1/3
+# )
 ```
 
 <video width="720" height="720" controls>
