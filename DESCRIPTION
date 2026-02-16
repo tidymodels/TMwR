@@ -49,6 +49,7 @@ Imports:
     lme4,
     lubridate,
     mda,
+    mirai,
     mixOmics,
     modeldata,
     multilevelmod,
