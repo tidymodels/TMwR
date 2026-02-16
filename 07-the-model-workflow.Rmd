@@ -183,16 +183,14 @@ A number of multilevel models have standardized on a formula specification devis
 
 ```r
 library(lme4)
+data(Orthodont, package = "nlme") # load the Orthodont data from the nlme package
+
 lmer(distance ~ Sex + (age | Subject), data = Orthodont)
 ```
 
 The effect of this is that each subject will have an estimated intercept and slope parameter for `age`. 
 
 The problem is that standard R methods can't properly process this formula: 
-
-```{r echo=FALSE}
-data(Orthodont, package = "nlme")
-```
 
 ```{r workflows-rand-mm, error=TRUE}
 model.matrix(distance ~ Sex + (age | Subject), data = Orthodont)
@@ -238,7 +236,7 @@ parametric_workflow <-
   add_model(parametric_spec, 
             formula = Surv(futime, fustat) ~ age + strata(rx))
 
-parametric_fit <- fit(parametric_workflow, data = ovarian)
+parametric_fit <- fit(parametric_workflow, data = survival::ovarian)
 parametric_fit
 ```
 

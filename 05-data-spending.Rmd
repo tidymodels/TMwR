@@ -121,7 +121,7 @@ ames_val_split <- initial_validation_split(ames, prop = c(0.6, 0.2))
 ames_val_split
 ```
 
-Printing the split now shows the size of the training set (`r format(nrow(training(ames_val_split)), big.mark = ",")`), validation set (`r format(nrow(validation(ames_val_split)), big.mark = ",")`), and test set ((`r format(nrow(testing(ames_val_split)), big.mark = ",")`). 
+Printing the split now shows the size of the training set (`r format(nrow(training(ames_val_split)), big.mark = ",")`), validation set (`r format(nrow(validation(ames_val_split)), big.mark = ",")`), and test set (`r format(nrow(testing(ames_val_split)), big.mark = ",")`). 
 
 To get the training, validation, and testing data, the same syntax is used: 
 
