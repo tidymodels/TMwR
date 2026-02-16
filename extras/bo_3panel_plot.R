@@ -29,6 +29,11 @@ collect_gp_results <- function(res, aqf = exp_improve(), num_vals = 100) {
     } else {
       current_best <- min(perf_res$mean[perf_res$.iter < i])
     }
+
+    if (is.null(gp_fit$fit)) {
+      print(gp_fit)
+    }
+
     gp_pred <- predict(gp_fit$fit, grid_scaled, se.fit = TRUE)
     candidates <-
       grid |>
