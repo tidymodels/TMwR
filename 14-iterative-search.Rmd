@@ -426,6 +426,8 @@ if (any(!has_files)) {
 }
 
 file.copy(files, "RData")
+si <- sessioninfo::session_info()
+save(si, file = "RData/si.RData")
 
 save(svm_bo_output, svm_bo, file = "RData/bo_debug.RData")
 
