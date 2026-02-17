@@ -37,6 +37,7 @@ Imports:
     ggforce,
     ggplot2,
     glmnet,
+    GPfit,
     gridExtra,
     infer,
     kableExtra (>= 1.2.1),
