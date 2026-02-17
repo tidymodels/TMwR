@@ -32,7 +32,7 @@ Imports:
     earth,
     embed (>= 0.1.5),
     fastICA,
-    finetune (>= 0.1.1),
+    finetune (>= 1.2.1.9000),
     forcats,
     ggforce,
     ggplot2,
@@ -91,7 +91,8 @@ Imports:
 Remotes:
     tidymodels/learntidymodels,
     tidymodels/applicable,
-    tidymodels/tune
+    tidymodels/tune,
+    tidymodels/finetune
 biocViews: mixOmics
 Encoding: UTF-8
 SystemRequirements: FFmpeg (>= 3.2); with at least libx264 and lame (mp3)
