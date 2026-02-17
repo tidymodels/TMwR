@@ -82,7 +82,7 @@ Imports:
     tidymodels (>= 1.1.0),
     tidyposterior (>= 0.0.3),
     tidyverse,
-    tune (>= 0.1.3),
+    tune (>= 2.0.1.9002),
     uwot,
     workflows (>= 0.2.2),
     workflowsets (>= 0.0.1),
@@ -90,7 +90,8 @@ Imports:
     yardstick
 Remotes:
     tidymodels/learntidymodels,
-    tidymodels/applicable
+    tidymodels/applicable,
+    tidymodels/tune
 biocViews: mixOmics
 Encoding: UTF-8
 SystemRequirements: FFmpeg (>= 3.2); with at least libx264 and lame (mp3)
