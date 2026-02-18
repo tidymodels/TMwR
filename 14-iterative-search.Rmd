@@ -7,7 +7,7 @@ library(kableExtra)
 library(av)
 library(mirai)
 
-daemons(parallel::detectCores())
+daemons(parallelly::availableCores())
 tidymodels_prefer()
 
 ## -----------------------------------------------------------------------------

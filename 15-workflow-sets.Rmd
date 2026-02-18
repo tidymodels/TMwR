@@ -11,7 +11,7 @@ library(mirai)
 tidymodels_prefer()
 caching <- FALSE
 
-cores <- parallel::detectCores()
+cores <- parallelly::availableCores()
 daemons(cores)
 ```
 

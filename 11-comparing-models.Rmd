@@ -10,7 +10,7 @@ library(forcats)
 library(mirai)
 
 tidymodels_prefer()
-daemons(parallel::detectCores())
+daemons(parallelly::availableCores())
 
 source("ames_snippets.R")
 load("RData/resampling.RData")

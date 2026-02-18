@@ -1,7 +1,7 @@
 library(tidymodels)
 library(rayshader)
 library(mirai)
-daemons(parallel::detectCores())
+daemons(parallelly::availableCores())
 
 ## -----------------------------------------------------------------------------
 

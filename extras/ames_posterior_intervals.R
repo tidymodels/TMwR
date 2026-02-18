@@ -14,9 +14,9 @@ ames_split <- initial_split(ames, prop = 0.80, strata = Sale_Price)
 ames_train <- training(ames_split)
 ames_test <- testing(ames_split)
 
-crs <- parallel::detectCores()
+crs <- parallelly::availableCores()
 
-daemons(parallel::detectCores())
+daemons(parallelly::availableCores())
 
 ## -----------------------------------------------------------------------------
 

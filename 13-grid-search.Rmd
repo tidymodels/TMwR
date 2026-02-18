@@ -11,7 +11,7 @@ library(kableExtra)
 
 data(cells)
 theme_set(theme_bw())
-daemons(parallel::detectCores())
+daemons(parallelly::availableCores())
 tidymodels_prefer()
 
 ## -----------------------------------------------------------------------------

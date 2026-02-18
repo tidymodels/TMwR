@@ -11,7 +11,7 @@ library(mirai)
 library(patchwork)
 library(beans)
 
-daemons(parallel::detectCores())
+daemons(parallelly::availableCores())
 tidymodels_prefer()
 ```
 
