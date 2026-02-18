@@ -416,22 +416,6 @@ svm_bo_sshh <-
 svm_bo <- svm_bo_sshh$result
 print(svm_bo)
 svm_bo_output <- svm_bo_sshh$messages
-
-nm <- recipes::names0(max(svm_bo$.iter), "gp_candidates_")
-file_name <- paste0(nm, ".RData")
-files <- file.path(tempdir(), file_name)
-has_files <- file.exists(files)
-if (any(!has_files)) {
-  rlang::abort("No GP files were found in `tempdir()`")
-}
-
-file.copy(files, "RData")
-si <- sessioninfo::session_info()
-save(si, file = "RData/si.RData")
-
-save(svm_bo_output, svm_bo, file = "RData/bo_debug.RData")
-
-
 ```
 
 ### The `tune_bayes()` function {#tune-bayes}
@@ -594,16 +578,16 @@ The animation below visualizes the results of the search. The black $\times$ val
 
 ```{r iterative-bo-progress, include = FALSE}
 gp_candidates <- collect_gp_results(svm_bo)
-print(gp_candidates)
-# av_capture_graphics(
-#   make_bo_animation(gp_candidates, svm_bo),
-#   output = "bo_search.mp4",
-#   width = 760,
-#   height = 760,
-#   res = 100,
-#   vfilter = 'framerate=fps=10', 
-#   framerate = 1/3
-# )
+
+av_capture_graphics(
+  make_bo_animation(gp_candidates, svm_bo),
+  output = "bo_search.mp4",
+  width = 760,
+  height = 760,
+  res = 100,
+  vfilter = 'framerate=fps=10',
+  framerate = 1/3
+)
 ```
 
 <video width="720" height="720" controls>
