@@ -54,16 +54,28 @@ Simple validation sets can also be used with stacking since tidymodels considers
 For the concrete example, the training set used for model stacking has columns for all of the candidate tuning parameter results. Table \@ref(tab:ensemble-candidate-preds) presents the first six rows and selected columns.
 
 ```{r ensembles-data-example, echo = FALSE, results = "asis", warning = FALSE, message = FALSE}
-stacks() |> 
+res <- 
+  stacks() |> 
   add_candidates(grid_results) |> 
   as_tibble() |> 
   mutate(
     sample_num = row_number(),
     buffer_1 = "",
     buffer_2 = "") |> 
-  slice_head(n = 6) |> 
-  select(sample_num, CART_bagged_0_0_0, starts_with("MARS"), Cubist_0_02_0,
-         buffer_1, Cubist_0_25_0, buffer_2) |> 
+  slice_head(n = 6) 
+
+# Get a subset of column names to make an abbreviated table
+cand_names <- names(res)
+cart_bag_col <- grep("^CART_bagged", cand_names, value = TRUE)[1]
+cubist_cols <- grep("^Cubist", cand_names, value = TRUE)
+cubist_first_col <- cubist_cols[1]
+cubist_last_col <- cubist_cols[length(cubist_cols)]
+
+res |> 
+  select(
+    sample_num, all_of(cart_bag_col), starts_with("MARS"), 
+    all_of(cubist_first_col), buffer_1, all_of(cubist_last_col), buffer_2
+  ) |> 
   knitr::kable(
     digits = 2,
     align = rep("c", 8),
