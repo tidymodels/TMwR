@@ -492,7 +492,7 @@ iter_2_text <-
     iter_1_imp &  !iter_2_imp ~ 
       paste0("the second iteration did not continue the trend with a suboptimal ROC value of ",
              round(iter_2_roc, 5), "."),
-    iter_1_imp &  !iter_2_imp ~ 
+    iter_1_imp &  iter_2_imp ~ 
       paste0("the second iteration further increased the outcome value (ROC = ",
              round(iter_2_roc, 5), ").") 
   )
@@ -789,7 +789,7 @@ svm_sa_sshh <-
     metrics = roc_res,
     initial = svm_initial,
     param_info = svm_param,
-    iter = 50,
+    iter = 25,
     control = ctrl_sa
   )
 
@@ -821,7 +821,7 @@ svm_sa <-
     metrics = roc_res,
     initial = svm_initial,
     param_info = svm_param,
-    iter = 50,
+    iter = 25,
     control = ctrl_sa
   )
 ```

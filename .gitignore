@@ -20,3 +20,6 @@ extras/iowa_highway.shx
 extras/iowa_highway.shp
 files_for_print*
 extras/iowa_highway.dbf
+
+/.quarto/
+**/*.quarto_ipynb
