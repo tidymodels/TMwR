@@ -7,11 +7,11 @@ library(learntidymodels)
 library(baguette)
 library(discrim)
 library(uwot)
-library(doMC)
+library(mirai)
 library(patchwork)
 library(beans)
 
-registerDoMC(cores = parallel::detectCores())
+daemons(parallelly::availableCores())
 tidymodels_prefer()
 ```
 
@@ -125,9 +125,9 @@ Before beginning any dimensionality reduction, we can spend some time investigat
 ```{r dimensionality-corr-plot, eval = FALSE}
 library(corrplot)
 tmwr_cols <- colorRampPalette(c("#91CBD765", "#CA225E"))
-bean_train %>% 
-  select(-class) %>% 
-  cor() %>% 
+bean_train |> 
+  select(-class) |> 
+  cor() |> 
   corrplot(col = tmwr_cols(200), tl.col = "black", method = "ellipse")
 ```
 
@@ -150,9 +150,9 @@ It's time to look at the beans data in a smaller space. We can start with a basi
 library(bestNormalize)
 bean_rec <-
   # Use the training data from the bean_val split object
-  recipe(class ~ ., data = bean_train) %>%
-  step_zv(all_numeric_predictors()) %>%
-  step_orderNorm(all_numeric_predictors()) %>% 
+  recipe(class ~ ., data = bean_train) |>
+  step_zv(all_numeric_predictors()) |>
+  step_orderNorm(all_numeric_predictors()) |> 
   step_normalize(all_numeric_predictors())
 ```
 
@@ -207,8 +207,8 @@ If you encounter errors when working with a recipe, `prep()` can be used with it
 :::
 
 ```{r dimensionality-prep-fail, error=TRUE}
-bean_rec_trained %>% 
-  step_dummy(cornbread) %>%  # <- not a real predictor
+bean_rec_trained |> 
+  step_dummy(cornbread) |>  # <- not a real predictor
   prep(verbose = TRUE)
 ```
 
@@ -216,7 +216,7 @@ Another option that can help you understand what happens in the analysis is `log
 
 ```{r dimensionality-prep-log}
 show_variables <- 
-  bean_rec %>% 
+  bean_rec |> 
   prep(log_changes = TRUE)
 ```
 
@@ -237,13 +237,13 @@ Figure \@ref(fig:bean-area) shows histograms of the `area` predictor before and 
 ```{r dimensionality-bake-off, eval = FALSE}
 library(patchwork)
 p1 <- 
-  bean_validation %>% 
+  bean_validation |> 
   ggplot(aes(x = area)) + 
   geom_histogram(bins = 30, color = "white", fill = "blue", alpha = 1/3) + 
   ggtitle("Original validation set data")
 
 p2 <- 
-  bean_val_processed %>% 
+  bean_val_processed |> 
   ggplot(aes(x = area)) + 
   geom_histogram(bins = 30, color = "white", fill = "red", alpha = 1/3) + 
   ggtitle("Processed validation set data")
@@ -263,8 +263,8 @@ Two important aspects of `bake()` are worth noting here.
 First, as previously mentioned, using `prep(recipe, retain = TRUE)` keeps the existing processed version of the training set in the recipe. This enables the user to use `bake(recipe, new_data = NULL)`, which returns that data set without further computations. For example: 
 
 ```{r dimensionality-new-data-null}
-bake(bean_rec_trained, new_data = NULL) %>% nrow()
-bean_train %>% nrow()
+bake(bean_rec_trained, new_data = NULL) |> nrow()
+bean_train |> nrow()
 ```
 
 If the training set is not pathologically large, using this value of `retain` can save a lot of computational time. 
@@ -280,11 +280,11 @@ Since recipes are the primary option in tidymodels for dimensionality reduction,
 ```{r dimensionality-function}
 library(ggforce)
 plot_validation_results <- function(recipe, dat = bean_validation) {
-  recipe %>%
+  recipe |>
     # Estimate any additional steps
-    prep() %>%
+    prep() |>
     # Process the data (the validation set by default)
-    bake(new_data = dat) %>%
+    bake(new_data = dat) |>
     # Create the scatterplot matrix
     ggplot(aes(x = .panel_x, y = .panel_y, color = class, fill = class)) +
     geom_point(alpha = 0.4, size = 0.5) +
@@ -304,8 +304,8 @@ A series of several feature extraction methodologies are explored here. An overv
 We've mentioned PCA several times already in this book, and it's time to go into more detail. PCA is an unsupervised method that uses linear combinations of the predictors to define new features. These features attempt to account for as much variation as possible in the original data. We add `step_pca()` to the original recipe and use our function to visualize the results on the validation set in Figure \@ref(fig:bean-pca) using:
 
 ```{r dimensionality-pca, eval = FALSE}
-bean_rec_trained %>%
-  step_pca(all_numeric_predictors(), num_comp = 4) %>%
+bean_rec_trained |>
+  step_pca(all_numeric_predictors(), num_comp = 4) |>
   plot_validation_results() + 
   ggtitle("Principal Component Analysis")
 ```
@@ -324,9 +324,9 @@ Recall that PCA is unsupervised. For these data, it turns out that the PCA compo
 
 ```{r dimensionality-pca-loadings, eval=FALSE}
 library(learntidymodels)
-bean_rec_trained %>%
-  step_pca(all_numeric_predictors(), num_comp = 4) %>% 
-  prep() %>% 
+bean_rec_trained |>
+  step_pca(all_numeric_predictors(), num_comp = 4) |> 
+  prep() |> 
   plot_top_loadings(component_number <= 4, n = 5) + 
   scale_fill_brewer(palette = "Paired") +
   ggtitle("Principal Component Analysis")
@@ -347,8 +347,8 @@ The top loadings are mostly related to the cluster of correlated predictors show
 PLS, which we introduced in Section \@ref(submodel-trick), is a supervised version of PCA. It tries to find components that simultaneously maximize the variation in the predictors while also maximizing the relationship between those components and the outcome. Figure \@ref(fig:bean-pls) shows the results of this slightly modified version of the PCA code:
 
 ```{r dimensionality-pls, eval = FALSE}
-bean_rec_trained %>%
-  step_pls(all_numeric_predictors(), outcome = "class", num_comp = 4) %>%
+bean_rec_trained |>
+  step_pls(all_numeric_predictors(), outcome = "class", num_comp = 4) |>
   plot_validation_results() + 
   ggtitle("Partial Least Squares")
 ```
@@ -364,9 +364,9 @@ bean_rec_trained %>%
 The first two PLS components plotted in Figure \@ref(fig:bean-pls) are nearly identical to the first two PCA components! We find this result because those PCA components are so effective at separating the varieties of beans. The remaining components are different. Figure \@ref(fig:pls-loadings) visualizes the loadings, the top features for each component.
 
 ```{r dimensionality-pls-loadings, eval = FALSE}
-bean_rec_trained %>%
-  step_pls(all_numeric_predictors(), outcome = "class", num_comp = 4) %>%
-  prep() %>% 
+bean_rec_trained |>
+  step_pls(all_numeric_predictors(), outcome = "class", num_comp = 4) |>
+  prep() |> 
   plot_top_loadings(component_number <= 4, n = 5, type = "pls") + 
   scale_fill_brewer(palette = "Paired") +
   ggtitle("Partial Least Squares")
@@ -385,8 +385,8 @@ Solidity (i.e., the density of the bean) drives the third PLS component, along w
 ICA is slightly different than PCA in that it finds components that are as statistically independent from one another as possible (as opposed to being uncorrelated). It can be thought of as maximizing the "non-Gaussianity" of the ICA components, or separating information instead of compressing information like PCA. Let's use `step_ica()` to produce Figure \@ref(fig:bean-ica):
 
 ```{r dimensionality-ica, eval=FALSE}
-bean_rec_trained %>%
-  step_ica(all_numeric_predictors(), num_comp = 4) %>%
+bean_rec_trained |>
+  step_ica(all_numeric_predictors(), num_comp = 4) |>
   plot_validation_results() + 
   ggtitle("Independent Component Analysis")
 ```
@@ -411,8 +411,8 @@ To create the mapping, the `r pkg(embed)` package contains a step function for t
 
 ```{r dimensionality-umap, eval = FALSE}
 library(embed)
-bean_rec_trained %>%
-  step_umap(all_numeric_predictors(), num_comp = 4) %>%
+bean_rec_trained |>
+  step_umap(all_numeric_predictors(), num_comp = 4) |>
   plot_validation_results() +
   ggtitle("UMAP")
 ```
@@ -430,8 +430,8 @@ While the between-cluster space is pronounced, the clusters can contain a hetero
 There is also a supervised version of UMAP:
 
 ```{r dimensionality-umap-supervised, eval=FALSE}
-bean_rec_trained %>%
-  step_umap(all_numeric_predictors(), outcome = "class", num_comp = 4) %>%
+bean_rec_trained |>
+  step_umap(all_numeric_predictors(), outcome = "class", num_comp = 4) |>
   plot_validation_results() +
   ggtitle("UMAP (supervised)")
 ```
@@ -459,27 +459,27 @@ library(baguette)
 library(discrim)
 
 mlp_spec <-
-  mlp(hidden_units = tune(), penalty = tune(), epochs = tune()) %>%
-  set_engine('nnet') %>%
+  mlp(hidden_units = tune(), penalty = tune(), epochs = tune()) |>
+  set_engine('nnet') |>
   set_mode('classification')
 
 bagging_spec <-
-  bag_tree() %>%
-  set_engine('rpart') %>%
+  bag_tree() |>
+  set_engine('rpart') |>
   set_mode('classification')
 
 fda_spec <-
   discrim_flexible(
     prod_degree = tune()
-  ) %>%
+  ) |>
   set_engine('earth')
 
 rda_spec <-
-  discrim_regularized(frac_common_cov = tune(), frac_identity = tune()) %>%
+  discrim_regularized(frac_common_cov = tune(), frac_identity = tune()) |>
   set_engine('klaR')
 
 bayes_spec <-
-  naive_Bayes() %>%
+  naive_Bayes() |>
   set_engine('klaR')
 ```
 
@@ -487,17 +487,17 @@ We also need recipes for the dimensionality reduction methods we'll try. Let's s
 
 ```{r dimensionality-recipes}
 bean_rec <-
-  recipe(class ~ ., data = bean_train) %>%
-  step_zv(all_numeric_predictors()) %>%
-  step_orderNorm(all_numeric_predictors()) %>%
+  recipe(class ~ ., data = bean_train) |>
+  step_zv(all_numeric_predictors()) |>
+  step_orderNorm(all_numeric_predictors()) |>
   step_normalize(all_numeric_predictors())
 
 pls_rec <- 
-  bean_rec %>% 
+  bean_rec |> 
   step_pls(all_numeric_predictors(), outcome = "class", num_comp = tune())
 
 umap_rec <-
-  bean_rec %>%
+  bean_rec |>
   step_umap(
     all_numeric_predictors(),
     outcome = "class",
@@ -517,7 +517,7 @@ bean_res <-
     models = list(bayes = bayes_spec, fda = fda_spec,
                   rda = rda_spec, bag = bagging_spec,
                   mlp = mlp_spec)
-  ) %>% 
+  ) |> 
   workflow_map(
     verbose = TRUE,
     seed = 1603,
@@ -532,11 +532,11 @@ We can rank the models by their validation set estimates of the area under the R
 
 ```{r dimensionality-ranked}
 rankings <- 
-  rank_results(bean_res, select_best = TRUE) %>% 
+  rank_results(bean_res, select_best = TRUE) |> 
   mutate(method = map_chr(wflow_id, ~ str_split(.x, "_", simplify = TRUE)[1])) 
 
 tidymodels_prefer()
-filter(rankings, rank <= 5) %>% dplyr::select(rank, mean, model, method)
+filter(rankings, rank <= 5) |> dplyr::select(rank, mean, model, method)
 ```
 
 Figure \@ref(fig:dimensionality-rankings) illustrates this ranking.
@@ -546,7 +546,7 @@ Figure \@ref(fig:dimensionality-rankings) illustrates this ranking.
 #| fig.cap = "Area under the ROC curve from the validation set",
 #| fig.alt = "Area under the ROC curve from the validation set. The three best model configurations use PLS together with regularized discriminant analysis, a multi-layer perceptron, and a naive Bayes model."
 
-rankings %>% 
+rankings |> 
   ggplot(aes(x = rank, y = mean, pch = method, color = model)) + 
   geom_point(cex = 3.5) + 
   theme(legend.position = "right") +
@@ -559,13 +559,13 @@ It is clear from these results that most models give very good performance; ther
 
 ```{r dimensionality-final}
 rda_res <- 
-  bean_res %>% 
-  extract_workflow("pls_rda") %>% 
+  bean_res |> 
+  extract_workflow("pls_rda") |> 
   finalize_workflow(
-    bean_res %>% 
-      extract_workflow_set_result("pls_rda") %>% 
+    bean_res |> 
+      extract_workflow_set_result("pls_rda") |> 
       select_best(metric = "roc_auc")
-  ) %>% 
+  ) |> 
   last_fit(split = bean_split, metrics = metric_set(roc_auc))
 
 rda_wflow_fit <- extract_workflow(rda_res)

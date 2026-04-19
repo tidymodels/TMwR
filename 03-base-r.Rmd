@@ -245,14 +245,14 @@ prob_tbl <-
     "pamr.train()" , "pamr"       ,  'pamr.predict(object, type = "posterior")'    
   ) 
 
-prob_tbl %>% 
+prob_tbl |> 
   kable(
     caption = "Heterogeneous argument names for different modeling functions.",
     label = "probability-args",
     escape = FALSE
-  ) %>%
-  kable_styling(full_width = FALSE) %>%
-  column_spec(1, monospace = ifelse(prob_tbl$Function == "various", FALSE, TRUE)) %>%
+  ) |>
+  kable_styling(full_width = FALSE) |>
+  column_spec(1, monospace = ifelse(prob_tbl$Function == "various", FALSE, TRUE)) |>
   column_spec(3, monospace = TRUE)
 ```
 
@@ -294,7 +294,7 @@ A few existing R packages provide a unified interface to harmonize these heterog
 The `broom::tidy()` function, which we use throughout this book, is another tool for standardizing the structure of R objects. It can return many types of R objects in a more usable format. For example, suppose that predictors are being screened based on their correlation to the outcome column. Using `purrr::map()`, the results from `cor.test()` can be returned in a list for each predictor: 
 
 ```{r base-r-corr-list}
-corr_res <- map(mtcars %>% select(-mpg), cor.test, y = mtcars$mpg)
+corr_res <- map(mtcars |> select(-mpg), cor.test, y = mtcars$mpg)
 
 # The first of ten results in the vector: 
 corr_res[[1]]
@@ -311,9 +311,9 @@ tidy(corr_res[[1]])
 These results can be "stacked" and added to a `ggplot()`, as shown in Figure \@ref(fig:corr-plot). 
 
 ```{r base-r-corr-plot, eval=FALSE}
-corr_res %>% 
+corr_res |> 
   # Convert each to a tidy format; `map_dfr()` stacks the data frames 
-  map_dfr(tidy, .id = "predictor") %>% 
+  map_dfr(tidy, .id = "predictor") |> 
   ggplot(aes(x = fct_reorder(predictor, estimate))) + 
   geom_point(aes(y = estimate)) + 
   geom_errorbar(aes(ymin = conf.low, ymax = conf.high), width = .1) +
@@ -334,7 +334,7 @@ R modeling functions from the core language or other R packages can be used in c
 
 ```{r base-r-by-species-split}
 split_by_species <- 
-  crickets %>% 
+  crickets |> 
   group_nest(species) 
 split_by_species
 ```
@@ -343,7 +343,7 @@ The `data` column contains the `rate` and `temp` columns from `crickets` in a _l
 
 ```{r base-r-species-models}
 model_by_species <- 
-  split_by_species %>% 
+  split_by_species |> 
   mutate(model = map(data, ~ lm(rate ~ temp, data = .x)))
 model_by_species
 ```
@@ -351,9 +351,9 @@ model_by_species
 To collect the coefficients for each of these models, use `broom::tidy()` to convert them to a consistent data frame format so that they can be unnested:
 
 ```{r base-r-species-coefs}
-model_by_species %>% 
-  mutate(coef = map(model, tidy)) %>% 
-  select(species, coef) %>% 
+model_by_species |> 
+  mutate(coef = map(model, tidy)) |> 
+  select(species, coef) |> 
   unnest(cols = c(coef))
 ```
 

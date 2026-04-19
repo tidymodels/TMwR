@@ -1,13 +1,13 @@
 sa_2d_plot <- function(sa_obj, history, large_sa, path = tempdir()) {
   range_data <- 
-    sa_obj %>% 
-    collect_metrics() %>% 
-    select(cost, rbf_sigma) %>% 
+    sa_obj |> 
+    collect_metrics() |> 
+    select(cost, rbf_sigma) |> 
     bind_rows(
-      large_sa %>% 
-        collect_metrics() %>% 
+      large_sa |> 
+        collect_metrics() |> 
         select(cost, rbf_sigma)
-    ) %>% 
+    ) |> 
     mutate(
       cost = log2(cost),
       rbf_sigma = log10(rbf_sigma)
@@ -16,23 +16,23 @@ sa_2d_plot <- function(sa_obj, history, large_sa, path = tempdir()) {
   y_rng <- 2^extendrange(range_data$cost)
   
   params <-
-    sa_obj %>%
-    collect_metrics() %>%
-    select(.iter, cost, rbf_sigma) %>%
+    sa_obj |>
+    collect_metrics() |>
+    select(.iter, cost, rbf_sigma) |>
     arrange(.iter)
   
   init <-
-    params %>%
+    params |>
     filter(.iter == 0)
   
   ## -----------------------------------------------------------------------------
   
   svm_roc <-
-    large_sa %>%
+    large_sa |>
     collect_metrics()
   
   large_plot <-
-    svm_roc %>%
+    svm_roc |>
     ggplot(aes(x = rbf_sigma, y = cost)) +
     geom_raster(aes(fill = mean), show.legend = FALSE) +
     scale_x_log10(labels = fmt_dcimals(2), limits = x_rng) + 
@@ -62,7 +62,7 @@ sa_2d_plot <- function(sa_obj, history, large_sa, path = tempdir()) {
   for (i in (num_init + 1):nrow(history)) {
     current_iter <- history$.iter[i]
     current_res <- current_param_path(history, current_iter)
-    current_best <- current_res %>% dplyr::filter(results == "new best")
+    current_best <- current_res |> dplyr::filter(results == "new best")
     
     ttl <- paste0("Iteration ", current_iter)
     
@@ -82,7 +82,7 @@ sa_2d_plot <- function(sa_obj, history, large_sa, path = tempdir()) {
     new_plot <-
       base_plot +
       geom_point(
-        data = current_res %>% slice(n()),
+        data = current_res |> slice(n()),
         size = 3,
         col = "green"
       ) +
@@ -106,7 +106,7 @@ sa_2d_plot <- function(sa_obj, history, large_sa, path = tempdir()) {
 
 current_param_path <- function(x, iter) {
   x <-
-    x %>%
+    x |>
     dplyr::filter(.iter <= iter)
   ind <- nrow(x)
   param_path <- ind
@@ -114,5 +114,5 @@ current_param_path <- function(x, iter) {
     ind <- which(x$.config == x$.parent[ind])
     param_path <- c(param_path, ind)
   }
-  x %>% dplyr::slice(rev(param_path))
+  x |> dplyr::slice(rev(param_path))
 }

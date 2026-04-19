@@ -3,10 +3,10 @@ library(RWeka)
 library(janitor)
 
 dry_beans <- 
-  read.arff(url("https://www.muratkoklu.com/datasets/vtdhnd02.php")) %>% 
-  dplyr::rename(AspectRatio = AspectRation) %>% 
-  clean_names() %>% 
-  as_tibble() %>% 
+  read.arff(url("https://www.muratkoklu.com/datasets/vtdhnd02.php")) |> 
+  dplyr::rename(AspectRatio = AspectRation) |> 
+  clean_names() |> 
+  as_tibble() |> 
   mutate(class = tolower(as.character(class)),
          class = factor(class))
 

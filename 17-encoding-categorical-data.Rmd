@@ -17,21 +17,21 @@ For statistical modeling in R, the preferred representation for categorical or n
 
 ```{r encoding-dummies, echo = FALSE, results = 'asis'}
 show_rows <- 
-  ames_train %>% 
-  mutate(.row = row_number()) %>% 
-  group_by(Bldg_Type) %>% dplyr::select(Bldg_Type, .row) %>% 
-  slice(1) %>% 
+  ames_train |> 
+  mutate(.row = row_number()) |> 
+  group_by(Bldg_Type) |> dplyr::select(Bldg_Type, .row) |> 
+  slice(1) |> 
   pull(.row)
 
-recipe(~Bldg_Type, data = ames_train) %>% 
-  step_mutate(`Raw Data` = Bldg_Type) %>% 
-  step_dummy(Bldg_Type, naming = function(var, lvl, ordinal = FALSE, sep = "_") lvl) %>% 
-  prep() %>% 
-  bake(ames_train) %>% 
-  slice(show_rows) %>% 
-  arrange(`Raw Data`) %>% 
+recipe(~Bldg_Type, data = ames_train) |> 
+  step_mutate(`Raw Data` = Bldg_Type) |> 
+  step_dummy(Bldg_Type, naming = function(var, lvl, ordinal = FALSE, sep = "_") lvl) |> 
+  prep() |> 
+  bake(ames_train) |> 
+  slice(show_rows) |> 
+  arrange(`Raw Data`) |> 
   kable(caption = "Dummy or indicator variable encodings for the building type predictor in the Ames training set.",
-        label = "encoding-dummies") %>% 
+        label = "encoding-dummies") |> 
   kable_styling(full_width = FALSE)
 ```
 
@@ -61,15 +61,15 @@ Sometimes qualitative columns can be *ordered*, such as "low," "medium," and "hi
 ord_vals <- c("none", "a little", "some", "a bunch", "copious amounts")
 ord_data <- tibble::tibble(`Raw Data` = ordered(ord_vals, levels = ord_vals))
 ord_contrasts <- 
-  model.matrix(~., data = ord_data) %>% 
-  round(2) %>% 
-  as.data.frame() %>% 
-  dplyr::select(-`(Intercept)`) %>% 
+  model.matrix(~., data = ord_data) |> 
+  round(2) |> 
+  as.data.frame() |> 
+  dplyr::select(-`(Intercept)`) |> 
   setNames(c("Linear", "Quadratic", "Cubic", "Quartic"))
 
-bind_cols(ord_data, ord_contrasts) %>% 
+bind_cols(ord_data, ord_contrasts) |> 
   kable(caption = "Polynominal expansions for encoding an ordered variable.",
-        label = "encoding-ordered-table") %>% 
+        label = "encoding-ordered-table") |> 
   kable_styling(full_width = FALSE)
 ```
 
@@ -82,10 +82,10 @@ There are multiple options for encodings more complex than dummy or indicator va
 ```{r encoding-mean-price}
 #| fig.cap = "Mean home price for neighborhoods in the Ames training set, which can be used as an effect encoding for this categorical variable",
 #| fig.alt = "A chart with points and error bars for the mean home price for neighborhoods in the Ames training set. The most expensive neighborhoods are Northridge and Stone Brook, while the least expensive are Iowa DOT and Railroad and Meadow Village."
-ames_train %>%
-  group_by(Neighborhood) %>%
+ames_train |>
+  group_by(Neighborhood) |>
   summarize(mean = mean(Sale_Price),
-            std_err = sd(Sale_Price) / sqrt(length(Sale_Price))) %>% 
+            std_err = sd(Sale_Price) / sqrt(length(Sale_Price))) |> 
   ggplot(aes(y = reorder(Neighborhood, mean), x = mean)) + 
   geom_point() +
   geom_errorbar(aes(xmin = mean - 1.64 * std_err, xmax = mean + 1.64 * std_err)) +
@@ -100,11 +100,11 @@ library(embed)
 
 ames_glm <- 
   recipe(Sale_Price ~ Neighborhood + Gr_Liv_Area + Year_Built + Bldg_Type + 
-           Latitude + Longitude, data = ames_train) %>%
-  step_log(Gr_Liv_Area, base = 10) %>% 
-  step_lencode_glm(Neighborhood, outcome = vars(Sale_Price)) %>%
-  step_dummy(all_nominal_predictors()) %>% 
-  step_interact( ~ Gr_Liv_Area:starts_with("Bldg_Type_") ) %>% 
+           Latitude + Longitude, data = ames_train) |>
+  step_log(Gr_Liv_Area, base = 10) |> 
+  step_lencode_glm(Neighborhood, outcome = vars(Sale_Price)) |>
+  step_dummy(all_nominal_predictors()) |> 
+  step_interact( ~ Gr_Liv_Area:starts_with("Bldg_Type_") ) |> 
   step_ns(Latitude, Longitude, deg_free = 20)
 
 ames_glm
@@ -114,7 +114,7 @@ As detailed in Section \@ref(recipe-functions), we can `prep()` our recipe to fi
 
 ```{r}
 glm_estimates <-
-  prep(ames_glm) %>%
+  prep(ames_glm) |>
   tidy(number = 2)
 
 glm_estimates
@@ -125,7 +125,7 @@ When we use the newly encoded `Neighborhood` numeric variable created via this m
 Effect encoding methods like this one can also seamlessly handle situations where a novel factor level is encountered in the data. This `value` is the predicted price from the GLM when we don't have any specific neighborhood information:
 
 ```{r}
-glm_estimates %>%
+glm_estimates |>
   filter(level == "..new")
 ```
 
@@ -139,17 +139,17 @@ When you create an effect encoding for your categorical variable, you are effect
 
 ### Effect encodings with partial pooling
 
-Creating an effect encoding with `step_lencode_glm()` estimates the effect separately for each factor level (in this example, neighborhood). However, some of these neighborhoods have many houses in them, and some have only a few. There is much more uncertainty in our measurement of price for the single training set home in the `r neighborhood_counts %>% slice_min(n) %>% pull(Neighborhood) %>% as.character()` neighborhood than the `r neighborhood_counts %>% slice_max(n) %>% pull(n)` training set homes in North Ames. We can use *partial pooling* to adjust these estimates so that levels with small sample sizes are shrunken toward the overall mean. The effects for each level are modeled all at once using a mixed or hierarchical generalized linear model:
+Creating an effect encoding with `step_lencode_glm()` estimates the effect separately for each factor level (in this example, neighborhood). However, some of these neighborhoods have many houses in them, and some have only a few. There is much more uncertainty in our measurement of price for the single training set home in the `r neighborhood_counts |> slice_min(n) |> pull(Neighborhood) |> as.character()` neighborhood than the `r neighborhood_counts |> slice_max(n) |> pull(n)` training set homes in North Ames. We can use *partial pooling* to adjust these estimates so that levels with small sample sizes are shrunken toward the overall mean. The effects for each level are modeled all at once using a mixed or hierarchical generalized linear model:
 
 
 ```{r}
 ames_mixed <- 
   recipe(Sale_Price ~ Neighborhood + Gr_Liv_Area + Year_Built + Bldg_Type + 
-           Latitude + Longitude, data = ames_train) %>%
-  step_log(Gr_Liv_Area, base = 10) %>% 
-  step_lencode_mixed(Neighborhood, outcome = vars(Sale_Price)) %>%
-  step_dummy(all_nominal_predictors()) %>% 
-  step_interact( ~ Gr_Liv_Area:starts_with("Bldg_Type_") ) %>% 
+           Latitude + Longitude, data = ames_train) |>
+  step_log(Gr_Liv_Area, base = 10) |> 
+  step_lencode_mixed(Neighborhood, outcome = vars(Sale_Price)) |>
+  step_dummy(all_nominal_predictors()) |> 
+  step_interact( ~ Gr_Liv_Area:starts_with("Bldg_Type_") ) |> 
   step_ns(Latitude, Longitude, deg_free = 20)
 
 ames_mixed
@@ -159,7 +159,7 @@ Let's `prep()` and `tidy()` this recipe to see the results:
 
 ```{r}
 mixed_estimates <-
-  prep(ames_mixed) %>%
+  prep(ames_mixed) |>
   tidy(number = 2)
 
 mixed_estimates
@@ -168,7 +168,7 @@ mixed_estimates
 New levels are then encoded at close to the same value as with the GLM:
 
 ```{r}
-mixed_estimates %>%
+mixed_estimates |>
   filter(level == "..new")
 ```
 
@@ -181,17 +181,17 @@ Let's visually compare the effects using partial pooling vs. no pooling in Figur
 ```{r encoding-compare-pooling, message=FALSE}
 #| fig.cap = "Comparing the effect encodings for neighborhood estimated without pooling to those with partial pooling",
 #| fig.alt = "A scatter chart comparing the effect encodings for neighborhood estimated without pooling to those with partial pooling. Almost all neighborhoods are very close to the slope = 1 line, but the neighborhoods with the fewest homes are further away."
-glm_estimates %>%
-  rename(`no pooling` = value) %>%
+glm_estimates |>
+  rename(`no pooling` = value) |>
   left_join(
-    mixed_estimates %>%
+    mixed_estimates |>
       rename(`partial pooling` = value), by = "level"
-  ) %>%
+  ) |>
   left_join(
-    ames_train %>% 
-      count(Neighborhood) %>% 
+    ames_train |> 
+      count(Neighborhood) |> 
       mutate(level = as.character(Neighborhood))
-  ) %>%
+  ) |>
   ggplot(aes(`no pooling`, `partial pooling`, size = sqrt(n))) +
   geom_abline(color = "gray50", lty = 2) +
   geom_point(alpha = 0.7) +
@@ -208,10 +208,10 @@ Traditional dummy variables as described in Section \@ref(dummies) require that 
 library(rlang)
 
 ames_hashed <-
-  ames_train %>%
+  ames_train |>
   mutate(Hash = map_chr(Neighborhood, hash))
 
-ames_hashed %>%
+ames_hashed |>
   select(Neighborhood, Hash)
 ```
 
@@ -224,11 +224,11 @@ A hashing function takes an input of variable size and maps it to an output of f
 The `rlang::hash()` function generates a 128-bit hash, which means there are `2^128` possible hash values. This is great for some applications but doesn't help with feature hashing of *high cardinality* variables (variables with many levels). In feature hashing, the number of possible hashes is a hyperparameter and is set by the model developer through computing the modulo of the integer hashes. We can get sixteen possible hash values by using `Hash %% 16`:
 
 ```{r}
-ames_hashed %>%
+ames_hashed |>
   ## first make a smaller hash for integers that R can handle
   mutate(Hash = strtoi(substr(Hash, 26, 32), base = 16L),  
          ## now take the modulo
-         Hash = Hash %% 16) %>%
+         Hash = Hash %% 16) |>
   select(Neighborhood, Hash)
 ```
 
@@ -245,11 +245,11 @@ We can implement feature hashing using a tidymodels recipe step from the `r pkg(
 library(textrecipes)
 ames_hash <- 
   recipe(Sale_Price ~ Neighborhood + Gr_Liv_Area + Year_Built + Bldg_Type + 
-           Latitude + Longitude, data = ames_train) %>%
-  step_log(Gr_Liv_Area, base = 10) %>% 
-  step_dummy_hash(Neighborhood, signed = FALSE, num_terms = 16L) %>%
-  step_dummy(all_nominal_predictors()) %>% 
-  step_interact( ~ Gr_Liv_Area:starts_with("Bldg_Type_") ) %>% 
+           Latitude + Longitude, data = ames_train) |>
+  step_log(Gr_Liv_Area, base = 10) |> 
+  step_dummy_hash(Neighborhood, signed = FALSE, num_terms = 16L) |>
+  step_dummy(all_nominal_predictors()) |> 
+  step_interact( ~ Gr_Liv_Area:starts_with("Bldg_Type_") ) |> 
   step_ns(Latitude, Longitude, deg_free = 20)
 
 ames_hash
@@ -259,20 +259,20 @@ Feature hashing is fast and efficient but has a few downsides. For example, diff
 
 ```{r encoding-hash, echo=FALSE}
 hash_table <-
-  prep(ames_hash) %>% 
-  bake(new_data = NULL, starts_with("dummyhash_Neighborhood_")) %>%
-  bind_cols(ames_train %>% select(Neighborhood)) %>%
-  distinct() %>%
-  select(-Neighborhood) %>%
-  map_dbl(sum) %>%
-  enframe() %>%
+  prep(ames_hash) |> 
+  bake(new_data = NULL, starts_with("dummyhash_Neighborhood_")) |>
+  bind_cols(ames_train |> select(Neighborhood)) |>
+  distinct() |>
+  select(-Neighborhood) |>
+  map_dbl(sum) |>
+  tibble::enframe() |>
   count(value)
 
-hash_table %>%
+hash_table |>
   kable(col.names = c("Number of neighborhoods within a hash feature", 
                       "Number of occurrences"),
         caption = "The number of hash features at each number of neighborhoods.",
-        label = "encoding-hash") %>%
+        label = "encoding-hash") |>
   kable_styling(full_width = FALSE)
 ```
 

@@ -36,6 +36,19 @@ jobs:
       - name: Build site
         run: Rscript -e 'bookdown::render_book("index.Rmd", quiet = TRUE)'
 
+      # Add these artifact upload steps
+      # - name: Upload build artifacts on failure
+      #   if: failure()
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: build-artifacts-on-failure
+      #     path: |
+      #       ./_book/
+      #       RData/
+      #       *.log
+      #       *.Rmd
+      #     retention-days: 7
+
       - name: Deploy to Netlify
         if: contains(env.isExtPR, 'false')
         id: netlify-deploy

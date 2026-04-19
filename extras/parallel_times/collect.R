@@ -15,7 +15,7 @@ get_date <- function(x) {
 get_times <- function(x) {
    load(x)
    res <- 
-      times %>% 
+      times |> 
       mutate(date = get_date(x))
 
    res
@@ -33,14 +33,14 @@ rdata <- rdata[!grepl("logging_data", rdata)]
 all_times <-  map_dfr(rdata, get_times) 
 
 seq <- 
-   all_times %>% 
-   filter(num_cores == 1) %>% 
-   dplyr::rename(seq_time = elapsed) %>% 
+   all_times |> 
+   filter(num_cores == 1) |> 
+   dplyr::rename(seq_time = elapsed) |> 
    select(-num_cores, -date) 
 
 times <- 
    full_join(all_times, seq, 
-             by = c("num_resamples", "num_grid", "preproc", "par_method")) %>% 
+             by = c("num_resamples", "num_grid", "preproc", "par_method")) |> 
    mutate(
       time_per_fit = elapsed/(num_grid * num_resamples),
       speed_up = seq_time/elapsed,
@@ -62,8 +62,8 @@ if (interactive()) {
       theme_bw() + 
       theme(legend.position = "top")
    
-   times %>% 
-      filter(preprocessing == "none") %>% 
+   times |> 
+      filter(preprocessing == "none") |> 
       ggplot(aes(x = num_cores, y = speed_up, col = preprocessing, shape = preprocessing)) + 
       geom_abline(lty = 1) + 
       geom_point() + 
@@ -75,8 +75,8 @@ if (interactive()) {
       theme_bw() + 
       theme(legend.position = "top")
    
-   times %>% 
-      filter(preprocessing != "expensive") %>% 
+   times |> 
+      filter(preprocessing != "expensive") |> 
       ggplot(aes(x = num_cores, y = speed_up, col = preprocessing, shape = preprocessing)) + 
       geom_abline(lty = 1) + 
       geom_point() + 

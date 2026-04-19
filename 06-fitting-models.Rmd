@@ -71,11 +71,11 @@ These specifications are built without referencing the data. For example, for th
 library(tidymodels)
 tidymodels_prefer()
 
-linear_reg() %>% set_engine("lm")
+linear_reg() |> set_engine("lm")
 
-linear_reg() %>% set_engine("glmnet") 
+linear_reg() |> set_engine("glmnet") 
 
-linear_reg() %>% set_engine("stan")
+linear_reg() |> set_engine("stan")
 ```
 
 
@@ -84,11 +84,11 @@ Once the details of the model have been specified, the model estimation can be d
 The `translate()` function can provide details on how `r pkg(parsnip)` converts the user's code to the package's syntax: 
 
 ```{r models-lin-reg-trans}
-linear_reg() %>% set_engine("lm") %>% translate()
+linear_reg() |> set_engine("lm") |> translate()
 
-linear_reg(penalty = 1) %>% set_engine("glmnet") %>% translate()
+linear_reg(penalty = 1) |> set_engine("glmnet") |> translate()
 
-linear_reg() %>% set_engine("stan") %>% translate()
+linear_reg() |> set_engine("stan") |> translate()
 ```
 
 Note that `missing_arg()` is just a placeholder for the data that has yet to be provided. 
@@ -102,19 +102,19 @@ Let's walk through how to predict the sale price of houses in the Ames data as a
 
 ```{r models-ames-geocodes}
 lm_model <- 
-  linear_reg() %>% 
+  linear_reg() |> 
   set_engine("lm")
 
 lm_form_fit <- 
-  lm_model %>% 
+  lm_model |> 
   # Recall that Sale_Price has been pre-logged
   fit(Sale_Price ~ Longitude + Latitude, data = ames_train)
 
 lm_xy_fit <- 
-  lm_model %>% 
+  lm_model |> 
   fit_xy(
-    x = ames_train %>% select(Longitude, Latitude),
-    y = ames_train %>% pull(Sale_Price)
+    x = ames_train |> select(Longitude, Latitude),
+    y = ames_train |> pull(Sale_Price)
   )
 
 lm_form_fit
@@ -136,41 +136,41 @@ arg_info <-
   )
 
 arg_info <-
-  get_from_env("rand_forest_args") %>% 
-  select(engine, parsnip, original) %>% 
-  full_join(arg_info, by = "parsnip") %>% 
+  get_from_env("rand_forest_args") |> 
+  select(engine, parsnip, original) |> 
+  full_join(arg_info, by = "parsnip") |> 
   mutate(package = ifelse(engine == "spark", "sparklyr", engine))
 
-arg_info %>%
-  select(package, `Argument Type`, original) %>%
-  # mutate(original = paste0("<tt>", original, "</tt>")) %>% 
+arg_info |>
+  select(package, `Argument Type`, original) |>
+  # mutate(original = paste0("<tt>", original, "</tt>")) |> 
   pivot_wider(
     id_cols = c(`Argument Type`),
     values_from = c(original),
     names_from = c(package)
-  ) %>% 
+  ) |> 
   kable(
     caption = "Example argument names for different random forest functions.",
     label = "rand-forest-args",
     escape = FALSE
-  ) %>%
-  kable_styling() %>%
+  ) |>
+  kable_styling() |>
   column_spec(2:4, monospace = TRUE)
 ```
 
 In an effort to make argument specification less painful, `r pkg(parsnip)` uses common argument names within and between packages. Table \@ref(tab:parsnip-args) shows, for random forests, what `r pkg(parsnip)` models use.
 
 ```{r, models-parsnip-names, echo = FALSE, results = "asis"}
-arg_info %>%
-  select(`Argument Type`, parsnip) %>%
-  distinct() %>% 
-  # mutate(parsnip = paste0("<tt>", parsnip, "</tt>")) %>% 
+arg_info |>
+  select(`Argument Type`, parsnip) |>
+  distinct() |> 
+  # mutate(parsnip = paste0("<tt>", parsnip, "</tt>")) |> 
   kable(
     caption = "Random forest argument names used by parsnip.",
     label = "parsnip-args",
     escape = FALSE
-  ) %>% 
-  kable_styling(full_width = FALSE) %>%
+  ) |> 
+  kable_styling(full_width = FALSE) |>
   column_spec(2, monospace = TRUE)
 ```
 
@@ -183,9 +183,9 @@ Some of the original argument names can be fairly jargon-y. For example, to spec
 To understand how the `r pkg(parsnip)` argument names map to the original names, use the help file for the model (available via `?rand_forest`) as well as the `translate()` function: 
 
 ```{r models-glmnet-trans}
-rand_forest(trees = 1000, min_n = 5) %>% 
-  set_engine("ranger") %>% 
-  set_mode("regression") %>% 
+rand_forest(trees = 1000, min_n = 5) |> 
+  set_engine("ranger") |> 
+  set_mode("regression") |> 
   translate()
 ```
 
@@ -198,8 +198,8 @@ Modeling functions in `r pkg(parsnip)` separate model arguments into two categor
 For example, in the translation of the previous random forest code, the arguments `num.threads`, `verbose`, and `seed` were added by default. These arguments are specific to the `r pkg(ranger)` implementation of random forest models and wouldn't make sense as main arguments. Engine-specific arguments can be specified in `set_engine()`. For example, to have the `ranger::ranger()` function print out more information about the fit:
 
 ```{r models-ranger-verb}
-rand_forest(trees = 1000, min_n = 5) %>% 
-  set_engine("ranger", verbose = TRUE) %>% 
+rand_forest(trees = 1000, min_n = 5) |> 
+  set_engine("ranger", verbose = TRUE) |> 
   set_mode("regression") 
 ```
 
@@ -209,13 +209,13 @@ rand_forest(trees = 1000, min_n = 5) %>%
 Once the model is created and fit, we can use the results in a variety of ways; we might want to plot, print, or otherwise examine the model output. Several quantities are stored in a `r pkg(parsnip)` model object, including the fitted model. This can be found in an element called `fit`, which can be returned using the `extract_fit_engine()` function:
 
 ```{r models-pluck}
-lm_form_fit %>% extract_fit_engine()
+lm_form_fit |> extract_fit_engine()
 ```
 
 Normal methods can be applied to this object, such as printing and plotting: 
 
 ```{r models-pluck-coef}
-lm_form_fit %>% extract_fit_engine() %>% vcov()
+lm_form_fit |> extract_fit_engine() |> vcov()
 ```
 
 :::rmdwarning
@@ -226,8 +226,8 @@ One issue with some existing methods in base R is that the results are stored in
 
 ```{r models-lm-param}
 model_res <- 
-  lm_form_fit %>% 
-  extract_fit_engine() %>% 
+  lm_form_fit |> 
+  extract_fit_engine() |> 
   summary()
 
 # The model coefficient table is accessible via the `coef` method.
@@ -263,7 +263,7 @@ Another area where `r pkg(parsnip)` diverges from conventional R modeling functi
 For example, when numeric data are predicted: 
 
 ```{r models-small-pred}
-ames_test_small <- ames_test %>% slice(1:5)
+ames_test_small <- ames_test |> slice(1:5)
 predict(lm_form_fit, new_data = ames_test_small)
 ```
 
@@ -276,9 +276,9 @@ Why the leading dot in some of the column names? Some tidyverse and tidymodels a
 These three rules make it easier to merge predictions with the original data: 
 
 ```{r models-small-int}
-ames_test_small %>% 
-  select(Sale_Price) %>% 
-  bind_cols(predict(lm_form_fit, ames_test_small)) %>% 
+ames_test_small |> 
+  select(Sale_Price) |> 
+  bind_cols(predict(lm_form_fit, ames_test_small)) |> 
   # Add 95% prediction intervals to the results:
   bind_cols(predict(lm_form_fit, ames_test_small, type = "pred_int")) 
 ```
@@ -292,11 +292,11 @@ tribble(
   "class",                   "character matrix",
   "probability (2 classes)", "numeric matrix (2nd level only)",
   "probability (3+ classes)", "3D numeric array (all levels)", 
-) %>% 
+) |> 
   kable(
     caption = "Different return values for glmnet prediction types.",
     label = "predict-types"
-  ) %>% 
+  ) |> 
   kable_styling(full_width = FALSE)
 ```
 
@@ -312,12 +312,12 @@ tribble(
   "prob", ".pred_{class levels}",
   "conf_int", ".pred_lower, .pred_upper",
   "pred_int", ".pred_lower, .pred_upper"
-) %>% 
+) |> 
   kable(
     caption = "The tidymodels mapping of prediction types and column names.",
     label = "predictable-column-names",
-  ) %>% 
-  kable_styling(full_width = FALSE)  %>%
+  ) |> 
+  kable_styling(full_width = FALSE)  |>
   column_spec(1:2, monospace = TRUE)
 ```
 
@@ -326,16 +326,16 @@ A main advantage of standardizing the model interface and prediction types in `r
 
 ```{r models-cart}
 tree_model <- 
-  decision_tree(min_n = 2) %>% 
-  set_engine("rpart") %>% 
+  decision_tree(min_n = 2) |> 
+  set_engine("rpart") |> 
   set_mode("regression")
 
 tree_fit <- 
-  tree_model %>% 
+  tree_model |> 
   fit(Sale_Price ~ Longitude + Latitude, data = ames_train)
 
-ames_test_small %>% 
-  select(Sale_Price) %>% 
+ames_test_small |> 
+  select(Sale_Price) |> 
   bind_cols(predict(tree_fit, ames_test_small))
 ```
 
@@ -375,5 +375,5 @@ ames_split <- initial_split(ames, prop = 0.80, strata = Sale_Price)
 ames_train <- training(ames_split)
 ames_test  <-  testing(ames_split)
 
-lm_model <- linear_reg() %>% set_engine("lm")
+lm_model <- linear_reg() |> set_engine("lm")
 ```

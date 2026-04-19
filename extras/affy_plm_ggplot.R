@@ -22,13 +22,13 @@ pm.y.locs <- pm.index %/% rows + 1
 # ------------------------------------------------------------------------------
 
 plm_resids <- 
-  tibble::as_tibble(Pset1@residuals$PM.resid) %>% 
+  tibble::as_tibble(Pset1@residuals$PM.resid) |> 
   mutate(
     probe = rownames(Pset1@residuals$PM.resid),
     x = pm.x.locs,
     y = pm.y.locs
-  ) %>% 
-  pivot_longer(cols = c(1:6), names_to = "Sample", values_to = "Intensity") %>% 
+  ) |> 
+  pivot_longer(cols = c(1:6), names_to = "Sample", values_to = "Intensity") |> 
   dplyr::filter(Sample %in% c("Good Quality", "Poor Quality"))
 
 # ------------------------------------------------------------------------------

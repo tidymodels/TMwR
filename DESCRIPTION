@@ -27,16 +27,16 @@ Imports:
     dials (>= 1.3.0),
     dimRed,
     discrim,
-    doMC,
     dplyr,
     earth,
     embed (>= 0.1.5),
     fastICA,
-    finetune (>= 0.1.1),
+    finetune (>= 1.2.1.9000),
     forcats,
     ggforce,
     ggplot2,
     glmnet,
+    GPfit,
     gridExtra,
     infer,
     kableExtra (>= 1.2.1),
@@ -49,11 +49,13 @@ Imports:
     lme4,
     lubridate,
     mda,
+    mirai,
     mixOmics,
     modeldata,
     multilevelmod,
     nlme (>= 3.1-157),
     nnet,
+    parallelly,
     parsnip,
     patchwork,
     pillar (>= 1.6.6),
@@ -81,14 +83,17 @@ Imports:
     tidymodels (>= 1.1.0),
     tidyposterior (>= 0.0.3),
     tidyverse,
-    tune (>= 0.1.3),
+    tune (>= 2.0.1.9002),
     uwot,
     workflows (>= 0.2.2),
     workflowsets (>= 0.0.1),
     xgboost,
     yardstick
 Remotes:
-    tidymodels/learntidymodels
+    tidymodels/learntidymodels,
+    tidymodels/applicable,
+    tidymodels/tune,
+    tidymodels/finetune
 biocViews: mixOmics
 Encoding: UTF-8
 SystemRequirements: FFmpeg (>= 3.2); with at least libx264 and lame (mp3)

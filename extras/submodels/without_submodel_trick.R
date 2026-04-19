@@ -6,7 +6,7 @@ library(doMC)
 ## -----------------------------------------------------------------------------
 
 data(cells)
-cells <- cells %>% select(-case)
+cells <- cells |> select(-case)
 set.seed(33)
 cell_folds <- vfold_cv(cells)
 roc_res <- metric_set(roc_auc)
@@ -14,13 +14,13 @@ roc_res <- metric_set(roc_auc)
 ## -----------------------------------------------------------------------------
 
 c5_spec <- 
-  boost_tree(trees = tune()) %>% 
-  set_engine("C5.0") %>% 
+  boost_tree(trees = tune()) |> 
+  set_engine("C5.0") |> 
   set_mode("classification")
 
 tic()
 set.seed(2)
-c5_spec %>%
+c5_spec |>
   tune_grid(
     class ~ .,
     resamples = cell_folds,
@@ -35,7 +35,7 @@ registerDoMC(cores = 10)
 
 tic()
 set.seed(2)
-c5_spec %>%
+c5_spec |>
   tune_grid(
     class ~ .,
     resamples = cell_folds,

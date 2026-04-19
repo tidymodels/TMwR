@@ -63,7 +63,7 @@ Simple random sampling is appropriate in many cases but there are exceptions. Wh
 #| fig.alt = "The distribution of the sale price (in log units) for the Ames housing data. The vertical lines indicate the quartiles of the data."
 
 sale_dens <- 
-  density(ames$Sale_Price, n = 2^10) %>% 
+  density(ames$Sale_Price, n = 2^10) |> 
   tidy() 
 quartiles <- quantile(ames$Sale_Price, probs = c(1:3)/4)
 quartiles <- tibble(prob = (1:3/4), value = unname(quartiles))
@@ -174,7 +174,7 @@ At this checkpoint, the important code snippets for preparing and splitting are:
 ```{r splitting-summary, eval = FALSE}
 library(tidymodels)
 data(ames)
-ames <- ames %>% mutate(Sale_Price = log10(Sale_Price))
+ames <- ames |> mutate(Sale_Price = log10(Sale_Price))
 
 set.seed(502)
 ames_split <- initial_split(ames, prop = 0.80, strata = Sale_Price)

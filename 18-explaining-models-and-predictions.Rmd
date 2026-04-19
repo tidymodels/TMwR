@@ -8,23 +8,20 @@ conflicted::conflict_prefer("explain", "lime")
 
 source("ames_snippets.R")
 
-ames_train <- ames_train %>%
-  mutate_if(is.integer, as.numeric)
-
 rf_model <- 
-  rand_forest(trees = 1000) %>% 
-  set_engine("ranger") %>% 
+  rand_forest(trees = 1000) |> 
+  set_engine("ranger") |> 
   set_mode("regression")
 
 rf_wflow <- 
-  workflow() %>% 
+  workflow() |> 
   add_formula(
     Sale_Price ~ Neighborhood + Gr_Liv_Area + Year_Built + Bldg_Type + 
-      Latitude + Longitude) %>% 
+      Latitude + Longitude) |> 
   add_model(rf_model) 
 
-rf_fit <- rf_wflow %>% fit(data = ames_train)
-lm_fit <- lm_wflow %>% fit(data = ames_train)
+rf_fit <- rf_wflow |> fit(data = ames_train)
+lm_fit <- lm_wflow |> fit(data = ames_train)
 ```
 
 # Explaining Models and Predictions {#explain}
@@ -53,9 +50,9 @@ In Chapters \@ref(resampling) and \@ref(compare), we trained and compared severa
 #| fig.cap = "Comparing predicted prices for a linear model with interactions and a random forest model",
 #| fig.alt = "Comparing predicted prices for a linear model with interactions and a random forest model. The random forest results in more accurate predictions."
 bind_rows(
-  augment(lm_fit, ames_train) %>% mutate(model = "lm + interactions"),
-  augment(rf_fit, ames_train) %>% mutate(model = "random forest")
-) %>%
+  augment(lm_fit, ames_train) |> mutate(model = "lm + interactions"),
+  augment(rf_fit, ames_train) |> mutate(model = "random forest")
+) |>
   ggplot(aes(Sale_Price, .pred)) +
   geom_abline(color = "gray50", lty = 2) + 
   geom_point(alpha = 0.2, show.legend = FALSE) +
@@ -71,7 +68,7 @@ vip_features <- c("Neighborhood", "Gr_Liv_Area", "Year_Built",
                   "Bldg_Type", "Latitude", "Longitude")
 
 vip_train <- 
-  ames_train %>% 
+  ames_train |> 
   select(all_of(vip_features))
 
 explainer_lm <- 
@@ -164,11 +161,11 @@ We could use the default plot method from `r pkg(DALEX)` by calling `plot(shap_d
 
 ```{r explain-duplex-rf-shap, eval=FALSE}
 library(forcats)
-shap_duplex %>%
-  group_by(variable) %>%
-  mutate(mean_val = mean(contribution)) %>%
-  ungroup() %>%
-  mutate(variable = fct_reorder(variable, abs(mean_val))) %>%
+shap_duplex |>
+  group_by(variable) |>
+  mutate(mean_val = mean(contribution)) |>
+  ungroup() |>
+  mutate(variable = fct_reorder(variable, abs(mean_val))) |>
   ggplot(aes(contribution, variable, fill = mean_val > 0)) +
   geom_col(data = ~distinct(., variable, mean_val), 
            aes(mean_val, variable), 
@@ -212,11 +209,11 @@ The results are shown in Figure \@ref(fig:gilbert-shap); unlike the duplex, the 
 #| fig.cap = "Shapley additive explanations from the random forest model for a one-family home in Gilbert",
 #| fig.alt = "Shapley additive explanations from the random forest model for a one-family home in Gilbert. Gross living area and year built have the largest contributions but in the opposite direction as the previous explainer."
 
-shap_house %>%
-  group_by(variable) %>%
-  mutate(mean_val = mean(contribution)) %>%
-  ungroup() %>%
-  mutate(variable = fct_reorder(variable, abs(mean_val))) %>%
+shap_house |>
+  group_by(variable) |>
+  mutate(mean_val = mean(contribution)) |>
+  ungroup() |>
+  mutate(variable = fct_reorder(variable, abs(mean_val))) |>
   ggplot(aes(contribution, variable, fill = mean_val > 0)) +
   geom_col(data = ~distinct(., variable, mean_val), 
            aes(mean_val, variable), 
@@ -258,17 +255,17 @@ ggplot_imp <- function(...) {
   metric_lab <- paste(metric_name, 
                       "after permutations\n(higher indicates more important)")
   
-  full_vip <- bind_rows(obj) %>%
+  full_vip <- bind_rows(obj) |>
     filter(variable != "_baseline_")
   
-  perm_vals <- full_vip %>% 
-    filter(variable == "_full_model_") %>% 
-    group_by(label) %>% 
+  perm_vals <- full_vip |> 
+    filter(variable == "_full_model_") |> 
+    group_by(label) |> 
     summarise(dropout_loss = mean(dropout_loss))
   
-  p <- full_vip %>%
-    filter(variable != "_full_model_") %>% 
-    mutate(variable = fct_reorder(variable, dropout_loss)) %>%
+  p <- full_vip |>
+    filter(variable != "_full_model_") |> 
+    mutate(variable = fct_reorder(variable, dropout_loss)) |>
     ggplot(aes(dropout_loss, variable)) 
   if(length(obj) > 1) {
     p <- p + 
@@ -325,8 +322,8 @@ Let's create another function for plotting the underlying data in this object:
 ggplot_pdp <- function(obj, x) {
   
   p <- 
-    as_tibble(obj$agr_profiles) %>%
-    mutate(`_label_` = stringr::str_remove(`_label_`, "^[^_]*_")) %>%
+    as_tibble(obj$agr_profiles) |>
+    mutate(`_label_` = stringr::str_remove(`_label_`, "^[^_]*_")) |>
     ggplot(aes(`_x_`, `_yhat_`)) +
     geom_line(data = as_tibble(obj$cp_profiles),
               aes(x = {{ x }}, group = `_ids_`),
@@ -386,8 +383,8 @@ This code produces Figure \@ref(fig:building-type-profiles), where we see that s
 We have the option of using `plot(pdp_liv)` for default `r pkg(DALEX)` plots, but since we are making plots with the underlying data here, we can even facet by one of the features to visualize if the predictions change differently and highlighting the imbalance in these subgroups (as shown in Figure \@ref(fig:building-type-facets)).
 
 ```{r explain-build-type-facet, eval = FALSE}
-as_tibble(pdp_liv$agr_profiles) %>%
-  mutate(Bldg_Type = stringr::str_remove(`_label_`, "random forest_")) %>%
+as_tibble(pdp_liv$agr_profiles) |>
+  mutate(Bldg_Type = stringr::str_remove(`_label_`, "random forest_")) |>
   ggplot(aes(`_x_`, `_yhat_`, color = Bldg_Type)) +
   geom_line(data = as_tibble(pdp_liv$cp_profiles),
             aes(x = Gr_Liv_Area, group = `_ids_`),
@@ -428,11 +425,11 @@ set.seed(1807)
 vip_beans <- 
   explain_tidymodels(
     rda_wflow_fit, 
-    data = bean_train %>% select(-class), 
+    data = bean_train |> select(-class), 
     y = bean_train$class,
     label = "RDA",
     verbose = FALSE
-  ) %>% 
+  ) |> 
   model_parts() 
 ```
 

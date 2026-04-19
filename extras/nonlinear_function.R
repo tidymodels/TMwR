@@ -3,9 +3,9 @@ nonlin_function <- function(x, error = TRUE) {
   # cool
   data(ames, package = "modeldata")
   rec <- 
-    recipe(Sale_Price ~ Longitude, data = ames) %>% 
-    step_log(Sale_Price, skip = TRUE) %>% 
-    step_range(Longitude) %>% 
+    recipe(Sale_Price ~ Longitude, data = ames) |> 
+    step_log(Sale_Price, skip = TRUE) |> 
+    step_range(Longitude) |> 
     prep()
   
   

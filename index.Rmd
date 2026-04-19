@@ -34,7 +34,7 @@ The next part of the book moves forward with more details on the process of crea
 
 Finally, the last section of this book, Chapters \@ref(dimensionality) through \@ref(inferential), covers other important topics for model building. We discuss more advanced feature engineering approaches like dimensionality reduction and encoding high cardinality predictors, as well as how to answer questions about why a model makes certain predictions and when to trust your model predictions.
 
-We do not assume that readers have extensive experience in model building and statistics. Some statistical knowledge is required, such as random sampling, variance, correlation, basic linear regression, and other topics that are usually found in a basic undergraduate statistics or data analysis course. We do assume that the reader is at least slightly familiar with dplyr, ggplot2, and the `%>%` "pipe" operator in R, and is interested in applying these tools to modeling. For users who don't yet have this background R knowledge, we recommend books such as [*R for Data Science*](https://r4ds.had.co.nz/) by Wickham and Grolemund (2016). Investigating and analyzing data are an important part of any model process.
+We do not assume that readers have extensive experience in model building and statistics. Some statistical knowledge is required, such as random sampling, variance, correlation, basic linear regression, and other topics that are usually found in a basic undergraduate statistics or data analysis course. We do assume that the reader is at least slightly familiar with dplyr, ggplot2, and the `|>` "pipe" operator in R, and is interested in applying these tools to modeling. For users who don't yet have this background R knowledge, we recommend books such as [*R for Data Science*](https://r4ds.had.co.nz/) by Wickham and Grolemund (2016). Investigating and analyzing data are an important part of any model process.
 
 This book is not intended to be a comprehensive reference on modeling techniques; we suggest other resources to learn more about the statistical methods themselves. For general background on the most common type of model, the linear model, we suggest @fox08.  For predictive models, @apm and @fes are good resources. For machine learning methods, @Goodfellow is an excellent (but formal) source of information. In some cases, we do describe the models we use in some detail, but in a way that is less mathematical, and hopefully more intuitive. 
 
@@ -49,11 +49,11 @@ contribs_all_json <- gh::gh("/repos/:owner/:repo/contributors",
   .limit = Inf
 )
 contribs_all <- tibble(
-  login = contribs_all_json %>% map_chr("login"),
-  n = contribs_all_json %>% map_int("contributions")
+  login = contribs_all_json |> map_chr("login"),
+  n = contribs_all_json |> map_int("contributions")
 )
 contribs_old <- read_csv("contributors.csv", col_types = list())
-contribs_new <- contribs_all %>% anti_join(contribs_old, by = "login")
+contribs_new <- contribs_all |> anti_join(contribs_old, by = "login")
 # Get info for new contributors
 needed_json <- map(
   contribs_new$login, 
@@ -64,8 +64,8 @@ info_new <- tibble(
   name = map_chr(needed_json, "name", .default = NA),
   blog = map_chr(needed_json, "blog", .default = NA)
 )
-contribs_new <- contribs_new %>% left_join(info_new, by = "login")
-contribs_all <- bind_rows(contribs_old, contribs_new) %>% arrange(login)
+contribs_new <- contribs_new |> left_join(info_new, by = "login")
+contribs_all <- bind_rows(contribs_old, contribs_new) |> arrange(login)
 write_csv(contribs_all, "contributors.csv")
 ```
 
@@ -77,8 +77,8 @@ We would like to thank our RStudio colleagues on the `r pkg(tidymodels)` team (D
 ```{r, results = "asis", echo = FALSE, message = FALSE}
 library(dplyr)
 contributors <- read.csv("contributors.csv", stringsAsFactors = FALSE)
-contributors <- contributors %>% 
-  filter(!login %in% c("topepo", "juliasilge", "dcossyleon")) %>% 
+contributors <- contributors |> 
+  filter(!login %in% c("topepo", "juliasilge", "dcossyleon")) |> 
   mutate(
     login = paste0("\\@", login),
     desc = ifelse(is.na(name), login, paste0(name, " (", login, ")"))
@@ -98,7 +98,7 @@ df <- tibble::tibble(
   package = pkgs$package,
   version = pkgs$ondiskversion,
   source = pkgs$source
-) %>% 
+) |> 
   mutate(
     source = stringr::str_split(source, " "),
     source = purrr::map_chr(source, ~ .x[1]),
