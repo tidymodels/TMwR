@@ -33,7 +33,7 @@ When starting a new modeling project, reducing the dimensions of the data may pr
 
 Principal component analysis (PCA) is one of the most straightforward methods for reducing the number of columns in the data set because it relies on linear methods and is unsupervised (i.e., does not consider the outcome data). For a high-dimensional classification problem, an initial plot of the main PCA components might show a clear separation between the classes. If this is the case, then it is fairly safe to assume that a linear classifier might do a good job. However, the converse is not true; a lack of separation does not mean that the problem is insurmountable.
 
-The dimensionality reduction methods discussed in this chapter are generally _not_ feature selection methods. Methods such as PCA represent the original predictors using a smaller subset of new features. All of the original predictors are required to compute these new features. The exception to this are sparse methods that have the ability to completely remove the impact of predictors when creating the new features.
+The dimensionality reduction methods discussed in this chapter are generally _not_ feature selection methods. Methods such as PCA represent the original predictors using a smaller subset of new features. All of the original predictors are required to compute these new features. The exception to this is sparse methods that have the ability to completely remove the impact of predictors when creating the new features.
 
 :::rmdnote
 This chapter has two goals: 
@@ -49,7 +49,7 @@ In addition to the `r pkg(tidymodels)` package, this chapter uses the following 
 
 [^learnnote]: The `r pkg(learntidymodels)` package can be found at its GitHub site: <https://github.com/tidymodels/learntidymodels>
 
-[^mixnote]: The `r pkg(mixOmics)` package is not available on CRAN, but instead on Bioconductor: <https://doi.org/doi:10.18129/B9.bioc.mixOmics>
+[^mixnote]: The `r pkg(mixOmics)` package is not available on CRAN, but instead on Bioconductor: <https://doi.org/10.18129/B9.bioc.mixOmics>
 
 ## A Picture Is Worth a Thousand... Beans {#beans}
 
@@ -59,7 +59,7 @@ Let's walk through how to use dimensionality reduction with `r pkg(recipes)` for
 
 Each image contains multiple beans. The process of determining which pixels correspond to a particular bean is called _image segmentation_. These pixels can be analyzed to produce features for each bean, such as color and morphology (i.e., shape). These features are then used to model the outcome (bean variety) because different bean varieties look different. The training data come from a set of manually labeled images, and this data set is used to create a predictive model that can distinguish between seven bean varieties: Cali, Horoz, Dermason, Seker, Bombay, Barbunya, and Sira. Producing an effective model can help manufacturers quantify the homogeneity of a batch of beans. 
 
-There are numerous methods for quantifying shapes of objects [@Mingqiang08]. Many are related to the boundaries or regions of the object of interest. Example of features include:
+There are numerous methods for quantifying shapes of objects [@Mingqiang08]. Many are related to the boundaries or regions of the object of interest. Examples of features include:
 
 -   The *area* (or size) can be estimated using the number of pixels in the object or the size of the convex hull around the object.
 
