@@ -29,7 +29,7 @@ In this chapter, we describe how to use `r pkg(tidymodels)` for fitting and asse
 
 ## Inference for Count Data
 
-To understand how tidymodels packages can be used for inferential modeling, let's focus on an example with count data. We'll use biochemistry publication data from the `r pkg(pscl)` package. These data consist of information on 915 Ph.D. biochemistry graduates and tries to explain factors that impact their academic productivity (measured via number or count of articles published within three years). The predictors include the gender of the graduate, their marital status, the number of children of the graduate that are at least five years old, the prestige of their department, and the number of articles produced by their mentor in the same time period. The data reflect biochemistry doctorates who finished their education between 1956 and 1963. The data are a somewhat biased sample of all of the biochemistry doctorates given during this period (based on completeness of information).
+To understand how tidymodels packages can be used for inferential modeling, let's focus on an example with count data. We'll use biochemistry publication data from the `r pkg(pscl)` package. These data consist of information on 915 Ph.D. biochemistry graduates and are used to explain factors that impact their academic productivity (measured via number or count of articles published within three years). The predictors include the gender of the graduate, their marital status, the number of children of the graduate that are at least five years old, the prestige of their department, and the number of articles produced by their mentor in the same time period. The data reflect biochemistry doctorates who finished their education between 1956 and 1963. The data are a somewhat biased sample of all of the biochemistry doctorates given during this period (based on completeness of information).
 
 :::rmdnote
 Recall that in Chapter \@ref(trust) we asked the question "Is our model applicable for predicting a specific data point?" It is very important to define what populations an inferential analysis applies to. For these data, the results would likely apply to biochemistry doctorates given around the time frame that the data were collected. Does it also apply to other chemistry doctorate types (e.g., medicinal chemistry, etc)? These are important questions to address (and document) when conducting inferential analyses. 
@@ -148,7 +148,7 @@ visualize(bootstrapped) +
 #| fig.alt = "The bootstrap distribution of the difference in means. The highlighted region is the confidence interval, which does not include a value of zero."
 ```
 
-Since the interval visualized in in Figure \@ref(fig:bootstrapped-mean) does not include zero, these results indicate that men have published more articles than women.
+Since the interval visualized in Figure \@ref(fig:bootstrapped-mean) does not include zero, these results indicate that men have published more articles than women.
 
 If we require a p-value, the `r pkg(infer)` package can compute the value via a permutation test, shown in the following code. The syntax is very similar to the bootstrapping code we used earlier. We add a `hypothesize()` verb to state the type of assumption to test and the `generate()` call contains an option to shuffle the data.
 
@@ -174,7 +174,7 @@ visualize(permuted) +
 #| echo = FALSE,
 #| out.width = "80%",
 #| fig.cap = "Empirical distribution of the test statistic under the null hypothesis. The vertical line indicates the observed test statistic.",
-#| fig.alt = "The empirical distribution of the test statistic under the null hypothesis. The vertical line indicates the observed test statistic and is far away form the mainstream of the distribution."
+#| fig.alt = "The empirical distribution of the test statistic under the null hypothesis. The vertical line indicates the observed test statistic and is far away from the mainstream of the distribution."
 ```
 
 The actual p-value is:
@@ -244,7 +244,7 @@ When we compare these results (in Figure \@ref(fig:glm-intervals)) to the purely
 ```{r glm-intervals}
 #| echo = FALSE,
 #| fig.cap = "Two types of confidence intervals for the Poisson regression model",
-#| fig.alt = "Two types of confidence intervals for the Poisson regression model. the interval for the PhD model is the only interval overlapping zero. The parametric intervals tend to be wider than the bootstrap intervals. "
+#| fig.alt = "Two types of confidence intervals for the Poisson regression model. the interval for the PhD model is the only interval overlapping zero. The parametric intervals tend to be wider than the bootstrap intervals."
 
 glm_boot %>% 
   select(term, method = .method, .estimate, .lower, .upper) %>% 
@@ -411,7 +411,7 @@ bootstrap_models %>%
 
 ```{r zip-bootstrap, ref.label = "inference-zip-bootstrap"}
 #| echo = FALSE,
-#| fig.cap = "Bootstrap distributions of the ZIP model coefficients. The vertical lines indicate the observed estimates. ",
+#| fig.cap = "Bootstrap distributions of the ZIP model coefficients. The vertical lines indicate the observed estimates.",
 #| fig.alt = "Bootstrap distributions of the ZIP model coefficients. The vertical lines indicate the observed estimates. The ment predictor that appears to be important to the model."
 ```
 
