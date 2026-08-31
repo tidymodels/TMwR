@@ -68,7 +68,7 @@ ord_contrasts <-
   setNames(c("Linear", "Quadratic", "Cubic", "Quartic"))
 
 bind_cols(ord_data, ord_contrasts) %>% 
-  kable(caption = "Polynominal expansions for encoding an ordered variable.",
+  kable(caption = "Polynomial expansions for encoding an ordered variable.",
         label = "encoding-ordered-table") %>% 
   kable_styling(full_width = FALSE)
 ```
