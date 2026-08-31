@@ -423,7 +423,7 @@ bean_test  <- testing(bean_split)
 load("RData/rda_fit.RData")
 ```
 
-```{r explain-bea-vip}
+```{r explain-bean-vip}
 set.seed(1807)
 vip_beans <- 
   explain_tidymodels(
