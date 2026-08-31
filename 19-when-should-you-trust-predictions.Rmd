@@ -68,7 +68,7 @@ We estimate a logistic regression model using Bayesian methods (using the defaul
 two_class_mod <- 
   logistic_reg() %>% 
   set_engine("stan", seed = 1902) %>% 
-  fit(class ~ . + I(x^2)+ I(y^2), data = training_set)
+  fit(class ~ . + I(x^2) + I(y^2), data = training_set)
 print(two_class_mod, digits = 3)
 ```
 
@@ -179,7 +179,7 @@ map(seq(0, .1, length.out = 40), eq_zone_results) %>%
 
 Figure \@ref(fig:equivocal-zone-results) shows us that accuracy improves by a few percentage points but at the cost of nearly 10% of predictions being unusable! The value of such a compromise depends on how the model predictions will be used. 
 
-This analysis focused on using the predicted class probability to disqualify points, since this is a fundamental measure of uncertainty in classification models. A slightly better approach would be to use the standard error of the class probability. Since we used a Bayesian model, the probability estimates we found are actually the mean of the posterior predictive distribution. In other words, the Bayesian model gives us a distribution for the class probability.  Measuring the standard deviation of this distribution gives us a _standard error of prediction_ of the probability. In most cases, this value is directly related to the mean class probability. You might recall that, for a Bernoulli random variable with probability $p$, the variance is $p(1-p)$. Because of this relationship, the standard error is largest when the probability is 50%. Instead of assigning an equivocal result using the class probability, we could instead use a cutoff on the standard error of prediction. 
+This analysis focused on using the predicted class probability to disqualify points, since this is a fundamental measure of uncertainty in classification models. A slightly better approach would be to use the standard error of the class probability. Since we used a Bayesian model, the probability estimates we found are actually the mean of the posterior predictive distribution. In other words, the Bayesian model gives us a distribution for the class probability. Measuring the standard deviation of this distribution gives us a _standard error of prediction_ of the probability. In most cases, this value is directly related to the mean class probability. You might recall that, for a Bernoulli random variable with probability $p$, the variance is $p(1-p)$. Because of this relationship, the standard error is largest when the probability is 50%. Instead of assigning an equivocal result using the class probability, we could instead use a cutoff on the standard error of prediction. 
 
 One important aspect of the standard error of prediction is that it takes into account more than just the class probability. In cases where there is significant extrapolation or aberrant predictor values, the standard error might increase. The benefit of using the standard error of prediction is that it might also flag predictions that are problematic (as opposed to simply uncertain). One reason we used the Bayesian model is that it naturally estimates the standard error of prediction; not many models can calculate this. For our test set, using `type = "pred_int"` will produce upper and lower limits and the `std_error` adds a column for that quantity. For 80% intervals: 
 
@@ -246,7 +246,7 @@ base_recipe <-
   step_dummy(all_nominal()) %>%
   # Remove any columns with a single unique value
   step_zv(all_predictors()) %>%
-  step_normalize(!!!stations)%>%
+  step_normalize(!!!stations) %>%
   step_pls(!!!stations, num_comp = 10, outcome = vars(ridership))
 
 lm_spec <-
@@ -316,7 +316,7 @@ res_2020 <-
 res_2020 %>% select(date, contains(".pred"))
 ```
 
-The prediction intervals are about the same width, even though these data are well beyond the time period of the original training set. However, given the global pandemic in 2020, the performance on these data are abysmal: 
+The prediction intervals are about the same width, even though these data are well beyond the time period of the original training set. However, given the global pandemic in 2020, the performance on these data is abysmal: 
 
 ```{r trust-chicago-2020-stats}
 res_2020 %>% select(date, ridership, starts_with(".pred"))
@@ -331,7 +331,7 @@ You can see this terrible model performance visually in Figure \@ref(fig:chicago
 #| out.width="80%", 
 #| fig.align="center",
 #| fig.cap = "Two weeks of 2020 predictions for the Chicago data along with 95% prediction intervals",
-#| fig.alt = "Two weeks of 2016 predictions for the Chicago data along with 95% prediction intervals. The model fit the data fairly well with reasonable error estimates."
+#| fig.alt = "Two weeks of 2020 predictions for the Chicago data along with 95% prediction intervals. The model fit the data fairly well with reasonable error estimates."
 
 res_2020 %>%
   mutate(day = add_day(.)) %>%
@@ -357,7 +357,7 @@ This situation can be avoided by having a secondary methodology that can quantif
 The idea is to accompany a prediction with a score that measures how similar the new point is to the training set.
 :::
 
-One method that works well uses principal component analysis (PCA) on the numeric predictor values. We'll illustrate the process by using only two of the predictors that correspond to ridership at different stations (California and Austin stations). The training set are shown in panel (a) in Figure \@ref(fig:pca-reference-dist). The ridership data for these stations are highly correlated, and the two distributions shown in the scatter plot correspond to ridership on the weekends and week days. 
+One method that works well uses principal component analysis (PCA) on the numeric predictor values. We'll illustrate the process by using only two of the predictors that correspond to ridership at different stations (California and Austin stations). The training set is shown in panel (a) in Figure \@ref(fig:pca-reference-dist). The ridership data for these stations are highly correlated, and the two distributions shown in the scatter plot correspond to ridership on the weekends and weekdays. 
 
 The first step is to conduct PCA on the training data. The PCA scores for the training set are shown in panel (b) in Figure \@ref(fig:pca-reference-dist). Next, using these results, we measure the distance of each training set point to the center of the PCA data (panel (c) of Figure \@ref(fig:pca-reference-dist)). We can then use this _reference distribution_ (panel (d) of Figure \@ref(fig:pca-reference-dist)) to estimate how far a data point is from the mainstream of the training data.  
 
@@ -499,7 +499,7 @@ The test set point has a distance of `r round(testing_pca$distance, 2)`. It is i
 
 The 2020 sample is farther from the center than any of the training set samples (with a percentile of `r new_pctl`%). This indicates the sample is very extreme and that its corresponding prediction would be a severe extrapolation (and probably should not be reported). 
 
-The `r pkg(applicable)` package can develop an applicability domain model using PCA. We'll use the 20 lagged station ridership predictors as inputs into the PCA analysis. There is an additional argument called `threshold`  that determines how many components are used in the distance calculation. For our example, we'll use a large value that indicates we should use enough components to account for 99% of the variation in the ridership predictors: 
+The `r pkg(applicable)` package can develop an applicability domain model using PCA. We'll use the 20 lagged station ridership predictors as inputs into the PCA analysis. There is an additional argument called `threshold` that determines how many components are used in the distance calculation. For our example, we'll use a large value that indicates we should use enough components to account for 99% of the variation in the ridership predictors: 
 
 ```{r trust-apd-pca}
 library(applicable)
@@ -540,7 +540,7 @@ score(pca_stat, Chicago_2020) %>% select(starts_with("distance"))
 The 2020 distance values indicate that these predictor values are outside of the vast majority of data seen by the model at training time. These should be flagged so that the predictions are either not reported at all or viewed with skepticism.  
 
 :::rmdnote
-One important aspect of this analysis concerns which predictors are used to develop the applicability domain model. In our analysis, we used the raw predictor columns. However, in building the model, PLS score features were used in their place. Which of these should `apd_pca()` use? The  `apd_pca()` function can also take a recipe as the input (instead of a formula) so that the distances reflect the PLS scores instead of the individual predictor columns. You can evaluate both methods to understand which one gives more relevant results. 
+One important aspect of this analysis concerns which predictors are used to develop the applicability domain model. In our analysis, we used the raw predictor columns. However, in building the model, PLS score features were used in their place. Which of these should `apd_pca()` use? The `apd_pca()` function can also take a recipe as the input (instead of a formula) so that the distances reflect the PLS scores instead of the individual predictor columns. You can evaluate both methods to understand which one gives more relevant results. 
 :::
 
 ## Chapter Summary {#trust-summary}
